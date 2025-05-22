@@ -1,6 +1,13 @@
-## Rules for Contributing
+## Contributing Guidelines
 
-_Content to be added_
+Thank you for considering contributing to this project!
+To keep things smooth and maintain high quality, please follow the rules and best practices outlined below.
+
+- Be respectful and constructive in code reviews and discussions.
+- Follow the Code of Conduct at all times.
+- All code must be reviewed and approved via a Pull Request (PR)
+- Write clear, concise commit messages and PR descriptions.
+- Keep the ```main``` branch production-ready. Do not push directly to it.
 
 ## Developer Workflow Overview
 
@@ -16,11 +23,97 @@ _Content to be added_
 
 ## Coding Standards and Style Guides
 
-_Content to be added_
+### General Principles (All Languages)
+- Write clear, readable, and self-explanatory code.
+- Use consistent indentation.
+- Use meaningful names for variables, functions, and classes.
+- Avoid hard-coding values - use constants or configuration where appropriate.
+- Comment why something is done, not what is done (code should explain the "what").
+- Avoid global variables unless necessary.
+
+### Fortran
+
+#### File Naming
+- Use ```.f90``` for modern Fortran source files.
+- Lowercase file names with underscores: ```calculate_area.f90```
+
+#### Style
+- Use ```implicit none``` to avoid undeclared variables.
+- Group related code into modules and subroutines.
+ 
+#### Naming
+- Use ```snake_case``` for variables and subroutines.
+- Modules: ```module_name```
+- Constants:```ALL_CAPS```
+
+#### Example
+```
+module circle_utils
+  implicit none
+  real, parameter :: PI = 3.14
+contains
+  function calculate_area(radius) result(area)
+    real, intent(in) :: radius
+    real :: area
+    area = PI * radius * radius
+  end function calculate_area
+end module circle_utils
+```
+
+### Java
+
+#### File Naming
+- Each class should go in its own ```.java``` file named after the class.
+
+#### Style
+- Follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+
+#### Naming
+- Classes: ```PascalCase```
+- Methods and variables: ```camelCase```
+- Constants: ```UPPER_SNAKE_CASE``` (with ```static final```)
+
+#### Example
+```
+public class Circle {
+    public static final double PI = 3.14;
+
+    public double calculateArea(double radius) {
+        return PI * radius * radius;
+    }
+}
+```
+### Python
+
+#### File Naming
+- Use ```snake_case.py``` for file names.
+
+#### Style
+- Follow guidelines in the [PEP 8](https://peps.python.org/pep-0008/).
+- Use 4-space indentation.
+- Limit lines to 79 characters.
+
+#### Naming
+- Variables and functions: ```snake_case```
+- Classes: ```PascalCase```
+- Constants: ```UPPER_SNAKE_CASE```
+
+#### Example
+```
+def calculate_area(radius):
+    """Calculate area of a circle."""
+    pi = 3.14
+    return pi*radius**2
+```
 
 ## Branching Strategies
 
-_Content to be added_
+### ```main``` Branch
+- Keep ```main``` always **stable and production-ready**.
+- Support **collaborative development**.
+- Ensure features and fixes are tested before release.
+- Require PR reviews.
+- Disallow direct pushes.
 
 ## Git Operations and Pull Requests Guidelines
 
@@ -110,4 +203,5 @@ _Content to be added_
 - Task authors should be responsible for clearing tasks, not PR authors.
 
 #### On pull request merge:
-- Once the pull request has been merged, the issue can be assigned to QA testing to verify that the bug has been addressed. Status should be 
+- Once the pull request has been merged, the issue can be assigned to QA testing to verify that the bug has been addressed.
+- The developer should assign an appropriate reviewer for their work.
