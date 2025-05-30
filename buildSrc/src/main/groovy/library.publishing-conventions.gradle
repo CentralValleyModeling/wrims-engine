@@ -1,0 +1,23 @@
+// This file defines the default configurations for publishing a subproject to HEC Nexus. Note that each subproject
+// still requires a `publishing` block to actually specify the component that will be published.
+
+plugins {
+    id 'maven-publish'
+}
+
+publishing {
+    // Publish to HEC's Maven-public by targeting the appropriate maven-snapshots or maven-releases repo based on the
+    // version of the library being deployed.
+    repositories {
+        maven {
+            credentials {
+                username = project.hasProperty('nexusUser') ? "$nexusUser" : "noUserSpecified"
+                password = project.hasProperty('nexusPassword') ? "$nexusPassword" : "noPasswordSpecified"
+            }
+            def baseUrl = "https://www.hec.usace.army.mil/nexus/repository"
+            afterEvaluate {
+                url = version.toString().endsWith("SNAPSHOT") ? "$baseUrl/maven-snapshots/" : "$baseUrl/maven-releases/"
+            }
+        }
+    }
+}
