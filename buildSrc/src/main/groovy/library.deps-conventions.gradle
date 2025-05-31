@@ -1,8 +1,28 @@
 // This file provides a set of defaults for defining the `repositories` block for subprojects within this build.
 // This ensures that all subprojects use the same repositories and credentials.
 
+// This function is used to provide a user-parseable error when Nexus credentials are not provided which can possibly cause a build failure.
+def checkForGHCredentials() {
+    if(!project.hasProperty('cvmUserId')) {
+        println ('Please set the cvmUserId property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmUserId= .')
+    }
+    if(!project.hasProperty('cvmPassword')) {
+        println ('Please set the cvmPassword property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmPassword= .')
+    }
+}
+
+
 // Define a standard set of repositories, a specific library may need to customize this list and add or remove some items
 repositories {
+	maven { 
+		url = 'https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies'
+		credentials {
+            checkForGHCredentials()
+            username = "$cvmUserId"
+            password = "$cvmPassword"
+        }
+	}
+
     maven {
         // The HEC Public repository where a lot of base dependencies are stored like hec-monolith
         url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
