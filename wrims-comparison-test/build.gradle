@@ -1,0 +1,97 @@
+plugins{
+    id 'library.deps-conventions'
+    id 'library.java-conventions'
+    id 'maven-publish'
+    id 'distribution'
+}
+configurations{
+    windows_x64
+    testProjects
+    regressionTest
+    comparisonReport
+}
+repositories{
+    maven {
+        name = "GitHubPackages-ReportTool"
+        url = uri("https://maven.pkg.github.com/CentralValleyModeling/system-summary-report-tool")
+        credentials {
+            username = project.findProperty('cvmUserId') ?: System.getenv('PKG_USERNAME')
+            password = project.findProperty('cvmPassword') ?: System.getenv('PKG_TOKEN')        }
+    }
+}
+
+dependencies {
+    implementation(project(":wrims-core")){
+        exclude group: "org.testng"
+    }
+
+    windows_x64 'mil.army.usace.hec:javaHeclib:7-IU-4-win-x86_64@zip'
+    windows_x64 "gov.ca.dwr:run-libs:+"
+    testProjects "gov.ca.dwr:cal_lite_test_01:+"
+
+    comparisonReport "gov.ca.dwr:system-summary-report-tool:master-SNAPSHOT"
+}
+
+tasks.register("testExecute", JavaExec) {
+    def compareDirName = "$buildDir/testProjects/CalLite4.1_TF"
+    dependsOn(tasks.named("getNatives"))
+    dependsOn(tasks.named("getTestProjects"))
+    workingDir "${buildDir}/testProjects/"
+    classpath = files("${compareDirName}/Run/external")
+    classpath += sourceSets.main.runtimeClasspath
+    mainClass = "wrimsv2.components.ControllerBatch"
+    args "-config=$buildDir/testProjects/CalLite4.1_TF/Test_02.config"
+    environment 'PATH', "${compareDirName}/Run/external;$buildDir/lib;${System.getenv('PATH')}"
+    systemProperty "java.library.path", "${compareDirName}/Run/external;$buildDir/lib"
+
+    jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+}
+tasks.register("testReport", JavaExec) {
+    dependsOn(tasks.named("testExecute"))
+    workingDir "${buildDir}/testProjects/"
+    classpath = configurations.comparisonReport
+    mainClass = "gov.ca.dwr.callite.Batch"
+    args "$buildDir/testProjects/callite_version_check_dss6_6.inp"
+
+    systemProperty "java.library.path", "$buildDir/lib"
+
+    environment 'PATH', "$buildDir/lib;${System.getenv('PATH')}"
+    jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+}
+tasks.register('getNatives', Sync) { syncTask ->
+    doFirst{
+        mkdir "$buildDir/lib"
+    }
+    syncTask.from configurations.windows_x64.collect { zipTree(it) }
+    syncTask.into file("$buildDir/lib")
+}
+
+tasks.register('getTestProjects', Sync) { syncTask ->
+    doFirst{
+        mkdir "$buildDir/testProjects"
+    }
+     syncTask.from configurations.testProjects.collect { zipTree(it) }
+    syncTask.into file("$buildDir/testProjects")
+}
+
+publishing {
+    publications {
+        pdf(MavenPublication) {
+            artifact("$buildDir/testProjects/Callite_update_compare_6_6.pdf") {
+                builtBy testReport
+                extension 'pdf'
+            }
+
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/CentralValleyModeling/wrims")
+            credentials {
+                username = project.findProperty('cvmUserId') ?: System.getenv('PKG_USERNAME')
+                password = project.findProperty('cvmPassword') ?: System.getenv('PKG_TOKEN')
+            }
+        }
+    }
+}
