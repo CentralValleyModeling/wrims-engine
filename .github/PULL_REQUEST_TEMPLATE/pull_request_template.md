@@ -24,5 +24,5 @@
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
 - [ ] My code follows the code style of this project.
-- [ ] My change requires a change to the documentation.
-- [ ] I have updated the documentation accordingly.
+- [ ] My code change has an accompanying test with appropriate test coverage.
+- [ ] My change required a change to the documentation, and I have updated the docs appropriately.
