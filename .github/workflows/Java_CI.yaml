@@ -10,6 +10,12 @@ jobs:
     runs-on: windows-2022
 
     steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: 1364941
+          private-key: ${{ secrets.WRIMS_DEPENDENCY_READER_PK }}
+
       - uses: actions/checkout@v2
 
       - name: Set up JDK 21
@@ -21,13 +27,13 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew clean -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ secrets.GITHUB_TOKEN }}
-          ./gradlew build -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ secrets.GITHUB_TOKEN }}
+          ./gradlew clean -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ steps.app-token.outputs.token }}
+          ./gradlew build -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ steps.app-token.outputs.token }}
 
       - name: Generate tattletale-reports
         run: |
-          ./gradlew clean -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ secrets.GITHUB_TOKEN }}
-          ./gradlew tattletaleReport -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ secrets.GITHUB_TOKEN }}
+          ./gradlew clean -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ steps.app-token.outputs.token }}
+          ./gradlew tattletaleReport -PcvmUserId=${{ github.actor }} -PcvmPassword=${{ steps.app-token.outputs.token }}
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4.0.0
