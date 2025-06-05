@@ -1,4 +1,4 @@
-## Contributing Guidelines
+# Contributing Guidelines
 
 Thank you for considering contributing to this project!
 To keep things smooth and maintain high quality, please follow the rules and best practices outlined below.
@@ -11,19 +11,24 @@ To keep things smooth and maintain high quality, please follow the rules and bes
 
 ## Developer Workflow Overview
 
-- Assign an issue to a resource
-- Create a new branch to address the assigned issue
-- Address the issue
-- Commit changes
-- Open a pull request
-- Have a peer review the pull request
-    - A pull request may require revisions from the reviewer before being approved 
-- Merge approved pull request into the main branch
-- Delete the working branch if no longer needed
+> [!IMPORTANT]  
+> This repository is currently `private`, and has limited the permissions for contributing to the repository. If you are unsure about your permissions, ask about it the [Developer Permissions](https://github.com/CentralValleyModeling/wrims-engine/discussions/44) discussion.
+
+1. [Assign an issue to a resource](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue)
+1. [Create a new branch](#branching-strategies) to address the assigned issue
+1. Address the issue
+1. [Commit changes](#commits)
+1. [Open a pull request](#pull-requests)
+1. Have a maintainer review the pull request
+    - A pull request may require revisions from the reviewer before being approved.
+1. Merge approved pull request into the main branch
+1. Delete the working branch if no longer needed
 
 ## Coding Standards and Style Guides
 
 ### General Principles (All Languages)
+
+- Follow the code style for the context (language, file purpose, etc)
 - Write clear, readable, and self-explanatory code.
 - Use consistent indentation.
 - Use meaningful names for variables, functions, and classes.
@@ -85,26 +90,20 @@ public class Circle {
 ```
 ### Python
 
-#### File Naming
-- Use ```snake_case.py``` for file names.
+The short answer: [PEP 8](https://peps.python.org/pep-0008/). It's encouraged to use a code formatter like `autopep8`, or `black`. As long as it's PEP 8 compliant, it's fine.
 
-#### Style
-- Follow guidelines in the [PEP 8](https://peps.python.org/pep-0008/).
-- Use 4-space indentation.
-- Limit lines to 79 characters.
+#### Scripts
 
-#### Naming
-- Variables and functions: ```snake_case```
-- Classes: ```PascalCase```
-- Constants: ```UPPER_SNAKE_CASE```
+Python scripts should provide a [CLI](https://docs.python.org/3/library/argparse.html) entry point so other users don't need to change source code in order to run the script with new inputs.
 
-#### Example
-```
-def calculate_area(radius):
-    """Calculate area of a circle."""
-    pi = 3.14
-    return pi*radius**2
-```
+Limit the use of `jupyter` notebooks for scripts that others might use for production or development activities. Notebooks are fine for documentation, tutorials, and the like.
+
+#### Modules & Packages
+
+Under most circumstances, Python modules shouldn't cause side effects upon `import`, they should not use `global`, and should not use `print` when `logging` is more appropriate.
+
+Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#term-namespace-package).
+
 
 ## Branching Strategies
 
@@ -120,15 +119,15 @@ def calculate_area(radius):
 ### Branching
 
 - All branches should have a known goal and lifecycle.
-- The branch name should summarize its goal and be appended by:
-    - devops/ - branches with changes that do not actually affect source code
-    - feature/ - branches with new features
-    - bugfix/ - branches with bug fixes
-    - docs/ - for branches only containing documentation addition or edits
+- The branch name should summarize its goal include one of these prefixes:
+    - `feature/` - branches with new features
+    - `bugfix/` - branches with bug fixes
+    - `devops/` - branches that change the CI/CD process, and similar activities.
+    - `docs/` - for branches only containing documentation addition or edits
 - Branches should be lightweight according to the goal and lifecycle.
 - **Main branch must remain deployable at all times.**
-    - No pull request should be maid to main with partially completed work (unless coordinated beforehand).
-    - Deployable means:
+    - No pull request should be made to `main` with partially completed work (with very limited exceptions which need to be coordinated before opening the pull request).
+    - "Deployable" means:
         - Developer tested
         - Automated tests are passing
         - Feature complete
@@ -136,13 +135,14 @@ def calculate_area(radius):
         - Static analysis completed
         - Test coverage metrics goal met
 - **Other people's branches:**
-  1. Do not push commits to someone else's feature branch; at least not without coordinating with them first.
-     1. It is somewhat rude.
-     2. There could be local changes that the originator has not pushed up yet that you are missing.
-  2. Instead submit a PR to that branch if you feel you have a constructive change for it.
+  - Do not push commits to someone else's feature branch; at least not without coordinating with them first.
+     - It is somewhat rude.
+     - There could be local changes that the originator has not pushed up yet that you are missing.
+  - Instead submit a PR to that branch if you feel you have a constructive change for it.
 - **Branches in general**
     - Do not leave feature branches laying around.
-- **Avoid Git Force Pushes**
+- **Avoid Git Force Pushes** 
+    - See [below](#use-the-force) sections below for details on when `--force` is okay.
     - When possible, avoid the use of ```git push --force```. If the option is available, use ```git push --force-with-lease``` (or the equivalent option in the application in use). ```--force``` performs a blind overwrite of the branch on the server, which may sometimes undesirably blast away changes. ```--force-with-lease``` checks the status of the branch on the server first, and if it has changed sinc the last ```fetch``` or ```pull```, will fail the ```push```.
 
 ### Commits
@@ -154,6 +154,8 @@ def calculate_area(radius):
     - more detailed description
 - If work is done for a ticket, the GitHub ID should be referenced. This allows GitHub/GitHub issues to link together and cross-reference. 
 - Try to group related changes in a single commit.
+
+#### Use the Force?
 - It is okay to rewrite your local feature branch history so that it is simpler and more clear
     - UNTIL you push the branch and share it
     - Though it may still be okay, coordinate with the team.
