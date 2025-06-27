@@ -7,27 +7,34 @@ To keep things smooth and maintain high quality, please follow the rules and bes
 - Follow the Code of Conduct at all times.
 - All code must be reviewed and approved via a Pull Request (PR)
 - Write clear, concise commit messages and PR descriptions.
-- Keep the ```main``` branch production-ready. Do not push directly to it.
+- The ```main``` branch is protected and always production-ready. All changes must be made via pull requests.
 
 ## Developer Workflow Overview
 
 > [!IMPORTANT]  
 > This repository is currently `private`, and has limited the permissions for contributing to the repository. If you are unsure about your permissions, ask about it the [Developer Permissions](https://github.com/CentralValleyModeling/wrims-engine/discussions/44) discussion.
 
-1. [Assign an issue to a resource](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue)
-1. [Create a new branch](#branching-strategies) to address the assigned issue
-1. Address the issue
-1. [Commit changes](#commits)
-1. [Open a pull request](#pull-requests)
-1. Have a maintainer review the pull request
+1. [Create an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue)
+2. Assign the issue to yourself
+3. [Create a new branch from ```main```](#branching-strategies) to address the assigned issue
+   - If creating a patch release, branch from a release branch
+5. [Open a pull request](#pull-requests)
+6. Address the issue
+7. [Commit changes](#commits)
+8. Have a maintainer review the pull request
     - A pull request may require revisions from the reviewer before being approved.
-1. Merge approved pull request into the main branch
-1. Delete the working branch if no longer needed
+9. Squash commits before merging the pull request
+10. Merge approved pull request into the main branch
+11. Delete the working branch if no longer needed
+
+> [!NOTE]
+> Creating and assigning an issue will only work for members of the development team.
 
 ## Coding Standards and Style Guides
 
 ### General Principles (All Languages)
 
+- Follow [**SOLID** design principles](https://en.wikipedia.org/wiki/SOLID)
 - Follow the code style for the context (language, file purpose, etc)
 - Write clear, readable, and self-explanatory code.
 - Use consistent indentation.
@@ -38,56 +45,15 @@ To keep things smooth and maintain high quality, please follow the rules and bes
 
 ### Fortran
 
-#### File Naming
-- Use ```.f90``` for modern Fortran source files.
-- Lowercase file names with underscores: ```calculate_area.f90```
-
 #### Style
 - Use ```implicit none``` to avoid undeclared variables.
 - Group related code into modules and subroutines.
- 
-#### Naming
-- Use ```snake_case``` for variables and subroutines.
-- Modules: ```module_name```
-- Constants:```ALL_CAPS```
-
-#### Example
-```
-module circle_utils
-  implicit none
-  real, parameter :: PI = 3.14
-contains
-  function calculate_area(radius) result(area)
-    real, intent(in) :: radius
-    real :: area
-    area = PI * radius * radius
-  end function calculate_area
-end module circle_utils
-```
 
 ### Java
-
-#### File Naming
-- Each class should go in its own ```.java``` file named after the class.
 
 #### Style
 - Follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
 
-#### Naming
-- Classes: ```PascalCase```
-- Methods and variables: ```camelCase```
-- Constants: ```UPPER_SNAKE_CASE``` (with ```static final```)
-
-#### Example
-```
-public class Circle {
-    public static final double PI = 3.14;
-
-    public double calculateArea(double radius) {
-        return PI * radius * radius;
-    }
-}
-```
 ### Python
 
 The short answer: [PEP 8](https://peps.python.org/pep-0008/). It's encouraged to use a code formatter like `autopep8`, or `black`. As long as it's PEP 8 compliant, it's fine.
@@ -108,11 +74,10 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 ## Branching Strategies
 
 ### ```main``` Branch
-- Keep ```main``` always **stable and production-ready**.
+- The ```main``` branch is protected and always production ready. All changes must be made via pull requests.
 - Support **collaborative development**.
 - Ensure features and fixes are tested before release.
-- Require PR reviews.
-- Disallow direct pushes.
+- PR reviews are **required**.
 
 ## Git Operations and Pull Requests Guidelines
 
@@ -138,7 +103,7 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
   - Do not push commits to someone else's feature branch; at least not without coordinating with them first.
      - It is somewhat rude.
      - There could be local changes that the originator has not pushed up yet that you are missing.
-  - Instead submit a PR to that branch if you feel you have a constructive change for it.
+  - Instead submit a PR to the developer's branch if you feel you have a constructive change for it.
 - **Branches in general**
     - Do not leave feature branches laying around.
 - **Avoid Git Force Pushes** 
@@ -183,14 +148,14 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 
 #### Start of work:
 - A pull request should be created as soon as possible within reason to allow others to understand, review, and collaborate on the change.
-    - Pull request should include the Jira ticket numbers (note that multiple tickets can be referenced).
+    - Pull request should include the GitHub issue numbers (note that multiple tickets can be referenced).
     - The pull request name should summarize the work being done similar to the branch name.
  -  A pull request should be small, concise, easier to review, and understand.
  -  Multiple pull requests can be made from a given branch to meet the above statement.
 
 #### During work:
 - The developer will push small commits during the development.
-- Commits should be squashed and rebased as necessary for clearer commit history. This should occur while work is progressing and not just once at the end.
+- **Commits should be squashed and rebased as necessary for clearer commit history. This should occur while work is progressing and not just once at the end.**
 
 #### End of Work:
 - Before a pull request is merged, changes should be tested by the developer thorugh both automated and manual exercise of the changed code. 
