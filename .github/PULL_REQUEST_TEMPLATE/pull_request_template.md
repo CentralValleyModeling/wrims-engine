@@ -20,9 +20,10 @@ Please consider the following when reviewing this PR:
 <!--- Include details of your testing environment, and the tests you ran to -->
 <!--- Does the code change have an accompanying test with appropriate test coverage? -->
 
-## Screenshots (if appropriate):
+## Screenshots (if appropriate)
+<!--- Avoid using screenshots to show differences in things other than figures, graphics, and GUI elements. Code, results from calculations, and tables should be formatted as text and included elsewhere in the PR. -->
 
-## Types of changes:
+## Types of changes
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
