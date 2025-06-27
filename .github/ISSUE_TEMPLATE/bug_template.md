@@ -6,19 +6,19 @@ labels:
 assignees:
 ---
 
-**Describe the bug**
-A concise description of the issue encountered.
+**Describe the bug:**
+A concise description of the bug encountered.
 
-**Steps to Reproduce the Issue:**
+**Steps to reproduce the bug:**
 1. Given I have '...'
 2. When I '...'
 3. Then '...'
 
-**Expected Behavior:**
+**Expected behavior:**
 Describe the expected behavior.
 
-**WRIMS Version used:**
-Note the build version used when the issue was encountered.
+**WRIMS version used:**
+Note the build version used when the bug was encountered.
 
 **Study used:**
-Note the study used when the issue was encountered.
+Note the study used when the bug was encountered.
