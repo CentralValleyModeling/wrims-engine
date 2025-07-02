@@ -30,6 +30,10 @@ To keep things smooth and maintain high quality, please follow the rules and bes
 > [!NOTE]
 > Creating and assigning an issue will only work for members of the development team.
 
+The following links reference workflows that closely model the developer workflow for this repository:
+- [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow)
+- [Gitflow workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
+
 ## Coding Standards and Style Guides
 
 ### General Principles (All Languages)
