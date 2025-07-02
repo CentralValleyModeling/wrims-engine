@@ -1,0 +1,160 @@
+@startuml
+'https://plantuml.com/component-diagram
+header "WRIMS"
+left to right direction
+skinparam linetype ortho
+cloud hec_nexus as "HEC Nexus"
+cloud maven_central as "Maven Central"
+
+rectangle wrims as "WRIMS 2.2"{
+    component wrims_ide as "WRIMS IDE" #lightgreen
+
+    component wrims_dssvue as "DWR DSSVue" #orange {
+        package dssvue as "gov.ca.dwr.hecdssvue"
+    }
+
+    component wrims_jdiagram as "DWR JDiagram" #orange {
+        package gov.ca.dwr.jdiagram
+    }
+
+    component wrims_core as "WRIMS Core" #orange
+
+    component xtext_editor as "xText Editor" #orange {
+        package xtext.editor as "gov.ca.dwr.xtext.editor"
+    }
+
+    component xtext_editor_ui as "xText Editor UI" #orange {
+        package xtext.editor.ui as "gov.ca.dwr.xtext.editor.ui"
+    }
+
+    component eclipse_luna_libs as "Eclipse Luna Libraries" #orange {
+        package org.eclipse.xtext
+    }
+
+    rectangle third_party as "Third-Party" #orange {
+        rectangle local_jars as "Local Jars" #white {
+            component antlrgenerator as "antlr-generator-3.2.0.jar"  #lightblue {
+                package org.antlr.generator
+            }
+            component swixml as "swixml.jar" #lightblue {
+                package org.swixml
+            }
+            component linearsolver as "com.google.ortools.linearsolver.jar" #lightblue
+            component vistajar as "vista.jar" #lightblue {
+                package vista
+            }
+            component calsurrogate as "calsurrogate.jar" #lightblue {
+                package calsim.surrogate
+            }
+            component jdiagram as "JDiagram.jar" #lightblue {
+                package com.mindfusion
+            }
+            component xaopt as "XAOptimizer.jar" #lightblue {
+                package com.sunsetsoft.xa
+            }
+            component coinor as "coinor.jar" #lightblue {
+                package org.coinor
+            }
+            component dsm2 as "dsm2-input-model.jar" #lightblue {
+                package gov.ca.dsm2.input
+            }
+            component itext as "iText.jar" #lightblue {
+                package com.lowagie
+            }
+            component jpython as "jpython.jar" #lightblue {
+                package com.oroinc.text.regex
+                package org.python
+            }
+            component jarhdf5 as "jarhdf5-2.10.0.jar" #lightblue {
+                package ncsa.hdf.ndf5lib
+            }
+            component gurobi as "gurobi.jar" #lightblue
+            component sqljdbc4 as "sqljdbc4-2.0.jar" #lightblue {
+                package com.microsoft.sqlserver.jdbc
+            }
+        }
+        rectangle resolved_deps as "Resolved dependencies" #white {
+        rectangle hec as "HEC"  {
+            package hec.dssgui
+            package hec.monolith {
+                package hec.hecmath
+                package hec.io
+                package hec.gfx2d
+            }
+            package javaHeclib
+            package hec.nucleus.metadata
+        }
+        rectangle non_hec as "Non-HEC"  {
+            package org.tensorflow
+            package antlr
+            package commons.io
+            package jfreechart
+            package osgi.core
+            package slf4jnop
+            package kryo
+            package guice
+            package log4j
+            package testng
+        }
+    }
+}
+
+xtext_editor_ui -down-> local_jars
+xtext_editor -down-> local_jars
+xtext_editor -> org.eclipse.xtext
+xtext_editor_ui -> org.eclipse.xtext
+
+wrims_ide -down-> wrims_core
+wrims_ide -down-> eclipse_luna_libs
+wrims_ide -down-> vistajar
+wrims_ide -down-> wrims_jdiagram
+wrims_ide -down-> hec
+wrims_ide -down-> wrims_dssvue
+wrims_ide -down-> xtext_editor_ui
+wrims_ide -down-> itext
+wrims_ide -down-> osgi.core
+wrims_ide -down-> jfreechart
+wrims_ide -down-> hec.nucleus.metadata
+
+wrims_core -down-> calsurrogate
+wrims_core -> third_party
+wrims_core -> coinor
+wrims_core -down-> xaopt
+wrims_core -> hec.monolith
+wrims_core -> linearsolver
+wrims_core -down-> jarhdf5
+wrims_core -down-> testng
+wrims_core -down-> org.tensorflow
+wrims_core -down-> antlr
+wrims_core -down-> commons.io
+wrims_core -down-> slf4jnop
+wrims_core -down-> kryo
+wrims_core -down-> javaHeclib
+wrims_core -down-> gurobi
+wrims_core -down-> hec.nucleus.metadata
+
+xtext_editor_ui -down-> xtext_editor
+xtext_editor_ui -down-> antlrgenerator
+xtext_editor_ui -down-> guice
+xtext_editor_ui -down-> log4j
+xtext_editor -down-> antlrgenerator
+
+calsurrogate -down-> org.tensorflow
+
+gov.ca.dwr.jdiagram -> jdiagram
+wrims_jdiagram -down-> eclipse_luna_libs
+
+hec -down-> hec_nexus
+non_hec -down-> maven_central
+
+dssvue -down-> hec.dssgui
+dssvue -down-> swixml
+dssvue -down-> javaHeclib
+dssvue -down-> jpython
+dssvue -down-> hec.monolith
+dssvue -down-> eclipse_luna_libs
+
+vista -> dsm2
+
+footer "green components indicate the primary module being represented \n orange components indicate key local modules \n blue components indicate locally-stored third-party jars"
+@enduml
