@@ -22,13 +22,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Echo token
-        run: echo "${{ steps.app-token.outputs.token }}"
+      - name: Echo app-slug
+        run: echo "${{ steps.app-token.outputs.app-slug }}"
 
       - name: Verify token access to wrims-engine-dependencies
         shell: bash
         run: |
-          curl -i -u "wrims-dependency-reader[bot]:${{ steps.app-token.outputs.token }}" \
+          curl -i -u "${{ steps.app-token.outputs.app-slug }}[bot]:${{ steps.app-token.outputs.token }}" \
             https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/com.google.ortools/linearsolver/2013-01-10/linearsolver-2013-01-10.jar
 
       - name: Set up JDK 21
