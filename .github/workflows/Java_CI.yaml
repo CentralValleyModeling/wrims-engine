@@ -22,6 +22,11 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
+      - name: Verify token access to wrims-engine-dependencies
+        run: |
+          curl -i -u "${{ github.actor }}:${{ steps.app-token.outputs.token }}" \
+            https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
