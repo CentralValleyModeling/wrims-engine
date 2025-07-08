@@ -10,20 +10,20 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: 1364941
-          private-key: ${{ secrets.WRIMS_DEPENDENCY_READER_PK }}
-          owner: 'CentralValleyModeling'
-          repositories: 'wrims-engine-dependencies'
+#      - uses: actions/create-github-app-token@v2
+#        id: app-token
+#        with:
+#          app-id: 1364941
+#          private-key: ${{ secrets.WRIMS_DEPENDENCY_READER_PK }}
+#          owner: 'CentralValleyModeling'
+#          repositories: 'wrims-engine-dependencies'
 
       - uses: actions/checkout@v2
-        with:
-          token: ${{ steps.app-token.outputs.token }}
+#        with:
+#          token: ${{ steps.app-token.outputs.token }}
 
-      - name: Echo app-slug
-        run: echo "${{ steps.app-token.outputs.app-slug }}"
+#      - name: Echo app-slug
+#        run: echo "${{ steps.app-token.outputs.app-slug }}"
 
       - name: Verify token access to wrims-engine-dependencies
         shell: bash
@@ -40,13 +40,13 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew clean -PcvmUserId="${{ steps.app-token.outputs.app-slug }}[bot]" -PcvmPassword="${{ steps.app-token.outputs.token }}"
-          ./gradlew build -PcvmUserId="${{ steps.app-token.outputs.app-slug }}[bot]" -PcvmPassword="${{ steps.app-token.outputs.token }}"
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
 
       - name: Generate tattletale-reports
         run: |
-          ./gradlew clean -PcvmUserId=${{ steps.app-token.outputs.app-slug }}[bot] -PcvmPassword=${{ steps.app-token.outputs.token }}
-          ./gradlew tattletaleReport -PcvmUserId=${{ steps.app-token.outputs.app-slug }}[bot] -PcvmPassword=${{ steps.app-token.outputs.token }}
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4.0.0
