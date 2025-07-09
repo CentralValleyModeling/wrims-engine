@@ -6,17 +6,13 @@ plugins {
 }
 
 publishing {
-    // Publish to HEC's Maven-public by targeting the appropriate maven-snapshots or maven-releases repo based on the
-    // version of the library being deployed.
     repositories {
         maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/CentralValleyModeling/wrims-engine")
             credentials {
-                username = project.hasProperty('nexusUser') ? "$nexusUser" : "noUserSpecified"
-                password = project.hasProperty('nexusPassword') ? "$nexusPassword" : "noPasswordSpecified"
-            }
-            def baseUrl = "https://www.hec.usace.army.mil/nexus/repository"
-            afterEvaluate {
-                url = version.toString().endsWith("SNAPSHOT") ? "$baseUrl/maven-snapshots/" : "$baseUrl/maven-releases/"
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
