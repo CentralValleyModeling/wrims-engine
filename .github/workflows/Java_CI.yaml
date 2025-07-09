@@ -2,7 +2,13 @@ name: Java CI
 
 on:
   pull_request:
+    types:
+      - synchronize
   push:
+    branches:
+      - 'devops/**'
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -62,12 +68,17 @@ jobs:
           path: |
             ./*/build/reports/**
 
-      - name: Publish wrims-core to GitHub Packages
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
-        run: |
-          ./gradlew wrims-core:publish \
-            -PcvmUserId="dwr-wrims-build" \
-            -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
-            -Pgpr.user="github-actions[bot]" \
-            -Pgpr.key="${{ secrets.GITHUB_TOKEN }}"
+      - name: Publish package
+        run: ./gradlew publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - name: Publish wrims-core to GitHub Packages
+##        if: startsWith(github.ref, 'refs/tags/')
+#        shell: bash
+#        run: |
+#          ./gradlew wrims-core:publish \
+#            -PcvmUserId="dwr-wrims-build" \
+#            -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
+#            -Pgpr.user="github-actions[bot]" \
+#            -Pgpr.key="${{ secrets.GITHUB_TOKEN }}"
