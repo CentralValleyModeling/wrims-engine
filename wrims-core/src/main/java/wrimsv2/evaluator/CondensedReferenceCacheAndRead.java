@@ -82,7 +82,7 @@ public class CondensedReferenceCacheAndRead {
             	tsc.fullName = condensedReference.getNominalPathname();
             	HecTime start = new HecTime();
             	HecTime end = new HecTime();
-            	condensedReference.getPathnameTimes(new CombinedDataManager(false), start, end);
+            	condensedReference.getPathnameTimes(new LocalDssDataManager(), start, end);
             	ts.setTimeWindow(start, end);
             	boolean removeMissing = false;
             	ts.read(tsc, removeMissing);
