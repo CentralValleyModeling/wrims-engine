@@ -1,15 +1,21 @@
 import java
 
-def __init__(self):
-    pass
+System = java.type("java.lang.System")
 
-def main():
-    print("Hello, World!")
-    System = java.type("java.lang.System")
-    System.out.println("Hello from Java System.out.println!")
+class HelloWorld:
+    def __init__(self):
+        pass
 
-def getText():
-    return "Hello, World 2!"
+    def __str__(self):
+        return "Hello, World!"
+
+    def main(self):
+        print(str(self))
+        System.out.println("Hello from Java System.out.println!")
+
+    def getText(self):
+        return str(self)
+
 
 if __name__ == "__main__":
-    main()
+    HelloWorld().main()
