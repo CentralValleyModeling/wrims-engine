@@ -8,12 +8,10 @@ plugins {
 
 // This utilizes Git Tag based versioning to set the version of the project based on the current Git Branch or Tag.
 // If a tag is checked out, the version will be the name of the most recent tag on this commit.
-// Otherwise, the version will be last version suffixed with a +
+// Otherwise, the version will be last version suffixed with a ".9999" to indicate that it is a snapshot.
 def versionLabel(gitInfo) {
-    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
     def tag = gitInfo.lastTag
-    // tag is returned as is. Branch may need cleanup
-    return branch == null ? tag : gitInfo.lastTag + ".9999"
+    return gitInfo.branchName == null ? tag : tag + ".9999"
 }
 
 allprojects {
