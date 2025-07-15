@@ -22,11 +22,11 @@ final class PythonTest {
             world.main();
 
             String result = world.getText();
-            assertEquals("Hello, World!", result);
+            assertEquals("Hello, World 2!", result);
         }
     }
 
     static Context createPythonContext(String pythonResourcesDirectory) {
-        return GraalPyResources.contextBuilder(Path.of(pythonResourcesDirectory)).build();
+        return GraalPyResources.contextBuilder(Path.of(pythonResourcesDirectory)).allowAllAccess(true).build();
     }
 }
