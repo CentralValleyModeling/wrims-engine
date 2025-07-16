@@ -20,10 +20,11 @@ sourceSets {
 
 
 dependencies {
+    api(platform(project(":wrims-engine-bom")))
+    api libs.hec.monolith
+
     antlr libs.antlr
 
-    api libs.hec.monolith
-    implementation libs.hec.nucleus.metadata
     implementation libs.guava
     implementation libs.commons.io
     implementation libs.xstream
@@ -43,23 +44,24 @@ dependencies {
     // ncsa.hdf.object.h5
     // implementation 'org.hdfgroup:hdf-java:2.6' from 2010 is present
     // at
-    implementation("ncsa.hdf.hdf5lib:jarhdf5:2.11.0")
+    implementation libs.jarhdf5
 
     // The oldest implementation of Google's linearsolver in mavencentral appears to be
     // implementation 'com.google.ortools:ortools-java:8.2.9004'
     // from 20 April 2021.
     // The local jar file contents are from 2013, so we'll use the local jar
     // until we verify that a newer version will work.
-    implementation('com.google.ortools:linearsolver:2013-01-10')
+    implementation libs.linearsolver
+//    implementation('com.google.ortools:linearsolver:2013-01-10')
 
     // The oldest implementation of gurobi in a maven repository appears to be
     // from 2014. We'll use the local jar (2012) until we verify that a newer version
     // will work.
-    implementation('gurobi:gurobi:5.0')
-    implementation('gov.ca.dwr:jcbc:2021-12-27')
-    implementation('lpsolve:lpsolve55j:2009.08.23')
-    implementation('com.sunsetsoft.xa:xaoptimizer:2016.11.04')
-    implementation('gov.ca.dwr.deltamodeling:calsurrogate:2023.12.25')
+    implementation libs.gurobi
+    implementation libs.jcbc
+    implementation libs.lpsolve55j
+    implementation libs.xaoptimizer
+    implementation libs.calsurrogate
 }
 
 // This moves .tokens files into the same generated-src files with the .java files
