@@ -1,0 +1,58 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+component wrims_core as "WRIMS-Core" {
+    package wrimsv2 #orange {
+
+            package commondata #lightgreen {
+                package tabledata
+                package solverdata
+                package wresldata
+            }
+
+        package debug
+        package evaluator #yellow
+        package parallel
+        package components
+        package hdf5
+        package ilp
+        package solver
+        package tools
+        package wreslparser
+        package wreslplus
+
+    }
+package main #orange
+}
+wresldata --> solverdata #grey
+evaluator --> solverdata #grey
+
+wresldata --> parallel #firebrick
+parallel --> wresldata  #firebrick
+wresldata --> evaluator #firebrick
+evaluator --> wresldata #firebrick
+wresldata --> components #firebrick
+components --> wresldata #firebrick
+
+hdf5 -d-> solverdata #grey
+hdf5 -d-> wresldata #grey
+ilp --> solverdata #grey
+ilp -r-> wresldata #grey
+solver --> wresldata #grey
+solver --> solverdata #grey
+tools --> wresldata #grey
+tools --> solverdata #grey
+debug --> wresldata #grey
+wreslparser --> wresldata #grey
+wreslplus --> wresldata #grey
+main --> wresldata #grey
+
+' The following relationships are hidden and used to format the diagram. They do not represent actual dependencies.
+' solverdata -l[hidden]-> wresldata
+components -l[hidden] commondata
+evaluator -d[hidden]-> tabledata
+evaluator -l[hidden]-> commondata
+
+footer "green components indicate the primary module being represented \n orange components indicate key local modules \n red lines represent circular dependencies \n blue lines represent dependencies of 'commondata' on other packages \n grey lines represent non-circular dependencies on 'commondata' \n yellow packages are made up of written and generated Java code"
+@enduml

@@ -1,0 +1,142 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+component wrims_core as "WRIMS-Core" {
+    package main #orange
+    package serial #orange
+    package wrimsv2 #orange {
+        package commondata
+        package components
+        package config
+        package debug
+        package evaluator #yellow
+        package exception #pink
+        package external
+        package hdf5
+        package ilp
+        package launch
+        package parallel
+        package solver
+        package sql
+        package tf #pink
+        package tools
+        package wreslparser.elements
+        package wreslplus.elements
+    }
+}
+
+
+main -> components
+main -> wreslparser.elements
+main --> commondata
+
+serial -> wreslplus.elements
+
+commondata -> evaluator
+commondata -> components
+commondata -> parallel
+
+components -> commondata
+components --> evaluator
+components -> external
+components -> solver
+components -> ilp
+components -> wreslparser.elements
+components -> wreslplus.elements
+components -> config
+components -> hdf5
+components -> launch
+components -> sql
+components -> tools
+components -> debug
+components -> parallel
+
+config -> components
+config --> evaluator
+config --> ilp
+config -> solver
+config -> wreslplus.elements
+config -> wreslparser.elements
+
+debug -> components
+debug --> wreslparser.elements
+debug -> solver
+debug -> commondata
+debug -> evaluator
+debug -> external
+
+evaluator -> commondata
+evaluator -> components
+evaluator --> parallel
+evaluator -> tools
+evaluator -> hdf5
+evaluator -> solver
+evaluator --> external
+evaluator -> ilp
+
+external -> components
+external -> evaluator
+external -> ilp
+external --> config
+
+hdf5 -> components
+hdf5 --> evaluator
+hdf5 --> launch
+hdf5 -> commondata
+hdf5 -> parallel
+hdf5 -> tools
+
+ilp -> commondata
+ilp -> components
+ilp -> evaluator
+ilp -> solver
+ilp -> wreslparser.elements
+
+launch -> ilp
+launch -> components
+launch -> wreslparser.elements
+launch -> solver
+
+parallel -> components
+parallel -> commondata
+parallel -> evaluator
+
+solver -> commondata
+solver -> components
+solver -> evaluator
+solver -> wreslparser.elements
+solver -> ilp
+solver -> tools
+solver -> wreslplus.elements
+
+sql -> components
+sql -> tools
+sql -> evaluator
+
+tools -> solver
+tools -> wreslplus.elements
+tools -> commondata
+tools -> components
+tools -> evaluator
+tools -> wreslparser.elements
+
+wreslparser.elements -> commondata
+wreslparser.elements -> components
+wreslparser.elements -> wreslplus.elements
+wreslparser.elements -> evaluator
+wreslparser.elements -> solver
+wreslparser.elements -> sql
+
+wreslplus.elements -> components
+wreslplus.elements -> commondata
+wreslplus.elements -> config
+wreslplus.elements -> evaluator
+
+' The following relationships are hidden and used to format the diagram. They do not represent actual dependencies.
+solver -d[hidden]-> commondata
+tf -d[hidden]-> exception
+
+footer "orange components are modules located outside of the wrimsv2 package \n pink components do not rely on other packages within WRIMS-Core \n yellow packages are made up of written and generated Java code"
+
+@enduml
