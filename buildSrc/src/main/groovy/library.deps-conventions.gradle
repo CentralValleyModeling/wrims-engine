@@ -1,0 +1,39 @@
+// This file provides a set of defaults for defining the `repositories` block for subprojects within this build.
+// This ensures that all subprojects use the same repositories and credentials.
+
+def checkForGHCredentials() {
+    if (!project.hasProperty('cvmUserId')) {
+        println('Please set the cvmUserId property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmUserId= .')
+    }
+    if (!project.hasProperty('cvmPassword')) {
+        println('Please set the cvmPassword property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmPassword= .')
+    }
+}
+// This function is used to check for the presence of GitHub credentials for accessing private repositories.
+
+
+// Define a standard set of repositories, a specific library may need to customize this list and add or remove some items
+repositories {
+    maven {
+        url = 'https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies'
+        credentials {
+            checkForGHCredentials()
+            username = "$cvmUserId"
+            password = "$cvmPassword"
+        }
+    }
+
+    maven {
+        // The HEC Public repository where a lot of base dependencies are stored like hec-monolith
+        url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
+    }
+
+    // The primary public Maven repository, Maven Central where most 3rd party dependencies can be found
+    mavenCentral()
+
+    maven {
+        // Provider for the gurobi jar
+        url = 'https://cogcomp.seas.upenn.edu/m2repo/'
+    }
+
+}

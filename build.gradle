@@ -1,0 +1,20 @@
+// This is the root build.gradle, which defines a few project-wide properties.
+// Notably, this project sets the version of all projects, as well as the group name.
+
+plugins {
+    id "com.palantir.git-version" version "3.0.0"
+    id 'base'
+}
+
+// This utilizes Git Tag based versioning to set the version of the project based on the current Git Branch or Tag.
+// If a tag is checked out, the version will be the name of the most recent tag on this commit.
+// Otherwise, the version will be last version suffixed with a ".9999" to indicate that it is a snapshot.
+def versionLabel(gitInfo) {
+    def tag = gitInfo.lastTag
+    return gitInfo.branchName == null ? tag : tag + ".9999"
+}
+
+allprojects {
+    group = 'gov.ca.dwr'
+    version = versionLabel(versionDetails())
+}

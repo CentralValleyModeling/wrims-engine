@@ -1,0 +1,63 @@
+// This file defines the default configurations for the Java plugin, such as configuring the Java version to target
+// and setting up a few common dependencies.
+
+plugins {
+    id 'java-library'
+}
+
+compileJava {
+    // Configure the Java release that you wish to target. Note that this does not necessarily directly correlate
+    // to the version of Java you have currently executing Gradle. This format requires at least Java 9, but will work
+    // with any release after that. Specifying the release with the `options.release` format enables compiling targeting
+    // a previous JDK when only a more recent JDK is available (for example, compile for Java 11 with Java 17 or 21).
+    options.release = 21
+	
+	// This is the preferred method to specify the Java version. There is also the sourceCompatibility property, but
+    // Gradle recommends the options.release property instead. There is also the Java Toolchains system, but that
+    // does not appear to support cross compiling (target 11 with JDK 17); it instead expects to find exactly the matching
+    // JDK for the target version. (This limits it to compiling for Java 11 with Java 11, and targeting Java 11 with
+    // Java 17 doesn't work.)
+}
+
+java {
+    // When building a library, ensure that a Sources and Javadoc jar are included as well; this makes sure
+    // that IDEs are able to automatically download and use the sources and javadoc for your library.
+    withSourcesJar()
+    withJavadocJar()
+}
+
+configurations {
+    tattletale
+}
+
+dependencies {
+    tattletale(libs.tattletale)
+}
+
+tasks.register('copyDependencies', Copy) {
+    from(configurations.runtimeClasspath) {
+    }
+    into 'build/tmp/libs'
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+tasks.register('tattletaleReport', JavaExec) {
+    dependsOn tasks.named('copyDependencies')
+    group = 'verification'
+    description = "Generates a JBoss Tattletale report for ${project.name}."
+    classpath = configurations.tattletale
+    mainClass = 'org.jboss.tattletale.Main'
+
+    args = [
+            "${layout.buildDirectory.asFile.get()}/tmp/libs#${layout.buildDirectory.asFile.get()}/libs",
+            "${layout.buildDirectory.asFile.get()}/reports/tattletale"
+    ]
+}
+
+dependencies {
+    testImplementation(libs.bundles.junit5)
+}
+
+test {
+    useJUnitPlatform()
+}

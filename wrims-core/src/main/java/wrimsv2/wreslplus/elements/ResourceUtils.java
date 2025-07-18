@@ -12,9 +12,9 @@ public class ResourceUtils {
      * If one of the provided resources does not exist, it is assumed to be a file unless it ends with '/' or
      * '\'.
      * 
-     * @param target targetPath is calculated to this file
-     * @param base basePath is calculated from this file
-     * @param separator directory separator. The platform default is not assumed so that we can test Unix behaviour when running on Windows (for example)
+     * @param targetPath targetPath is calculated to this file
+     * @param basePath basePath is calculated from this file
+     * @param pathSeparator directory separator. The platform default is not assumed so that we can test Unix behaviour when running on Windows (for example)
      * @return
      */
     public static String getRelativePath(String targetPath, String basePath, String pathSeparator) {

@@ -3,6 +3,7 @@ plugins{
     id 'antlr'
     id 'library.deps-conventions'
     id 'library.java-conventions'
+    id 'library.publishing-conventions'
 }
 
 sourceSets {
@@ -19,10 +20,11 @@ sourceSets {
 
 
 dependencies {
+    api(platform(project(":wrims-engine-bom")))
+    api libs.hec.monolith
+
     antlr libs.antlr
 
-    api libs.hec.monolith
-    implementation libs.hec.nucleus.metadata
     implementation libs.guava
     implementation libs.commons.io
     implementation libs.xstream
@@ -42,25 +44,24 @@ dependencies {
     // ncsa.hdf.object.h5
     // implementation 'org.hdfgroup:hdf-java:2.6' from 2010 is present
     // at
-    implementation(":jarhdf5-2.11.0")
+    implementation libs.jarhdf5
 
     // The oldest implementation of Google's linearsolver in mavencentral appears to be
     // implementation 'com.google.ortools:ortools-java:8.2.9004'
     // from 20 April 2021.
     // The local jar file contents are from 2013, so we'll use the local jar
     // until we verify that a newer version will work.
-    implementation(':com.google.ortools.linearsolver')
+    implementation libs.linearsolver
+//    implementation('com.google.ortools:linearsolver:2013-01-10')
 
     // The oldest implementation of gurobi in a maven repository appears to be
     // from 2014. We'll use the local jar (2012) until we verify that a newer version
     // will work.
-    implementation(':gurobi')
-    implementation(':coinor')
-    implementation(':lpsolve55j')
-    implementation(':XAOptimizer')
-    implementation(':calsurrogate')
-
-    testImplementation(libs.bundles.junit5)
+    implementation libs.gurobi
+    implementation libs.jcbc
+    implementation libs.lpsolve55j
+    implementation libs.xaoptimizer
+    implementation libs.calsurrogate
 }
 
 // This moves .tokens files into the same generated-src files with the .java files
@@ -89,20 +90,14 @@ tasks.withType(AntlrTask) {
     }
 }
 
-eclipse {
-    classpath {
-        file {
-            whenMerged {
-                //Gradle Eclipse plugin and multiple source sets are causing issues with the eclipse
-                //classpath within the Eclipse IDE. We need to ignore the ones we know are duplicates.
-                cp ->
-                    cp.getEntries().removeIf(e -> (e.path == 'src/main/java' && e.output == 'bin/main')
-                            || (e.path == 'src/main/antlr' && e.output == 'bin/main'))
-            }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
         }
     }
 }
 
-test {
-    useJUnitPlatform()
+tasks.named('sourcesJar') {
+    dependsOn tasks.named('generateGrammarSource')
 }
