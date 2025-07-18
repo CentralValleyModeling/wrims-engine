@@ -1,0 +1,62 @@
+name: Java CI
+
+on:
+  pull_request:
+    types:
+      - synchronize
+  push:
+    branches:
+      - 'devops/**'
+    tags:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Verify token access to wrims-engine-dependencies
+        shell: bash
+        run: |
+          curl -i -u "dwr-wrims-build:${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
+            https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/com.google.ortools/linearsolver/2013-01-10/linearsolver-2013-01-10.jar
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+
+      - name: Upload Core jar
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4.0.0
+        with:
+          name: wrims-core
+          path: |
+            ./wrims-core/build/libs/*.jar
+
+      - name: Generate tattletale-reports
+        run: |
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4.0.0
+        with:
+          name: reports
+          path: |
+            ./*/build/reports/**
+
+      - name: Publish package
+        run: ./gradlew publish -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -19,3 +19,9 @@ This repository contains the code, tests, and developer documentation for the Ja
 <!-- write or link to information on developer installation, trainings, etc -->
 
 Prior to the present revison of the WRIMS build system, the equivalent of WRIMS-core was a jar file named `WRIMSv2.jar`.
+
+## Getting Started
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/CentralValleyModeling/wrims-engine.git

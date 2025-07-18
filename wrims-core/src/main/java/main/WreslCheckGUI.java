@@ -121,8 +121,7 @@ public class WreslCheckGUI {
 	/**
 	 * Creates a panel consisting of label, a textfield populated by a browse
 	 * (file browser) button
-	 * 
-	 * @return
+	 *
 	 */
 	@SuppressWarnings("serial")
 	private static class InputFilePanel extends JPanel {
