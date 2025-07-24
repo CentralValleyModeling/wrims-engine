@@ -1,0 +1,54 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+component wrims_core as "WRIMS-Core" {
+    package wrimsv2 #orange {
+        package wreslparser #white {
+            package elements #lightgreen
+            package grammar #lightseagreen
+        }
+        package commondata
+        package components
+        package evaluator #yellow
+        package solver
+        package tools
+        package sql
+        package wreslplus
+
+        package config
+        package debug
+        package hdf5
+        package ilp
+        package launch
+    }
+    package main #orange
+}
+
+elements -r->  components #firebrick
+components -->  elements #firebrick
+elements -d->  solver #firebrick
+solver -->  elements #firebrick
+elements -->  tools #firebrick
+tools -l->  elements #firebrick
+elements -->  wreslplus #firebrick
+wreslplus -->  elements #firebrick
+elements -r->  grammar #firebrick
+grammar -->  elements #firebrick
+
+elements -->  commondata #blue
+elements -->  evaluator #blue
+elements -->  sql #blue
+
+config -->  elements #grey
+debug -->  elements #grey
+hdf5 -->  elements #grey
+ilp -->  elements #grey
+launch -->  elements #grey
+main --> elements #grey
+
+' The following relationships are hidden and used to format the diagram. They do not represent actual dependencies.
+'debug -r[hidden]-> evaluator
+
+footer "green components indicate the primary module being represented \n orange components indicate key local modules \n red lines represent circular dependencies \n blue lines represent dependencies of 'elements' on other packages \n grey lines represent non-circular dependencies on 'elements' \n turquoise components are generated source code \n yellow packages are made up of written and generated Java code"
+@enduml

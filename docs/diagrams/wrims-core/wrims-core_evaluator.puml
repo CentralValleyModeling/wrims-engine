@@ -1,0 +1,64 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+
+component wrims_core as "WRIMS-Core"{
+    package wrimsv2  #orange {
+        package evaluator #lightgreen
+        package commondata #white {
+                package wresldata
+                package solverdata
+
+        }
+        package components
+        package config
+        package debug
+        package external
+        package launch
+        package parallel
+        package hdf5
+        package ilp
+        package solver
+        package sql
+        package tools
+        package wreslparser.elements
+        package wreslplus.elements
+
+    }
+package main #orange
+}
+
+evaluator --> components #firebrick
+components -r-> evaluator #firebrick
+evaluator --> hdf5 #firebrick
+hdf5 --> evaluator  #firebrick
+evaluator --> ilp #firebrick
+ilp --> evaluator  #firebrick
+evaluator --> solver #firebrick
+solver -left-> evaluator  #firebrick
+evaluator --> tools #firebrick
+tools --> evaluator  #firebrick
+evaluator --> wresldata #firebrick
+wresldata --> evaluator  #firebrick
+external --> evaluator #firebrick
+evaluator --> external  #firebrick
+
+evaluator --> parallel #blue
+evaluator --> solverdata #blue
+
+config --> evaluator  #grey
+wreslparser.elements --> evaluator #grey
+wreslplus.elements --> evaluator #grey
+debug --> evaluator  #grey
+launch --> evaluator  #grey
+sql --> evaluator  #grey
+main -l-> evaluator  #grey
+
+' The following relationships are hidden and used to format the diagram. They do not represent actual dependencies.
+components -up[hidden]-> ilp
+ilp -up[hidden]-> hdf5
+hdf5 -up[hidden]-> solver
+solver -up[hidden]-> tools
+
+footer "green components indicate the primary module being represented \n orange components indicate key local modules \n red lines represent circular dependencies \n blue lines represent dependencies of 'evaluator' on other packages \n grey lines represent non-circular dependencies on 'evaluator' \n the 'evaluator' package is made up of written and generated Java code"
+@enduml
