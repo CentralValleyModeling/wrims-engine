@@ -4,26 +4,27 @@ System = java.type("java.lang.System")
 MyCustomClass = java.type("graalpy.MyCustomClass")  # Adjust
 
 class JavaTest:
-    def __init__(self):
-        self.custom_class = MyCustomClass()
-
     def __str__(self):
         return "JavaTest instance with custom class"
 
-    def main(self):
+    def instanceTest(self):
+        custom_instance = MyCustomClass()
         print(str(self))
         System.out.println("Hello from Java System.out.println!")
-        self.custom_class.main()
-        if (MyCustomClass.isTrue()):
-            System.out.println("Custom class is true")
+        custom_instance.printTest()
+        if (MyCustomClass.isAnInteger(3)):
+            System.out.println("Provided value is an integer")
 
-        System.out.println("Number from custom class: " + str(self.custom_class.getNumber(2, 3)))
+        if not MyCustomClass.isAnInteger("Hello"):
+            System.out.println("Provided value is not an integer")
+
+        System.out.println("Number from custom class: " + str(custom_instance.getAbsoluteDifference(2, 3)))
 
     def getText(self):
-        return str(self)
+        return MyCustomClass().getText()
 
-    def isTrue(self):
-        return MyCustomClass.isTrue()
+    def isAnInteger(self, value):
+        return MyCustomClass.isAnInteger(value)
 
-    def getNumber(self, a, b):
-        return self.custom_class.getNumber(a, b)
+    def getAbsoluteDifference(self, a, b):
+        return MyCustomClass().getAbsoluteDifference(a, b)

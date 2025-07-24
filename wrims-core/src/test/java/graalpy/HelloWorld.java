@@ -1,7 +1,7 @@
 package graalpy;
 
 interface HelloWorld {
-    void main();
+    void printTest();
 
     String getText();
 }

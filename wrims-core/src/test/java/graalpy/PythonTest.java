@@ -1,6 +1,7 @@
 package graalpy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -20,7 +21,7 @@ final class PythonTest {
             context.eval("python", "sys.path.append(sys_path)");
 
             HelloWorld world = context.eval("python", "from HelloWorld import HelloWorld; HelloWorld()").as(HelloWorld.class);
-            world.main();
+            world.printTest();
 
             String result = world.getText();
             assertEquals("Hello, World!", result);
@@ -37,12 +38,24 @@ final class PythonTest {
             context.eval("python", "sys.path.append(sys_path)");
 
             JavaTest test = context.eval("python", "from JavaTest import JavaTest; JavaTest()").as(JavaTest.class);
-            test.main();
+            test.instanceTest();
 
-            boolean isTrue = test.isTrue();
+            boolean isTrue = test.isAnInteger(3);
             assertTrue(isTrue);
 
-            int number = test.getNumber(5, 10);
+            boolean isFalse = test.isAnInteger("This is a string");
+            assertFalse(isFalse);
+
+            boolean isFalse2 = test.isAnInteger(3.14);
+            assertFalse(isFalse2);
+
+            boolean isFalse3 = test.isAnInteger(null);
+            assertFalse(isFalse3);
+
+            boolean isFalse4 = test.isAnInteger("56");
+            assertFalse(isFalse4);
+
+            int number = test.getAbsoluteDifference(5, 10);
             assertEquals(5, number);
 
             String result = test.getText();

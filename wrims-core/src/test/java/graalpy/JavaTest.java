@@ -1,11 +1,11 @@
 package graalpy;
 
 public interface JavaTest {
-    void main();
+    void instanceTest();
 
     String getText();
 
-    boolean isTrue();
+    boolean isAnInteger(Object value);
 
-    int getNumber(int x, int y);
+    int getAbsoluteDifference(int x, int y);
 }

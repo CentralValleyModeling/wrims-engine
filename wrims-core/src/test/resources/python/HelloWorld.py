@@ -9,7 +9,7 @@ class HelloWorld:
     def __str__(self):
         return "Hello, World!"
 
-    def main(self):
+    def printTest(self):
         print(str(self))
         System.out.println("Hello from Java System.out.println!")
 
@@ -18,4 +18,4 @@ class HelloWorld:
 
 
 if __name__ == "__main__":
-    HelloWorld().main()
+    HelloWorld().printTest()

@@ -2,15 +2,19 @@ package graalpy;
 
 public final class MyCustomClass {
 
-    public void main() {
+    public void printTest() {
         System.out.println("Hello from MyCustomClass!");
     }
 
-    public static boolean isTrue() {
-        return true;
+    public static boolean isAnInteger(Object value) {
+        return (value instanceof Integer);
     }
 
-    public int getNumber(int x, int y) {
+    public int getAbsoluteDifference(int x, int y) {
         return Math.abs(x - y);
+    }
+
+    public String getText() {
+        return "JavaTest instance with custom class";
     }
 }
