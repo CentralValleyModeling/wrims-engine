@@ -11,3 +11,17 @@ if (!file('gradle.properties').exists()) {
         rename("gradle.properties.template", "gradle.properties")
     }
 }
+
+/// DEVELOPER IDE BUILDING FROM SOURCE ///
+if(hasProperty('librarySourcesDir')) {
+    def externalDir = new File("$librarySourcesDir")
+    if (externalDir.exists()) {
+        externalDir.eachDir() { directory ->
+            def dwrExtFile = new File(directory, "dwr-build-ext.gradle")
+            if (dwrExtFile.exists()) {
+                gradle.ext.externalLibDir = directory
+                apply from: dwrExtFile
+            }
+        }
+    }
+}

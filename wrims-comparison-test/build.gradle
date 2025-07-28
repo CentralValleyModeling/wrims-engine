@@ -7,7 +7,6 @@ plugins{
 configurations{
     windows_x64
     testProjects
-    regressionTest
     comparisonReport
 }
 
@@ -16,11 +15,10 @@ dependencies {
         exclude group: "org.testng"
     }
 
-    windows_x64 'mil.army.usace.hec:javaHeclib:7-IU-4-win-x86_64@zip'
-    windows_x64 "gov.ca.dwr:run-libs:+"
-    testProjects "gov.ca.dwr:cal_lite_test_01:+"
-
-    comparisonReport "gov.ca.dwr:system-summary-report-tool:master-SNAPSHOT"
+    windows_x64(libs.javaHeclib){artifact {type = 'zip'}}
+    windows_x64 libs.run.libs
+    testProjects libs.cal.lite.test
+    comparisonReport libs.system.summary.report.tool
 }
 
 tasks.register("testExecute", JavaExec) {
@@ -43,27 +41,32 @@ tasks.register("testReport", JavaExec) {
     workingDir "${buildDir}/testProjects/"
     classpath = configurations.comparisonReport
     mainClass = "gov.ca.dwr.callite.Batch"
-    args "$buildDir/${project.findProperty('inputFilePath') ?: "testProjects/callite_version_check_dss6_6.inp"}"
+    def inputFile = file("$buildDir/${project.findProperty('inputFilePath') ?: "testProjects/callite_version_check_dss6_6.inp"}")
+    args inputFile
+    inputs.file(inputFile)
 
     systemProperty "java.library.path", "$buildDir/lib"
-
     environment 'PATH', "$buildDir/lib;${System.getenv('PATH')}"
     jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+
+    def outputFile = file("$buildDir/testProjects/Callite_update_compare_6_6.pdf")
+    outputs.file(outputFile)
+
+    def outputErrorFile = file("$buildDir/testProjects/Callite_update_compare_6_6_VALIDATION_FAILURES.csv")
+    doLast {
+        if (execResult.exitValue == 2 && outputErrorFile.exists()) {
+            outputs.file(outputErrorFile)
+        }
+    }
 }
 
 tasks.register('getNatives', Sync) { syncTask ->
-    doFirst{
-        mkdir "$buildDir/lib"
-    }
     syncTask.from configurations.windows_x64.collect { zipTree(it) }
     syncTask.into file("$buildDir/lib")
 }
 
 tasks.register('getTestProjects', Sync) { syncTask ->
-    doFirst{
-        mkdir "$buildDir/testProjects"
-    }
-     syncTask.from configurations.testProjects.collect { zipTree(it) }
+    syncTask.from configurations.testProjects.collect { zipTree(it) }
     syncTask.into file("$buildDir/testProjects")
 }
 
