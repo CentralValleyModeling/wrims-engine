@@ -1,6 +1,7 @@
 rootProject.name = 'wrims-engine'
 include 'wrims-core'
 include 'wrims-engine-bom'
+include 'wrims-comparison-test'
 
 // If there is no gradle.properties when Gradle starts up, copy the template into place
 if (!file('gradle.properties').exists()) {
@@ -11,3 +12,16 @@ if (!file('gradle.properties').exists()) {
     }
 }
 
+/// DEVELOPER IDE BUILDING FROM SOURCE ///
+if(hasProperty('librarySourcesDir')) {
+    def externalDir = new File("$librarySourcesDir")
+    if (externalDir.exists()) {
+        externalDir.eachDir() { directory ->
+            def dwrExtFile = new File(directory, "dwr-build-ext.gradle")
+            if (dwrExtFile.exists()) {
+                gradle.ext.externalLibDir = directory
+                apply from: dwrExtFile
+            }
+        }
+    }
+}
