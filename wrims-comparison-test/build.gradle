@@ -1,0 +1,82 @@
+plugins{
+    id 'library.deps-conventions'
+    id 'library.java-conventions'
+    id 'maven-publish'
+    id 'distribution'
+}
+configurations{
+    windows_x64
+    testProjects
+    comparisonReport
+}
+
+dependencies {
+    implementation(project(":wrims-core")){
+        exclude group: "org.testng"
+    }
+
+    windows_x64(libs.javaHeclib){artifact {type = 'zip'}}
+    windows_x64 libs.run.libs
+    testProjects libs.cal.lite.test
+    comparisonReport libs.system.summary.report.tool
+}
+
+tasks.register("testExecute", JavaExec) {
+    def compareDirName = "$buildDir/testProjects/CalLite4.1_TF"
+    dependsOn(tasks.named("getNatives"))
+    dependsOn(tasks.named("getTestProjects"))
+    workingDir "${buildDir}/testProjects/"
+    classpath = files("${compareDirName}/Run/external")
+    classpath += sourceSets.main.runtimeClasspath
+    mainClass = "wrimsv2.components.ControllerBatch"
+    args "-config=$buildDir/${project.findProperty('configFilePath') ?: "/testProjects/CalLite4.1_TF/Test_02.config"}"
+    environment 'PATH', "${compareDirName}/Run/external;$buildDir/lib;${System.getenv('PATH')}"
+    systemProperty "java.library.path", "${compareDirName}/Run/external;$buildDir/lib"
+
+    jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+}
+
+tasks.register("testReport", JavaExec) {
+    dependsOn(tasks.named("testExecute"))
+    workingDir "${buildDir}/testProjects/"
+    classpath = configurations.comparisonReport
+    mainClass = "gov.ca.dwr.callite.Batch"
+    def inputFile = file("$buildDir/${project.findProperty('inputFilePath') ?: "testProjects/callite_version_check_dss6_6.inp"}")
+    args inputFile
+    inputs.file(inputFile)
+
+    systemProperty "java.library.path", "$buildDir/lib"
+    environment 'PATH', "$buildDir/lib;${System.getenv('PATH')}"
+    jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+
+    def outputFile = file("$buildDir/testProjects/Callite_update_compare_6_6.pdf")
+    outputs.file(outputFile)
+
+    def outputErrorFile = file("$buildDir/testProjects/Callite_update_compare_6_6_VALIDATION_FAILURES.csv")
+    doLast {
+        if (execResult.exitValue == 2 && outputErrorFile.exists()) {
+            outputs.file(outputErrorFile)
+        }
+    }
+}
+
+tasks.register('getNatives', Sync) { syncTask ->
+    syncTask.from configurations.windows_x64.collect { zipTree(it) }
+    syncTask.into file("$buildDir/lib")
+}
+
+tasks.register('getTestProjects', Sync) { syncTask ->
+    syncTask.from configurations.testProjects.collect { zipTree(it) }
+    syncTask.into file("$buildDir/testProjects")
+}
+
+publishing {
+    publications {
+        pdf(MavenPublication) {
+            artifact("$buildDir/testProjects/Callite_update_compare_6_6.pdf") {
+                builtBy testReport
+                extension 'pdf'
+            }
+        }
+    }
+}
