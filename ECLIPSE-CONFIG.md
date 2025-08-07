@@ -49,10 +49,12 @@ You can generate a personal access token here: https://github.com/settings/token
 
 The following commands will clone the repository, and build the project from a command prompt.
 Alternatively, you can use your preferred git repo manager tool to clone the wrims repo and checkout the wrims-devops branch.
+
+### Example using Command Prompt or PowerShell on Windows
 ```
 git clone https://github.com/CentralValleyModeling/wrims-engine.git
 cd wrims-engine
-gradlew build
+.\gradlew build
 ```
 
 ### Common Build Errors
@@ -79,10 +81,28 @@ BUILD SUCCESSFUL in 29s
 15 actionable tasks: 15 up-to-date
 ```
 
+### HANDLING BUILD ERRORS FROM CMD or POWERSHELL: 
+If you have a space in your java path you will need to wrap it in quotes like this: 
+```cmd
+"C:\Program Files\Java\jdk-21\bin\java" -jar gradle/wrapper/gradle-wrapper.jar build
+```
+
+If you encounter an error like: "invalid option: --release", try including the -Dorg.gradle.java.home option in your build command before for the -jar like this:
+
+```cmd
+C:\java\jdk-21\bin\java -Dorg.gradle.java.home=C:\java\jdk-21 -jar gradle/wrapper/gradle-wrapper.jar build
+```
+
 ## 2. Open Eclipse with a new/clean workspace
 
-Once you have built the wrims-engine project with Gradle from the command line, you can open Eclipse with a new workspace to import the project.
+Once you have built the wrims-engine project with Gradle from the command line, launch Eclipse.
+
+Create a new workspace to import the project.
+
 Using Eclipse 2024-12, the default Java version is 21, so you should not need to change the Java version in Eclipse.
+
+NOTE: If you have an existing workspace, you can import the wrims-engine project into that workspace, but it is recommended to use a new workspace to avoid any conflicts with existing projects.
+You will also need to make sure the workspace gradle and project settings are set to use the JDK 21 version you have installed.
 
 ## 3. Import the wrims-engine project into Eclipse
 Close the "Welcome" window if it appears.
