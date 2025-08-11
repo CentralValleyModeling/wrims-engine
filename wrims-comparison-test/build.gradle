@@ -36,6 +36,20 @@ tasks.register("testExecute", JavaExec) {
     jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
 }
 
+tasks.register("testExecuteDanube", JavaExec) {
+    def compareDirName = "$buildDir/testProjects/danube"
+    dependsOn(tasks.named("getNatives"))
+    workingDir "${buildDir}/testProjects/"
+    classpath = files("${compareDirName}/Run/external")
+    classpath += sourceSets.main.runtimeClasspath
+    mainClass = "wrimsv2.components.ControllerBatch"
+    args "-config=$buildDir/${project.findProperty('configFilePath') ?: "/testProjects/danube/test.config"}"
+    environment 'PATH', "${compareDirName}/Run/external;$buildDir/lib;${System.getenv('PATH')}"
+    systemProperty "java.library.path", "${compareDirName}/Run/external;$buildDir/lib"
+
+    jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+}
+
 tasks.register("testReport", JavaExec) {
     dependsOn(tasks.named("testExecute"))
     workingDir "${buildDir}/testProjects/"
