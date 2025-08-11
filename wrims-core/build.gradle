@@ -17,7 +17,14 @@ sourceSets {
     }
 }
 
+configurations{
+    windows_x64
+}
 
+dependencies {
+    windows_x64(libs.javaHeclib){artifact {type = 'zip'}}
+    windows_x64 libs.run.libs
+}
 
 dependencies {
     api(platform(project(":wrims-engine-bom")))
@@ -103,6 +110,17 @@ publishing {
     }
 }
 
+tasks.register('getNatives', Sync) { syncTask ->
+    syncTask.from configurations.windows_x64.collect { zipTree(it) }
+    syncTask.into file("${buildDir}/tmp/x64")
+}
+
 tasks.named('sourcesJar') {
     dependsOn tasks.named('generateGrammarSource')
 }
+
+tasks.named('build') {
+    dependsOn tasks.named('copyDependencies')
+}
+
+
