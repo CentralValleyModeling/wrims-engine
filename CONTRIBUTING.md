@@ -9,6 +9,10 @@ To keep things smooth and maintain high quality, please follow the rules and bes
 - Write clear, concise commit messages and PR descriptions.
 - The ```main``` branch is protected and always production-ready. All changes must be made via pull requests.
 
+## Developer IDE configuration
+
+See [ECLIPSE-CONFIG.md](./ECLIPSE-CONFIG.md) for Eclipse IDE setup instruction
+
 ## Developer Workflow Overview
 
 > [!IMPORTANT]  
