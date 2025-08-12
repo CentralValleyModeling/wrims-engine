@@ -22,6 +22,7 @@ dependencies {
 }
 
 tasks.register("testExecute", JavaExec) {
+    group = "compute-tests"
     def compareDirName = "$buildDir/testProjects/CalLite4.1_TF"
     dependsOn(tasks.named("getNatives"))
     dependsOn(tasks.named("getTestProjects"))
@@ -36,14 +37,17 @@ tasks.register("testExecute", JavaExec) {
     jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
 }
 
-tasks.register("testExecuteDanube", JavaExec) {
-    def compareDirName = "$buildDir/testProjects/danube"
+tasks.register("executeDcr2023", JavaExec) {
+    group = "compute-tests"
+    def configFile = "test.config"
+    def projectFolder = "/testProjects/dcr2023"
+    def compareDirName = "$buildDir${projectFolder}"
     dependsOn(tasks.named("getNatives"))
     workingDir "${buildDir}/testProjects/"
     classpath = files("${compareDirName}/Run/external")
     classpath += sourceSets.main.runtimeClasspath
     mainClass = "wrimsv2.components.ControllerBatch"
-    args "-config=$buildDir/${project.findProperty('configFilePath') ?: "/testProjects/danube/test.config"}"
+    args "-config=$buildDir/${project.findProperty('configFilePath') ?: "${projectFolder}/${configFile}"}"
     environment 'PATH', "${compareDirName}/Run/external;$buildDir/lib;${System.getenv('PATH')}"
     systemProperty "java.library.path", "${compareDirName}/Run/external;$buildDir/lib"
 
