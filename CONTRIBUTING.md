@@ -142,6 +142,14 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 - The lifecycle of a pull request is the developer's responsibility.
 - As much as possible, pull requests should have small changes. However, this means as small as possible.
 - Preferred is to merge in any successful change during development as soon as possible. This means a given effort may involve a series of pull requests. This is normal and preferred.
+- **Task List Checker** is enabled for all pull requests. Any tasks in the pull request description will be checked for completion. If any tasks are unchecked at the time of the last build, a "pending check" named "checklist completion" will block the PR from being merged.
+- Tasks (checkboxes) can be added to the description using markdown format:
+  ```markdown
+  - [ ] Task 1
+  - [ ] Task 2 
+  ```
+- If any tasks in the PR description remain unchecked after the last commit is pushed, you must manually re-run the build from the Actions tab to clear the "pending check" blocking the merge.
+- Only tasks in the PR description are checked, not tasks in comments.
 - NOTE: while prudence and fixing complexity can override the above two rules, it should not as a matter of course and only be done after smaller changes have been attempted.
 
 #### Pull Request Title/Summary
