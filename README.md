@@ -25,6 +25,7 @@ Prior to the present revison of the WRIMS build system, the equivalent of WRIMS-
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/CentralValleyModeling/wrims-engine.git
+   ```
    
 # RUNNING HEADLESS WRIMS ENGINE COMPUTE
 The WRIMS engine can be run headless (without the GUI) using the `wrims-core` jar along with all dependency jars and libs. 
@@ -40,15 +41,15 @@ Here are the required steps to run a headless compute with the WRIMS engine jar 
    ```sh
     ./gradlew :wrims-core:getNatives
    ```
-3. Create a batch file in the root directory of the wrims-engine folder named run_project.bat with the following template. Update the project directory and config file as needed.
+3. Clone the run_wrims_study_example.bat file in the root directory of the wrims-engine folder and update the project directory and config file paths.
    ```bat
    @echo off
    REM PROJECT SETTINGS: PROJECT_DIR, and CONFIG_FILE variables as needed.
-   set PROJECT_DIR=wrims-comparison-test\build\testProjects\dcr2023
-   set CONFIG_FILE=test.config
+   set PROJECT_DIR=J:\wrims\projects\dcr2023
+   set CONFIG_FILE=study.config
    
    REM Set the JAVA_HOME environment variable to the path of your java 21 JDK
-   set JAVA_HOME="C:\Users\josh\.jdks\corretto-21.0.3"
+   set JAVA_HOME="J:\java\jdk\jdk_21.0.8_temurin"
    
    set temp_wrims2=".\foo"
    
