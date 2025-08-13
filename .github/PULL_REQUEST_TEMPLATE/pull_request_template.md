@@ -25,11 +25,11 @@ Please consider the following when reviewing this PR:
 
 ## Types of changes
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Documentation change
-- [ ] New tests (new unit tests, test scenarios, or test case documentation)
-- [ ] Triggers regression testing (change affects downstream modules and will require regression testing)
+> - [ ] Bug fix (non-breaking change which fixes an issue)
+> - [ ] New feature (non-breaking change which adds functionality)
+> - [ ] Breaking change (fix or feature that would cause existing functionality to change)
+> - [ ] Documentation change
+> - [ ] New tests (new unit tests, test scenarios, or test case documentation)
+> - [ ] Triggers regression testing (change affects downstream modules and will require regression testing)
 <!--- see how your change affects other areas of the code, etc. -->
-- [ ] Other (include a description)
+> - [ ] Other (include a description)
