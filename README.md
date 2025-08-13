@@ -25,3 +25,49 @@ Prior to the present revison of the WRIMS build system, the equivalent of WRIMS-
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/CentralValleyModeling/wrims-engine.git
+   
+# RUNNING HEADLESS WRIMS ENGINE COMPUTE
+The WRIMS engine can be run headless (without the GUI) using the `wrims-core` jar along with all dependency jars and libs. 
+This is useful for running batch processes or automated tests.
+
+Here are the required steps to run a headless compute with the WRIMS engine jar directly:
+
+1. Build the wrims-core module. This will create a jar file in the `wrims-core/build/libs` directory and the copy the dependent jars into `wrims-core/build/tmp/libs`.
+   ```sh
+   ./gradlew :wrims-core:build
+   ```
+2. Run the "getNatives" task in the wrims-core module. This will download all the required dll files into the `wrims-core/build/tmp/x64` directory. 
+   ```sh
+    ./gradlew :wrims-core:getNatives
+   ```
+3. Create a batch file in the root directory of the wrims-engine folder named run_project.bat with the following template. Update the project directory and config file as needed.
+   ```bat
+   @echo off
+   REM PROJECT SETTINGS: PROJECT_DIR, and CONFIG_FILE variables as needed.
+   set PROJECT_DIR=wrims-comparison-test\build\testProjects\dcr2023
+   set CONFIG_FILE=test.config
+   
+   REM Set the JAVA_HOME environment variable to the path of your java 21 JDK
+   set JAVA_HOME="C:\Users\josh\.jdks\corretto-21.0.3"
+   
+   set temp_wrims2=".\foo"
+   
+   REM Add the required DLLs to the PATH. Do not change if this if run from the wrims-engine root directory.
+   set PATH=%PATH%;wrims-core\build\tmp\x64
+   
+   REM Add the external libraries to the PATH. Do not change.
+   set PATH=%PATH%;%PROJECT_DIR%\Run\External
+   
+   REM Set the main class to run. This is the entry point for the WRIMS application. Do not change when running from wrims-engine root.
+   set MAIN_CLASS=wrimsv2.components.ControllerBatch
+   set WRIMS_CORE_JAR="wrims-core\build\libs\*"
+   set WRIMS_CORE_DEPENDENCIES="wrims-core\build\tmp\libs\*"
+   
+   %JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -cp "%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%" %MAIN_CLASS% -config=%PROJECT_DIR%\%CONFIG_FILE%
+   pause
+   ```   
+
+4. Run the batch file from a terminal or double-click it to execute the bat file.
+   ```sh
+   run_project.bat
+   ```
