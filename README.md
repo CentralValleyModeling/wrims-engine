@@ -72,3 +72,20 @@ Here are the required steps to run a headless compute with the WRIMS engine jar 
    ```sh
    run_project.bat
    ```
+   
+# Dependabot Configuration
+This repository uses Dependabot to keep dependencies up to date. The configuration file is located at `.github/dependabot.yml`. 
+
+The current configuration checks for updates to dependencies weekly.
+
+Dependabot will automatically create pull requests for dependency updates, which can then be reviewed and merged by the specified reviewers.
+It is currently configured to check for updates to Gradle dependencies and GitHub Actions workflows.
+
+The default reviewers for dependency update pull requests are configured in the `dependabot.yml` file as well.
+To add or change reviewers, edit the `reviewers` section of the file for the appropriate package ecosystem.
+
+The currently configured reviewers are:
+- @hxiedwr
+- @dwr-zroy
+
+More information about configuring Dependabot can be found in the [Dependabot configuration documentation](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates).
