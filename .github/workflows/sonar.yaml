@@ -3,9 +3,13 @@ on:
   workflow_run:
     workflows: ["Java CI"]
     type: [completed]
+  push:
+    branches:
+      - main
 
 jobs:
   Sonar:
+    name: SonarCloud Scanner
     runs-on: windows-2022
     if: github.event.workflow_run && github.event.workflow_run.conclusion == 'success'
     steps:
