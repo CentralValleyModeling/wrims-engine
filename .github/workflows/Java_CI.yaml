@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
       - name: Verify token access to wrims-engine-dependencies
         shell: bash
@@ -23,7 +23,7 @@ jobs:
             https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/com.google.ortools/linearsolver/2013-01-10/linearsolver-2013-01-10.jar
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload Core jar
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: wrims-core
           path: |
@@ -48,7 +48,7 @@ jobs:
           ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
 
       - name: Upload Reports
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: reports
           path: |
@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload Comparison Report
         if: always()
-        uses: actions/upload-artifact@v4.0.0
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: comparison-report
           path: |
