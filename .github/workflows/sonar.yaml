@@ -51,20 +51,16 @@ jobs:
         run: |
           ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
           ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
-
-      - name: Get PR Info
-        id: get_pr
-        run: |
-          PR_NUMBER=$(gh pr list --state all --search "${{ github.event.workflow_run.head_sha }}" --json number --jq '.[0].number')
-          PR_BRANCH=$(gh pr view $PR_NUMBER --json headRefName --jq '.headRefName')
-          PR_BASE=$(gh pr view $PR_NUMBER --json baseRefName --jq '.baseRefName')    
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew sonar -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" --info -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} -Dsonar.pullrequest.key=$PR_NUMBER -Dsonar.pullrequest.branch=$PR_BRANCH -Dsonar.pullrequest.base=$PR_BASE
+          ./gradlew sonar \
+                  -PcvmUserId="dwr-wrims-build" \
+                  -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
+                  --info \
+                  -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
+                  -Dsonar.pullrequest.key=$PR_NUMBER \
+                  -Dsonar.pullrequest.branch=$PR_BRANCH \
+                  -Dsonar.pullrequest.base=$PR_BASE
