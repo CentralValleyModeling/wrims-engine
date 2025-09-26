@@ -40,18 +40,12 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
-      - name: Download Coverage
-        uses: actions/download-artifact@v4.3.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
-          path: ./
-          merge-multiple: true
       - name: Build with Gradle
         run: |
           ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
           ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
       - name: Analyze
+        id: sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -64,3 +58,10 @@ jobs:
                   -Dsonar.pullrequest.key=${{ github.event.workflow_run.pull_requests[0].number }} \
                   -Dsonar.pullrequest.branch=${{ github.event.workflow_run.pull_requests[0].head.ref }} \
                   -Dsonar.pullrequest.base=${{ github.event.workflow_run.pull_requests[0].base.ref }}
+      - name: Upload Failure Report
+        if: steps.sonar.outcome == 'failure'
+        uses: actions/upload-artifact@v4.3.0
+        with:
+          name: sonar-failure-report
+          path: /home/runner/work/wrims-engine/wrims-engine/build/reports/problems/problems-report.html
+          retention-days: 7
