@@ -15,15 +15,15 @@ jobs:
     name: SonarCloud Scanner
     runs-on: ubuntu-latest
     if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'push'
-    env:
-      REPO: ${{ github.event.workflow_run.head_repository.full_name }}
-      REF: ${{ github.event.workflow_run.head_branch }}
     steps:
       - name: Checkout PR
         uses: actions/checkout@v4.2.2
+        env:
+          REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          REF: ${{ github.event.workflow_run.head_branch }}
         with:
-          repository: $REPO
-          ref: $REF
+          repository: ${{ env.REPO }}
+          ref: ${{ env.REF }}
           fetch-depth:
             0
       - name: Set up JDK 21
