@@ -126,3 +126,22 @@ That lines up with GitHub’s backend batching → Dependabot may only generate 
 internal processing finishes. You’ll often see the “Dependabot created a PR” timestamp not match when the update job ran.
 
 ---
+
+# SonarQube in-IDE Plugin Setup
+
+To set up SonarQube analysis in your IDE, follow these steps:
+1. **Install SonarLint Plugin:**
+   - For IntelliJ IDEA: Go to `File > Settings > Plugins`, search for "SonarQube for IDE", and install it.
+   - For Eclipse: Go to `Help > Eclipse Marketplace`, search for "SonarQube for IDE", and install it.
+2. **Configure SonarQube Connection:**
+   - Open the SonarQube for IDE plugin settings in your IDE.
+     - For IntelliJ IDEA: `File > Settings > Tools > SonarQube for IDE`. Then choose the "Configure a connection" option and add a new connection.
+     - For Eclipse: `Window > Show View > Other > SonarQube > SonarQube Bindings`. Then use the new view window to add a new connection by right-clicking in the view and selecting "Bind Projects".
+   - Choose the "WRIMS-Engine" project from the list of available projects. You may need to provide the GitHub URL to point at the correct SonarQube project.
+   - Authenticate with SonarQube Cloud. It is recommended to do so with your GitHub credentials, as this will link any organization membership to your SonarQube account.
+3. **Bind the Project:**
+   - After configuring the connection, bind your local project to the SonarQube project.
+   - This will enable SonarQube analysis for your project in the IDE.
+4. **Run Analysis:**
+   - You can now run SonarQube analysis directly from your IDE.
+   - The plugin will provide real-time feedback on code quality and potential issues as you write code.
