@@ -135,12 +135,33 @@ To set up SonarQube analysis in your IDE, follow these steps:
    - For Eclipse: Go to `Help > Eclipse Marketplace`, search for "SonarQube for IDE", and install it.
 2. **Configure SonarQube Connection:**
    - Open the SonarQube for IDE plugin settings in your IDE.
-     - For IntelliJ IDEA: `File > Settings > Tools > SonarQube for IDE`. Then choose the "Configure a connection" option and add a new connection.
-     - For Eclipse: `Window > Show View > Other > SonarQube > SonarQube Bindings`. Then use the new view window to add a new connection by right-clicking in the view and selecting "Bind Projects".
-   - Choose the "WRIMS-Engine" project from the list of available projects. You may need to provide the GitHub URL to point at the correct SonarQube project.
-   - Authenticate with SonarQube Cloud. It is recommended to do so with your GitHub credentials, as this will link any organization membership to your SonarQube account.
+     - For IntelliJ IDEA: `File > Settings > Tools > SonarQube for IDE`.
+     - For Eclipse: `Window > Show View > Other > SonarQube > SonarQube Bindings`. 
+   - Create a token for the DWR-CVM organization. 
+     - Add Connection to SonarQube organization. 
+       - For IntelliJ IDEA: Go to `File > Settings > Tools > SonarQube for IDE` and press the `+` button in the `Connections to SonarQube` section.
+       - For Eclipse: Use the SonarQube Bindings panel to add a new connection by right-clicking in the view and selecting "New Connection...".
+     - Select "SonarQube Cloud" on the left, and name the connection whatever you want to (recommended: `dwr-cvm`). Click "Next"
+     - Click "Create Token" ("Generate token" in Eclipse). This sends you to SonarQube, and if you have an account, will automatically create an authentication token for you if you allow the connection. Log in with your GitHub credentials if prompted.
+       - If using Eclipse, click "Next".
+     - Connect to the `dwr-cvm` organization. 
+       - For IntelliJ IDEA: Click "Select another organization" if it doesn't already show up. Type in `dwr-cvm` into the window that appears. That should add it to the list of "Your Organizations". Click "Next".
+       - For Eclipse: The organization name will already be populated. Click "Next". Name the connection whatever you want to (recommended: `dwr-cvm`) and click "Next".
+     - Choose whether you want to receive the SonarQube Cloud notifications. It is recommended to do so. Click "Next".
+     - Finally,
+       - For IntelliJ IDEA: Click "Create".
+       - For Eclipse: Click "Finish".
 3. **Bind the Project:**
    - After configuring the connection, bind your local project to the SonarQube project.
+     - For IntelliJ IDEA: To do so, open the SonarQube for IDE plugin settings in your IDE.
+       - `File > Settings > Tools > SonarQube for IDE > Project Settings`. The "Project Settings" option may be hidden by a dropdown arrow next to the "SonarQube for IDE" option.
+       - Then select the "Bind Project to SonarCloud" option.
+       - Choose the connection you created in the previous steps in the "Connection" dropdown.
+       - Next, select the "Search in list..." option to choose the project. If you don't see the WRIMS-Engine project, you can enter the project key manually in the "Project key" entry box. The project key for WRIMS-Engine is `CentralValleyModeling_wrims-engine`.
+       - Click "Apply", then "OK" to close the settings window.
+     - For Eclipse: The binding menu is presented immediately after configuring the connection to the organization. 
+       - Click "Add..." and select the project you want to bind. Then, click "Next". 
+       - Choose the SonarQube project to bind to. This should be the project key for WRIMS-Engine, which is `CentralValleyModeling_wrims-engine`. Click "Finish".
    - This will enable SonarQube analysis for your project in the IDE.
 4. **Run Analysis:**
    - You can now run SonarQube analysis directly from your IDE.
