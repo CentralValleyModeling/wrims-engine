@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main
+env:
+  WRIMS_ENGINE_DEPENDENCIES: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
+
 
 jobs:
   Sonar:
@@ -15,9 +18,12 @@ jobs:
     steps:
       - name: Checkout PR
         uses: actions/checkout@v4.2.2
+        env:
+          REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          REF: ${{ github.event.workflow_run.head_branch }}
         with:
-          repository: ${{ github.event.workflow_run.head_repository.full_name }}
-          ref: ${{ github.event.workflow_run.head_branch }}
+          repository: ${{ env.REPO }}
+          ref: ${{ env.REF }}
           fetch-depth:
             0
       - name: Set up JDK 21
@@ -44,22 +50,26 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: |
-          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
-          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$WRIMS_ENGINE_DEPENDENCIES"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="$WRIMS_ENGINE_DEPENDENCIES"
       - name: Analyze
         id: sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          REVISION: ${{ github.event.workflow_run.head_sha }}
+          REQUEST_NUM: ${{ github.event.workflow_run.pull_requests[0].number }}
+          REQUEST_BRANCH: ${{ github.event.workflow_run.pull_requests[0].head.ref }}
+          BASE_BRANCH: ${{ github.event.workflow_run.pull_requests[0].base.ref }}
         run: |
           ./gradlew sonar \
                   -PcvmUserId="dwr-wrims-build" \
-                  -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
+                  -PcvmPassword="$WRIMS_ENGINE_DEPENDENCIES" \
                   --info \
-                  -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
-                  -Dsonar.pullrequest.key=${{ github.event.workflow_run.pull_requests[0].number }} \
-                  -Dsonar.pullrequest.branch=${{ github.event.workflow_run.pull_requests[0].head.ref }} \
-                  -Dsonar.pullrequest.base=${{ github.event.workflow_run.pull_requests[0].base.ref }}
+                  -Dsonar.scm.revision=$REVISION \
+                  -Dsonar.pullrequest.key=$REQUEST_NUM \
+                  -Dsonar.pullrequest.branch=$REQUEST_BRANCH \
+                  -Dsonar.pullrequest.base=$BASE_BRANCH
       - name: Upload Failure Report
         if: failure()
         uses: actions/upload-artifact@v4.3.0
