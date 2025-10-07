@@ -170,7 +170,7 @@ public class DebugInterface {
 				e.printStackTrace();
 			}
 		} else if (request.equals("resume")) {
-			controllerDebug.resume();
+			controllerDebug.safeResume();
 			try {
 				sendRequest("resumed");
 			} catch (IOException e) {
@@ -342,15 +342,24 @@ public class DebugInterface {
 				e.printStackTrace();
 			}
 		}else if (request.equals("terminate")) {
-			controllerDebug.stop();
+            System.out.println("Terminate requested");
+			controllerDebug.requestTerminate();
 			if (isDebugging){
+                System.out.println("Close Solvers");
 				if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG")) {
 					ControlData.xasolver.close();
 				}else if (ControlData.solverName.equalsIgnoreCase("Cbc")){
 					CbcSolver.close();
 				}
-				DssOperation.saveInitialData(ControlData.dvDss, FilePaths.fullDvarDssPath);
-				DssOperation.saveDvarData(ControlData.dvDss, FilePaths.fullDvarDssPath);
+                System.out.println("Save Data");
+                try {
+                    DssOperation.saveInitialData(ControlData.dvDss, FilePaths.fullDvarDssPath);
+                    DssOperation.saveDvarData(ControlData.dvDss, FilePaths.fullDvarDssPath);
+                } catch (Exception exception) {
+                    System.out.println("Exception ocurred while saving data during termination");
+                    exception.printStackTrace();
+                }
+                System.out.println("Close Dss Files");
 				ControlData.dvDss.close();
 				terminateCode=1;
 			}
@@ -363,7 +372,7 @@ public class DebugInterface {
 			}
 			isDebugging=false;
 		}else if (request.equals("suspend")) {
-			controllerDebug.suspend();
+   controllerDebug.requestPause();
 			System.out.println("suspended");
 			try {
 				sendRequest("suspended");
@@ -419,7 +428,7 @@ public class DebugInterface {
 				TableSeries.tableSeries=new HashMap<String, LookUpTable> ();
 			}
 			controllerDebug.modelIndex=Integer.parseInt(requestParts[2])-2;
-			controllerDebug.resume();
+			controllerDebug.safeResume();
 			try {
 				sendRequest("resumed");
 			} catch (IOException e) {
@@ -474,8 +483,8 @@ public class DebugInterface {
 					ControlData.cycleDataStartDay=ControlData.resimDay;
 				}
 			}
-			
-			controllerDebug.resume();
+
+			controllerDebug.safeResume();
 			try {
 				sendRequest("resumed");
 			} catch (IOException e) {

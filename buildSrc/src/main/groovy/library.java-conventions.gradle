@@ -61,3 +61,14 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// Ensure LICENSE from the root of the repo is included in the produced jars (if present)
+tasks.withType(Jar).configureEach {
+    def licenseFile = rootProject.file('LICENSE')
+    if (licenseFile.exists()) {
+        from(licenseFile) {
+            into 'META-INF'
+            rename { 'LICENSE' }
+        }
+    }
+}
