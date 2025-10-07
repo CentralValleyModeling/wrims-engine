@@ -1,12 +1,4 @@
-/*
- * Water Resource Integrated Modeling System (WRIMS) Copyright (c) 2024.
- *
- * WRIMS 2 is copyrighted by the State of California Department of Water Resources.
- * It is licensed under the Eclipse Public License, Version 1.0.
- * See Eclipse Public License for more details.
- */
-
-package wrimsv2.components;
+package wrimsv2.evaluator;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import wrimsv2.evaluator.TimeOperation;
 
-final class ControllerBatchTest {
+final class TimeOperationTest {
 
     @CsvSource({"1Month", "1MON", "1month", "1mon", "1mOnTh", "1MoN"})
     @ParameterizedTest
