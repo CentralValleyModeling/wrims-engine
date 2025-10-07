@@ -54,6 +54,41 @@ import gov.ca.water.wrims.engine.core.wreslplus.elements.Tools;
 import gov.ca.water.wrims.engine.core.wreslplus.elements.procedures.ErrorCheck;
 
 public class ControllerDebug extends Thread {
+	private final Object pauseLock = new Object();
+	private volatile boolean paused = false;
+	private volatile boolean terminated = false;
+
+	public void requestPause() {
+		paused = true;
+	}
+
+	public void safeResume() {
+		synchronized (pauseLock) {
+			paused = false;
+			pauseLock.notifyAll();
+		}
+	}
+
+	public void requestTerminate() {
+		terminated = true;
+		// Ensure any waiting pause is released
+		safeResume();
+		// Interrupt in case the thread is blocked elsewhere
+		this.interrupt();
+	}
+
+	private void pauseHereUntilResumed() {
+		synchronized (pauseLock) {
+			while (paused && !terminated) {
+				try {
+					pauseLock.wait();
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					break;
+				}
+			}
+		}
+	}
 	private DebugInterface di;
 	public int debugYear;
 	public int debugMonth;
@@ -251,14 +286,14 @@ public class ControllerDebug extends Thread {
 		VariableTimeStep.initialCycleStartDate();
 		VariableTimeStep.setCycleEndDate(sds);
 		int sectionI=0;
-		while (VariableTimeStep.checkEndDate(ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear, ControlData.endDay, ControlData.endMonth, ControlData.endYear)<=0 && noError){
+		while (VariableTimeStep.checkEndDate(ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear, ControlData.endDay, ControlData.endMonth, ControlData.endYear)<=0 && noError && !terminated){
 			if (ControlData.solverName.equalsIgnoreCase("XALOG")) SetXALog.enableXALog();
 			ClearValue.clearValues(modelList, modelDataSetMap);
 			sds.clearVarTimeArrayCycleValueMap();
 			sds.clearVarCycleIndexByTimeStep();
 			modelIndex=0;
 			prepareInitialTimeStep();
-			while (modelIndex<modelList.size()  && noError){  
+			while (modelIndex<modelList.size()  && noError && !terminated){  
 				int cycleI=modelIndex+1;
 				String strCycleI=cycleI+"";
 				boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
@@ -272,7 +307,7 @@ public class ControllerDebug extends Thread {
 				VariableTimeStep.setCycleTimeStep(sds);
 				VariableTimeStep.setCurrentDate(sds, ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear);
 				
-				while(VariableTimeStep.checkEndDate(ControlData.currDay, ControlData.currMonth, ControlData.currYear, ControlData.cycleEndDay, ControlData.cycleEndMonth, ControlData.cycleEndYear)<0 && noError){
+				while(VariableTimeStep.checkEndDate(ControlData.currDay, ControlData.currMonth, ControlData.currYear, ControlData.cycleEndDay, ControlData.cycleEndMonth, ControlData.cycleEndYear)<0 && noError && !terminated){
 					ValueEvaluatorParser modelCondition=modelConditionParsers.get(modelIndex);
 					boolean condition=false;
 					try{
@@ -476,27 +511,47 @@ public class ControllerDebug extends Thread {
 			VariableTimeStep.setCycleEndDate(sds);
 		}
 		new CloseCurrentSolver(ControlData.solverName);
-
-		if (ControlData.yearOutputSection<0 && ControlData.writeInitToDVOutput) DssOperation.writeInitDvarAliasToDSS();
-		if (ControlData.yearOutputSection<0) DssOperation.writeDVAliasToDSS();
-		ControlData.dvDss.close();
-		if (ControlData.outputType==1){
-			HDF5Writer.createDvarAliasLookup();
-			HDF5Writer.writeTimestepData();
-			HDF5Writer.writeCyclesDvAlias();
-			HDF5Writer.closeDataStructure();
-		}else if (ControlData.outputType==2){
-			mySQLCWriter.process();
-		}else if (ControlData.outputType==3){
-			mySQLRWriter.process();
-		}else if (ControlData.outputType==4){
-			sqlServerRWriter.process();
-		}else if (ControlData.outputType==5){
-			CsvOperation co = new CsvOperation();
-			co.ouputCSV(FilePaths.fullCsvPath, 0);
-		}
 		
-		WeightEval.outputWtTableAR();
+		if (!terminated) {
+			if (ControlData.yearOutputSection<0 && ControlData.writeInitToDVOutput) DssOperation.writeInitDvarAliasToDSS();
+			if (ControlData.yearOutputSection<0) DssOperation.writeDVAliasToDSS();
+			try {
+				if (ControlData.dvDss != null) {
+					ControlData.dvDss.close();
+				}
+			} catch (Throwable t) {
+				// ignore on termination/cleanup
+			}
+			if (ControlData.outputType==1){
+				HDF5Writer.createDvarAliasLookup();
+				HDF5Writer.writeTimestepData();
+				HDF5Writer.writeCyclesDvAlias();
+				HDF5Writer.closeDataStructure();
+			}else if (ControlData.outputType==2){
+				mySQLCWriter.process();
+			}else if (ControlData.outputType==3){
+				mySQLRWriter.process();
+			}else if (ControlData.outputType==4){
+				sqlServerRWriter.process();
+			}else if (ControlData.outputType==5){
+				CsvOperation co = new CsvOperation();
+				co.ouputCSV(FilePaths.fullCsvPath, 0);
+			}
+			
+			WeightEval.outputWtTableAR();
+		} else {
+			// minimal defensive cleanup on termination
+			try {
+				if (ControlData.dvDss != null) {
+					ControlData.dvDss.close();
+				}
+			} catch (Throwable t) {
+			}
+			try {
+				HDF5Writer.closeDataStructure();
+			} catch (Throwable t) {
+			}
+		}
 	}
 	
 	public void prepareInitialTimeStep(){
@@ -541,7 +596,8 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				this.suspend();
+				paused = true;
+				pauseHereUntilResumed();
 			}
 		}else{
 			if (ControlData.currYear==debugYear && ControlData.currMonth==debugMonth && ControlData.currDay==debugDay && i==debugCycle-1){
@@ -551,7 +607,8 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				this.suspend();
+				paused = true;
+				pauseHereUntilResumed();
 			}
 		}
 		if (Error.getTotalError()>0){
@@ -562,7 +619,8 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			this.suspend();
+			paused = true;
+			pauseHereUntilResumed();
 		}else{
 			checkConditionalBreakpoint();
 		}
@@ -632,7 +690,8 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			this.suspend();
+			paused = true;
+			pauseHereUntilResumed();
 		}
 	}
 
