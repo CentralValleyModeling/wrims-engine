@@ -6,10 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class CsvResult  {
     protected final int[] ids;
@@ -74,12 +71,8 @@ public class CsvResult  {
         this(sourceFile.toAbsolutePath().toString());
     }
 
-    public String[] getVariables() {
-        return variables;
-    }
-
-    public float[] getValues() {
-        return values;
+    public Set<String> getUniqueVariables() {
+        return new HashSet<>(Arrays.asList(variables));
     }
 
     private int[] getVariableIndexes(String variable) throws StringNotFoundException {
@@ -112,7 +105,7 @@ public class CsvResult  {
         return result;
     }
 
-    public float[] getVariableArray(String variable) throws StringNotFoundException {
+    public float[] getValueArray(String variable) throws StringNotFoundException {
         int[] indexes = this.getVariableIndexes(variable);
         float[] result = new float[indexes.length];
         for (int i = 0; i < indexes.length; i++) {
@@ -121,8 +114,8 @@ public class CsvResult  {
         return result;
     }
 
-    public float getSumForVariable(String variable) throws StringNotFoundException {
-        float[] variableValues = this.getVariableArray(variable);
+    public float getSum(String variable) throws StringNotFoundException {
+        float[] variableValues = this.getValueArray(variable);
         float sum = 0;
         for (float val : variableValues) {
             sum += val;
@@ -130,9 +123,9 @@ public class CsvResult  {
         return sum;
     }
 
-    public float getAverageForVariable(String variable) throws StringNotFoundException {
-        float[] variableValues = this.getVariableArray(variable);
-        float sum = this.getSumForVariable(variable);
+    public float getAverage(String variable) throws StringNotFoundException {
+        float[] variableValues = this.getValueArray(variable);
+        float sum = this.getSum(variable);
         return sum / variableValues.length;
     }
 }
