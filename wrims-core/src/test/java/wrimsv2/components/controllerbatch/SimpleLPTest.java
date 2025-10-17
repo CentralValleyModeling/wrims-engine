@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SimpleLPTest {
     private static final Logger logger = Logger.getLogger(SimpleLPTest.class.getName());
 
-    static Path inputFile = Paths.get("src/test/resources/models/testModelSimpleLP/model.launch.config").toAbsolutePath();
-    static Path resultsFile = Paths.get("src/test/resources/models/testModelSimpleLP/output/dv.csv").toAbsolutePath();
+    static Path inputFile = Paths.get("src/test/resources/models/SimpleLP/model.launch.config").toAbsolutePath();
+    static Path resultsFile = Paths.get("src/test/resources/models/SimpleLP/output/dv.csv").toAbsolutePath();
     static ControllerBatch controller;
 
     @BeforeAll
@@ -66,8 +66,8 @@ public class SimpleLPTest {
         try {
             CsvResult result = new CsvResult(resultsFile);
             String[] variables = {"X1", "X2"};
-            for (String var : variables) {
-                assertEquals(12, result.getValueArray(var).length);
+            for (String varName : variables) {
+                assertEquals(12, result.getValueArray(varName).length);
             }
         } catch (StringNotFoundException e) {
             fail("not all expected variables were found in the output file");
