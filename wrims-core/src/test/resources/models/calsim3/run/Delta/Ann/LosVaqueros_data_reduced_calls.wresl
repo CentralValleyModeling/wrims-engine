@@ -1,0 +1,30 @@
+/*
+ 
+References data from cycle MONTHLYWEIGHTED to reduce ANN function calls to reduce runtime.
+
+See the *_data.wresl file for how these parameters are calculated.
+
+*/
+
+!****************************************************************************************
+
+! calculate previous month's value of salinity
+define LV_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define LV_EC_Month_sv {value LV_EC_Month[monthlyweighted]}
+goal setLV_EC_MON {LV_EC_Month = LV_EC_Month_sv}
+
+!get ANN_EC for 2 month earlier 4/14/2005
+define LV_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define LV_EC_Month_smooth_sv {value LV_EC_MonthDSM2[monthlyweighted]}
+goal setLV_EC_DSM2 {LV_EC_MonthDSM2 = LV_EC_Month_smooth_sv}
+
+! calculate the maximum 14 day running average
+define LV_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+define LV_EC_Max14Day_sv {value LV_EC_Max14Day[monthlyweighted]}
+goal setLV_EC_14Ave {LV_EC_Max14Day = LV_EC_Max14Day_sv}
+
+!get ANN_EC for 2 month earlier
+define LV_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define LV_EC_Max14day_smooth_sv {value LV_EC_Max14_DSM2[monthlyweighted]}
+goal setLV_EC_DSM2_2 {LV_EC_Max14_DSM2 = LV_EC_Max14day_smooth_sv}
+

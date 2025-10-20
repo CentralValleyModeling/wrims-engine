@@ -1,0 +1,93 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-seepage_initial.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Naming takes the following form:
+
+The sign of GetSeep is with respect to groundwater; i.e.
+
+  positive seepage (GetSeep) = loosing stream
+  negative seepage (GetSeep) = gaining stream
+
+When multiplied by -1, it reflects stream's perspective.  
+
+*/
+
+/*
+!*********************************************************************
+!*********************************************************************
+!***  Conversion factor from CFS to CF/MONTH
+!*********************************************************************
+!*********************************************************************
+define  cfs_cfm  {value daysin * 86400.0}
+define  cfs_cfmp {case first{
+                     condition wateryear == bgnWY .and. month == Oct
+                          value daysin * 86400.0}
+                  case other{
+                     condition always
+                          value  daysindv(-1) * 86400.0 }}
+*/
+!*********************************************************************
+!*********************************************************************
+!***  Groundwater simulation
+!*********************************************************************
+!*********************************************************************
+! NCLUDE '..\..\CVGroundwater\CVGroundwater.wresl'
+
+         
+!*********************************************************************
+!*********************************************************************
+!***  Define goals
+!*********************************************************************
+!********************************************************************* 
+!!!! American River !!!!!!!!!!!
+/*goal setNegSG374_FOLSM_66 {lhs SG374_FOLSM_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG374_FOLSM_66(-1) < 0 rhs SG374_FOLSM_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG375_NTOMA_66 {lhs SG375_NTOMA_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG375_NTOMA_66(-1) < 0 rhs SG375_NTOMA_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG376_AMR020_66 {lhs SG376_AMR020_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG376_AMR020_66(-1) < 0 rhs SG376_AMR020_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG377_AMR015_66 {lhs SG377_AMR015_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG377_AMR015_66(-1) < 0 rhs SG377_AMR015_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG378_AMR009_66 {lhs SG378_AMR009_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG378_AMR009_66(-1) < 0 rhs SG378_AMR009_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG379_AMR004_66 {lhs SG379_AMR004_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG379_AMR004_66(-1) < 0 rhs SG379_AMR004_66(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG380_AMR004_66 {lhs SG380_AMR004_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG380_AMR004_66(-1) < 0 rhs SG380_AMR004_66(-1)   lhs>rhs penalty SGPHIGH}}*/
+
+goal setNegSG374_FOLSM_66 {SG374_FOLSM_66 = 0.}
+goal setNegSG375_NTOMA_66 {SG375_NTOMA_66 = 0.}
+goal setNegSG376_AMR020_66 {SG376_AMR020_66 = 0.}
+goal setNegSG377_AMR015_66 {SG377_AMR015_66 = 0.}
+goal setNegSG378_AMR009_66 {SG378_AMR009_66 = 0.}
+goal setNegSG379_AMR004_66 {SG379_AMR004_66 = 0.}
+goal setNegSG380_AMR004_66 {SG380_AMR004_66 = 0.}
+
+
+/*goal setPosSG374_FOLSM_66 {lhs SG374_FOLSM_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG374_FOLSM_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG374_FOLSM_66(-1) }}
+goal setPosSG375_NTOMA_66 {lhs SG375_NTOMA_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG375_NTOMA_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG375_NTOMA_66(-1) }}
+goal setPosSG376_AMR020_66 {lhs SG376_AMR020_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG376_AMR020_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG376_AMR020_66(-1) }}
+goal setPosSG377_AMR015_66 {lhs SG377_AMR015_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG377_AMR015_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG377_AMR015_66(-1) }}
+goal setPosSG378_AMR009_66 {lhs SG378_AMR009_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG378_AMR009_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG378_AMR009_66(-1) }}
+goal setPosSG379_AMR004_66 {lhs SG379_AMR004_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG379_AMR004_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG379_AMR004_66(-1) }}
+goal setPosSG380_AMR004_66 {lhs SG380_AMR004_66 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG380_AMR004_66(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG380_AMR004_66(-1) }}*/
+
+                                        
+! Calculate total seepage per river reach
+goal setSG_AMR_Total 	{SG_AMR_Total = SG374_FOLSM_66  + SG375_NTOMA_66  + SG376_AMR020_66 + SG377_AMR015_66 + SG378_AMR009_66 + SG379_AMR004_66 + SG380_AMR004_66}                                             
+
+
+
+

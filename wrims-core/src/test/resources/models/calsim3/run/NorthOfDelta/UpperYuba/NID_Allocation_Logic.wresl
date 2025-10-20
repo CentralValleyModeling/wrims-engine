@@ -1,0 +1,228 @@
+! Implementation of the 2015 Drought Contingency Plan each Year in April
+
+! Available supply: 1) reservoir storage (excluding dead storage), 2) Inflow forecast (April through September)
+! -March Storage: Jackson Meadows, Jackson, French, Faucherie, Sawmill, Bowman, Scotts Flat, Dutch Flat, Rollins, Combie
+define S_DUTCHF {value 2.0} !TAF
+define Gross_Storage_NID {
+	case BeginWY {
+		condition month <= MAR .and. wateryear == 1922
+		value 195.0}	!Average value
+	case Apr {
+		condition month == APR
+		value S_JKSMD(-1) + S_JKSN_NID + S_FRNCH(-1) + S_BOWMN(-1) + S_SCOTF(-1) + S_DUTCHF + S_RLLNS_NID(-1) + S_CMBIE(-1)}
+	case Other {
+		condition always
+		value Gross_Storage_NID_DV(-1)}
+	}
+define Gross_Storage_NID_DV {alias Gross_Storage_NID kind 'STORAGE' units 'TAF'}
+
+! April-June inflow
+define Apr_Jun_Inflow_NID_DV {std kind 'INFLOW' units 'TAF'}
+define Apr_Jun_Inflow_NID {
+	case BeginWY {
+		condition month <= MAR .and. wateryear == BGNWY
+		value 0.5*133.0}	!Average value
+	case Apr {
+		condition month == APR
+		sum(i=0, 2, 1) (I_JKSMD(i) + I_FRNCH(i) + I_BOWMN(i) + I_LCBRF(i)  + I_SFD003(i) + I_SCOTF(i) + I_DER004(i) + I_CMBIE(i) + max(0.0,I_RLLNS(i) - 350.0) + I_WLF013(i))* cfs_taf(i)}
+	case Other {
+		condition always
+		value Apr_Jun_Inflow_NID_DV(-1)}
+	}
+goal setApr_Jun_Inflow_NID_DV {Apr_Jun_Inflow_NID_DV = Apr_Jun_Inflow_NID}
+
+! July-Sept inflow
+define Jul_Sep_Inflow_NID_DV {std kind 'INFLOW' units 'TAF'}
+define Jul_Sep_Inflow_NID {
+	case BeginWY {
+		condition month <= MAR .and. wateryear == BGNWY
+		value 0.5*133.0}	!Average value
+	case Apr {
+		condition month == APR
+		sum(i=3, 5, 1) (I_JKSMD(i) + I_FRNCH(i) + I_BOWMN(i) + MAX(0.0,I_LCBRF(i)-11.5)  + I_SFD003(i) + I_SCOTF(i) + I_DER004(i) + I_CMBIE(i) + max(0.0,I_RLLNS(i) - 350.0) + I_WLF013(i)) * cfs_taf(i)}
+	case Other {
+		condition always
+		value Jul_Sep_Inflow_NID_DV(-1)}
+	}
+goal setJul_Sep_Inflow_NID_DV {Jul_Sep_Inflow_NID_DV = Jul_Sep_Inflow_NID}
+
+! Minimum carryover storage target, includes dead storage volume, from 2015 NID drought contingency plan, Table 5-4, 
+define Carryover_Storage_NID {value 78.0}	!TAF
+
+! Contract Purchases from PG&E
+! NID_Max_Contract_Amount, calculated in PGE_Allocation_Logic
+
+! Recycled Water, from 2015 NID Urban Water Management Plan, for Year 2015 
+define NID_Recycled_Water {value 2.0}	!TAF
+
+! Sum available storage, forecasted inflow, NID purchase water, and recycled water to define available NID supply.
+define Available_Supply_NID {value Gross_Storage_NID - Carryover_Storage_NID + Apr_Jun_Inflow_NID + Jul_Sep_Inflow_NID + NID_Max_Contract_Amount_Wise*PGE_WY_Allocation + NID_Max_Contract_Amount_Deer*PGE_WY_Allocation + NID_Recycled_Water}
+define Available_Supply_NID_DV {std kind 'STORAGE' units 'TAF'}
+goal setAvailable_Supply_NID_DV {Available_Supply_NID_DV = Available_Supply_NID}
+
+! Environmental Flow Requirement (Annual), based on expired FERC license conditions
+! -Middle Yuba River below Milton Diversion Dam
+! -Canyon Creek below Bowman-Spaulding Diversion Dam
+! -Bear River below Lake Combie
+define Instream_Flow_Reqs_NID_DV {std kind 'INFLOW' units 'TAF'}
+define Instream_Flow_Reqs_NID {
+	case BeginWY {
+		condition month <= JAN .and. wateryear == 1922
+		value 7.625}	!Average value
+	case Apr {
+		condition month == APR
+		value 7.625}
+	case Other {
+		condition always
+		value Instream_Flow_Reqs_NID_DV(-1)}
+	}
+goal setInstream_Flow_Reqs_NID_DV {Instream_Flow_Reqs_NID_DV = Instream_Flow_Reqs_NID}
+
+! This code is no longer used 
+! Calculate NID total Demand (April through December)
+!define RUFR_24_NA1_DV {timeseries kind 'REUSE' units 'NONE'} 
+
+define SumUD_24_NU3 {std kind 'URBAN-DEMAND' units 'TAF'} !Calculate Annual demand for NID North Auburn
+define SumUD_24_NU3_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_24_NU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_24_NU3(-1)
+        }}
+goal setSumUD_24_NU3 {SumUD_24_NU3=SumUD_24_NU3_sv}
+
+define Total_Demand_NID_DV {std kind 'DEMAND' units 'TAF'}
+define Total_Demand_NID {
+	case BeginWY {
+		condition month <= MAR .and. wateryear == BGNWY
+		value 133.0}	!Average value
+	case LastWY {
+        condition month == APR .and. wateryear == ENDWY
+        sum(i=0, 5, 1) (AW_NIDDC_NA1(i) + AW_NIDDC_NA2(i) + AW_NIDDC_NA3(i) + UD_GRSVL(i) + UD_WLDWD(i) + UD_PINES(i) + AW_NIDBR_NA(i) + DMD_CBC001_CCK036_NID(i) + UD_24_NU3(i) + (AWO_24_NA1(i)*(1.0-RUFO_24_NA1) + AWR_24_NA1(i)/**(1.0-RUFR_24_NA1_DV(i))*/) * (1.0+RPF_24_NA1)/(1.0 - DLF_24_NA1)) * cfs_taf(i)}
+	case Apr {
+		condition month == APR
+		sum(i=0, 8, 1) (AW_NIDDC_NA1(i) + AW_NIDDC_NA2(i) + AW_NIDDC_NA3(i) + UD_GRSVL(i) + UD_WLDWD(i) + UD_PINES(i) + AW_NIDBR_NA(i) + DMD_CBC001_CCK036_NID(i) + UD_24_NU3(i) + (AWO_24_NA1(i)*(1.0-RUFO_24_NA1) + AWR_24_NA1(i)/**(1.0-RUFR_24_NA1_DV(i))*/) * (1.0+RPF_24_NA1)/(1.0 - DLF_24_NA1)) * cfs_taf(i)}
+	case Other {
+		condition always
+		value Total_Demand_NID_DV(-1)}
+	}
+goal setTotal_Demand_NID_DV {Total_Demand_NID_DV = Total_Demand_NID}
+
+/*
+! Calculate the ratio of available water divided by demand
+define Usage_Reduction_NID {value min(1.0, ((Available_Supply_NID - Instream_Flow_Reqs_NID) / Total_Demand_NID))}
+define Usage_Reduction_NID_DV {std kind 'RATIO' units 'NONE'}
+goal setUsage_Reduction_NID_DV {Usage_Reduction_NID_DV = Usage_Reduction_NID}
+*/
+
+!/* Implementation of the Water Availability Guidance Table
+! Forecasted Available Supply on April 1st
+!	> 235.7 TAF - Normal operations
+!	235.7 to 205.7 TAF - Stage 1: Voluntary usage reduction 10 - 20%
+!	205.7 to 198.2 TAF - Stage 2: Mandatory usage reduction 10 - 25%
+!	198.2 to 175.7 TAF - Stage 3: Mandatory usage reduction 25 - 40%
+!	< 175.7	TAF - Stage 4: Mandatory usage reduction > 40%
+define Usage_Reduction_NID_DV {std kind 'RATIO' units 'NONE'}
+define Usage_Reduction_NID {
+	case BeginWY {
+		condition month <= MAR .and. wateryear == 1922
+		value 1.0}	!Normal operations
+	case Normal_Ops {
+		condition month == APR .and. Available_Supply_NID >= 235.7
+		value 1.0}	!Normal operations
+	case Stage1 {
+		condition month == APR .and. Available_Supply_NID >= 205.7
+		value 0.9}	!10% reduction
+	case Stage2 {
+		condition month == APR .and. Available_Supply_NID >= 198.2
+		value 0.8}	!20% reduction
+	case Stage3 {
+		condition month == APR .and. Available_Supply_NID >= 175.7
+		value 0.7}	!10% reduction
+	case Stage4 {
+		condition month == APR .and. Available_Supply_NID < 175.7
+		value 0.5}	!50% reduction
+	case Other {
+		condition always
+		value Usage_Reduction_NID_DV(-1)}
+	}
+goal setUsage_Reduction_NID_DV {Usage_Reduction_NID_DV = Usage_Reduction_NID}
+!*/
+
+define D_CBC001_24_NA1_ADD 	{lower 0 upper 99999 kind 'CHANNEL' units 'CFS'}
+define D_CBC001_24_NA1_HISTORICAL 	{lower 0 upper 99999 kind 'CHANNEL' units 'CFS'}
+!goal setD_CBC001_24_NA1_ADD {D_CBC001_24_NA1 = D_CBC001_24_NA1_HISTORICAL + D_CBC001_24_NA1_ADD}
+
+! Yuba System, limit NID deliveries based on drought contingency plan
+goal limit_NIDDC_NA1_deliveries {D_DES006_NIDDC_NA1 + D_CSD014_NIDDC_NA1 < AW_NIDDC_NA1 * Usage_Reduction_NID}
+goal limit_GRSVL_deliveries {D_DES006_GRSVL + D_CSD014_GRSVL < UD_GRSVL * Usage_Reduction_NID}
+
+!goal setUD_GRSVL_2      {D_CSD014_GRSVL                  < 0.5*UD_GRSVL* Usage_Reduction_NID} !Analysis of watertreatment data suggests that deliveries are split approximately equally between canals
+!goal setUD_GRSVL_3      {D_DES006_GRSVL                  < 0.5*UD_GRSVL* Usage_Reduction_NID} !Analysis of watertreatment data suggests that deliveries are split approximately equally between canals
+
+
+
+
+goal limit_NIDDC_NA2_deliveries {D_DER004_NIDDC_NA2 + D_DER011_NIDDC_NA2 + D_NWT013_NIDDC_NA2 < AW_NIDDC_NA2 * Usage_Reduction_NID}
+goal limit_WLDWD_deliveries {D_NWT013_WLDWD < UD_WLDWD * Usage_Reduction_NID}
+
+! Limit NID purchased water deliveries at Deer Creek PH to maximum contract amount, per NID-PG&E Consolidation Contract (pg. 26, Section B-12)
+goal monthly_PGE_purchases_Deer {
+	lhs C_SYC020_PGE
+		case Jan {
+			condition month==JAN
+			rhs (2.745 * taf_cfs * WaterYearConditions_NID_PGE + 1.882 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Feb {
+			condition month==FEB
+			rhs (2.574 * taf_cfs * WaterYearConditions_NID_PGE + 1.616 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Mar {
+			condition month==MAR
+			rhs (2.853 * taf_cfs * WaterYearConditions_NID_PGE + 1.882 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Apr {
+			condition month==APR
+			rhs (2.707 * taf_cfs * WaterYearConditions_NID_PGE + 1.915 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case May {
+			condition month==MAY
+			rhs (4.897 * taf_cfs * WaterYearConditions_NID_PGE + 1.915 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Jun {
+			condition month==JUN
+			rhs (4.998 * taf_cfs * WaterYearConditions_NID_PGE + 1.915 * taf_cfs*(1-WaterYearConditions_NID_PGE)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Jul {
+			condition month==JUL
+			rhs (4.359 * taf_cfs * WaterYearConditions_NID_PGE + 4.359 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Aug {
+			condition month==AUG
+			rhs (4.144 * taf_cfs * WaterYearConditions_NID_PGE + 4.144 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Sep {
+			condition month==SEP
+			rhs (3.280 * taf_cfs * WaterYearConditions_NID_PGE + 3.280 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Oct {
+			condition month==OCT
+			rhs (2.959 * taf_cfs * WaterYearConditions_NID_PGE + 2.959 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Nov {
+			condition month==NOV
+			rhs (2.811 * taf_cfs * WaterYearConditions_NID_PGE + 2.811 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Dec {
+			condition month==DEC
+			rhs (3.014 * taf_cfs * WaterYearConditions_NID_PGE + 3.014 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+	}
+define PGE_purchased_by_NID {alias (D_WSE004_24_NU3_PGE + D_WSE004_24_NA1_PGE + D_STH000_ABN027_PGE + C_SYC020_PGE) * cfs_taf kind 'flow' units 'TAF'}
+
+goal limit_PINES_deliveries {D_CBC000_PINES < UD_PINES * Usage_Reduction_NID}
+goal limitNIDBR_NA_deliveries {D_CBC000_NIDBR_NA < AW_NIDBR_NA * Usage_Reduction_NID}
+

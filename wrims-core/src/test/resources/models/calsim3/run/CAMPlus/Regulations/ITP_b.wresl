@@ -1,0 +1,94 @@
+define(fm) export_reduction_cap {
+		case NoReductionCap {
+			condition	(mv($m)>=jun .or. mv($m)<=mar) .or. wyt_SJR> 1.5
+			value		99999.*cfs_taf	
+		}
+		case otherwise {
+			condition	always
+			value		150.    
+		}	
+}
+
+define(fm) NMFS_MaxExp_ON_taf {
+    case AprMay {		
+        condition mv($m)>=APR .AND. mv($m)<=MAY
+        value max_sjr_ie_fm[CAM1]($m)}
+    case otherwise{
+        condition always
+        value 999999.}
+}
+define(fm) NMFS_MaxExp_ON_taf_ {alias NMFS_MaxExp_ON_taf($m) kind 'NMFS' units 'taf'}
+
+define(fm) SWPExpCapShare_OMR {
+	case Remains_Balanced {
+		condition EI_int_fm[CAM1]($m) > 0.5
+		value SWPExpCapShare_Blncd_CAM
+	}
+	case otherwise {
+		condition always
+		value SWPExpCapShare_Srpls_CAM
+	}
+}
+define(fm) SWPExpCapShare_OMRDV{alias SWPExpCapShare_OMR($m) kind 'temp' units 'none'}
+
+define(fm) initial_30TAF_cut_reduction_ {std kind 'SJRIE' units 'TAF'}
+define(fm) initial_30TAF_cut_reduction {
+	case NoCutReduction {
+		condition	mv($m)>=Jun .or. mv($m)<=Mar .or. wyt_SJR> 1.5
+					.OR. C33_total_fm[CAM1]($m) > 44500*cfs_taf($m)
+					.OR. NMFS_MaxExp_ON_taf($m) > (D33D_fm[CAM1]($m)+D33E_fm[CAM1]($m))				!total SJR I/E export does not constrain
+					.OR. SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m) > D33D_fm[CAM1]($m)	!40% of the SJR I/E does not constrain constrain
+					.OR. D33D_fm[CAM1]($m) < 600.*cfs_taf($m)					!at or below Health and Safety Exports
+		
+		value		0.	
+	}
+	case currentmonth {
+		condition	$m==0
+		value		max(0., min(30. - initial_30TAF_cut_reduction_(-1), 
+								(D33D_fm[CAM1]-max(600*cfs_taf,SWPExpCapShare_OMR*NMFS_MaxExp_ON_taf))))
+	}
+	case otherwise {
+		condition	always
+		value		max(0., min(30. - initial_30TAF_cut_reduction($m-1), 
+								(D33D_fm[CAM1]($m)-max(600*cfs_taf($m),SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m)))))
+	}
+}
+goal(fm) set_initial_30TAF_cut_reduction_ {initial_30TAF_cut_reduction_($m) = initial_30TAF_cut_reduction($m)}
+	
+define(fm) Alt2BSWPExpCut_SJRIE_taf{
+	case CurrentMonthAprMay {		
+        condition $m==0 .and. mv($m)>=APR .AND. mv($m)<=MAY
+					.AND. C33_total_fm[CAM1]($m) < 44500*cfs_taf($m) 
+					.AND. NMFS_MaxExp_ON_taf($m) < (D33D_fm[CAM1]($m)+D33E_fm[CAM1]($m))			!total SJR I/E export must be less than the baseline total export
+					.AND. SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m) < D33D_fm[CAM1]($m)	!40% of the SJR I/E must be less than the baseline SWP exports
+					.AND. D33D_fm[CAM1]($m) > 600.*cfs_taf($m)					!Health and Safety Exports
+		value min(export_reduction_cap($m)-Alt2BSWPExpCut_SJRIE_taf_(-1), max(0,D33D_fm[CAM1]($m)-initial_30TAF_cut_reduction($m)
+        		-max(600*cfs_taf($m),SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m))))}
+	case AprMay {		
+        condition mv($m)>=APR .AND. mv($m)<=MAY
+					.AND. C33_total_fm[CAM1]($m) < 44500*cfs_taf($m) 
+					.AND. NMFS_MaxExp_ON_taf($m) < (D33D_fm[CAM1]($m)+D33E_fm[CAM1]($m))			!total SJR I/E export must be less than the baseline total export
+					.AND. SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m) < D33D_fm[CAM1]($m)	!40% of the SJR I/E must be less than the baseline SWP exports
+					.AND. D33D_fm[CAM1]($m) > 600.*cfs_taf($m)					!Health and Safety Exports
+		value min(export_reduction_cap($m)-Alt2BSWPExpCut_SJRIE_taf($m-1), max(0,D33D_fm[CAM1]($m)-initial_30TAF_cut_reduction($m)
+        		-max(600*cfs_taf($m),SWPExpCapShare_OMR($m)*NMFS_MaxExp_ON_taf($m))))}
+     case otherwise{
+        condition always
+        value 0.}   		
+}
+
+define(fm) Alt2BSWPExpCut_SJRIE_taf_{alias Alt2BSWPExpCut_SJRIE_taf($m) kind 'flow-delivery' units 'taf'}
+
+define(fm) ITP_SJRIE_Banks_Exp_max {
+	case AprMay {
+		condition	mv($m)>=APR .AND. mv($m)<=MAY
+		value		max(600.*cfs_taf($m),D33D_fm[CAM1]($m) - Alt2BSWPExpCut_SJRIE_taf($m))
+	}
+	case otherwise {
+		condition	always
+		value		99999.
+	}
+}
+define(fm) ITP_SJRIE_Banks_Exp_max_ {alias ITP_SJRIE_Banks_Exp_max($m) kind 'Export-Constraint' units 'taf'}
+
+goal(fm) lim_banksITPb_fm {D33D_fm($m) < ITP_SJRIE_Banks_Exp_max($m)}

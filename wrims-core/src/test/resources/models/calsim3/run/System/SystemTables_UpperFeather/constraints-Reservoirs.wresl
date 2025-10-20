@@ -1,0 +1,179 @@
+/*
+Constraints-Reservoirs.wresl
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Bucks Lake, Buck Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_BUCKSZone1     {S_BUCKS_1 < S_BUCKSlevel1}                                                                        
+goal S_BUCKSZone2     {S_BUCKS_2 < S_BUCKSlevel2-S_BUCKSlevel1}                                                              
+goal S_BUCKSZone3     {S_BUCKS_3 < S_BUCKSlevel3-S_BUCKSlevel2}                                                              
+goal S_BUCKSZone4     {S_BUCKS_4 < S_BUCKSlevel4-S_BUCKSlevel3}                                                              
+goal S_BUCKSZone5     {S_BUCKS_5 < S_BUCKSlevel5-S_BUCKSlevel4}                                                              
+goal storage_BUCKS    {S_BUCKS=S_BUCKS_1+S_BUCKS_2+S_BUCKS_3+S_BUCKS_4+S_BUCKS_5}                                                       
+                      
+goal area_BUCKS       {A_BUCKS=A_BUCKSlast+1000*coefev_BUCKS*S_BUCKS-1000*coefev_BUCKS*S_BUCKS(-1)}                                        
+goal setevap_BUCKS    {E_BUCKS*cfs_af=(ER_BUCKS/24)*A_BUCKSlast+(ER_BUCKS/24)*A_BUCKS}                                         
+goal maxrelease_BUCKS {C_BUCKS<relcap_BUCKS} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Antelope Reservoir, Antelope Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_ANTLPZone1     {S_ANTLP_1 < S_ANTLPlevel1}                                                                        
+goal S_ANTLPZone2     {S_ANTLP_2 < S_ANTLPlevel2-S_ANTLPlevel1}                                                              
+goal S_ANTLPZone3     {S_ANTLP_3 < S_ANTLPlevel3-S_ANTLPlevel2}                                                              
+goal S_ANTLPZone4     {S_ANTLP_4 < S_ANTLPlevel4-S_ANTLPlevel3}                                                            
+goal S_ANTLPZone5     {S_ANTLP_5 < S_ANTLPlevel5-S_ANTLPlevel4}             
+                                                 
+goal storage_ANTLP    {S_ANTLP=S_ANTLP_1+S_ANTLP_2+S_ANTLP_3+S_ANTLP_4+S_ANTLP_5}                                                       
+                      
+goal area_ANTLP       {A_ANTLP=A_ANTLPlast+1000*coefev_ANTLP*S_ANTLP-1000*coefev_ANTLP*S_ANTLP(-1)}                                        
+goal setevap_ANTLP    {E_ANTLP*cfs_af=(ER_ANTLP/24)*A_ANTLPlast+(ER_ANTLP/24)*A_ANTLP}                                         
+goal maxrelease_ANTLP {C_ANTLP<relcap_ANTLP} 
+
+
+! Antelope period of collection storage is from October 1 to June 30 
+define AntelopeStorageTrigger{
+	case OctJun {condition range(month,Oct,Jun)value 1.}
+	case Otherwise {condition always value 0.}}
+
+goal setS_ANTLP {S_ANTLP < MAX(S_ANTLPLevel1,S_ANTLP(-1)) + 99999.*AntelopeStorageTrigger}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Butt Valley Reservoir, Butt Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_BTVLYZone1     {S_BTVLY_1 < S_BTVLYlevel1}                                                                        
+goal S_BTVLYZone2     {S_BTVLY_2 < S_BTVLYlevel2-S_BTVLYlevel1}                                                              
+goal S_BTVLYZone3     {S_BTVLY_3 < S_BTVLYlevel3-S_BTVLYlevel2}                                                              
+goal S_BTVLYZone4     {S_BTVLY_4 < S_BTVLYlevel4-S_BTVLYlevel3}                                                              
+goal S_BTVLYZone5     {S_BTVLY_5 < S_BTVLYlevel5-S_BTVLYlevel4}                                                              
+goal storage_BTVLY    {S_BTVLY=S_BTVLY_1+S_BTVLY_2+S_BTVLY_3+S_BTVLY_4+S_BTVLY_5}                                                       
+                      
+goal area_BTVLY       {A_BTVLY=A_BTVLYlast+1000*coefev_BTVLY*S_BTVLY-1000*coefev_BTVLY*S_BTVLY(-1)}                                        
+goal setevap_BTVLY    {E_BTVLY*cfs_af=(ER_BTVLY/24)*A_BTVLYlast+(ER_BTVLY/24)*A_BTVLY}                                         
+goal maxrelease_BTVLY {C_BTVLY<relcap_BTVLY} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Almanor Reservoir, North Fork Feather River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_ALMNRZone1     {S_ALMNR_1 < S_ALMNRlevel1}                                                                        
+goal S_ALMNRZone2     {S_ALMNR_2 < S_ALMNRlevel2-S_ALMNRlevel1}                                                              
+goal S_ALMNRZone3     {S_ALMNR_3 < S_ALMNRlevel3-S_ALMNRlevel2}                                                              
+goal S_ALMNRZone4     {S_ALMNR_4 < S_ALMNRlevel4-S_ALMNRlevel3}                                                              
+goal S_ALMNRZone5     {S_ALMNR_5 < S_ALMNRlevel5-S_ALMNRlevel4}                                                              
+goal storage_ALMNR    {S_ALMNR=S_ALMNR_1+S_ALMNR_2+S_ALMNR_3+S_ALMNR_4+S_ALMNR_5}                                                       
+                      
+goal area_ALMNR       {A_ALMNR=A_ALMNRlast+1000*coefev_ALMNR*S_ALMNR-1000*coefev_ALMNR*S_ALMNR(-1)}                                        
+goal setevap_ALMNR    {E_ALMNR*cfs_af=(ER_ALMNR/24)*A_ALMNRlast+(ER_ALMNR/24)*A_ALMNR}                                         
+goal maxrelease_ALMNR {C_ALMNR<relcap_ALMNR} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Mountain Meadows Reservoir, North Fork Feather River   !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                              
+goal S_MTMDWZone1     {S_MTMDW_1 < S_MTMDWlevel1}                                                                        
+goal S_MTMDWZone2     {S_MTMDW_2 < S_MTMDWlevel2-S_MTMDWlevel1}                                                              
+goal S_MTMDWZone3     {S_MTMDW_3 < S_MTMDWlevel3-S_MTMDWlevel2}                                                              
+goal S_MTMDWZone4     {S_MTMDW_4 < S_MTMDWlevel4-S_MTMDWlevel3}                                                              
+goal S_MTMDWZone5     {S_MTMDW_5 < S_MTMDWlevel5-S_MTMDWlevel4}                                                              
+goal storage_MTMDW    {S_MTMDW=S_MTMDW_1+S_MTMDW_2+S_MTMDW_3+S_MTMDW_4+S_MTMDW_5}                                                       
+                      
+goal area_MTMDW       {A_MTMDW=A_MTMDWlast+1000*coefev_MTMDW*S_MTMDW-1000*coefev_MTMDW*S_MTMDW(-1)}                                        
+goal setevap_MTMDW    {E_MTMDW*cfs_af=(ER_MTMDW/24)*A_MTMDWlast+(ER_MTMDW/24)*A_MTMDW}                                         
+goal maxrelease_MTMDW {C_MTMDW<relcap_MTMDW} 
+
+
+! Note: Initial storage values are end-of-September 40-year average: 1976-2015 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Davis !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_DAVISZone1     {S_DAVIS_1 < S_DAVISlevel1}                                                                        
+goal S_DAVISZone2     {S_DAVIS_2 < S_DAVISlevel2-S_DAVISlevel1}                                                              
+goal S_DAVISZone3     {S_DAVIS_3 < S_DAVISlevel3-S_DAVISlevel2}                                                              
+goal S_DAVISZone4     {S_DAVIS_4 < S_DAVISlevel4-S_DAVISlevel3}                                                              
+goal S_DAVISZone5     {S_DAVIS_5 < S_DAVISlevel5-S_DAVISlevel4}                                                              
+goal storage_DAVIS    {S_DAVIS=S_DAVIS_1+S_DAVIS_2+S_DAVIS_3+S_DAVIS_4+S_DAVIS_5} 
+
+goal   Area_DAVIS    {A_DAVIS=A_DAVISlast+1000*coefev_DAVIS*S_DAVIS-1000*coefev_DAVIS*S_DAVIS(-1)}
+goal   Evap_DAVIS    {E_DAVIS*cfs_af=(ER_DAVIS/24)*A_DAVISlast+(ER_DAVIS/24)*A_DAVIS}
+goal   MaxRel_DAVIS  {C_DAVIS<Relcap_DAVIS}
+
+! Davis period of collection to storage is October 1 to June 30
+define DavisStorageTrigger {
+	case OctJun    {condition range(month,Oct,Jun)value 1.}	
+	case Otherwise {condition always value 0.}}
+		
+goal setS_Davis {S_Davis < max(S_DAVISlevel1, S_Davis(-1)) + 99999.*DavisStorageTrigger}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Frenchman !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_FRMANZone1     {S_FRMAN_1 < S_FRMANlevel1}                                                                        
+goal S_FRMANZone2     {S_FRMAN_2 < S_FRMANlevel2-S_FRMANlevel1}                                                              
+goal S_FRMANZone3     {S_FRMAN_3 < S_FRMANlevel3-S_FRMANlevel2}                                                              
+goal S_FRMANZone4     {S_FRMAN_4 < S_FRMANlevel4-S_FRMANlevel3}                                                              
+goal S_FRMANZone5     {S_FRMAN_5 < S_FRMANlevel5-S_FRMANlevel4}                                                              
+goal storage_FRMAN    {S_FRMAN=S_FRMAN_1+S_FRMAN_2+S_FRMAN_3+S_FRMAN_4+S_FRMAN_5} 
+
+goal   Area_FRMAN    {A_FRMAN=A_FRMANlast+1000*coefev_FRMAN*S_FRMAN-1000*coefev_FRMAN*S_FRMAN(-1)}
+goal   Evap_FRMAN    {E_FRMAN*cfs_af=(ER_FRMAN/24)*A_FRMANlast+(ER_FRMAN/24)*A_FRMAN}
+goal   MaxRel_FRMAN  {C_FRMAN<Relcap_FRMAN}
+
+! Frenchman period of collection storage is from November 1 to June 1 
+define FrenchmanStorageTrigger{
+	case OctMay    {condition range(month,Oct,May)value 1.}
+	case Nov       {condition month == Nov value 1.}
+	case Otherwise {condition always value 0.}}
+
+goal setS_FRMAN {S_FRMAN < max(S_FRMANlevel1, S_FRMAN(-1)) + 99999.*FrenchmanStorageTrigger}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Little Grass Valley Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_LGRSVZone1   {S_LGRSV_1 < S_LGRSVlevel1}                                                                        
+goal S_LGRSVZone2   {S_LGRSV_2 < S_LGRSVlevel2-S_LGRSVlevel1}                                                              
+goal S_LGRSVZone3   {S_LGRSV_3 < S_LGRSVlevel3-S_LGRSVlevel2}                                                              
+goal S_LGRSVZone4   {S_LGRSV_4 < S_LGRSVlevel4-S_LGRSVlevel3}                                                              
+goal S_LGRSVZone5   {S_LGRSV_5 < S_LGRSVlevel5-S_LGRSVlevel4}                                                              
+goal storage_LGRSV  {S_LGRSV=S_LGRSV_1+S_LGRSV_2+S_LGRSV_3+S_LGRSV_4+S_LGRSV_5}
+
+goal area_LGRSV     {A_LGRSV=A_LGRSVlast+1000*coefev_LGRSV*S_LGRSV-1000*coefev_LGRSV*S_LGRSV(-1)}
+goal evap_LGRSV     {E_LGRSV*cfs_af=(ER_LGRSV/24)*A_LGRSVlast+(ER_LGRSV/24)*A_LGRSV}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Sly Creek Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_SLYCKZone1   {S_SLYCK_1 < S_SLYCKlevel1}                                                                        
+goal S_SLYCKZone2   {S_SLYCK_2 < S_SLYCKlevel2-S_SLYCKlevel1}                                                              
+goal S_SLYCKZone3   {S_SLYCK_3 < S_SLYCKlevel3-S_SLYCKlevel2}                                                              
+goal S_SLYCKZone4   {S_SLYCK_4 < S_SLYCKlevel4-S_SLYCKlevel3}                                                              
+goal S_SLYCKZone5   {S_SLYCK_5 < S_SLYCKlevel5-S_SLYCKlevel4}                                                              
+goal storage_SLYCK  {S_SLYCK=S_SLYCK_1+S_SLYCK_2+S_SLYCK_3+S_SLYCK_4+S_SLYCK_5}
+
+goal area_SLYCK     {A_SLYCK=A_SLYCKlast+1000*coefev_SLYCK*S_SLYCK-1000*coefev_SLYCK*S_SLYCK(-1)}
+goal evap_SLYCK     {E_SLYCK*cfs_af=(ER_SLYCK/24)*A_SLYCKlast+(ER_SLYCK/24)*A_SLYCK}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Round Valley and Philbrook Reservoirs (aggregated)   !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                              
+goal S_RVPHBZone1   {S_RVPHB_1 < S_RVPHBlevel1}                                                                        
+goal S_RVPHBZone2   {S_RVPHB_2 < S_RVPHBlevel2-S_RVPHBlevel1}                                                              
+goal S_RVPHBZone3   {S_RVPHB_3 < S_RVPHBlevel3-S_RVPHBlevel2}
+
+goal storage_RVPHB  {S_RVPHB=S_RVPHB_1+S_RVPHB_2+S_RVPHB_3}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!   Summary   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setS_UPPERFEATHER {S_UPPERFEATHER = S_BUCKS+S_ANTLP+S_BTVLY+S_ALMNR+S_MTMDW+S_DAVIS+S_FRMAN+S_LGRSV+S_SLYCK+S_RVPHB}
+goal setE_UPPERFEATHER {E_UPPERFEATHER = E_BUCKS+E_ANTLP+E_BTVLY+E_ALMNR+E_MTMDW+E_DAVIS+E_FRMAN+E_LGRSV+E_SLYCK}!+E_RVPHB}
+

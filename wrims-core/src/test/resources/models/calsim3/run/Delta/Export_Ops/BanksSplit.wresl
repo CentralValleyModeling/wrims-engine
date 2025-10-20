@@ -1,0 +1,47 @@
+! Banks Split between SWP and CVP
+
+define C_CAA003_swp {std KIND 'FLOW-DELIVERY' UNITS 'CFS'} ! SWP Banks
+!define C_CAA003_cvp {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Total CVP wheeling at Banks
+
+!define C_CAA003_cvc {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! CVC wheeling at Banks
+define C_CAA003_cvcrels {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! CVC - Released Water
+define C_CAA003_cvcsurp {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! CVC - Surplus Only
+define C_CAA003_cvcsurp1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define C_CAA003_cvcsurp2 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+
+define C_CAA003_cvpwhl {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! CVP Wheeling to CVP San Luis
+define C_CAA003_whlrels {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! JPOD - Released Water
+define C_CAA003_whlsurp {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! JPOD - Surplus Only
+define C_CAA003_whlsurp1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define C_CAA003_whlsurp2 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+
+define C_CAA003_WTS {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Water transfer export at Banks
+goal movetransfers {WTS_deliv = C_CAA003_WTS} ! Transfers are pulled out of model immediately so they are not stored in San Luis
+
+define C_CAA003_cvpded {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define C_CAA003_cvpded_Exp1 { std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define C_CAA003_cvpded_Exp2 { std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+
+define C_CAA003_EXP1 {std kind 'FLOW-DELIVERY' units 'CFS'}
+define C_CAA003_EXP2 {std kind 'FLOW-DELIVERY' units 'CFS'}
+
+define Surp1Terms {std kind 'FLOW-CHANNEL' units 'CFS'}
+define Surp2Terms {std kind 'FLOW-CHANNEL' units 'CFS'}
+define SurpTerms {std kind 'FLOW-CHANNEL' units 'CFS'}
+
+goal totalBanks {C_CAA003 = C_CAA003_swp + C_CAA003_cvp + C_CAA003_WTS} !Total Banks
+goal totalcvpWheel {C_CAA003_cvp = C_CAA003_cvc + C_CAA003_cvpwhl + C_CAA003_cvpded} ! Total Wheeling at Banks for CVP.
+
+goal totalcvpded {C_CAA003_cvpded = C_CAA003_cvpded_exp1 + C_CAA003_cvpded_exp2}
+
+goal totalcvcwhl {C_CAA003_cvc = C_CAA003_cvcrels + C_CAA003_cvcsurp}
+goal totalcvcsurp {C_CAA003_cvcsurp = C_CAA003_cvcsurp1 + C_CAA003_cvcsurp2}
+
+goal totaljpodwhl {C_CAA003_cvpwhl = C_CAA003_whlrels + C_CAA003_whlsurp}
+goal totalcvpwhlsurp {C_CAA003_whlsurp = C_CAA003_whlsurp1 + C_CAA003_whlsurp2}
+
+goal SetSurp1Terms {Surp1Terms = C_CAA003_cvcsurp1 + C_CAA003_whlsurp1}
+goal SetSurp2Terms {Surp2Terms = C_CAA003_cvcsurp2 + C_CAA003_whlsurp2}
+goal SetSurpTerms {SurpTerms = Surp1Terms + Surp2Terms}
+
+

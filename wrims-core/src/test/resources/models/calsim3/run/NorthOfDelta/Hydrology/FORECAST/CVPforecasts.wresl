@@ -1,0 +1,98 @@
+/*This file defines the forecast information used by the CVP.
+
+  Forecast of Runoff for CVP is defined as: [ Shasta Lake Inflow forecast based on the
+  Sacramento R. component of SRI - Sum of Shasta Lake Inflows (I_SHSTA) since 1-OCT ] +
+  [ American R. Component of the SRI - Sum of Folsom Lake Inflows (I_FOLSM + I17) since 1-OCT ].
+
+  Forecast of Runoff for the CVP NOD is defined as: [ Shasta Lake Inflow forecast based
+  on the Sacramento R. component of SRI - Sum of Shasta Lake Inflows (I_SHSTA) since 1-OCT ].
+*/
+
+
+! Forecast of Sacramento River Runoff into Shasta Lake for REMAINDER of WATER YEAR
+
+define frcst_sac {
+    case FebtoMay  {
+        condition   month >= Feb .and. month <=MAY
+        sum(i=0, 12-month, 1) I3_fm[Forecast2](i)}
+    case other {
+        condition   always
+        value       0.0 }
+}
+define frcst_Sac_dv{alias frcst_Sac kind 'forecast-flow' units 'taf'}
+
+
+define I5_JunDV {std kind 'FLOW-INFLOW' units 'TAF'}
+define I5_JulDV {std kind 'FLOW-INFLOW' units 'TAF'}
+define I5_AugDV {std kind 'FLOW-INFLOW' units 'TAF'}
+define I5_SepDV {std kind 'FLOW-INFLOW' units 'TAF'}
+
+goal setI5_JunDV{
+    lhs I5_JunDV
+    case JanToMay{
+        condition month>=Jan .and. month<=May
+        rhs I5_JunDV[Forecast2]
+    }
+    case JunToDec{
+        condition always
+        rhs 0.0
+    }
+}
+
+goal setI5_JulDV{
+    lhs I5_JulDV
+    case JanToMay{
+        condition month>=Jan .and. month<=May
+        rhs I5_JulDV[Forecast2]
+    }
+    case JunToDec{
+        condition always
+        rhs 0.0
+    }
+}
+
+goal setI5_AugDV{
+    lhs I5_AugDV
+    case JanToMay{
+        condition month>=Jan .and. month<=May
+        rhs I5_AugDV[Forecast2]
+    }
+    case JunToDec{
+        condition always
+        rhs 0.0
+    }
+}
+
+goal setI5_SepDV{
+    lhs I5_SepDV
+    case JanToMay{
+        condition month>=Jan .and. month<=May
+        rhs I5_SepDV[Forecast2]
+    }
+    case JunToDec{
+        condition always
+        rhs 0.0
+    }
+}
+
+
+! Forecast of American River Runoff into Folsom Lake for REMAINDER of WATER YEAR
+define frcst_amr {
+       case FebtoMay  {
+            condition   month >= Feb .and. month <=May
+            sum(i=0, 12-month, 1) I5_fm[Forecast2](i)}
+       case JUNfore {
+            condition month==Jun 
+            value I5_JunDV(-1)+I5_JulDV(-1)+I5_AugDV(-1)++I5_SepDV(-1)}
+      case JULfore {
+            condition  month >= JUL .and. month <= Sep
+            sum(i=0, 12-month, 1) UNIMP_FOLS(i)
+      }
+      case Oct_Jan {
+            condition  always
+            value 0.0 }
+       }
+
+define frcst_Amr_dv{alias frcst_Amr kind 'forecast-flow' units 'taf'}
+
+

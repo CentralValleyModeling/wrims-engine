@@ -1,0 +1,121 @@
+/*
+File Name: constraints-minflows.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+*/
+
+
+! Instream flow requirements
+goal   C_LWSTNtotal  {C_LWSTN = C_LWSTN_MIF + C_LWSTN_ADD}
+
+goal   C_KSWCKtotal  {C_KSWCK = C_KSWCK_MIF + C_KSWCK_ADD}
+
+goal   C_SAC240total {C_SAC240 = C_SAC240_MIF + C_SAC240_ADD}  ! Red Bluff Diversion Dam
+
+goal   C_SAC201total {C_SAC201 = C_SAC201_MIF + C_SAC201_ADD}  ! Hamilton City
+
+goal   C_SAC120total {C_SAC120 = C_SAC120_MIF + C_SAC120_ADD}  ! Wilkins Slough !5/6/2021 moved NCP compliance point to Sac120 from Sac097
+
+goal   C_SAC097total {C_SAC097 = C_SAC097_MIF + C_SAC097_ADD}  ! Navigation Control Point
+
+!goal   C_SAC041total {C_SAC041 = C_SAC041_MIF + C_SAC041_ADD}  ! Hood
+
+goal   C_SAC017total {C_SAC017 = C_SAC017_MIF + C_SAC017_ADD}  ! Rio Vista
+
+goal   C_FTR039total {C_FTR039 = C_FTR039_MIF + C_FTR039_ADD}
+
+goal   C_FTR003total {C_FTR003 = C_FTR003_MIF + C_FTR003_ADD}
+
+goal   C_FTR059total {C_FTR059 = C_FTR059_MIF + C_FTR059_ADD}
+
+goal   C_FTR068total {C_FTR068 = C_FTR068_MIF + C_FTR068_ADD}  ! Low Flow Channel
+
+goal   C_AMR004total {C_AMR004 = C_AMR004_MIF + C_AMR004_ADD + C_AMR004_MIT}  ! Lower American River
+
+goal setC_AMR004_MIT {C_AMR004_MIT + C_AMR004_MIT_SHRTG = Mitigation_Release*0.95} !Assume 5% loss between Hell Hole and Folsom Dam
+
+goal   C_WKYTNtotal  {C_WKYTN = C_WKYTN_MIF+C_WKYTN_ADD}
+
+goal   C_NTOMAtotal {C_NTOMA = C_NTOMA_MIF + C_NTOMA_ADD + C_NTOMA_MIT}
+
+goal setC_NTOMA_MIT {C_NTOMA_MIT + C_NTOMA_MIT_SHRTG = Mitigation_Release*0.95} !Assume 5% loss between Hell Hole and Folsom Dam
+
+goal   C_EPARKtotal {C_EPARK = C_EPARK_MIF+C_EPARK_ADD}
+
+goal   C_SGRGEtotal {C_SGRGE = C_SGRGE_MIF+C_SGRGE_ADD}
+
+goal   C_BLKBTtotal {C_BLKBT = C_BLKBT_MIF+C_BLKBT_ADD}
+
+goal   C_STN021total{C_STN021 = C_STN021_MIF+C_STN021_ADD}
+
+goal   C_STN014total {C_STN014 = C_STN014_MIF+C_STN014_ADD}
+
+goal   C_PTH007total {C_PTH007 = C_PTH007_MIF+C_PTH007_ADD}
+
+goal   C_PTH024total {C_PTH024 = C_PTH024_MIF+C_PTH024_ADD}
+
+!goal   C_OGN005total {C_OGN005 = C_OGN005_MIF+C_OGN005_ADD}
+
+!goal   C_MFY013total {C_MFY013 = C_MFY013_MIF+C_MFY013_ADD}
+
+! Middle Fork Yuba below Our House Diversion Dam
+!goal   set_C_MFY013_MIF {C_MFY013_MIF = min(MF_MFY013,I_MFY013)}
+
+! Oregon Creek below Log Cabin Diversion Dam
+!goal   set_C_OGN005_MIF {C_OGN005_MIF + C_MFY013_MIF = min(MF_OGN005+MF_MFY013, I_MFY013+I_OGN005)}
+
+! French Dry Creek below Sicard Ditch Diversion
+goal C_FDC006total       {C_FDC006=C_FDC006_MIF+C_FDC006_ADD}
+goal C_FDC006inflow      {C_FDC006_MIF < MF_FDC006}
+
+! Yuba River's Smartsville gage flow requirement
+!goal C_YUB024total {C_YUB024 = C_YUB024_MIF + C_YUB024_ADD}
+!goal meetYUB024min {C_YUB024_MIF < MF_YUB024} !constraint set in YubaMinFlows.wresl
+
+! Yuba River's Marysville gage flow requirement
+goal C_YUB006total  {C_YUB006 = C_YUB006_MIF + C_YUB006_ADD}
+goal meetYUB006min  {C_YUB006_MIF < MF_YUB006} !constraint set in YubaMinFlows.wresl
+
+! Bear River above Rollins Reservoir
+!goal C_BRR073total {C_BRR073=C_BRR073_MIF+C_BRR073_ADD}
+!goal C_BRR073minflow {C_BRR073_MIF < MF_BRR073}
+
+! Bear River above Rollins Reservoir
+!goal C_BRR066total {C_BRR066=C_BRR066_MIF+C_BRR066_ADD}
+!goal C_BRR066minflow {C_BRR066_MIF < MF_BRR066}
+
+! Bear River Canal Diversion Dam
+!goal C_BRR050total {C_BRR050=C_BRR050_MIF+C_BRR050_ADD}
+!goal C_BRR050minflow {C_BRR050_MIF < MF_BRR050}
+
+! Combie Reservoir release
+!goal C_CMBIEtotal {C_CMBIE=C_CMBIE_MIF+C_CMBIE_ADD}
+!goal C_CMBIEminflow {C_CMBIE_MIF < MF_CMBIE}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Mormon Ravine !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal C_MRM001total {C_MRM001=C_MRM001_MIF+C_MRM001_ADD}
+goal C_MRM001minflow {C_MRM001_MIF < MF_MRM001_BUFF}
+/*
+! Camp Far West Reservoir release
+goal C_CMPFWtotal {C_CMPFW=C_CMPFW_MIF+C_CMPFW_ADD}
+goal C_CMPFWminflow {C_CMPFW_MIF < MF_CMPFW}
+*/
+! Bear River below Camp Far West near Wheatland gage
+goal C_BRR017total {C_BRR017=C_BRR017_MIF+C_BRR017_BDSA+C_BRR017_ADD}
+goal C_BRR017minflow {C_BRR017_MIF < MF_BRR017}
+goal C_BRR017BDSAflow {C_BRR017_BDSA < BDSA_Req}
+
+! North Fork Cache Creek below Indian Valley Reservoir
+goal C_INDVLtotal {C_INDVL=C_INDVL_MIF+C_INDVL_ADD}
+goal C_INDVLminflow {C_INDVL_MIF < MF_INDVL}
+
+! Cache Creek below Capay Diversion Dam
+goal C_CCH030total {C_CCH030=C_CCH030_MIF+C_CCH030_ADD}
+goal C_CCH030minflow {C_CCH030_MIF < MF_CCH030}
+
+! Cache Creek at Yolo USGS gage 11452500
+goal C_CCH012total  {C_CCH012=C_CCH012_MIF+C_CCH012_ADD}
+goal C_CCH012minflow    {C_CCH012_MIF < MF_CCH012}

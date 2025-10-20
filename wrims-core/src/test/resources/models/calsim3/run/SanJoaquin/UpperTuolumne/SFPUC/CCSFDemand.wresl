@@ -1,0 +1,112 @@
+/*
+City and County of San Francisco (CCSF) demands on the Upper Tuolumne Watershed
+ */
+ 
+ 
+ define HTCHYInflowFebJulydv {std kind 'INFLOW' units 'TAF'}
+ define HTCHYInflowFebJuly {
+ 		case FirstMonth {
+ 		condition wateryear == BgnWY .and. month == OCT
+ 		sum(i=4,9,1)I_HTCHY(i)*cfs_taf(i)} 
+ 		case February {
+ 		condition month == FEB
+ 		sum(i=0,5,1)I_HTCHY(i)*cfs_taf(i)}
+ 		case otherwise {
+ 		condition always
+ 		value HTCHYInflowFebJulydv(-1)}}
+ 		
+goal setHTCHYInflowFebJulydv {HTCHYInflowFebJulydv = HTCHYInflowFebJuly} 		
+ 		
+ define HetchyFebStoragedv {std kind 'STORAGE' units 'TAF'}
+ define HetchyFebStorage {
+ 		case FirstMonth {
+ 		condition wateryear == BgnWY .and. month == OCT
+ 		value S_HTCHY(-1)}
+ 		case February {
+ 		condition month == FEB
+ 		value S_HTCHY(-1)}
+ 		case otherwise {
+ 		condition always
+ 		value HetchyFebStoragedv(-1)}}
+ 		
+goal setHetchyFebStoragedv {HetchyFebStoragedv = HetchyFebStorage} 	
+
+define CCSFWaterSupplyForecast {value HTCHYInflowFebJuly + HetchyFebStorage}
+
+define CCSFAnnualDemanddv {std kind 'DEMAND' units 'TAF'}
+
+! Regression equation between Don Pedro FERC model export and storage and inflow
+! FERC model assumes a CCSF demand of 238 MGD
+! CalSim 3 assumes 265 MGD (rqeuested by SFPUC)
+define CCSFAnnualDemand   {value (-0.0592*CCSFWaterSupplyForecast + 287.18)*(265/238)} !units TAF
+goal setCCSFAnnualDemanddv {CCSFAnnualDemanddv = CCSFAnnualDemand} 	
+
+
+
+
+define CCSFDemandPattern  {case October {
+ 		                   condition month == OCT
+ 		                   value 0.0839}
+ 		                   case November {
+ 		                   condition month == NOV
+ 		                   value 0.0496}
+ 		                   case December {
+ 		                   condition month == DEC
+ 		                   value 0.0426}
+ 		                   case January {
+ 		                   condition month == JAN
+ 		                   value 0.0588}
+ 		                   case February {
+ 		                   condition month == FEB
+ 		                   value 0.0412}
+ 		                   case March {
+ 		                   condition month == MAR
+ 		                   value 0.0682}
+ 		                   case April {
+ 		                   condition month == APR
+ 		                   value 0.0840}
+ 		                   case mMay {
+ 		                   condition month == MAY
+ 		                   value 0.1057}
+ 		                   case June {
+ 		                   condition month == JUN
+ 		                   value 0.1023}
+ 		                   case July {
+ 		                   condition month == JUL
+ 		                   value 0.1294}
+ 		                   case August {
+ 		                   condition month == AUG
+ 		                   value 0.1282}
+ 		                   case otherwise {
+ 		                   condition always
+ 		                   value 0.1062}
+ 		                   }
+define CCSFDemand {value CCSFDemandPattern * CCSFAnnualDemand }
+define CCSFDemanddv {alias CCSFDemand kind 'DEMAND' units 'TAF'}
+
+!Calculated with perfect foresight for SMR Forecast Releases (TAF)
+define CCSFDemand_Feb {value 0.0412 * CCSFAnnualDemand} 
+define CCSFDemand_Mar {value 0.0682 * CCSFAnnualDemand}
+define CCSFDemand_Apr {value 0.0840 * CCSFAnnualDemand}
+define CCSFDemand_May {value 0.1057 * CCSFAnnualDemand}
+define CCSFDemand_Jun {value 0.1023 * CCSFAnnualDemand}
+
+
+!Running model with historical/TDM Demand: 
+!define CCSFDemand {timeseries kind 'DEMAND' units 'TAF'} ! Historical/TDM CCSF Demand
+
+!******************************************************************************************************
+!** Groveland CSD Demand ******************************************************************************
+!******************************************************************************************************
+
+define GRVLDDemand {value 32.} !CFS
+goal SetHTCHYReleaseGRVLD {D_MNT000_GRVLD < GRVLDDemand}
+
+!******************************************************************************************************
+!** San Joaquin Pipelines demands *********************************************************************
+!******************************************************************************************************
+
+! Min Diversion from Hetch Hetchy is set equal to the San Joaquin Pipeline demands   
+goal SetHtchyReleasetoSJPL2 {D_MOC003_FHT015 < CCSFDemand*taf_cfs}
+
+

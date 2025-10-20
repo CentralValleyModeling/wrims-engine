@@ -1,0 +1,98 @@
+! E. Reyes 7/2/98
+! A. Munevar 11/20/99
+
+!Cross Channel Code
+
+/*
+09/10/2020
+Modify the regression equations used to compute flow through the Delta cross channel and Georgiana Sl for the
+base scenario derived based on DSM2 outputs (updated by using DCD model as input)
+
+DXC & Georg. Sl. Flow = (a * Sac Flow) + b
+        where a = 0.3261 , b = 1280 cfs ==> OPEN GATE POSITION
+        where a = 0.1415 , b = 973.48 cfs  ==> CLOSED GATE POSITION
+
+We can break the equation into individual component that will give the same result:
+
+  Georgianna Sl. Flow           = 0.1415*Qsac + 973.48  ==> OPEN OR CLOSED GATE POSITION
+  DXC Flow                              = 0.1846*Qsac + 306.52 ==> OPEN GATE POSITION
+  DXC Flow                              = 0.0               ==> CLOSED GATE POSITION
+
+! ***************
+Future SLR of 55cm
+09/10/2021
+Modify the regression equations used to compute flow through the Delta cross channel and Georgiana Sl for the
+base scenario derived based on DSM2 outputs (updated by using DCD model as input)
+
+DXC & Georg. Sl. Flow = (a * Sac Flow) + b
+        where a = 0.3526 , b = 1043.2 cfs  ==> OPEN GATE POSITION
+        where a = 0.1402 , b = 1054.8 cfs  ==> CLOSED GATE POSITION
+
+We can break the equation into individual component that will give the same result:
+
+  Georgianna Sl. Flow          			= 0.1402*Qsac + 1054.8  ==> OPEN OR CLOSED GATE POSITION
+  DXC Flow                              = 0.2124*Qsac - 11.6    ==> OPEN GATE POSITION
+  DXC Flow                              = 0.0                   ==> CLOSED GATE POSITION
+
+! ***************
+SLR of 15cm
+interpolated from coefficients shown above
+
+  Georgianna Sl. Flow          			= 0.1411*Qsac + 995.66  ==> OPEN OR CLOSED GATE POSITION
+  DXC Flow                              = 0.1922*Qsac + 219.76  ==> OPEN GATE POSITION
+  DXC Flow                              = 0.0                   ==> CLOSED GATE POSITION
+! ***************
+*/
+! Split arc C401B into Georgianna Sl. and DXC components
+define DXC_max {value 99999.*taf_cfs} ! over 1,600,000 cfs (plenty big)
+! Current assumption is to use same parameters from 15 cm interpolation for 30 cm.
+! Ideally, 30 cm DXC would have unique parameters. This will be tackled later on as improvement
+! 12/2023, NOsorio
+define georgslough_coef_a {select georg_coef_a from dxc_slr where slrswitch=int(simulateANNSLR)}
+define georgslough_coef_b {select georg_coef_b from dxc_slr where slrswitch=int(simulateANNSLR)}
+define D_SAC030_MOK014_coef_a {select dcc_coef_a from dxc_slr where slrswitch=int(simulateANNSLR)}
+define D_SAC030_MOK014_coef_b {select dcc_coef_b from dxc_slr where slrswitch=int(simulateANNSLR)}
+
+! Georgiana Sl. component is always this equation
+goal GeorgSlough {C_SAC029B = georgslough_coef_a*C_SAC041 + georgslough_coef_b}
+
+! Number of days in each month that the DXC gate is open
+define WQCP_days_open   {select days_open from xchanneldays where month=month}
+
+define WQCP_DCC_days_DV {alias WQCP_days_open kind 'DCC-DAYS-OPEN' UNITS 'NONE'} ! For output only
+define NMFS_DCC_days_DV {alias NMFS_days_open kind 'DCC-DAYS-OPEN' UNITS 'NONE'} ! For output only
+
+define numberofdaysopen {value min(WQCP_days_open, NMFS_days_open, RV_days_open) } !NMFS_days_open defined in DCC_stub or DELTA RPAs logic
+
+! Fraction of month gates are open
+define fract_open   {value numberofdaysopen/daysin }
+define fract_open_  {alias fract_open kind 'DXC-FRACT-OPEN' UNITS 'NONE'}  !for output only
+
+! ######### Sac Flow Closure ###############
+! Sac flow at which gates will be closed
+define SAC_threshold  { value 25000.0} ! units =cfs
+
+! The following variables are zero or one if their corresponding condition is false or true, respectively
+define int_SAC_below  {INTEGER std kind 'INTEGER' units 'NONE'}                  ! 0: high flow; 1:  low flow
+define int_SAC_above  {alias 1. - int_SAC_below kind 'INTEGER' units 'NONE'}     ! 1: high flow; 0:  low flow
+define SAC_above {std kind 'FLOW-SAC-ABV' units 'CFS'}      ! zero if C400 < threshold
+define SAC_below {std kind 'FLOW-SAC-BEL' units 'CFS'}      ! zero if C400 > threshold
+!zrc@ define SAC_max {value 99999.*taf_cfs} ! over 1,600,000 cfs (plenty big)
+define SAC_max {value 130000} !zrc@ 63223 < 130,000
+
+! following constraints allow only one of the two flow variables to be positive
+goal SAC_flood_flow  {SAC_above - SAC_below = C_SAC041 - SAC_threshold }
+goal SAC_abv_force   {SAC_above < SAC_max -int_SAC_below * SAC_max}
+goal SAC_bel_force   {SAC_below < int_SAC_below * SAC_max}
+
+define DXC_est { value numberofdaysopen}
+define DXC_estdv {alias DXC_est kind 'GATE-DAYS-OPEN' units 'NONE'}
+goal setDXC {DXC = DXC_est * int_SAC_below}
+
+! Gate open and closure equations with the automatic Sac closure
+goal open_cond_flow { D_SAC030_MOK014 = D_SAC030_MOK014_coef_a*SAC_threshold*int_SAC_below*fract_open - D_SAC030_MOK014_coef_a*SAC_below*fract_open + int_SAC_below*(D_SAC030_MOK014_coef_b)*fract_open }
+
+!GOAL HELP_INTEGER {LHS C_SAC029A RHS 0.0 LHS>RHS PENALTY 0.000001}
+
+
+!******************************************************************************

@@ -1,0 +1,336 @@
+/*
+CALSIM 3.0
+CACHECK.WRESL
+
+Edited A Draper, MWH, June 1, 2011
+*/
+
+/*
+Clear Lake is a natural lake with an approximate area of 44,0000 acres when full and a maximum depth of approximately 50 feet.
+Water level fluctuations were modified by the construction of the Cache Creek Dam in 1914.
+From 1915 until present, the levels of Clear Lake have been manipulated by operation of the Cache Creek Dam.
+
+Zero on the Rumsey gage (which is located at Lakeport)
+is regarded as the natural rim of the lake when water ceases to flow into Cache Creek.
+An elevation of 7.56 feet on the Rumsey Gage is considered a "full" lake
+with an active storage of 313,000 acre-feet.
+*/
+
+! Code to simulate storage above zero on the Rumsey gage
+goal AdjStorage2_CLRLK  {S_adjCLRLK + 842.0 = S_CLRLK}
+
+
+! Code to distinguish between flood releases and releases for water supply
+define C_CLRLK_FR 	{std kind 'FLOW' units 'CFS'} !normal flood release  !@jmg 2017v13
+define C_CLRLK_WS 	{std kind 'FLOW' units 'CFS'}
+goal setC_CLRLK_Total	{C_CLRLK < C_CLRLK_FR + C_CLRLK_WS}   !@jmg 2017v13
+
+!Code to simulate seepage through Clear Lake Dam - assumed to be 5 cfs
+define CLDamLeak 		{value 5.0}
+define C_CLRLK_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_CLRLK_ADD 	{std kind 'FLOW-ADDITIONAL-INSTREAM' units 'CFS'}
+goal C_CLRLKtotal  	{C_CLRLK = C_CLRLK_MIF + C_CLRLK_ADD}
+goal setC_CLRLK_MIF 	{C_CLRLK_MIF < CLDamLeak}
+
+! Weight on C_CLRLK_MIF 5000, Weight on dead storage -10,000
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Solano Decree (1978, modified 1995)        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Summer operation of Clear Lake are governed by the Solano Decree (1978, modified 1995). The decree specifies how much water is available for use by Yolo County FCWCD,
+and how much water is available in each month of the summer. If Clear Lake is full (7.56 feet Rumsey) on May 1, 150,000 acre-feet of water is available to Yolo.
+On Clear Lake, 150,000 acre-feet amounts to approximately 3 1/2 feet. If Clear Lake is below 3.22 feet Rumsey on May 1, no water is available to Yolo for release.
+An additional 3 feet of water evaporates from the surface during the summer months, therefore, Clear Lake can drop from 3 to 6 1/2 feet in any given summer.
+On the average, Clear Lake fluctuates 5.6 feet each year.
+
+The adjusted May 1 lake level determines the allowable withdrawal by Yolo County FCWCD.
+Irrigation withdrawals in April are added to the May 1 lake level to determine the allowable withdrawal for the year.
+Flood releases required by the Gopcevic Decree (1920) are not counted as part of the annual allotment.
+The following table summarizes the allowable withdrawal based on the adjusted May 1 lake level:
+
+ Adjusted	Lake		Allowable  
+ May 1		Storage		Seasonal
+ Level				Withdrawal
+
+3.22 		130,000		       0
+3.50		141,770		   7,847
+4.00		162,390		  21,593
+4.50		183,135		  35,423
+5.00		204,030		  49,353 
+5.50		225,105		  63,403
+6.00		246,350		  83,350
+6.50		267,785		 104,785
+7.00		289,400		.126,400
+7.56		313,000		.150,000
+ 
+The maximum withdrawal is 150,000 acre-feet. If the stage of Clear Lake is 3.22 feet or less in the Rumsey gage on May 1, the District may not withdraw
+any water to deliver below the Cache Creek Dam for that season (October 31).
+*/
+
+! Clear Lake Level on May 1
+! Defined in terms of adjusted lake storage (zero storage at zero stage on Rumsey gage)
+define CLRLK_May1_dv {lower unbounded upper unbounded kind 'STORAGE' units 'TAF'}
+
+define CLRLK_May1 {
+case FirstMonth {
+	condition wateryear == bgnWY .and. month <= APR
+    	value 313.0 }
+case May {
+    	condition   month == MAY
+    	value S_adjCLRLK(-1) }
+case other  {
+    	condition always
+    	value CLRLK_May1_dv(-1) }
+}
+
+goal set_CLRLK_May1_dv { CLRLK_May1_dv =  CLRLK_May1}
+
+
+! Adjusted Clear Lake Level on May 1
+! Equals Clear Lake storage May 1 plus April releases for irrigation
+define adjCLRLK_May1_dv {lower unbounded upper unbounded kind 'STORAGE' units 'TAF'}
+
+define adjCLRLK_May1 {
+case FirstMonth {
+	condition wateryear == bgnWY .and. month <= APR
+    	value 313.0 }
+case May {
+    	condition   month == May
+    	value S_adjCLRLK(-1) + C_CLRLK(-1)*cfs_taf(-1) - max(0.0, S_CLRLK(-2) + I_CLRLK(-1)*cfs_taf(-1) - D_CLRLK_CLLPT(-1) - E_CLRLK(-1)*cfs_taf(-1) - S_CLRLKLevel4(-1)) }
+case other  {
+    	condition always
+    	value adjCLRLK_May1_dv(-1) }
+}
+
+goal set_adjCLRLK_May1_dv { adjCLRLK_May1_dv =  adjCLRLK_May1}
+
+! Allowable release from storage April 1 - October 31
+define Alloc_YCFCWCD {
+case LoStorage {
+	condition adjCLRLK_May1 < 225.105
+	value max(0.,adjCLRLK_May1 * 63.403 / 225.105) }
+case other  {
+    	condition always
+    	value max(150.0, 63.403 + (adjCLRLK_May1 - 225.105) * 87.895 / 86.597) }
+}
+
+define alloc_YCFCWCD_dv {std kind 'Allocation' units 'TAF'}
+goal setalloc_YCFCWCD_dv {alloc_YCFCWCD_dv = alloc_YCFCWCD}
+
+! No release from storage if May 1 elevation below 3.22 feet
+goal set_C_CLRLK_WS {
+     lhs C_CLRLK_WS
+     case Low {
+          condition adjCLRLK_May1 <= 130.00 .and. month >= MAY .and. month <= SEP .or. adjCLRLK_May1 <= 130.00 .and. month == OCT
+          rhs CLDamLeak
+	  lhs>rhs     constrain
+    	  lhs<rhs     penalty 0
+     }
+     case other {
+          condition always
+          rhs 99999.
+          lhs>rhs     constrain
+    	  lhs<rhs     penalty 0
+     }
+}
+
+/*
+The seasonal withdrawal may only be made between April 1 and October 31.
+Only flood releases required by the Gopcevic Decree are allowed between November 1 and March 31.
+In order to balance the needs for recreation on Clear Lake and water use within Yolo County, withdrawals are limited by month to a maximum
+of the following percentages of the total withdrawal for each month:
+
+Month		Percent
+April		 7.0
+May		18.6
+June		20.6
+July		21.0
+August		19.9
+September	10.5
+October		 2.4
+
+
+Withdrawals during any month, except October, may exceed that month's withdrawal by 10 percent or 1,000 acre-feet, whichever is greater.
+Such excess withdrawal is deducted from the allowable withdrawal for the next month. In addition, the October monthly withdrawal may be taken in any given month
+without affecting the following month's scheduled withdrawal. 
+
+In addition to the maximum amount withdrawn, monthly minimum water levels must be maintained. These limitations are based on the adjusted May 1 lake level.
+If the adjusted May 1 lake level is above 7.56 feet Rumsey, the lake may not be drawn below 1.25 feet Rumsey on October 31.
+If the adjusted May 1 lake level is below 3.75 feet Rumsey, the lake may not be drawn below 0.12 feet Rumsey on October 31.
+With summer evaporation form the lake at approximately 3 feet, it is possible for the lake to drop below Zero Rumsey when the lake fills to less than 3 feet Rumsey,
+even though no water is withdrawn from the lake. 
+
+*/ 
+
+! Allowable Lake release
+define C_CLRLK_WSMax {
+case April {
+    	condition   month == APR
+   	value 0.070*Alloc_YCFCWCD*taf_cfs }
+case May {
+    	condition   month == MAY
+    	value 0.186*Alloc_YCFCWCD*taf_cfs }
+case June {
+    	condition   month == JUN
+    	value 0.206*Alloc_YCFCWCD*taf_cfs }
+case July {
+    	condition   month == JUL
+    	value 0.210*Alloc_YCFCWCD*taf_cfs }
+case August {
+    	condition   month == AUG
+    	value 0.199*Alloc_YCFCWCD*taf_cfs }
+case September {
+    	condition   month == SEP
+    	value 0.105*Alloc_YCFCWCD*taf_cfs }
+case October {
+    	condition   month == OCT
+    	value 0.024*Alloc_YCFCWCD*taf_cfs }
+case other  {
+    	condition always
+    	value 99999. }
+}
+
+define C_CLRLK_WSMax_dv {std kind 'Allocation' units 'CFS'}
+goal setC_CLRLK_WSMax_dv {C_CLRLK_WSMax_dv = C_CLRLK_WSMax}
+
+! Allowable Lake release
+goal setC_CLRLK_WS {
+lhs C_CLRLK_WS
+case April  {
+    	condition month == APR
+    	rhs 150.0 * 0.07
+    	lhs>rhs     constrain
+    	lhs<rhs     penalty 0 }
+case MayOct {
+    	condition   month >= MAY .and. month <= SEP .or. month == OCT
+    	rhs max(C_CLRLK_WSMax,CLDamLeak) ! Assume no flood release during irrigation season
+    	lhs>rhs     constrain
+    	lhs<rhs     penalty 0 }
+case other  {
+     	condition always
+     	rhs 99999.
+     	lhs>rhs     constrain
+    	lhs<rhs     penalty 0 }
+}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Gopcevic Decree (1920)        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+The Gopcevic Decree required the development of an operation schedule for the Cache Creek Dam on Cache Creek. Yolo County FCWCD
+must operate the Cache Creek Dam in accordance with the schedule. The Operation Schedule identifies lake levels for different times during
+the winter to which Clear Lake is allowed to fill. When the actual lake level is below the level indicated in the schedule, no water is allowed to be
+released at the dam. Should the actual lake level rise above the level indicated in the schedule, the gates in the dam must be opened to lower the
+lake level. As the actual lake level approaches the level indicated in the schedule for that date, conditions are taken into account so that the dam
+operation will minimize flooding, while allowing the lake to fill to 7.56 Rumsey. 
+
+Dec 31: 5.50 feet = 1,067.105
+Jan 31: 6.55 feet = 1,111.938
+Feb 28: 7.32 feet = 1,145.322
+Mar 31: 7.56 feet = 1,155.826
+
+The decree specifies that water must be released from Clear Lake Dam in the summer months so that lake elevations not exceed the following percentages
+of the actual level on April 15 of each year:
+
+May 1:	97% of April 15 stage
+Jun 1: 	89% of April 15 stage
+Jul 1: 	79% of April 15 stage
+Aug 1: 	69% of April 15 stage
+Sep 1:	58% of April 15 stage
+
+To code this a line of least squares was drawn through the stage-capacity relationship, where the capacity is the active storage above a stage of 7.56 feet:
+
+Storage - 842 = 41,163 * Stage
+i.e. zero on Rumsey gage = 842 TAF
+*/
+
+! Clear Lake maximum elevations
+define S_CLRLKlevel4_sv {
+     case December {
+               condition month == DEC
+               value 1067.0 ! 5.50 feet
+     }
+     case January {
+               condition month == JAN
+               value 1112. ! 6.55 feet
+     }
+     case February {
+               condition month == FEB
+               value 1145. ! 7.32 feet
+     }
+     case March {
+                    condition month == MAR
+               value 1154. ! 7.56 feet
+     }
+     case April {
+          condition month == APR
+          value max(0.,0.97*S_adjCLRLK(-1)) + 842.0
+     }
+     case May {
+          condition month == MAY
+          value max(0.,0.5*0.89*S_adjCLRLK(-1) + 0.5*0.89*S_adjCLRLK(-2)) + 842.0
+     }
+     case June {
+          condition month == JUN
+          value max(0.,0.5*0.79*S_adjCLRLK(-2) + 0.5*0.79*S_adjCLRLK(-3)) + 842.0
+     }
+     case July {
+          condition month == JUL
+          value max(0.,0.5*0.69*S_adjCLRLK(-3) + 0.5*0.69*S_adjCLRLK(-4)) + 842.0
+     }
+     case August {
+          condition month == AUG
+          value max(0.,0.5*0.58*S_adjCLRLK(-4) + 0.5*0.58*S_adjCLRLK(-5)) + 842.0
+     }
+     case other {
+          condition always
+          value 312.0 + 842.0
+     }
+}
+
+goal setS_CLRLKlevel4 {S_CLRLKlevel4 = S_CLRLKlevel4_sv}
+
+/*
+Withdrawals during any month, except October, may exceed that month's withdrawal by 10 percent or 1,000 acre-feet, whichever is greater.
+Such excess withdrawal is deducted from the allowable withdrawal for the next month. In addition, the October monthly withdrawal may be taken
+in any given month without affecting the following month's scheduled withdrawal.
+
+In addition to the maximum amount withdrawn, monthly minimum water levels must be maintained. These limitations are based on the adjusted May 1 lake level.
+If the adjusted May 1 lake level is above 7.56 feet Rumsey, the lake may not be drawn below 1.25 feet Rumsey on October 31.
+If the adjusted May 1 lake level is below 3.75 feet Rumsey, the lake may not be drawn below 0.12 feet Rumsey on October 31.
+With summer evaporation form the lake at approximately 3 feet, it is possible for the lake to drop below Zero Rumsey when the lake fills to less than 3 feet Rumsey,
+even though no water is withdrawn from the lake.
+*/
+
+! Operational Spills
+! Assume an amount equal to 5% of deliveries at Capay Dam are spilled over the dam
+goal setC_CCH030 {C_CCH030 > 0.05*D_CCH030_20_NA1}
+
+! Capay Valley Diversions
+! Assume diversion equals 5% of deliveries at Capay Dam
+!goal setC_CCH052 {D_CCH052_20_NA1 = 0.05*D_CCH030_20_NA1}
+goal setD_CCH052_20_NA1 {D_CCH052_20_NA1 = 0.0526*D_CCH030_20_NA1} !(.05/.95=.0101)
+
+! Indian Valley Reservoir releases for power generation
+! First 250 cfs released from Indian Valley
+! Weights on active storage in Indian Valley Reservoir approximately twice those for Clear Lake releases.
+
+define YCFCWCDDemand {value (AWr_20_NA1*(1.- RUFr_20_NA1- GPmin_20_NA1 + RPF_20_NA1) + AWo_20_NA1*(1.- min(0.10, RUFo_20_NA1) - GPmin_20_NA1 + RPF_20_NA1))
+					/(1. - EVF_CCH030_20_NA1 - DPF_CCH030_20_NA1 - LFF_CCH030_20_NA1 - OSF_CCH030_20_NA1)}
+					
+goal setC_INDVL {C_INDVL > min(max(0.0, S_INDVL(-1) - S_INDVLlevel1)*taf_cfs(-1), 250.0, YCFCWCDDemand - I_CCH053 - I_BRC003 - CLDamLeak) }
+
+define YCFCWCDDemand_dv {std kind 'DEMAND' units 'CFS'}
+goal setYCFCWCDDemand {YCFCWCDDemand_dv = YCFCWCDDemand}
+
+! Limit dam releases for purposes other than (a) flood control, (b) YCFCWCD deliveries (and associated spills), and (c) instream flows
+! Weight on instream flows above minimum is -3000
+
+! Evaporation when lake reaches bottom of flood control
+define A_CLRLK_FC       	{value A_CLRLKlast+1000*coefev_CLRLK*S_CLRLKLevel4_sv-1000*coefev_CLRLK*S_CLRLK(-1)}
+define E_CLRLK_FC   	{value ( (ER_CLRLK/24.0)*A_CLRLKlast+(ER_CLRLK/24.0)*A_CLRLK_FC)*af_cfs}
+
+! Determine flood release
+goal setC_CLRLK_FR	{C_CLRLK_FR = max(0.0, S_CLRLK(-1) + I_CLRLK*cfs_taf - E_CLRLK_FC*cfs_taf - S_CLRLKLevel4_sv)*taf_cfs}

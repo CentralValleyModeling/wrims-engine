@@ -1,0 +1,89 @@
+! CVP_AllocMod.wresl
+
+! Starting in June, if the amount of water in SL plus the expected export capacity
+! is more than the demand from now through the end of August, then increase allocation
+! export capability from now through the end of August is estCVPExpThruAug or estCVPExpThruAugdv(MAY-month)
+! minus the actual export since May.  
+
+define MayAugExpEst {
+    case initialdel {
+        condition month <= MAY .and. wateryear == BgnWY
+        value 0. }
+    case JuneJuly {
+        condition month==JUN .or. month==JUL 
+        value estCVPExpThruAugdv(may-month)    }
+    case otherwise {
+        condition always
+        value 0. }
+}
+define May_to_Now_Exp {
+    case initialdel {
+        condition month <= MAY .and. wateryear == BgnWY
+        value 0. }
+    case June { condition month==JUN value C_DMC003(-1)*cfs_taf(-1)    }
+    case July { condition month==JUL value C_DMC003(-1)*cfs_taf(-1) + C_DMC003(-2)*cfs_taf(-2)    }
+    case otherwise {
+        condition always
+        value 0. }  
+}
+define Summer_SOD_WS_nor {  ! 
+    case initialdel {
+        condition month <= FEB .and. wateryear == BgnWY
+        value 0. }
+    case June {
+        condition month==JUN
+        value max(0., S_SLUIS_CVP(-1)-90. + jbypass_del + MayAugExpEst - May_to_Now_Exp) }
+    case July {
+        condition month==JUL
+        value max(0., S_SLUIS_CVP(-1)-90. + MayAugExpEst - May_to_Now_Exp) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+define Summer_SOD_WS_dry {
+    case initialdel {
+        condition month <= FEB .and. wateryear == BgnWY
+        value 0. }
+    case June {
+        condition month==JUN
+        value max(0., S_SLUIS_CVP(-1)-90. + jbypass_del + 800.*cfs_taf + 800.*cfs_taf(1) + 800.*cfs_taf(2)) }
+    case July {
+        condition month==JUL
+        value max(0., S_SLUIS_CVP(-1)-90. + 800.*cfs_taf + 800.*cfs_taf(1)) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+! calculate total CVP SOD demand through August
+include 'BaseCVPDemTotals.wresl'
+
+! Is there extra water to allocate?
+define SODExtra {
+    case DryJunAug {
+        condition month>=JUN .and. month <=AUG .and. SACIND<6.0
+        value max(0., min(Summer_SOD_WS_nor, Summer_SOD_WS_dry) - CVPSODBaseDemThruAug)}
+    case JunAug {
+        condition month>=JUN .and. month <=AUG 
+        value max(0., Summer_SOD_WS_nor - CVPSODBaseDemThruAug)}
+    case otherwise {
+        condition always
+        value 0.}
+}
+
+! In June, a 5% increase in allocation would mean ~70 taf more delivery June-Sept
+! In July, a 5% increase in allocation would mean ~50 taf more delivery July-Sept
+! Increase is set in June or July and carried through to the following March
+
+define MaxCVPAgInc {
+    case tucps     {condition tucp_trigger>.5 value 0.}
+    case otherwise {condition always value 1.-perdel_cvpag_s_base}
+}
+define cvp_perdel_incAg_ {std kind 'allocation' units 'none'}
+define CVP_perdel_incAg {
+    case MarMay { condition month>=MAR .and. month<=MAY value 0.}
+    case June   { condition month==JUN value min(.25, MaxCVPAgInc, int(SODExtra/70.)*.05)}
+    case July05 { condition month==JUL .and. perdv_cvpag_s(-1)<.50 .and. SODExtra>50.  value min(MaxCVPAgInc,cvp_perdel_incAg_(-1)+.05)}
+    case other  { condition always value cvp_perdel_incAg_(-1)}
+}
+goal set_cvp_perdel_incAg_ {cvp_perdel_incAg_ = cvp_perdel_incAg}
+

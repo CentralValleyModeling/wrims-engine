@@ -1,0 +1,307 @@
+/*
+File name: UpperTuolumne_constraints-minflows.wresl
+
+Purpose: Define and impose minimu flow requirement
+
+Naming takes the following form:
+
+*/
+
+
+
+!Hetch Hetchy have a dynamic instream flow requirement (three categories) which is triggered either by precipitation at the reservoir or inflow to the reservoir for different months. 
+!Eleanor has two categories for minimum flow requirements; when there is pumping, and when there is no pumping to transfer water from Eleanor to Cherry. 
+!Lloyd has only one set of minimum flow requirement.
+
+
+!**********************************************************************************
+!********* Tuolumne River  below Hetch Hetchy reservoir ***************************
+!**********************************************************************************
+
+!Hetch Hetchy instream flow requirement (cubic feet per second - cfs)
+!Year Type A
+!Oct	Nov	Dec	Jan	Feb	Mar	Apr	May	Jun	Jul	Aug	Sep 1-14	Sep 15-30
+!60	60	50	50	60	60	75	100	125	125	125	100		80
+
+!Year Type B
+!Oct	Nov	Dec	Jan	Feb	Mar	Apr	May	Jun	Jul	Aug	Sep 1-14	Sep 15-30
+!50	50	40	40	50	50	65	80	110	110	110	80		65
+
+!Year Type C
+!Oct	Nov	Dec	Jan	Feb	Mar	Apr	May	Jun	Jul	Aug	Sep 1-14	Sep 15-30
+!35	35	35	35	35	35	35	50	75	75	75	75		50
+
+
+!Hetch Hetchy instream flow requirement triggers
+
+!Month		Year Type A	Year Type B	Year Type C
+
+
+!Trigger Jan. through Jun. = Cumulative precipitation at Hetch Hetchy Reservoir from October 1 of the previous year as of the end of the previous month
+!January	> 8.8 in	>6.1 in		<=6.1 in
+!February	> 14 in		>9.5 in		<=9.5 in
+!March		> 18.6 in	>14.2 in	<=14.2 in
+!April		> 23 in		>23 in		<=18 in
+!May		> 26.6 in	>19.5 in	<=19.5 in
+!June		> 28.45 in	>21.25 in	<=21.25 in
+
+
+!Trigger Jul. through Dec. = Cumulative inflow to Hetch Hetchy Reservoir from October 1 of the previous year as of the end of the previous month
+!July		> 575,000 AF	> 390,000 AF	<= 390,000 AF
+!August		> 640,000 AF	> 400,000 AF	<= 400,000 AF
+!September	As August			
+!October	As August		
+!November	As August			
+!December	As August
+
+!Source: Final PEIR on SFPUC Water System Improvement Program, 2008.
+!SFPUC must release an additional 64 cfs into the river below Hetch Hetchy Reservoir when the diversion through Canyon Tunnel exceeds 920 cfs
+!Releases cannot be diverted below O’Shaughnessy Dam (i.e., at Early Intake); they flow down the Tuolumne River, are supplemented by tributary flow and releases at Kirkwood Powerhouse, and enter Don Pedro Reservoir
+
+
+
+! Cumulative precipitation at Hetch Hetchy Reservoir watershed from October 1 as of the end of the previous month (Jan. through Jun.)
+define HTCHYTotPrecip {
+     case JanJun {
+     	condition month >= jan .and. month <= jun
+     	sum(i=OCT-month,-1,1) P_HTCHY(i) }
+     case otherwise {
+     	condition always
+     	value     0. }}
+     	
+define HTCHYTotPrecipdv {alias HTCHYTotPrecip kind 'PRECIPITATION' units 'INCHES'}	
+     	
+
+! Cumulative inflow to Hetch Hetchy Reservoir from October 1 as of the end of the previous month (Jul. through Aug.). Sept. through Dec. triggers are similar to August trigger. 
+define HTCHYTotInflow {
+     case OctDecBeginYear {
+          condition month >= oct .and. month <= dec .and. wateryear == bgnWY 
+          value 459.} !Average Oct-Jul inflow 1922-2015
+     case OctDec {
+          condition month >= oct .and. month <= dec 
+          sum(i=-11-month,-2-month,1) I_HTCHY(i)*cfs_taf(i) }
+     case JulAug {
+          condition month >= jul .and. month <= aug
+          sum(i=OCT-month,-1,1) I_HTCHY(i)*cfs_taf(i) }
+     case September {
+          condition month == sep 
+          sum(i=OCT-month,-2,1) I_HTCHY(i)*cfs_taf(i) }
+     case otherwise {
+          condition always
+     	  value     0. }}
+          
+define HTCHYTotInflowdv {alias HTCHYTotInflow kind 'INFLOW' units 'TAF'}          
+
+
+! Water year type and calculation of instream flow requirement below Hetch Hetchy reservoir
+define MF_HTCHY {
+     case JANytA {
+	condition HTCHYtotprecip > 8.8 .and. month == jan
+	value 50.}
+     case JANytB {
+	condition HTCHYtotprecip > 6.1 .and. month == jan
+	value 40.}
+     case JANytC {
+	condition HTCHYtotprecip <= 6.1 .and. month == jan
+	value 35.}
+     case FEBytA {
+  	condition HTCHYtotprecip > 14. .and. month == feb
+  	value 60.}
+     case FEBytB {
+  	condition HTCHYtotprecip > 9.5 .and. month == feb
+  	value 50.}
+     case FEBytC {
+  	condition HTCHYtotprecip <= 9.5 .and. month == feb
+	value 35.}
+     case MARytA {
+	condition HTCHYtotprecip > 18.6 .and. month == mar
+	value 60.}
+	case MARytB {
+	condition HTCHYtotprecip > 14.2 .and. month == mar
+	value 50.}
+	case MARytC {
+	condition HTCHYtotprecip <= 14.2 .and. month == mar
+	value 35.}
+     case APRytA {
+ 	condition HTCHYtotprecip > 23. .and. month == apr
+	value 75.}
+     case APRytB {
+ 	condition HTCHYtotprecip > 18. .and. month == apr
+	value 65.}
+     case APRytC {
+ 	condition HTCHYtotprecip <= 18. .and. month == apr
+	value 35.}
+     case MayytA {
+ 	condition HTCHYtotprecip > 26.6 .and. month == may
+	value 100.}
+     case MayytB {
+	condition HTCHYtotprecip > 19.5 .and. month == may
+	value 80.}
+     case MayytC {
+	condition HTCHYtotprecip <= 19.5 .and. month == may
+	value 50.}
+     case JunytA {
+	condition HTCHYtotprecip > 28.45 .and. month == jun
+	value 125.}
+     case JunytB {
+	condition HTCHYtotprecip > 21.25 .and. month == jun
+	value 110.}
+     case JunytC {
+	condition HTCHYtotprecip <= 21.25 .and. month == jun
+	value 75.}
+     case JulytA {
+	condition HTCHYTotInflow > 575. .and. month == jul
+	value 125.}
+     case JulytB {
+	condition HTCHYTotInflow > 390. .and. month == jul
+	value 110.}
+     case JulytC {
+	condition HTCHYTotInflow <= 390. .and. month == jul
+	value 75.}
+     case AugytA {
+	condition HTCHYTotInflow > 640. .and. month == aug
+	value 125.}
+     case AugytB {
+	condition HTCHYTotInflow > 400. .and. month == aug
+	value 110.}
+    case AugytC {
+	condition HTCHYTotInflow <= 400. .and. month == aug
+	value 75.}
+    case SepytA {
+	condition HTCHYTotInflow > 640. .and. month == sep
+	value 90.}
+    case SepytB {
+	condition HTCHYTotInflow > 400. .and. month == sep
+	value 72.5}
+    case SepytC {
+	condition HTCHYTotInflow <= 400. .and. month == sep
+	value 62.5}
+    case OctytA {
+	condition HTCHYTotInflow > 640. .and. month == oct
+	value 60.}
+    case OctytB {
+	condition HTCHYTotInflow > 400. .and. month == oct
+	value 50.}
+   case OctytC {
+	condition HTCHYTotInflow <= 400. .and. month == oct
+	value 35.}
+   case NovytA {
+	condition HTCHYTotInflow > 640. .and. month == nov
+	value 60.}
+   case NovytB {
+	condition HTCHYTotInflow > 400. .and. month == nov
+	value 50.}
+   case NovytC {
+	condition HTCHYTotInflow <= 400. .and. month == nov
+	value 35.}	
+   case DecytA {
+ 	condition HTCHYTotInflow > 640. .and. month == dec
+	value 50.}
+   case DecytB {
+	condition HTCHYTotInflow > 400. .and. month == dec
+	value 40.}
+   case DecytC {
+	condition HTCHYTotInflow <= 400. .and. month == dec
+	value 35.}	 
+   case others  {
+	condition always
+	value 0.     }
+        }
+
+goal setHTCHYMin   {C_HTCHY_MIF < MF_HTCHY}
+define MF_HTCHYdv {alias MF_HTCHY kind 'FLOW' units 'CFS'}          
+
+
+!**********************************************************************************
+!********* Eleanor Creek below Lake Eleanor ***************************************
+!**********************************************************************************
+
+!a) No Pumping between Lake Lloyd and Lake Eleanor
+!Oct	Nov	Dec	Jan	Feb	Mar	Apr1-14	Apr15-30	May	Jun	Jul	Aug	Sep 1-15	Sep16-30
+!5	5	5	5	5	5	5	5		5	5	15.5	15.5	15.5		15.5
+
+!b) Pumping between Lake Lloyd and Lake Eleanor 
+!Oct	Nov	Dec	Jan	Feb	Mar	Apr1-14	Apr15-30	May	Jun	Jul	Aug	Sep 1-15	Sep16-30
+!10	5	5	5	5	10	10	20		20	20	20	20	20		10
+
+!Source: Final PEIR on SFPUC Water System Improvement Program, 2008.
+
+!Condition: No Pumping between Lake Eleanor and Lake Lloyd
+define MF_ELENR_1 {
+   case OctJun {
+	condition month >= oct .and. month <= jun
+	value 5.}
+   case JulSep {
+	condition always
+	value 15.5}
+	}
+
+!Condition: Pumping between Lake Lloyd and Lake Eleanor
+define MF_ELENR_2 {
+   case October {
+	Condition month==oct
+	value 10.}
+   case NovFeb {
+	condition month >= nov .and. month <= feb
+	value 5.}
+   case March {
+	condition month == mar
+	value 10.}
+   case April {
+	condition month == apr
+	value 15.}
+   case MayAug {
+	condition month >= may .and. month <= aug
+	value 20.}
+   case September {
+	condition always
+	value 15.}
+        }
+
+define CUM_ECT001_DV {std kind 'FLOW'  units 'TAF'}
+define CUM_ECT001_SV {
+   case Oct {
+	condition month == oct 
+	value 0.}
+   case Otherwise {
+	condition always
+	value CUM_ECT001_DV(-1) + C_ECT001(-1)}
+	}
+goal set_CUM_ECT001 {CUM_ECT001_DV = CUM_ECT001_SV} 
+
+define MF_ELENR{
+	case Tunnel_flow {
+	condition CUM_ECT001_SV == 0. 
+	value MF_ELENR_1}
+	case Otherwise {
+	condition always 
+	value MF_ELENR_2}
+	}
+	
+goal ELENR_min_release {C_ELENR_MIF < MF_ELENR}
+
+!**********************************************************************************
+!********* Cherry Creek below Lake LLoyd  *****************************************
+!**********************************************************************************
+define MF_LLOYD {
+case OctJun {
+	condition month >= oct .and. month <= jun
+	value 5.}
+case JulSep {
+	condition always
+	value 15.}}
+
+goal LLOYD_min_release {C_LLOYD_MIF < MF_LLOYD}
+
+
+
+
+
+
+
+
+
+
+
+
+

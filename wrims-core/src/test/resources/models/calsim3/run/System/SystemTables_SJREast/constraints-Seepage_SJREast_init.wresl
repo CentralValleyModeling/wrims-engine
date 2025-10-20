@@ -1,0 +1,360 @@
+/*
+CALSIM 3.0  SYSTEM FILE
+
+NAMING TAKES THE FOLLOWING FORM:
+SG_C2VSIM(R374)StreamNode_CalSimNode_C2VSIM(R374)Reach
+
+positive seepage = gaining stream; negative seepage = losing stream
+(dll output is reverse, aquifer instead of stream frame of reference;
+multiplying by -1 reflects stream's perspective)
+
+D. O'Connor (USBR) 2016 (mirroring Sac Basin set up by M. Lui/R.Chen)
+Tribs listed North to South, SJR last:
+*/
+
+! See Comment (2) above.
+! SG_WDWRD_seep is a TS in TAF - convert to cfs and set Woodward seepage
+!goal set_SG_WDWRD   {SG_WDWRD = SG_WDWRD_seep*taf_cfs*(-1)}   !assumes wdwrd SV values are positive
+
+goal setNegSG_WDWRD {lhs SG_WDWRD case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_WDWRD(-1) < 0 rhs SG_WDWRD(-1)   lhs>rhs penalty SGPHIGH}}
+goal setPosSG_WDWRD {lhs SG_WDWRD case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_WDWRD(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG_WDWRD(-1) }}
+
+goal setNegSG_MDSTO_644 {lhs SG_MDSTO_644 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_MDSTO_644(-1) < 0 rhs SG_MDSTO_644(-1)   lhs>rhs penalty SGPHIGH}}
+goal setPosSG_MDSTO_644 {lhs SG_MDSTO_644 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_MDSTO_644(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG_MDSTO_644(-1) }}
+
+goal setNegSG_TRLCK_666 {lhs SG_TRLCK_666 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_TRLCK_666(-1) < 0 rhs SG_TRLCK_666(-1)   lhs>rhs penalty SGPHIGH}}
+goal setPosSG_TRLCK_666 {lhs SG_TRLCK_666 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG_TRLCK_666(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG_TRLCK_666(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Calaveras River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG161_CLV035_25 {lhs SG161_CLV035_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG161_CLV035_25(-1) < 0 rhs SG161_CLV035_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG162_CLV028_25 {lhs SG162_CLV028_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG162_CLV028_25(-1) < 0 rhs SG162_CLV028_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG163_CLV023_25 {lhs SG163_CLV023_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG163_CLV023_25(-1) < 0 rhs SG163_CLV023_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG164_CLV016_25 {lhs SG164_CLV016_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG164_CLV016_25(-1) < 0 rhs SG164_CLV016_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG165_CLV010_25 {lhs SG165_CLV010_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG165_CLV010_25(-1) < 0 rhs SG165_CLV010_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG166_CLV004_25 {lhs SG166_CLV004_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG166_CLV004_25(-1) < 0 rhs SG166_CLV004_25(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG167_CLV004_25 {lhs SG167_CLV004_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG167_CLV004_25(-1) < 0 rhs SG167_CLV004_25(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG161_CLV035_25 {lhs SG161_CLV035_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG161_CLV035_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG161_CLV035_25(-1) }}
+goal setPosSG162_CLV028_25 {lhs SG162_CLV028_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG162_CLV028_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG162_CLV028_25(-1) }}
+goal setPosSG163_CLV023_25 {lhs SG163_CLV023_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG163_CLV023_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG163_CLV023_25(-1) }}
+goal setPosSG164_CLV016_25 {lhs SG164_CLV016_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG164_CLV016_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG164_CLV016_25(-1) }}
+goal setPosSG165_CLV010_25 {lhs SG165_CLV010_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG165_CLV010_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG165_CLV010_25(-1) }}
+goal setPosSG166_CLV004_25 {lhs SG166_CLV004_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG166_CLV004_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG166_CLV004_25(-1) }}
+goal setPosSG167_CLV004_25 {lhs SG167_CLV004_25 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG167_CLV004_25(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG167_CLV004_25(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stanislaus River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG146_STS058_23 {lhs SG146_STS058_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG146_STS058_23(-1) < 0 rhs SG146_STS058_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG147_STS053_23 {lhs SG147_STS053_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG147_STS053_23(-1) < 0 rhs SG147_STS053_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG148_STS050_23 {lhs SG148_STS050_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG148_STS050_23(-1) < 0 rhs SG148_STS050_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG149_STS043_23 {lhs SG149_STS043_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG149_STS043_23(-1) < 0 rhs SG149_STS043_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG150_STS036_23 {lhs SG150_STS036_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG150_STS036_23(-1) < 0 rhs SG150_STS036_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG151_STS030_23 {lhs SG151_STS030_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG151_STS030_23(-1) < 0 rhs SG151_STS030_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG152_STS020_23 {lhs SG152_STS020_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG152_STS020_23(-1) < 0 rhs SG152_STS020_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG153_STS011_23 {lhs SG153_STS011_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG153_STS011_23(-1) < 0 rhs SG153_STS011_23(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG154_STS011_23 {lhs SG154_STS011_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG154_STS011_23(-1) < 0 rhs SG154_STS011_23(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG146_STS058_23 {lhs SG146_STS058_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG146_STS058_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG146_STS058_23(-1) }}
+goal setPosSG147_STS053_23 {lhs SG147_STS053_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG147_STS053_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG147_STS053_23(-1) }}
+goal setPosSG148_STS050_23 {lhs SG148_STS050_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG148_STS050_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG148_STS050_23(-1) }}
+goal setPosSG149_STS043_23 {lhs SG149_STS043_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG149_STS043_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG149_STS043_23(-1) }}
+goal setPosSG150_STS036_23 {lhs SG150_STS036_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG150_STS036_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG150_STS036_23(-1) }}
+goal setPosSG151_STS030_23 {lhs SG151_STS030_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG151_STS030_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG151_STS030_23(-1) }}
+goal setPosSG152_STS020_23 {lhs SG152_STS020_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG152_STS020_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG152_STS020_23(-1) }}
+goal setPosSG153_STS011_23 {lhs SG153_STS011_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG153_STS011_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG153_STS011_23(-1) }}
+goal setPosSG154_STS011_23 {lhs SG154_STS011_23 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG154_STS011_23(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG154_STS011_23(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Tuolumne River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG135_TUO053_21 {lhs SG135_TUO053_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG135_TUO053_21(-1) < 0 rhs SG135_TUO053_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG136_TUO047_21 {lhs SG136_TUO047_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG136_TUO047_21(-1) < 0 rhs SG136_TUO047_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG137_TUO043_21 {lhs SG137_TUO043_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG137_TUO043_21(-1) < 0 rhs SG137_TUO043_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG138_TUO036_21 {lhs SG138_TUO036_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG138_TUO036_21(-1) < 0 rhs SG138_TUO036_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG139_TUO030_21 {lhs SG139_TUO030_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG139_TUO030_21(-1) < 0 rhs SG139_TUO030_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG140_TUO022_21 {lhs SG140_TUO022_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG140_TUO022_21(-1) < 0 rhs SG140_TUO022_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG141_TUO015_21 {lhs SG141_TUO015_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG141_TUO015_21(-1) < 0 rhs SG141_TUO015_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG142_TUO010_21 {lhs SG142_TUO010_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG142_TUO010_21(-1) < 0 rhs SG142_TUO010_21(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG143_TUO003_21 {lhs SG143_TUO003_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG143_TUO003_21(-1) < 0 rhs SG143_TUO003_21(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG135_TUO053_21 {lhs SG135_TUO053_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG135_TUO053_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG135_TUO053_21(-1) }}
+goal setPosSG136_TUO047_21 {lhs SG136_TUO047_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG136_TUO047_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG136_TUO047_21(-1) }}
+goal setPosSG137_TUO043_21 {lhs SG137_TUO043_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG137_TUO043_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG137_TUO043_21(-1) }}
+goal setPosSG138_TUO036_21 {lhs SG138_TUO036_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG138_TUO036_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG138_TUO036_21(-1) }}
+goal setPosSG139_TUO030_21 {lhs SG139_TUO030_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG139_TUO030_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG139_TUO030_21(-1) }}
+goal setPosSG140_TUO022_21 {lhs SG140_TUO022_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG140_TUO022_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG140_TUO022_21(-1) }}
+goal setPosSG141_TUO015_21 {lhs SG141_TUO015_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG141_TUO015_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG141_TUO015_21(-1) }}
+goal setPosSG142_TUO010_21 {lhs SG142_TUO010_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG142_TUO010_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG142_TUO010_21(-1) }}
+goal setPosSG143_TUO003_21 {lhs SG143_TUO003_21 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG143_TUO003_21(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG143_TUO003_21(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Merced River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG116_MCD052_17 {lhs SG116_MCD052_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG116_MCD052_17(-1) < 0 rhs SG116_MCD052_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG117_MCD048_17 {lhs SG117_MCD048_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG117_MCD048_17(-1) < 0 rhs SG117_MCD048_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG118_MCD042_17 {lhs SG118_MCD042_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG118_MCD042_17(-1) < 0 rhs SG118_MCD042_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG119_MCD036_17 {lhs SG119_MCD036_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG119_MCD036_17(-1) < 0 rhs SG119_MCD036_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG120_MCD028_17 {lhs SG120_MCD028_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG120_MCD028_17(-1) < 0 rhs SG120_MCD028_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG121_MCD021_17 {lhs SG121_MCD021_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG121_MCD021_17(-1) < 0 rhs SG121_MCD021_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG122_MCD014_17 {lhs SG122_MCD014_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG122_MCD014_17(-1) < 0 rhs SG122_MCD014_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG123_MCD009_17 {lhs SG123_MCD009_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG123_MCD009_17(-1) < 0 rhs SG123_MCD009_17(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG124_MCD002_17 {lhs SG124_MCD002_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG124_MCD002_17(-1) < 0 rhs SG124_MCD002_17(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG116_MCD052_17 {lhs SG116_MCD052_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG116_MCD052_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG116_MCD052_17(-1) }}
+goal setPosSG117_MCD048_17 {lhs SG117_MCD048_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG117_MCD048_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG117_MCD048_17(-1) }}
+goal setPosSG118_MCD042_17 {lhs SG118_MCD042_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG118_MCD042_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG118_MCD042_17(-1) }}
+goal setPosSG119_MCD036_17 {lhs SG119_MCD036_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG119_MCD036_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG119_MCD036_17(-1) }}
+goal setPosSG120_MCD028_17 {lhs SG120_MCD028_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG120_MCD028_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG120_MCD028_17(-1) }}
+goal setPosSG121_MCD021_17 {lhs SG121_MCD021_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG121_MCD021_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG121_MCD021_17(-1) }}
+goal setPosSG122_MCD014_17 {lhs SG122_MCD014_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG122_MCD014_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG122_MCD014_17(-1) }}
+goal setPosSG123_MCD009_17 {lhs SG123_MCD009_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG123_MCD009_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG123_MCD009_17(-1) }}
+goal setPosSG124_MCD002_17 {lhs SG124_MCD002_17 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG124_MCD002_17(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG124_MCD002_17(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bear Creek      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setNegSG105_BCK040_15 {lhs SG105_BCK040_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG105_BCK040_15(-1) < 0 rhs SG105_BCK040_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG106_BCK035_15 {lhs SG106_BCK035_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG106_BCK035_15(-1) < 0 rhs SG106_BCK035_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG107_BCK031_15 {lhs SG107_BCK031_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG107_BCK031_15(-1) < 0 rhs SG107_BCK031_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG108_BCK024_15 {lhs SG108_BCK024_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG108_BCK024_15(-1) < 0 rhs SG108_BCK024_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG109_BCK017_15 {lhs SG109_BCK017_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG109_BCK017_15(-1) < 0 rhs SG109_BCK017_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG110_BCK010_15 {lhs SG110_BCK010_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG110_BCK010_15(-1) < 0 rhs SG110_BCK010_15(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG111_BCK006_15 {lhs SG111_BCK006_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG111_BCK006_15(-1) < 0 rhs SG111_BCK006_15(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG105_BCK040_15 {lhs SG105_BCK040_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG105_BCK040_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG105_BCK040_15(-1) }}
+goal setPosSG106_BCK035_15 {lhs SG106_BCK035_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG106_BCK035_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG106_BCK035_15(-1) }}
+goal setPosSG107_BCK031_15 {lhs SG107_BCK031_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG107_BCK031_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG107_BCK031_15(-1) }}
+goal setPosSG108_BCK024_15 {lhs SG108_BCK024_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG108_BCK024_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG108_BCK024_15(-1) }}
+goal setPosSG109_BCK017_15 {lhs SG109_BCK017_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG109_BCK017_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG109_BCK017_15(-1) }}
+goal setPosSG110_BCK010_15 {lhs SG110_BCK010_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG110_BCK010_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG110_BCK010_15(-1) }}
+goal setPosSG111_BCK006_15 {lhs SG111_BCK006_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG111_BCK006_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG111_BCK006_15(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Chowchilla/Eastside Bypass !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setNegSG76_FRS016_9   {lhs SG76_FRS016_9   case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG76_FRS016_9     (-1) < 0 rhs SG76_FRS016_9     (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG77_FRS016_9   {lhs SG77_FRS016_9   case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG77_FRS016_9  (-1) < 0 rhs SG77_FRS016_9  (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG87_EBP030_11 {lhs SG87_EBP030_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG87_EBP030_11    (-1) < 0 rhs SG87_EBP030_11    (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG88_EBP030_11  {lhs SG88_EBP030_11  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG88_EBP030_11 (-1) < 0 rhs SG88_EBP030_11 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG101_DED003_13 {lhs SG101_DED003_13 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG101_DED003_13(-1) < 0 rhs SG101_DED003_13(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG112_BCK006_15 {lhs SG112_BCK006_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG112_BCK006_15(-1) < 0 rhs SG112_BCK006_15(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG76_FRS016_9   {lhs SG76_FRS016_9   case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG76_FRS016_9     (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG76_FRS016_9     (-1) }}
+goal setPosSG77_FRS016_9   {lhs SG77_FRS016_9   case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG77_FRS016_9  (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG77_FRS016_9  (-1) }}
+goal setPosSG87_EBP030_11 {lhs SG87_EBP030_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG87_EBP030_11    (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG87_EBP030_11    (-1) }}
+goal setPosSG88_EBP030_11  {lhs SG88_EBP030_11  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG88_EBP030_11 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG88_EBP030_11 (-1) }}
+goal setPosSG101_DED003_13 {lhs SG101_DED003_13 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG101_DED003_13(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG101_DED003_13(-1) }}
+goal setPosSG112_BCK006_15 {lhs SG112_BCK006_15 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG112_BCK006_15(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG112_BCK006_15(-1) }}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deadman Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG93_DED044_13  {lhs SG93_DED044_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG93_DED044_13 (-1) < 0 rhs SG93_DED044_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG94_DED038_13  {lhs SG94_DED038_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG94_DED038_13 (-1) < 0 rhs SG94_DED038_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG95_DED035_13  {lhs SG95_DED035_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG95_DED035_13 (-1) < 0 rhs SG95_DED035_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG96_DED032_13  {lhs SG96_DED032_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG96_DED032_13 (-1) < 0 rhs SG96_DED032_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG97_DED025_13  {lhs SG97_DED025_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG97_DED025_13 (-1) < 0 rhs SG97_DED025_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG98_DED019_13  {lhs SG98_DED019_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG98_DED019_13 (-1) < 0 rhs SG98_DED019_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG99_DED010_13  {lhs SG99_DED010_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG99_DED010_13 (-1) < 0 rhs SG99_DED010_13 (-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG100_DED003_13 {lhs SG100_DED003_13 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG100_DED003_13(-1) < 0 rhs SG100_DED003_13(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG93_DED044_13  {lhs SG93_DED044_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG93_DED044_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG93_DED044_13 (-1) }}
+goal setPosSG94_DED038_13  {lhs SG94_DED038_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG94_DED038_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG94_DED038_13 (-1) }}
+goal setPosSG95_DED035_13  {lhs SG95_DED035_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG95_DED035_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG95_DED035_13 (-1) }}
+goal setPosSG96_DED032_13  {lhs SG96_DED032_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG96_DED032_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG96_DED032_13 (-1) }}
+goal setPosSG97_DED025_13  {lhs SG97_DED025_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG97_DED025_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG97_DED025_13 (-1) }}
+goal setPosSG98_DED019_13  {lhs SG98_DED019_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG98_DED019_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG98_DED019_13 (-1) }}
+goal setPosSG99_DED010_13  {lhs SG99_DED010_13  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG99_DED010_13 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG99_DED010_13 (-1) }}
+goal setPosSG100_DED003_13 {lhs SG100_DED003_13 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG100_DED003_13(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG100_DED003_13(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Chowchilla River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG80_CHW031_11 {lhs SG80_CHW031_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG80_CHW031_11(-1) < 0 rhs SG80_CHW031_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG81_CHW028_11 {lhs SG81_CHW028_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG81_CHW028_11(-1) < 0 rhs SG81_CHW028_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG82_CHW024_11 {lhs SG82_CHW024_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG82_CHW024_11(-1) < 0 rhs SG82_CHW024_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG83_CHW021_11 {lhs SG83_CHW021_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG83_CHW021_11(-1) < 0 rhs SG83_CHW021_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG84_CHW017_11 {lhs SG84_CHW017_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG84_CHW017_11(-1) < 0 rhs SG84_CHW017_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG85_CHW011_11 {lhs SG85_CHW011_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG85_CHW011_11(-1) < 0 rhs SG85_CHW011_11(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG86_CHW006_11 {lhs SG86_CHW006_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG86_CHW006_11(-1) < 0 rhs SG86_CHW006_11(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG80_CHW031_11 {lhs SG80_CHW031_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG80_CHW031_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG80_CHW031_11(-1) }}
+goal setPosSG81_CHW028_11 {lhs SG81_CHW028_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG81_CHW028_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG81_CHW028_11(-1) }}
+goal setPosSG82_CHW024_11 {lhs SG82_CHW024_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG82_CHW024_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG82_CHW024_11(-1) }}
+goal setPosSG83_CHW021_11 {lhs SG83_CHW021_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG83_CHW021_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG83_CHW021_11(-1) }}
+goal setPosSG84_CHW017_11 {lhs SG84_CHW017_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG84_CHW017_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG84_CHW017_11(-1) }}
+goal setPosSG85_CHW011_11 {lhs SG85_CHW011_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG85_CHW011_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG85_CHW011_11(-1) }}
+goal setPosSG86_CHW006_11 {lhs SG86_CHW006_11 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG86_CHW006_11(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG86_CHW006_11(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Fresno River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG69_FRS045_9 {lhs SG69_FRS045_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG69_FRS045_9(-1) < 0 rhs SG69_FRS045_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG70_FRS039_9 {lhs SG70_FRS039_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG70_FRS039_9(-1) < 0 rhs SG70_FRS039_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG71_FRS036_9 {lhs SG71_FRS036_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG71_FRS036_9(-1) < 0 rhs SG71_FRS036_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG72_FRS032_9 {lhs SG72_FRS032_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG72_FRS032_9(-1) < 0 rhs SG72_FRS032_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG73_FRS025_9 {lhs SG73_FRS025_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG73_FRS025_9(-1) < 0 rhs SG73_FRS025_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG74_FRS020_9 {lhs SG74_FRS020_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG74_FRS020_9(-1) < 0 rhs SG74_FRS020_9(-1)   lhs>rhs penalty SGPHIGH}}
+goal setNegSG75_FRS016_9 {lhs SG75_FRS016_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG75_FRS016_9(-1) < 0 rhs SG75_FRS016_9(-1)   lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG69_FRS045_9 {lhs SG69_FRS045_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG69_FRS045_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG69_FRS045_9(-1) }}
+goal setPosSG70_FRS039_9 {lhs SG70_FRS039_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG70_FRS039_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG70_FRS039_9(-1) }}
+goal setPosSG71_FRS036_9 {lhs SG71_FRS036_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG71_FRS036_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG71_FRS036_9(-1) }}
+goal setPosSG72_FRS032_9 {lhs SG72_FRS032_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG72_FRS032_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG72_FRS032_9(-1) }}
+goal setPosSG73_FRS025_9 {lhs SG73_FRS025_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG73_FRS025_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG73_FRS025_9(-1) }}
+goal setPosSG74_FRS020_9 {lhs SG74_FRS020_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG74_FRS020_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG74_FRS020_9(-1) }}
+goal setPosSG75_FRS016_9 {lhs SG75_FRS016_9 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG75_FRS016_9(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG75_FRS016_9(-1) }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Joaquin River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setNegSG54_SJR263_7 {lhs SG54_SJR263_7 
+     case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} 
+     case negative {condition SG54_SJR263_7(-1) < 0 rhs SG54_SJR263_7(-1)   lhs>rhs penalty 77708}}
+
+goal setNegSG55_SJR256_7 {lhs SG55_SJR256_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG55_SJR256_7(-1) < 0 rhs SG55_SJR256_7(-1)   lhs>rhs penalty 77707}}
+goal setNegSG56_SJR249_7 {lhs SG56_SJR249_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG56_SJR249_7(-1) < 0 rhs SG56_SJR249_7(-1)   lhs>rhs penalty 77706}}
+goal setNegSG57_SJR242_7 {lhs SG57_SJR242_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG57_SJR242_7(-1) < 0 rhs SG57_SJR242_7(-1)   lhs>rhs penalty 77705}}
+goal setNegSG58_SJR235_7 {lhs SG58_SJR235_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG58_SJR235_7(-1) < 0 rhs SG58_SJR235_7(-1)   lhs>rhs penalty 77704}}
+goal setNegSG59_SJR227_7 {lhs SG59_SJR227_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG59_SJR227_7(-1) < 0 rhs SG59_SJR227_7(-1)   lhs>rhs penalty 77703}}
+goal setNegSG60_SJR221_7 {lhs SG60_SJR221_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG60_SJR221_7(-1) < 0 rhs SG60_SJR221_7(-1)   lhs>rhs penalty 77702}}
+goal setNegSG61_SJR214_7 {lhs SG61_SJR214_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG61_SJR214_7(-1) < 0 rhs SG61_SJR214_7(-1)   lhs>rhs penalty 77701}}
+goal setNegSG62_SJR205_7 {lhs SG62_SJR205_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG62_SJR205_7(-1) < 0 rhs SG62_SJR205_7(-1)   lhs>rhs penalty 77700}}
+goal setNegSG63_SJR205_8 {lhs SG63_SJR205_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG63_SJR205_8(-1) < 0 rhs SG63_SJR205_8(-1)   lhs>rhs penalty 77699}}
+goal setNegSG64_SJR198_8 {lhs SG64_SJR198_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG64_SJR198_8(-1) < 0 rhs SG64_SJR198_8(-1)   lhs>rhs penalty 77698}}
+goal setNegSG65_SJR192_8 {lhs SG65_SJR192_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG65_SJR192_8(-1) < 0 rhs SG65_SJR192_8(-1)   lhs>rhs penalty 77697}}
+goal setNegSG66_SJR185_8 {lhs SG66_SJR185_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG66_SJR185_8(-1) < 0 rhs SG66_SJR185_8(-1)   lhs>rhs penalty 77696}}
+goal setNegSG67_SJR180_8 {lhs SG67_SJR180_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG67_SJR180_8(-1) < 0 rhs SG67_SJR180_8(-1)   lhs>rhs penalty 77695}}
+goal setNegSG68_SJR173_8 {lhs SG68_SJR173_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG68_SJR173_8(-1) < 0 rhs SG68_SJR173_8(-1)   lhs>rhs penalty 77694}}
+goal setNegSG78_SJR173_10  {lhs SG78_SJR173_10  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG78_SJR173_10 (-1) < 0 rhs SG78_SJR173_10 (-1)   lhs>rhs penalty 77693}}
+goal setNegSG79_SJR166_10  {lhs SG79_SJR166_10  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG79_SJR166_10 (-1) < 0 rhs SG79_SJR166_10 (-1)   lhs>rhs penalty 77692}}
+goal setNegSG89_SJR166_12  {lhs SG89_SJR166_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG89_SJR166_12 (-1) < 0 rhs SG89_SJR166_12 (-1)   lhs>rhs penalty 77691}}
+goal setNegSG90_SJR157_12  {lhs SG90_SJR157_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG90_SJR157_12 (-1) < 0 rhs SG90_SJR157_12 (-1)   lhs>rhs penalty 77690}}
+goal setNegSG91_SJR152_12  {lhs SG91_SJR152_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG91_SJR152_12 (-1) < 0 rhs SG91_SJR152_12 (-1)   lhs>rhs penalty 77689}}
+goal setNegSG92_SJR145_12  {lhs SG92_SJR145_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG92_SJR145_12 (-1) < 0 rhs SG92_SJR145_12 (-1)   lhs>rhs penalty 77688}}
+goal setNegSG102_SJR145_14 {lhs SG102_SJR145_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG102_SJR145_14(-1) < 0 rhs SG102_SJR145_14(-1)   lhs>rhs penalty 77687}}
+goal setNegSG103_SJR141_14 {lhs SG103_SJR141_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG103_SJR141_14(-1) < 0 rhs SG103_SJR141_14(-1)   lhs>rhs penalty 77686}}
+goal setNegSG104_SJR134_14 {lhs SG104_SJR134_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG104_SJR134_14(-1) < 0 rhs SG104_SJR134_14(-1)   lhs>rhs penalty 77685}}
+goal setNegSG113_SJR134_16 {lhs SG113_SJR134_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG113_SJR134_16(-1) < 0 rhs SG113_SJR134_16(-1)   lhs>rhs penalty 77684}}
+goal setNegSG114_SJR123_16 {lhs SG114_SJR123_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG114_SJR123_16(-1) < 0 rhs SG114_SJR123_16(-1)   lhs>rhs penalty 77683}}
+goal setNegSG115_SJR116_16 {lhs SG115_SJR116_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG115_SJR116_16(-1) < 0 rhs SG115_SJR116_16(-1)   lhs>rhs penalty 77682}}
+goal setNegSG125_SJR116_18 {lhs SG125_SJR116_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG125_SJR116_18(-1) < 0 rhs SG125_SJR116_18(-1)   lhs>rhs penalty 77681}}
+goal setNegSG126_SJR111_18 {lhs SG126_SJR111_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG126_SJR111_18(-1) < 0 rhs SG126_SJR111_18(-1)   lhs>rhs penalty 77680}}
+goal setNegSG127_SJR106_18 {lhs SG127_SJR106_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG127_SJR106_18(-1) < 0 rhs SG127_SJR106_18(-1)   lhs>rhs penalty 77679}}
+goal setNegSG131_SJR106_20 {lhs SG131_SJR106_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG131_SJR106_20(-1) < 0 rhs SG131_SJR106_20(-1)   lhs>rhs penalty 77678}}
+goal setNegSG132_SJR096_20 {lhs SG132_SJR096_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG132_SJR096_20(-1) < 0 rhs SG132_SJR096_20(-1)   lhs>rhs penalty 77677}}
+goal setNegSG133_SJR090_20 {lhs SG133_SJR090_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG133_SJR090_20(-1) < 0 rhs SG133_SJR090_20(-1)   lhs>rhs penalty 77676}}
+goal setNegSG134_SJR081_20 {lhs SG134_SJR081_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG134_SJR081_20(-1) < 0 rhs SG134_SJR081_20(-1)   lhs>rhs penalty 77675}}
+goal setNegSG144_SJR081_22 {lhs SG144_SJR081_22 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG144_SJR081_22(-1) < 0 rhs SG144_SJR081_22(-1)   lhs>rhs penalty 77674}}
+goal setNegSG145_SJR072_22 {lhs SG145_SJR072_22 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG145_SJR072_22(-1) < 0 rhs SG145_SJR072_22(-1)   lhs>rhs penalty 77673}}
+goal setNegSG155_SJR072_24 {lhs SG155_SJR072_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG155_SJR072_24(-1) < 0 rhs SG155_SJR072_24(-1)   lhs>rhs penalty 77672}}
+goal setNegSG156_SJR062_24 {lhs SG156_SJR062_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG156_SJR062_24(-1) < 0 rhs SG156_SJR062_24(-1)   lhs>rhs penalty 77671}}
+goal setNegSG157_SJR056_24 {lhs SG157_SJR056_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG157_SJR056_24(-1) < 0 rhs SG157_SJR056_24(-1)   lhs>rhs penalty 77670}}
+goal setNegSG158_SJR048_24 {lhs SG158_SJR048_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG158_SJR048_24(-1) < 0 rhs SG158_SJR048_24(-1)   lhs>rhs penalty 77669}}
+goal setNegSG159_SJR042_24 {lhs SG159_SJR042_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG159_SJR042_24(-1) < 0 rhs SG159_SJR042_24(-1)   lhs>rhs penalty 77668}}
+goal setNegSG160_SJR038_24 {lhs SG160_SJR038_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG160_SJR038_24(-1) < 0 rhs SG160_SJR038_24(-1)   lhs>rhs penalty 77667}}
+goal setNegSG168_SJR038_26 {lhs SG168_SJR038_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG168_SJR038_26(-1) < 0 rhs SG168_SJR038_26(-1)   lhs>rhs penalty 77665}}
+goal setNegSG169_SJR033_26 {lhs SG169_SJR033_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG169_SJR033_26(-1) < 0 rhs SG169_SJR033_26(-1)   lhs>rhs penalty 77664}}
+
+
+goal setPosSG54_SJR263_7 {lhs SG54_SJR263_7 
+     case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} 
+     case negative {condition SG54_SJR263_7(-1) < 0 rhs 0      lhs<rhs penalty 0} 
+     case postive {condition always rhs SG54_SJR263_7(-1) }}
+     
+goal setPosSG55_SJR256_7 {lhs SG55_SJR256_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG55_SJR256_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG55_SJR256_7(-1) }}
+goal setPosSG56_SJR249_7 {lhs SG56_SJR249_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG56_SJR249_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG56_SJR249_7(-1) }}
+goal setPosSG57_SJR242_7 {lhs SG57_SJR242_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG57_SJR242_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG57_SJR242_7(-1) }}
+goal setPosSG58_SJR235_7 {lhs SG58_SJR235_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG58_SJR235_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG58_SJR235_7(-1) }}
+goal setPosSG59_SJR227_7 {lhs SG59_SJR227_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG59_SJR227_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG59_SJR227_7(-1) }}
+goal setPosSG60_SJR221_7 {lhs SG60_SJR221_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG60_SJR221_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG60_SJR221_7(-1) }}
+goal setPosSG61_SJR214_7 {lhs SG61_SJR214_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG61_SJR214_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG61_SJR214_7(-1) }}
+goal setPosSG62_SJR205_7 {lhs SG62_SJR205_7 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG62_SJR205_7(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG62_SJR205_7(-1) }}
+goal setPosSG63_SJR205_8 {lhs SG63_SJR205_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG63_SJR205_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG63_SJR205_8(-1) }}
+goal setPosSG64_SJR198_8 {lhs SG64_SJR198_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG64_SJR198_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG64_SJR198_8(-1) }}
+goal setPosSG65_SJR192_8 {lhs SG65_SJR192_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG65_SJR192_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG65_SJR192_8(-1) }}
+goal setPosSG66_SJR185_8 {lhs SG66_SJR185_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG66_SJR185_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG66_SJR185_8(-1) }}
+goal setPosSG67_SJR180_8 {lhs SG67_SJR180_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG67_SJR180_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG67_SJR180_8(-1) }}
+goal setPosSG68_SJR173_8 {lhs SG68_SJR173_8 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG68_SJR173_8(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG68_SJR173_8(-1) }}
+goal setPosSG78_SJR173_10  {lhs SG78_SJR173_10  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG78_SJR173_10 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG78_SJR173_10 (-1) }}
+goal setPosSG79_SJR166_10  {lhs SG79_SJR166_10  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG79_SJR166_10 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG79_SJR166_10 (-1) }}
+goal setPosSG89_SJR166_12  {lhs SG89_SJR166_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG89_SJR166_12 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG89_SJR166_12 (-1) }}
+goal setPosSG90_SJR157_12  {lhs SG90_SJR157_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG90_SJR157_12 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG90_SJR157_12 (-1) }}
+goal setPosSG91_SJR152_12  {lhs SG91_SJR152_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG91_SJR152_12 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG91_SJR152_12 (-1) }}
+goal setPosSG92_SJR145_12  {lhs SG92_SJR145_12  case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG92_SJR145_12 (-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG92_SJR145_12 (-1) }}
+goal setPosSG102_SJR145_14 {lhs SG102_SJR145_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG102_SJR145_14(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG102_SJR145_14(-1) }}
+goal setPosSG103_SJR141_14 {lhs SG103_SJR141_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG103_SJR141_14(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG103_SJR141_14(-1) }}
+goal setPosSG104_SJR134_14 {lhs SG104_SJR134_14 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG104_SJR134_14(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG104_SJR134_14(-1) }}
+goal setPosSG113_SJR134_16 {lhs SG113_SJR134_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG113_SJR134_16(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG113_SJR134_16(-1) }}
+goal setPosSG114_SJR123_16 {lhs SG114_SJR123_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG114_SJR123_16(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG114_SJR123_16(-1) }}
+goal setPosSG115_SJR116_16 {lhs SG115_SJR116_16 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG115_SJR116_16(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG115_SJR116_16(-1) }}
+goal setPosSG125_SJR116_18 {lhs SG125_SJR116_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG125_SJR116_18(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG125_SJR116_18(-1) }}
+goal setPosSG126_SJR111_18 {lhs SG126_SJR111_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG126_SJR111_18(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG126_SJR111_18(-1) }}
+goal setPosSG127_SJR106_18 {lhs SG127_SJR106_18 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG127_SJR106_18(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG127_SJR106_18(-1) }}
+goal setPosSG131_SJR106_20 {lhs SG131_SJR106_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG131_SJR106_20(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG131_SJR106_20(-1) }}
+goal setPosSG132_SJR096_20 {lhs SG132_SJR096_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG132_SJR096_20(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG132_SJR096_20(-1) }}
+goal setPosSG133_SJR090_20 {lhs SG133_SJR090_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG133_SJR090_20(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG133_SJR090_20(-1) }}
+goal setPosSG134_SJR081_20 {lhs SG134_SJR081_20 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG134_SJR081_20(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG134_SJR081_20(-1) }}
+goal setPosSG144_SJR081_22 {lhs SG144_SJR081_22 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG144_SJR081_22(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG144_SJR081_22(-1) }}
+goal setPosSG145_SJR072_22 {lhs SG145_SJR072_22 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG145_SJR072_22(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG145_SJR072_22(-1) }}
+goal setPosSG155_SJR072_24 {lhs SG155_SJR072_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG155_SJR072_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG155_SJR072_24(-1) }}
+goal setPosSG156_SJR062_24 {lhs SG156_SJR062_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG156_SJR062_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG156_SJR062_24(-1) }}
+goal setPosSG157_SJR056_24 {lhs SG157_SJR056_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG157_SJR056_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG157_SJR056_24(-1) }}
+goal setPosSG158_SJR048_24 {lhs SG158_SJR048_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG158_SJR048_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG158_SJR048_24(-1) }}
+goal setPosSG159_SJR042_24 {lhs SG159_SJR042_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG159_SJR042_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG159_SJR042_24(-1) }}
+goal setPosSG160_SJR038_24 {lhs SG160_SJR038_24 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG160_SJR038_24(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG160_SJR038_24(-1) }}
+goal setPosSG168_SJR038_26 {lhs SG168_SJR038_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG168_SJR038_26(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG168_SJR038_26(-1) }}
+goal setPosSG169_SJR033_26 {lhs SG169_SJR033_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG169_SJR033_26(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG169_SJR033_26(-1) }}
+!goal setPosSG170_SJR028_26 {lhs SG170_SJR028_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG170_SJR028_26(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG170_SJR028_26(-1) }}
+!goal setPosSG171_SJR023_26 {lhs SG171_SJR023_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG171_SJR023_26(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG171_SJR023_26(-1) }}
+!goal setPosSG172_SJR022_26 {lhs SG172_SJR022_26 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG172_SJR022_26(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG172_SJR022_26(-1) }}
+!goal setPosSG200_SJR022_31 {lhs SG200_SJR022_31 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG200_SJR022_31(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG200_SJR022_31(-1) }}
+!goal setPosSG201_SJR013_31 {lhs SG201_SJR013_31 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG201_SJR013_31(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG201_SJR013_31(-1) }}
+!goal setPosSG202_SJR009_31 {lhs SG202_SJR009_31 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG202_SJR009_31(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG202_SJR009_31(-1) }}
+!goal setPosSG203_SJR006_31 {lhs SG203_SJR006_31 case firstmon {condition wateryear == bgnWY .and. month == Oct rhs 0} case negative {condition SG203_SJR006_31(-1) < 0 rhs 0      lhs<rhs penalty 0} case postive {condition always rhs SG203_SJR006_31(-1) }}
+
+
+
+
+
+! define values to be used for seepage in the southern sjr ops code
+!@zrc 10/8/2018! define UpperSJRSeep     {value  (-GetSeep(54)-GetSeep(55)-GetSeep(56)
+!@zrc 10/8/2018!                                  -GetSeep(57)-GetSeep(58)-GetSeep(59))/cfs_cfm }
+!@zrc 10/8/2018! define UpperFresnoSeep  {value  (-GetSeep(69)-GetSeep(70)-GetSeep(71))/cfs_cfm }
+define UpperSJRSeep     {case firstmon {condition wateryear == bgnWY .and. month == Oct value 0} 
+                         case other    {condition always 
+                         value  SG54_SJR263_7(-1) +SG55_SJR256_7(-1) +SG56_SJR249_7(-1)
+                               +SG57_SJR242_7(-1) +SG58_SJR235_7(-1) +SG59_SJR227_7(-1) }} !@zrc 10/8/2018
+define MidSJRSeep       {case firstmon {condition wateryear == bgnWY .and. month == Oct value 0} 
+                         case other    {condition always 
+                         value SG60_SJR221_7(-1) + SG61_SJR214_7(-1) + SG63_SJR205_8(-1) + SG62_SJR205_7(-1)}}                             
+                               
+define UpperFresnoSeep  {case firstmon {condition wateryear == bgnWY .and. month == Oct value 0} 
+                         case other    {condition always 
+                         value  SG69_FRS045_9(-1) +SG70_FRS039_9(-1) +SG71_FRS036_9(-1) }} !@zrc 10/8/2018                                
+                                 
+define UpperSJRSeep_A    {alias UpperSJRSeep        kind 'SEEPAGE' units 'CFS' }
+define UpperFresnoSeep_A {alias UpperFresnoSeep     kind 'SEEPAGE' units 'CFS' } 
+
+!define svH_SJR263_54 { value H_SJR263_54(-1) }
+!define svH_GW_SJR263_54 {value H_GW_SJR263_54(-1) }

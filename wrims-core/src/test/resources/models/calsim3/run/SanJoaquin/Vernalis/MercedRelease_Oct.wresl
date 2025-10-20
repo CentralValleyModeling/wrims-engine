@@ -1,0 +1,49 @@
+! MercedRelease_Oct.wresl
+
+! Edward Chang
+! DWR
+! 06/05/2000
+! WRESL code for Merced releases in October
+
+/*
+ The following code defines and imposes an additional Oct release amount from McClure (Merced River)
+ Cycle 6.
+
+ According to the 1998 San Joaquin River Agreement, the Merced River will provide an additional 12.5 TAF above 
+ releases for in-basin requirements.
+*/
+
+/*
+ Revised by: R. Field, USBR, 03/12/2003
+ Purpose: Review and comment code.
+*/
+
+!##################################################################################################
+
+/*
+ Merced river release from McClure reservoir in October.
+ Release is the difference between dead pool storage and previous cycle 
+ storage (SJR_WQ1) or 12.5 TAF, whichever is the least value (negative
+ values are not allowed.)
+ Releases are not made in any other month.
+*/
+define MercedRelease_Oct { 
+     case October {
+          condition month == oct
+          value     max (0.,min (S_MCLRE[SJR_WQ1] - S_MCLRElevel1, 0.)) }
+     case otherwise {
+          condition always
+          value     0. }
+          }
+! Set McClure minimum release in October equal to the Merced river release in October.          
+goal meetC_MCLREMINcycle6 {
+     lhs  C_MCLREMIN
+     case October {
+          condition month == oct
+          rhs       MercedRelease_Oct*TAF_cfs
+          lhs<rhs   penalty 0. }
+     case otherwise {
+          condition always
+          rhs       0. 
+          lhs<rhs   penalty 0. }
+          }

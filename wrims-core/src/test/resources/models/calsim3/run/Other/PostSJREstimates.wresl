@@ -1,0 +1,31 @@
+! PostSJREstimates.wresl
+
+! previous cycle assessments of vernalis flow are used in the full-system
+! code.  This definition creates a reference that is always valid depending
+! on the month, since not all of the SJR cycles are performed in every month.
+
+define C_SJR070est {
+	case OctMar {
+		condition month<APR
+		value C_SJR070[SJR_WQ1]}
+	case AprMay {
+		condition month==APR .or. month==MAY   !@jmg 2017.11.08 - adding case for AprMay
+		value C_SJR070[SJR_WQ2]}
+	case JunSep {
+		condition always 
+		value C_SJR070[SJR_WQ1]}  !@jmg 2017.11.09 - changed ref to SJR_WQ1
+}
+define C_SJR070estDV {alias C_SJR070est kind 'CHANNEL' UNITS 'CFS'}
+
+define C_CLV004est {
+	case OctMar {
+		condition month<APR
+		value C_CLV004[SJR_WQ1]}
+	case AprMay {
+		condition month==APR .or. month==MAY   !@jmg 2017.11.08 - adding case for AprMay
+		value C_CLV004[SJR_WQ2]}
+	case JunSep {
+		condition always 
+		value C_CLV004[SJR_WQ1]}  !@jmg 2017.11.09 - changed ref to SJR_WQ1
+}
+define C_CLV004estDV {alias C_CLV004est kind 'CHANNEL' UNITS 'CFS'}

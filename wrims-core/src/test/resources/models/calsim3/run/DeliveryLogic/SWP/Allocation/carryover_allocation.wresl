@@ -1,0 +1,581 @@
+
+
+!Define individual contractor carryover accounts
+define co_dv_1  {std  kind 'alias' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_dv_2  {std  kind 'alias' units 'taf'} !ALAMEDA COUNTY WD
+define co_dv_3  {std  kind 'alias' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define co_dv_4  {std  kind 'alias' units 'taf'} !SANTA CLARITA WA
+define co_dv_5  {std  kind 'alias' units 'taf'} !CITY OF YUBA CITY
+define co_dv_6  {std  kind 'alias' units 'taf'} !COACHELLA VALLEY WD
+define co_dv_7  {std  kind 'alias' units 'taf'} !COUNTY OF BUTTE
+define co_dv_8  {std  kind 'alias' units 'taf'} !COUNTY OF KINGS
+define co_dv_9  {std  kind 'alias' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define co_dv_10 {std kind 'alias' units 'taf'} !DESERT WA
+define co_dv_11 {std kind 'alias' units 'taf'} !DUDLEY RIDGE WD
+define co_dv_12 {std kind 'alias' units 'taf'} !EMPIRE WEST SIDE ID
+define co_dv_13 {std kind 'alias' units 'taf'} !KERN COUNTY WA
+define co_dv_14 {std kind 'alias' units 'taf'} !LITTLEROCK CREEK ID
+define co_dv_15 {std kind 'alias' units 'taf'} !METROPOLITAN WDSC
+define co_dv_16 {std kind 'alias' units 'taf'} !MOJAVE WA
+define co_dv_17 {std kind 'alias' units 'taf'} !NAPA COUNTY FC&WCD
+define co_dv_18 {std kind 'alias' units 'taf'} !OAK FLAT WD
+define co_dv_19 {std kind 'alias' units 'taf'} !PALMDALE WD
+define co_dv_20 {std kind 'alias' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define co_dv_21 {std kind 'alias' units 'taf'} !SAN GABRIEL VALLEY MWD
+define co_dv_22 {std kind 'alias' units 'taf'} !SAN GORGONIO PASS WA
+define co_dv_23 {std kind 'alias' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define co_dv_24 {std kind 'alias' units 'taf'} !SANTA BARBARA COUNTY FC&WCD
+define co_dv_25 {std kind 'alias' units 'taf'} !SANTA CLARA VALLEY WD
+define co_dv_26 {std kind 'alias' units 'taf'} !SOLANO COUNTY WA
+define co_dv_27 {std kind 'alias' units 'taf'} !TULARE LAKE BASIN WSD
+define co_dv_28 {std kind 'alias' units 'taf'} !VENTURA COUNTY WPD
+define co_dv_29 {std kind 'alias' units 'taf'} !KERN COUNTY WA - MI
+define co_dv_30 {std kind 'alias' units 'taf'} !SANTA CLARITA WA - MI
+
+!Determine beginning of month contractor Article 56 request.
+define co_req_1  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_1(-1)} case otherwise {condition always value max(0., co_dv_1(-1) - swp_CO_ACFC(-1)*cfs_taf(-1))}} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_req_2  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_2(-1)} case otherwise {condition always value max(0., co_dv_2(-1) - swp_CO_ACWD(-1)*cfs_taf(-1))}} !ALAMEDA COUNTY WD
+define co_req_3  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_3(-1)} case otherwise {condition always value max(0., co_dv_3(-1) - swp_CO_AVEK(-1)*cfs_taf(-1))}} !ANTELOPE VALLEY-EAST KERN WA
+define co_req_4  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_4(-1)} case otherwise {condition always value max(0., co_dv_4(-1) - swp_CO_CLWA1(-1)*cfs_taf(-1))}}  !SANTA CLARITA WA
+define co_req_5  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_5(-1)} case otherwise {condition always value max(0., co_dv_5(-1) - swp_CO_YUBA(-1)*cfs_taf(-1))}} !CITY OF YUBA CITY
+define co_req_6  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_6(-1)} case otherwise {condition always value max(0., co_dv_6(-1) - swp_CO_CVWD(-1)*cfs_taf(-1))}} !COACHELLA VALLEY WD
+define co_req_7  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_7(-1)} case otherwise {condition always value max(0., co_dv_7(-1) - swp_CO_BUTTE(-1)*cfs_taf(-1))}}  !COUNTY OF BUTTE
+define co_req_8  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_8(-1)} case otherwise {condition always value max(0., co_dv_8(-1) - swp_CO_KINGS(-1)*cfs_taf(-1))}} !COUNTY OF KINGS
+define co_req_9  {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_9(-1)} case otherwise {condition always value max(0., co_dv_9(-1) - swp_CO_CLA(-1)*cfs_taf(-1))}} !CRESTLINE-LAKE ARROWHEAD WA
+define co_req_10 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_10(-1)} case otherwise {condition always value max(0., co_dv_10(-1) - swp_CO_DESERT(-1)*cfs_taf(-1))}} !DESERT WA
+define co_req_11 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_11(-1)} case otherwise {condition always value max(0., co_dv_11(-1) - swp_CO_DUDLEY(-1)*cfs_taf(-1))}}  !DUDLEY RIDGE WD
+define co_req_12 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_12(-1)} case otherwise {condition always value max(0., co_dv_12(-1) - swp_CO_EMPIRE(-1)*cfs_taf(-1))}}  !EMPIRE WEST SIDE ID
+define co_req_13 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_13(-1)} case otherwise {condition always value max(0., co_dv_13(-1) - swp_CO_KERN(-1)*cfs_taf(-1))}} !KERN COUNTY WA
+define co_req_14 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_14(-1)} case otherwise {condition always value max(0., co_dv_14(-1) - swp_CO_LCID(-1)*cfs_taf(-1))}}  !LITTLEROCK CREEK ID
+define co_req_15 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_15(-1)} case otherwise {condition always value max(0., co_dv_15(-1) - swp_CO_MWD(-1)*cfs_taf(-1))}} !METROPOLITAN WDSC
+define co_req_16 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_16(-1)} case otherwise {condition always value max(0., co_dv_16(-1) - swp_CO_MWA(-1)*cfs_taf(-1))}}  !MOJAVE WA
+define co_req_17 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_17(-1)} case otherwise {condition always value max(0., co_dv_17(-1) - swp_CO_Napa(-1)*cfs_taf(-1))}}  !NAPA COUNTY FC&WCD
+define co_req_18 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_18(-1)} case otherwise {condition always value max(0., co_dv_18(-1) - swp_CO_Oak(-1)*cfs_taf(-1))}}  !OAK FLAT WD
+define co_req_19 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_19(-1)} case otherwise {condition always value max(0., co_dv_19(-1) - swp_CO_PWD(-1)*cfs_taf(-1))}} !PALMDALE WD
+define co_req_20 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_20(-1)} case otherwise {condition always value max(0., co_dv_20(-1) - swp_CO_SBV(-1)*cfs_taf(-1))}} !SAN BERNARDINO VALLEY MWD
+define co_req_21 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_21(-1)} case otherwise {condition always value max(0., co_dv_21(-1) - swp_CO_SGV(-1)*cfs_taf(-1))}} !SAN GABRIEL VALLEY MWD
+define co_req_22 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_22(-1)} case otherwise {condition always value max(0., co_dv_22(-1) - swp_CO_SGP(-1)*cfs_taf(-1))}} !SAN GORGONIO PASS WA
+define co_req_23 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_23(-1)} case otherwise {condition always value max(0., co_dv_23(-1) - swp_CO_SLO(-1)*cfs_taf(-1))}} !SAN LUIS OBISPO COUNTY FC&WCD
+define co_req_24 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_24(-1)} case otherwise {condition always value max(0., co_dv_24(-1) - swp_CO_SB(-1)*cfs_taf(-1))}}  !SANTA BARBARA COUNTY FC&WCD
+define co_req_25 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_25(-1)} case otherwise {condition always value max(0., co_dv_25(-1) - swp_CO_SCV(-1)*cfs_taf(-1))}}  !SANTA CLARA VALLEY WD
+define co_req_26 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_26(-1)} case otherwise {condition always value max(0., co_dv_26(-1) - swp_CO_Solano(-1)*cfs_taf(-1))}}  !SOLANO COUNTY WA
+define co_req_27 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_27(-1)} case otherwise {condition always value max(0., co_dv_27(-1) - swp_CO_Tulare(-1)*cfs_taf(-1))}}  !TULARE LAKE BASIN WSD
+define co_req_28 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_28(-1)} case otherwise {condition always value max(0., co_dv_28(-1) - swp_CO_VC(-1)*cfs_taf(-1))}} !VENTURA COUNTY WPD
+define co_req_29 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_29(-1)} case otherwise {condition always value max(0., co_dv_29(-1) - 0.*cfs_taf(-1))}} !KERN COUNTY WA - MI
+define co_req_30 {case a{condition month == oct .and. wateryear == bgnWY value 0.} case b{condition month == jan value antco_dv_30(-1)} case otherwise {condition always value max(0., co_dv_30(-1) - swp_CO_CLWA2(-1)*cfs_taf(-1))}} !SANTA CLARITA WA - MI
+
+!Save beginning of month contractor Article 56 request.
+define co_req_1_dv  {alias co_req_1 kind 'carryover' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_req_2_dv  {alias co_req_2 kind 'carryover' units 'taf'} !ALAMEDA COUNTY WD
+define co_req_3_dv  {alias co_req_3 kind 'carryover' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define co_req_4_dv  {alias co_req_4 kind 'carryover' units 'taf'}  !SANTA CLARITA WA
+define co_req_5_dv  {alias co_req_5 kind 'carryover' units 'taf'} !CITY OF YUBA CITY
+define co_req_6_dv  {alias co_req_6 kind 'carryover' units 'taf'} !COACHELLA VALLEY WD
+define co_req_7_dv  {alias co_req_7 kind 'carryover' units 'taf'}  !COUNTY OF BUTTE
+define co_req_8_dv  {alias co_req_8 kind 'carryover' units 'taf'} !COUNTY OF KINGS
+define co_req_9_dv  {alias co_req_9 kind 'carryover' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define co_req_10_dv {alias co_req_10 kind 'carryover' units 'taf'} !DESERT WA
+define co_req_11_dv {alias co_req_11 kind 'carryover' units 'taf'}  !DUDLEY RIDGE WD
+define co_req_12_dv {alias co_req_12 kind 'carryover' units 'taf'}  !EMPIRE WEST SIDE ID
+define co_req_13_dv {alias co_req_13 kind 'carryover' units 'taf'} !KERN COUNTY WA
+define co_req_14_dv {alias co_req_14 kind 'carryover' units 'taf'}  !LITTLEROCK CREEK ID
+define co_req_15_dv {alias co_req_15 kind 'carryover' units 'taf'} !METROPOLITAN WDSC
+define co_req_16_dv {alias co_req_16 kind 'carryover' units 'taf'}  !MOJAVE WA
+define co_req_17_dv {alias co_req_17 kind 'carryover' units 'taf'}  !NAPA COUNTY FC&WCD
+define co_req_18_dv {alias co_req_18 kind 'carryover' units 'taf'}  !OAK FLAT WD
+define co_req_19_dv {alias co_req_19 kind 'carryover' units 'taf'} !PALMDALE WD
+define co_req_20_dv {alias co_req_20 kind 'carryover' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define co_req_21_dv {alias co_req_21 kind 'carryover' units 'taf'} !SAN GABRIEL VALLEY MWD
+define co_req_22_dv {alias co_req_22 kind 'carryover' units 'taf'} !SAN GORGONIO PASS WA
+define co_req_23_dv {alias co_req_23 kind 'carryover' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define co_req_24_dv {alias co_req_24 kind 'carryover' units 'taf'}  !SANTA BARBARA COUNTY FC&WCD
+define co_req_25_dv {alias co_req_25 kind 'carryover' units 'taf'}  !SANTA CLARA VALLEY WD
+define co_req_26_dv {alias co_req_26 kind 'carryover' units 'taf'}  !SOLANO COUNTY WA
+define co_req_27_dv {alias co_req_27 kind 'carryover' units 'taf'}  !TULARE LAKE BASIN WSD
+define co_req_28_dv {alias co_req_28 kind 'carryover' units 'taf'} !VENTURA COUNTY WPD
+define co_req_29_dv {alias co_req_29 kind 'carryover' units 'taf'} !KERN COUNTY WA - MI
+define co_req_30_dv {alias co_req_30 kind 'carryover' units 'taf'} !SANTA CLARITA WA - MI
+
+!Sum up total carryover request.
+define co_req_tot {value co_req_1 +co_req_2+co_req_3+co_req_4+co_req_5+co_req_6+co_req_7+co_req_8+co_req_9+co_req_10+
+    co_req_11 +co_req_12+co_req_13+co_req_14+co_req_15+co_req_16+co_req_17+co_req_18+co_req_19+co_req_20+
+    co_req_21 +co_req_22+co_req_23+co_req_24+co_req_25+co_req_26+co_req_27+co_req_28+co_req_29+co_req_30}
+define co_req_tot_dv {alias co_req_tot kind 'carryover' units 'taf'}
+
+define co_req_tot_sod {value co_req_1 +co_req_2+co_req_3+co_req_4+co_req_6+co_req_8+co_req_9+co_req_10+
+    co_req_11 +co_req_12+co_req_13+co_req_14+co_req_15+co_req_16+co_req_18+co_req_19+co_req_20+
+    co_req_21 +co_req_22+co_req_23+co_req_24+co_req_25+co_req_27+co_req_28+co_req_29+co_req_30}
+define co_req_tot_sod_dv {alias co_req_tot_sod kind 'carryover' units 'taf'}
+
+define co_req_tot_nod {value co_req_5 +co_req_7+co_req_17+co_req_26}
+define co_req_tot_nod_dv {alias co_req_tot_nod kind 'carryover' units 'taf'}
+
+!define avail_surplus {value (NDOI_ADD_CVP(-1) + NDOI_ADD_SWP(-1))*cfs_taf(-1)}
+!define avail_surplus_dv {alias avail_surplus kind 'carryover' units 'taf'}
+
+! lost carryover storage due to full San Luis (lost equal to unused banks capacity) and Article 21 deliveries made
+define co_spill {
+  case a  {condition month==oct .and. wateryear==bgnWY value 0.}
+  case b  {condition month==jan             value 0.}
+  case c  {condition S_SLUIS_SWP(-1)>=1067                    value min(co_req_tot_sod, max(0.,swp_IN_total(-1)-swp_IN_Feath(-1)-swp_IN_NBay(-1))*cfs_taf(-1)
+  																+ min(max(0.,6680.-C_CAA003(-1)) * cfs_taf(-1), (NDOI_ADD_CVP(-1) + NDOI_ADD_SWP(-1))*cfs_taf(-1))) }
+  case d  {condition always                           value min(co_req_tot_sod, max(0.,swp_IN_total(-1)-swp_IN_Feath(-1)-swp_IN_NBay(-1))*cfs_taf(-1))}
+}
+define co_spill_dv {alias co_spill kind 'carryover' units 'taf'}
+
+! Another loss of carryover can be insufficient storage in San Luis at the beginning of January.
+define co_unavail {
+    case January {
+        condition month == jan
+        value max(0., co_req_tot_sod - (S_SLUIS_SWP(-1) - 42.))
+    }
+    case otherwise {
+        condition always
+        value 0.
+    }
+}
+define co_unavail_dv {alias co_unavail kind 'carryover' units 'taf'}
+
+! Total carryover shortage will be the maximum of the spill or unavailable.  When one is greater than zero,
+!it is likely that the other will be zero.
+define co_lost {value max(co_spill, co_unavail)}
+define co_lost_dv {alias co_lost kind 'carryover' units 'taf'}
+
+!Determine carryover available after losses subtracted.
+define co_available {value max(0., co_req_tot - co_lost)}
+goal set_co_available {co_available_dv = co_available}  !dvar defined in wsi_swp.wresl
+
+define co_available_sod {value max(0., co_req_tot_sod - co_lost)}
+goal set_co_available_sod {co_available_sod_dv = co_available_sod}  !dvar defined in wsi_swp.wresl
+
+define co_available_nod {value co_req_tot_nod}
+goal set_co_available_nod {co_available_nod_dv = co_available_nod}  !dvar defined in wsi_swp.wresl
+
+
+!Determine carryover and spill allocations.
+define alloc_co_1 {value A56_Allocation(1,1,co_lost,
+tableA_1,co_req_1,tableA_2,co_req_2,tableA_3,co_req_3,tableA_4,co_req_4,tableA_5,0.,tableA_6,co_req_6,tableA_7,0.,tableA_8,co_req_8,tableA_9,co_req_9,tableA_10,co_req_10,
+tableA_11,co_req_11,tableA_12,co_req_12,tableA_13,co_req_13,tableA_14,co_req_14,tableA_15,co_req_15,tableA_16,co_req_16,tableA_17,0.,tableA_18,co_req_18,tableA_19,co_req_19,tableA_20,co_req_20,
+tableA_21,co_req_21,tableA_22,co_req_22,tableA_23,co_req_23,tableA_24,co_req_24,tableA_25,co_req_25,tableA_26,0.,tableA_27,co_req_27,tableA_28,co_req_28,tableA_29,co_req_29,tableA_30,co_req_30)}
+
+define alloc_co_2 {value A56_Allocation(0,2)}
+define alloc_co_3 {value A56_Allocation(0,3)}
+define alloc_co_4 {value A56_Allocation(0,4)}
+define alloc_co_5 {value co_req_5/max(0.001,co_available_nod)}
+define alloc_co_6 {value A56_Allocation(0,6)}
+define alloc_co_7 {value co_req_7/max(0.001,co_available_nod)}
+define alloc_co_8 {value A56_Allocation(0,8)}
+define alloc_co_9 {value A56_Allocation(0,9)}
+define alloc_co_10 {value A56_Allocation(0,10)}
+define alloc_co_11 {value A56_Allocation(0,11)}
+define alloc_co_12 {value A56_Allocation(0,12)}
+define alloc_co_13 {value A56_Allocation(0,13)}
+define alloc_co_14 {value A56_Allocation(0,14)}
+define alloc_co_15 {value A56_Allocation(0,15)}
+define alloc_co_16 {value A56_Allocation(0,16)}
+define alloc_co_17 {value co_req_17/max(0.001,co_available_nod)}
+define alloc_co_18 {value A56_Allocation(0,18)}
+define alloc_co_19 {value A56_Allocation(0,19)}
+define alloc_co_20 {value A56_Allocation(0,20)}
+define alloc_co_21 {value A56_Allocation(0,21)}
+define alloc_co_22 {value A56_Allocation(0,22)}
+define alloc_co_23 {value A56_Allocation(0,23)}
+define alloc_co_24 {value A56_Allocation(0,24)}
+define alloc_co_25 {value A56_Allocation(0,25)}
+define alloc_co_26 {value co_req_26/max(0.001,co_available_nod)}
+define alloc_co_27 {value A56_Allocation(0,27)}
+define alloc_co_28 {value A56_Allocation(0,28)}
+define alloc_co_29 {value A56_Allocation(0,29)}
+define alloc_co_30 {value A56_Allocation(0,30)}
+
+!Save allocations
+define alloc_co_1_dv  {alias alloc_co_1 kind 'carryover-allocation' units 'none'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define alloc_co_2_dv  {alias alloc_co_2 kind 'carryover-allocation' units 'none'} !ALAMEDA COUNTY WD
+define alloc_co_3_dv  {alias alloc_co_3 kind 'carryover-allocation' units 'none'} !ANTELOPE VALLEY-EAST KERN WA
+define alloc_co_4_dv  {alias alloc_co_4 kind 'carryover-allocation' units 'none'}  !SANTA CLARITA WA
+define alloc_co_5_dv  {alias alloc_co_5 kind 'carryover-allocation' units 'none'} !CITY OF YUBA CITY
+define alloc_co_6_dv  {alias alloc_co_6 kind 'carryover-allocation' units 'none'} !COACHELLA VALLEY WD
+define alloc_co_7_dv  {alias alloc_co_7 kind 'carryover-allocation' units 'none'}  !COUNTY OF BUTTE
+define alloc_co_8_dv  {alias alloc_co_8 kind 'carryover-allocation' units 'none'} !COUNTY OF KINGS
+define alloc_co_9_dv  {alias alloc_co_9 kind 'carryover-allocation' units 'none'} !CRESTLINE-LAKE ARROWHEAD WA
+define alloc_co_10_dv {alias alloc_co_10 kind 'carryover-allocation' units 'none'} !DESERT WA
+define alloc_co_11_dv {alias alloc_co_11 kind 'carryover-allocation' units 'none'}  !DUDLEY RIDGE WD
+define alloc_co_12_dv {alias alloc_co_12 kind 'carryover-allocation' units 'none'}  !EMPIRE WEST SIDE ID
+define alloc_co_13_dv {alias alloc_co_13 kind 'carryover-allocation' units 'none'} !KERN COUNTY WA
+define alloc_co_14_dv {alias alloc_co_14 kind 'carryover-allocation' units 'none'}  !LITTLEROCK CREEK ID
+define alloc_co_15_dv {alias alloc_co_15 kind 'carryover-allocation' units 'none'} !METROPOLITAN WDSC
+define alloc_co_16_dv {alias alloc_co_16 kind 'carryover-allocation' units 'none'}  !MOJAVE WA
+define alloc_co_17_dv {alias alloc_co_17 kind 'carryover-allocation' units 'none'}  !NAPA COUNTY FC&WCD
+define alloc_co_18_dv {alias alloc_co_18 kind 'carryover-allocation' units 'none'}  !OAK FLAT WD
+define alloc_co_19_dv {alias alloc_co_19 kind 'carryover-allocation' units 'none'} !PALMDALE WD
+define alloc_co_20_dv {alias alloc_co_20 kind 'carryover-allocation' units 'none'} !SAN BERNARDINO VALLEY MWD
+define alloc_co_21_dv {alias alloc_co_21 kind 'carryover-allocation' units 'none'} !SAN GABRIEL VALLEY MWD
+define alloc_co_22_dv {alias alloc_co_22 kind 'carryover-allocation' units 'none'} !SAN GORGONIO PASS WA
+define alloc_co_23_dv {alias alloc_co_23 kind 'carryover-allocation' units 'none'} !SAN LUIS OBISPO COUNTY FC&WCD
+define alloc_co_24_dv {alias alloc_co_24 kind 'carryover-allocation' units 'none'}  !SANTA BARBARA COUNTY FC&WCD
+define alloc_co_25_dv {alias alloc_co_25 kind 'carryover-allocation' units 'none'}  !SANTA CLARA VALLEY WD
+define alloc_co_26_dv {alias alloc_co_26 kind 'carryover-allocation' units 'none'}  !SOLANO COUNTY WA
+define alloc_co_27_dv {alias alloc_co_27 kind 'carryover-allocation' units 'none'}  !TULARE LAKE BASIN WSD
+define alloc_co_28_dv {alias alloc_co_28 kind 'carryover-allocation' units 'none'} !VENTURA COUNTY WPD
+define alloc_co_29_dv {alias alloc_co_29 kind 'carryover-allocation' units 'none'} !KERN COUNTY WA - MI
+define alloc_co_30_dv {alias alloc_co_30 kind 'carryover-allocation' units 'none'} !SANTA CLARITA WA - MI
+
+
+!Allocate available carryover to contractors:
+define co_current_1  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_1*co_available_sod} } !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_current_2  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_2*co_available_sod} } !ALAMEDA COUNTY WD
+define co_current_3  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_3*co_available_sod} } !ANTELOPE VALLEY-EAST KERN WA
+define co_current_4  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_4*co_available_sod} } !SANTA CLARITA WA
+define co_current_5  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_5*co_available_nod} } !CITY OF YUBA CITY
+define co_current_6  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_6*co_available_sod} } !COACHELLA VALLEY WD
+define co_current_7  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_7*co_available_nod} } !COUNTY OF BUTTE
+define co_current_8  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_8*co_available_sod} } !COUNTY OF KINGS
+define co_current_9  {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_9*co_available_sod} } !CRESTLINE-LAKE ARROWHEAD WA
+define co_current_10 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_10*co_available_sod} } !DESERT WA
+define co_current_11 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_11*co_available_sod} } !DUDLEY RIDGE WD
+define co_current_12 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_12*co_available_sod} } !EMPIRE WEST SIDE ID
+define co_current_13 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_13*co_available_sod} } !KERN COUNTY WA
+define co_current_14 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_14*co_available_sod} } !LITTLEROCK CREEK ID
+define co_current_15 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_15*co_available_sod} } !METROPOLITAN WDSC
+define co_current_16 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_16*co_available_sod} } !MOJAVE WA
+define co_current_17 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_17*co_available_nod} } !NAPA COUNTY FC&WCD
+define co_current_18 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_18*co_available_sod} } !OAK FLAT WD
+define co_current_19 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_19*co_available_sod} } !PALMDALE WD
+define co_current_20 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_20*co_available_sod} } !SAN BERNARDINO VALLEY MWD
+define co_current_21 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_21*co_available_sod} } !SAN GABRIEL VALLEY MWD
+define co_current_22 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_22*co_available_sod} } !SAN GORGONIO PASS WA
+define co_current_23 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_23*co_available_sod} } !SAN LUIS OBISPO COUNTY FC&WCD
+define co_current_24 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_24*co_available_sod} } !SANTA BARBARA COUNTY FC&WCD
+define co_current_25 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_25*co_available_sod} } !SANTA CLARA VALLEY WD
+define co_current_26 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_26*co_available_nod} } !SOLANO COUNTY WA
+define co_current_27 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_27*co_available_sod} } !TULARE LAKE BASIN WSD
+define co_current_28 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_28*co_available_sod} } !VENTURA COUNTY WPD
+define co_current_29 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_29*co_available_sod} } !KERN COUNTY WA - MI
+define co_current_30 {case b{condition wateryear==bgnWY value 0.} case a{condition always value ALLOC_CO_30*co_available_sod} } !SANTA CLARITA WA - MI
+
+!position analysis:                                                                                      
+/*define co_current_1  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*118.17/352.} } !ALAMEDA COUNTY FC&WCD-ZONE 7   
+define co_current_2  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !ALAMEDA COUNTY WD
+define co_current_3  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 31.09/352.} } !ANTELOPE VALLEY-EAST KERN WA
+define co_current_4  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 29.10/352.} } !SANTA CLARITA WA
+define co_current_5  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !CITY OF YUBA CITY
+define co_current_6  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !COACHELLA VALLEY WD
+define co_current_7  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !COUNTY OF BUTTE
+define co_current_8  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !COUNTY OF KINGS
+define co_current_9  {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  1.62/352.} } !CRESTLINE-LAKE ARROWHEAD WA
+define co_current_10 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 30.79/352.} } !DESERT WA
+define co_current_11 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !DUDLEY RIDGE WD
+define co_current_12 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !EMPIRE WEST SIDE ID
+define co_current_13 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 17.17/352.} } !KERN COUNTY WA
+define co_current_14 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !LITTLEROCK CREEK ID
+define co_current_15 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !METROPOLITAN WDSC
+define co_current_16 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 65.43/352.} } !MOJAVE WA
+define co_current_17 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 13.69/352.} } !NAPA COUNTY FC&WCD
+define co_current_18 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !OAK FLAT WD
+define co_current_19 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.97/352.} } !PALMDALE WD
+define co_current_20 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SAN BERNARDINO VALLEY MWD
+define co_current_21 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SAN GABRIEL VALLEY MWD
+define co_current_22 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SAN GORGONIO PASS WA
+define co_current_23 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SAN LUIS OBISPO COUNTY FC&WCD
+define co_current_24 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SANTA BARBARA COUNTY FC&WCD
+define co_current_25 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !SANTA CLARA VALLEY WD
+define co_current_26 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1* 43.98/352.} } !SOLANO COUNTY WA
+define co_current_27 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !TULARE LAKE BASIN WSD
+define co_current_28 {case b{condition month>=oct .and. month <=dec .and. wateryear==bgnWY value 0.} case a{condition always value swp_co_1*  0.00/352.} } !VENTURA COUNTY WPD*/
+
+goal set_co_dv_1  {co_dv_1 = co_current_1 } !ALAMEDA COUNTY FC&WCD-ZONE 7
+goal set_co_dv_2  {co_dv_2 = co_current_2 } !ALAMEDA COUNTY WD
+goal set_co_dv_3  {co_dv_3 = co_current_3 } !ANTELOPE VALLEY-EAST KERN WA
+goal set_co_dv_4  {co_dv_4 = co_current_4 } !SANTA CLARITA WA
+goal set_co_dv_5  {co_dv_5 = co_current_5 } !CITY OF YUBA CITY
+goal set_co_dv_6  {co_dv_6 = co_current_6 } !COACHELLA VALLEY WD
+goal set_co_dv_7  {co_dv_7 = co_current_7 } !COUNTY OF BUTTE
+goal set_co_dv_8  {co_dv_8 = co_current_8 } !COUNTY OF KINGS
+goal set_co_dv_9  {co_dv_9 = co_current_9 } !CRESTLINE-LAKE ARROWHEAD WA
+goal set_co_dv_10 {co_dv_10 = co_current_10} !DESERT WA
+goal set_co_dv_11 {co_dv_11 = co_current_11} !DUDLEY RIDGE WD
+goal set_co_dv_12 {co_dv_12 = co_current_12} !EMPIRE WEST SIDE ID
+goal set_co_dv_13 {co_dv_13 = co_current_13} !KERN COUNTY WA
+goal set_co_dv_14 {co_dv_14 = co_current_14} !LITTLEROCK CREEK ID
+goal set_co_dv_15 {co_dv_15 = co_current_15} !METROPOLITAN WDSC
+goal set_co_dv_16 {co_dv_16 = co_current_16} !MOJAVE WA
+goal set_co_dv_17 {co_dv_17 = co_current_17} !NAPA COUNTY FC&WCD
+goal set_co_dv_18 {co_dv_18 = co_current_18} !OAK FLAT WD
+goal set_co_dv_19 {co_dv_19 = co_current_19} !PALMDALE WD
+goal set_co_dv_20 {co_dv_20 = co_current_20} !SAN BERNARDINO VALLEY MWD
+goal set_co_dv_21 {co_dv_21 = co_current_21} !SAN GABRIEL VALLEY MWD
+goal set_co_dv_22 {co_dv_22 = co_current_22} !SAN GORGONIO PASS WA
+goal set_co_dv_23 {co_dv_23 = co_current_23} !SAN LUIS OBISPO COUNTY FC&WCD
+goal set_co_dv_24 {co_dv_24 = co_current_24} !SANTA BARBARA COUNTY FC&WCD
+goal set_co_dv_25 {co_dv_25 = co_current_25} !SANTA CLARA VALLEY WD
+goal set_co_dv_26 {co_dv_26 = co_current_26} !SOLANO COUNTY WA
+goal set_co_dv_27 {co_dv_27 = co_current_27} !TULARE LAKE BASIN WSD
+goal set_co_dv_28 {co_dv_28 = co_current_28} !VENTURA COUNTY WPD
+goal set_co_dv_29 {co_dv_29 = co_current_29} !KERN COUNTY WA - MI
+goal set_co_dv_30 {co_dv_30 = co_current_30} !SANTA CLARITA WA - MI
+
+!Calculate previous month's spill by contractor.
+define co_spill_1 {value max(0., co_req_1 - co_current_1)}
+define co_spill_2 {value max(0., co_req_2 - co_current_2)}
+define co_spill_3 {value max(0., co_req_3 - co_current_3)}
+define co_spill_4 {value max(0., co_req_4 - co_current_4)}
+define co_spill_5 {value max(0., co_req_5 - co_current_5)}
+define co_spill_6 {value max(0., co_req_6 - co_current_6)}
+define co_spill_7 {value max(0., co_req_7 - co_current_7)}
+define co_spill_8 {value max(0., co_req_8 - co_current_8)}
+define co_spill_9 {value max(0., co_req_9 - co_current_9)}
+define co_spill_10 {value max(0., co_req_10 - co_current_10)}
+define co_spill_11 {value max(0., co_req_11 - co_current_11)}
+define co_spill_12 {value max(0., co_req_12 - co_current_12)}
+define co_spill_13 {value max(0., co_req_13 - co_current_13)}
+define co_spill_14 {value max(0., co_req_14 - co_current_14)}
+define co_spill_15 {value max(0., co_req_15 - co_current_15)}
+define co_spill_16 {value max(0., co_req_16 - co_current_16)}
+define co_spill_17 {value max(0., co_req_17 - co_current_17)}
+define co_spill_18 {value max(0., co_req_18 - co_current_18)}
+define co_spill_19 {value max(0., co_req_19 - co_current_19)}
+define co_spill_20 {value max(0., co_req_20 - co_current_20)}
+define co_spill_21 {value max(0., co_req_21 - co_current_21)}
+define co_spill_22 {value max(0., co_req_22 - co_current_22)}
+define co_spill_23 {value max(0., co_req_23 - co_current_23)}
+define co_spill_24 {value max(0., co_req_24 - co_current_24)}
+define co_spill_25 {value max(0., co_req_25 - co_current_25)}
+define co_spill_26 {value max(0., co_req_26 - co_current_26)}
+define co_spill_27 {value max(0., co_req_27 - co_current_27)}
+define co_spill_28 {value max(0., co_req_28 - co_current_28)}
+define co_spill_29 {value max(0., co_req_29 - co_current_29)}
+define co_spill_30 {value max(0., co_req_30 - co_current_30)}
+!Save previous month's spill by contractor.
+define co_spill_1_dv  {alias co_spill_1 kind 'carryover' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_spill_2_dv  {alias co_spill_2 kind 'carryover' units 'taf'} !ALAMEDA COUNTY WD
+define co_spill_3_dv  {alias co_spill_3 kind 'carryover' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define co_spill_4_dv  {alias co_spill_4 kind 'carryover' units 'taf'}  !SANTA CLARITA WA
+define co_spill_5_dv  {alias co_spill_5 kind 'carryover' units 'taf'} !CITY OF YUBA CITY
+define co_spill_6_dv  {alias co_spill_6 kind 'carryover' units 'taf'} !COACHELLA VALLEY WD
+define co_spill_7_dv  {alias co_spill_7 kind 'carryover' units 'taf'}  !COUNTY OF BUTTE
+define co_spill_8_dv  {alias co_spill_8 kind 'carryover' units 'taf'} !COUNTY OF KINGS
+define co_spill_9_dv  {alias co_spill_9 kind 'carryover' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define co_spill_10_dv {alias co_spill_10 kind 'carryover' units 'taf'} !DESERT WA
+define co_spill_11_dv {alias co_spill_11 kind 'carryover' units 'taf'}  !DUDLEY RIDGE WD
+define co_spill_12_dv {alias co_spill_12 kind 'carryover' units 'taf'}  !EMPIRE WEST SIDE ID
+define co_spill_13_dv {alias co_spill_13 kind 'carryover' units 'taf'} !KERN COUNTY WA
+define co_spill_14_dv {alias co_spill_14 kind 'carryover' units 'taf'}  !LITTLEROCK CREEK ID
+define co_spill_15_dv {alias co_spill_15 kind 'carryover' units 'taf'} !METROPOLITAN WDSC
+define co_spill_16_dv {alias co_spill_16 kind 'carryover' units 'taf'}  !MOJAVE WA
+define co_spill_17_dv {alias co_spill_17 kind 'carryover' units 'taf'}  !NAPA COUNTY FC&WCD
+define co_spill_18_dv {alias co_spill_18 kind 'carryover' units 'taf'}  !OAK FLAT WD
+define co_spill_19_dv {alias co_spill_19 kind 'carryover' units 'taf'} !PALMDALE WD
+define co_spill_20_dv {alias co_spill_20 kind 'carryover' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define co_spill_21_dv {alias co_spill_21 kind 'carryover' units 'taf'} !SAN GABRIEL VALLEY MWD
+define co_spill_22_dv {alias co_spill_22 kind 'carryover' units 'taf'} !SAN GORGONIO PASS WA
+define co_spill_23_dv {alias co_spill_23 kind 'carryover' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define co_spill_24_dv {alias co_spill_24 kind 'carryover' units 'taf'}  !SANTA BARBARA COUNTY FC&WCD
+define co_spill_25_dv {alias co_spill_25 kind 'carryover' units 'taf'}  !SANTA CLARA VALLEY WD
+define co_spill_26_dv {alias co_spill_26 kind 'carryover' units 'taf'}  !SOLANO COUNTY WA
+define co_spill_27_dv {alias co_spill_27 kind 'carryover' units 'taf'}  !TULARE LAKE BASIN WSD
+define co_spill_28_dv {alias co_spill_28 kind 'carryover' units 'taf'} !VENTURA COUNTY WPD
+define co_spill_29_dv {alias co_spill_29 kind 'carryover' units 'taf'} !KERN COUNTY WA - MI
+define co_spill_30_dv {alias co_spill_30 kind 'carryover' units 'taf'} !SANTA CLARITA WA - MI
+
+!split to contractor segment (contractors with multiple locations split demands based on distribution of table a demands):
+define co2_1  {value co_current_1 *dem_tableA_1 /(dem_tableA_1  + dem_tableA_2)} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co2_2  {value co_current_1 *dem_tableA_2 /(dem_tableA_1  + dem_tableA_2)} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co2_3  {value co_current_2 *dem_tableA_3 /(dem_tableA_3 )} !ALAMEDA COUNTY WD
+define co2_4  {value co_current_3 *dem_tableA_4 /(dem_tableA_4 )} !ANTELOPE VALLEY-EAST KERN WA
+define co2_5  {value co_current_4 *dem_tableA_5 /(dem_tableA_5)} !SANTA CLARITA WA
+define co2_6  {value co_current_30 *dem_tableA_6 /(dem_tableA_6)} !SANTA CLARITA WA
+define co2_7  {value co_current_5 *dem_tableA_7 /(dem_tableA_7 )} !CITY OF YUBA CITY
+define co2_8  {value co_current_6 *dem_tableA_8 /(dem_tableA_8 )} !COACHELLA VALLEY WD
+!define co2_9  {value co_current_7 *dem_tableA_9 /(dem_tableA_9 )} !COUNTY OF BUTTE
+define co2_10 {value co_current_8 *dem_tableA_10/(dem_tableA_10)} !COUNTY OF KINGS
+define co2_11 {value co_current_9 *dem_tableA_11/(dem_tableA_11)} !CRESTLINE-LAKE ARROWHEAD WA
+define co2_12 {value co_current_10*dem_tableA_12/(dem_tableA_12)} !DESERT WA
+define co2_13 {value co_current_11*dem_tableA_13/(dem_tableA_13)} !DUDLEY RIDGE WD
+define co2_14 {value co_current_12*dem_tableA_14/(dem_tableA_14)} !EMPIRE WEST SIDE ID
+define co2_15 {value co_current_29*dem_tableA_15/(dem_tableA_15)} !KERN COUNTY WA
+define co2_16 {value co_current_13*dem_tableA_16/(dem_tableA_16 + dem_tableA_17 + dem_tableA_18 + dem_tableA_19)} !KERN COUNTY WA
+define co2_17 {value co_current_13*dem_tableA_17/(dem_tableA_16 + dem_tableA_17 + dem_tableA_18 + dem_tableA_19)} !KERN COUNTY WA
+define co2_18 {value co_current_13*dem_tableA_18/(dem_tableA_16 + dem_tableA_17 + dem_tableA_18 + dem_tableA_19)} !KERN COUNTY WA
+define co2_19 {value co_current_13*dem_tableA_19/(dem_tableA_16 + dem_tableA_17 + dem_tableA_18 + dem_tableA_19)} !KERN COUNTY WA
+define co2_20 {value co_current_14*dem_tableA_20/(dem_tableA_20)} !LITTLEROCK CREEK ID
+define co2_21 {value co_current_15*dem_tableA_21/(dem_tableA_21 /*+ dem_tableA_22*/ + dem_tableA_23 + dem_tableA_24 + dem_tableA_25)} !METROPOLITAN WDSC
+!define co2_22 {value co_current_15*dem_tableA_22/(dem_tableA_21 + dem_tableA_22 + dem_tableA_23 + dem_tableA_24 + dem_tableA_25)} !METROPOLITAN WDSC
+define co2_23 {value co_current_15*dem_tableA_23/(dem_tableA_21 /*+ dem_tableA_22*/ + dem_tableA_23 + dem_tableA_24 + dem_tableA_25)} !METROPOLITAN WDSC
+define co2_24 {value co_current_15*dem_tableA_24/(dem_tableA_21 /*+ dem_tableA_22*/ + dem_tableA_23 + dem_tableA_24 + dem_tableA_25)} !METROPOLITAN WDSC
+define co2_25 {value co_current_15*dem_tableA_25/(dem_tableA_21 /*+ dem_tableA_22*/ + dem_tableA_23 + dem_tableA_24 + dem_tableA_25)} !METROPOLITAN WDSC
+define co2_26 {value co_current_16*dem_tableA_26/(dem_tableA_26)} !MOJAVE WA
+define co2_27 {value co_current_17*dem_tableA_27/(dem_tableA_27)} !NAPA COUNTY FC&WCD
+define co2_28 {value co_current_18*dem_tableA_28/(dem_tableA_28)} !OAK FLAT WD
+define co2_29 {value co_current_19*dem_tableA_29/(dem_tableA_29)} !PALMDALE WD
+define co2_30 {value co_current_20*dem_tableA_30/(dem_tableA_30)} !SAN BERNARDINO VALLEY MWD
+define co2_31 {value co_current_21*dem_tableA_31/(dem_tableA_31)} !SAN GABRIEL VALLEY MWD
+define co2_32 {value co_current_22*dem_tableA_32/(dem_tableA_32)} !SAN GORGONIO PASS WA
+define co2_33 {value co_current_23*dem_tableA_33/(dem_tableA_33)} !SAN LUIS OBISPO COUNTY FC&WCD
+define co2_34 {value co_current_24*dem_tableA_34/(dem_tableA_34)} !SANTA BARBARA COUNTY FC&WCD
+define co2_35 {value co_current_25*dem_tableA_35/(dem_tableA_35)} !SANTA CLARA VALLEY WD
+define co2_36 {value co_current_26*dem_tableA_36/(dem_tableA_36)} !SOLANO COUNTY WA
+define co2_37 {value co_current_27*dem_tableA_37/(dem_tableA_37)} !TULARE LAKE BASIN WSD
+define co2_38 {value co_current_28*dem_tableA_38/(dem_tableA_38 + dem_tableA_39)} !VENTURA COUNTY WPD
+define co2_39 {value co_current_28*dem_tableA_39/(dem_tableA_38 + dem_tableA_39)} !VENTURA COUNTY WPD
+
+define co2dv_1  {alias co2_1  kind 'alias' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co2dv_2  {alias co2_2  kind 'alias' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co2dv_3  {alias co2_3  kind 'alias' units 'taf'} !ALAMEDA COUNTY WD
+define co2dv_4  {alias co2_4  kind 'alias' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define co2dv_5  {alias co2_5  kind 'alias' units 'taf'} !SANTA CLARITA WA
+define co2dv_6  {alias co2_6  kind 'alias' units 'taf'} !SANTA CLARITA WA
+define co2dv_7  {alias co2_7  kind 'alias' units 'taf'} !CITY OF YUBA CITY
+define co2dv_8  {alias co2_8  kind 'alias' units 'taf'} !COACHELLA VALLEY WD
+!define co2dv_9  {alias co2_9  kind 'alias' units 'taf'} !COUNTY OF BUTTE
+define co2dv_10 {alias co2_10 kind 'alias' units 'taf'} !COUNTY OF KINGS
+define co2dv_11 {alias co2_11 kind 'alias' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define co2dv_12 {alias co2_12 kind 'alias' units 'taf'} !DESERT WA
+define co2dv_13 {alias co2_13 kind 'alias' units 'taf'} !DUDLEY RIDGE WD
+define co2dv_14 {alias co2_14 kind 'alias' units 'taf'} !EMPIRE WEST SIDE ID
+define co2dv_15 {alias co2_15 kind 'alias' units 'taf'} !KERN COUNTY WA
+define co2dv_16 {alias co2_16 kind 'alias' units 'taf'} !KERN COUNTY WA
+define co2dv_17 {alias co2_17 kind 'alias' units 'taf'} !KERN COUNTY WA
+define co2dv_18 {alias co2_18 kind 'alias' units 'taf'} !KERN COUNTY WA
+define co2dv_19 {alias co2_19 kind 'alias' units 'taf'} !KERN COUNTY WA
+define co2dv_20 {alias co2_20 kind 'alias' units 'taf'} !LITTLEROCK CREEK ID
+define co2dv_21 {alias co2_21 kind 'alias' units 'taf'} !METROPOLITAN WDSC
+!define co2dv_22 {alias co2_22 kind 'alias' units 'taf'} !METROPOLITAN WDSC
+define co2dv_23 {alias co2_23 kind 'alias' units 'taf'} !METROPOLITAN WDSC
+define co2dv_24 {alias co2_24 kind 'alias' units 'taf'} !METROPOLITAN WDSC
+define co2dv_25 {alias co2_25 kind 'alias' units 'taf'} !METROPOLITAN WDSC
+define co2dv_26 {alias co2_26 kind 'alias' units 'taf'} !MOJAVE WA
+define co2dv_27 {alias co2_27 kind 'alias' units 'taf'} !NAPA COUNTY FC&WCD
+define co2dv_28 {alias co2_28 kind 'alias' units 'taf'} !OAK FLAT WD
+define co2dv_29 {alias co2_29 kind 'alias' units 'taf'} !PALMDALE WD
+define co2dv_30 {alias co2_30 kind 'alias' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define co2dv_31 {alias co2_31 kind 'alias' units 'taf'} !SAN GABRIEL VALLEY MWD
+define co2dv_32 {alias co2_32 kind 'alias' units 'taf'} !SAN GORGONIO PASS WA
+define co2dv_33 {alias co2_33 kind 'alias' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define co2dv_34 {alias co2_34 kind 'alias' units 'taf'} !SANTA BARBARA COUNTY FC&WCD
+define co2dv_35 {alias co2_35 kind 'alias' units 'taf'} !SANTA CLARA VALLEY WD
+define co2dv_36 {alias co2_36 kind 'alias' units 'taf'} !SOLANO COUNTY WA
+define co2dv_37 {alias co2_37 kind 'alias' units 'taf'} !TULARE LAKE BASIN WSD
+define co2dv_38 {alias co2_38 kind 'alias' units 'taf'} !VENTURA COUNTY WPD
+define co2dv_39 {alias co2_39 kind 'alias' units 'taf'} !VENTURA COUNTY WPD
+
+!demand for this month
+define co_fraction {
+  case a {condition month==jan value 0.45}!45% in jan
+  case b {condition month==feb value 0.73}!40% in mar (73% of remaining demand)
+  case c {condition always value 1.0 }!15% in mar and following months (100% or remaining demand)
+}
+define co_fraction_dv {alias co_fraction kind 'demand-distribution' units 'none'}
+
+! Distribute San Luis SWP carryover deliveries throughout year for select contractors based on drought years carryover behavior.
+define wyt_SAC_A56 {
+    case OCTtoDec {
+             condition  month >= OCT .and. month <= DEC 
+             value wyt_Sac_(PrevMay)
+             }
+        case JuntoSep {
+             condition  month >= Jun .and. month <= Sep 
+             value wyt_Sac_(PrevMay)
+             }
+        case rest {
+             condition  always
+             value WYT_SAC_Frcst}
+}
+define wyt_SAC_A56_{alias wyt_SAC_A56 kind 'wateryeartype' units 'none'}
+
+define co_fraction_to_Sep {
+	case EarlyFullSanLuis {
+		condition	wyt_SAC_A56 < 3.5
+		value		co_fraction
+	}
+	case OcttoDec {
+		condition	range(month,oct,dec)
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		1./(13. - real(month))
+	}
+}
+define co_fraction_to_Sep_dv {alias co_fraction_to_Sep kind 'demand-distribution' units 'none'}
+
+define co_dem_1  {value co_fraction_to_Sep*co2_1 *taf_cfs}
+define co_dem_2  {value co_fraction_to_Sep*co2_2 *taf_cfs}
+define co_dem_3  {value co_fraction_to_Sep*co2_3 *taf_cfs}
+define co_dem_4  {value co_fraction_to_Sep*co2_4 *taf_cfs}
+define co_dem_5  {value co_fraction_to_Sep*co2_5 *taf_cfs}
+define co_dem_6  {value co_fraction_to_Sep*co2_6 *taf_cfs}
+define co_dem_7  {value co_fraction_to_Sep*co2_7 *taf_cfs}
+define co_dem_8  {value co_fraction*co2_8 *taf_cfs}
+!define co_dem_9  {value co_fraction*co2_9 *taf_cfs}
+define co_dem_10 {value co_fraction*co2_10*taf_cfs}
+define co_dem_11 {value co_fraction_to_Sep*co2_11*taf_cfs}
+define co_dem_12 {value co_fraction*co2_12*taf_cfs}
+define co_dem_13 {value co_fraction_to_Sep*co2_13*taf_cfs}
+define co_dem_14 {value co_fraction*co2_14*taf_cfs}
+define co_dem_15 {value co_fraction*co2_15*taf_cfs}
+define co_dem_16 {value co_fraction*co2_16*taf_cfs}
+define co_dem_17 {value co_fraction*co2_17*taf_cfs}
+define co_dem_18 {value co_fraction*co2_18*taf_cfs}
+define co_dem_19 {value co_fraction*co2_19*taf_cfs}
+define co_dem_20 {value co_fraction*co2_20*taf_cfs}
+define co_dem_21 {value co_fraction_to_Sep*co2_21*taf_cfs}
+!define co_dem_22 {value co_fraction*co2_22*taf_cfs}
+define co_dem_23 {value co_fraction_to_Sep*co2_23*taf_cfs}
+define co_dem_24 {value co_fraction_to_Sep*co2_24*taf_cfs}
+define co_dem_25 {value co_fraction_to_Sep*co2_25*taf_cfs}
+define co_dem_26 {value co_fraction_to_Sep*co2_26*taf_cfs}
+define co_dem_27 {value co_fraction_to_Sep*co2_27*taf_cfs}
+define co_dem_28 {value co_fraction_to_Sep*co2_28*taf_cfs}
+define co_dem_29 {value co_fraction_to_Sep*co2_29*taf_cfs}
+define co_dem_30 {value co_fraction_to_Sep*co2_30*taf_cfs}
+define co_dem_31 {value co_fraction*co2_31*taf_cfs}
+define co_dem_32 {value co_fraction_to_Sep*co2_32*taf_cfs}
+define co_dem_33 {value co_fraction_to_Sep*co2_33*taf_cfs}
+define co_dem_34 {value co_fraction_to_Sep*co2_34*taf_cfs}
+define co_dem_35 {value co_fraction_to_Sep*co2_35*taf_cfs}
+define co_dem_36 {value co_fraction_to_Sep*co2_36*taf_cfs}
+define co_dem_37 {value co_fraction*co2_37*taf_cfs}
+define co_dem_38 {value co_fraction*co2_38*taf_cfs}
+define co_dem_39 {value co_fraction*co2_39*taf_cfs}
+
+define co_demdv_1  {alias co_dem_1  kind 'alias' units 'cfs'}
+define co_demdv_2  {alias co_dem_2  kind 'alias' units 'cfs'}
+define co_demdv_3  {alias co_dem_3  kind 'alias' units 'cfs'}
+define co_demdv_4  {alias co_dem_4  kind 'alias' units 'cfs'}
+define co_demdv_5  {alias co_dem_5  kind 'alias' units 'cfs'}
+define co_demdv_6  {alias co_dem_6  kind 'alias' units 'cfs'}
+define co_demdv_7  {alias co_dem_7  kind 'alias' units 'cfs'}
+define co_demdv_8  {alias co_dem_8  kind 'alias' units 'cfs'}
+!define co_demdv_9  {alias co_dem_9  kind 'alias' units 'cfs'}
+define co_demdv_10 {alias co_dem_10 kind 'alias' units 'cfs'}
+define co_demdv_11 {alias co_dem_11 kind 'alias' units 'cfs'}
+define co_demdv_12 {alias co_dem_12 kind 'alias' units 'cfs'}
+define co_demdv_13 {alias co_dem_13 kind 'alias' units 'cfs'}
+define co_demdv_14 {alias co_dem_14 kind 'alias' units 'cfs'}
+define co_demdv_15 {alias co_dem_15 kind 'alias' units 'cfs'}
+define co_demdv_16 {alias co_dem_16 kind 'alias' units 'cfs'}
+define co_demdv_17 {alias co_dem_17 kind 'alias' units 'cfs'}
+define co_demdv_18 {alias co_dem_18 kind 'alias' units 'cfs'}
+define co_demdv_19 {alias co_dem_19 kind 'alias' units 'cfs'}
+define co_demdv_20 {alias co_dem_20 kind 'alias' units 'cfs'}
+define co_demdv_21 {alias co_dem_21 kind 'alias' units 'cfs'}
+!define co_demdv_22 {alias co_dem_22 kind 'alias' units 'cfs'}
+define co_demdv_23 {alias co_dem_23 kind 'alias' units 'cfs'}
+define co_demdv_24 {alias co_dem_24 kind 'alias' units 'cfs'}
+define co_demdv_25 {alias co_dem_25 kind 'alias' units 'cfs'}
+define co_demdv_26 {alias co_dem_26 kind 'alias' units 'cfs'}
+define co_demdv_27 {alias co_dem_27 kind 'alias' units 'cfs'}
+define co_demdv_28 {alias co_dem_28 kind 'alias' units 'cfs'}
+define co_demdv_29 {alias co_dem_29 kind 'alias' units 'cfs'}
+define co_demdv_30 {alias co_dem_30 kind 'alias' units 'cfs'}
+define co_demdv_31 {alias co_dem_31 kind 'alias' units 'cfs'}
+define co_demdv_32 {alias co_dem_32 kind 'alias' units 'cfs'}
+define co_demdv_33 {alias co_dem_33 kind 'alias' units 'cfs'}
+define co_demdv_34 {alias co_dem_34 kind 'alias' units 'cfs'}
+define co_demdv_35 {alias co_dem_35 kind 'alias' units 'cfs'}
+define co_demdv_36 {alias co_dem_36 kind 'alias' units 'cfs'}
+define co_demdv_37 {alias co_dem_37 kind 'alias' units 'cfs'}
+define co_demdv_38 {alias co_dem_38 kind 'alias' units 'cfs'}
+define co_demdv_39 {alias co_dem_39 kind 'alias' units 'cfs'}
+
+

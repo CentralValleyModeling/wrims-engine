@@ -1,0 +1,950 @@
+! MercedOps.wresl
+! Deliveries and Operations for Merced River Demands.
+
+/*
+This file determines surface water allocations by Merced ID to: farmers within the district,
+El Nido ID, Stevinson WD, and sphere of influence sales. The file also considers deliveries
+to the Merced Unit of the Merced NWR and the East Bear Unit of the San Luis NWR.
+
+Water demands are met by surface water diversions or ground water pumping according to the
+following priority:  1. Minimum gw pumping, 2. Surface supply, 3. Additional gw pumping.
+
+Merced ID growers and Stevinson WD receive the same allocation.
+El Nido ID allocation is set to one-half that of Merced ID groweres (unless they
+receive a full allocation). When allocations are 100%, water is made available to
+sphere of influence growers.
+
+
+
+! PART 1 - WATER ALLOCATIONS
+
+! I   - Determine April-September Water Demands
+! II  - Determine April-September Water Supplies
+! III - Determine Water Allocations
+! IV  - Constrain deliveries by allocations
+
+! PART 2 - FLOOD CONTROL
+
+! I   - Determine rain flood space requirement
+! II  - Foecast inflows from current month (beginning March) through July
+! III - Estimate deliveries from current month (beginning March) through July
+! IV  - Estimate releases for flow requirements from current month (beginning March) through July
+! V   - Estimate total release from current month (beginning March) through July
+! VI  - Estimate supplementary release to avoid spilling
+! VII - Determine Level 4 to achieve supplemental release
+*/
+
+
+!PART 1 - WATER ALLOCATIONS
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  I   - Determine April-September Water Demands (exc SOI sales)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! A - Merced ID - Northside
+! B - Merced ID - Southside
+! C - Merced NWR, Merced Unit
+! D - San Luis NWR, East Bear Unit
+! E - El Nido WD
+! F - Stevinson WD
+! G - Total demand
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! A. Forecast for Northside Merced ID demands (62_NA6)
+define MIDDem_N {value AWR_62_NA6*cfs_taf*(1+ RPF_62_NA6- RUFR_62_NA6) + AWO_62_NA6*cfs_taf*(1+ RPF_62_NA6 - RUFo_62_NA6)}
+
+define MIDDem_AprSep_N_dv {std kind 'DEMAND' units 'TAF'}
+
+define MIDDem_AprSep_N {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=6,11,1)   (AWR_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6- RUFR_62_NA6) + AWO_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6 - RUFo_62_NA6)) }								
+    case april {
+        condition month == apr
+         sum(i=0,5,1)   (AWR_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6- RUFR_62_NA6) + AWO_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6 - RUFo_62_NA6)) }
+    case otherwise {
+        condition   always
+        value MIDDem_AprSep_N_dv(-1) }
+        }
+               
+goal setMIDDem_AprSep_N_dv {MIDDem_AprSep_N_dv = MIDDem_AprSep_N}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! B. Forecast for Southside Merced ID demands (63_NA3)
+define MIDDem_S {value AWR_63_NA3*cfs_taf*(1+ RPF_63_NA3- RUFR_63_NA3) + AWO_63_NA3*cfs_taf*(1+ RPF_63_NA3 - RUFo_63_NA3)}
+
+define MIDDem_AprSep_S_dv {std kind 'DEMAND' units 'TAF'}
+
+define MIDDem_AprSep_S {
+		case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=6,11,1)(AWR_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3- RUFR_63_NA3) + AWO_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3 - RUFo_63_NA3))}								
+    case april {
+        condition month == apr
+        sum(i=0,5,1)(AWR_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3- RUFR_63_NA3) + AWO_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3 - RUFo_63_NA3))}
+    case otherwise {
+        condition   always
+        value MIDDem_AprSep_S_dv(-1) }
+        }
+        
+ goal setMIDDem_AprSep_S_dv {MIDDem_AprSep_S_dv = MIDDem_AprSep_S}       
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  C. Forecast for Merced Unit of Merced NWR demands(63_PR2)
+define MercedNWRDem {value AWR_63_PR2*cfs_taf*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2*cfs_taf*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2*cfs_taf*(1+ RPF_63_PR2 - RUFW_63_PR2)}
+
+define MercedNWRDem_AprSep_dv {std kind 'DEMAND' units 'TAF'}
+define MercedNWRDem_AprSep {
+		case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=6,11,1)(AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}		
+    case april {
+        condition month == apr
+        sum(i=0,5,1) (AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}
+    case otherwise {
+        condition   always
+        value MercedNWRDem_AprSep_dv(-1) }
+        }
+
+goal setMercedNWRDem_AprSep_dv {MercedNWRDem_AprSep_dv = MercedNWRDem_AprSep}
+
+define MercedNWRDem_NowJul {
+	case MarJul {
+        condition range(month, Mar, Jul)
+        sum(i=0,jul-month,1) (AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+
+define MercedNWRDem_NowJul_dv {alias MercedNWRDem_NowJul  kind 'DEMAND' units 'TAF'}
+
+
+define MercedNWRDem_AprMar_dv {std kind 'DEMAND' units 'TAF'}
+define MercedNWRDem_AprMar {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}
+    case april {
+        condition month == APR .and. wateryear < EndWY  
+        sum(i=0,11,1) (AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}
+    case april_LastYear{
+        condition wateryear == EndWY .and. month == APR
+    	sum(i=-12,-7,1) (AWR_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2- RUFR_63_PR2) + AWO_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFo_63_PR2)+ AWW_63_PR2(i)*cfs_taf(i)*(1+ RPF_63_PR2 - RUFW_63_PR2))}
+    case otherwise {
+        condition   always
+        value MercedNWRDem_AprMar_dv(-1) }
+        }
+
+goal setMercedNWRDem_AprMar_dv {MercedNWRDem_AprMar_dv = MercedNWRDem_AprMar}      
+  
+  
+  
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+ !  D. Forecast for East Bear Unit of San Luis NWR demands(63_PR3)
+define SanLuisNWRDem {value AWR_63_PR3*cfs_taf*(1+ RPF_63_PR3- RUFR_63_PR3) + AWO_63_PR3*cfs_taf*(1+ RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3*cfs_taf*(1+ RPF_63_PR3 - RUFW_63_PR3)}
+ 
+define SanLuisNWRDem_AprSep_dv {std kind 'DEMAND' units 'TAF'}
+define SanLuisNWRDem_AprSep {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3- RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case april {
+        condition month == apr
+        sum(i=0,5,1) (AWR_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3- RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case otherwise {
+        condition   always
+        value SanLuisNWRDem_AprSep_dv(-1) }
+        }
+
+goal setSanLuisNWRDem_AprSep_dv {SanLuisNWRDem_AprSep = SanLuisNWRDem_AprSep_dv}
+
+define SanLuisNWRDem_AprMar_dv {std kind 'DEMAND' units 'TAF'}
+define SanLuisNWRDem_AprMar {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1 + RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case april {
+        condition month == APR .and. wateryear < EndWY  
+        sum(i=0,11,1) (AWR_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1 + RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case april_LastYear{
+        condition wateryear == EndWY .and. month == APR
+    	sum(i=-12,-7,1) (AWR_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1 + RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case otherwise {
+        condition   always
+        value SanLuisNWRDem_AprMar_dv(-1) }
+        }      
+        
+goal setSanLuisNWRDem_AprMar_dv {SanLuisNWRDem_AprMar = SanLuisNWRDem_AprMar_dv}
+
+define SanLuisNWRDem_NowJul {
+	case MarJul {
+        condition range(month, Mar, Jul)
+        sum(i=0,jul-month,1) (AWR_63_PR3(i)*cfs_taf(i)*(1 + RPF_63_PR3 - RUFR_63_PR3) + AWO_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFo_63_PR3)+ AWW_63_PR3(i)*cfs_taf(i)*(1+ RPF_63_PR3 - RUFW_63_PR3))}
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+
+define SanLuisNWRDem_NowJul_dv {alias SanLuisNWRDem_NowJul  kind 'DEMAND' units 'TAF'}
+
+
+        
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!         
+! E. Forecast for El Nido ID demands (63_NA5)
+define ElNidoDem {value AWR_63_NA5*cfs_taf*(1+ RPF_63_NA5- RUFR_63_NA5) + AWO_63_NA5*cfs_taf*(1+ RPF_63_NA5 - RUFo_63_NA5)}
+
+define ElNidoDem_AprSep_dv {std kind 'DEMAND' units 'TAF'}
+
+define ElNidoDem_AprSep {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5- RUFR_63_NA5) + AWO_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5 - RUFo_63_NA5))}
+    case april {
+        condition month == apr
+	sum(i=0,5,1) (AWR_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5- RUFR_63_NA5) + AWO_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5 - RUFo_63_NA5))}
+    case otherwise {
+        condition   always
+        value ElNidoDem_AprSep_dv(-1) }
+        }
+        
+goal setElNidoDem_AprSep_dv {ElNidoDem_AprSep_dv = ElNidoDem_AprSep}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! F. Forecast for Stevinson WD demands (63_NA4)
+define StevinsonDem {value AWR_63_NA4*cfs_taf*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4*cfs_taf*(1+ RPF_63_NA4 - RUFo_63_NA4)}
+
+define StevinsonDem_AprSep_dv {std kind 'DEMAND' units 'TAF'}
+define StevinsonDem_AprSep {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+	case april {
+        condition month == apr
+	    sum(i=0,5,1) (AWR_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+	case otherwise {
+        condition   always
+        value StevinsonDem_AprSep_dv(-1) }
+        }
+        
+goal setStevinsonDem_AprSep_dv {StevinsonDem_AprSep_dv = StevinsonDem_AprSep}        
+        
+
+define StevinsonDem_AprMar_dv {std kind 'DEMAND' units 'TAF'}
+define StevinsonDem_AprMar {
+    case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=0,11,1) (AWR_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+    case april {
+	     condition month == apr .and. wateryear < EndWY
+	     sum(i=0,11,1) (AWR_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+    case april_LastYear{
+	     condition wateryear == EndWY .and. month == APR 
+	     sum(i=-12,-7,1) (AWR_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4- RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+    case otherwise {
+             condition   always
+             value StevinsonDem_AprMar_dv(-1) }
+        }
+
+goal setStevinsonDem_AprMar_dv {StevinsonDem_AprMar_dv = StevinsonDem_AprMar} 
+
+define StevinsonDem_NowJul {
+    case MarJul {
+        condition range(month, Mar, Jul)
+        sum(i=0,jul-month,1) (AWR_63_NA4(i)*cfs_taf(i)*(1 + RPF_63_NA4 - RUFR_63_NA4) + AWO_63_NA4(i)*cfs_taf(i)*(1+ RPF_63_NA4 - RUFo_63_NA4))}
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+
+define StevinsonDem_NowJul_dv {alias StevinsonDem_NowJul  kind 'DEMAND' units 'TAF'}            
+        
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! G. Total demand for surface water at river
+
+define MercedTotDem_AprSep_dv {std kind 'DEMAND' units 'TAF'}
+define MercedTotDem_AprSep {
+    case FirstMonth {
+	condition month == OCT .and. wateryear == BgnWY
+	value max(0., MIDDem_AprSep_N* (1.- GPmin_62_NA6_P - GPmin_62_NA6_D)/(1.-EVF_MCD055_62_NA6-LFF_MCD055_62_NA6-DPF_MCD055_62_NA6-OSF_MCD055_62_NA6)
+                    + MIDDem_AprSep_S* (1.- GPmin_63_NA3_P - GPmin_63_NA3_D)/(1.-EVF_MID021_63_NA3-LFF_MID021_63_NA3-DPF_MID021_63_NA3-OSF_MID021_63_NA3) 
+        	    + ElNidoDem_AprSep*(1.- GPmin_63_NA5)                   /(1.-EVF_MPS020_63_NA5-LFF_MPS020_63_NA5-DPF_MPS020_63_NA5-OSF_MPS020_63_NA5)
+        	    + 15.000*(MercedNWRDem_AprSep/MercedNWRDem_AprMar)
+        	    +  8.863*(SanLuisNWRDem_AprSep/SanLuisNWRDem_AprMar)
+        	    + 26.400*(StevinsonDem_AprSep/StevinsonDem_AprMar)) }
+    case April {
+        condition month==apr
+        value max(0., MIDDem_AprSep_N* (1.- GPmin_62_NA6_P - GPmin_62_NA6_D)/(1.-EVF_MCD055_62_NA6-LFF_MCD055_62_NA6-DPF_MCD055_62_NA6-OSF_MCD055_62_NA6)
+                    + MIDDem_AprSep_S* (1.- GPmin_63_NA3_P - GPmin_63_NA3_D)/(1.-EVF_MID021_63_NA3-LFF_MID021_63_NA3-DPF_MID021_63_NA3-OSF_MID021_63_NA3) 
+        	    + ElNidoDem_AprSep*(1.- GPmin_63_NA5)                   /(1.-EVF_MPS020_63_NA5-LFF_MPS020_63_NA5-DPF_MPS020_63_NA5-OSF_MPS020_63_NA5)
+        	    + 15.000*(MercedNWRDem_AprSep/MercedNWRDem_AprMar)
+        	    +  8.863*(SanLuisNWRDem_AprSep/SanLuisNWRDem_AprMar)
+        	    + 26.400*(StevinsonDem_AprSep/StevinsonDem_AprMar)) }
+    case otherwise {
+        condition always
+        value MercedTotDem_AprSep_dv(-1) }
+}
+
+goal setMercedTotDem_AprSep_dv {MercedTotDem_AprSep_dv = MercedTotDem_AprSep}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  II. Determine water supplies for the April-September period
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! A - Forecasted inflows
+! B - Reservoir evaporation
+! C - Supply for irrigation
+
+! A. Forecasted inflows (using perfect foresight)
+define MercedInfow_AprSep_dv {std kind 'INFLOW' units 'TAF'}
+
+define MercedInfow_AprSep {
+    case FirstMonth {
+	condition month == OCT .and. wateryear == BgnWY
+	sum(i=apr-month,sep-month,1) (I_MCLRE(i)+I_MCD055(i))*cfs_taf(i) }
+    case aprthrusep {
+        condition   month >= apr .and. month <= sep
+        sum(i=apr-month,sep-month,1) (I_MCLRE(i)+I_MCD055(i))*cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value MercedInfow_AprSep_dv(-1) }
+        }
+        
+goal setMercedInfow_AprSep_dv {MercedInfow_AprSep_dv = MercedInfow_AprSep}
+
+! B. Estimate reservoir evaporation
+define MclreEvapRate_AprSep_dv {std kind 'EVAPRATE' units 'INCHES'}
+
+define MclreEvapRate_AprSep {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		sum(i=apr-month,sep-month,1) ER_MCLRE(i) }
+    case aprthrusep {
+        condition   month >= apr .and. month <= sep
+        sum(i=apr-month,sep-month,1) ER_MCLRE(i) }
+    case otherwise {
+        condition   always
+        value MclreEvapRate_AprSep_dv(-1) }
+        }
+
+define A_MCLRE_1 {select area from res_info given storage=1000*S_MCLRE(-1) use linear where res_num=20}
+define A_MCLRE_2 {select area from res_info given storage=1000*S_MCLRElevel2 use linear where res_num=20}
+
+define MclreEvap_AprSep {value (MclreEvapRate_AprSep/12.)*(A_MCLRE_1+A_MCLRE_2)/2000.}
+
+goal setMclreEvapRate_AprSep_dv {MclreEvapRate_AprSep_dv = MclreEvapRate_AprSep}
+
+
+! C. Estimate available water supply for irrigation purposes
+! Current storage + inflow - min release - target carryover storage - evaporation
+
+define MCLREAvailAprSep_dv {std kind 'WATER-SUPPLY' units 'TAF'}
+define MCLREAvailAprSep {
+	case FirstMonth {
+		condition month == OCT .and. wateryear == BgnWY
+		value 0.		}
+    case April {
+        condition month == APR
+        value max(0., S_MCLRE(-1) + MercedInfow_AprSep - CowellFercFlow_AprSep - MclreEvap_AprSep - S_MCLRElevel2)}
+    case otherwise {
+        condition always
+        value MCLREAvailAprSep_dv(-1)
+        }
+}
+
+goal setMCLREAvailAprSep_dv {MCLREAvailAprSep_dv = MCLREAvailAprSep}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  III. Determine MID water allocations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! A - Merced NWR, Merced Unit            (perdel_MercedNWR)
+! B - Merced ID                          (perdel_MercedID)
+! C - El NIdo ID                         (perdel_ElNido)
+! D - Stevinson WD                       (perdelStevinson)
+! E - SOI sales                          (perdel_SOI)
+! F - San Luis NWR, East Bear Creek Unit (perdel_SanLuisNWR)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! A - Merced NWR, Merced Unit
+
+!MID is responsible for delivery of up to 15 taf/yr to the Refuge demand
+!Refuge allocation is 1.0 if there is at least 15 taf of water supply.
+define Perdel_MercedNWRdv {std kind 'percent-delivery' units 'none'}
+define Perdel_MercedNWR {
+    case firstyear {
+        condition wateryear == BgnWY .and. month <= MAR
+        value 1.}
+    case April {
+        condition month==APR
+        value min(1.0, MCLREAvailAprSep/min(15., MercedNWRDem_AprSep))}
+    case otherwise {
+        condition always
+        value Perdel_MercedNWRdv(-1)}
+}
+
+goal setPerdel_MercedNWRdv {Perdel_MercedNWRdv = Perdel_MercedNWR}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! B - Merced ID
+
+! Water available for Merced ID and Stevinson is any supply remaining after 15 taf is allocated to the refuge.  
+define Perdel_MercedIDdv  {std kind 'percent-delivery' units 'none'}
+define Perdel_MercedID {
+    case firstyear {
+        condition wateryear == BgnWY .and. month <= Mar
+        value 1. }
+    case AprilLowStorage {
+        condition month == apr .and. S_MCLRE(-1) < 115. ! Check this condition. Could be implemented using weights.
+        value 0.}
+    case April {
+        condition month == apr
+        value max(0., min(1.,(MCLREAvailAprSep-min(15., MercedNWRDem_AprSep))/(MercedTotDem_AprSep - min(15., MercedNWRDem_AprSep))
+        )) }
+    case otherwise {
+        condition always
+        value Perdel_MercedIDdv(-1) }
+}
+goal setPerdel_MercedIDdv {Perdel_MercedIDdv = Perdel_MercedID}
+
+! No diversions at MCD055 and MCD052 if reservoir is lower than 115 TAF
+!define MIDDiversionMax {value max(0.,S_MCLRE(-1) - 115.)*taf_cfs}
+!goal limitMIDDiversion   {D_MCD055_62_NA6 + D_MCD052_MID021 < MIDDiversionMax}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! C - El Nido ID
+
+!In years when Merced ID receives less than a full allocation, these areas receive one half of Merced ID’s allocation. 
+!For example, if Merced ID’s allocation is 80 percent of total demand, El Nido areas are allocated 40 percent of their total demand. 
+! Stevinson deliveries are cut by the same percentage as Merced ID.
+define Perdel_ElNidodv  {std kind 'percent-delivery' units 'none'}
+define Perdel_ElNido {
+    case firstyear {
+        condition wateryear == BgnWY .and. month <= Mar
+        value 1.}
+    case April {  
+        condition month == apr .and. perdel_MercedID > 0.999
+        value perdel_MercedID}
+    case April_Full {  
+        condition month == apr
+        value perdel_MercedID*0.5}
+    case otherwise {
+        condition always
+        value Perdel_ElNidodv(-1) }
+}
+goal set_Perdel_ElNidodv {Perdel_ElNidodv = Perdel_ElNido}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! D - Stevinson WD
+
+define Perdel_Stevinsondv  {std kind 'percent-delivery' units 'none'}
+define Perdel_Stevinson {value perdel_MercedID} ! Stevinson deliveries are cut by the same percentage as Merced ID.
+
+goal set_perdel_Stevinsondv {perdel_Stevinsondv = Perdel_Stevinson}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! E -  Sphere of Influence sale
+
+define Perdel_SOIdv  {std kind 'percent-delivery' units 'none'}
+define Perdel_SOI {
+    case Wet {
+       condition perdel_MercedID > 0.999 !If allocation to Merced ID is less than 100 percent, no allocation to Sphere of Influence sales, otherwise 100%
+       value 1.}
+    case otherwise {
+       condition always
+       value 0.}}
+       
+goal set_perdel_SOIdv {perdel_SOIdv = Perdel_SOI} 
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! F -  San Luis NWR, East Bear Unit
+
+define Perdel_SanLuisNWRdv  {std kind 'percent-delivery' units 'none'}
+define Perdel_SanLuisNWR {value perdel_MercedID} ! Need to identify how allocation to refuge are decided. This is a placeholder.
+
+goal set_perdel_SanLuisNWRdv {perdel_SanLuisNWRdv = Perdel_SanLuisNWR}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  IV. Constrain deliveries by water allocations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! A - Merced NWR, Merced Unit
+! B - Merced ID, Northside
+! C - Merced ID, Southside
+! D - El NIdo ID
+! E - Stevinson WD
+! F - SOI sales
+! G - San Luis NWR, East Bear Creek Unit
+! H - Merced NWR, Arena Plains Unit
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! A -  Merced NWR. Merced Unit
+
+! Merced ID water is delivered to Merced Unit via Deadman Creek
+! The refuge also diverts water under its water rights to Deadman Creek
+define D_DED010_63_PR2_MID {std kind 'diversion' units 'cfs'}
+define D_DED010_63_PR2_WR {std kind 'diversion' units 'cfs'}
+goal splitD_DED010_63_PR2 {D_DED010_63_PR2 = D_DED010_63_PR2_MID + D_DED010_63_PR2_WR}
+
+! MID Water
+goal limit63_PR2b {D_MID021_DED010 < Perdel_MercedNWR * 15. * taf_cfs * MercedNWRDem/MercedNWRDem_AprMar}
+goal setD_DED010_63_PR2_MID {D_DED010_63_PR2_MID = D_MID021_DED010}
+
+! Water Right water
+goal setD_DED010_63_PR2_WR  {D_DED010_63_PR2_WR = 0.} !Need to add water right
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! B - Merced ID Northside Diversions
+
+goal limitD_MIDb {D_MCD055_62_NA6 < perdel_MercedID*(AWO_62_NA6+AWR_62_NA6)
+                                  + perdel_MercedID*RP_62_NA6
+                                  + perdel_MercedID*DL_62_NA6
+                                  - perdel_MercedID*RU_62_NA6
+                                  - perdel_MercedID*(GPmin_62_NA6_D+GPmin_62_NA6_P)* (AWo_62_NA6 * (1+ RPF_62_NA6 - RUFo_62_NA6) + AWr_62_NA6 * (1+ RPF_62_NA6 - RUFr_62_NA6)) }
+                                  
+                                  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! C - Merced ID Southside Diversions
+
+goal limitD_MIDa {D_MID021_63_NA3 < perdel_MercedID*AW_63_NA3 !Merced ID growers - Southside
+                                  + perdel_MercedID*RP_63_NA3
+                                  + perdel_MercedID*DL_63_NA3
+                                  - perdel_MercedID*RU_63_NA3
+                                  - perdel_MercedID*(GPmin_63_NA3_D+GPmin_63_NA3_P)*(AWo_63_NA3 * (1+ RPF_63_NA3 - RUFo_63_NA3) + AWr_63_NA3 * (1+ RPF_63_NA3 - RUFr_63_NA3))}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! D - Merced ID deliveries to El Nido ID + water rights
+
+goal limitD_MIDc {D_MID021_MPS020 < Perdel_ElNido*(AWO_63_NA5+AWR_63_NA5)
+                                  + Perdel_ElNido*RP_63_NA5
+                                  + Perdel_ElNido*DL_63_NA5
+                                  - Perdel_ElNido*RU_63_NA5
+                                  - Perdel_ElNido*(GPmin_63_NA5)* (AWo_63_NA5 * (1+ RPF_63_NA5 - RUFo_63_NA5) + AWr_63_NA5 * (1+ RPF_63_NA5 - RUFr_63_NA5)) }
+
+!El Nido has a water right to Deadman Creek for 3.8 cfs Nov 1 through April 15 (Merced ID AB 3616)
+define WRmon_DED025_63_NA5 {case NovMarch  {condition range(month, Nov, Mar) value 3.8*taf_cfs}
+			    case April     {condition month == Apr value 1.9*taf_cfs}
+			    case Otherwise {condition always value 0.}
+}
+define WR_DED025_63_NA5    {alias WRmon_DED025_63_NA5 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+goal setDED025_63_NA5      {D_DED025_63_NA5 < WRmon_DED025_63_NA5 * taf_cfs}
+
+
+!El Nido has a water right to Mariposa Creek
+define WRmon_MPS020_63_NA5  {
+	             case NovMarch  {condition range(month, Nov, Mar) value 100.*taf_cfs}
+			     case April     {condition month == Apr value 50. *cfs_taf}
+			     case Otherwise {condition always value 0.}
+}
+define WR_MPS020_63_NA5     {alias WRmon_MPS020_63_NA5 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+define D_MPS020_63_NA5_WR   {std kind 'DIVESION' units 'CFS'}
+define D_MPS020_63_NA5_MID  {std kind 'DIVESION' units 'CFS'}
+goal setD_MPS020_63_NA5     {D_MPS020_63_NA5 = D_MPS020_63_NA5_WR + D_MPS020_63_NA5_MID}
+
+goal setD_MPS020_63_NA5_MID {D_MPS020_63_NA5_MID = D_MID021_MPS020}
+goal setD_MPS020_63_NA5_WR  {D_MPS020_63_NA5_WR < WRmon_MPS020_63_NA5*taf_cfs}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! E - Merced ID deliveries to Stevinson WD
+
+! Merced ID water is delivered to Stevinson WD via the Eastside Canal
+! The district also diverts water under its water rights to Bear Creek
+
+define D_BCK006_ESC004_WR  {std kind 'Diversion' units 'cfs'}
+define D_BCK006_ESC004_MID {std kind 'Diversion' units 'cfs'}
+
+goal splitD_BCK006_ESC004 {D_BCK006_ESC004 = D_BCK006_ESC004_WR + D_BCK006_ESC004_MID}
+
+! Water Right Water
+define StevinsonWaterRightsFlag {
+    case October {
+        condition month == Oct
+        value 1.}
+    case MarSep {
+        condition month >= Mar .and. month <= Sep
+        value 1.}
+    case otherwise {
+        condition always
+        value 0.}
+}
+
+goal setD_BCK006_ESC004_WR_1 {D_BCK006_ESC004_WR < 163. * StevinsonWaterRightsFlag}
+goal setD_BCK006_ESC004_WR_2 {D_BCK006_ESC004_WR < I_BUR005 + I_BCK040 + SG105_BCK040_15 + SG106_BCK035_15 + SG107_BCK031_15 + SG108_BCK024_15 + SG109_BCK017_15 + SG110_BCK010_15 + SG111_BCK006_15}
+
+
+! Stevinson deliveries are cut by the same percentage as Merced ID. ! The monthly demands indicated below
+! have an april-sept sum of 26.4 which is the contract entitlement for Stevinson WD
+define StevinsonEntitlement { ! demand in cfs
+    case AprSep {
+        condition month == apr .or. month == sep
+        value 54.44 * perdel_Stevinson}
+    case MayAug {
+        condition month >= may .and. month <= aug
+        value 81.66 * perdel_Stevinson}
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+! MID water is routed from the Main Canal to Bear Creek to Eastside Canal
+! MID also routes water from the Main Canal to Bear Creek to East Bear Unit of the San Luis NWR
+define D_MID021_BCK033_STV {std kind 'diversion' units 'cfs'}
+define D_MID021_BCK033_EBU {std kind 'diversion' units 'cfs'}
+!define D_MID021_BCK033_ADD {std kind 'diversion' units 'cfs'}
+goal splitD_MID021_BCK033  {D_MID021_BCK033 = D_MID021_BCK033_STV + D_MID021_BCK033_EBU} !+ D_MID021_BCK033_ADD}
+
+! Because of high simulated seepage losses along the Eastside Canal, the model convets this water through a parallel arc: D_BCK033_BCK006
+! Split D_MID021_BCK033 into water demand portion and additional portion, with a negative weight on additional portion to avoid excess diversions
+goal setD_BCK033_BCK006 {D_BCK033_BCK006 = D_MID021_BCK033}
+goal setD_BCK006_ESC004_MID {D_MID021_BCK033_STV = D_BCK006_ESC004_MID}
+goal set_D_MID021_BCK033_STV  {D_MID021_BCK033_STV < StevinsonEntitlement}
+!goal set_D_BCK006_ESC004_MID  {D_BCK006_ESC004_MID < StevinsonEntitlement}  
+
+goal setD_EBP042_ESC004 {D_EBP042_ESC004 = 0}	!Set to zero temporarily (Need to check water rights to other creeks)
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! F -  Merced ID deliveries to Sphere of Influence growers
+
+goal set_D_MID021_63_NA4  {D_MID021_63_NA4 < 16. * taf_cfs * perdel_SOI * StevinsonDem/StevinsonDem_AprMar}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! G - Merced ID deliveries to East Bear Unit of San Luis NWR
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal set_D_MID021_BCK033_EBU  {D_MID021_BCK033_EBU < Perdel_SanLuisNWR * 8.863 * taf_cfs * SanLuisNWRDem/SanLuisNWRDem_AprMar}
+
+goal setD_EBP048_63_PR3 {D_EBP048_63_PR3 < D_MID021_BCK033_EBU} !There may be seepage losses along Bear Creek 
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! H - Merced NWR, Arena Plains Unit
+
+! 63_PR1 - Arena Unit of Merced NWR. Dependent on wastewater return flows
+goal setD_ESC005_EBP050 {D_ESC005_EBP050 < R_AWWWTP_ESC005}
+goal setD_ESC005_63_PR1 {D_ESC005_63_PR1 < R_AWWWTP_ESC005}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! I - Riparian Diversions Merced River Shaffer Bridge to Mouth
+
+! Limits on D_MCD021_63_NA4 are set in arcs-contracts.wresl and constraints-contracts.wresl
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! J - Stevinson WD Diversions from Merced River
+
+! Limits on D_MCD002_63_NA4 are set in arcs-contracts.wresl and constraints-contracts.wresl
+
+
+
+
+!PART 2 - MCCLURE RESERVOIR FLOOD CONTROL OPERATIONS
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/*
+The Corps requires conditional storage space be maintained in the reservoir from March 1
+through the end of July in some years. Conditional space is maintained to store snow
+pack that may melt suddenly and create periods of high inflow. Conditional space is utilized in
+years when forecasted future inflow, including snowmelt, will exceed demands and available
+storage space. In these years, the reservoir is drawn down below the rain flood requirement in
+anticipation of the future snowmelt.
+
+! I   - Determine rain flood space requirement
+! II  - Foecast inflows from current month (beginning March) through July
+! III - Estimate deliveries from current month (beginning March) through July
+! IV  - Estimate releases for flow requirements from current month (beginning March) through July
+! V   - Estimate total release from current month (beginning March) through July
+! VI  - Estimate supplementary release to avoid spilling
+! VII - Determine Level 4 to achieve supplemental release
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! I   - Determine rain flood space requirement
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define S_MCLRElevel4_init {select target from res_level where res_num=20,level=4,month=month}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! II  - Foecast inflows from current month (beginning March) through July
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define MercedInfow_NowJul {! Define inflows using perfect forecast
+    case MarJul {
+        condition   month >= mar .and. month <= jul
+        sum(i=0,jul-month,1) (I_MCLRE(i)+I_MCD055(i))*cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+        
+define MercedInfow_NowJul_dv {alias MercedInfow_NowJul kind 'inflow' units 'taf'}  
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! III - Estimate deliveries from current month (beginning March) through July
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! A - Merced ID - Northside
+! B - Merced ID - Southside
+! C - El Nido WD
+! D - Sphere of influence sales
+! E - Stevinson WD
+! F - Merced NWR, Merced Unit
+! G - San Luis NWR, East Bear Unit
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! A - Estimate deliveries to Merced ID - Northside from now through July 
+
+define MIDNorthForecastDeliv {
+	case MarJul{
+		condition range(month, Mar, Jul)  
+        sum(i=0, Jul-month,1) perdel_MercedID
+        	                 *(AWR_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6- RUFR_62_NA6) + AWO_62_NA6(i)*cfs_taf(i)*(1+ RPF_62_NA6 - RUFo_62_NA6))
+        	                 *(1.- GPmin_62_NA6_P - GPmin_62_NA6_D)
+        	                 /(1.-EVF_MCD055_62_NA6-LFF_MCD055_62_NA6-DPF_MCD055_62_NA6-OSF_MCD055_62_NA6)}
+    case otherwise {
+        condition always
+        value 0. }
+        }
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! B - Estimate deliveries to Merced ID - Southside from now through July         	                 
+
+define MIDSouthForecastDeliv {
+	case mMarJul{
+		condition range(month, Mar, Jul)  
+        sum(i=0, Jul-month,1) perdel_MercedID
+        	                 *(AWR_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3- RUFR_63_NA3) + AWO_63_NA3(i)*cfs_taf(i)*(1+ RPF_63_NA3 - RUFo_63_NA3))
+        	                 *(1.- GPmin_63_NA3_P - GPmin_63_NA3_D)
+        	                 /(1.-EVF_MID021_63_NA3-LFF_MID021_63_NA3-DPF_MID021_63_NA3-OSF_MID021_63_NA3)}
+     case otherwise {
+        condition always
+        value 0. }
+        }       	                 
+
+
+
+        	                 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! C - Estimate deliveries to El Nido ID from now through July           	                 
+
+define ElNidoForecastDeliv {
+	case mMarJul{
+		condition range(month, Mar, Jul)  
+        sum(i=0, Jul-month,1) Perdel_ElNido
+        	                 *(AWR_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5 - RUFR_63_NA5) + AWO_63_NA5(i)*cfs_taf(i)*(1+ RPF_63_NA5 - RUFo_63_NA5))
+        	                 *(1.- GPmin_63_NA5)
+        	                 /(1.-EVF_MPS020_63_NA5-LFF_MPS020_63_NA5-DPF_MPS020_63_NA5-OSF_MPS020_63_NA5)}
+     case otherwise {
+        condition always
+        value 0. }
+        }       	                 
+
+      	                         	                         	                      
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! D - Estimate deliveries to SOI from now through July  
+
+! March value may be inaccurate as: (1) using previous year allocation; (2) using previous year demand pattern
+define SOIForecastDeliv {
+	 case MarJul{
+	 	condition range(month, Mar, Jul) .and. perdel_MercedID >=0.99
+        value 16.*StevinsonDem_NowJul/StevinsonDem_AprMar} !SOI has same pattern as Stevinson WD i.e. 63_NA4
+     case otherwise {
+     	condition always
+     	value 0.}
+     }
+
+
+ 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! E - Estimate deliveries to Stevinson WD from now through July      
+
+define StevinsonForecastDeliv  {case mMar{condition month == Mar value 18.14*perdel_MercedID}	!Cumulative of allocation (TAF) split evenly from Apr to Sep
+				case mApr{condition month == Apr value 18.14*perdel_MercedID}
+				case mMay{condition month == May value 14.90*perdel_MercedID}
+				case mJun{condition month == Jun value  9.88*perdel_MercedID}
+				case mJul{condition month == Jul value  5.02*perdel_MercedID}	
+				case otherwise {condition always value 0.}		! 
+}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! F - Estimate deliveries to Merced NWR, Merced Unit from now through July 
+define MercedNWRForecastDeliv {
+	 case MarJul{
+	 	condition range(month, Mar, Jul)
+        value 15. * MercedNWRDem_NowJul/MercedNWRDem_AprMar}
+     case otherwise {
+     	condition always
+     	value 0.}
+     }
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+! G - Estimate deliveries to San Luis NWR, East Bear Unit from now through July 
+define EastSanLuisNWRForecastDeliv {
+	 case MarJul{
+	 	condition range(month, Mar, Jul)
+        value 8.863 * SanLuisNWRDem_NowJul/SanLuisNWRDem_AprMar}
+     case otherwise {
+     	condition always
+     	value 0.}
+     }
+     
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! IV  - Estimate releases for flow requirements from current month (beginning March) through July
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
+
+! Ignore stream-groundwater losses to keep code simple
+
+define FERCCowell_NowJul {
+    case March {
+        condition month==Mar
+        value max(max(DGFlow*DGFlag,FERC_MCD033),CowellBase)*cfs_taf+max(FERC_MCD033_Apr,CowellBase_Apr)*cfs_taf(1)+max(FERC_MCD033_May,CowellBase_May)*cfs_taf(2)
+                 +max(FERC_MCD033_Jun,CowellBase_Jun)*cfs_taf(3)+max(FERC_MCD033_Jul,CowellBase_Jul)*cfs_taf(4)}
+    case April {
+        condition month==Apr
+        value max(FERC_MCD033,CowellBase)*cfs_taf+max(FERC_MCD033_May,CowellBase_May)*cfs_taf(1)+max(FERC_MCD033_Jun,CowellBase_Jun)*cfs_taf(2)
+             +max(FERC_MCD033_Jul,CowellBase_Jul)*cfs_taf(3)}
+    case mMay {
+        condition month==May
+        value max(FERC_MCD033,CowellBase)*cfs_taf+max(FERC_MCD033_Jun,CowellBase_Jun)*cfs_taf(1)+max(FERC_MCD033_Jul,CowellBase_Jul)*cfs_taf(2)}
+    case June {
+        condition month==Jun
+        value max(FERC_MCD033,CowellBase)*cfs_taf+max(FERC_MCD033_Jul,CowellBase_Jul)*cfs_taf(1)}
+    case July {
+        condition month==Jul
+        value max(FERC_MCD033,CowellBase)*cfs_taf}
+    case otherwise {
+     	condition always
+     	value 0.}
+     }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! V   - Estimate total release from current month (beginning March) through July
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define ReleaseForecast_NowJul {value MIDNorthForecastDeliv
+	                          + MIDSouthForecastDeliv
+	                          + ElNidoForecastDeliv
+	                          + StevinsonForecastDeliv
+	                          + SOIForecastDeliv
+	                          + MercedNWRForecastDeliv
+	                          + EastSanLuisNWRForecastDeliv
+	                          + FERCCowell_NowJul}
+
+define MIDNorthForecastDeliv_dv    {alias MIDNorthForecastDeliv kind 'RELEASE' units 'TAF'}
+define MIDSouthForecastDeliv_dv    {alias MIDSouthForecastDeliv kind 'RELEASE' units 'TAF'}
+define ElNidoForecastDeliv_dv      {alias ElNidoForecastDeliv kind 'RELEASE' units 'TAF'}
+define StevinsonForecastDeliv_dv   {alias StevinsonForecastDeliv kind 'RELEASE' units 'TAF'}
+define SOIForecastDeliv_dv         {alias SOIForecastDeliv kind 'RELEASE' units 'TAF'}
+define MercedNWRForecastDeliv_dv   {alias MercedNWRForecastDeliv kind 'RELEASE' units 'TAF'}
+define EastSanLuisNWRForecastDeliv_dv {alias EastSanLuisNWRForecastDeliv kind 'RELEASE' units 'TAF'}
+define FERCCowell_NowJul_dv        {alias FERCCowell_NowJul kind 'RELEASE' units 'TAF'}
+define ReleaseForecast_NowJul_dv   {alias ReleaseForecast_NowJul kind 'RELEASE' units 'TAF'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! VI  - Estimate supplementary release to avoid spilling
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SupRelease {case March     {condition month == Mar value max(0, MercedInfow_NowJul - ReleaseForecast_NowJul - S_MCLRElevel5 + S_MCLRE(-1))/3.5}
+				   case April     {condition month == Apr value max(0, MercedInfow_NowJul - ReleaseForecast_NowJul - S_MCLRElevel5 + S_MCLRE(-1))/2.5}
+				   case mMay	  {condition month == May value max(0, MercedInfow_NowJul - ReleaseForecast_NowJul - S_MCLRElevel5 + S_MCLRE(-1))/1.5}
+				   case June      {condition month == Jun value max(0, MercedInfow_NowJul - ReleaseForecast_NowJul - S_MCLRElevel5 + S_MCLRE(-1))/0.5}
+				   case otherwise {condition always       value 0.}}
+					  
+define SupRelease_dv {alias SupRelease kind 'RELEASE' units 'TAF'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! VII - Determine Level 4 to achieve supplemental release
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		  
+define MonthlyDemand {
+    case MarJul {
+        condition range(month,Mar,Jul)
+        value max(0., MIDDem_N  *(1.- GPmin_62_NA6_P - GPmin_62_NA6_D)/(1.-EVF_MCD055_62_NA6-LFF_MCD055_62_NA6-DPF_MCD055_62_NA6-OSF_MCD055_62_NA6)
+                    + MIDDem_S  *(1.- GPmin_63_NA3_P - GPmin_63_NA3_D)/(1.-EVF_MID021_63_NA3-LFF_MID021_63_NA3-DPF_MID021_63_NA3-OSF_MID021_63_NA3) 
+        	    + ElNidoDem *(1.- GPmin_63_NA5)                   /(1.-EVF_MPS020_63_NA5-LFF_MPS020_63_NA5-DPF_MPS020_63_NA5-OSF_MPS020_63_NA5)
+        	    + 15.000*(MercedNWRDem/MercedNWRDem_AprMar)
+        	    +  8.863*(SanLuisNWRDem/SanLuisNWRDem_AprMar)
+        	    + 26.400*(StevinsonDem/StevinsonDem_AprMar)
+                    + max(FERC_MCD033, DGFlow*DGFlag)*cfs_taf) }
+    case otherwise {
+        condition always
+        value 0}
+}
+
+define S_MCLRElevel4   {value max(S_MCLRElevel3 ,min(S_MCLRElevel4_init, S_MCLRE(-1) + I_MCLRE*cfs_taf - monthlyDemand  - SupRelease))}
+define S_MCLRElevel4dv {alias S_MCLRElevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+
+
+

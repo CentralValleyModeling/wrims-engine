@@ -1,0 +1,37 @@
+/*
+Constraints-returns.wresl
+CalSim 3.0 System File
+
+Purpose:
+Calculate return flow from demand units
+
+Naming takes the following form:
+R_{DEMAND UNIT}			- return flow from specific demand unit
+R_{WBA}_{DESTINATION}	- aggregated return from WBA to specific location
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! DIVERSIONS TO WBAS, AND SUB-ARCS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_24_NA1 {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_24_NA2 {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_24_NA3 {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU2 {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU1 {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU3 {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+goal setR_24_NA1_CCK022	{R_24_NA1_CCK022  = TW_24_NA1 + LF_24_NA1 + OS_24_NA1 - RU_24_NA1}
+goal setR_24_NA2_ABN000	{R_24_NA2_ABN000  = TW_24_NA2 + LF_24_NA2 + OS_24_NA2 - RU_24_NA2}
+goal setR_24_NA3_SCR002	{R_24_NA3_SCR002  = 2.5*TW_24_NA3 + LF_24_NA3 + OS_24_NA3 - RU_24_NA3} ! Scale by 2.5 because of error in land use
+goal setR_24_NU2_RFS26N	{R_24_NU2_RFS26N   = WW_24_NU2}
+goal setR_24_NU1_ABN027 {R_24_NU1_ABN027  = WW_24_NU1}
+goal setR_24_NU3_CCK038 {R_24_NU3_CCK038 = WW_24_NU3}
+
+
+

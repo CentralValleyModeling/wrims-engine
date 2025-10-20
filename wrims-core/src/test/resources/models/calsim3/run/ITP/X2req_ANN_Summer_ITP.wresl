@@ -1,0 +1,122 @@
+!Calculate Delta outflow requirement to push X2 to 80 km in June, July and August
+!of W, AN and BN years.  This is used as a flow target for use of ITP carryover 
+!and ITP 100 TAF export cut.
+
+define X2_WHLJPOD_est {
+      value  Ann_X2(
+               SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+               NDO(-4),NDO(-3),NDO(-2),NDO(-1),NDO[WHEELJPOD],
+               int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+               int(monthly_ave),(month),wateryear)
+}
+define X2_WHLJPOD_est_ {alias X2_WHLJPOD_est kind 'X2-POSITION-EST' units 'KM'}
+
+
+define daysX2_80km_mod {
+	case MarToJun {
+		condition	range(month,mar,jun) .and. wyt_SAC < 3.5
+		value		daysX2_cnf_mod		
+	}
+	case JulAug {
+		condition	range(month,jul,aug) .and. wyt_SAC < 3.5
+		value		daysin
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+define daysX2_80km_mod_ {alias daysX2_80km_mod kind 'ITP-X2' units 'days'}
+
+define begday_80km {	
+	case MarToJun {
+		condition	range(month,mar,jun) .and. wyt_SAC < 3.5
+		value		begday_cnf		
+	}
+	case JulAug {
+		condition	range(month,jul,aug) .and. wyt_SAC < 3.5
+		value		1
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+define begday_80km_ {alias begday_80km kind 'ITP-X2' units 'day'}
+
+define endday_80km {	
+	case MarToJun {
+		condition	range(month,mar,jun) .and. wyt_SAC < 3.5
+		value		endday_cnf		
+	}
+	case JulAug {
+		condition	range(month,jul,aug) .and. wyt_SAC < 3.5
+		value		daysin
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+define endday_80km_ {alias endday_80km kind 'ITP-X2' units 'day'}
+
+
+define DO_req_X2_80km_init {
+     case MartoJun {
+          condition      daysX2_80km_mod > 0.5 .and. range(month,mar,jun) .and. X2_WHLJPOD_est > km_PA
+          value getNDO_x2_curMonNDOSplit(km_PA,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    NDO(-4),NDO(-3),NDO(-2),NDO(-1),DO_req_X2roe,DO_req_X2chs,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+                    int(endday_roe),int(daysX2_chs_mod),10,month,wateryear,int(begday_80km),int(endday_80km))}
+     case JulyAndAugust {
+          condition      range(month,jul,aug) .and. wyt_Sac < 3.5 .and. X2_WHLJPOD_est > km_PA
+          value getNDO_X2(km_PA,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    NDO(-4),NDO(-3),NDO(-2),NDO(-1),
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+                    10,month,wateryear,int(1),int(31))}
+     case StandardOff {
+         condition       always
+         value           0.0  }
+}
+
+define DO_req_X2_80km_init_ {alias DO_req_X2_80km_init kind 'Delta-Outflow-Required' units 'cfs'}
+
+define DO_req_X2_80km {
+     case Positive {
+          condition      DO_req_X2_80km_init > 0.1
+          value 		DO_req_X2_80km_init
+     }
+     case StandardOff {
+         condition       always
+         value           0.0  }   }
+
+define DO_req_X2_80km_ {alias DO_req_X2_80km kind 'Delta-Outflow-Required' units 'cfs'}
+
+define DO_req_X2_ITP_temp {value getFinalMrdo ( DO_req_X2roe, int(begday_roe),  int(endday_roe),
+                                        DO_req_X2chs, int(begday_chs),  int(endday_chs),
+                                        DO_req_X2_80km, int(begday_80km),  int(endday_80km),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        0.,  int(1), int(daysin),
+                                        DO_req_flow,  int(begday_flw),  int(endday_flw),
+                                        wateryear, month, daysin )}
+
+define DO_req_X2_ITP {
+	case MaytoAug {
+		condition	range(month,may,aug)
+		value		DO_req_X2_ITP_temp
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define DO_req_X2_ITP_ {alias DO_req_X2_ITP kind 'Delta-Outflow-Required' units 'cfs'}

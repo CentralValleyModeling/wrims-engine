@@ -1,0 +1,207 @@
+/* 
+File Name: ARPS.wresl
+
+Purpose:
+This file sets up the diversion from the American River Pump Station (PCWA)
+on the North Fork American River.
+
+1) If not simulating the American River module, the ARPD diversion needsto be specified as timeseries data
+2) If simulating the upper American watershed, set diversions at the pump station to zero in the Bear module
+3) Subsequently, set the diversion in the American river module
+
+*/
+
+
+!==================================================================================================
+! PCWA American River Pump Station - Auburn Dam site
+!==================================================================================================
+
+! From April-October 15 assume all deliveries are for Zone 5 (for simplicity assume April-September)
+! From October 15 - March assume all deliveries are for lower Zone 1 M&I (for simplicity assume October-March)
+
+!---------------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------------
+define SumOctMarUD_24_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumOctMarUD_24_NU2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,5,1) UD_24_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumOctMarUD_24_NU2(-1)
+        }}
+goal setSumOctMarUD_24_NU2 {SumOctMarUD_24_NU2=SumOctMarUD_24_NU2_sv}
+
+!---------------------------------------------
+!Define monthly pattern of agricultural demand
+!---------------------------------------------
+
+define SumAprSepAW_24_NA2 {std kind 'APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAprSepAW_24_NA2_sv {
+    case oct{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=6,11,1)  AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2)
+        }
+    case otherwise {
+        condition   always
+        value  SumAprSepAW_24_NA2(-1)
+        }}
+goal setSumAprSepAW_24_NA2 {SumAprSepAW_24_NA2=SumAprSepAW_24_NA2_sv}
+
+
+!---------------------------------------------
+!Define monthly pattern of remaining urban demand
+!--------------------------------------------
+define RemUD_24_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define RemUD_24_NU2_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,5,1) UD_24_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value max(0.,RemUD_24_NU2(-1) - UD_24_NU2(-1)*cfs_taf(-1))
+        }}
+goal setRemUD_24_NU2 {RemUD_24_NU2=RemUD_24_NU2_sv}
+
+!---------------------------------------------
+!Define monthly pattern of remaining agricultural demand
+!--------------------------------------------
+define RemAW_24_NA2 {std kind 'REMAINING-APPLIED-WATER' units 'TAF'} !Annual demand
+define RemAW_24_NA2_sv {
+    case oct{
+     condition month == oct
+        sum(i=6,11,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2)
+        }
+    case NovMar{
+     condition month >= nov .and. month <= apr
+        value RemAW_24_NA2(-1)
+        }      
+    case otherwise {
+        condition   always
+        value max(0.,RemAW_24_NA2(-1) - AWR_24_NA2(-1)*cfs_taf(-1)*(1+RPF_24_NA2-RUFR_24_NA2) - AWO_24_NA2(-1)*cfs_taf(-1)*(1+RPF_24_NA2-RUFO_24_NA2))
+        }}
+goal setRemAW_24_NA2 {RemAW_24_NA2=RemAW_24_NA2_sv}
+
+!---------------------------------------------
+!Define annual urban demand
+!---------------------------------------------
+define SumUD_24_NU1 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_24_NU1_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_24_NU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_24_NU1(-1)
+        }}
+goal setSumUD_24_NU1 {SumUD_24_NU1=SumUD_24_NU1_sv}
+
+define SumUD_24_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_24_NU2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_24_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_24_NU2(-1)
+        }}
+goal setSumUD_24_NU2 {SumUD_24_NU2=SumUD_24_NU2_sv}
+
+!---------------------------------------------
+!Define annual agricultural demand
+!---------------------------------------------
+
+define SumAW_24_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_24_NA2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_24_NA2(-1)
+        }}
+goal setSumAW_24_NA2 {SumAW_24_NA2=SumAW_24_NA2_sv}
+
+
+define SumAW_24_NA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_24_NA3_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_24_NA3(-1)
+        }}
+goal setSumAW_24_NA3 {SumAW_24_NA3=SumAW_24_NA3_sv}
+
+define AW_24_NA2_ {value AWR_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFO_24_NA2)}
+define AW_24_NA3_ {value 2.5*AWR_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFO_24_NA3)}
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+! See NorthOfDelta\American\MFP\WaterRights.wresl
+
+
+!---------------------------------------
+!Define  Water Forum limits
+!---------------------------------------
+!  PCWA 'Replacement' (or, 'mitigation') water code is in MFP/WatForum_mitigation.wresl
+
+define WFann_NFA016_ABT002 {
+        case Existing {condition LODflag==0. value 35.5}  
+        case Buildout {condition LODflag==1. value 70.5}}!65.5}}
+define WFann_NFA016_ABT002_remdv {std kind 'DIVERSION' units 'TAF'}
+
+define WFann_NFA016_ABT002_rem  {
+    case October {condition month==OCT value WFann_NFA016_ABT002}
+    case NovSep  {condition always value max(0.,WFann_NFA016_ABT002_remdv(-1) - D_NFA016_ABT002(-1)*cfs_taf(-1))}}
+
+goal setWFann_NFA016_ABT002_remdv {WFann_NFA016_ABT002_remdv = WFann_NFA016_ABT002_rem}
+
+define UrbanFlag {case OctMar {condition month >= Oct .and. month <= mar value 1.} case otherwise {condition always value 0.}}
+define AgFlag {value 1. - UrbanFlag}
+
+
+define WFmon_NFA016_ABT002 {
+    case NoRemaining {
+        condition RemUD_24_NU2_sv+RemAW_24_NA2_sv == 0.
+        value 0.}
+    case otherwise {
+        condition always
+        value max(0.0, WFann_NFA016_ABT002_rem*  (UD_24_NU2*cfs_taf*UrbanFlag + AWR_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFR_24_NA2)*AgFlag + AWO_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFO_24_NA2)*AgFlag) / (RemUD_24_NU2_sv+RemAW_24_NA2_sv))}
+}
+define WF_NFA016_ABT002    {alias WFmon_NFA016_ABT002 kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_PCWA {
+        case Existing {condition LODflag==0. value 0.}   !TAF No point of diversion under existing conditions
+        case Buildout {condition LODflag==1. value 35.}} !Assume 35 TAF CVP Contract limit under future conditions; POD from Folsom
+define CLmon_FOLSM_PCWA {value max(0.0, CLann_FOLSM_PCWA * UD_24_NU2*cfs_taf / SumUD_24_NU2_sv)} 
+define CL_FOLSM_PCWA  {alias CLmon_FOLSM_PCWA kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!***********Full Contract Demands*********************************************
+! Under future conditions, simulate the delivery of full contract demands for PCWA
+
+define PCWA_FullContract_add_ann {value LODFlag*((/*CLann_PCWA_1_5*/104.0 /*+ CLann_FOLSM_PCWA */ + WFann_NFA016_ABT002) - (1-GPmin_24_NU2)*SumUD_24_NU2_sv - (1-GPmin_24_NA2)*SumAW_24_NA2_sv - (1-GPmin_24_NA3)*SumAW_24_NA3_sv)}
+define  UD_24_NU2_add    {value PCWA_FullContract_add_ann*taf_cfs * ((UD_24_NU2*cfs_taf)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+define  AW_24_NA2_add    {value PCWA_FullContract_add_ann*taf_cfs * ((AW_24_NA2_)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+define  AW_24_NA3_add    {value PCWA_FullContract_add_ann*taf_cfs * ((AW_24_NA3_)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+
+define  UD_24_NU2_add_dv {alias UD_24_NU2_add kind 'ADD-URBAN-DEMAND' units 'CFS'}
+define  AW_24_NA2_add_dv {alias AW_24_NA2_add kind 'ADD-APPLIED-WATER' units 'CFS'}
+define  AW_24_NA3_add_dv {alias AW_24_NA3_add kind 'ADD-APPLIED-WATER' units 'CFS'}
+
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitD_NFA016_ABT002 {D_NFA016_ABT002 < WFann_NFA016_ABT002_remdv*taf_cfs} !Water Forum constraint

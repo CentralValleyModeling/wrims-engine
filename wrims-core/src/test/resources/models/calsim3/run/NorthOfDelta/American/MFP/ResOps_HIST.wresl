@@ -1,0 +1,253 @@
+!MFP Operating Rules
+!M.Bachman 12/2017
+
+!Storage requirements from FERC Middle Fork Project No.2079 License
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! French Meadows !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Duncan Tunnel is closed Jul 1 - Nov 1 (OASIS model)
+define D_DCC009_FRMDW_capacity {
+	case Closed 	{condition (range(month,JUL,SEP) .or. month==OCT) value 0.} 
+	case Otherwise 	{condition always value 400.}
+}	
+goal setD_DCC009_FRMDW_capacity	{D_DCC009_FRMDW < D_DCC009_FRMDW_capacity}
+
+
+! Level 2
+/*
+Condition 36 in previous MFP FERC license specifies the following minimum reservoir pool elevations:
+	Year Type				Date Range		Operating Pool (taf)
+ 	Folsom FNF > 2000 AF	10/1-5/31		50
+ 							6/1-9/30		60
+ 	Folsom FNF > 1200 AF	10/1-5/31		25
+ 							6/1-9/30		60
+ 	Folsom FNF < 1200 AF	10/1-5/31		8.7
+ 							6/1-9/30		28
+*/
+
+define S_FRMDWlevel2 {
+	case OctMay_1 {
+		condition range(month,Oct,May) .and. amer_annual >= 2000
+		value 50.
+		}
+	case OctMay_2 {
+		condition range(month,Oct,May) .and. amer_annual >  1200
+		value 25.
+		}
+	case OctMay_3 {
+		condition range(month,Oct,May) .and. amer_annual <  1200
+		value 8.7
+		}
+	case JunSep_1 {
+		condition range(month,Jun,Sep) .and. amer_annual >  1200
+		value 60.
+		}
+	case JunSep_2 {
+		condition range(month,Jun,Sep) .and. amer_annual <  1200
+		value 28.
+		}
+	}
+goal   SetFRMWDzone2 {S_FRMDW_2 < max(S_FRMDWlevel2-S_FRMDWlevel1,0.)}
+
+
+! Level 3
+/* 
+No recreational objectives defined in old FERC license
+Set to minimum monthly values 1996-2015, ignoring 2001-2002 which appear atypical
+*/
+!define S_FRMDWlevel3 {value max(S_FRMDWlevel2, 50.)} 
+define S_FRMDWlevel3 {
+	case Oct {
+		condition month == Oct value max(S_FRMDWlevel2, 42.4)}
+	case Nov {
+		condition month == Nov value max(S_FRMDWlevel2, 40.7)}
+	case Dec {
+		condition month == Dec value max(S_FRMDWlevel2, 41.4)}
+	case Jan {
+		condition month == Jan value max(S_FRMDWlevel2, 42.4)}
+	case Feb {
+		condition month == Feb value max(S_FRMDWlevel2, 42.9)}
+	case Mar {
+		condition month == Mar value max(S_FRMDWlevel2, 49.2)}
+	case Apr {
+		condition month == Apr value max(S_FRMDWlevel2, 60.3)}
+	case May {
+		condition month == May value max(S_FRMDWlevel2, 61.3)}
+	case Jun {
+		condition month == Jun value max(S_FRMDWlevel2, 56.1)}
+	case Jul {
+		condition month == Jul value max(S_FRMDWlevel2, 51.9)}
+	case Aug {
+		condition month == Aug value max(S_FRMDWlevel2, 44.9)}
+	case Sep {
+		condition month == Sep value max(S_FRMDWlevel2, 41.3)}
+		}
+
+
+goal   SetFRMWDzone3 {S_FRMDW_3 < max (S_FRMDWlevel3-S_FRMDWlevel2,0.)}
+
+
+! Level 6 
+/* 
+Physical top of reservoir
+Spill gates are open from November through March
+Spill gates are closed April through October
+*/
+define S_FRMDWlevel6 { 
+	case OpenGates { 
+		condition range(month,Nov,Mar)
+		value 111.602
+		} 
+	case ClosedGates {
+		condition always
+		value 134.993
+		}	
+	}
+goal   SetFRMWDZone6 {S_FRMDW_6 < max(S_FRMDWlevel6-S_FRMDWlevel5,0.)}
+
+
+! Level 5 
+/* 
+Discretionary releases for hydropower (and all other uses)
+*/
+define S_FRMDWlevel5 {value S_FRMDWlevel6}
+goal   SetFRMWDZone5 {S_FRMDW_5 < max(S_FRMDWlevel5-S_FRMDWlevel4,0.)}
+
+
+! Level 4 
+/* 
+Discretionary releases for deliveries, not hydropower
+In Cycle 1, this is set to the top of S_FRMDW_5
+As Level 4 weight > hydropower weights, this will prevent hydropower deliveries
+  (outside of spill) in Cycle 1
+*/
+/*define S_FRMDWlevel4 {
+		case MaySep {condition range(month,May,Sep) value S_FRMDWlevel3 +30.} !30.0 is a calibration factor based on historical data
+		case Oct    {condition month == Oct value S_FRMDWlevel3 +30.} 
+		case otherwise {condition always value S_FRMDWlevel3 +15.}}           !15.0 is a calibration factor based on historical data
+*/
+
+/*define S_FRMDWlevel4 {
+		case MaySep {condition range(month,May,Sep) value S_FRMDWlevel3 +30.} !30.0 is a calibration factor based on historical data
+		case Oct    {condition month == Oct value S_FRMDWlevel3 +30.} 
+		case otherwise {condition always value S_FRMDWlevel3 +15.}}           !15.0 is a calibration factor based on historical data
+		
+		
+goal   SetFRMWDZone4 {S_FRMDW_4 < max(S_FRMDWlevel4-S_FRMDWlevel3,0.)}*/
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Hell Hole !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Level 2
+/*
+Condition 36 in previous MFP FERC license specifies the following minimum reservoir pool elevations:
+	Year Type				Date Range		Operating Pool (taf)
+ 	Folsom FNF > 2000 AF	10/1-5/31		50
+ 							6/1-9/30		60
+ 	Folsom FNF > 1200 AF	10/1-5/31		25
+ 							6/1-9/30		60
+ 	Folsom FNF < 1200 AF	10/1-5/31		8.7
+ 							6/1-9/30		28
+*/
+
+define S_HHOLElevel2 {
+	case OctMay_1 {
+		condition range(month,Oct,May) .and. amer_annual >= 2000
+		value 50.
+		}
+	case OctMay_2 {
+		condition range(month,Oct,May) .and. amer_annual >  1200
+		value 25.
+		}
+	case OctMay_3 {
+		condition range(month,Oct,May) .and. amer_annual <  1200
+		value 5.5
+		}
+	case JunSep_1 {
+		condition range(month,Jun,Sep) .and. amer_annual >  1200
+		value 70.
+		}
+	case JunSep_2 {
+		condition range(month,Jun,Sep) .and. amer_annual <  1200
+		value 26.
+		}
+	}
+goal   SetHHOLEzone2 {S_HHOLE_2 < max(S_HHOLElevel2-S_HHOLElevel1,0.)}
+
+
+! Level 3
+/* 
+No recreational objectives defined in old FERC license
+Set to minimum monthly values 1996-2015, ignoring 2001-2002 which appear atypical
+*/
+!define S_HHOLElevel3 {value max(S_HHOLElevel2, 100.)} 
+
+define S_HHOLElevel3 {
+	case Oct {
+		condition month == Oct value max(S_HHOLElevel2, 57.3)}
+	case Nov {
+		condition month == Nov value max(S_HHOLElevel2, 55.5)}
+	case Dec {
+		condition month == Dec value max(S_HHOLElevel2, 54.5)}
+	case Jan {
+		condition month == Jan value max(S_HHOLElevel2, 65.6)}
+	case Feb {
+		condition month == Feb value max(S_HHOLElevel2, 77.4)}
+	case Mar {
+		condition month == Mar value max(S_HHOLElevel2, 82.2)}
+	case Apr {
+		condition month == Apr value max(S_HHOLElevel2, 101.9)}
+	case May {
+		condition month == May value max(S_HHOLElevel2, 108.5)}
+	case Jun {
+		condition month == Jun value max(S_HHOLElevel2, 97.3)}
+	case Jul {
+		condition month == Jul value max(S_HHOLElevel2, 81.8)}
+	case Aug {
+		condition month == Aug value max(S_HHOLElevel2, 65.7)}
+	case Sep {
+		condition month == Sep value max(S_HHOLElevel2, 49.4)}
+		}
+		
+goal  SetHHOLElevel3 {S_HHOLE_3 < max (S_HHOLElevel3-S_HHOLElevel2,0.)}
+
+! Level 6 
+/* 
+Physical top of reservoir
+*/
+define S_HHOLElevel6 {value 207.59}
+goal   SetHHOLEZone6 {S_HHOLE_6 < max(S_HHOLElevel6-S_HHOLElevel5,0.)}
+
+
+! Level 5 
+! Discretionary releases for hydropower (and all other uses)
+! defined in WaterForumMitigation1.wresl
+
+
+! Level 4 
+! Discretionary releases for deliveries, not hydropower
+! defined in WaterForumMitigation1.wresl
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define S_FRMDWlevel2dv {alias S_FRMDWlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel3dv {alias S_FRMDWlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel4dv {alias S_FRMDWlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel5dv {alias S_FRMDWlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel6dv {alias S_FRMDWlevel6 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_HHOLElevel2dv {alias S_HHOLElevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HHOLElevel3dv {alias S_HHOLElevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HHOLElevel4dv {alias S_HHOLElevel4 kind 'STORAGE-LEVEL' units 'TAF'} 
+!define S_HHOLElevel5dv {alias S_HHOLElevel5} !defined in WatForum_mitigation
+define S_HHOLElevel6dv {alias S_HHOLElevel6 kind 'STORAGE-LEVEL' units 'TAF'}

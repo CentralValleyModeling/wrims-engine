@@ -1,0 +1,238 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+ File Name: arcs-WUfactors.wresl
+ CalSim 3.0 System File
+ 
+ Purpose:
+ Define water use factors
+
+ NAMING TAKES THE FOLLOWING FORMS:
+ EVF_{Upstream CalSim 3.0 node}_{demand unit} - evaporative conveyance loss
+ DPF_{Upstream CalSim 3.0 node}_{demand unit} - deep percolation conveyance loss
+ LFF_{Upstream CalSim 3.0 node}_{demand unit} - lateral flow conveyance loss (from canal to toe drain)
+ OSF_{Upstream CalSim 3.0 node}_{demand unit} - spill conveyance loss (from canal to drain outfall - not available for reuse)
+ 
+ RUFR_{demand unit}	- reuse fraction for irrigated rice
+ RUFO_{demand unit} 	- reuse fraction for all other crops
+ RUFW_{demand unit} 	- reuse fraction for wetlands
+ RPF_{demand unit} 	- riparian and miscellaneous field/on-farm evaporative losses 
+ EV_{demand unit} 		- total evaporative loss associated with surface water conveyance 
+ DP_{demand unit} 		- total deep percolation loss associated with surface water conveyance  
+ LF_{demand unit} 		- total lateral flow loss associated with surface water conveyance  
+ OS_{demand unit} 		- total spill associated with surface water conveyance 
+ DL_{demand unit} 		- total loss associated with surface water conveyance (evaporation loss+deep percolation+lateral flow+spill) 
+ 
+
+ Edited ADraper, MWH, 08/01/11
+*/
+
+define TWAWRatio   {select TWAW from AgReuse where DU=1,month=month} !maximum reuse fraction for irrigated rice - all demand units
+define RUFR5	 	{select fraction from AgReuse where DU=5,month=month} !maximum reuse fraction for irrigated rice - Others
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District and UARP - Deliveries to EID Eastern and EID WESTERN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define DL_ELDID_NU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WTPRS1_ELDID_NU1  {value 0.0}
+define SF_WTPRS1_ELDID_NU1  {value 0.0}
+
+define EF_WTPRSA_ELDID_NU1  {value 0.0}
+define SF_WTPRSA_ELDID_NU1  {value 0.0}
+
+define DL_ELDID_NU2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NU2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NU2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WRT000_ELDID_NU2  {value 0.0}
+define SF_WRT000_ELDID_NU2  {value 0.0}
+
+define EF_WTPRS1_ELDID_NU2  {value 0.0}
+define SF_WTPRS1_ELDID_NU2  {value 0.0}
+
+define EF_WTPRSA_ELDID_NU2  {value 0.0}
+define SF_WTPRSA_ELDID_NU2  {value 0.0}
+
+
+define DL_ELDID_NA1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NA1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NA1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_JNKSN_ELDID_NA1  {value 0.0}
+define SF_JNKSN_ELDID_NA1  {value 0.0}
+
+define DL_ELDID_NA2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NA2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NA2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_JNKSN_ELDID_NA2  {value 0.0}
+define SF_JNKSN_ELDID_NA2  {value 0.0}
+
+define EF_WRT000_ELDID_NA2  {value 0.0}
+define SF_WRT000_ELDID_NA2  {value 0.0}
+
+define EF_EDC021_ELDID_NA2  {value 0.0}
+define SF_EDC021_ELDID_NA2  {value 0.0}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado County Other County Areas (OCA)  - Deliveries from Folsom    !!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!EDCOCA_NU1 - OCA Urban potentially supply by Folsom (N. SFA)
+define DL_EDCOCA_NU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NU1  {value 0.0}
+define SF_FOLSM_EDCOCA_NU1  {value 0.0}
+
+define EF_WRT000_EDCOCA_NU1  {value 0.0}
+define SF_WRT000_EDCOCA_NU1  {value 0.0}
+
+define DL_EDCOCA_NU3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NU3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NU3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WRT000_EDCOCA_NU3  {value 0.0}
+define SF_WRT000_EDCOCA_NU3  {value 0.0}
+
+!EDCOCA_NA1 - OCA Ag potentially supply by Folsom (N. SFA)
+define DL_EDCOCA_NA1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NA1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NA1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NA1  {value 0.0}
+define SF_FOLSM_EDCOCA_NA1  {value 0.0}
+
+define EF_WRT000_EDCOCA_NA1  {value 0.0}
+define SF_WRT000_EDCOCA_NA1  {value 0.0}
+
+define DL_EDCOCA_NA3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NA3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NA3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WRT000_EDCOCA_NA3  {value 0.0}
+define SF_WRT000_EDCOCA_NA3  {value 0.0}
+
+define EF_EDC021_EDCOCA_NA3  {value 0.0}
+define SF_EDC021_EDCOCA_NA3  {value 0.0}
+
+define EF_JNKSN_EDCOCA_NA3  {value 0.0}
+define SF_JNKSN_EDCOCA_NA3  {value 0.0}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stumpy Meadows (GDPUD) to water users within the GDPUD service area  !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define DL_GDPUD_NU    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_GDPUD_NU    {std kind 'EVAPORATIVE-LOSS' units 'CFS'} 
+define SL_GDPUD_NU   {std kind 'SEEPAGE-LOSS'     units 'CFS'} 
+
+define EF_WTPWAL_GDPUD_NU  {value 0.0}
+define SF_WTPWAL_GDPUD_NU  {value 0.05}
+
+define DL_GDPUD_PU    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_GDPUD_PU    {std kind 'EVAPORATIVE-LOSS' units 'CFS'} 
+define SL_GDPUD_PU   {std kind 'SEEPAGE-LOSS'     units 'CFS'} 
+
+define EF_WTPWAL_GDPUD_PU  {value 0.0}
+define SF_WTPWAL_GDPUD_PU  {value 0.0}
+
+define DL_GDPUD_NA    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_GDPUD_NA    {std kind 'EVAPORATIVE-LOSS' units 'CFS'} 
+define SL_GDPUD_NA   {std kind 'SEEPAGE-LOSS'     units 'CFS'} 
+
+define EF_GDD010_GDPUD_NA  {value 0.0}
+define SF_GDD010_GDPUD_NA  {value 0.12}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stumpy Meadows (GDPUD) and UARP to El Dorado County Other County Areas   !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!D_GDD010_EDCOCA_NU1
+define DL_GDPUD_EDCOCA_NU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_GDPUD_EDCOCA_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'} 
+define SL_GDPUD_EDCOCA_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'} 
+
+define EF_GDD010_EDCOCA_NU1  {value 0.0}
+define SF_GDD010_EDCOCA_NU1  {value 0.0}
+
+!D_GDD010_EDCOCA_NA1
+define DL_GDPUD_EDCOCA_NA1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_GDPUD_EDCOCA_NA1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'} 
+define SL_GDPUD_EDCOCA_NA1    {std kind 'SEEPAGE-LOSS'     units 'CFS'} 
+
+define EF_GDD010_EDCOCA_NA1  {value 0.0}
+define SF_GDD010_EDCOCA_NA1  {value 0.0}
+
+!=============================================
+! 24_NA2: Placer County Water Agency - Zone 5
+!=============================================
+define EVF_ABN010_24_NA2 {value 0.01} !evaporative loss fraction
+define DPF_ABN010_24_NA2 {value 0.12} !deep percolation loss fraction
+define LFF_ABN010_24_NA2 {value 0.09} !lateral flow loss fraction lateral flow
+define OSF_ABN010_24_NA2 {value 0.03} !canal operating spill fraction
+
+define RUFR_24_NA2       {value RUFR5*TWAWRatio}!reuse fraction for irrigated rice
+define RUFO_24_NA2       {value 0.05} !reuse fraction for all other crops
+define RPF_24_NA2        {value 0.05} !riparian and miscellaneous ET fraction
+
+define EV_24_NA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_24_NA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_24_NA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_24_NA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_24_NA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NA3: Placer County Water Agency - Zone 1
+!=============================================
+define EVF_STH003_24_NA3 {value 0.01} !evaporative loss fraction
+define DPF_STH003_24_NA3 {value 0.12} !deep percolation loss fraction
+define LFF_STH003_24_NA3 {value 0.09} !lateral flow loss fraction lateral flow
+define OSF_STH003_24_NA3 {value 0.03} !canal operating spill fraction
+
+define EVF_STH005_24_NA3 {value 0.01} !evaporative loss fraction
+define DPF_STH005_24_NA3 {value 0.12} !deep percolation loss fraction
+define LFF_STH005_24_NA3 {value 0.09} !lateral flow loss fraction lateral flow
+define OSF_STH005_24_NA3 {value 0.03} !canal operating spill fraction
+
+define EVF_WSE006_24_NA3 {value 0.01} !evaporative loss fraction
+define DPF_WSE006_24_NA3 {value 0.12} !deep percolation loss fraction
+define LFF_WSE006_24_NA3 {value 0.09} !lateral flow loss fraction lateral flow
+define OSF_WSE006_24_NA3 {value 0.03} !canal operating spill fraction
+
+define EVF_LBC049_24_NA3 {value 0.01} !evaporative loss fraction
+define DPF_LBC049_24_NA3 {value 0.12} !deep percolation loss fraction
+define LFF_LBC049_24_NA3 {value 0.09} !lateral flow loss fraction lateral flow
+define OSF_LBC049_24_NA3 {value 0.03} !canal operating spill fraction
+
+define RUFR_24_NA3       {value RUFR5*TWAWRatio}!reuse fraction for irrigated rice
+define RUFO_24_NA3       {value 0.05} !reuse fraction for all other crops
+define RPF_24_NA3        {value 0.05} !riparian and miscellaneous ET fraction
+
+define EV_24_NA3         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_24_NA3         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_24_NA3         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_24_NA3         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_24_NA3         {std kind 'DELIVERY-LOSS' units 'CFS'}

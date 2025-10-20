@@ -1,0 +1,662 @@
+! American River Flow Management Standard
+
+!	Edited by Puneet Khatavkar on 7/17/2019
+
+! *** Compute the American River Index (ARI)  ***
+! The ARI is the forecasted water year unimpaired flow for the American River at Folsom, less spills.
+!Determine the volume of spills 
+Define Fol_spill_vol {
+    case FebMay {
+        condition month >= FEB .and. month <=MAY
+        sum(i=prevOCT,-1,1)
+        max(0, C_Folsm(i) - 8000)*cfs_taf(i) }           !Add up spills since October.  Assume all releases from Folsom Reservoir over 8000 cfs are spills
+    case JunSep {
+        condition month >=JUN .and. month<=SEP
+        sum(i=prevOCT, prevAPR) 
+        max(0, C_Folsm(i) - 8000)*cfs_taf(i) }           !Add up spills between October and May.  Assume all releases from Folsom Reservoir over 8000 cfs are spills
+    case Oct  {
+        condition month == OCT .and. wateryear>BgnWy
+        sum (i=PrevOCT,PrevApr)
+        max(0, C_Folsm(i) - 8000)*cfs_taf(i) }           !Add up spills between previous year's October and May.  Assume all releases from Folsom Reservoir over 8000 cfs are spills
+    case NovJan {
+        condition month >=NOV .and. month <= JAN .and. wateryear >BgnWy
+        sum(i= prevOct - 12, PrevApr,1 )            !Add up spills between October and May for the previous water year
+        max(0, C_Folsm(i) - 8000)*cfs_taf(i) }           !Add up spills since October.  Assume all releases from Folsom Reservoir over 8000 cfs are spills
+    case other {
+        condition   always
+        value       0}
+    }
+Define Fol_spill_vol_dv {alias Fol_spill_vol kind 'DEBUG' units 'TAF'}  ! write Fol_spill_vol to DV file  
+
+!Define the forecasted unimpaired flow  
+define Amer_B120dv {std kind 'FLOW' units 'TAF'}  
+Define Amer_B120  { 
+    case firstMon { 
+      Condition   WaterYear == BgnWY .and. month == Oct
+        value (sum(i=-Sep-month+1, -Oct-month+1, 1) UNIMP_FOLS(i))}	
+    case FebMay  {
+        Condition   Month>=Feb .and. month<=May
+        value (sum(i=Oct-month,-1,1)UNIMP_FOLS(i))+ (sum(i=0, Sep-month, 1) I_Folsm_fm_med[Forecast2](i)) }
+    case JunSep {
+      Condition   Month>=Jun .and. month<=Sep
+        value Amer_B120dv(-1)}
+    case OctJan {                                       
+        condition   always                              !Need to use the previous water year forecast in October through January    
+        value Amer_B120dv(-1)}
+    }
+
+goal set_Amer_B120dv {Amer_B120dv=Amer_B120}  
+
+Define ARI_Index {value max(Amer_B120 - Fol_spill_vol , 0) }    !The American River Index is the WY forecast less spills to date.
+Define ARI_Index_dv {alias ARI_Index kind 'FLOW' units 'TAF'}  ! write ARI Index to DV file
+
+define minflowFMPJan_tmp {  !Initial MRR in January
+        case Jan{
+                condition       month == JAN                        ! Look up Jan flows in table MRR_Schedule using the SRI (Sacramento River Index)
+                select          MRR_Flow
+                from            MRR_Schedule
+                given           ARI=SacRiverIndex_75Exc 
+                use             linear
+                where           month=month }
+        case other{
+                condition       always
+                value           0.}}
+				
+define minflowFMP_tmp {
+        case FebDec {
+                condition       month >= FEB .or. month <=DEC                               ! Look up February-December flows in table MRR_Schedule using the index flow Amer_FNF
+                select          MRR_Flow
+                from            MRR_Schedule
+                given           ARI=ARI_Index 
+                use             linear
+                where           month=month }  
+        case other {
+                condition           always
+                value               0.}
+}				
+Define minflowFMP_tmp_dv {alias minflowFMP_tmp kind 'FLOW' units 'CFS'}  ! write minflowFMP_tmp to DV file
+!********** Redd Dewatering Protections ********
+! Chinook Redd Protections
+Define minflowJanFeb_min {
+        case Jan {
+                condition       month == JAN
+                value           0.7*C_NTOMA_mif(-1)  }   !Limit minflow to 70% of December MRR
+        case Feb {
+                condition       month == FEB
+                value           0.7*C_NTOMA_mif(-2)  }   !Limit minflow to 70% of December MRR
+        case other {
+                condition       always
+                value           0. }}
+            
+! Steelhead Redd Protections
+define C_NTOMA_MIF_RDPA_base {std kind 'FLOW' units 'CFS'}       
+Define C_NTOMA_MIF_RDPA_base_Init {
+    case Feb{
+        condition month==FEB
+        value C_NTOMA_mif(-1)}       !use January's MRR as the RDPA base flow
+    case Mar {
+        condition month==MAR
+        value max(C_NTOMA_mif(-1), C_NTOMA_MIF_RDPA_Base(-1))}    !use the greater of the January or February's MRR as the RDPA base flow
+    case AprMay {
+        condition month >= Apr .and. month <= MAY
+        value C_NTOMA_MIF_RDPA_Base(-1)}
+    case other {
+        condition always
+        value 0. }
+}
+Goal Set_C_NTOMA_MIF_RDPA_Base {C_NTOMA_MIF_RDPA_base = C_NTOMA_MIF_RDPA_base_Init}
+
+define minflowFebMay_min{           ! lookup the minimum allowable flow in the LAR for Steelhead given the greater of the January or February MRR.
+        case FebMay{
+                condition       month >=FEB .and. month <=MAY                   
+                select          MinAllowMRR
+                from            AmerSteelhead
+                given           BaseMRR=C_NTOMA_MIF_RDPA_base_Init
+                use             linear}
+        case other {
+                condition           always
+                value               0.}
+}
+!******* End of Redd Dewatering Protections *******
+
+!******* Pulse Flow Calculations *******
+Define minflowFMPFebMay_tmp {
+    case FebMay {
+        condition       month>=FEB .and. month<=MAY
+        value           max(minflowJanFeb_min, minflowFebMay_min, minflowFMP_tmp) }
+    case other {
+        condition       always
+        value           0. }
+}
+
+Define minflowFMPMarFlag_init {                                     !Setting a flag for pulse flows
+    case NoSet {
+        condition   month <= FEB .or. month >= JUL
+        Value       0. }
+    case MarSet {           !The pulse occurs if the March MRR is between 1000 and 1500 cfs
+        Condition   month == MAR .and. minflowFMPFebMay_tmp >= 1000. .and. minflowFMPFebMay_tmp <= 1500 
+        Value       1. }
+    case MarNoSet{
+        condition   month == MAR
+        value       0. }
+    case AprMayNoSet{   
+        Condition   month >= APR .and. month <=JUN .and. minflowFMPMarFlag(-1) == 1
+        Value   1. }
+    case other {
+        condition   always
+        Value       0 }
+    }
+    
+Define minflowFMPMarFlag {std kind 'FLAG' units 'NONE'}
+Goal Set_minflowFMPMarFlag {minflowFMPMarFlag = minflowFMPMarFlag_Init}
+
+define MarPulseFlow {       !Computing the maximum flow for the pulse
+    case Mar_Pulse{
+        condition       month == MAR                    
+        value           minflowFMPMarFlag_Init * min(4000., 3 * minflowFMPFebMay_tmp) }     !the pulse is a maximum of 4000 cfs or 3 x the MRR
+    case other{
+        condition       always
+        value           0.}
+    }
+    
+define MarPulseVol_Init {       !Computing the volume of the pulse and its downramp
+    case Mar {
+        condition       month == MAR                    !The pulse has a two-day peak, followed by a 500 cfs/day reduction back to MRR
+        value           max(0., minflowFMPMarFlag_Init * ((MarPulseFlow-minflowFMPFebMay_tmp)*2. + (max(minflowFMPFebMay_tmp,MarPulseFlow-500.)-minflowFMPFebMay_tmp) + (max(minflowFMPFebMay_tmp,MarPulseFlow-1000.)-minflowFMPFebMay_tmp) 
+                        + (max(minflowFMPFebMay_tmp,MarPulseFlow-1500.)-minflowFMPFebMay_tmp) + (max(minflowFMPFebMay_tmp,MarPulseFlow-2000.)-minflowFMPFebMay_tmp)
+                        + (max(minflowFMPFebMay_tmp,MarPulseFlow-2500.)-minflowFMPFebMay_tmp) + (max(minflowFMPFebMay_tmp,MarPulseFlow-3000.)-minflowFMPFebMay_tmp)
+                        + (max(minflowFMPFebMay_tmp,MarPulseFlow-3500.)-minflowFMPFebMay_tmp) + (max(minflowFMPFebMay_tmp,MarPulseFlow-4000.)-minflowFMPFebMay_tmp)) * 60. * 60. * 24. / (43560. * 1000.))}
+    case AprJun {
+        condition       month >=APR .and. month <=JUN
+        value           MarPulseVol(-1) }
+    case other{
+        condition       always
+        value           0.}
+    }
+define MarPulseVol {std kind 'Pulse_Volume' units 'TAF'}
+Goal Set_MarPulseVol {MarPulseVol = MarPulseVol_Init}
+
+define minflowFMP_AprJun_Pulse_Red {        !Volume to reduce each month's MRR by to accomodate March pulse
+    case OctJan {
+        condition       month >= OCT .and. month <= MAR
+        Value           0. }
+    case AprJun_Pulse {
+        condition       month >= APR .and. month <= JUN             ! if the pulse was already triggered in a previous month, trigger reduction in subsequent months
+        value           minflowFMPMarFlag_Init * (MarPulseVol_Init * 1000 / 91) * 43560 / (60 * 60 * 24) }      !compute the daily flow change for Apr, May, and June.
+    case other {
+        condition   always
+        value       0.}
+    }
+
+define minflowFMP_Mar_Pulse {
+    case March_Pulse {
+        condition       month == MAR .and. minflowFMPFebMay_tmp >= 1000. .and. minflowFMPFebMay_tmp <= 1500.
+        value           MarPulseVol_Init * taf_cfs }
+    case other  {
+        condition       always
+        value           0. }
+    }
+!***** End of Pulse Flow Calculations *****
+
+
+! ***** Minimum release requirement from Nimbus *****
+define minflowFMPAmer {
+        case Oct {
+                condition       month == OCT
+                value           min (minflowFMP_tmp, 1500.)}                !Max MRR in Oct is 1500 cfs
+        case Nov_Dec {
+                condition       month >=NOV .and. month <=DEC  
+                value           minflowFMP_tmp}
+        case Jan    {           
+                condition       month == JAN
+                value           min(C_NTOMA_mif(-1), max (minflowJanFeb_min, minflowFMPJan_tmp, 500.))}      
+        case Feb {          
+                condition       month ==FEB
+                value           max (minflowJanFeb_min, minflowFebMay_min, minflowFMPFebMay_tmp, 500.)}
+        case Mar {
+                condition       month == MAR
+                value           max (minflowFMPFebMay_tmp, minflowFMPFebMay_tmp + minflowFMP_Mar_Pulse, 500.)}      !Pulse flow can make the MRR higher than 1,750 cfs, 
+        case AprMay {           
+                condition       month >=Apr .and. month <=MAY 
+                value           max (minflowFebMay_min, minflowFMPFebMay_tmp - minflowFMP_AprJun_Pulse_Red, 500.)}              
+        case Jun {
+                condition       month == JUN                                ! Look up flows in table CO_Schedule using the index flow Amer_FNF
+                value           minflowFMP_tmp - minflowFMP_AprJun_Pulse_Red}
+        case Jul {
+                condition       month == JUL 
+                value           minflowFMP_tmp}             
+        case other {
+                condition       always
+                value           C_NTOMA_mif(-1)}     
+}
+Define minflowFMPAmer_dv {alias minflowFMPAmer kind 'FLOW' units 'CFS'}  ! write minflowFMPAmer to DV file
+! ***** End of Minimum Flow Calculations *****
+!**************************************************************************************************************
+!****Water Forum code to limit excess flows when storage is forecast to be below a carryover storage target****
+!**************************************************************************************************************
+
+!**** Set the end-of-May Storage Target *****
+Define EOMay_Target_Init {
+    Case FebMay {
+        Condition   Month>=FEB .and. month<=MAY
+        Select      Storage
+        From        EOMay_Target    
+        Given       ARI = ARI_Index
+        use         linear  }
+    Case Other {
+        Condition   always
+        value       0.}
+}
+
+Define EOMay_Target {value min(EOMay_Target_Init, 900.)}
+
+define EOMay_Target_dv {alias EOMay_Target kind 'debug' units 'taf'}
+
+!*** End of End-of-May Storage Target Calculation ****
+
+!***** Set the End-of-December Storage Target *****
+! The current year's UIFR volume is defined in the Demands70.wresl file
+! Defining the previous year's UIFR Volume
+/*
+define UIFR_YR { ! Water Forum Dry Year Cutbacks are based on Unimpaired Flow into Folsom Res between Mar and Nov.
+    case after_October {
+          condition month >= OCT .and. month < MAR                  !Use UIFR value for March to February
+          select UIFR 
+          from UIFR 
+          where year = Wateryear - 1.} 
+    case rest {
+          condition always
+          select UIFR 
+          from UIFR 
+          where year = Wateryear}
+}   
+define UIFR_YR_dv {alias UIFR_YR kind 'alias' units 'none'}  ! write unimpaired inflow to Folsom reservoir to DV file
+
+Define UIFR_1YRPrev {            
+    case after_October {
+        condition month >= OCT .and. month < FEB .and. wateryear >= 1923                !Use UIFR value for February to January
+              select UIFR 
+              from UIFR 
+              where year = Wateryear - 2.} 
+    case after_Feb {
+        condition month >=FEB .and. wateryear >= 1922
+              select UIFR 
+              from UIFR 
+              where year = Wateryear - 1.}
+    case rest {
+        condition always
+              select UIFR 
+              from UIFR 
+              where year = Wateryear}
+}   
+! Defining the two years prior UIFR volume
+Define UIFR_2YRPrev {            
+    case after_October {
+        condition month >= OCT .and. month < FEB .and. wateryear >= 1924                
+              select UIFR 
+              from UIFR 
+              where year = Wateryear - 3.} 
+    case after_Feb {
+        condition month >=FEB .and. wateryear >= 1923
+            select UIFR
+            from UIFR
+            where year = Wateryear - 2. }
+    case rest {
+        condition always
+              select UIFR 
+              from UIFR 
+              where year = Wateryear  }
+} 
+Define UIFR_3YRPrev {            
+    case after_October {
+        condition month >= OCT .and. month < FEB .and. wateryear >= 1925                
+              select UIFR 
+              from UIFR 
+              where year = Wateryear - 4.} 
+    case after_Feb {
+        condition month >=FEB .and. wateryear >= 1924
+            select UIFR
+            from UIFR
+            where year = Wateryear - 3. }
+    case rest {
+        condition always
+              select UIFR 
+              from UIFR 
+              where year = Wateryear  }
+}
+*/
+Define EODec_Target{
+/*!Use consistent target for all years for ROC on LTO
+    case confyr {
+        condition    UIFR_Yr <= 400
+        value        230.  }                                    ! if it is a conference year, UIFR<=400, set Target to 230 TAF
+    case TwoYrConf  {
+        condition (UIFR_YR + UIFR_1YRPrev) <=1200               ! If the two-year average UIFR is less than 600, set Target to 230
+        value       230.  }     
+    case ThreeYrConf  {
+        condition (UIFR_YR + UIFR_1YRPrev + UIFR_2YRPrev) <=2700    !If the three-year average UIFR is less than 900, set the Target to 230
+        value       230.  }
+    case FourYrConf {
+        condition (UIFR_YR + UIFR_1YRPrev + UIFR_2YRPrev + UIFR_3YRPrev) <=4400 !If the three-year average UIFR is less than 1100, set the Target to 230
+        value       230. }
+*/    case other {
+        condition   always
+!        value       250.  }
+        value       275.  }
+}
+
+define EODec_Target_dv {alias EODec_Target kind 'debug' units 'taf'}
+
+! *** Explicit MRR Calculation for storage forecasting purposes ***
+define minflowFMPAmer_FebMar_init {
+        select          MRR_Flow
+        from            MRR_Schedule
+        given           ARI=ARI_index 
+        use             linear
+        where           month=6}        !Use March as the lookup month
+define minflowFMPAmer_FebMar {value min(1750.,minflowFMPAmer_FebMar_init)}
+
+define minflowFMPAmer_AprJun_init {
+        select          MRR_Flow
+        from            MRR_Schedule
+        given           ARI=ARI_index 
+        use             linear
+        where           month=9}        !Use June as the lookup month
+define minflowFMPAmer_AprJun {value min(1500.,minflowFMPAmer_AprJun_init)}
+
+define minflowFMPAmer_JulSep_init {
+        select          MRR_Flow
+        from            MRR_Schedule
+        given           ARI=ARI_index 
+        use             linear
+        where           month=10}       !Use July as the lookup month
+define minflowFMPAmer_JulSep {value min(1750.,minflowFMPAmer_JulSep_init)}
+
+define minflowFMPAmer_Oct_init {                            ! Look up Oct flows in table CO_Schedule using the index flow Amer_FNF
+                select          MRR_Flow
+                from            MRR_Schedule
+                given           ARI=ARI_index 
+                use             linear
+                where           month=1}  !Lookup OCT value
+define minflowFMPAmer_Oct { value min(minflowFMPAmer_OCT_init, 1500.)}  ! max flow in Sep and Oct is 1500 cfs
+
+define minflowFMPAmer_NovDec {
+        select          MRR_Flow
+        from            MRR_Schedule
+        given           ARI=ARI_index 
+        use             linear
+        where           month=2 }       !Use November as the lookup month
+
+!*** end of explicit calculation of MRR for storage forecasting ***
+
+! *** Calculate the forecasted evap from Folsom during June-Dec ***
+! Computing total evaporation volume between current month and the end of December
+define evap_coef {  !use for S_FOLSM_carryover
+        select      coef
+        from        FolEvapCoef
+        where       month=month}
+
+define Evap_Folsom {
+    case JunDec { 
+        condition   month >= JUN .or. month <= DEC
+        value       S_FOLSM(-1) * evap_coef }
+    case other {
+        condition   always
+        value       0.0}
+}
+
+!Compute evaporation for each individual month
+define evap_coef_monthly { !use for S_FOLSMmin
+        select      coef_monthly
+        from        FolEvapCoef
+        where       month=month}
+
+define Evap_Folsom_monthly {
+    case JunDec {
+        condition   month >= JUN .or. month <= DEC
+        value       S_FOLSM(-1) * evap_coef_monthly }
+    case other {
+        condition   always
+        value       0.0}
+}
+!*** End of Evaporation Forecast ***
+
+
+
+define S_FOLSM_DemandFrcst {                           
+        case FebMay {                   !calculate Folsom diversions + evaporation for February through May.
+            condition range (month, FEB, MAY)             
+                value min(UD_26N_PU1_NowMay,  perdem_UD_26N_PU1_NowMay * waterlimit_UD_26N_PU1 )
+        	    + min( UD_26N_PU2_NowMay + UD_26N_PU3_NowMay, perdem_UD_26N_PU2a3_NowMay * waterlimit_UD_26N_PU2a3)
+        	    + min( UD_26S_PU1_NowMay, perdem_UD_26S_PU1_NowMay * waterlimit_UD_26S_PU1 )
+        	    + min( UD_26S_PU2_NowMay, perdem_UD_26S_PU2_NowMay * waterlimit_UD_26S_PU2 )
+        	    + min( UD_26S_PU3_NowMay, perdem_UD_26S_PU3_NowMay * waterlimit_UD_26S_PU3 )
+        	    + min( UD_60N_PU_NowMay, perdem_UD_60N_PU_NowMay * waterlimit_UD_60N_PU )
+        	    + min( UD_ELDID_NU3_NowMay, perdem_UD_ELDID_NU3_NowMay * waterlimit_UD_ELDID_NU3 )
+        	    + min( UD_26N_NU1_NowMay, perdem_UD_26N_NU1_NowMay * waterlimit_UD_26N_NU1 )
+        	    + UD_26S_NU4_NowMay
+        	    + min( PCWATotals_NowMay, perdem_PCWA_NowMay * waterlimit_PCWA)}    
+        case JunDec {
+			condition range (month, JUN, DEC) .and. wateryear < EndWY      !Between May and September.  No End-of-December ops in 2015            
+                value min( UD_26N_PU1_NowDec, perdem_UD_26N_PU1_NowDec * waterlimit_UD_26N_PU1  )
+        	    + min( UD_26N_PU2_NowDec + UD_26N_PU3_NowDec , perdem_UD_26N_PU2a3_NowDec * waterlimit_UD_26N_PU2a3)
+        	    + min( UD_26S_PU1_NowDec , perdem_UD_26S_PU1_NowDec * waterlimit_UD_26S_PU1  )
+        	    + min( UD_26S_PU2_NowDec, perdem_UD_26S_PU2_NowDec * waterlimit_UD_26S_PU2  )
+        	    + min( UD_26S_PU3_NowDec , perdem_UD_26S_PU3_NowDec * waterlimit_UD_26S_PU3  )
+        	    + min( UD_60N_PU_NowDec , perdem_UD_60N_PU_NowDec * waterlimit_UD_60N_PU   )
+        	    + min( UD_ELDID_NU3_NowDec , perdem_UD_ELDID_NU3_NowDec * waterlimit_UD_ELDID_NU3     )
+        	    + min( UD_26N_NU1_NowDec , perdem_UD_26N_NU1_NowDec * waterlimit_UD_26N_NU1  )
+        	    + UD_26S_NU4_NowDec
+				+ min( PCWATotals_NowDec, perdem_PCWA_NowDec * waterlimit_PCWA)}  
+        case other{ 
+                condition       always
+                value           0. }
+}
+
+define S_FOLSM_DemandFrcst_dv {alias S_FOLSM_DemandFrcst kind 'Demand' units 'taf'}
+
+Define S_FOLSM_DepletionFrcst {													!**** CHANGE TO AMERFORECAST FROM OTHER FILE
+    case FebMay {
+        Condition month>=FEB .and. month <=MAY
+        value S_FOLSM_DemandFrcst + Evap_Folsom }                                    
+    case JunDec {
+        Condition month >=JUN .or. month <=DEC
+        value S_FOLSM_DemandFrcst + Evap_Folsom  }   
+    case Other {
+        condition always
+        value 0.}
+}       
+
+define S_FOLSM_DepletionFrcst_dv {alias S_FOLSM_DepletionFrcst kind 'Depletion' units 'taf'}
+
+define FOLSM_INFLOW {timeseries kind 'INFLOW' units 'TAF'}  !Inflow is a timeseries developed from a prior model run (C_NFA011 +  C_SFA011 + CT_FairOaks + I_FOLSM)
+ 
+Define S_FOLSM_InflFrcst_FebSep {
+    case FebMay {                                   ! Forecast the inflow for the current month through the end of May. (For February through May)  
+        condition   month >=FEB .and. month <= MAY
+         sum(i=1,MAY-month,1) FOLSM_INFLOW(i)}
+    case JunSep {                                   ! Forecast the inflow for the current month through the end of September. (For June through September)
+        condition   month >=JUN .and. month <= SEP .and. wateryear < EndWY           
+        sum(i=1,SEP-month,1)  FOLSM_INFLOW(i)}
+    case Other {
+        condition   always
+        value       0.0}
+}
+define S_FOLSM_InflFrcst_FebSep_dv {alias S_FOLSM_InflFrcst_FebSep kind 'debug' units 'taf'}
+
+!Replacement logic to forecast local inflow to Folsom Reservoir. UNDER IMPROVEMENT, 01/2024 NOsorio
+/*Define I_FOLSM_Fcst {
+	case FebMay {condition	month >=FEB .and. month <= MAY 	sum(i=1,MAY-month,1) (I_FOLSM(i) + CT_FAIROAKS_SV(i))*cfs_taf(i)}
+	case JunSep {condition	month >=JUN .and. month <= SEP .and. wateryear < EndWY	sum(i=1,SEP-month,1) (I_FOLSM(i)+CT_FAIROAKS_SV(i))*cfs_taf(i)}
+    case LastYr {condition	month >=JUN .and. month < SEP sum(i=1,SEP-month,1) (I_FOLSM(i)+CT_FAIROAKS_SV(i))*cfs_taf(i)}
+	case Other 	{condition	always 							value 0.0}
+}
+Define I_FOLSM_FCST_DV {alias I_FOLSM_Fcst kind 'FORECAST' units 'TAF'}
+
+Define S_FOLSM_InflFrcst_FebSep_old {value max(0., MFP_Release_Fcst + SFA_Release_Fcst + I_FOLSM_Fcst)}
+define S_FOLSM_InflFrcst_FebSep_old_dv {alias S_FOLSM_InflFrcst_FebSep kind 'debug' units 'taf'}*/
+
+!90% exceedance forecast of fall flows, derived from year with 90% exceedance flows in Fall in FOLSM_INFLOW timeseries
+
+define Oct90flow {select Histflow from AR_90EXCFALL where month = 1}
+define Nov90flow {select Histflow from AR_90EXCFALL where month = 2}
+define Dec90flow {select Histflow from AR_90EXCFALL where month = 3}
+/* !UNDER IMPROVEMENT, 01/2024 NOsorio
+define Oct90flow {value FOL_Oct_90pct_Fcst }
+define Nov90flow {value FOL_Nov_90pct_Fcst }
+define Dec90flow {value FOL_Dec_90pct_Fcst }
+*/
+Define S_FOLSM_InflFrcst_OctDec {
+    case MaySep {
+        condition month >= JUN .and. month <= SEP
+        value       Oct90flow + Nov90flow + Dec90flow }                             !Using 90% exceedance inflow forecast
+    case Oct {
+        condition   month == OCT
+        value       Nov90flow + Dec90flow   }                               !Using 90% exceedance inflow forecast
+    case Nov {
+        condition   month == NOV
+        value       Dec90flow}                                          !Using 90% exceedance inflow forecast
+    case other{
+        condition   always
+        value       0.0}  
+}
+
+define S_FOLSM_InflFrcst_OctDec_dv {alias S_FOLSM_InflFrcst_OctDec kind 'debug' units 'taf'}
+
+define S_FOLSM_InflFrcst {
+    case FebMay {
+        condition   month >= FEB .and. month <= MAY
+        value       S_FOLSM_InflFrcst_FebSep  }
+    case JunSep  {
+        condition   month >= JUN .and. month <= SEP
+        value       S_FOLSM_InflFrcst_FebSep + S_FOLSM_InflFrcst_OctDec }
+    case OctDec  {
+        condition   month >=OCT .and. month <=NOV
+        value       S_FOLSM_InflFrcst_OctDec }
+    case other{
+        condition   always
+        value       0.0}
+}
+
+define S_FOLSM_InflFrcst_dv {alias S_FOLSM_InflFrcst kind 'debug' units 'taf'}
+
+!  Using 90% exceedance of Folsom inflows 
+Define S_FOLSM_OctDecInf{    
+    case Oct{
+        condition   month == OCT
+        value       Oct90flow }
+    case Nov{
+        condition   month == NOV
+        value       Nov90flow }
+    case Dec{
+        condition   month==DEC
+        value       Dec90flow}
+    
+    ! Use this regardless of perfect foresight or forecast
+    case other{
+        condition   always
+        value       0.0}
+}
+define S_FOLSM_OctDecInf_dv {alias S_FOLSM_OctDecInf kind 'debug' units 'taf'}
+
+! Forecast minimum MRR volume from February through target storage month (May or December) for use in forecasting storage - Used to identify the target storage at the end of the current month
+define FMPfrcst {
+    case Feb{
+        condition       month==FEB
+        value           (minflowFMPAmer_FebMar *31. + minflowFMPAmer_AprJun *( 30. + 31.)) *1.9835/1000. }
+    case Mar{
+        condition       month==MAR
+        value           minflowFMPAmer_AprJun *( 30. + 31.) *1.9835/1000. }
+    case Apr{
+        condition       month==APR
+        value           minflowFMPAmer_AprJun *( 31.) *1.9835/1000. }  
+    case Jun{               
+        condition       month==JUN
+        value           (minflowFMPAmer_JulSep *( 31. + 30. + 31.) + minflowFMPAmer_Oct * (31.) + minflowFMPAmer_NovDec*(30. + 31.))*1.9835/1000.}     
+    case Jul{               
+        condition       month==JUL
+        value           (minflowFMPAmer_JulSep *(31. + 30.) + minflowFMPAmer_Oct *(31.) + minflowFMPAmer_NovDec*(30. + 31.))*1.9835/1000.}     
+    case Aug{               
+        condition       month==AUG
+        value           (minflowFMPAmer_JulSep * (30.) + minflowFMPAmer_Oct * (31.) + minflowFMPAmer_NovDec *(30. + 31.))*1.9835/1000.}     
+    case Sep{               
+        condition       month==SEP
+        value           (minflowFMPAmer_Oct * (31.) + minflowFMPAmer_NovDec*(30. + 31.))*1.9835/1000.}     
+    case Oct{               
+        condition       month==OCT
+        value           minflowFMPAmer_NovDec* (30. + 31.) *1.9835/1000.}     
+    case Nov{               
+        condition       month==NOV
+        value           minflowFMPAmer_NovDec* (31.) *1.9835/1000.}                 
+    case other{
+        condition       always
+        value           0.}
+        }
+
+! S_FOLSM_Carryover is the minimum storage required at the end of a given month to ensure end-of-DEC Folsom Storage Target is met, assuming releases are only for MRR, and diversions and evaporation occur as forecasted.
+define S_FOLSM_carryover {
+    case FebApr {
+        condition       month >=FEB .and. month <=Apr
+        value           max(90., min(S_FOLSMlevel5, EOMay_Target - S_FOLSM_InflFrcst + S_FOLSM_DepletionFrcst + FMPfrcst))}
+    case May {
+        condition       month == MAY
+        value           EOMay_Target  }
+    case JunNov {       
+        condition       month >= JUN .or. month <= NOV
+        value           max(90., min(S_FOLSMLevel5, EODec_Target - S_FOLSM_InflFrcst + S_FOLSM_DepletionFrcst + FMPfrcst)) }   !a maximum of either 90 TAF (bottom out the reservoir) or desired storage (End of Dec Storage target) - available water in current month + min flow requirement.
+    case Dec {
+        condition       month == Dec
+        value           EODec_Target }
+    case other{
+        condition       always
+        value           S_FOLSMLevel5}
+}
+define S_FOLSM_carryover_DV {alias S_FOLSM_carryover kind 'Storage' units 'taf'}
+
+! define the initial estimate of end of month Folsom Reservoir storage for the current month  
+! Previous month's storage + inflows - diversions - evaporation - MIF
+define S_FOLSMinit {
+        value     min(  S_FOLSMLevel5, S_FOLSM(-1) + (C_NFA011[UpperAmerican] + C_SFA011[UpperAmerican])*cfs_taf + CT_FAIROAKS_SV + I_FOLSM
+                - min(  UD_26N_PU1 * cfs_taf, perdem_UD_26N_PU1* waterlimit_UD_26N_PU1  )
+        	    - min( (UD_26N_PU2 + UD_26N_PU3) * cfs_taf, perdem_UD_26N_PU2a3 * waterlimit_UD_26N_PU2a3)
+        	    - min(  UD_26S_PU1 * cfs_taf, perdem_UD_26S_PU1* waterlimit_UD_26S_PU1  )
+        	    - min(  UD_26S_PU2 * cfs_taf, perdem_UD_26S_PU2* waterlimit_UD_26S_PU2  )
+        	    - min(  UD_26S_PU3 * cfs_taf, perdem_UD_26S_PU3* waterlimit_UD_26S_PU3  )
+        	    - min(  UD_60N_PU  * cfs_taf, perdem_UD_60N_PU * waterlimit_UD_60N_PU   )
+        	    - min(  UD_ELDID_NU3 * cfs_taf, perdem_UD_ELDID_NU3* waterlimit_UD_ELDID_NU3 )
+        	    - min(  UD_26N_NU1 * cfs_taf, perdem_UD_26N_NU1* waterlimit_UD_26N_NU1  )
+        	    - UD_26S_NU4        	    
+        	    - min( (AWO_24_NA2*DFo_24_NA2 + AWR_24_NA2*DFr_24_NA2 + 2.5*AWO_24_NA3*DFo_24_NA3 + 2.5*AWR_24_NA3*DFr_24_NA3 + UD_24_NU2) * cfs_taf, perdem_PCWA * waterlimit_PCWA )
+                - Evap_Folsom_monthly - minflowFMPAmer*cfs_taf )} 
+ 						
+define S_FOLSMinit_DV {alias S_FOLSMinit kind 'STORAGE' units 'taf'}
+
+! define max water release from Folsom without jeopardizing the carryover storage target
+define C_NTOMA_max { 
+    case FebDec {
+        condition       month>=FEB .or. month<=DEC
+        value           max(minflowFMPAmer, (S_FOLSMinit - S_FOLSM_carryover) * taf_cfs + minflowFMPAmer) }   ! initial estimate of Folsom Storage - carryover water + min flow requirement. 
+    case other{
+        condition       always
+        value           99999}
+    }
+define C_NTOMA_max_DV   {alias C_NTOMA_max kind 'flow' units 'cfs'}
+
+goal S_FOLSM_high {  
+    LHS C_NTOMA
+    case FebMay {
+        condition   month>=FEB .and. month<=MAY                 
+        RHS C_NTOMA_max
+        LHS < RHS   penalty 0
+        LHS > RHS   penalty 1300}      
+    case other {
+        condition   always      
+        RHS         C_NTOMA_max
+        LHS < RHS   penalty 0
+        LHS > RHS   penalty 1300}       
+}
+define C_NTOMA_fmp_mif {std kind 'INIT_FLOW' units 'CFS'}    
+goal set_C_NTOMA_fmp_mif {C_NTOMA_fmp_mif = minflowFMPAmer}             
+define C_NTOMA_fmp {alias minflowFMPAmer kind 'FLOW' units 'CFS'}     
+
+!*******END OF EDIT ON 7_18_2019*******

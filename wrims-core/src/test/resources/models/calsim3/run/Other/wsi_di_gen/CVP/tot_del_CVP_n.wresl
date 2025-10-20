@@ -1,0 +1,89 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+! This file calculates the sum of the actual CVP NOD deliveries for each type (PA, PU, PS
+! and RF) for the previous project delivery season.  For PS arcs, only the delivery values for
+! April - October are totaled since March and November - February values are non-project water right diversions.
+
+! This file is used to calculate the Actual DI to be used in the curve generation procedure.
+
+
+! ================================ AG Deliveries ===============================
+
+define cvpdel_PA {  
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) (D_WTPCSD_02_PA(i) + D_SAC294_03_PA(i) + D_CCL005_04_PA1(i) + D_TCC022_04_PA2(i) + D_TCC036_07N_PA(i) + D_TCC081_07S_PA(i) + D_TCC111_07S_PA(i) + D_FTR021_16_PA(i))* cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0. }
+       }
+
+
+! =============================== Urban Deliveries ===================================
+! Include placeholders for nine CVP MI contractors with mixed diversion of CVP and Water Forum water - CVP delivery assumes zero shortage! Include placeholders for nine CVP MI contractors with mixed diversion of CVP and Water Forum water - CVP delivery assumes zero shortage
+
+define cvpdel_PU { 
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) ((D_WTPBUK_03_SU(i)+ D_WTPCSD_02_PU(i) + D_WKYTN_02_PU(i) + D_WTPJMS_03_PU1(i) + D_WTPBLV_03_PU2(i))* cfs_taf(i) + CL_FOLSM_WTPFOL(i) + CL_FOLSM_WTPSJP(i) + CL_FOLSM_WTPEDH(i) + CL_FOLSM_WTPRSV(i) + CL_FSC025_60N_PU(i) + CL_WTPSAC_SCWA(i)* cfs_taf(i) + CL_FOLSM_PCWA(i)) }
+
+       case      otherwise {
+       condition always
+       value     0. }
+       }
+
+
+! =============================== Settlement Deliveries (previous April - October only) ========
+
+define cvpdel_PS {
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-5,-11,-1) (D_SAC296_02_SA(i) + D_WTPFTH_03_SU(i) + D_WTPFTH_02_SU(i) + D_SAC289_03_SA(i) + D_SAC178_08N_SA1(i) + D_SAC159_08N_SA1(i)+ D_GCC027_08N_SA2(i) + D_SAC159_08S_SA1(i) + D_GCC056_08S_SA2(i) + D_SAC121_08S_SA3(i) + D_SAC109_08S_SA3(i) + D_MTC000_09_SA1(i) + D_SAC162_09_SA2(i) + D_SAC136_18_SA(i) + D_SAC122_19_SA(i) + D_SAC115_19_SA(i) + D_SAC099_19_SA(i) + D_SAC091_19_SA(i) + D_SAC083_21_SA(i) + D_SAC074_21_SA(i) + D_SAC082_22_SA1(i) + D_SAC078_22_SA1(i))* cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0. }
+       }
+
+
+! ================================== Refuge Deliveries =========================
+
+define cvpdel_PR {
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) (D_GCC027_08N_PR1(i) + D_GCC039_08N_PR2(i) + D_GCC056_08S_PR(i) + D_CBD037_08S_PR(i) /*+ D_WEC005_11_PR(i) + D_RVC005_11_PR(i)*/ + D_MTC000_09_PR(i))* cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0. }
+       }
+
+
+! ============================= Actual Total Deliveries ===========================
+
+define tot_del_cvp_n { value cvpdel_PA + cvpdel_PU + cvpdel_PS + cvpdel_PR }
+
+define tot_del_cvp_n_wsi {alias tot_del_cvp_n kind 'wsi-output' units 'taf'}
+define cvpdel_PA_wsi {alias cvpdel_PA kind 'wsi-output' units 'taf'}
+define cvpdel_PU_wsi {alias cvpdel_PU kind 'wsi-output' units 'taf'}
+define cvpdel_PS_wsi {alias cvpdel_PS kind 'wsi-output' units 'taf'}
+define cvpdel_PR_wsi {alias cvpdel_PR kind 'wsi-output' units 'taf'}

@@ -1,0 +1,57 @@
+! Friant_wsf.wresl
+! Created for the Upper San Joaquin River Basin Storage Investigation Project
+! Implements Friant water supply forecast logic.
+! Determines available water supply for impending irrigation season.
+!##############################################################################
+
+/*
+Sum of Friant inflow from current month (or from June if current month is after June)
+through September - perfect foresight used for water supply
+*/
+define I_MLRTN_thrusep {
+    case MarthruSep {
+        condition   month >= mar .and. month <= sep
+        sum(i=0,Sep-month,1) I_MLRTN_IMP(i)*cfs_taf(i) }
+    case otherwise  {
+        condition   always
+        value 0.0 } }
+
+! Sum of the average evaporation losses from Friant for current month through September
+define FREvap_sep {
+    case MarthruJun {
+        condition   month >= mar .and. month <= jun
+        select thru_sep
+        from Friant_Evap
+        where month = month }
+    case otherwise {
+        condition   always
+        value 0.0  } }
+
+! Sum of the combined Madera and Friant-Kern canal losses from current month through September
+define FRloss_sep {
+    case MarthruJun {
+        condition   month >= mar .and. month <= jun
+        select thru_sep
+        from Friant_Canal_losses
+        where month = month }
+    case otherwise {
+        condition   always
+        value 0.0  } }
+
+define TREvap_sep {value A17last*FREvap_sep/A_MLRTNlast}
+
+
+
+/*
+Friant water supply forecast used to determine available supply for irrigation season
+*/
+define Fr_WS_for {
+    case MarthruJun {
+       condition  month >= mar .and. month <= jun
+           value max(0.0, I_MLRTN_thrusep + SIO_FWUA(-1) - S_MLRTNlevel1 - S17level1
+                          - FREvap_sep -TREvap_sep - FRloss_sep - MLRTN_rel_sep )  }   
+    case JulthruFeb {
+        condition always
+        value 0.0 } }
+
+

@@ -1,0 +1,153 @@
+! estimate water cost at Jersey Point for SMSCG op difference
+
+!*************************************************************************************************************
+!get slope and intercept for constraint exp<=m*sac+b
+
+define JP_b_smscg_on_sv {
+  case control{
+    condition month >= Apr .and. month <= Aug
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),smscg_op_on,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    JP_EC_STD_sv,line_JP_lo,line_JP_hi,
+                    int(JP),int(intercept),int(ann_type),month,wateryear,4)}
+  case other {
+    condition  always
+    value 999999.}
+}
+define JP_m_smscg_on_sv {
+  case reducecalls {
+    condition  JP_b_sv >= 999990.
+    value 0.}
+  case control{
+    condition month >= Apr .and. month <= Aug
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),smscg_op_on,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    JP_EC_STD_sv,line_JP_lo,line_JP_hi,
+                    int(JP),int(slope),int(ann_type),month,wateryear,4)}
+  case other {
+    condition  always
+    value 0.}
+}
+define JP_m_smscg_on {alias JP_m_smscg_on_sv kind 'SLOPE' units 'NONE'}
+define JP_b_smscg_on {alias JP_b_smscg_on_sv kind 'INTERCEPT' units 'NONE'}
+
+define JP_b_smscg_off_sv {
+  case control{
+    condition month >= Apr .and. month <= Aug
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),smscg_op_off,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    JP_EC_STD_sv,line_JP_lo,line_JP_hi,
+                    int(JP),int(intercept),int(ann_type),month,wateryear,4)}
+  case other {
+    condition  always
+    value 999999.}
+}
+define JP_m_smscg_off_sv {
+  case reducecalls {
+    condition  JP_b_sv >= 999990.
+    value 0.}
+  case control{
+    condition month >= Apr .and. month <= Aug
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),smscg_op_off,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    JP_EC_STD_sv,line_JP_lo,line_JP_hi,
+                    int(JP),int(slope),int(ann_type),month,wateryear,4)}
+  case other {
+    condition  always
+    value 0.}
+}
+define JP_m_smscg_off {alias JP_m_smscg_off_sv kind 'SLOPE' units 'NONE'}
+define JP_b_smscg_off {alias JP_b_smscg_off_sv kind 'INTERCEPT' units 'NONE'}
+
+!! SAC_0 = ( Export – b_0 )/m_0
+!! SAC_1 = ( Export – b_1 )/m_1
+
+define JP_ignore { 
+	case smscg_on_m {
+		condition JP_m_smscg_on_sv < 0.05 
+		value 1 }
+	case smscg_off_m {
+		condition JP_m_smscg_off_sv < 0.05 
+		value 1 }
+	case err {
+		condition JP_b_sv >= 999990.
+		value 1 }
+	  case otherwise {
+		condition  always
+		value 0 }
+	}
+define JP_ignoreDV {alias JP_ignore kind 'LOGICAL' units 'LOGICAL'}	
+
+define JP_SAC_on_sv { 
+
+	case disregard {
+		condition JP_ignore > 0.9
+		value 0 }
+
+	case otherwise {
+		condition always
+		value (EXP_TD[DELTA_SRPLS]-JP_b_smscg_on_sv)/JP_m_smscg_on_sv }
+	}
+define JP_SAC_on {alias JP_SAC_on_sv kind 'flow' units 'cfs'}
+
+define JP_SAC_off_sv { 
+	case disregard {
+		condition JP_ignore > 0.9
+		value 0 }
+	case otherwise {
+		condition always
+		value (EXP_TD[DELTA_SRPLS]-JP_b_smscg_off_sv)/JP_m_smscg_off_sv }
+	}
+define JP_SAC_off {alias JP_SAC_off_sv kind 'flow' units 'cfs'}
+
+
+define JP_smscg_costSacSV {   
+	case disregard {
+		condition JP_ignore > 0.9
+		value 0 }
+	case otherwise {
+		condition always
+		value JP_SAC_on_sv-JP_SAC_off_sv }
+	}
+define JP_smscg_costSac {alias JP_smscg_costSacSV kind 'flow' units 'cfs'}
+
+define JP_smscg_costSac_opsSV {   
+	case disregard {
+		condition JP_ignore > 0.9
+		value 0 }
+	case Summer {
+		condition month>=Jun .and. month<=Aug
+		value (JP_SAC_on_sv-JP_SAC_off_sv)*(1-round(SMSCG_OPSV)) }
+	case Otherwise {
+		condition always
+		value 0 }		
+	}
+define JP_smscg_costSac_ops {alias JP_smscg_costSac_opsSV kind 'flow' units 'cfs'}

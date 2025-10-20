@@ -1,0 +1,342 @@
+
+/*
+File Name: UpperTuolumne_ResOps.wresl
+
+Purpose: Define reservoir operations
+
+*/
+
+
+! General Operation Rules for SFPUC:
+!    1.	Priority is to meet minimum flow requirements below reservoirs
+!    2.	Soft Target for reservoirs storage is defined (level 3) to be met at each month if possible 
+!    3.	From February to June, excess water is calculated, and it is released from the reservoirs considering a release factor. 
+!        This excess water should be released thorough the powerhouse/tunnel. In case of capacity limitation for tunnels,
+!        the excess water should either remain in the reservoir or spill if reservoir is full. 
+        
+! Specific Operation Rules for SFPUC:
+!    1.	All the transferred water from Eleanor to Lloyd should flow directly through Holm powerhouse (Cherry Tunnel) and not be stored in Lake Lloyd. 
+!    2.	Supplemental releases are made from Lloyd and Hetch Hetchy based on the water bank accounting, which is defined in CCSFWaterBank.wresl.
+
+
+! Split tunnel diversions (Canyon, Eleanor to Cherry, and Cherry tunnels) into subarcs
+! snow melt release "_SMR"
+! minimum power release "_MIN" (only applicable for Cherry Tunnel)
+! other water diversions "_ADD" 
+! These flow components have different weights in the objective function
+
+
+
+!******************************************************************************************************
+!** Hetch Hetchy Reservoir Operations *****************************************************************
+!******************************************************************************************************
+
+! Flow through Canyon Power Tunnel is split up to a min flow (D_HTCHY_CPT012_MIN, snowmelt release from Hetch Hetchy reservoir (C_HTCHY_SMR)
+! and any additional water that flows through the tunnel (D_HTCHY_CPT012_ADD).
+define D_HTCHY_CPT012_MIN  {std kind 'DIVERSION' units 'CFS'}
+define D_HTCHY_CPT012_SMR  {std kind 'DIVERSION' units 'CFS'}
+define D_HTCHY_CPT012_ADD  {std kind 'DIVERSION' units 'CFS'}
+goal SttotalD_Htchy_CPT012 {D_Htchy_CPT012 = D_HTCHY_CPT012_MIN + D_HTCHY_CPT012_ADD + D_HTCHY_CPT012_SMR} 
+
+
+! Cumulative inflow to Hetch Hetchy Reservoir from current month to the end of June as a perfect foresight (Feb through Jun)
+define HTCHYForesight {
+     case FebJun {
+          condition month >= feb .and. month <= jun
+          sum(i=0,9-month,1) I_HTCHY(i)* cfs_taf 
+          }
+     case otherwise {
+          condition always
+          value     0. }}
+ 		         
+! Calculate reservoir storage difference as the end of June storage minus current month's storage (Feb through June)  		       	         		         
+define HTCHYdeltaS {
+     case FebJun {
+	      condition month >= feb .and. month <= jun
+	      value max(0., S_HTCHYlevel5 - S_HTCHY(-1)) } !level 5 = target storage
+     case otherwise {
+	      condition always
+	      value 0. }}
+     
+! Cumulative demand from current month to the end of June (Feb through Jun). Demand is considered as sum of MIF (maximum values) and SJPL deliveries  
+define HTCHYtotldemand { ! if simulating dynamically 
+     case February {
+	      condition month == feb 
+	      value (60.*cfs_taf + 60.*cfs_taf(1) + 75.*cfs_taf(2) + 100.*cfs_taf(3)+ 125.*cfs_taf(4)
+	      	    + CCSFDemand_Feb + CCSFDemand_Mar + CCSFDemand_Apr + CCSFDemand_May + CCSFDemand_Jun
+	      	    + GRVLDDemand)}
+	 case March {     
+	      condition month == mar 
+	      value (60.*cfs_taf + 75.*cfs_taf(1) + 100.*cfs_taf(2) + 125.*cfs_taf(3)
+	      	    + CCSFDemand_Mar + CCSFDemand_Apr + CCSFDemand_May + CCSFDemand_Jun
+	      	    + GRVLDDemand)}
+     case April {
+	      condition month == apr 
+	      value (75.*cfs_taf + 100.*cfs_taf(1) + 125.*cfs_taf(2)
+	      	    + CCSFDemand_Apr + CCSFDemand_May + CCSFDemand_Jun
+	      	    + GRVLDDemand)}
+     case May {
+	      condition month == may 
+	      value (100.*cfs_taf + 125.*cfs_taf(1)
+	      	    + CCSFDemand_May + CCSFDemand_Jun
+	      	    + GRVLDDemand)}
+     case June {
+	      condition month == jun 
+	      value (125.*cfs_taf + CCSFDemand_Jun + GRVLDDemand
+	      )}
+     case otherwise {
+		  condition always
+          value 0.}}
+  /* 
+ ! use if CCSFDemand is preprocessed timeseries: 
+ define HTCHYCCSFDemand {
+     case February {
+     condition month == feb
+     sum (i=0,5,1) CCSFDemand(i)}
+     case March {
+     condition month == mar
+     sum (i=0,4,1) CCSFDemand(i)}
+     case April {
+     condition month == apr
+     sum (i=0,3,1) CCSFDemand(i)}
+     case mMay {
+     condition month == may
+     sum (i=0,2,1) CCSFDemand(i)}
+     case June {
+     condition month == jun
+     sum (i=0,1,1) CCSFDemand(i)}
+     case otherwise {
+     condition always
+     value     0. }}
+ 
+ define HTCHYtotldemand { !If using preprocessed timeseries:   
+     case February {
+	      condition month == feb 
+	      value (60.*cfs_taf + 60.*cfs_taf(1) + 75.*cfs_taf(2) + 100.*cfs_taf(3)+ 125.*cfs_taf(4)
+	      	    + HTCHYCCSFDemand + GRVLDDemand)}
+	 case March {     
+	      condition month == mar 
+	      value (60.*cfs_taf + 75.*cfs_taf(1) + 100.*cfs_taf(2) + 125.*cfs_taf(3)
+	      	    + HTCHYCCSFDemand + GRVLDDemand)}
+     case April {
+	      condition month == apr 
+	      value (75.*cfs_taf + 100.*cfs_taf(1) + 125.*cfs_taf(2)
+	      	    + HTCHYCCSFDemand + GRVLDDemand)}
+     case May {
+	      condition month == may 
+	      value (100.*cfs_taf + 125.*cfs_taf(1)
+	      	    + HTCHYCCSFDemand + GRVLDDemand) }
+     case June {
+	      condition month == jun 
+	      value (125.*cfs_taf + HTCHYCCSFDemand + GRVLDDemand)}
+     case otherwise {
+		  condition always
+          value 0.}}
+*/ 
+
+! Release factor to determine current month's share of excess water that can be released.
+! Source: FERC Daily Tuolumne Model 		         
+define HTCHYrelfactor {
+     case February {
+          condition month == feb !5 months of releases
+          value 0.25 } ! was 0.1, adjusted due to tunnel capacity limitation
+     case March {
+          condition month == mar !4 months of releases
+          value 0.25 }  ! was 0.1, adjusted due to tunnel capacity limitation
+     case April {
+          condition month == apr !3 months of releases
+          value 0.25 }  ! was 0.1, adjusted due to tunnel capacity limitation
+     case May {
+          condition month == may !2 months of releases
+          value 1.}    ! 1.0                     
+     case otherwise {
+          condition always
+          value 1. }}
+  
+define HTCHYsnowmeltrel {
+     case FebJun {
+          condition month >= feb .and. month <= jun
+          value min(9999.,max(0.,HTCHYForesight - HTCHYtotldemand - HTCHYdeltaS)*HTCHYrelfactor*taf_cfs)}      
+     case otherwise {
+          condition always
+	      value 0. }}
+	      
+define HTCHYsnowmeltrelDV {alias HTCHYsnowmeltrel kind 'FORECAST' units 'CFS'}      
+goal HTCHY_snowmelt_release {C_HTCHY_SMR + D_HTCHY_CPT012_SMR  < HTCHYsnowmeltrel}
+
+!******************************************************************************************************
+!** Eleanor Reservoir Operations **********************************************************************
+!******************************************************************************************************
+
+! Flow through the Eleanor-Cherry tunnel is split up to excess water release from Eleanor Reservoir (C_ELENR_SMR)
+! and any other additional flow that can go through the tunnel (_CHRRY_CHY000_ADD).    
+define D_ELENR_ECT001_SMR   {std kind 'DIVERSION' units 'CFS'}
+define D_ELENR_ECT001_ADD   {std kind 'DIVERSION' units 'CFS'}
+goal SettotalD_ELENR_ECT001 {D_ELENR_ECT001 = D_ELENR_ECT001_ADD + D_ELENR_ECT001_SMR}
+
+! All water diverted through Eleanor Tunnel to Lake Lloyd should be released through the Cherry Tunnel
+! and Holm Powerhouse in the same month  
+goal minrelCherry {D_ELENR_ECT001 < D_CHRRY_CHY000}
+
+
+! Cumulative inflow to Eleanor Reservoir from current month to the end of June using perfect foresight (Feb through Jun)
+define ELENRForesight {
+     case FebJun {
+          condition month >= feb .and. month <= jun
+          sum(i=0,9-month,1) I_ELENR(i)*cfs_taf }
+     case otherwise {
+          condition always
+          value     0. }}
+
+! Calculate reservoir storage difference as the end of June storage minus current month's storage (Feb through June) 		         
+define ELENRdeltaS {
+     case FebJun {
+	  condition month >= dec .and. month <= jun
+	  value max(0., S_ELENRlevel5 - S_ELENR(-1)) }
+     case otherwise {
+	  condition always
+	  value     0. }}
+	  
+! Cumulative demand from current month to the end of June (Feb through Jun). Demand is considered as sum of MIF (maximum values) and flow through Eleanor to Cherry diversion at its maximum capacity 		         
+define ELENRtotldemand {
+     case February {
+	   condition month == feb 
+	   value (5. + 10. + 15. + 20 + 20 + 0.*(10-month) )* cfs_taf}
+     case March {
+	   condition month == mar 
+	   value (10. + 15. + 20 + 20 + 0.*(10-month) )* cfs_taf}
+     case April {
+	   condition month == apr 
+	   value (15. + 20 + 20 + 0.*(10-month) )* cfs_taf}
+     case May {
+	   condition month == may 
+	   value (20 + 20 + 0.*(10-month) )* cfs_taf}
+     case June {
+	   condition month == jun 
+	   value (20 + 0.*(10-month) )* cfs_taf}
+     case otherwise {
+	   condition always
+	   value     0. }}
+
+! Release factor to determine current month's share of excess water that can be released. 
+! Source; FERC Daily Tuolumne Model 	
+define ELENRrelfactor {
+     case February {
+          condition month == feb !5 months of releases
+          value 0.2 }
+     case March {
+          condition month == mar !4 months of releases
+          value 0.25 }
+     case April {
+          condition month == apr !3 months of releases
+          value 0.33 }
+     case May {
+          condition month == may !2 months of releases
+          value 0.70 }                         
+     case otherwise {
+          condition always
+          value 1. }}
+	 		          		       
+! Excess water that can be released from Eleanor Reservoir 	 		         
+define ELENRsnowmeltrel {
+        case FebJun {
+             condition month >= feb .and. month <= jun
+             value max(0.,ELENRForesight - ELENRtotldemand - ELENRdeltaS)*ELENRrelfactor*taf_cfs}
+        case otherwise {
+	     condition always
+	     value 0.}}
+	     
+define ELENRsnowmeltrelDV {alias ELENRsnowmeltrel kind 'FORECAST' units 'TAF'}	     
+goal ELENR_snowmelt_release {C_ELENR_SMR + D_ELENR_ECT001_SMR < ELENRsnowmeltrel}
+
+! Limit snow melt release from the reservoir 
+! goal ELENR_snowmelt_limit {C_ELENR_SMR + D_ELENR_ECT001_SMR < 2500} 
+
+
+	 		         
+!******************************************************************************************************
+!** Lloyd/Cherry Reservoir Operations *****************************************************************
+!******************************************************************************************************
+! Cherry Power Tunnel (Holm Powerhouse) is split up to a min flow (D_CHRRY_CHY000_MIN), snowmelt release from Lloyd reservoir (C_LLOYD_SMR)
+! and any additional water that flows through the tunnel (D_CHRRY_CHY000_ADD). Additional releases may occur for the Water Bank.
+define D_CHRRY_CHY000_MIN  {upper 158.3 kind 'DIVERSION' units 'CFS'}
+define D_CHRRY_CHY000_SMR  {std kind 'DIVERSION' units 'CFS'}
+define D_CHRRY_CHY000_ADD  {std kind 'DIVERSION' units 'CFS'}
+goal SettotalD_CHRRY_CHY000 {D_CHRRY_CHY000 = D_CHRRY_CHY000_MIN + D_CHRRY_CHY000_SMR + D_CHRRY_CHY000_ADD}
+
+
+! Cumulative inflow to Lake Lloyd from current month to the end of June using perfect foresight (Feb through Jun)
+define LLOYDForesight {
+    case FebJun {
+         condition month >= feb .and. month <= jun
+         sum(i=0,9-month,1) I_LLOYD(i)*cfs_taf }
+    case otherwise {
+         condition always
+         value     0. }}
+
+! Calculate reservoir storage difference as the end of June storage minus current month's storage (Feb through June) 		         
+define LLOYDdeltaS {
+    case FebJun {
+	 condition month >= dec .and. month <= jun
+	 value max(0., S_LLOYDlevel5 - S_LLOYD(-1)) }
+    case otherwise {
+	 condition always
+	 value     0. }
+ 		         }
+! Cumulative demand from current month to the end of June (Feb through Jun). Demand is considered as sum of MIF and flow through Cherry Power Tunnel in its maximum capacity
+define LLOYDtotldemand {
+    case February {
+	condition month >= feb .and. month<=jun 
+	value (5*(10-month) + 158.*(10-month) )* cfs_taf }
+    case otherwise {
+	condition always
+	value 0. }}
+
+! Release factor to determine current month's share of excess water that can be released. 	
+define LLOYDrelfactor {
+     case February {
+          condition month == feb !5 months of releases
+          value 0.2 }
+     case March {
+          condition month == mar !4 months of releases
+          value 0.25 }
+     case April {
+          condition month == apr !3 months of releases
+          value 0.33 }
+     case May {
+          condition month == may !2 months of releases
+          value 0.50 }                         
+     case otherwise {
+          condition always
+          value 1. }}
+ 		         
+! Excess water that can be released from Lloyd reservoir  		           		         
+define Lloydsnowmeltrel {
+    case FebJun {
+         condition month >= feb .and. month <= jun
+         value max(0.,LLOYDForesight - LLOYDtotldemand - LLOYDdeltaS)*LLOYDrelfactor*taf_cfs}
+    case otherwise {
+	     condition always
+	      value 0. }}
+	      
+define LLOYDsnowmeltrelDV {alias LLOYDsnowmeltrel kind 'FORECAST' units 'TAF'}	      	 		         
+goal LLOYD_snowmelt_release {C_LLOYD_SMR + D_CHRRY_CHY000_SMR < Lloydsnowmeltrel} 
+
+! Limit snow melt release from the reservoir 
+! goal LLOYD_snowmelt_limit {C_LLOYD_SMR + D_CHRRY_CHY000_SMR < 3000}
+
+!******************************************************************************************************
+!** Lower Cherry Creek Aqueduct ***********************************************************************
+!******************************************************************************************************
+
+!This system on Cherry Creek was the earliest diversion structure built in 1916 as an initial step of the Hetch Hetchy project.
+!The diversion dam diverts water from Cherry Creek into the Lower Cherry Aqueduct which leads to Early Intake. In its earliest
+! function, water released from Lake Eleanor down Cherry Creek was diverted to the original 3 MW powerhouse at Early Intake
+! which produced all of the energy needed to construct O’Shaughnessy Dam as well as power Groveland. As of 2011, the last time the structure
+! was put into full use was during the 1988-1991 drought. Water was diverted from Cherry Creek (below Lake Eleanor and Cherry Reservoir)
+! to augment the water diverted from the Hetch Hetchy watershed.
+
+goal setD_CHY006_LCA001 {D_CHY006_LCA001 = 0.}
+
+
+

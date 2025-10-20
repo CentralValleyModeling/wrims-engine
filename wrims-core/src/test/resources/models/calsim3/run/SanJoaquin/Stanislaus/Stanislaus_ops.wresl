@@ -1,0 +1,382 @@
+! Stanislaus_ops.wresl
+! This file replaces both Stan_defs.wresl and Stanislaus_dems.wresl files used in CalSim-II.
+
+/*
+This file contains code that defines allocation of water supply to Oakdale Irrigation
+District, South San Joaquin Irrigation District, Stockton East Water District, Central
+San Joaquin Water District, and develops monthly targets and limits for deliveries to 
+these entities.   
+
+Basin deliveries which are not subject to allocations or which are served only by 
+groundwater supplies are controlled by code in constraints-deliveries.wresl in the 
+system directory.
+
+Revised by: R. Field, USBR, 1/02/04
+Purpose: Revise CSJSEWD_PAGyr logic to incorporate STANMOD IOP logic.
+
+Revised by: R. Field, USBR, 9/25/03
+Purpose: Incorporated additional M&I variable names and added M&I return flow
+capabilities.
+
+Revised by C. Hsu, USBR, 3/09/03
+Purpose: Review and comment.
+
+Revised by C. Olson, DWR, 05/01/07
+Purpose: for Calsim 3.0
+
+Revised by I. Ferguson, USBR, date unknown
+Purpose: for Calsim 3.0. Merged Stan_defs.wresl and Stanislaus_dems.wresl
+
+Revised by A. Draper, MWH, 02/20/15,
+Purpose: Revised representation of agricultural water use to match standard template
+used for the Sacramento Valley. Added logic for the South County Water Supply Project
+that provides treated M&I water to the Cities of Escalon, Lathrop, Manteca, and Tracy.
+
+Revised by D. O'Connor, USBR, 11/2015
+Purpose: Revised river demand factor formulas, rearranged code/renamed variables, set
+explicit allocation logic for annual NM inflow <600 TAF per 1998 OID/SSJID agreement,
+disaggregated Oakdale North/South San Joaquin demand unit into separate diversions 
+and added diversion from LJC022 for SEWD Ag component (most SEWD ag from Calaveras). 
+ 
+*/
+!#################################################################################
+
+/*
+Allocations to Central San Joaquin WCD and SEWD MI are determined annually using the
+New Melones forecast variable NMforecast1 (end of February NM storage plus March
+through September inflow forecast, also used for pulse flows).  NMforecast2 sums the
+Oct through Sept inflow foreast and is used for OID and SSJID.
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      SEWD MI Demand/Allocation      !!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define annual SEWD Project M & I allocation using NMforecast1 table
+define AnnAlloc_SEWD_PMI    {
+	Case W_AN_BN   {condition wyt_SJR_stan < 3.5 value 75. }
+	case otherwise {condition always             value 0. }
+}
+
+! Define SEWD monthly M & I delivery percentage of overall demand
+define SEWD_PMI_PctDem   { select  SEWD from stan_mon where month=month }
+! Distribute allocation into monthly pattern
+define Alloc_SEWD_PMI  { value AnnAlloc_SEWD_PMI * SEWD_PMI_PctDem * taf_cfs }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      SEWD MI Diversion Limit     !!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Set limits on SEWD maximum M & I delivery
+goal limit_D_LJC022_WTPWDH   { D_LJC022_WTPWDH < Alloc_SEWD_PMI }
+goal totD_LJC022_WTPWDH { D_LJC022_WTPWDH = D_LJC022_WTPWDHa + D_LJC022_WTPWDHb}
+goal meet_SEWD_sale     { D_LJC022_WTPWDHb < 0.} ! no Sale
+!goal meet_SEWD_sale     { D_LJC022_WTPWDHb < (Ann_OIDSSJID_to_SEWD_saleVol * SEWD_sale_pct) * taf_cfs}
+
+define DLT_LJC022_WTPWDH {alias Alloc_SEWD_PMI kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      Central San Joaquin WCD       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      CSJWCD Land Use Based Demands  !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define river demand factor (fraction) for CSJWCD (accounting for min groundwater pumping, reuse, EV, and conveyance loss assumptions
+define DFo_60S_PA2  {value ((1 + RPF_60S_PA2 )*(1  - GPmin_60S_PA2)- RUFo_60S_PA2)/(1 - EVF_LJC010_60S_PA2  - DPF_LJC010_60S_PA2  - LFF_LJC010_60S_PA2  - OSF_LJC010_60S_PA2)}
+define DFr_60S_PA2  {value ((1 + RPF_60S_PA2 )*(1  - GPmin_60S_PA2)- RUFr_60S_PA2)/(1 - EVF_LJC010_60S_PA2  - DPF_LJC010_60S_PA2  - LFF_LJC010_60S_PA2  - OSF_LJC010_60S_PA2)}
+
+! Define monthly CSJWCD land use based demand on River, relaxing for LJC inflow
+define RivDem_CSJWCD  { value max(0.0, AWo_60S_PA2*DFo_60S_PA2*cfs_taf + AWr_60S_PA2*DFr_60S_PA2*cfs_taf - max(0,I_LJC022*cfs_taf))}
+
+! Define annual CSJWCD land use based demand on River relaxing for LJC inflow, set every March
+define AnnRivDem_CSJWCD_dv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define AnnRivDem_CSJWCD {
+    case first {
+          condition month < mar .and. wateryear == BgnWY
+          value 132.0 }   ! set to annual average
+    case final {
+          condition month == mar .and. wateryear == EndWY
+          sum(i=-5,6,1) max(0.0, AWo_60S_PA2(i)*DFo_60S_PA2*cfs_taf(i) + AWr_60S_PA2(i)*DFr_60S_PA2*cfs_taf(i)- max(0,I_LJC022(i)*cfs_taf(i)))}
+    case mar {
+        condition month == mar
+        sum(i=0,11,1) max(0.0, AWo_60S_PA2(i)*DFo_60S_PA2*cfs_taf(i) + AWr_60S_PA2(i)*DFr_60S_PA2*cfs_taf(i)- max(0,I_LJC022(i)*cfs_taf(i)))}
+    case UntilNextMar {
+        condition   always
+        value AnnRivDem_CSJWCD_dv(-1) }
+        }
+goal set_ann_CSJWCDdv  { AnnRivDem_CSJWCD_dv = AnnRivDem_CSJWCD }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      CSJWCD Allocation              !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define annual CSJWCD allocation using NMforecast1 table
+define AnnAlloc_CSJWCD  { 
+      case W_AN_BN  {condition wyt_SJR_stan < 3.5  value 80. }
+      case D                 { condition wyt_SJR_stan < 4.5 value 49. }
+      case otherwise    {condition always value 0. }
+}
+define AnnAlloc_CSJWCD_dv  { alias AnnAlloc_CSJWCD kind 'ANNUAL-DEMAND' units 'TAF'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      CSJWCD Diversion Limit         !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! CSJWCD diversion limit  - allocation patterned by monthly demand distribution and allow diversion to accept LJC inflow
+goal limit_D_LJC010_60S_PA2 { D_LJC010_60S_PA2  < AnnAlloc_CSJWCD * RivDem_CSJWCD/AnnRivDem_CSJWCD * taf_cfs + max(0., I_LJC022) }
+define DLT_LJC010_60S_PA2 {alias AnnAlloc_CSJWCD * RivDem_CSJWCD/AnnRivDem_CSJWCD * taf_cfs + max(0., I_LJC022) kind 'DIVERSION-LIMIT' units 'CFS'}
+define DLT_LJC010_60S_PA2_CVP {alias AnnAlloc_CSJWCD * RivDem_CSJWCD/AnnRivDem_CSJWCD * taf_cfs  kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!    Upper Farmington Canal Limit  !!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Limit Upper Farmington Canal diversion to sum of SEWD and CSJWCD diversions plus UFC losses
+
+goal limit_D_STS059_UFC000  { D_STS059_UFC000 < DLT_LJC022_WTPWDH + DLT_LJC010_60S_PA2_CVP + D_UFC000_UFCLOS  } 
+define DLT_STS059_UFC000 {alias DLT_LJC022_WTPWDH + DLT_LJC010_60S_PA2_CVP + D_UFC000_UFCLOS   kind 'DIVERSION-LIMIT' units 'CFS'}                                                   
+
+! to do dbo  - find/add UFC loss factor data/code (10% per csii?)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!   Oakdale ID and South San Joaquin Demands  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!! Disaggregate OID demands into N/S (for modeling only)!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!  OID North Land Use Based Demand  !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define river demand factor (fraction) for OID North (accounting for min groundwater pumping, reuse, EV, and conveyance loss assumptions)
+define DFo_61_PA1  {value ((1 + RPF_61_PA1)*(1 - GPmin_61_PA1_D - GPmin_61_PA1_P)- RUFo_61_PA1)/(1 - EVF_SSJ004_61_PA1  - DPF_SSJ004_61_PA1  - LFF_SSJ004_61_PA1  - OSF_SSJ004_61_PA1)} 
+define DFr_61_PA1  {value ((1 + RPF_61_PA1)*(1 - GPmin_61_PA1_D - GPmin_61_PA1_P)- RUFr_61_PA1)/(1 - EVF_SSJ004_61_PA1  - DPF_SSJ004_61_PA1  - LFF_SSJ004_61_PA1  - OSF_SSJ004_61_PA1)} 
+
+! Define monthly OID North land use based demand on River
+define RivDem_OIDN        {value  AWo_61_PA1*DFo_61_PA1*cfs_taf + AWr_61_PA1*DFr_61_PA1*cfs_taf}
+
+! Define annual OID North land use based demand on River, set every October
+define AnnRivDem_OIDN_dv     {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define AnnRivDem_OIDN {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_61_PA1(i)*DFo_61_PA1*cfs_taf(i) + AWr_61_PA1(i)*DFr_61_PA1*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value AnnRivDem_OIDN_dv(-1) }
+        }
+goal set_AnnRivDem_OIDN_dv {AnnRivDem_OIDN_dv = AnnRivDem_OIDN}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!! OID South Land Use Based Demand !!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define river demand factor (fraction) for OID South (accounting for min groundwater pumping, reuse, EV, and conveyance loss assumptions)
+define DFo_61_PA2  {value ((1 + RPF_61_PA2)*(1 - GPmin_61_PA2_D - GPmin_61_PA2_P) - RUFo_61_PA2)/(1 - EVF_OAK020_61_PA2 - DPF_OAK020_61_PA2 - LFF_OAK020_61_PA2 - OSF_OAK020_61_PA2)} 
+define DFr_61_PA2  {value ((1 + RPF_61_PA2)*(1 - GPmin_61_PA2_D - GPmin_61_PA2_P) - RUFr_61_PA2)/(1 - EVF_OAK020_61_PA2 - DPF_OAK020_61_PA2 - LFF_OAK020_61_PA2 - OSF_OAK020_61_PA2)} 
+
+! Define monthly OID South land use based demand on River
+define RivDem_OIDS      {value AWo_61_PA2*DFo_61_PA2*cfs_taf + AWr_61_PA2*DFr_61_PA2*cfs_taf}
+
+! Define annual OID South land use based demand on River, set every October
+define AnnRivDem_OIDS_dv      {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define AnnRivDem_OIDS {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_61_PA2(i)*DFo_61_PA2*cfs_taf(i) + AWr_61_PA2(i)*DFr_61_PA2*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value AnnRivDem_OIDS_dv(-1) }
+        }
+goal set_AnnRivDem_OIDS_dv {AnnRivDem_OIDS_dv = AnnRivDem_OIDS}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!      Total OID Demand     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Total OID Land Use Base Demands
+define AnnRivDem_OID        {value AnnRivDem_OIDN + AnnRivDem_OIDS}
+define AnnRivDem_OID_dv     {alias AnnRivDem_OID kind 'ANNUAL-DEMAND' units 'TAF'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!    South San Joaquin ID  - Woodward Res. Seepage and Urban Demands   !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define annual Woodward seepage
+define Ann_WDWRD_seepdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define Ann_WDWRD_seep {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) SG_WDWRD_seep(i) }
+    case otherwise {
+        condition   always
+        value ann_WDWRD_seepdv(-1) }
+        }
+goal set_Ann_WDWRD_seepdv {Ann_WDWRD_seepdv = Ann_WDWRD_seep}
+
+
+! Calculate annual urban demands for City of Tracy (50_PU) and Cities of Escalon, Lathrop, and Manteca (61_NU2).
+define Ann_50_PUdv {std kind 'ANNUAL-DEMAND' units 'CFS'}
+define Ann_50_PU {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) UD_50_PU(i)
+        }
+    case otherwise {
+        condition   always
+        value ann_50_PUdv(-1) }
+        }
+goal set_Ann_50_PUdv {ann_50_PUdv = ann_50_PU}
+
+define Ann_61_NU2dv {std kind 'ANNUAL-DEMAND' units 'CFS'}
+define Ann_61_NU2 {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) UD_61_NU2(i)
+        }
+    case otherwise {
+        condition   always
+        value ann_61_NU2dv(-1) }
+        }
+goal set_Ann_61_NU2dv {Ann_61_NU2dv = Ann_61_NU2}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!       South San Joaquin ID Land Use Based Demand        !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define surface water demand factor (demand on River) for SSJID (accounting for min groundwater pumping, reuse, EV, and conveyance loss assumptions)
+define DFo_61_PA3  {value ((1 + RPF_61_PA3 )*(1 - GPmin_61_PA3_D - GPmin_61_PA3_P)- RUFo_61_PA3)/(1 - EVF_WDWRD_61_PA3  - DPF_WDWRD_61_PA3  - LFF_WDWRD_61_PA3  - OSF_WDWRD_61_PA3)}
+define DFr_61_PA3  {value ((1 + RPF_61_PA3 )*(1 - GPmin_61_PA3_D - GPmin_61_PA3_P)- RUFr_61_PA3)/(1 - EVF_WDWRD_61_PA3  - DPF_WDWRD_61_PA3  - LFF_WDWRD_61_PA3  - OSF_WDWRD_61_PA3)}
+
+! Use 2010 deliveries to Escalon, Lathrop, Manteca, and Tracy as surrogate for urban demand on South County Water Supply Program
+! These are reported in the SSJID 2010/2012 Urban Water Management Plan Annual 2010 delivery = 17,430 TAF. (Tracy = 10.595, Manteca = 5.745, Lathrop = 1.090, Escalon = 0)
+! Projected 2015 delivery = 21,975 TAF. 
+
+! Define monthly SSJID land use based and urban sale demand on River
+define RivDem_SSJ            {value AWo_61_PA3*DFo_61_PA3*cfs_taf + AWr_61_PA3*DFr_61_PA3*cfs_taf + 10.595 * UD_50_PU/ann_50_PU + 6.835 * UD_61_NU2/ann_61_NU2}
+
+! Define annual river demand for SSJID (sum of Oct - Sept demands)
+define AnnRivDem_SSJ_dv       {std kind 'ANNUAL-DEMAND' units 'TAF'}   
+define AnnRivDem_SSJ {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_61_PA3(i)*DFo_61_PA3*cfs_taf(i) + AWr_61_PA3(i)*DFr_61_PA3*cfs_taf(i) + 17.430/12. 
+        }
+    case otherwise {
+        condition   always
+        value AnnRivDem_SSJ_dv(-1) }
+        }     
+goal set_AnnRivDem_SSJ_dv {AnnRivDem_SSJ_dv = AnnRivDem_SSJ}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!    Combined Oakdale ID/South San Joaquin ID Allocation    !!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+The allocation to Oakdale ID and South San Joaquin ID is determined jointly using the NMforecast2 forecast
+(NewMelonesForecast.wresl). Monthly delivery of surface water is limited by distributing the annual allocation
+by the annual pattern of applied water demand. 
+*/
+
+! Per 8.30.1998 Sipulation Agreement, Oakdale and SSJID have rights to the first 600 TAF of annual NM, 
+! inflow (as defined by NMforecast2) unless it's < 600 TAF. If <600, Reclamation supplies one third the 
+! deficiency.
+
+define OSSJID_Alloc_init_dv  {std kind 'allocation-volume' units 'TAF'}
+define OSSJID_Alloc_init  {   
+       case under600fcst   {
+       condition NMforecast2 < 600.
+       value     NMforecast2 + (600. - NMforecast2)/3
+       }
+       case otherwise  {
+       condition always
+       value  600.}
+      }
+goal  setOSSJID_Alloc_init_dv {OSSJID_Alloc_init_dv = OSSJID_Alloc_init}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!    OID/SSJID Final Allocation    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Apportion OID's initial allocation between North and South
+define OIDS_pctOIDdem {value (AnnRivDem_OIDS)/(AnnRivDem_OIDS + AnnRivDem_OIDN)}
+! OID South side allocation
+define OIDS_Alloc  {value (OSSJID_Alloc_init/2.) * (OIDS_pctOIDdem)}
+! OID North side allocation
+define OIDN_Alloc  {value (OSSJID_Alloc_init/2.) - OIDS_Alloc}
+define SSJID_Alloc {value max(0., (OSSJID_Alloc_init/2. - Ann_WDWRD_seep))} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!      OID/SSJID Diversion Limits     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! OID Diversion Limits  !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! OIDN diversion limit  - allocation patterned by monthly demand distribution
+
+goal   limitD_SSJ004_61_PA1 {D_SSJ004_61_PA1 < OIDN_Alloc*(RivDem_OIDN/AnnRivDem_OIDN)*taf_cfs }
+define DLT_SSJ004_61_PA1 {alias OIDN_Alloc*(RivDem_OIDN/AnnRivDem_OIDN)*taf_cfs  kind 'DIVERSION-LIMIT' units 'CFS'}
+
+! OIDS diversion limit  - allocation patterned by monthly demand distribution (and MID transfer, now zero)
+
+goal limitD_STS059_OAK001 {D_STS059_OAK001 < OIDS_Alloc*(RivDem_OIDS/AnnRivDem_OIDS)*taf_cfs + D_OAK020_61_NA2}
+define DLT_STS059_OAK001 {alias OIDS_Alloc*(RivDem_OIDS/AnnRivDem_OIDS)*taf_cfs + D_OAK020_61_NA2  kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! SSJID Diversion Limits  !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal limit_D_WDWRD_61_PA3    {D_WDWRD_61_PA3 + D_WDWRD_WTPDGT < SSJID_Alloc*(RivDem_SSJ/AnnRivDem_SSJ)*taf_cfs}
+define DLT_WDWRD_61_PA3 {alias SSJID_Alloc*(RivDem_SSJ/AnnRivDem_SSJ)*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+goal limit_D_WDWRD_WTPDGT_1  {D_WDWRD_WTPDGT <  10.595*taf_cfs * UD_50_PU/ann_50_PU + 6.835*taf_cfs * UD_61_NU2/ann_61_NU2}
+define DLT_WDWRD_WTPDGT_1  {alias  10.595*taf_cfs * UD_50_PU/ann_50_PU + 6.835*taf_cfs * UD_61_NU2/ann_61_NU2  kind 'DIVERSION-LIMIT' units 'CFS'}
+goal limit_D_WDWRD_WTPDGT_2  {D_WDWRD_WTPDGT <  36 * 1.547} ! 36 MGD capacity (41.9 MGD peaking capacity, possibly more soon ("Phase II") - periodically check web/SSJID.com - Nick C. Degroot Water Treatment Plan)
+define DLT_WDWRD_WTPDGT_2 {alias  36 * 1.5472  kind 'DIVERSION-LIMIT' units 'CFS'} !1 mgd = 1.547 cfs)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Other Stanislaus River Diversions   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+D_STS030_61_NA4 - Stanislaus Riparian Demands
+These demands are not subject to allocations of water supply in the Stanislaus River
+Code in constraints-deliveries.wresl in the system files appropriately limits delivery
+and weights guide delivery of water in priority.  
+*/
+
+
+/* initial code for OID/SSJID sale to SEWD (in case it returns)             
+!!!!!!!!!!!!!!!!!!!
+! Define sale of OIDSSJID water to Stockton East from lookup table based on NMforecast2 (updated each October, perfect foresight sum of Oct - Sept inflows)
+define Ann_OIDSSJID_to_SEWD_saleVol   { value 0.0} !no more sale !select sale from SEWD_sale given NM_Inf=NMforecast2 use minimum}
+! Define SEWD sale percentage
+define SEWD_sale_pct    { select percent from SEWD_sale_mon where month=month}
+! limit monthly diversion to pattern of SEWD sale
+goal meet_SEWD_sale     { D_LJC022_WTPWDHb < (Ann_OIDSSJID_to_SEWD_saleVol * SEWD_sale_pct) * taf_cfs}
+define DLT_LJC022_WTPWDHb {alias (Ann_OIDSSJID_to_SEWD_saleVol * SEWD_sale_pct) * taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+! total SEWD WTP Deliveries
+goal totD_LJC022_WTPWDH { D_LJC022_WTPWDH = D_LJC022_WTPWDHa + D_LJC022_WTPWDHb}
+define DLT_LJC022_WTPWDH {alias DLT_LJC022_WTPWDHa + DLT_LJC022_WTPWDHb kind 'DIVERSION-LIMIT' units 'CFS'}
+
+> sale term then needs to be added through rest of file, with diversion logic added to other system files.
+
+*/
+                            
+                            

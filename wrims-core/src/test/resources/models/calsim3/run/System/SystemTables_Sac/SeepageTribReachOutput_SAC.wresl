@@ -1,0 +1,236 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: SeepageReachOutput_SAC.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Output StreamGain/Loss in tributaries and mainstem reaches in Sacramento Valley
+
+Z.Q. Richard Chen, DWR 4/20/2021
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Calculate total seepage per river reach
+!sum of SG terms in SAC River Above Bend Bridge
+define SG_TRIB_SAC1AB   {alias SG205_SAC296_32 + SG206_SAC294_32 + SG207_SAC289_32 + SG208_SAC287_32 + SG209_SAC281_32 + SG210_SAC277_32
+                            + SG215_SAC277_34 + SG216_SAC275_34 + SG217_SAC269_34 
+                            + SG222_SAC269_37 + SG223_SAC265_37 + SG224_SAC259_37 
+                            + SG227_SAC259_39 
+                            kind 'STREAM-GAIN' units 'CFS'}
+                            
+define SG_TRIB_COW   {alias SG211_COW014_33 + SG212_COW007_33 + SG213_COW003_33 + SG214_COW003_33
+                            kind 'STREAM-GAIN' units 'CFS'}
+define SG_TRIB_BTL   {alias SG220_BTL006_36 + SG221_BTL006_36
+                            kind 'STREAM-GAIN' units 'CFS'}
+                            
+!sum of all SG terms in  CWD and its tributaries (for C2VSIM GW budget)                            
+define SG_TRIB_CWDALL   {alias SG218_CWD004_35 + SG219_CWD003_35 !orignal C2VSIM_CG Cottonwood Creek
+                           + SG450_MCW003_76 + SG451_MCW003_76 !Middle Fork Cottonwood Creek
+                           + SG452_CWD022_77 + SG453_CWD018_77 + SG454_CWD013_77 + SG455_CWD009_77 !extended Cottonwood Creek
+                           + SG456_CWD009_78 + SG457_CWD004_78 !extended Cottonwood Creek
+                           + SG458_NCW001_79 + SG459_NCW001_79 !North Fork Cottonwood Creek
+                           + SG460_SCW025_80 + SG461_SCW020_80 + SG462_SCW020_80  !South Fork Cottonwood Creek
+                           + SG463_SCW008_81 + SG464_SCW004_81 + SG465_SCW004_81  !South Fork Cottonwood Creek
+                           + SG466_STC010_82 + SG467_STC008_82 + SG468_STC008_82 
+                           kind 'STREAM-GAIN' units 'CFS'}!Salt Creek flowing into South Fork Cottonwood Creek
+
+!sum of the SG terms that are connected to CS3 stream by continuity in  CWD and its tributaries (for CalSim Surface Water  Budget)
+define SG_TRIB_CWD {alias SG218_CWD004_35 + SG219_CWD003_35 !orignal C2VSIM_CG Cottonwood Creek
+                           + SG453_CWD018_77 + SG454_CWD013_77 + SG455_CWD009_77 !extended Cottonwood Creek
+                           + SG456_CWD009_78 + SG457_CWD004_78 !extended Cottonwood Creek
+                           + SG463_SCW008_81 + SG464_SCW004_81 + SG465_SCW004_81  !South Fork Cottonwood Creek
+                           kind 'STREAM-GAIN' units 'CFS'}!Salt Creek flowing into South Fork Cottonwood Creek                           
+
+!sum of SG terms in SAC River between Bend Bridge and Butte City
+define SG_TRIB_SAC2BB {alias SG228_SAC254_39 + SG229_SAC250_39 
+                           + SG230_SAC247_39 + SG231_SAC240_39 + SG232_SAC232_39
+                           + SG235_SAC232_41 + SG236_SAC228_41 
+                           + SG246_SAC228_44 + SG247_SAC224_44 
+                           + SG254_SAC224_46 + SG255_SAC218_46 
+                           + SG259_SAC218_48 + SG260_SAC214_48 + SG261_SAC207_48 + SG262_SAC196_48 
+                           + SG273_SAC196_51 + SG274_SAC193_51 + SG275_SAC188_51
+                           + SG276_SAC182_51 + SG277_SAC178_51 + SG278_SAC174_51 
+                           kind 'STREAM-GAIN' units 'CFS'}
+
+define SG_TRIB_PYN   {alias SG225_PYN001_38 + SG226_PYN001_38
+                            kind 'STREAM-GAIN' units 'CFS'}                                      
+define SG_TRIB_ANT   {alias SG233_ANT010_40 + SG234_ANT010_40
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_ELD   {alias SG237_ELD027_42 + SG238_ELD022_42 + SG239_ELD017_42 + SG240_ELD012_42 + SG241_ELD005_42 + SG242_ELD005_42
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_MLC   {alias SG243_MLC006_43 + SG244_MLC004_43 + SG245_MLC004_43
+                           kind 'STREAM-GAIN' units 'CFS'}
+define SG_TRIB_THM   {alias SG248_THM026_45 + SG249_THM021_45 + SG250_THM017_45 + SG251_THM012_45 + SG252_THM005_45 + SG253_THM005_45
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_DRC   {alias SG256_DRC010_47 + SG257_DRC005_47 + SG258_DRC005_47
+                           kind 'STREAM-GAIN' units 'CFS'}     
+
+define SG_TRIB_STN   {alias SG263_STN026_49 + SG264_STN021_49 + SG265_STN014_49 + SG266_STN009_49 + SG267_STN004_49 + SG268_STN004_49
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_BCC   {alias SG269_BCC012_50 + SG270_BCC006_50 + SG271_BCC004_50 + SG272_BCC004_50
+                           kind 'STREAM-GAIN' units 'CFS'}     
+
+!sum of SG terms in SAC River between Butte City and Fremont Weir
+define SG_TRIB_SAC3BF  {alias  SG279_SAC168_51 + SG280_SAC162_51 + SG281_SAC154_51 + SG282_SAC148_51 
+                           + SG293_SAC148_53 + SG294_SAC141_53 + SG295_SAC134_53 + SG296_SAC129_53 
+                           + SG297_SAC122_53 + SG298_SAC115_53 + SG299_SAC106_53 + SG300_SAC097_53 + SG301_SAC092_53 
+                           + SG330_SAC092_57 + SG331_SAC085_57
+                           kind 'STREAM-GAIN' units 'CFS'}
+                                      
+define SG_TRIB_BTC   {alias SG283_BTC043_52 + SG284_BTC036_52 + SG285_BTC032_52 + SG286_BTC029_52 + SG287_BTC024_52 + SG288_BTC018_52 + SG289_BTC015_52 + SG290_BTC007_52 + SG291_BTC003_52 + SG292_BSL001_52
+                           kind 'STREAM-GAIN' units 'CFS'}     
+
+define SG_TRIB_CBD   {alias  SG318_CBD049_55 + SG319_CBD044_55 + SG320_CBD041_55 + SG321_CBD037_55 + SG322_CBD031_55 
+                           + SG323_CBD031_56 + SG324_CBD028_56 + SG325_CBD023_56 + SG326_CBD018_56 + SG327_CBD012_56 + SG328_CBD005_56 + SG329_CBD000_56
+                           + SG469_CBD055_83 + SG470_CBD052_83 + SG471_CBD050_83 + SG472_CBD049_83 
+                           kind 'STREAM-GAIN' units 'CFS'}                                                   
+
+define SG_TRIB_SBP   {alias   SG333_BSL001_58 + SG334_SBP031_58 + SG335_SBP028_58 + SG336_SBP024_58 + SG337_SBP021_58 + SG338_SBP018_58 + SG339_SBP014_58 + SG340_SBP012_58
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_FTR   {alias SG341_FTR068_59 + SG342_FTR063_59 + SG343_FTR059_59 + SG344_FTR053_59 + SG345_FTR048_59 + SG346_FTR045_59 + SG347_FTR036_59 + SG348_FTR029_59 
+                           + SG352_FTR029_61 + SG353_FTR025_61 + SG354_FTR021_61 + SG355_FTR016_61 + SG356_FTR012_61 
+                           + SG362_FTR012_63 + SG363_FTR008_63 
+                           + SG364_FTR008_64 + SG365_FTR003_64 + SG366_FTR003_64
+                           kind 'STREAM-GAIN' units 'CFS'}     
+define SG_TRIB_YUB   {alias SG349_YUB011_60 + SG350_YUB006_60 + SG351_YUB002_60
+                           kind 'STREAM-GAIN' units 'CFS'}
+define SG_TRIB_BRR   {alias SG357_CMPFW_62  + SG358_BRR017_62 + SG359_BRR011_62 + SG360_BRR004_62 + SG361_BRR004_62
+                           kind 'STREAM-GAIN' units 'CFS'}     
+
+!sum of SG terms in SAC River between Fremont Weir and Freeport
+define SG_TRIB_SAC4FF  {alias + SG332_SAC083_57 + SG367_SAC083_65 + SG368_SAC082_65
+                           + SG369_SAC081_65 + SG370_SAC078_65 + SG371_SAC075_65 + SG372_SAC066_65 + SG373_SAC063_65 
+                           + SG381_SAC063_67 + SG382_SAC057_67 + SG383_SAC053_67 + SG384_SAC048_67 
+                           kind 'STREAM-GAIN' units 'CFS'}
+define SG_TRIB_AMR   {alias SG374_FOLSM_66  + SG375_NTOMA_66  + SG376_AMR020_66 + SG377_AMR015_66 + SG378_AMR009_66 + SG379_AMR004_66 + SG380_AMR004_66
+                           kind 'STREAM-GAIN' units 'CFS'}   
+                           
+!sum of SG terms in SAC River in DeltA up to Freeport                           
+define SG_TRIB_SAC5DT  {alias SG385_SAC041_67 + SG386_SAC036_67 + SG387_SAC030_67 + SG388_SAC022_67 + SG389_SAC017_67 
+                           + SG413_SAC017_71 + SG414_SAC011_71 + SG415_SAC007_71 + SG416_SAC003_71 + SG417_SAC000_71 
+                           + SG418_SAC000_72 
+                           kind 'STREAM-GAIN' units 'CFS'}                           
+define SG_TRIB_CCH   {alias SG390_CCH030_68 + SG391_CCH023_68 + SG392_CCH017_68 + SG393_CCH012_68 + SG394_CCH006_68 + SG395_CCH003_68
+                           kind 'STREAM-GAIN' units 'CFS'}
+define SG_TRIB_PTH   {alias SG400_PTH024_69 + SG401_PTH020_69 + SG402_PTH015_69 + SG403_PTH011_69 + SG404_PTH007_69 + SG405_PTH007_69
+                           kind 'STREAM-GAIN' units 'CFS'}   
+define SG_TRIB_YBP   {alias SG396_YBP032_68 + SG397_YBP026_68 + SG398_YBP023_68 + SG399_YBP020_68 
+                           + SG406_YBP020_70 + SG407_YBP016_70 + SG408_YBP014_70 + SG409_YBP011_70 + SG410_YBP007_70 + SG411_YBP002_70 + SG412_YBP002_70
+                           kind 'STREAM-GAIN' units 'CFS'}
+
+define SG_TRIB_GCC   {alias 0 kind 'STREAM-GAIN' units 'CFS'}!SG302_GCC000_54+SG303_GCC007_54+ SG304_GCC010_54 +....+SG317_GCC065_54
+
+!Total SG
+define SG_SACAB   {alias SG_TRIB_SAC1AB + SG_TRIB_COW + SG_TRIB_BTL + SG_TRIB_PYN + SG_TRIB_CWD kind 'STREAM-GAIN' units 'CFS'}
+define SG_SACBB   {alias SG_TRIB_SAC2BB + SG_TRIB_ANT + SG_TRIB_ELD + SG_TRIB_MLC + SG_TRIB_THM + SG_TRIB_DRC + SG_TRIB_STN + SG_TRIB_BCC kind 'STREAM-GAIN' units 'CFS'}                         
+define SG_SACFB   {alias SG_TRIB_SAC3BF  + SG_TRIB_CBD + SG_TRIB_BTC + SG_TRIB_SBP kind 'STREAM-GAIN' units 'CFS'}
+define SG_SACAMR  {alias SG_TRIB_SAC4FF + SG_TRIB_AMR kind 'STREAM-GAIN' units 'CFS'}
+define SG_YBPALL  {alias SG_TRIB_CCH + SG_TRIB_PTH + SG_TRIB_YBP kind 'STREAM-GAIN' units 'CFS'}
+define SG_FTRALL  {alias SG_TRIB_FTR + SG_TRIB_BRR + SG_TRIB_YUB  kind 'STREAM-GAIN' units 'CFS'}
+
+define SR_SACBASIN     {alias +SR_02 +SR_03 +SR_04 +SR_05 +SR_06 +SR_07N +SR_07S +SR_08N 
+        +SR_08S +SR_09 +SR_10 +SR_11 +SR_12 +SR_13 +SR_14 +SR_15N +SR_15S +SR_16 +SR_17N 
+        +SR_17S +SR_18 +SR_19 +SR_20 +SR_21 +SR_22 +SR_23 +SR_24 +SR_25 +SR_26N +SR_26S
+kind 'SURFACE-RUNOFF' units 'CFS'}
+
+define TD_SACBASIN  {alias TD_CWD003_218 + TD_SAC271_219 + TD_COW003_213 + TD_SAC265_223 + TD_SAC277_210 + TD_SAC207_261
++ TD_SAC217_259 + TD_SAC196_272 + TD_SAC201_262 + TD_SAC217_260 + TD_SAC185_276 + TD_CBD049_318 + TD_SAC185_275
++ TD_CBD028_324 + TD_CBD038_321 + TD_CBD049_319 + TD_SAC154_281 + TD_SAC185_277 + TD_CBD028_325 + TD_CBD038_322 
++ TD_RFS8S_330  + TD_BSL001_290 + TD_BTC017_287 + TD_SAC141_294 + TD_SAC185_278 + TD_BSL001_292 + TD_BTC017_289 
++ TD_SAC196_273 + TD_BSL001_291 + TD_BTC017_288 + TD_DWRPS1_340 + TD_FTR059_343 + TD_HON004_346 + TD_RFS13_345  
++ TD_HON004_347 + TD_JCK002_348 + TD_FTR029_352 + TD_JCK002_351 + TD_BRR004_360 + TD_FTR012_361 + TD_DWRPS1_339
++ TD_BSL001_333 + TD_SSL001_366 + TD_RFS18_337  + TD_RD1500_367 + TD_CCH017_392 + TD_PTH021_401 + TD_YBP023_398
++ TD_YBP023_397 + TD_YBP032_396 + TD_CRC002_369 + TD_SAC066_373 + TD_ABN000_368 + TD_BRR004_362 + TD_BRR011_359
++ TD_CCK007_370 + TD_CRC002_371 + TD_ABN000_332 + TD_ABN010_331 + TD_BRR004_356 + TD_CCK022_365 + TD_CRC002_372
++ TD_EMD007_380 + TD_CSL005_411 + TD_PTH024_400 + TD_AMR004_381 + TD_EMD001_382 + TD_EMD007_383 + TD_NTOMA_374
++ TD_AMR007_378 + TD_NTOMA_375  + TD_SAC048_384
+kind 'DRAIN-GW' units 'CFS'}
+
+define SG_SACBASIN {alias TD_SACBASIN
++SG_SACAB + SG_SACBB + SG_SACFB + SG_SACAMR + SG_YBPALL + SG_FTRALL 
+ kind 'STREAM-GAIN' units 'CFS'}
+
+define I_ALD002 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_ALD004 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_ALOHA {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_BSH003 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_CAPLS {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_CMP014 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_CYN009 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_DCC010 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_ECHOL {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_FRMDW {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_GERLE {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_HHOLE {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_ICEHS {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_JNKSN {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_LNG012 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_LOONL {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_LRB004 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MFA025 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MFA036 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NFA016 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NLC003 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NMA003 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NNA013 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_PLC007 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_PLM001 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_PYR001 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_RCK001 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_RUB002 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_RUB047 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFA040 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFA066 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFA076 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFR006 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SILVR {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SLC003 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SLF009 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SLV006 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SLV015 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_STMPY {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_UNVLY {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_WBR001 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+
+define I_SACbasin {alias 
++I_ALD002	+I_ALD004	+I_ALMNR	+I_ALOHA	+I_ANT011	+I_ANTLP	+I_BCC014	+I_BCN010	+I_BLKBT	+I_BOWMN
++I_BRC003	+I_BRR023	+I_BSH003	+I_BTC048	+I_BTL006	+I_BTVLY	+I_BUCKS	+I_CAPLS	+I_CCH053	+I_CLR011
++I_CLRLK	+I_CMBIE	+I_CMP001	+I_CMP014	+I_CMPFW	+I_COW014	+I_CWD018	+I_CYN009	+I_DAVIS	+I_DCC010
++I_DER001	+I_DER004	+I_DHC021	+I_DRC012	+I_EBF001	+I_ECHOL	+I_ELD027	+I_ENGLB	+I_EPARK	+I_FOLSM
++I_FRDYC	+I_FRMAN	+I_FRMDW	+I_FRNCH	+I_GERLE	+I_GZL009	+I_HHOLE	+I_HON021	+I_ICEHS	+I_INDVL
++I_JKSMD	+I_JNKSN	+I_LCBRF	+I_LCC038	+I_LDC029	+I_LGRSV	+I_LKVLY	+I_LNG012	+I_LOONL	+I_LOSVQ
++I_LRB004	+I_LWSTN	+I_MERLC	+I_MFA001	+I_MFA023	+I_MFA025	+I_MFA036	+I_MFF019	+I_MFF087	+I_MFY013
++I_MLC006	+I_MNS000	+I_MSH015	+I_MTMDW	+I_NBLDB	+I_NFA016	+I_NFA022	+I_NFA054	+I_NFF029	+I_NFF046
++I_NFF058	+I_NFY029	+I_NLC003	+I_NMA003	+I_NNA013	+I_OGN005	+I_OROVL	+I_PLC007	+I_PLM001	+I_PTH070
++I_PYN001	+I_PYR001	+I_RCK001	+I_RLLNS	+I_RUB002	+I_RUB047	+I_RVPHB	+I_SCOTF	+I_SCW008	+I_SFA030
++I_SFA040	+I_SFA066	+I_SFA076	+I_SFD003	+I_SFF008	+I_SFF011	+I_SFR006	+I_SFY007	+I_SFY048	+I_SGRGE
++I_SHSTA	+I_SILVR	+I_SLC003	+I_SLF009	+I_SLT009	+I_SLV006	+I_SLV015	+I_SLYCK	+I_SPLDG	+I_STMPY
++I_THM028	+I_TRNTY	+I_UNVLY	+I_WBF006	+I_WBF015	+I_WBF030	+I_WBR001	+I_WKYTN	+I_WLF013	
+ kind 'INFLOW' units 'CFS'}
+ 
+ define CT_SACbasin {alias 
+ +CT_BENDBRIDGE_SV +CT_BUTTECITY_SV +CT_WILKINSSL_SV
+ +CT_OROVILLE_SV +CT_SMARTVILLE_SV +CT_WHEATLAND_SV +CT_NICOLAUS_SV
+ +CT_VERONA_SV +CT_FAIROAKS_SV +CT_FREEPORT_SV
+ !+CT_COLUSA_SV +CT_DAVIS_SV +CT_SACSLOUGH_SV +CT_WOODLAND_SV +CT_YOLO_SV
+ kind 'CLOSURE-TERM' units 'CFS'}
+ 
+

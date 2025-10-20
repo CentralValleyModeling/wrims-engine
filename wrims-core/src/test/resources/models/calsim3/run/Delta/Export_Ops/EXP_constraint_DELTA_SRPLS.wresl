@@ -1,0 +1,116 @@
+! EXP_constraint.wresl
+!
+! **********************************************************************************************
+!
+! Determine health and safety level at OMR that must be allowed
+define HandS_minpump {
+     case JanMay {
+          condition month>=JAN .and. month<=MAY
+          value 1500.}
+     case Jun {
+          condition month==JUN
+!          value 2000.}
+          value 1500.}
+     case other {
+          condition always
+          value 0.}
+}
+! Take the most restrictive of the NMFS export restrictions but consider the Health
+!   and safety level export that must be allowed
+!define MAXEXP_RPA {value max( min(NMFS_MaxExp, NMFS_MaxExp_DCC, FWS_MaxExp_X2), HandS_minpump)}
+!define MAXEXP_RPA {value min(NMFS_MaxExp, NMFS_MaxExp_DCC, FWS_MaxExp_X2)}
+define MAXEXP_RPA {value max( min(NMFS_MaxExp, NMFS_MaxExp_DCC/*, FWS_MaxExp_X2*/), (1-max(JonesIFSwitch,BanksIFSwitch)) * HandS_minpump)}
+!
+! **********************************************************************************************
+!
+
+! 5/9/2019 Revised code to assign available export capacity, instead of assigning portion of export reduction met by each project.
+! 5/9/2019 This formulation allows for experimenting with other than 50/50 sharing of available export capacity.
+
+define Export_dec_RPA {value max(0.,EXP_TD[UPSTREAM] - MAXEXP_RPA)}
+!define SWP_exp_dec_RPA {value max(0.,min(Export_dec_RPA,C_CAA003_SWP_TD[UPSTREAM] - C_DMC000_TD[UPSTREAM]))}
+!define CVP_exp_dec_RPA {value max(0.,min(Export_dec_RPA,C_DMC000_TD[UPSTREAM] - C_CAA003_SWP_TD[UPSTREAM]))}
+!define Comb_exp_dec_RPA {value max(0., Export_dec_RPA - SWP_exp_dec_RPA - CVP_exp_dec_RPA)}
+
+define Export_dec_RPA_ {alias Export_dec_RPA kind 'temp' units 'cfs'}
+!define SWP_exp_dec_RPA_ {alias SWP_exp_dec_RPA kind 'temp' units 'cfs'}
+!define CVP_exp_dec_RPA_ {alias CVP_exp_dec_RPA kind 'temp' units 'cfs'}
+!define Comb_exp_dec_RPA_ {alias Comb_exp_dec_RPA kind 'temp' units 'cfs'}
+
+! 5/9/2019 Limit the new export sharing ratios to SJR IE only.
+define CVPExpCapShare_NMFS {
+	case Apr_May {
+		condition month >= apr .and. month <= may ! 5/9/2019 Limiting to SJR IE only.
+		value CVPExpCapShare_Srpls
+	}
+	case otherwise {
+		condition always
+		value 0.5	! 5/9/2019 50/50 sharing of Fall X2 and DXC burden.
+	}
+}
+
+define SWPExpCapShare_NMFS {
+	case Apr_May {
+		condition month >= apr .and. month <= may ! 5/9/2019  Limiting to SJR IE only.
+		value SWPExpCapShare_Srpls
+	}
+	case otherwise {
+		condition always
+		value 0.5	! 5/9/2019 50/50 sharing of Fall X2 and DXC burden.
+	}
+}
+
+define MAXEXP_RPA_CVP_Init {value CVPExpCapShare_NMFS*MAXEXP_RPA}
+define MAXEXP_RPA_SWP_Init {value SWPExpCapShare_NMFS*MAXEXP_RPA}
+
+define Unused_MAXEXP_RPA_CVP {value max(0., MAXEXP_RPA_CVP_Init - C_DMC000_TD[UPSTREAM])}
+define Unused_MAXEXP_RPA_SWP {value max(0., MAXEXP_RPA_SWP_Init - C_CAA003_SWP_TD[UPSTREAM])}
+
+define MAXEXP_RPA_CVP {value max(tracyminpump,min(C_DMC000_TD[UPSTREAM], MAXEXP_RPA_CVP_Init) + Unused_MAXEXP_RPA_SWP)}
+define MAXEXP_RPA_SWP {value max(banksminpump,min(C_CAA003_SWP_TD[UPSTREAM], MAXEXP_RPA_SWP_Init) + Unused_MAXEXP_RPA_CVP)}
+
+!5/9/2019 Limit NMFS RPAs impact on South Delta exports to SJR IE only.
+!5/9/2019 Fall X2 and DXC to be treated as in-basin use.
+!5/9/2019 RPAs can still constrain total exports. It is assumed that other constraints (cheifly, COA IBU and UWFE) sharing will dictate how these are shared.
+!-TF, 4/29/20. Change made so that SJR IE controls TD+NDD exports, to trigger spring outflow
+
+goal set_MAXEXP_RPA_SWP {
+    lhs     C_CAA003_SWP
+    case SjrIeOnly {
+    	condition   month>=apr .and.  month<=may
+    	rhs     MAXEXP_RPA_SWP
+    	lhs<rhs penalty    0}
+    }
+
+define MAXEXP_RPA_SWP_Initdv {alias MAXEXP_RPA_SWP_Init kind 'TEMP' units 'CFS'}
+define Unused_MAXEXP_RPA_SWPdv {alias Unused_MAXEXP_RPA_SWP kind 'TEMP' units 'CFS'}    
+define MAXEXP_RPA_SWPdv {alias MAXEXP_RPA_SWP kind 'EXPORT-LIMIT' units 'CFS'}
+
+goal set_MAXEXP_RPA_CVP {
+    lhs     C_DMC000 + C_CAA003_CVP
+    case SjrIeOnly {
+    	condition   month>=apr .and.  month<=may
+    	rhs     MAXEXP_RPA_CVP
+    	lhs<rhs penalty    0}
+    }
+
+define MAXEXP_RPA_CVP_Initdv {alias MAXEXP_RPA_CVP_Init kind 'TEMP' units 'CFS'}
+define Unused_MAXEXP_RPA_CVPdv {alias Unused_MAXEXP_RPA_CVP kind 'TEMP' units 'CFS'}    
+define MAXEXP_RPA_CVPdv {alias MAXEXP_RPA_CVP kind 'EXPORT-LIMIT' units 'CFS'}
+
+define MAXEXP_RPA_dv {alias MAXEXP_RPA kind 'EXPORT-LIMIT' units 'CFS'}
+
+goal set_HandSminpump {
+    lhs     C_DMC000_TD + C_CAA003_TD + C_DMC000_IF + C_CAA003_IF
+    case IF_on {
+     condition  max(JonesIFSwitch,BanksIFSwitch) > 0.5
+     rhs     HandS_minpump
+     lhs>rhs penalty 0
+     lhs<rhs penalty 90000}
+}
+
+! This constraint also handles the condition when maxexp_rpa is determined by
+! X2 or DCC conditions - no sharing of this export restriction other than through
+! COA IBU/UWFE percentages.
+! This also limits Partner use of LV by export constraints.
+goal constrain_D408_P {C_DMC000_TD + C_CAA003_TD + D408_P < maxexp_rpa}

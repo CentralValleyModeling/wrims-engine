@@ -1,0 +1,24 @@
+/*
+File Name: Yuba_Operations_LYRA.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Operational Logic for New Bullards Bar Dam
+
+*/
+
+!modified code for releases from New Bullards Bar
+!minimum instream flow is 6 cfs.  After that, releases limited to 3700 cfs until
+!flood control pool is reached and then add'l releases can be made.  
+!NBB is operated to meet minimum instream flow d/s of Daguerre Point Diversion Dam
+
+!NYR below New Bullards Bar minimum flow
+goal set_C_NFY002_MIF_LYRA  {C_NFY002_MIF_LYRA = MF_C_NFY002}
+goal C_NFY002_LYRA_Total    {C_NFY002_LYRA = C_NFY002_MIF_LYRA  + C_NFY002_ADD_LYRA}
+
+!Limit Colgate flow to maximum capacity.
+goal limitD_NBLDB_CGT005_POW_LYRA {D_NBLDB_CGT005_POW_LYRA < ColgateMax}
+goal D_NBLDB_CGT005_LYRATotal {D_NBLDB_CGT005_LYRA = D_NBLDB_CGT005_POW_LYRA}
+
+!Limit Narrows flow to maximum capacity
+goal C_ENGLBpower_LYRA   {C_ENGLB_POW_LYRA < NarrowsMax}
+goal C_ENGLB_LYRAtotal   {C_ENGLB_LYRA = C_ENGLB_POW_LYRA + C_ENGLB_ADD_LYRA}

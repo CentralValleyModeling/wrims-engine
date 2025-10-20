@@ -1,0 +1,249 @@
+! SouthernSJR_Dems.wresl
+! Deliveries and Operations on Upper SJR, Fresno, and Chowchilla Rivers
+
+/*
+This file defines delivery operations for the Upper SJR, Fresno River, and
+Chowchilla River, including Madera ID and Chowchilla WD.
+
+64_PA1 - Madera ID - Madera Canal, Fresno River (Franchi DD), Dry and Berenda Creeks
+64_PA2 - Chowchilla WD - Madera Canal and Chowchilla River, through Ash Slough and Berenda Slough
+64_PA3 - Gravelly Ford WD and Root Creek WD - San Joaquin River
+64_NA1 - Non-District Ag - GW only
+64_NA2 - Clayton WD and Non-District - EBP, Fresno River, and Chowchilla WD returns
+64_NU  - Non-District Urban - All GW
+
+Revised by: R. Field, USBR, 09/26/03
+Purpose: Incorporate additional M&I groundwater and M&I return flow arcs.
+Revised by: T. Crawford, USBR, 03/13/03
+Purpose: Review and document file
+Revised by: C. Olson for Calsim-III, 4/25/2007
+*/
+
+/*
+************************San Joaquin River Operations**************************
+Millerton Lake releases and deliveries to Madera Canal and Friant-Kern Canal are 
+determined by code found in the "friant" folder.
+
+
+/*
+*************************Fresno River Operations*****************************
+*/
+!The SWRCB issued Permit 16584 to the USBR on. April 3,1973, pursuant to Decision 1407.
+!The permit authorizes Reclamation to store up to 74,000 acre-feet per annum at Hidden Reservoir,
+!also known as Lake Hensley, on the Fresno River. The authorized purposes of use under
+!Permit 16584 are recreation, domestic, and irrigation. The collection season is from December 1
+!of each year to April XI of the succeeding year. The season may be extended to include the
+!months of May and November, provided that the USBR releases equivalent exchange water from’
+!the Madera Canal’ to satisfy prior rights, and provided that a minimum pool of 5,000 acre-feet is ‘.
+!maintained. The Madera Irrigation District (MID) has contracted with the USBR for the entire
+!yield of Hidden Reservoir.
+
+! Reclamation must release suffiecint water from Hidden Dam to meet senior water right holders
+! USACE studies indicate a river seepage (losses) of 80 cfs in the reach below the dam.
+
+! Madera ID has Pre-1914 rights to divert water from Big Creek (Big Creek Diversion) and 
+! the North Fork of Willow Creek (Soquel Diversion - 50cfs max). The Big Creek Diversion originates in Big Creek,
+! a tributary of the Merced River. This Diversion is located just upstream of Fish Camp, CA, where
+! the water is redirected to flow down Lewis Creek, a tributary of the upper Fresno River. The Soquel
+! Diversion originates in North Fork Willow Creek, a tributary of the San Joaquin River. This Diversion
+! is located approximately 9 miles upstream of Bass Lake, where water can be redirected to flow through
+! the Soquel Ditch to Nelder Creek, a tributary of the upper Fresno River. Alternatively, water can be
+! left in North Fork Willow Creek, and allowed to flow to Bass Lake and eventually to the San Joaquin River,
+! where it can be diverted in Friant Dam.  Madera ID also has a Pre-1914 water right on the Fresno River.
+
+! In 1976, madera ID netered into an agreement with PG&E to use the Soquesl water to generate power
+! in the San Joaquin River. Since 1979, Reclamation has executed annual Warren contracts to convey (up tp 10 TAF) this
+! non-CVP water through Madera Canal for delivery to Madera ID.
+
+! Madera ID’s water rights to sources of non-CVP water that could potentially be stored within the Hidden Unit
+!are as follows:
+! 	Up to 50 cfs of water imported from Big Creek from December 1 to July 15 the following year (except in April, when the water right is reduced to 20 cfs);
+! 	Up to 50 cfs of water imported from North Fork Willow Creek through the Soquel Diversion from October 1 through July 31 the following year; and
+! 	Up to 200 cfs of water from the Fresno River (which is inclusive of water imported from Big Creek and North Fork Willow Creek) year-round.
+
+! Each April, forecast April through Sept inflow to Hensley Lake (sum of April-Sept inflows)
+define sumI_HNSLY_part {
+    case apr {
+        condition   month == apr
+        sum(i=0,5,1) I_HNSLY(i) * cfs_TAF(i) }
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+
+! Hensley carryover storage based on SJRindex year type (from lookup table)
+define S_HNSLYcarryover {select Hnsly from HnslyCarryover where yrtype=wyt_SJR}
+
+! Hensley Lake evaporation estimate (from table, based on SJRindex year type)
+define S_HNSLYevap_est {select Hnsly from evap_est where yrtype=wyt_SJR}
+define S_HNSLYevap_estdv {alias S_HNSLYevap_est*taf_cfs kind 'debug' units 'cfs'}
+
+! Decision variable for Hensley Lake available water supply
+define S_HNSLYAvaildv {std kind 'water-supply' units 'taf'}
+
+/*
+Apr-Sep available water (not accounting for seepage) is forecasted in April;
+that value is stored in PrvHnslyAvail_pl decision variable each month until it
+is reforecasted the following April.
+*/
+define PrvHnslyAvail_pl {std kind 'water-supply' units 'taf'}
+
+/*
+Forecast Hensley Lake available water supply for Madera ID;
+
+Water Supply Forecast =   End-of-March storage
+                        + Apr-Sep inflow
+                        - Carryover target (from lookup table)
+                        - Downstream requirements
+                        - Fresno River seepage
+                        - Evap Estimate (ranges from 1 to 6 taf)
+
+Note: S_HNSLYAvail_p1 does not account for Fresno River seepage
+*/
+define S_HNSLYAvail_p1 {
+    case first5months {
+        condition month <= mar .and. wateryear == BgnWY
+        value         S_HNSLY(-1) }
+    case April {
+        condition month == apr
+        value        max(0., S_HNSLY(-1) + sumI_HNSLY_part - S_HNSLYcarryover - S_HNSLYevap_est)}
+    case otherwise {
+        condition   always
+        value         PrvHnslyAvail_pl(-1) }
+        }
+
+! Store April water supply forecast value in PrvHnslyAvail_pl decision variable
+goal set_PrvHnslyAvail_pl{PrvHnslyAvail_pl = S_HNSLYavail_p1}
+
+! Fresno River seepage estimate based on supply forecast (from lookup table)
+define fresno_seep { select fresno_seep from fresno_seep given forecast = S_HNSLYavail_p1 use minimum }
+
+! Apr-Sep available water supply forecast; accounts for Fresno River seepage
+define S_HNSLYAvail { value  max(0.,S_HNSLYavail_p1 - fresno_seep) }
+
+! Set WS forecast equal to the decision variable; ensure non-negative value
+goal set_S_HNSLYAvaildv {S_HNSLYAvaildv = max(0., S_HNSLYAvail)}
+
+! Determine from lookup table, monthly distribution of available ag water
+define fresno_ag_dist {
+    select fresno_pattern
+    from fresno_agdist
+    given forecast = S_HNSLYAvail
+    use minimum
+    where month = month }
+
+!Fresno River deliveries to Madera ID are limited to the current month's 
+!available water and to conveyance capacity of 200 cfs.
+!Current month avail water = Apr-Sep WS forecast * distribution percentage
+define D_FRS036_limit       {value max (0., S_HNSLYAvail*fresno_ag_dist*taf_cfs/100.)}
+goal limitD_FRS036_64_PA1   {D_FRS036_64_PA1 < min(200., D_FRS036_limit)}
+
+!Madera Canal deliveries to Madera ID are split 37%/63% between mileposts 6 and 32
+!NOTE -- these constraints are critical to matching diversion from MLRTN --> MDC w/ CSII values.
+! goal forceD_MDC006_64_PA1   {D_MDC006_64_PA1 > 90. * 0.37}
+! goal forceD_MDC032_64_PA1   {D_MDC032_64_PA1 > 90. * 0.67}
+goal limitD_MDC006_64_PA1   {D_MDC006_64_PA1 < D_MLRTN_MDC006 * 0.6 * 0.37 - D_MDC006_MDCLOS * 0.6 * 0.37}
+goal limitD_MDC032_64_PA1   {D_MDC032_64_PA1 < D_MLRTN_MDC006 * 0.6 * 0.63 - D_MDC006_MDCLOS * 0.6 * 0.63}
+
+!For Mar-May during below normal, above normal, and wet years (SJRindex),
+!define minimum Fresno River channel flow as the smaller of 1 taf and
+!inflow - delivery (ie minimum C_FRS039 flow ranges from 0 taf and 1 taf,
+!inclusive)
+
+define C_FRS036_min {
+    case AprJul {
+        condition month >=MAR .and. month <=MAY .and. wyt_SJR <=3
+        value min(1.0*taf_cfs, max(0., I_HNSLY - min(200., D_FRS036_limit))) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+goal setC_FRS036_MIF   {C_FRS036_MIF  = C_FRS036_min}
+
+
+!The majority of returns from Chowchilla go to non-district riparian and not to EBP. Limit diversion from
+!EBP and do not limit amount of Chowchilla returns non-dist users can take. 
+goal limitD_EBP016_64_NA2  {D_EBP016_64_NA2   < C_EBP005 + R_64_PA3_EBP016 + 0.1*R_64_PA1_EBP016}
+
+
+/*
+************************Chowchilla River Operations**************************
+For deliveries to Chowchilla Irrigation District
+Forecast Eastman Lake available water supply for Chowchilla ID;
+Water supply forecast =   End of March storage
+                        + Apr-Sep inflow (sum of April through September inflows)
+                        - Carryover target
+                        - Chowchilla River seepage (4.3 taf Apr-Sep = 25.2)
+                        - Evap estimate
+*/
+
+define sumI_ESTMN_part {
+    case apr {
+        condition   month == apr
+        sum(i=0,5,1) I_ESTMN(i) * cfs_TAF(i) }
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+
+! Eastman carryover storage based on SJRindex year type (from lookup table)
+define S_ESTMNcarryover {select Estmn from EstmnCarryover where yrtype=wyt_SJR}
+
+! Eastman Lake evaporation estimate (from table, based on SJRindex year type)
+define S_ESTMNevap_est {select Estmn from evap_est where yrtype=wyt_SJR}   !MBK changed S_HNSLY to S_ESTMN
+
+! Decision variable for Eastman Lake available water supply
+define S_ESTMNAvaildv {std kind 'water-supply' units 'taf'}
+
+/*
+Apr-Sep available water (not accounting for seepage) is forecasted in April;
+that value is stored in prvEstmnAvail_p1 decision variable each month until it
+is reforecasted the following April.
+*/
+define prvEstmnAvail_p1 {std kind 'water-supply' units 'taf'}
+
+define S_ESTMNAvail_p1 {
+    case first5months {
+        condition month <= mar .and. wateryear == BgnWY
+        value         S_ESTMN(-1) }
+    case April {
+        condition month == apr
+        value         max( 0.0, (S_ESTMN(-1) + sumI_ESTMN_part - S_ESTMNcarryover - S_ESTMNevap_est) )}
+    case otherwise {
+        condition   always
+        value          prvEstmnAvail_p1(-1) }
+}
+
+! Store April water supply forecast value in prvEstmnAvail_p1 decision variable
+goal set_prvEstmnAvail_p1 { prvEstmnAvail_p1 = S_ESTMNAvail_p1 }
+     
+! Chowchilla River seepage estimate based on WS forecast (from lookup table)
+define chowchilla_seep    { select chowchilla_seep from chowchilla_seep given forecast=S_ESTMNAvail_p1 use minimum}
+
+! Apr-Sep available water supply forecast; accounts for river seepage
+define S_ESTMNAvail       { value S_ESTMNAvail_p1 - chowchilla_seep }
+
+! Set WS forecast equal to the decision variable; ensure non-negative value
+goal set_S_ESTMNAvaildv   { S_ESTMNAvaildv = max(0., S_ESTMNAvail) }
+
+! Determine from lookup tables, monthly distribution of available ag water and max surface diversion
+define chow_ag_dist {
+    select chow_pattern
+    from Chowchilla_agdist
+    given forecast = S_ESTMNAvail
+    use minimum
+    where month = month }
+define chow_max_surf { select  chow_max_surf  from chow_max_surf where month = month}
+
+! split deliveries to Chowchilla ID evenly for now
+! limit the amount of Chowchilla River water delivered to the SW allocation
+! limit total delivery to the chow_max_surf value
+! limit total delivery to the SW allocation and Madera Canal share
+
+define total64_PA2   {alias D_CHW017_64_PA2 + D_ASL013_64_PA2 + D_BRS018_64_PA2 kind 'delivery' units 'cfs'}
+goal limit64_PA2a    {D_CHW017_64_PA2 + D_ASL013_64_PA2 + D_BRS018_64_PA2 < chow_max_surf*taf_cfs}
+goal limit64_PA2b    {D_CHW017_64_PA2 + D_ASL013_64_PA2 + D_BRS018_64_PA2 < D_MLRTN_MDC006*0.4 - D_MDC006_MDCLOS*0.4          ! Chowchilla share of Madera Canal
+                                                                          + max(0., S_ESTMNAvail)*chow_ag_dist/100.*taf_cfs}  ! Chowchilla River allocation
+goal limitD_CHW017_64_PA2a {D_CHW017_64_PA2 < max(0., S_ESTMNAvail)*chow_ag_dist/100.*taf_cfs}
+
+

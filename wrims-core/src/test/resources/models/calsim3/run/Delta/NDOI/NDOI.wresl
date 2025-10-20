@@ -1,0 +1,94 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+NDOI.wresl
+
+Purpose:
+Calculate NDOI for D1641
+
+According to revised Water Rigth Decistion 1641 March 15, 2000
+NDOI = Delta inflow - Net Delta constumtive use - Delta exports
+where Delta inflow = SAC + SRTP + YOLO + EAST + MISC + SJR
+
+SAC = Sacramento River at Freepot mean daily flow for the pervious day
+SRTP = Sacramento Regional Treatment Plant average daily discharge for the pervious week
+YOLO = Yolo Bypass mean daily flow for the pervious day, which is equal to the flows from the
+       Sacramento Weir, Fremont Weir, Cache Creek at Rumsey, and the South Fork of Putah Creek.
+East = Eastside Streams mean daily flow for the previous day from the Mokelumne River at
+       Woodbridge, Cosumnes River at Michigan Bar, and Calaveras River at Bellota.
+Misc = Combined mean daily flow for the previous day of Bear Creek, Dry Creek, Stockton
+       Diverting Canal, Frechch Camp Slough, Marsh Creek, and Morrison Creek. 
+SJR = San Joaquin River flow at Vernalis, mean daily flow for the previous day. 
+ */
+
+
+
+define DeltaInflowforNDOI {std kind 'FLOW' units 'CFS'}
+goal set_DeltaInflowforNDOI {DeltaInflowforNDOI =   C_SAC049!Sacramento River at Freeport B9-1840/11447650
+                                                  + R_SRWWTP_SAC048!Sacramento Regional Treatment Plant
+                                                  + SP_SAC066_YBP020!Sacramento Weir A0-2903
+                                                  + SP_SAC083_YBP037!Fremont Weir
+                                                  + C_CCH053 !Cache Creek at Rumsey
+                                                  + C_PTH007 !South Fork of Putah Creek
+                                                  + C_MOK034 !Mokelumne River at Woodbridge B0-2105/11325500
+                                                  + C_CSM035 !Cosumnes River at Michigan Bar B1-1150/11335000
+                                                  + C_CLV026 !Calaveras River at Bellota B0-2520/11310700
+                                                  /*+ C_BEA020 */!Bear Creek at Lodi B0-2010
+                                                  + C_DSC016 !Dry Creek at Galt B0-2805/11329500
+                                                  + C_SDC001 !Stockton Diverting Canal B0-2580/11310990
+                                                  + C_FCS006 !French Camp Slough at French Camp B02805/11304600
+                                                  + C_MSH015 !Marsh Creek at Byron B8-9100/11337500
+                                                  /*+ C_MOR020*/ !Morrison Creek at Sacramento A0-0020/11336580
+                                                  + C_SJR070}!San Joaquin River flow at Vernalis B0-7020/11303500
+                                                  
+define DeltaExportforNDOI {std kind 'FLOW' units 'CFS'}
+goal set_DeltaExportforNDOI {DeltaExportforNDOI =   C_CAA003            !Clifton Court Forebay
+                                                  + C_DMC003            !Tracy Pumping Plant
+                                                  + D408_RS             !Contra Costa Canal
+                                                  + D408_OR     !CCWD Old River Diversion
+                                                  + D408_VC     !CCWD Middle River Diversion (Victoria Canal)
+                                                  + D_BKR004_NBA009     !North Bay Aqueduct 
+                                                  + D_OMR027_SJRRrecap  !Recapture of restoration flows  
+                                                  + D_OMR028_SRSC}      !Export of SRSC land fallowing transfer  
+                                                  
+! In Dayflow, daily Delta precipitation is approximated using precipitation measured at Stockton Fire Station No. 4 in units of inches.
+! It is assumed that the entire Delta receives the same depth when calculating the volume of water precipitated (depth multiplied by the area of the Delta.
+! It is further assumed that the storm drainage is distributed evenly over five days, the day the precipitation was measured and the following four days.
+! Precipitation is converted to a volumetric flow rate by dividing the volume of water (in cubic feet) by five days (in seconds) making its units consistent
+! with other input data (e.g. streamflow).
+
+define DeltaAccretionforNDOI {timeseries kind 'FLOW' units 'TAF' convert 'CFS'}
+
+
+! Gross channel depletion (consumptive use) in the Delta is a difficult quantity to estimate because of the many variables involved.
+! Direct monitoring is impractical at present; therefore, various approximation techniques are used.
+! In the Dayflow program, each month of the year has been assigned an average value, but the same annual pattern is used regardless
+! of meteorological and hydrological conditions. Daily mean estimates were determined graphically by fitting the monthly averages with a continuous curve.
+
+define DeltaDepletionforNDOI {timeseries kind 'FLOW' units 'TAF' convert 'CFS'}                                                                                                     
+
+! logic for meeting NDOI and X2
+define NDOI     {std kind 'FLOW' units 'CFS'} ! D1641 flow definition
+define NDOI_MIN {std kind 'FLOW' units 'CFS'} ! the portion of NDOI that meets D1641 req'ts (DO and X2)
+define NDOI_ADD {std kind 'FLOW' units 'CFS'} ! balance of NDOI that is above what's necessary to meet std or X2
+goal set_NDOI {NDOI = DeltaInflowforNDOI + DeltaAccretionforNDOI - DeltaDepletionforNDOI - DeltaExportforNDOI}
+goal tot_NDOI {NDOI = NDOI_MIN + NDOI_ADD}
+
+
+
+
+

@@ -1,0 +1,108 @@
+! X2 setup for WQCP requirements
+
+! set minimum flow
+define flowmin_DecA4 {value 0.}
+
+! set the flow cap for each station (cfs). this is max flow to meet X2 at each station
+define flowcap_roe {value 29200. }     ! cfs for Roe Island/Port Chicago
+define flowcap_chs {value 11400. }     ! cfs for Chipps Island
+define flowcap_cnf {value 7100.  }     ! cfs for Confluence (Sac & SJR)
+
+! set the trigger value which activates the operation of Roe X2 standard
+define trigger_x2roe {value 66.3 } ! km to just beyond Roe Island
+
+! set the minimum flow for the circumstances in which there is no requirement at the confluence
+!   ie. May_SRI < 8.1 maf, then no X2 standard
+define flowmin_specX2 {value 4000. }         ! cfs for months (feb-june) in which no confluence req
+
+! ******************************************************************************************
+! Get the days required for X2 at each location (Roe, Chipps, Confluence)
+
+!@jmg 2017v13 - following section updated
+define daysX2_roeTB {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0  
+          value     roe_days    }
+     case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1 
+          value          0. }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+
+define daysX2_chs {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0  
+          value     chs_days    }
+    case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1  
+          value          0. }
+
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+define daysX2_cnf {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0  
+          value     cnf_days     }
+    case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1 
+          value          0. }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+
+
+define daysX2_roe {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN
+          value min( daysX2_roeTB, daysX2_chs) }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+!@jmg 2017v13 end of this section update
+
+! ******************************************************************************************
+! Modify the days at each location depending on whether the trigger for Roe has been tripped
+! If   X2last > trigger then,
+!              roe_days=0, chs_days=orig, cnf_days=daysinperiod - chs_days
+! If   X2last < trigger then,
+!              roe_days=orig, chs_days=orig-roe_days, cnf_days=daysin period-chs_days-roe_days
+!
+! NOTE: THE DAY MODIFICATION ASSUMES THAT CHS_DAYS >= ROE_DAYS.  IE.  WHEN YOU MEET ROE YOU
+! AUTOMATICALLY MEET CHIPPS. BE SURE TABLE 'X2DAYS' IS SET PROPERLY.
+
+define daysX2_roe_mod {
+     case RoeOff {
+         condition      x2_last > trigger_x2roe
+          value          0.    }
+     case RoeOn {
+          condition      always
+          value          daysX2_roe  }
+}
+define daysX2_chs_mod {
+     case RoeOff {
+          condition      x2_last > trigger_x2roe
+          value          daysX2_chs  }
+     case RoeOn {
+          condition      always
+          value          daysX2_chs - daysX2_roe  }
+}
+define daysX2_bkg_mod {value 0.}                                       
+define daysX2_cnf_mod {
+    case SpecialStd {
+        condition       daysX2_cnf > 0.5
+        value           daysin - daysX2_chs_mod - daysX2_roe_mod  }     ! days here make up the balance
+    case StandardOff {                                                      ! for the period unless the original
+        condition       always                                              ! days at cnf are zero.  in this case
+        value           0.   }                                              ! there is no standard!!
+}
+define modroeday {alias daysX2_roe_mod kind 'debug' units 'none'}
+define modchsday {alias daysX2_chs_mod kind 'debug' units 'none'}
+define modcnfday {alias daysX2_cnf_mod kind 'debug' units 'none'}
+
+! ******************************************************************************************

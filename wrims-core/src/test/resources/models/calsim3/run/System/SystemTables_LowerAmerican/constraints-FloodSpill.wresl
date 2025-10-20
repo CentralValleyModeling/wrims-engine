@@ -1,0 +1,48 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-FloodSpill.wresl
+CalSim 3.0 System File
+
+Purpose:
+To allow flow tops the channel capacity or the reservoir release capacity (RelCap_xxxxx) for flood spill.
+
+Naming takes the following form where {xxxxx} represent the flow node:
+C_{xxxxx}_NCF      -- Normal channel flow (NCF) under channel capacity constraint or normal release under MaxRel constaint
+C_{xxxxx}_Flood    -- Flood release above MaxRel constraint or normal channel capacity
+
+Z.Q. Richard Chen, BDO 3/3/2017 
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! American River	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_FOLSM_NCF	{lower 0 upper RelCap_FOLSM kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_FOLSM  {C_FOLSM < RelCap_FOLSM}
+define C_FOLSM_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+goal   MaxRel_FOLSM  	{C_FOLSM_NCF + C_FOLSM_Flood = C_FOLSM }
+
+define C_NTOMA_NCF	{lower 0 upper 7071*taf_cfs kind 'CHANNEL' units 'CFS'}  !define C_NTOMA  {lower 0 upper 7071*taf_cfs kind 'CHANNEL' units 'CFS'}
+define C_NTOMA_Flood	{std kind 'SPILL' units 'CFS'} !7071*taf = 114999 cfs in 31 days and 127320 cfs in 28 days
+goal   Flood_NTOMA  	{C_NTOMA_NCF + C_NTOMA_Flood = C_NTOMA }
+!goal   MaxRel_NTOMA  {C_NTOMA < RelCap_NTOMA} !not used since RelCap_NTOMA = 169,652 cfs fixed in the res_info table > 7071*taf_cfs
+
+
+Objective obj_Flood = {
+[C_FOLSM_Flood, -900000],
+[C_NTOMA_Flood, -900000],
+}
+

@@ -1,0 +1,176 @@
+! SJR_ChannelSplits.wresl
+! The following are defininitions and goals to split arcs within demand and channel arcs
+! Revised by C. Hsu, 3/4/03, USBR, for review and documentation project
+!#########################################################################################
+/*
+Arc splits are used to route seperate types of water (beyond just the minimum in-stream
+flow and excess flows) in channel arcs, and to delivery different types of water in delivery arcs.
+Split-arcs for reservoir releases (plus VAMP releases from Exchange Contractors via DMC)
+*/
+
+/*
+New Melones arc splits
+*/
+! Release from New Melones main channel flow
+define C_MELONm {std kind 'FLOW-MAIN' units 'cfs'}
+! Release from New Melones for flood flow
+define C_MELONF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Release from New Melones for water quality
+define C_MELONWQ {std kind 'FLOW-RELEASE' units 'cfs'}
+! Release from New Melones for dissolved oxygen
+define C_MELONDO {std kind 'FLOW-RELEASE' units 'cfs'}
+! Release from New Melones for minimum flow
+define C_MELONMIN {std kind 'FLOW-RELEASE' units 'cfs'}
+! Release from New Melones for NMFS RPA on Stanislaus flows
+define C_MELONRPA {std kind 'FLOW-RELEASE' units 'cfs'}
+! Sum all the components of the flow for Stanislaus River below New Melones
+goal aggregC_MELON { C_MELON = C_MELONM + C_MELONF + C_MELONWQ + C_MELONDO + C_MELONMIN  }  
+
+/*
+New Melones Reservoir
+Tulloch excess flows seperated into a flood arc (from spills in from New Melones),
+WQ, DO and an excess flow arc above the minimum flow requirement.
+(used to be Goodwin at node 16)
+*/
+! Define flow release for water quality from Tulloch
+define C_STS059WQ {std kind 'FLOW-RELEASE' units 'cfs'}
+! Define flow release for DO from Tulloch
+define C_STS059DO {std kind 'FLOW-RELEASE' units 'cfs'}
+! Define flow release from flood flow spills
+define C_STS059F {std kind 'FLOW-FLOOD' units 'cfs'}
+! Define excess flow release
+define C_STS059_exc_a {std kind 'FLOW-EXCESS' units 'cfs'}
+! Define minimum flow release from Tulloch, units = CFS
+define C_STS059MIN {std kind 'FLOW-RELEASE' units 'cfs'}
+! Sum all the components for the flow release of Tulloch
+goal aggegC_STS059_exc {C_STS059_EXC = C_STS059_exc_a + C_STS059WQ + C_STS059DO + C_STS059MIN }
+
+
+
+/*
+Don Pedro arc spilts
+*/
+! Release from Don Pedro for main flow
+define C_PEDROM {std kind 'FLOW-MAIN' units 'cfs'}
+! Release from Don Pedro for flood flow
+define C_PEDROF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Sum all the flow components for flow of Tuolumne River below New Don Pedro
+goal aggregC_PEDRO { C_PEDRO = C_PEDROM + C_PEDROF }
+
+/*
+Lake McClure arc spilts
+*/
+! Release from Lake McClure for main flow
+define C_MCLREM {std kind 'FLOW-MAIN' units 'cfs'}
+! Release from Lake McClure for flood flow
+define C_MCLREF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Minimum flow release from Lake McClure (active requirement only in October)
+define C_MCLREmin {std kind 'FLOW-RELEASE' units 'cfs'}
+! Sum all the flow components for flow below Lake McCLure
+goal aggregC_MCLRE { C_MCLRE = C_MCLREM + C_MCLREF + C_MCLREMIN }  
+
+
+/*
+Eastman Lake arc spilts
+*/
+! Release from Eastman Lake for main channel flow
+define C_ESTMNM {std kind 'FLOW-MAIN' units 'cfs'}
+! Release from Eastman Lake for flood flow
+define C_ESTMNF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Sum all the components for the flow of Chowchilla River below Eastman Lake
+goal aggregC_ESTMN { C_ESTMN = C_ESTMNM + C_ESTMNF }
+
+
+/*
+Hensley Lake arc spilts
+*/
+! Release from Hensley Lake for main channel flow
+define C_HNSLYM {std kind 'flow-main' units 'cfs'}
+! Release from Hensley Lake for flood flow
+define C_HNSLYF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Flow components for the flow of Fresno River below Hensley Lake
+goal aggregC_HNSLY { C_HNSLY = C_HNSLYM + C_HNSLYF }
+
+
+/*
+Arc spilts for Millerton Lake
+*/
+! Release from Millerton Lake for main channel flow
+define C_MLRTNM {std kind 'FLOW-MAIN' units 'cfs'}
+! Release from Millerton Lake for flood flow
+define C_MLRTNF {std kind 'FLOW-FLOOD' units 'cfs'}
+! Snowmelt release from Millerton Lake
+define C_MLRTNA {std kind 'FLOW-SNOWMELT' units 'cfs'}
+! Total of Millerton release equal to flow in main channel plus flood flow plus snowmelt
+goal aggregC_MLRTN { C_MLRTN = C_MLRTNM + C_MLRTNF + C_MLRTNA }
+
+! Define Madera Canal losses, units = CFS
+define D_MLRTN_MDC_loss {std kind 'flow-loss' units 'cfs'}
+! Define Madera Canal main channel flows, Class 1, units = CFS
+define D_MLRTN_MDC_C1 {std kind 'flow-delivery' units 'cfs'}
+! Define Madera Canal main channel flows, Class 2, units = CFS
+define D_MLRTN_MDC_C2 {std kind 'flow-delivery' units 'cfs'}
+! Define Madera Canal 215 flows, units = CFS
+define D_MLRTN_MDC_215  {std kind 'flow-delivery' units 'cfs'}
+! Define Madera Canal flood flows, units = CFS
+define D_MLRTN_MDC_F    {std kind 'flow-delivery' units 'cfs'}
+!define Madera Canal 16(b) flows
+define D_MLRTN_MDC_16B {std kind 'flow-delivery' units 'cfs'}
+! Madera Canal flows equal to the sum of the canal losses plus main channel flow plus 215 flow
+goal aggreg_D_MLRTN_MDC {D_MLRTN_MDC006 = D_MLRTN_MDC_loss + D_MLRTN_MDC_C1 + D_MLRTN_MDC_C2 + D_MLRTN_MDC_215 + D_MLRTN_MDC_F + D_MLRTN_MDC_16B}
+! Aggregate flows from MDC032 to Chowchilla River
+goal aggreg_C_MDC032 {C_MDC032 = C_MDC032_M + C_MDC032_F + C_MDC032_16B}
+
+! Define Friant-Kern canal losses, units = CFS
+define D_MLRTN_FRK_loss {std kind 'flow-loss' units 'cfs'}
+! Define Friant/Kern Canal main channel flows, Class 1, units = CFS
+define D_MLRTN_FRK_C1   {std kind 'flow-delivery' units 'cfs'}
+! Define Friant/Kern Canal main channel flows, Class 2, units = CFS
+define D_MLRTN_FRK_C2   {std kind 'flow-delivery' units 'cfs'}
+! Define Friant/Kern Canal 215 flows, units = CFS
+define D_MLRTN_FRK_215  {std kind 'flow-delivery' units 'cfs'}
+! Define Friant/Kern Canal 16b flows
+define D_MLRTN_FRK_16B {std kind 'flow-delivery' units 'cfs'}
+! Friant/Kern Canal flows equal to the sum of the canal losses plus main channel flow plus 215 flow
+goal aggregD_MLRTN_FRK {D_MLRTN_FRK000 = D_MLRTN_FRK_loss + D_MLRTN_FRK_C1 + D_MLRTN_FRK_C2 + D_MLRTN_FRK_215 + D_MLRTN_FRK_16B }
+
+
+/*
+Chowchilla Bypass operations
+The Chowchilla Bypass splits Millerton flood flows that flow past Gravelly Ford
+(Millerton does not release water for demands past Gravelly Ford).
+The Bypass structure allows 2000 cfs to flow into the Mendota Pool before routing water
+through the Chowchilla Bypass (in order to protect the Riparian land around the Mendota
+Pool.  The Bypass has a channel capacity of 6500 cfs which if exceeded will flood
+back into the Mendota Pool.  Therefore, the operations are as follows:
+   1)up to 1400 cfs through C_SJR205_main
+   2)the next 6500 cfs through D_SJR214_EBP001
+   3)any flows above 7900 cfs through C_SJR205_flood
+System defined restrictions on D_SJR214_EBP001 give it an upper limit of 6500 and a negative weight
+C_SJR205_flood needs to have a larger negative weight than D_SJR214_EBP001 for a correct order of filling
+*/
+
+define C_SJR205_main { upper 1400. kind 'flow-channel' units 'cfs' } 
+define C_SJR205_flood { std kind 'flow-flood' units 'cfs' }
+goal aggregC_SJR205 { C_SJR205 = C_SJR205_main + C_SJR205_flood }
+
+! integer variable to control chowchilla bypass use
+! don't allow diversions if C_SJR205 < mendota pool capacity
+! C605A is already split into C_SJR205_main and C_SJR205_flood, which is highly penalized
+define int_SJR205 {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}  ! 0 if C_SJR205 < 1400; 1 if C_SJR205 > 1400
+goal boundSJR205_0 {C_SJR205_main > int_SJR205 * 1400.}
+goal boundSJR205_1 {C_SJR205_flood < int_SJR205 * 9999999.}
+goal boundD_SJR214_EBP001 {D_SJR214_EBP001 < int_SJR205 * 6500.}
+
+! Separate the flow arc below Gravelly Ford into flow destined for channel losses and main channel flow
+define C_SJR227_loss {std kind 'loss' units 'cfs'}
+define C_SJR227_main {std kind 'channel' units 'cfs'}
+goal aggregC603 {C_SJR227 = C_SJR227_loss + C_SJR227_main}
+! Further split C_SJR227_main into restoration/settlement flows and flood/snowmelt release
+define C_SJR227_mainsjrr {std kind 'channel' units 'cfs'} ! sjr restoration
+define C_SJR227_mainsmfl {std kind 'channel' units 'cfs'} ! snowmelt/flood
+goal aggregC603_main {C_SJR227_main = C_SJR227_mainsjrr + C_SJR227_mainsmfl}
+
+
+
+

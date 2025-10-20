@@ -1,0 +1,93 @@
+! THIS code calculates the last month X2
+! X2 is the 2ppt bottom isohaline line used to describe the entrapment zone.
+! The position as a function of last month's position and current month's Net Delta outflow
+
+!*********************************************************************************************
+! prepare inputs for X2 calculation
+
+!define NDO {alias NDOI_MIN + NDOI_ADD KIND 'FLOW-NDO' UNITS 'CFS'}  ! total of mrdo and surplus
+define NDO {std kind 'FLOW-NDO' units 'CFS'}
+goal setNDO {NDO = NDOI_MIN - C_SAC041_WQ + NDOI_ADD}
+
+! ******************************************************************************************
+! Get last month's X2 position using ANN
+! calculate previous month's value of X2
+
+define X2_prv {std kind 'X2-POSITION-PREV' units 'KM'}
+
+define X2_last {
+
+  case lastWaterYear {
+    condition  month == Oct
+      value  ANN_X2(
+               X2_PRV[WHEELJPOD](-5),X2_PRV[WHEELJPOD](-4),X2_PRV[WHEELJPOD](-3),X2_PRV[WHEELJPOD](-2),X2_PRV[WHEELJPOD](-1),
+               NDO[WHEELJPOD](-5),NDO[WHEELJPOD](-4),NDO[WHEELJPOD](-3),NDO[WHEELJPOD](-2),NDO[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  Ann_X2(
+               X2_PRV[WHEELJPOD](-5),X2_PRV[WHEELJPOD](-4),X2_PRV[WHEELJPOD](-3),X2_PRV[WHEELJPOD](-2),X2_PRV[WHEELJPOD](-1),
+               NDO[WHEELJPOD](-5),NDO[WHEELJPOD](-4),NDO[WHEELJPOD](-3),NDO[WHEELJPOD](-2),NDO[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(monthly_ave),(month-1),wateryear)}
+}
+
+goal X2lastperiod {X2_prv=X2_last}      ! output purposes only
+
+! ******************************************************************************************
+! Get last month's X2 position as modified by NODOS using ANN
+! calculate previous month's value of X2 NODOS
+
+define NDO_MOD {std kind 'FLOW-NDO' units 'CFS'}
+goal setNDO_MOD {NDO_MOD = NDOI_MIN + NDOI_ADD}
+
+define X2_prv_MOD {std kind 'X2-POSITION-PREV' units 'KM'}
+
+define X2_last_MOD {
+
+  case lastWaterYear {
+    condition  month == Oct
+      value  ANN_X2(
+               X2_prv_MOD[WHEELJPOD](-5),X2_prv_MOD[WHEELJPOD](-4),X2_prv_MOD[WHEELJPOD](-3),X2_prv_MOD[WHEELJPOD](-2),X2_prv_MOD[WHEELJPOD](-1),
+               NDO_MOD[WHEELJPOD](-5),NDO_MOD[WHEELJPOD](-4),NDO_MOD[WHEELJPOD](-3),NDO_MOD[WHEELJPOD](-2),NDO_MOD[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  Ann_X2(
+               X2_prv_MOD[WHEELJPOD](-5),X2_prv_MOD[WHEELJPOD](-4),X2_prv_MOD[WHEELJPOD](-3),X2_prv_MOD[WHEELJPOD](-2),X2_prv_MOD[WHEELJPOD](-1),
+               NDO_MOD[WHEELJPOD](-5),NDO_MOD[WHEELJPOD](-4),NDO_MOD[WHEELJPOD](-3),NDO_MOD[WHEELJPOD](-2),NDO_MOD[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(monthly_ave),(month-1),wateryear)}
+}
+
+goal X2lastperiod_MOD {X2_prv_MOD=X2_last_MOD}      ! output purposes only
+
+! ******************************************************************************************
+! Get last month's X2 position using K-M equation
+! coefficients used in K-M equation
+
+define a_x2_coef {value 122.2}
+define b_x2_coef {value 0.3278}
+define c_x2_coef {value 17.65}
+
+define X2_prv_KM {std kind 'X2-POSITION-PREV' units 'KM'}
+
+! do KM equation continuously from initial condition
+define X2_last_KM {
+    case firstmonth {
+	condition month == OCT .and. wateryear == 1922
+        value a_x2_coef + b_x2_coef*X2_prv(-1) - c_x2_coef*LOG10(NDO(-1))
+        }
+    case otherwise {
+	condition always
+        value a_x2_coef + b_x2_coef*X2_prv_KM(-1) - c_x2_coef*LOG10(NDO(-1))
+        }
+}
+
+goal X2lastperiod_KM {X2_prv_KM=X2_last_KM}      ! output purposes only (need previous value)--could also be an alias
+
+! ******************************************************************************************

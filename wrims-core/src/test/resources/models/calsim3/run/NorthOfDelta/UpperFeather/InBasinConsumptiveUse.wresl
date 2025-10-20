@@ -1,0 +1,33 @@
+/*
+InBasinConsumptiveUse.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+Account for crop consumptive use within the North and Middle Fork Feather River.
+
+Created A Draper, MWH/Stantec, 06.30.17 
+ */
+ 
+/*
+There are significant areas of irrigated agriculture within the North and Middle Fork Feather River.
+These areas are described  in the "Report on Upper Feather River Service Area" DWR, 1958. The report                
+estimates the net consumptive use to be approximately 76 TAF/year.
+
+DWR in the calculation of the unimpaired flow at Oroville (CDEC, FTO) assume an impairment of 75 TAF/yr
+with a fixed 12-month repeating pattern:
+
+ID	Oct	Nov	Dec	Jan	Feb	Mar	Apr	May	Jun	Jul	Aug	Sep	WY
+FTO	.9	.2	.1	.1	0	0	1.3	7.5	22.5	21.3	13.6	7.5	75.0
+
+Note: That these data are mislabelled on CDEC
+
+To be consistent with the derived inflow timeseries data, which are derived from the CDEC-published unimpaired
+flow at Oroville, the Upper Feather River module assumes a total in-basin depletion of 75 TAF/yr.
+
+
+*/
+
+define UF_CULOS {timeseries kind 'CONSUMPTIVE-USE' UNITS 'TAF' convert 'CFS'} ! Consumptive Use
+
+goal setCULos {D_FTR074_CULOS < UF_CULOS + R_LCCWD_MFF095 + R_PLMAS_MFF088 - D_BGC002_PLMAS - D_NLL016_LCCWD}
+

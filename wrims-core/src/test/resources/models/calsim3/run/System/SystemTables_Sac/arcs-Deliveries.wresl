@@ -1,0 +1,1259 @@
+/*
+File Name: arcs-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Define arcs associated with delivery of water
+
+Naming takes the following form:
+DG_{Demand Unit}         - Total (Gross) Surface diversion
+DN_{Demand Unit}         - Net Surface Delivery, reduced by conveyance losses and spills
+RU_{Demand Unit}         - Reuse of return flow from field/farm and lateral seepage from canal system to toe drains
+RP_{Demand Unit}         - Evaporative and evapotranspiration losses from riparian vegetation and miscellaneous on-farm/field losses 
+AW_{Demand Unit}         - Total Applied Water
+AWR_{Demand Unit}        - Applied Water for rice
+AWO_{Demand Unit}        - Applied Water for all other crops
+AWW_{Demand Unit}        - Applied Water for wetlands
+UD_{Demand Unit}         - Urban demand
+
+*/
+
+define SHRTG_08N_PR1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_PR2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_PR   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_PR     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_PR  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_NR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_PR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17S_PR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_PU2   {std kind 'SHORTAGE' units 'CFS'}
+
+/*
+!define SHRTG_09_PR    {std kind 'SHORTAGE' units 'CFS'}
+!define SHRTG_09_PR2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_NU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_PA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_PU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_SA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_02_SU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_NU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_PA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_PU1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_PU2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_PU3    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_SA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_03_SU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_04_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_04_NU1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_04_NU2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_04_PA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_04_PA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_05_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_05_NU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_06_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_06_NU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_06_PA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07N_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07N_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07N_PA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07S_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07S_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_07S_PA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_PA   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_PR1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_PR2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_SA1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08N_SA2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_NA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_NA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_PA   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_PR   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_SA1  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_SA2  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_08S_SA3    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_NA     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_NU     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_PR     {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_SA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_09_SA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_10_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_10_NU1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_10_NU2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_NU1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_NU2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_PR  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_SA1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_SA2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_SA3 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_11_SA4 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_12_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_12_NU1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_12_NU2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_12_SA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_13_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_13_NU1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_13_NU2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_13_PA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_14_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_14_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15N_NA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15N_NA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15N_NU {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15N_SA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15S_NA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15S_NA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15S_NU {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_15S_SA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_NA1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_NA2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_PA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_PU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_16_SA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_NA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_NR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_NU {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17N_PR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17S_NA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17S_NU {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17S_PR {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_17S_SA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_18_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_18_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_18_SA  {std kind 'SHORTAGE' units 'CFS'}
+!define SHRTG_19_NA {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_19_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_19_SA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_20_NA1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_20_NA2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_20_NU1 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_20_NU2 {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_20_PA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_21_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_21_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_21_PA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_21_PU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_21_SA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_22_NA  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_22_NU  {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_22_SA1    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_22_SA2    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_23_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_23_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NA1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NA2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NA3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NU1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NU2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NU3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_24_NU4   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_25_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_25_NU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_25_PA1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_25_PA2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_25_PU    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NU1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NU2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NU3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NU4   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_NU5    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_PU1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_PU2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26N_PU3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_NA    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_NU1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_NU2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_NU3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_NU4    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU1   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU2   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU3   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU4   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU5   {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_26S_PU6    {std kind 'SHORTAGE' units 'CFS'}
+define SHRTG_60N_NA2    {std kind 'SHORTAGE' units 'CFS'}  !@jmg 2017v13 - not sure if used in merged model
+define SHRTG_60N_NU1   {std kind 'SHORTAGE' units 'CFS'}   !@jmg 2017v13 - not sure if used in merged model
+define SHRTG_60N_PU   {std kind 'SHORTAGE' units 'CFS'}    !@jmg 2017v13 - not sure if used in merged model
+define SHRTG_60S_NU    {std kind 'SHORTAGE' units 'CFS'}   !@jmg 2017v13 - not sure if used in merged model
+define SHRTG_EBMUD   {std kind 'SHORTAGE' units 'CFS'}     !@jmg 2017v13 - not sure if used in merged model
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 1      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Not used
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 2      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_02_NA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_02_NA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_02_NA       {std kind 'REUSE' units 'CFS'}
+define    RP_02_NA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_02_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_02_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_02_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_02_SA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_02_SA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_02_SA       {std kind 'REUSE' units 'CFS'}
+define    RP_02_SA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_02_SA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_02_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_02_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_02_SU       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_02_SU       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_02_SU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_02_PA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_02_PA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_02_PA       {std kind 'REUSE' units 'CFS'}
+define    RP_02_PA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_02_PA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_02_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_02_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_02_PU  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_02_PU  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_02_PU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+! no surface deliveries to 2_NU
+define    UD_02_NU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 3      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_03_NA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_NA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_03_NA       {std kind 'REUSE' units 'CFS'}
+define    RP_03_NA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_03_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_03_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_03_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_03_SA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_SA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_03_SA       {std kind 'REUSE' units 'CFS'}
+define    RP_03_SA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_03_SA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_03_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_03_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_03_SU       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_SU       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_03_SU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_03_PA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_PA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_03_PA       {std kind 'REUSE' units 'CFS'}
+define    RP_03_PA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}    
+define    AW_03_PA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_03_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_03_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_03_PU1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_PU1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_03_PU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_03_PU2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_03_PU2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_03_PU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!define    DN_03_PU3 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+!define    DG_03_PU3 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+!define    UD_03_PU3 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+! no surface deliveries to 3_NU
+define    UD_03_NU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 4      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_04_NA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_04_NA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_04_NA       {std kind 'REUSE' units 'CFS'}
+define    RP_04_NA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_04_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_04_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_04_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_04_PA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_04_PA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_04_PA1 {std kind 'REUSE' units 'CFS'}
+define    RP_04_PA1 {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_04_PA1      {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_04_PA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_04_PA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_04_PA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_04_PA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_04_PA2 {std kind 'REUSE' units 'CFS'}
+define    RP_04_PA2 {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_04_PA2      {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_04_PA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_04_PA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+! no surface deliveries to 4_NU1
+define    UD_04_NU1      {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! no surface deliveries to 4_NU2
+define    UD_04_NU2      {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 5      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_05_NA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_05_NA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_05_NA       {std kind 'REUSE' units 'CFS'}
+define    RP_05_NA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_05_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_05_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_05_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_05_NA         {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+! no surface deliveries to 5_NU
+define    UD_05_NU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 6      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! no surface deliveries to 6_NA
+define    AW_06_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_06_NA       {std kind 'REUSE' units 'CFS'}
+define    RP_06_NA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_06_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_06_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_06_PA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_06_PA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_06_PA       {std kind 'REUSE' units 'CFS'}
+define    RP_06_PA       {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_06_PA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_06_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_06_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+! no surface deliveries to 6_NU
+define    UD_06_NU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-NORTH          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!no surface deliveries to 7N_NA
+define    AW_07N_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_07N_NA {std kind 'REUSE' units 'CFS'}
+define    RP_07N_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_07N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_07N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!no surface deliveries to 7N_NU
+define    UD_07N_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_07N_PA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_07N_PA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_07N_PA {std kind 'REUSE' units 'CFS'}
+define    RP_07N_PA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_07N_PA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_07N_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_07N_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-SOUTH          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!no surface deliveries to 7S_NA
+define    AW_07S_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_07S_NA {std kind 'REUSE' units 'CFS'}
+define    RP_07S_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_07S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_07S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!no surface deliveries to 7S_NU
+define    UD_07S_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_07S_PA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_07S_PA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_07S_PA {std kind 'REUSE' units 'CFS'}
+define    RP_07S_PA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_07S_PA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_07S_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_07S_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-NORTH          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_08N_NA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_NA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_NA {std kind 'REUSE' units 'CFS'}
+define    RP_08N_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08N_PA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_PA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_PA {std kind 'REUSE' units 'CFS'}
+define    RP_08N_PA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_PA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08N_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08N_PA   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_08N_SA1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_SA1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_SA1     {std kind 'REUSE' units 'CFS'}
+define    RP_08N_SA1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_SA1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_SA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08N_SA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08N_SA1  {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_08N_SA2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_SA2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_SA2     {std kind 'REUSE' units 'CFS'}
+define    RP_08N_SA2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_SA2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_SA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08N_SA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08N_SA2  {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define RiceFact_08N_SA2 {
+    case shasta_critical {condition wyt_shasta_cvp>3.5 value 1.0} !.65}
+    case otherwise {condition always value 1.0}
+}
+
+define    DN_08N_PR1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_PR1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_PR1     {std kind 'REUSE' units 'CFS'}
+define    RP_08N_PR1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_PR1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_PR1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_08N_PR1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_08N_PR1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08N_PR2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08N_PR2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08N_PR2     {std kind 'REUSE' units 'CFS'}
+define    RP_08N_PR2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08N_PR2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08N_PR2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_08N_PR2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_08N_PR2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+! no surface deliveries to 8N_NU
+define    UD_08N_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-SOUTH          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_08S_NA1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_NA1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_NA1     {std kind 'REUSE' units 'CFS'}
+define    RP_08S_NA1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_NA1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08S_NA2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_NA2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_NA2     {std kind 'REUSE' units 'CFS'}
+define    RP_08S_NA2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_NA2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08S_SA1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_SA1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_SA1     {std kind 'REUSE' units 'CFS'}
+define    RP_08S_SA1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_SA1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_SA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_SA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08S_SA1  {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_08S_SA2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_SA2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_SA2     {std kind 'REUSE' units 'CFS'}
+define    RP_08S_SA2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_SA2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_SA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_SA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08S_SA2  {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define RiceFact_08S_SA2 {
+    case shasta_critical {condition wyt_shasta_cvp>3.5 value 1.0} !.65}
+    case otherwise {condition always value 1.0}
+}
+
+define    DN_08S_SA3     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_SA3     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_SA3     {std kind 'REUSE' units 'CFS'}
+define    RP_08S_SA3     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_SA3     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_SA3    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_SA3    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08S_PR {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_PR {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_PR {std kind 'REUSE' units 'CFS'}
+define    RP_08S_PR {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_PR {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_08S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_08S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_08S_PA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_08S_PA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_08S_PA {std kind 'REUSE' units 'CFS'}
+define    RP_08S_PA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_08S_PA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_08S_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_08S_PA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_08S_PA   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+! no surface deliveries to 8S_NU
+define    UD_08S_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 9      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_09_NA       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_09_NA       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_09_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_09_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_09_NA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_09_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_09_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_09_NA    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+!no surface deliveries to 9_NU
+define    UD_09_NU       {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_09_SA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_09_SA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_09_SA1      {std kind 'REUSE' units 'CFS'}
+define    RP_09_SA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_09_SA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_09_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_09_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_09_SA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_09_SA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_09_SA2      {std kind 'REUSE' units 'CFS'}
+define    RP_09_SA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_09_SA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_09_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_09_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_09_SA2   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_09_PR       {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_09_PR       {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_09_PR  {std kind 'REUSE' units 'CFS'}
+define    RP_09_PR  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_09_PR       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_09_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_09_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_09_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_10_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_10_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_10_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_10_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_10_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_10_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_10_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_10_NA    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+!no surface deliveries to 10_NU1
+define    UD_10_NU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!no surface deliveries to 10_NU2
+define    UD_10_NU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 11          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_11_NU1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_NU1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_11_NU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+!no surface deliveries to 11_NU2
+define    UD_11_NU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_11_SA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_SA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_SA1      {std kind 'REUSE' units 'CFS'}
+define    RP_11_SA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_SA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_11_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_11_SA1   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_11_SA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_SA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_SA2      {std kind 'REUSE' units 'CFS'}
+define    RP_11_SA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_SA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_11_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_11_SA2   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_11_SA3 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_SA3 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_SA3      {std kind 'REUSE' units 'CFS'}
+define    RP_11_SA3      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_SA3 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_SA3     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_11_SA3     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_11_SA3   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_11_SA4 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_SA4 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_SA4      {std kind 'REUSE' units 'CFS'}
+define    RP_11_SA4      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_SA4 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_SA4     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_11_SA4     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_11_SA4   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_11_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_11_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_11_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_11_NA    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_11_PR  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_11_PR  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_11_PR  {std kind 'REUSE' units 'CFS'}
+define    RP_11_PR  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_11_PR  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_11_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_11_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_11_PR {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_12_NU1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_12_NU1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_12_NU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!no surface deliveries to 12_NU2
+define    UD_12_NU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_12_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_12_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_12_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_12_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_12_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_12_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_12_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_12_NA    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+define    DN_12_SA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_12_SA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_12_SA  {std kind 'REUSE' units 'CFS'}
+define    RP_12_SA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_12_SA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_12_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_12_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_13_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_13_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_13_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_13_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_13_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_13_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_13_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_13_NU1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_13_NU1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_13_NU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_13_NU2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_13_NU2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_13_NU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_14_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_14_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_14_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_14_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_14_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_14_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_14_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 14_NU
+define    UD_14_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-NORTH    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!No surface delivery to 15N_NA1
+define    AW_15N_NA1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_15N_NA1     {std kind 'REUSE' units 'CFS'}
+define    RP_15N_NA1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_15N_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15N_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_15N_NA2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_15N_NA2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_15N_NA2     {std kind 'REUSE' units 'CFS'}
+define    RP_15N_NA2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_15N_NA2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_15N_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15N_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_15N_SA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_15N_SA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_15N_SA      {std kind 'REUSE' units 'CFS'}
+define    RP_15N_SA      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_15N_SA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_15N_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15N_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_15N_NU {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_15N_NU {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_15N_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-SOUTH    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!No surface delivery to 15S_NA1
+define    AW_15S_NA1     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_15S_NA1     {std kind 'REUSE' units 'CFS'}
+define    RP_15S_NA1     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_15S_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15S_NA1    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_15S_NA2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_15S_NA2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_15S_NA2     {std kind 'REUSE' units 'CFS'}
+define    RP_15S_NA2     {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_15S_NA2     {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_15S_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15S_NA2    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 15S_NU
+define    UD_15S_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_15S_SA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_15S_SA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_15S_SA      {std kind 'REUSE' units 'CFS'}
+define    RP_15S_SA      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_15S_SA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_15S_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_15S_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 16          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_16_PU  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_16_PU  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_16_PU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!No surface delivery to 16_NA1
+define    AW_16_NA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_16_NA1 {std kind 'REUSE' units 'CFS'}
+define    RP_16_NA1 {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_16_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_16_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_16_NA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_16_NA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_16_NA2      {std kind 'REUSE' units 'CFS'}
+define    RP_16_NA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_16_NA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_16_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_16_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_16_PA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_16_PA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_16_PA  {std kind 'REUSE' units 'CFS'}
+define    RP_16_PA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_16_PA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_16_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_16_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_16_SA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_16_SA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_16_SA  {std kind 'REUSE' units 'CFS'}
+define    RP_16_SA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_16_SA       {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_16_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_16_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 16_NU
+define    UD_16_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-NORTH    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!No surface delivery to 17N_NA
+define    AW_17N_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_17N_NA {std kind 'REUSE' units 'CFS'}
+define    RP_17N_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_17N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_17N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_17N_NR {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_17N_NR {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_17N_NR      {std kind 'REUSE' units 'CFS'}
+define    RP_17N_NR      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_17N_NR {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_17N_NR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_17N_NR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_17N_NR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_17N_PR {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_17N_PR {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_17N_PR      {std kind 'REUSE' units 'CFS'}
+define    RP_17N_PR      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_17N_PR {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_17N_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_17N_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_17N_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 17N_NU
+define    UD_17N_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-SOUTH    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_17S_NA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_17S_NA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}   
+define    RU_17S_NA      {std kind 'REUSE' units 'CFS'}
+define    RP_17S_NA      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_17S_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_17S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_17S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_17S_SA {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_17S_SA {std kind 'SW-DELIVERY-GROSS' units 'CFS'}   
+define    RU_17S_SA      {std kind 'REUSE' units 'CFS'}
+define    RP_17S_SA      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_17S_SA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_17S_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_17S_SA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_17S_PR {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_17S_PR {std kind 'SW-DELIVERY-GROSS' units 'CFS'}   
+define    RU_17S_PR      {std kind 'REUSE' units 'CFS'}
+define    RP_17S_PR      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_17S_PR {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_17S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWW_17S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+define    AWO_17S_PR     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 17S_NU
+define    UD_17S_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 18          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_18_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_18_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_18_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_18_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_18_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_18_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_18_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 18_NU
+define    UD_18_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_18_SA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_18_SA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_18_SA  {std kind 'REUSE' units 'CFS'}
+define    RP_18_SA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_18_SA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_18_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_18_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 19          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+define   DN_19_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define   DG_19_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define   GP_19_NA  {std kind 'GW-PUMPING' units 'CFS'}                    
+define   GPmin_19_NA    {select  fraction from AgMingw where id = 51}
+define   RU_19_NA  {std kind 'REUSE' units 'CFS'}
+define   RP_19_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define   AW_19_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define   AWR_19_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define   AWO_19_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+*/
+define    DN_19_SA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_19_SA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_19_SA  {std kind 'REUSE' units 'CFS'}
+define    RP_19_SA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_19_SA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_19_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_19_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+!No surface delivery to 18_NU
+define    UD_19_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 20          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! no surface deliveries to 20_NU2
+define    UD_20_NU2  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+! no surface deliveries to 20_NA2
+define    AW_20_NA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_20_NA2 {std kind 'REUSE' units 'CFS'}
+define    RP_20_NA2 {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_20_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_20_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_20_NA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_20_NA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_20_NA1      {std kind 'REUSE' units 'CFS'}
+define    RP_20_NA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_20_NA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_20_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_20_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_20_PA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_20_PA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_20_PA  {std kind 'REUSE' units 'CFS'}
+define    RP_20_PA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_20_PA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_20_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_20_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_20_NU1  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_20_NU1  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_20_NU1  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 21          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_21_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_21_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_21_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_21_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_21_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_21_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_21_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_21_PU  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_21_PU  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_21_PU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_21_SA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_21_SA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_21_SA  {std kind 'REUSE' units 'CFS'}
+define    RP_21_SA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_21_SA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_21_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_21_SA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_21_PA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_21_PA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_21_PA  {std kind 'REUSE' units 'CFS'}
+define    RP_21_PA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_21_PA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_21_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_21_PA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+define AWW_21_PA    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for wetlands
+
+! no surface deliveries to 21_NU
+define    UD_21_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 22          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! no surface deliveries to 22_NU
+define    UD_22_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+define    DN_22_SA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_22_SA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_22_SA1      {std kind 'REUSE' units 'CFS'}
+define    RP_22_SA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_22_SA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_22_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_22_SA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_22_SA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_22_SA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_22_SA2      {std kind 'REUSE' units 'CFS'}
+define    RP_22_SA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_22_SA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_22_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_22_SA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_22_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_22_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_22_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_22_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_22_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_22_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_22_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_23_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_23_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_23_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_23_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_23_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_23_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_23_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+! no surface deliveries to 23_NU
+define    UD_23_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_24_NA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_24_NA1      {std kind 'REUSE' units 'CFS'}
+define    RP_24_NA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_24_NA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_24_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_24_NA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_24_NA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_24_NA2      {std kind 'REUSE' units 'CFS'}
+define    RP_24_NA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_24_NA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_24_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_24_NA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_24_NA3 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NA3 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_24_NA3      {std kind 'REUSE' units 'CFS'}
+define    RP_24_NA3      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_24_NA3 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_24_NA3     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_24_NA3     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_24_NU2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NU2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_24_NU2 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_24_NU1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NU1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_24_NU1 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+                                                       ! CHANGED BY D.JONES 04/21/08. DELETE AFTER VERIFICATION
+define    DN_24_NU3 {std kind 'SW-DELIVERY-NET' units 'CFS'}               ! define  DN_24_PU  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_24_NU3 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}             ! define  DG_24_PU  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_24_NU3 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}  ! define  UD_24_PU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! no surface deliveries to 24_NU4
+define    UD_24_NU4 {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 25          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_25_PA2 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_25_PA2 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}   
+define    RU_25_PA2      {std kind 'REUSE' units 'CFS'}
+define    RP_25_PA2      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_25_PA2 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_25_PA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_25_PA2     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_25_NA  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_25_NA  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_25_NA  {std kind 'REUSE' units 'CFS'}
+define    RP_25_NA  {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_25_NA  {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_25_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_25_NA {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_25_PA1 {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_25_PA1 {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    RU_25_PA1      {std kind 'REUSE' units 'CFS'}
+define    RP_25_PA1      {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AW_25_PA1 {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    AWR_25_PA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_25_PA1     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+define    DN_25_PU  {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_25_PU  {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_25_PU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!define AWO_SIDSH    {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'} !23% of total of AWo_25_PA1 and SIDSH
+define    UD_CSPSO  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_SUISN  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_FRFLD  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_VLLJO  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_BNCIA  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_TVAFB        {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_NAPA2  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define    UD_PUTAH  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!Demand are currently not defined for Napa and Anerican Canyon.
+!Table A water and Arcticle 21 water is delivered from the NBA and split 21% to American Canyon and 79% to Napa
+!define   UD_NAPA        {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+!define   UD_AMCYN  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! no surface deliveries to 25_NU
+define    UD_25_NU  {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26N         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_26N_PU1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_PU1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_PU1     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_PU2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_PU2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_PU2     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_PU3     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_PU3     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_PU3     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_NU1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_NU1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_NU1     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_NU2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_NU2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_NU2     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_NU3     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_NU3     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_NU3     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26N_NU4     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26N_NU4     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26N_NU4     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! no surface deliveries to 26N_NU5
+define    UD_26N_NU5     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! no surface deliveries to 26N_NA
+define    AW_26N_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_26N_NA {std kind 'REUSE' units 'CFS'}
+define    RP_26N_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_26N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_26N_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26S         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define    DN_26S_PU1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU1     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_PU2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU2     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_NU1     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_NU1     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_NU1     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_PU4     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU4     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU4     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_NU2     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_NU2     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_NU2     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_NU3     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_NU3     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_NU3     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_PU5     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU5     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU5     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_NU4     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_NU4     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_NU4     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_PU3     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU3     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU3     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+define    DN_26S_PU6     {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define    DG_26S_PU6     {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define    UD_26S_PU6     {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+!define    DN_26S_EX {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+!define    DG_26S_EX {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+!define    UD_26S_EX {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+/*
+! no surface deliveries to 26S_NA
+define    AW_26S_NA {std kind 'APPLIED-WATER' units 'CFS'} ! Total Applied Water
+define    RU_26S_NA {std kind 'REUSE' units 'CFS'}
+define    RP_26S_NA {std kind 'RIPARIAN-MISC-ET' units 'CFS'}
+define    AWR_26S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for rice
+define    AWO_26S_NA     {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'CFS'}! Applied Water for all other crops
+*/
+
+!======================================================================
+! El Dorado Irrigation District - Deliveries from Folsom
+!======================================================================
+define DN_ELDID_NU3    {std kind 'SW-DELIVERY-NET' units 'CFS'}               
+define DG_ELDID_NU3    {std kind 'SW-DELIVERY-GROSS' units 'CFS'}
+define UD_ELDID_NU3    {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define SHRTG_ELDID_NU3 {std kind 'SHORTAGE' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Nevada Irrigation District - Combie System   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define UD_PINES      {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define DN_NIDBR_NA   {std kind 'SW-DELIVERY-NET' units 'CFS'}
+define DG_NIDBR_NA   {std kind 'SW-DELIVERY-GROSS' units 'CFS'}             
+define AW_NIDBR_NA   {timeseries kind 'APPLIED-WATER' units 'TAF' convert 'cfs'} ! Total Applied Water
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                               

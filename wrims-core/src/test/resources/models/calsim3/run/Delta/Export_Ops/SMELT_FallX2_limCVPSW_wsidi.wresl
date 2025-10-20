@@ -1,0 +1,125 @@
+! SMELT_FallX2_LimCVPSW.wresl
+!
+! If there is an August action, release from storage.  
+! In September and October, encourage meeting CVP responsibility through export cuts
+! by penalizing increase in CVP storage withdrawal.   
+
+define FallX2_ExportThreshold {value 1500.}
+define FallX2_ShastaThreshold {value 3000.}
+ 
+define FallX2_DOinc {
+    case AugSepWAN {
+        condition month>=AUG .and. wyt_SAC<=2
+        value max(0., MRDO_X2nocap - NDOI[SETUP])}  ! + C400_WQ[SETUP])}
+    case OctWAN {
+        condition month==OCT .and. wyt_SAC<=2
+        value max(0., MRDO_X2nocap - NDOI[SETUP])}  ! + C400_WQ[SETUP])}
+    case otherwise {
+        condition always
+        value 0.}
+}
+
+! penalty is not harsh enough to override sod delivery
+goal limitCVPSW {
+    lhs SHADS + FOLDS + WHSSW
+    case AugSepX2 {
+        condition month>=AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs SHADS[SETUP] + FOLDS[SETUP] + WHSSW[SETUP]
+        lhs<rhs penalty 0
+        lhs>rhs penalty 1200} 
+    case OctX2 {
+        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs SHADS[SETUP] + FOLDS[SETUP] + WHSSW[SETUP]
+        lhs<rhs penalty 0
+        lhs>rhs penalty 1200} 
+}
+! In September, have Folsom release 20% of what is needed, to take the load off of Shasta
+! penalty is set to override the balancing goals for this operation
+goal SeptX2fromFolsom {
+	lhs FOLDS - FOLDS[SETUP]
+	case SeptX2 {
+		condition month==SEP .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+		rhs 0.3 * SHADS - 0.3 * SHADS[SETUP]
+		lhs<rhs penalty 35
+		lhs>rhs penalty 0	}
+}
+
+
+! this goal is likely not needed if the penalty above is lower than 1165
+goal limCVP_SOD_Shortage {
+	lhs Short_CVP_Tot_S 
+	case AugX2 {
+		condition month==AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+		rhs Short_CVP_Tot_S[SETUP]
+		lhs<rhs penalty 0}
+	case SepX2 {
+		condition month==SEP .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+		rhs Short_CVP_Tot_S[SETUP]*1.25
+		lhs<rhs penalty 0}
+}
+define cvp_sod_short_mw {alias short_cvp_tot_s[SETUP] kind 'temp-cfs' units 'cfs'}
+
+! prevent the export cut from draining San Luis in September and leaving nothing for October
+goal CVPSLforFallX2 {
+    lhs S_SLUIS_CVP
+    case AugX2 {
+        condition month==AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs S_SLUIS_CVP[SETUP] - 0.33 * (S_SLUIS_CVP[SETUP] - S_SLUIS_CVP_DP)
+        lhs>rhs penalty 0} 
+    case SepX2 {
+        condition month==SEP .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs S_SLUIS_CVP[SETUP] - 0.90 * (S_SLUIS_CVP[SETUP] - S_SLUIS_CVP_DP)
+        lhs>rhs penalty 0} 
+}
+
+! Calculate how much of the add'l Fall X2 DO could be met with export reduction
+define FallX2_ExpRed {
+    case AugSepWAN {
+        condition month>=AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        value max(0.,min(C_DMC000[SETUP] + C_CAA003[SETUP] - FallX2_ExportThreshold,FallX2_DOinc))}
+    case OctWAN {
+        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        value max(0.,min(C_DMC000[SETUP] + C_CAA003[SETUP] - FallX2_ExportThreshold,FallX2_DOinc))}
+    case otherwise {
+        condition always
+        value 0.}
+}
+
+! limit projects' responsibility to Fall X2 to what could have come from export reduction
+! if Shasta storage condition is getting low
+/*
+goal meetD407 {
+    lhs D407 
+    case AugSep {
+        condition month>=AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1. .and. S4[SETUP]<FallX2_ShastaThreshold
+!        rhs min(mrdo_x2nocap, C406[SETUP] + FallX2_ExpRed)
+        rhs min(mrdo_x2nocap, D407[SETUP] + C407_ANN[SETUP] + FallX2_ExpRed)
+        lhs<rhs penalty 0}
+    case Oct {
+        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1. .and. S4[SETUP]<FallX2_ShastaThreshold
+!        rhs min(mrdo_x2nocap, C406[SETUP] + FallX2_ExpRed)
+        rhs min(mrdo_x2nocap, D407[SETUP] + C407_ANN[SETUP] + FallX2_ExpRed)
+        lhs<rhs penalty 0}
+}*/
+
+! limit CVP wheeling operations
+goal lmtCVPwheelrels {
+    lhs C_CAA003_cvcrels + C_CAA003_whlrels 
+    case AugSep {
+        condition month>=AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs 0.
+        lhs<rhs penalty 0}
+    case Oct {
+        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        rhs 0.
+        lhs<rhs penalty 0}
+}
+
+define FallX2_DOincdv {alias FallX2_DOinc kind 'Export-Limit' units 'cfs'} !for output only
+define FallX2_ExpReddv {alias FallX2_ExpRed kind 'Export-Limit' units 'cfs'} !for output only
+
+define FWS_MaxExp_X2 {value 99999.}
+define FWS_MaxExpX2dv {alias FWS_MaxExp_X2 kind 'Export-Limit' units 'cfs'} !for output only
+
+
+

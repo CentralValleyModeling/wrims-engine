@@ -1,0 +1,362 @@
+/*
+File Name: arcs-minflows.wresl
+CalSim 3.0 System File - Upper Feather River Module
+
+Purpose:
+
+Naming takes the following form:
+
+
+*/
+
+! Switch between existing and new/proposed FERC license requirements
+!define P2088MinFlowFlag {value 0}
+
+!Define water year types for South Feather Power Project P-2088
+!define OrovilleFNF {timeseries kind 'FULLNATURALFLOW' units 'TAF'} !from CDEC
+define OrovilleFNF_UpdateMarchdv {std kind 'FNFWY' units 'TAF'}
+
+!	Annual Unimpaired Inflow to Lake Oroville
+define OrovilleFNF_UpdateMarch { 
+       case octBgnWY {condition month == OCT .and. wateryear == 1922 sum(i=0,11,1) (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+	I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf(i)} ! special case for first wateryear, Sum Oct-Sep	
+       case March    {condition month == Mar                         sum(i=-5,6,1) (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+	I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf(i)}
+       case Rest     {condition always value OrovilleFNF_UpdateMarchdv(-1) }}
+goal setOrovilleFNF_UpdateMarchdv {OrovilleFNF_UpdateMarchdv = OrovilleFNF_UpdateMarch}
+
+
+!============================================================
+! North Fork Feather River
+!============================================================
+
+! NFF below Poe Dam
+define C_NFF029_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFF029_SHTG {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_NFF029_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define minflow_NFF029 {value 50.} !cfs !Source: WEAP
+
+define minflow_NFF029dv {std kind 'MINFLOW' units 'CFS'} !for debugging
+goal setminflow_NFF029dv {minflow_NFF029dv = minflow_NFF029}
+
+! NFF below Cresta Dam
+define C_NFF035_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFF035_SHTG {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_NFF035_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+
+define minflow_NFF035 {
+	case Wet           {condition OrovilleFNF_UpdateMarch >= 5679.0 select Wet           from UF_FERC_NFF035 where month = month}	
+	case Normal        {condition OrovilleFNF_UpdateMarch >= 3228.0 select Normal        from UF_FERC_NFF035 where month = month}
+	case Dry           {condition OrovilleFNF_UpdateMarch >= 2505.0 select Dry           from UF_FERC_NFF035 where month = month}
+	case CriticallyDry {condition OrovilleFNF_UpdateMarch <= 2505.0 select CriticallyDry from UF_FERC_NFF035 where month = month}
+	case Otherwise     {condition always value 0.}} !cfs
+	
+define minflow_NFF035dv {std kind 'MINFLOW' units 'CFS'} !for debugging
+goal setminflow_NFF035dv {minflow_NFF035dv = minflow_NFF035}
+
+! NFF below Rock Creek Forebay
+define C_NFF046_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFF046_SHTG {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_NFF046_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define minflow_NFF046 {
+	case Wet           {condition OrovilleFNF_UpdateMarch >= 5679.0 select Wet           from UF_FERC_NFF046 where month = month}	
+	case Normal        {condition OrovilleFNF_UpdateMarch >= 3228.0 select Normal        from UF_FERC_NFF046 where month = month}
+	case Dry           {condition OrovilleFNF_UpdateMarch >= 2505.0 select Dry           from UF_FERC_NFF046 where month = month}
+	case CriticallyDry {condition OrovilleFNF_UpdateMarch <= 2505.0 select CriticallyDry from UF_FERC_NFF046 where month = month}
+	case Otherwise     {condition always value 0.}} !cfs
+
+define minflow_NFF046dv {std kind 'MINFLOW' units 'CFS'} !for debugging
+goal setminflow_NFF046dv {minflow_NFF046dv = minflow_NFF046}
+
+! NFF below Belden Reservoir
+!define P2105_WQCFlag {value 0.}		!Switch for use of new Water Quality Certification MIFs for FERC Project P-2105 (1 for New WQ requirements, 0 for old FERC license)
+
+
+define C_NFF058_MIF    {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFF058_SHTG   {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_NFF058_ADD    {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define minflow_NFF058  {
+	case P2105_WQC_Wet {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 5679. select Belden_Wet from UF_FERC2105 where month = month}
+	case P2105_WQC_Norm {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 3228. select Belden_Norm from UF_FERC2105 where month = month}
+	case P2105_WQC_Dry {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 2505. select Belden_Dry from UF_FERC2105 where month = month}
+	case P2105_WQC_CD {condition P2105_WQCFlag == 1. select Belden_CD from UF_FERC2105 where month = month}
+	case OctAprSep {condition month <= Apr .or. month == Sep value 60.}		!Changed to 60 from 600
+	case Otherwise {condition always value 140.}}			! PG&E Hydro Divestiture table 4.3-13 
+
+define minflow_NFF058dv {std kind 'MINFLOW' units 'CFS'} !for debugging
+goal setminflow_NFF058dv {minflow_NFF058dv = minflow_NFF058}
+
+! NFF below Mountain Meadows 
+define C_MTMDW_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_MTMDW_SHTG{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_MTMDW_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define minflow_MTMDW {value 4.} !cfs !Source: PG&E Hydro Divestiture Draft EIR AppendixC 2000
+
+! NFF below Almanor Reservoir
+define C_ALMNR_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_ALMNR_SHTG{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_ALMNR_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define minflow_ALMNR 	{case P2105_WQC_Wet {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 5679. select Almanor_Wet from UF_FERC2105 where month = month}
+						 case P2105_WQC_Norm {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 3228. select Almanor_Norm from UF_FERC2105 where month = month}
+						 case P2105_WQC_Dry {condition P2105_WQCFlag == 1. .and. OrovilleFNF_UpdateMarch >= 2505. select Almanor_Dry from UF_FERC2105 where month = month}
+						 case P2105_WQC_CD {condition P2105_WQCFlag == 1. select Almanor_CD from UF_FERC2105 where month = month}
+						 case OldFERC {condition always value 35.}} !cfs !Source: PG&E application for new FERC license (2002; FERC No. 2105)
+
+define minflow_ALMNRdv {std kind 'MINFLOW' units 'CFS'} !for debugging
+goal setminflow_ALMNRdv {minflow_ALMNRdv = minflow_ALMNR}
+
+! Grizzly Creek below Grizzly Forebay
+!define P619MinFlowFlag {value 0}
+define C_GZL008_MIF  {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_GZL008_SHTG {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_GZL008_ADD  {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+
+! From EIS for FERC P-619
+		
+define minflow_GZL008 {
+	case Wet           {condition OrovilleFNF_UpdateMarch >= 5679.0 .and. P619_WQCFlag ==1 select Wet           from UF_FERC_GZL008 where month = month}	
+	case Normal        {condition OrovilleFNF_UpdateMarch >= 3228.0 .and. P619_WQCFlag ==1 select Normal        from UF_FERC_GZL008 where month = month}
+	case Dry           {condition OrovilleFNF_UpdateMarch >= 2505.0 .and. P619_WQCFlag ==1 select Dry           from UF_FERC_GZL008 where month = month}
+	case CriticallyDry {condition OrovilleFNF_UpdateMarch <= 2505.0 .and. P619_WQCFlag ==1 select CriticallyDry from UF_FERC_GZL008 where month = month}
+	case OldLicense    {condition P619_WQCFlag ==0 select Old from UF_FERC_GZL008 where month = month }
+	case Otherwise     {condition always value 0.}} !cfs
+	
+! Bucks Creek below Lower Bucks Dam
+/*Operation Criteria Source: FERC Project No. 619 Final License Application, Exhibit B
+Operation of Bucks Lake, Lower Bucks Lake, Three Lakes, and Grizzly Forebay (note: only Bucks Lake
+modeled here) are coordinated to optimize the use of water. Project operations are similar in all water 
+year types in that water diverted through Project facilities and tunnels is used to generate power 
+when the water is available. During drier water years, the Project generation may be lower to maintain reservoir
+level elevations in Bucks Lake. While the Project reservoirs are managed to provide the water for
+hydropower generation, minimum instream flow releases (ranging from 4 cubic feet per second
+(cfs) to 8 cfs depending upon time of year) are also required into Bucks Creek and Grizzly Creek,
+per the January 11, 2006, Order Amending Minimum Streamflow Requirements.
+
+Per 2006 Order, minimum releases to Bucks Creek from Lower Bucks Lake, as well as
+Grizzly Creek from Grizzly Forebay Dam (i.e. C_LBUCKS and C_GZL008):
+
+	May - Jun: 8 CFS
+	Jul - Oct: 6 CFS
+	Nov - Apr: 4 CFS
+ */
+ 
+define C_LBUCK_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_LBUCK_SHTG {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_LBUCK_ADD {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+
+define minflow_LBUCK {
+	case Wet           {condition OrovilleFNF_UpdateMarch >= 5679.0 .and. P619_WQCFlag ==1 select Wet           from UF_FERC_LBUCK where month = month}	
+	case Normal        {condition OrovilleFNF_UpdateMarch >= 3228.0 .and. P619_WQCFlag ==1 select Normal        from UF_FERC_LBUCK where month = month}
+	case Dry           {condition OrovilleFNF_UpdateMarch >= 2505.0 .and. P619_WQCFlag ==1 select Dry           from UF_FERC_LBUCK where month = month}
+	case CriticallyDry {condition OrovilleFNF_UpdateMarch <= 2505.0 .and. P619_WQCFlag ==1 select CriticallyDry from UF_FERC_LBUCK where month = month}
+	case OldLicense    {condition P619_WQCFlag ==0 select Old from UF_FERC_LBUCK where month = month }
+	case Otherwise     {condition always value 0.}} !cfs
+	
+
+!============================================================
+! East Branch Feather River
+!============================================================
+
+! Indian Creek below Antelope Reservoir
+! Minimum release depends on storage:
+! 5,002 ft and above, 20 cfs
+! 4,998 ft and above, 10 cfs
+! Below 4,998 ft, 5 cfs
+
+define C_ANTLP_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_ANTLP_SHTG	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_ANTLP_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_ANTLP 	{Case EHiStorage {condition S_ANTLP(-1)+I_ANTLP*cfs_taf > 20.564 value 20.}
+			 Case HiStorage  {condition S_ANTLP(-1)+I_ANTLP*cfs_taf > 19.014 .and. S_ANTLP(-1)+I_ANTLP*cfs_taf < 20.564 value 10.}
+	                 Case LoStorage  {condition always value 5.}}
+
+
+!============================================================
+! West Branch Feather River
+!============================================================
+!Define switch for P-803 for use of old FERC license or new WQ Certification MIFs
+!define P803_WQCFlag {value 0.}		!Switch for use of new Water Quality Certification MIFs for FERC Project P-803 (1 for New WQ requirements, 0 for old FERC license)
+!Define water year types for West Branch Feather FERC No. 803
+define OrovilleFNF_WestFeathdv {std kind 'FNFWY' units 'TAF'}
+
+define OrovilleFNF_WestFeath {
+       case octBgnWY    {condition month == OCT .and. wateryear == 1922 sum(i=6,9,1)  (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf} ! special case for first 'wateryear', Sum Oct-Sep	
+       case May  	{condition month == MAY                         sum(i=-1,2,1) (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf}
+       case Rest        {condition always value OrovilleFNF_WestFeathdv(-1) }}
+goal setOrovilleFNF_WestFeathdv {OrovilleFNF_WestFeathdv = OrovilleFNF_WestFeath}
+
+define C_RVPHB_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_RVPHB_SHTG     {std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_RVPHB_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_RVPHB 	{ 									 !Defined by FERC No. 803
+	case NormalYear {condition OrovilleFNF_WestFeath > 1758. !50 year Apr-Jul avg (1961-2010) from CDEC, B120, unchanged in new WQ certification
+		value 2.5}
+	case DryYear {condition OrovilleFNF_WestFeath <= 1758.
+		value 2.1} 
+}
+
+define C_WBF030_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_WBF030_SHTG	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_WBF030_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_WBF030 	{ 									 !Defined by FERC No. 803
+	case NormalYear {condition OrovilleFNF_WestFeath > 1758. !50 year Apr-Jul avg (1961-2011) from CDEC, B120, condition unchanged in new WQ
+		value 15.}
+	case DryYear_WQC_OctFeb	{condition P803_WQCFlag == 1. .and.OrovilleFNF_WestFeath <= 1758. .and. month >= Oct .and. month <= Feb  value 7.}
+	case DryYear_WQC_MarAug {condition P803_WQCFlag == 1. .and.OrovilleFNF_WestFeath <= 1758. .and. month >= Mar .and. month <= Aug  value 15.}
+	case DryYear_WQC_Sept	{condition P803_WQCFlag == 1. .and.OrovilleFNF_WestFeath <= 1758. .and. month == Sep value 7.}
+	case DryYear_OldFERC {condition OrovilleFNF_WestFeath <= 1758.
+		value 7.} 
+}
+
+define C_WBF015_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_WBF015_SHTG	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_WBF015_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_WBF015 	{value 0.0} !Does not appear to be a min. flow requirement below Miocene
+
+
+!============================================================
+! Middle Fork Feather River
+!============================================================
+
+! Big Grizzly Creek below Lake Davis
+! Lake is operated for instream flow requirement below dam and minor releases for water supply. Stream release requirements are based on lake elevations at certain times of year.
+! Releases can vary from 10-23 CFS. 
+
+define C_BGC002_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_BGC002_SHTG 	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_BGC002_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_BGC002 {
+	case firstmon {
+		condition wateryear == BgnWY
+		select       Davisminflow
+		from         UF_DavisMinFlow
+		given        AprilStorage=66. ! Average 1968-2015
+               	use          linear
+               	}
+    case Febflow  {condition    month == Feb
+		select       Davisminflow
+               	from         UF_DavisMinFlow
+               	given        AprilStorage=S_DAVIS(-1) + I_DAVIS*cfs_taf + I_DAVIS(1)*cfs_taf(1)
+               	use          linear
+    		}
+    case Marflow  {condition    month == Mar
+		select       Davisminflow
+               	from         UF_DavisMinFlow
+               	given        AprilStorage=S_DAVIS(-1) + I_DAVIS*cfs_taf
+               	use          linear
+    		}
+    case Aprflow  {condition    month == Apr
+		select       Davisminflow
+               	from         UF_DavisMinFlow
+               	given        AprilStorage=S_DAVIS(-1)
+               	use          linear
+    		}
+	case other {
+		condition    always
+		select       Davisminflow
+               	from         UF_DavisMinFlow
+               	given        AprilStorage=S_DAVIS(prevAPR)
+               	use          linear
+               	}}
+		 
+
+! Last Chance Creek below Frenchman Dam
+! Flow requirement is 2 cfs or natural flow under low storage conditions
+
+define C_NLL016_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NLL016_SHTG	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_NLL016_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+define minflow_NLL016Flag {
+	case On {condition range(month,Oct,Mar) value 1.}
+	case Off {condition always value 1.}}
+
+define minflow_NLL016 	{
+	case FirstMonth {condition month==Oct .and. wateryear == 1922 value 2.0*minflow_NLL016Flag}
+	case Above16000 {condition S_FRMAN(prevOCT)>16. value 2.0*minflow_NLL016Flag}
+	case Below16000 {condition S_FRMAN(prevOCT)<16. value min(I_FRMAN, 2.0)*minflow_NLL016Flag}}
+
+
+!============================================================
+! South Fork Feather River
+!============================================================
+
+define P2088_WYT {
+       case Wet       {condition OrovilleFNF_UpdateMarch>7100 value 1}       
+       case AN        {condition OrovilleFNF_UpdateMarch>4000 value 2} 
+       case BN        {condition OrovilleFNF_UpdateMarch>2400 value 3} 
+       case Dry       {condition always value 4}}
+
+define P2088_WYTdv	{alias P2088_WYT kind 'WATERYEAR-TYPE' units 'NONE'}
+
+! Downstream of Little Grass Valley Reservoir
+define C_SFF039_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SFF039_SHTG	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_SFF039_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_LGRSV {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=1, WYT=P2088_WYT, month=month}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=1, WYT=P2088_WYT, month=month}}
+define minflow_LGRSVdv {alias minflow_LGRSV kind 'MINFLOW' units 'CFS'}
+
+! Downstream of South Fork Diversion Dam
+define C_SFF028_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SFF028_SHTG	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_SFF028_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_SFF028 {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=2, WYT=P2088_WYT, month=month}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=2, WYT=P2088_WYT, month=month}}
+define minflow_SFF028dv {alias minflow_SFF028 kind 'MINFLOW' units 'CFS'}
+
+! Downstream of Forbestown Dam
+define C_SFF018_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SFF018_SHTG 	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_SFF018_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_SFF018 {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=3, WYT=P2088_WYT, month=month}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=3, WYT=P2088_WYT, month=month}}
+define minflow_SFF018dv {alias minflow_SFF018 kind 'MINFLOW' units 'CFS'}
+
+! Downstream of Lost Creek Dam
+define C_LST003_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_LST003_SHTG 	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_LST003_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_LST003 {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=4, WYT=P2088_WYT, month=month}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=4, WYT=P2088_WYT, month=month}}
+define minflow_LST003dv {alias minflow_LST003 kind 'MINFLOW' units 'CFS'}
+
+! Downstream of Slate Creek Diversion Dam
+define C_SLT008_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SLT008_SHTG 	{std kind 'FLOW-SHORTAGE-INSTREAM' units 'CFS'}
+define C_SLT008_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define minflow_SLT008 {
+	case ExistingLicense {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=month}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=month}}
+define minflow_SLT008dv {alias minflow_SLT008 kind 'MINFLOW' units 'CFS'}
+
+define C_NFF029_SHTGdv {alias C_NFF029_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_NFF035_SHTGdv {alias C_NFF035_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_NFF046_SHTGdv {alias C_NFF046_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_NFF058_SHTGdv {alias C_NFF058_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_ALMNR_SHTGdv  {alias C_ALMNR_SHTG  kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_GZL008_SHTGdv {alias C_GZL008_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_LBUCK_SHTGdv  {alias C_LBUCK_SHTG  kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_RVPHB_SHTGdv  {alias C_RVPHB_SHTG  kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_SFF039_SHTGdv {alias C_SFF039_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_SFF028_SHTGdv {alias C_SFF028_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_SFF018_SHTGdv {alias C_SFF018_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_LST003_SHTGdv {alias C_LST003_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_SLT008_SHTGGdv{alias C_SLT008_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_ANTLP_SHTGdv  {alias C_ANTLP_SHTG  kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_NLL016_SHTGdv {alias C_NLL016_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_BGC002_SHTGdv {alias C_BGC002_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_WBF015_SHTGdv {alias C_WBF015_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_WBF030_SHTGdv {alias C_WBF030_SHTG kind 'DEBUG-SHORTAGE' units 'CFS'}
+define C_MTMDW_SHTGdv  {alias C_MTMDW_SHTG  kind 'DEBUG-SHORTAGE' units 'CFS'}
+
+!define OrovilleFNF {timeseries kind 'FULLNATURALFLOW' units 'TAF'} !from CDEC
+define OrovilleFNF_WYdv {std kind 'FNFWY' units 'TAF'}
+
+define OrovilleFNF_WY { 
+       case octBgnWY  {condition month == OCT .and. wateryear == 1922 sum(i=0,11,1) (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf(i)} ! special case for first wateryear, Sum Oct-Sep	
+       case February  {condition month == FEB                         sum(i=-4,7,1) (I_SFF011(i)+I_SFF008(i)+I_LGRSV(i)+I_SLYCK(i)+I_DAVIS(i)+I_MFF087(i)+I_FRMAN(i)+I_MFF019(i)+I_RVPHB(i)+I_WBF030(i)+I_WBF015(i)+I_WBF006(i)+I_NFF029(i)+I_ALMNR(i)+I_MTMDW(i)+I_GZL009(i)+I_BUCKS(i)+I_EBF001(i)+I_ANTLP(i)+I_BTVLY(i)+I_OROVL(i)+CT_OROVILLE_SV(i))*cfs_taf(i)}
+       case Rest      {condition always value OrovilleFNF_WYdv(-1) }}
+goal setOrovilleFNF_WYdv {OrovilleFNF_WYdv = OrovilleFNF_WY}

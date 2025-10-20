@@ -1,0 +1,808 @@
+!PowerOps.wresl
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Powerhouse Outages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Outages from discussion with ECorp re: OASIS model MFP operations
+
+! French Meadows tunnel closed in April in non-wet years
+define D_FRMDW_FMT002_capacity {
+	case Closed 	{condition (month==APR .and. amer_annual < 3400) value 0.} 
+	case Otherwise 	{condition always value 400.}
+}	
+goal setD_FRMDW_FMT002_capacity	{D_FRMDW_FMT002 < D_FRMDW_FMT002_capacity}
+define D_FRMDW_FMT002_capacity_dv	{alias D_FRMDW_FMT002_capacity kind 'CHANNEL' UNITS 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Hydropower Forecasting !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+The hydropower supply forecasting and release schedule logic are as follows:
+
+   Available hydropower supply forecast (through December) =
+	    MFP storage available 														(May-Dec; value represents previous month)	  
+	  + French Meadows, Hell Hole forecasted inflow [perfect foresight] 			(May-Dec, value represents current month + forecast through Dec) 
+	  - max(MFP deliveries to 3 MFP contractors, MFP delivery at ARPS + [75 cfs]) 	(May-Dec; value represents current month's maximum + forecast through Dec)		  	
+	  - carryover target (150 TAF)													(May-Dec; constant)
+   
+   Monthly hydropower release schedule =
+      [Available hydropower supply forecast (through December)] / [# months remaining until December [including December]]
+      
+      The reasoning is to have the MFP release an equally proportional amount of the available forecasted supply each month through December,
+      with the forecasted supply being updated each month.
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Middle Fork Project - System !!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Available Storage Forecast !!!!!!!!!!!!!!!!
+
+define  MFPtot_storage    {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+		}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value S_FRMDW(-1) + S_HHOLE(-1)
+		}
+	case Otherwise {
+		condition always
+		value MFPtot_storagedv(-1)}
+}
+define  MFPtot_storagedv  {std kind 'STORAGE' units 'taf'}
+goal setMFPtot_storagedv  {MFPtot_storagedv = MFPtot_storage}
+
+
+! Forecasted Inflow !!!!!!!!!!!!!!!!!!!!!!!!! 
+
+define  MFPpow_inflow_FRMDW 	{
+	case FirstWY {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+	}
+	case LastWY {
+		condition wateryear==EndWY .and. month==MAY
+		sum(i=0,4,1) I_FRMDW(i)*cfs_taf(i)
+	}
+	case MayDec_1 {
+		condition month==MAY
+		sum(i=0,7,1) I_FRMDW(i)*cfs_taf(i)
+	}
+	case MayDec_2 {
+		condition range(month,JUN,SEP) .or. range(month,OCT,DEC)
+		value MFPpow_inflow_FRMDWdv(-1) - I_FRMDW(-1)*cfs_taf(-1)
+	}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define  MFPpow_inflow_FRMDWdv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflow_FRMDWdv	{MFPpow_inflow_FRMDWdv = MFPpow_inflow_FRMDW}
+
+define  MFPpow_inflow_HHOLE 	{
+	case FirstWY {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+	}
+	case LastWY {
+		condition wateryear==EndWY .and. month==MAY
+		sum(i=0,4,1) I_HHOLE(i)*cfs_taf(i)
+	}
+	case MayDec_1 {
+		condition month==MAY
+		sum(i=0,7,1) I_HHOLE(i)*cfs_taf(i)
+	}
+	case MayDec_2 {
+		condition range(month,JUN,SEP) .or. range(month,OCT,DEC)
+		value MFPpow_inflow_HHOLEdv(-1) - I_HHOLE(-1)*cfs_taf(-1) 
+	}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define  MFPpow_inflow_HHOLEdv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflow_HHOLEdv	{MFPpow_inflow_HHOLEdv = max(0,MFPpow_inflow_HHOLE)}
+
+define  MFPpow_inflow_RUB044	{
+	case MayDec_WANBN {
+		condition (range(month,MAY,SEP) .or. range(month,OCT,DEC)) .and. amer_annual >= 1700.
+		select BelowNormal from MFPpow_forecast where month=month, identifier=1
+		}
+	case MayDec_Dry {
+		condition (range(month,MAY,SEP) .or. range(month,OCT,DEC)) .and. amer_annual >= 900.
+		select Dry from MFPpow_forecast where month=month, identifier=1
+		}
+	case MayDec_Crit {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		select Critical from MFPpow_forecast where month=month, identifier=1
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define  MFPpow_inflow_RUB044dv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflow_RUB044dv	{MFPpow_inflow_RUB044dv = MFPpow_inflow_RUB044}
+
+define  MFPpow_inflow_LRB003	{
+	case MayDec_WANBN {
+		condition (range(month,MAY,SEP) .or. range(month,OCT,DEC)) .and. amer_annual >= 1700.
+		select BelowNormal from MFPpow_forecast where month=month, identifier=2
+		}
+	case MayDec_Dry {
+		condition (range(month,MAY,SEP) .or. range(month,OCT,DEC)) .and. amer_annual >= 900.
+		select Dry from MFPpow_forecast where month=month, identifier=2
+		}
+	case MayDec_Crit {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		select Critical from MFPpow_forecast where month=month, identifier=2
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define  MFPpow_inflow_LRB003dv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflow_LRB003dv	{MFPpow_inflow_LRB003dv = MFPpow_inflow_LRB003}
+
+! Duncan Tunnel is closed Jun-Oct (OASIS model)
+! Therefore, inflow from Duncan Creek is only 'available' in May, Nov-Dec
+define  MFPpow_inflow_DCC010_novdec 	{
+	case LastYr 	{condition (wateryear==EndWY .and. month==MAY) 	value 0.}
+	case NovDec 	{condition month==MAY sum(i=6,7,1) I_DCC010(i)*cfs_taf(i)}
+	case Otherwise 	{condition always value 0.}}
+
+define  MFPpow_inflow_DCC010 	{
+	case FirstWY {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+	}
+	case LastWY {
+		condition wateryear==EndWY .and. month==MAY
+		value I_DCC010*cfs_taf
+	}
+	case MayDec_1 {
+		condition month==MAY
+		value I_DCC010*cfs_taf + MFPpow_inflow_DCC010_novdec
+	}
+	case MayDec_2 {
+		condition range(month,JUN,SEP) .or. month==OCT
+		value MFPpow_inflow_DCC010dv(-1)
+	}
+	case MayDec_3 {
+		condition month==NOV
+		sum(i=0,1,1) I_DCC010(i)*cfs_taf(i)
+	}
+	case MayDec_4 {
+		condition month==DEC
+		value I_DCC010*cfs_taf
+	}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define  MFPpow_inflow_DCC010dv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflow_DCC010dv	{MFPpow_inflow_DCC010dv = MFPpow_inflow_DCC010}
+
+define MFPpow_inflow {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+	}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value 	  MFPpow_inflow_FRMDW + MFPpow_inflow_HHOLE + MFPpow_inflow_RUB044 + MFPpow_inflow_LRB003 + (MFPpow_inflow_DCC010 - sumMIF_MFP_DCC008)
+	}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define MFPpow_inflowdv  {std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_inflowdv {MFPpow_inflowdv = max(0,MFPpow_inflow)}
+
+
+! Middle Fork Project water demands!!!!!!!!!!
+
+define  MFPpow_demand_Folsom 	{		!MFF_demand_Folsom
+	case FirstWY {
+		condition wateryear==bgnWY .and. month<May
+		value 0.}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value (WFmon_NFA016_ABT002+MFPSJmon_FOLSM_WTPSJP + MFPSSmon_FOLSM_WTPSJP + MFPmon_FOLSM_WTPRSV) * taf_cfs
+		}
+	case Otherwise {
+		condition always
+		value 0.
+}}
+define  MFPpow_demand_Folsomdv 	{alias MFPpow_demand_Folsom kind 'FORECAST' units 'CFS'}
+
+define  MFPpow_demand_ARPS 		{					!MFP_demand_ARPS 	
+	case FirstWY {
+		condition wateryear==bgnWY .and. month<May
+		value 0.}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value WFmon_NFA016_ABT002*taf_cfs + 75.
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+		}
+define  MFPpow_demand_ARPSdv 	{alias MFPpow_demand_ARPS kind 'FORECAST' units 'CFS'}
+
+define  MFPpow_demand_max 		{value max(MFPpow_demand_Folsom, MFPpow_demand_ARPS)}
+
+! New Variables to compute MFP, WR and CVP deliveries and get MFP deliveries
+!Fraction of demands remaining to be supplied
+!Roseville
+define  RemDemF_WTPRSV	{
+	case JanDec_WANBN {
+		condition (range(month,Oct,SEP))
+		select UD_26N_PU1 from MFP_DemandFractions where Month=month
+		}}
+!Sacramento Suburban		
+define  RemDemF_SacSub	{
+	case JanDec_WANBN {
+		condition (range(month,Oct,SEP))
+		select UD_26N_NU1 from MFP_DemandFractions where Month=month
+		}}		
+!FairOaks, Orangevale etc. 		
+define  RemDemF_Fairoaks	{
+	case JanDec_WANBN {
+		condition (range(month,Oct,SEP))
+		select UD_26N_PU3 from MFP_DemandFractions where Month=month
+		}}	
+!SJWD. 		
+define  RemDemF_SJWD	{
+	case JanDec_WANBN {
+		condition (range(month,Oct,SEP))
+		select UD_26N_PU2 from MFP_DemandFractions where Month=month
+		}}			
+
+!Annual Total Demands
+define Dem_WTPRSV       {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  Dem_WTPRSV_SV	{
+	case JanDec_WANBN {
+	condition month == oct 
+        sum(i=0,11,1) UD_26N_PU1(i)*cfs_taf(i)
+		}
+	case otherwise{condition always value Dem_WTPRSV(-1)}}
+	goal setDem_WTPRSV{Dem_WTPRSV=Dem_WTPRSV_SV}
+!Sacramento Suburban	
+define Dem_SacSub       {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand	
+define  Dem_SacSub_SV	{
+	case JanDec_WANBN {
+	condition month == oct 
+        sum(i=0,11,1) UD_26N_NU1(i)*cfs_taf(i)}
+	case otherwise{condition always value Dem_SacSub(-1)}}
+		goal setDem_SacSub {Dem_SacSub=Dem_SacSub_SV}
+!FairOaks, Orangeville etc. 	
+define Dem_Fairoaks       {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand	
+define  Dem_Fairoaks_SV	{
+	case JanDec_WANBN {
+	condition month == oct 
+        sum(i=0,11,1) UD_26N_PU3(i)*cfs_taf(i)}
+	case otherwise{condition always value Dem_Fairoaks(-1)}}
+			goal setDem_Fairoaks {Dem_Fairoaks=Dem_Fairoaks_SV}
+!San Juan
+define Dem_SJWD       {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand		
+define  Dem_SJWD_SV	{
+	case JanDec_WANBN {
+	condition month == oct 
+        sum(i=0,11,1) UD_26N_PU2(i)*cfs_taf(i)}
+	case otherwise{condition always value Dem_SJWD(-1)}}
+				goal setDem_SJWD {Dem_SJWD=Dem_SJWD_SV}			
+!	Sac Suburban
+! For Sacramento Suburban just take the monthly MFP water based on pattern summing 
+define MFPDemForecast_SacSub{value MFPSSann_FOLSM_WTPSJP*RemDemF_SacSub}	!Forecast of MFP water required for Sac Suburban demands till end of year
+
+define ARPS_rem_Pattern{case mOct{condition month == Oct value 0.3289}	!Pattern based on annual consumption till end of Dec
+					case mNov{condition month == Nov value 0.1591}
+					case mDec{condition month == Dec value 0.0066}
+					case mJan{condition month == Jan value 1}
+					case mFeb{condition month == Feb value 1}
+					case mMar{condition month == Mar value 0.9989}
+					case mApr{condition month == Apr value 0.9986}
+					case mMay{condition month == May value 0.9841}
+					case mJun{condition month == Jun value 0.8605}
+					case mJul{condition month == Jul value 0.7209}
+					case mAug{condition month == Aug value 0.4974}
+					case mSep{condition month == Sep value 0.3477}
+}
+define  MFPForecast_D_NFA016_ABT002{value WFann_NFA016_ABT002*ARPS_rem_Pattern}
+
+!San Jaun
+! San Juan takes MFP water and CVP water in relationship to the contract amount. CVP contract amount and MFP contract amount
+
+! The amount of MFP water = MFPcontract amount/Sum(MFP_Contract amount + CVP contract amount)*(annual demand - annual WR)* fraction of remaining
+define MFPDemForecast_SJWD{value MFPSJann_FOLSM_WTPSJP/(MFPSJann_FOLSM_WTPSJP+CLann_FOLSM_WTPSJP)*max(0,Dem_Fairoaks_SV+Dem_SJWD_SV-WRann_FOLSM_WTPSJP)*(RemDemF_Fairoaks+RemDemF_SJWD)/2}
+!Roseville
+!Create a lookup table for Jun - Dec demand fraction
+!  remaining CVP
+define DemForecast_WTPRSVRemainingCVP{value max(0, CLann_FOLSM_WTPRSV-Dem_WTPRSV_SV*(1-RemDemF_WTPRSV))}
+!Total MFP Demand = min(MFP Cap, Fraction*annual demand - Remaining CVP)
+define MFPDemForecast_WTPRSV{value max(0, Dem_WTPRSV_SV*RemDemF_WTPRSV - DemForecast_WTPRSVRemainingCVP)}
+!Total demand forecast for MFP Hell Hole and French Meadows Reservoirs
+define MFPDemForecast_HHOLE{value MFPDemForecast_SacSub+MFPDemForecast_SJWD+MFPDemForecast_WTPRSV+MFPForecast_D_NFA016_ABT002}
+
+define MFPMIFReq_Remainder{value MFPForecast_D_NFA016_ABT002+75*cfs_taf*(12-month)}
+define MFPForecast_SystemDem{value max(MFPDemForecast_HHOLE,MFPMIFReq_Remainder)}
+
+
+define  MFPpow_demand    		{				!MFP_demand_NowDEC
+	case FirstWY {
+		condition wateryear==bgnWY .and. month<May
+		value 0.}
+	case MaySep {
+		condition range(month,MAY,SEP)
+		sum (i=0,15-month,1) MFPpow_demand_max*cfs_taf(i)
+	}
+	case OctDec {
+		condition range(month,OCT,DEC)
+		sum (i=0,3-month,1) MFPpow_demand_max*cfs_taf(i)
+	}
+	case otherwise {
+		condition always
+		value 0.
+	}}
+define  MFPpow_demanddv  		{std kind 'DEMAND' units 'taf'}
+goal setMFPpow_demanddv  		{MFPpow_demanddv = MFPpow_demand}
+
+
+! Available Hydropower Supply !!!!!!!!!!!!!!!
+
+define MFPpow_supply {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+		}
+	case MayDec {
+		condition range(month,JUN,SEP) .or. range(month,OCT,DEC)
+		value max(MFPtot_storage + MFPpow_inflow - MFPpow_demand - 150. , 0.)
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define MFPpow_supplydv   {std kind 'supply' units 'taf'}
+goal setMFPpow_supplydv  {MFPpow_supplydv = MFPpow_supply}
+
+
+! Release Schedule !!!!!!!!!!!!!!!!!!!!!!!!!!
+! Put code in for forecast of releases. Water balance to be done on French Meadows and Hell Hole.
+!Demands
+!American Pump house
+!Flow requirements below the dams are governing
+!French Meadows
+!PCWA_DD_Flag
+!Inflow to French Meadows
+
+
+!Inflows to French Meadows
+define MFPForecast_FRMDWInflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_FRMDW(i)*cfs_taf(i)}
+	case JunSep	   {condition range(month, Jun, Sep).and.wateryear < EndWY   sum(i=0,15-month,1) I_FRMDW(i)*cfs_taf(i)}
+	case OctDec	   {condition range(month, Oct, Dec).and.wateryear < EndWY  sum(i=0,3-month,1) I_FRMDW(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define MFPForecast_DCCInflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  (I_DCC010(i))*cfs_taf(i)}
+	case JunSep	   {condition range(month, Jun, Sep).and.wateryear < EndWY  sum(i=0,15-month,1) I_DCC010(i)*cfs_taf(i)}
+	case OctDec{condition range(month, Oct, Dec).and.wateryear < EndWY  sum(i=0,3-month,1) I_DCC010(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+	
+!Inflows to Hell Hole
+!UARPForecast_RubiconMIF
+!UARPForecast_LRubiconMIF
+define MFPForecast_HholeInflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  (I_HHOLE(i))*cfs_taf(i)}
+	case JunSep	   {condition range(month,Jun,Sep).and. wateryear < EndWY sum(i=0, 15-month,1) (I_HHOLE(i))*cfs_taf(i)}
+	case OctDec	   {condition range(month,Oct,Dec).and. wateryear < EndWY sum(i=0, 3-month,1)(I_HHOLE(i))*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+
+!MIFS for Duncan Creek and MFA downstream of FRMDW
+define MFPForecast_MIF_MFP_DCC008 {
+	case JanMayWet    {condition range(month,Jan,May).and. amer_annual>1000 sum(i=0,8-month,1)  (2+min(8., I_DCC010(i)))*cfs_taf(i)}
+	case JanMayDry    {condition range(month,Jan,May).and. amer_annual<1000 sum(i=0,8-month,1)  (2+min(4., I_DCC010(i)))*cfs_taf(i)}
+	case JunSepWet    {condition range(month,Jun,Sep).and.wateryear < EndWY .and. amer_annual>1000 sum(i=0,15-month,1)  (2+min(8., I_DCC010(i)))*cfs_taf(i)}
+	case JunSepDry    {condition range(month,Jun,Sep).and.wateryear < EndWY .and. amer_annual<1000 sum(i=0,15-month,1)  (2+min(4., I_DCC010(i)))*cfs_taf(i)}
+	case OctDecWet    {condition range(month,Oct,Dec).and.wateryear < EndWY .and. amer_annual>1000 sum(i=0,3-month,1)  (2+min(8., I_DCC010(i)))*cfs_taf(i)}
+	case OctDecDry    {condition range(month,Oct,Dec).and.wateryear < EndWY .and. amer_annual<1000 sum(i=0,3-month,1)  (2+min(4., I_DCC010(i)))*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define MFPForecast_MIF_MFP_MFA047 {
+	case JanMayWet    {condition range(month,Jan,May).and. amer_annual>1000 sum(i=0,8-month,1)  10*cfs_taf(i)}
+	case JanMayDry    {condition range(month,Jan,May).and. amer_annual<1000 sum(i=0,8-month,1)  6*cfs_taf(i)}
+	case NovDecWet    {condition range(month,Nov,Dec).and. amer_annual>1000 sum(i=0,3-month,1)  10*cfs_taf(i)}
+	case NovDecDry    {condition range(month,Nov,Dec).and. amer_annual<1000 sum(i=0,3-month,1)  6*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define MFPForecast_FRMDWNetInflow{value MFPForecast_FRMDWInflow+max(0, MFPForecast_DCCInflow-MFPForecast_MIF_MFP_DCC008)}
+
+
+define MFPUARPYrType{
+	case Wet{
+		condition amer_annual >= 3500
+		value 1.
+		}
+	case AboveNormal{
+		condition amer_annual >= 2600
+		value 2.
+		}
+	case BelowNormal{
+		condition amer_annual >= 1700
+		value 3.
+		}
+	case Dry{
+		condition amer_annual >= 900
+		value 4.
+		}
+	case CriticalDry{
+		condition always
+		value 5.
+		}
+	}
+define MFPForecast_LRubiconMIF_cfs { !Little Rubicon (TAF)
+					case Wet {condition range(month,Jan,May)  .and. MFPUARPYrType>0.5 .and.  MFPUARPYrType<1.5 		select EOMWet from UARPmif_LRB003
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. MFPUARPYrType>1.5 .and.  MFPUARPYrType<2.5			select EOMAboveNormal from UARPmif_LRB003 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. MFPUARPYrType>2.5 .and.  MFPUARPYrType<3.5 		select EOMBelowNormal from UARPmif_LRB003 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. MFPUARPYrType>3.5 .and.  MFPUARPYrType<4.5  	 		select EOMDry from UARPmif_LRB003 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. MFPUARPYrType>4.5 .and.  MFPUARPYrType<5.5 		select EOMCritical from UARPmif_LRB003 
+							  where month=month}
+					case EODWet {condition range(month,Jan,May)  .and. MFPUARPYrType>0.5 .and.  MFPUARPYrType<1.5 		select EODWet from UARPmif_LRB003
+							  where month=month}
+					case EODabvNormal {condition range(month,Jun,Sep).or. range(month, Oct, Dec) .and. MFPUARPYrType>1.5 .and.  MFPUARPYrType<2.5			select EODAboveNormal from UARPmif_LRB003 
+							  where month=month}
+					case EODblwNormal {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>2.5 .and.  MFPUARPYrType<3.5 		select EODBelowNormal from UARPmif_LRB003 
+							  where month=month}
+					case EODDry {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>3.5 .and.  MFPUARPYrType<4.5  	 		select EODDry from UARPmif_LRB003 
+							  where month=month}
+					case EODCrit {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>4.5 .and.  MFPUARPYrType<5.5 		select EODCritical from UARPmif_LRB003 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define MFPForecast_LRubiconMIF{value MFPForecast_LRubiconMIF_cfs*cfs_taf}
+
+define MFPForecast_RubiconMIF_cfs { !Rubicon (TAF)
+					case Wet {condition range(month,Jan,May)  .and. MFPUARPYrType>0.5 .and.  MFPUARPYrType<1.5 		select EOMWet from UARPmif_RUB044
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May)  .and. MFPUARPYrType>1.5 .and.  MFPUARPYrType<2.5		select EOMAboveNormal from UARPmif_RUB044 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. MFPUARPYrType>2.5 .and.  MFPUARPYrType<3.5 		select EOMBelowNormal from UARPmif_RUB044 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. MFPUARPYrType>3.5 .and.  MFPUARPYrType<4.5  		select EOMDry from UARPmif_RUB044 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. MFPUARPYrType>4.5 .and.  MFPUARPYrType<5.5  		select EOMCritical from UARPmif_RUB044 
+							  where month=month}
+							  					case EODWet {condition range(month,Jan,May)  .and. MFPUARPYrType>0.5 .and.  MFPUARPYrType<1.5 		select EODWet from UARPmif_RUB044
+							  where month=month}
+					case EODabvNormal {condition range(month,Jun,Sep).or. range(month, Oct, Dec) .and. MFPUARPYrType>1.5 .and.  MFPUARPYrType<2.5			select EODAboveNormal from UARPmif_RUB044 
+							  where month=month}
+					case EODblwNormal {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>2.5 .and.  MFPUARPYrType<3.5 		select EODBelowNormal from UARPmif_RUB044 
+							  where month=month}
+					case EODDry {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>3.5 .and.  MFPUARPYrType<4.5  	 		select EODDry from UARPmif_RUB044 
+							  where month=month}
+					case EODCrit {condition range(month,Jun,Sep).or. range(month, Oct, Dec)  .and. MFPUARPYrType>4.5 .and.  MFPUARPYrType<5.5 		select EODCritical from UARPmif_RUB044 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define MFPForecast_RubiconMIF{value MFPForecast_RubiconMIF_cfs*cfs_taf}
+
+
+
+
+
+define MFPForecast_TotalSystemInflow{value 
+	MFPForecast_FRMDWNetInflow+MFPForecast_HholeInflow+MFPForecast_RubiconMIF+MFPForecast_LRubiconMIF
+}		!Total forecasted inflow for Hell Hole and French Meadows for January to May period
+
+define MFPForecast_MIF_MFP_RUB031 {
+	case JanMayWet    {condition range(month,Jan,May).and. amer_annual>1000 sum(i=0,8-month,1)  12*cfs_taf(i)}
+	case JanMayDry    {condition range(month,Jan,May).and. amer_annual<1000 sum(i=0,8-month,1)  8*cfs_taf(i)}
+	case NovDecWet	  {condition range(month,Nov,Dec).and. amer_annual>1000 sum(i=0,3-month,1)  22*cfs_taf(i)}
+	case NovDecDry	  {condition range(month,Nov,Dec).and. amer_annual<1000 sum(i=0,3-month,1)	12*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+}
+
+define MFPForecast_TotalSystemMIF {value MFPForecast_MIF_MFP_MFA047+MFPForecast_MIF_MFP_RUB031}
+
+	
+
+
+define MFPpow_release {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 20. ! calibration factor
+		}
+	case MaySep {
+		condition range(month,MAY,SEP)
+		value MFPpow_supply / (16. - month)
+	}
+	case OctDec {
+		condition range(month,OCT,DEC)
+		value MFPpow_supply / (4. - month)
+	}
+	case Otherwise {
+		condition always
+		value 20.
+	}
+}
+define MFPpow_releasedv   {std kind 'release' units 'taf'}
+goal setMFPpow_releasedv  {MFPpow_releasedv = MFPpow_release}
+
+define MFPpow_releaseCFSdv   {std kind 'release' units 'taf'}
+goal setMFPpow_releaseCFSdv  {MFPpow_releaseCFSdv = MFPpow_release*taf_cfs}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! French Meadows Forecast !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Available hydropower supply forecast for release to Hell Hole from French Meadows.
+! Per discussion with OASIS modelers, this is the method used (in addition to the project-wide forecast)
+!   in the OASIS model. 
+
+! Available Storage Forecast !!!!!!!!!!!!!!!!
+
+define  MFPpow_FRMDW_storage    {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+		}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value S_FRMDW(-1)
+		}
+	case Otherwise {
+		condition always
+		value MFPpow_FRMDW_storagedv(-1)}
+}
+define  MFPpow_FRMDW_storagedv  {std kind 'STORAGE' units 'taf'}
+goal setMFPpow_FRMDW_storagedv  {MFPpow_FRMDW_storagedv = MFPpow_FRMDW_storage}
+
+define MFPpow_FRMDW_inflow {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+	}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value 	  MFPpow_inflow_FRMDW + max(0,MFPpow_inflow_DCC010 - sumMIF_MFP_DCC008)
+	}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+
+define MFPpow_FRMDW_inflowdv  {std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setMFPpow_FRMDW_inflowdv {MFPpow_FRMDW_inflowdv = MFPpow_FRMDW_inflow}
+
+
+! French Meadow water demands!!!!!!!!!!
+
+define  MFPpow_FRMDW_demand_FRMDW_orig 	{
+	case FirstWY {
+		condition wateryear==bgnWY .and. month<May
+		value 0.}
+	case MaySep_1000 {
+		condition range(month,MAY,SEP) .and. amer_annual>=1000
+		sum (i=0,15-month,1) 8.*cfs_taf(i)
+	}
+	case MaySep_less {
+		condition range(month,MAY,SEP)
+		sum (i=0,15-month,1) 4.*cfs_taf(i)
+	}
+	case OctDec_1000 {
+		condition range(month,OCT,DEC) .and. amer_annual>=1000
+		sum (i=0,3-month,1) 8.*cfs_taf(i)
+	}
+	case OctDec_less {
+		condition range(month,OCT,DEC)
+		sum (i=0,3-month,1) 4.*cfs_taf(i)
+	}
+	case otherwise {
+		condition always
+		value 0.
+	}
+}
+define  MFPpow_FRMDW_demand_FRMDW_current 	{
+	case Wet{
+		condition amer_annual >= 3400
+		select Wet from MFPpow_forecast
+		where month = month, identifier = 4
+		}
+	case AboveNormal{
+		condition amer_annual >= 2400
+		select AboveNormal from MFPpow_forecast
+		where month = month, identifier = 4
+		}
+	case BelowNormal{
+		condition amer_annual >= 1500
+		select BelowNormal from MFPpow_forecast
+		where month = month, identifier = 4
+		}
+	case Dry{
+		condition amer_annual >= 1000
+		select Dry from MFPpow_forecast
+		where month = month, identifier = 4
+		}
+	case Critical{
+		condition always
+		select Critical from MFPpow_forecast
+		where month = month, identifier = 4
+		}
+}
+define 	MFPpow_FRMDW_demand {
+			case ExistingConditions {condition LODflag==0. value MFPpow_FRMDW_demand_FRMDW_orig}
+			case BuildoutConditions {condition LODflag==1. value MFPpow_FRMDW_demand_FRMDW_current}
+			}
+
+define  MFPpow_FRMDW_demanddv 	{alias MFPpow_FRMDW_demand kind 'FORECAST' units 'CFS'}
+
+
+! Available Hydropower Supply !!!!!!!!!!!!!!!
+
+define MFPpow_FRMDW_supply {											
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0.
+		}
+	case MayDec {
+		condition range(month,MAY,SEP) .or. range(month,OCT,DEC)
+		value max(MFPpow_FRMDW_storage + MFPForecast_FRMDWNetInflow - MFPpow_FRMDW_demand - 50. , 0.)
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+define MFPpow_FRMDW_supplydv   {std kind 'supply' units 'taf'}
+goal setMFPpow_FRMDW_supplydv  {MFPpow_FRMDW_supplydv = MFPpow_FRMDW_supply}
+
+
+! French Meadows Release Schedule !!!!!!!!!!!!!!!!!!!!!!!!!!
+!Assuming no demand during period of diversion to storage, the following gives the monthly water available for release that can be transferred to Hell Hole
+define AFRMDWlast {select area from American_ResInfo given storage=1000*S_FRMDW(-1) use linear where ResNum=1}
+define MFPForecast_FRMDWEvapRate {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_FRMDW(i)}
+	case EndWaterJunSep {condition range(month,Jun,Sep).and. wateryear == EndWY sum(i=0,12-month,1)  ER_FRMDW(i)}
+	case JunSep {condition range(month,Jun, Sep) sum(i=0,15-month,1)  ER_FRMDW(i)}
+	case OctDec {condition range(month,Oct,Dec) sum(i=0,3-month,1)  ER_FRMDW(i)}
+	}
+define MFPForecast_FRMDWEvap   {value MFPForecast_FRMDWEvapRate*(AFRMDWlast)/12000.}
+define FRM_PowerReleaseTarget_JanMay {
+	case JanMay {condition range(month,Jan,May)
+		         value max(0,(MFPForecast_FRMDWNetInflow - MFPForecast_MIF_MFP_MFA047 + S_FRMDW(-1) - 134.99-MFPForecast_FRMDWEvap)/(8-month+1))  !Using level 6 for May at 134.99
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+define MFPForecast_FRMDWNetInflowdv{alias MFPForecast_FRMDWNetInflow kind 'debug' units 'taf'}
+define MFPForecast_MIF_MFP_MFA047dv{alias MFPForecast_MIF_MFP_MFA047 kind 'debug' units 'taf'}
+define MFPForecast_FRMDWEvapdv{alias MFPForecast_FRMDWEvap kind 'debug' units 'taf'}
+	
+!Hell hole MIF forecast for Nov-Dec
+
+! Hell Hole Release Schedule !!!!!!!!!!!!!!!!!!!!!!!!!!
+define AHHOLElast {select area from American_ResInfo given storage=1000*S_HHOLE(-1) use linear where ResNum=2}
+
+define MFPForecast_HHOLEEvapRate {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_HHOLE(i)}
+	case EndWaterJunSep {condition range(month,Jun,Sep).and. wateryear == EndWY sum(i=0,12-month,1)  ER_HHOLE(i)}
+	case JunSep {condition range(month,Jun, Sep) sum(i=0,13-month,1)  ER_HHOLE(i)}
+	case OctDec {condition range(month,Oct,Dec) sum(i=0,3-month,1)  ER_HHOLE(i)}
+	}
+
+define MFPForecast_HHOLEEvap   {value MFPForecast_HHOLEEvapRate*(AHHOLElast)/12000.}
+
+
+
+/*define MFPpow_HHOLE_release {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0. 
+		}
+	case JunSep {
+		condition range(month,Jun,SEP)
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_SystemDem-MFPForecast_HHOLEEvap-150.) / (16. - month))
+	}
+	case MOct {
+		condition month == Oct
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_SystemDem-MFPForecast_HHOLEEvap-150.) / (4. - month))
+	}
+		case NovDec {
+		condition range(month,Nov,DEC)
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_MIF_MFP_RUB031-MFPForecast_MIF_MFP_MFA047-MFPForecast_HHOLEEvap-150.) / (4. - month)) !In Nov and Dec no water demand is considered
+	}
+	case Otherwise {
+		condition always
+		value 0.
+	}
+}*/
+
+
+
+!Assuming no demand during period of diversion to storage, the following gives the monthly water available for release that can be transferred to Hell Hole	
+define HH_PowerReleaseTarget_JanMay {
+	case JanMay {condition range(month,Jan,May)
+		         value max(0,(MFPForecast_TotalSystemInflow - MFPForecast_TotalSystemMIF + S_HHOLE(-1)+S_FRMDW(-1)-S_FRMDWlevel6 - S_HHOLElevel6-MFPForecast_HHOLEEvap)/(8-month+1)) 
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+
+define MFPpow_FRMDW_release {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 20. ! calibration factor
+		}
+	case MaySep {
+		condition range(month,MAY,SEP)
+		value max(0,(MFPpow_FRMDW_supply-MFPForecast_FRMDWEvap)) / (16. - month)
+	}
+	case OctDec {
+		condition range(month,OCT,DEC)
+		value max(0,(MFPpow_FRMDW_supply-MFPForecast_FRMDWEvap)) / (4. - month)
+	}
+	case Otherwise {
+		condition always
+		value 20.
+	}
+}
+
+define FRM_Inflow {value I_FRMDW*cfs_taf + max(0, I_DCC010 - MIF_MFP_DCC008)*cfs_taf}
+define S_FRMDWlevel4init {
+		case FirstMonth {
+		condition wateryear==BgnWY .and. month==Oct
+		value 50. 
+		}
+	case JunNov    {condition range(month,Jun,Sep) .or. range(month,Oct,Nov) 
+	                value min(S_FRMDWlevel4dv(-1),max(50, max(S_FRMDWlevel3, S_FRMDW(-1)+FRM_Inflow- MFPpow_FRMDW_release-AFRMDWlast*ER_FRMDW/12000.-(MIF_MFP_MFA047 + MIF_MFP_buffer)*cfs_taf)))
+	}
+	case JanApr   {condition range(month,Jan,Apr)
+	               value  max(S_FRMDWlevel4dv(-1),max(S_FRMDWlevel3,S_FRMDW(-1)+FRM_Inflow - FRM_PowerReleaseTarget_JanMay-AFRMDWlast*ER_FRMDW/12000.-(MIF_MFP_MFA047 + MIF_MFP_buffer)*cfs_taf))
+	}
+	case MMay	  {condition month == May
+					value S_FRMDWlevel5
+	}
+	Case MonthDec {condition month == Dec
+		           value 50.
+    }
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+define S_FRMDWlevel4{value min(S_FRMDWlevel5,S_FRMDWlevel4init)}
+
+goal   SetFRMWDZone4 {S_FRMDW_4 < max(S_FRMDWlevel4-S_FRMDWlevel3,0.)}
+
+
+define FRM_PowerReleaseTarget_JanMaydv{alias FRM_PowerReleaseTarget_JanMay kind 'debug' units 'taf'}
+
+define FRM_Evapdv{alias AFRMDWlast*ER_FRMDW/12000. kind 'debug' units 'taf'}
+define MFPpow_FRMDW_releasedv   {std kind 'release' units 'taf'}
+goal setMFPpow_FRMDW_releasedv  {MFPpow_FRMDW_releasedv = MFPpow_FRMDW_release}
+
+define MFPpow_FRMDW_releaseCFSdv   {std kind 'release' units 'taf'}
+goal setMFPpow_FRMDW_releaseCFSdv  {MFPpow_FRMDW_releaseCFSdv = MFPpow_FRMDW_release*taf_cfs}
+
+define D_HHOLE_MFT003_WS  {std kind 'FLOW' units 'CFS'} !Release for water supply
+define D_HHOLE_MFT003_MIT {std kind 'FLOW' units 'CFS'} !Release for mitigation
+define D_HHOLE_MFT003_POW {std kind 'FLOW' units 'CFS'} !Release for power
+define D_HHOLE_MFT003_EXC {std kind 'FLOW' units 'CFS'} !Additional release
+define D_HHOLE_MFT003_OTH {std kind 'FLOW' units 'CFS'} !Release for other reason
+
+goal D_HHOLE_MFT003total  {D_HHOLE_MFT003=D_HHOLE_MFT003_WS+D_HHOLE_MFT003_MIT+D_HHOLE_MFT003_POW+D_HHOLE_MFT003_EXC+D_HHOLE_MFT003_OTH}

@@ -1,0 +1,38 @@
+/*
+PalermoCanal.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+Limit deliveries to 13_NU1 in simulation of the upper Feather River module
+so as to account for later deliveries from the Palermo Canal in the later cycles.
+
+Created A Draper, MWH/Stantec, 06.29.17 
+ */
+ 
+/*
+SFWPA’s Palermo canal distributes an average of approximately 6 TAF/yr
+to customers from Oroville dam at a maximum rate of 40 cfs. The canal
+uses inflows from Sucker Run Creek and spilled flows from Ponderosa dam.
+*/
+
+! Assume Palermo Canal deliveries equal to 6 TAF/yr with fixed delivery pattern
+! based on historical deliveries 1996-2015
+define PalermoCanalPattern {
+	case October  {condition month == OCT value 0.10}
+	case November {condition month == NOV value 0.04}
+	case December {condition month == DEC value 0.02}
+	case January  {condition month == JAN value 0.01}
+	case February {condition month == FEB value 0.01}
+	case March    {condition month == MAR value 0.01}
+	case April    {condition month == APR value 0.04}
+	case May      {condition month == MAY value 0.12}
+	case June     {condition month == JUN value 0.15}
+	case July     {condition month == JUL value 0.17}
+	case August   {condition month == AUG value 0.17}
+	case September{condition always value 0.16}}
+
+define PalermoCanalEstimate {value 6.0 * PalermoCanalPattern * taf_cfs}
+
+goal limit_D_OROVL_13_NU1 {D_OROVL_13_NU1 < PalermoCanalEstimate}
+
+

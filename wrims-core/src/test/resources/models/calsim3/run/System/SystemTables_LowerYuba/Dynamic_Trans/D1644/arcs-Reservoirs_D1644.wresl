@@ -1,0 +1,34 @@
+/*
+File Name: arcs-reservoirs_D1644.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Bullards Bar Reservoir, North Fork  Yuba River  !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_NBLDB_1_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDB_2_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDB_3_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDBlevel4_D1644 {select target from res_level where res_num=93,level=1644,month=month}
+Define S_NBLDBLevel4_DV_D1644 {alias S_NBLDBlevel4_D1644 kind 'STORAGE' units 'TAF'}
+define S_NBLDBlevel3_D1644 {value min(S_NBLDBlevel3_,S_NBLDBlevel4_D1644)}
+define S_NBLDB_4_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDB_5_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDB_6_D1644     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NBLDB_D1644       {std kind 'STORAGE' units 'TAF'}
+define E_NBLDB_D1644       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_NBLDB_D1644       {std kind 'SURFACE-AREA' units 'ACRES'}
+define A_NBLDBlast_D1644   {select area from YubaBear_res_info given storage=1000*S_NBLDB_D1644(-1) use linear where res_num=11}
+define A_NBLDBforward_D1644 {select area from YubaBear_res_info given storage=1050*S_NBLDB_D1644(-1) use linear where res_num=11}
+define A_NBLDBback_D1644   {select area from YubaBear_res_info given storage=950*S_NBLDB_D1644(-1) use linear where res_num=11}
+define coefev_NBLDB_D1644  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_NBLDB_D1644(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=93}	 
+	case Otherwise { condition always 
+                value (A_NBLDBforward_D1644 - A_NBLDBback_D1644)/(100*max(0.01,S_NBLDB_D1644(-1)))}
+        }
+define RelCap_NBLDB_D1644  {select discharge from YubaBear_res_info given storage=1000*S_NBLDB_D1644(-1) use linear where res_num=11}

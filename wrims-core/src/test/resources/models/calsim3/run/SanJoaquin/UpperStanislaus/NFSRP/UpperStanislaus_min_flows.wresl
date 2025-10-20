@@ -1,0 +1,58 @@
+! North Fork Stanislaus River Project minimum flow requirement
+! Chakri 02/26/08
+! Bridget Childs 01/13/2023
+! *********************************************************************************
+! FERC Project No. 2409: North FOrk Stanislaus River Project (Feb 8, 1982): 
+
+! Article 37. The Licensee shall release a continuous minimum flow of 16.5 cfs immediately below 
+! Spicer Meadow Dam and below McKays Diversion Dam and a flow of 16.5 cfs or the natural inflow, 
+! if less, below the North Fork Diversion Dam and below the Beaver Creek Diversion Dam. 
+
+! Highland Creek below Spicer Meadow Dam (C_SPICE)
+define SPICE_MIF {value 16.5}
+goal SetC_SPICE_MIF {C_SPICE_MIF +C_SPICE_SHTG = SPICE_MIF}
+define C_SPICE_ADD_1 {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define C_SPICE_ADD_2 {std kind 'FLOW-SPILL-POWER' units 'CFS'}
+goal C_SPICE_EXC_total {C_SPICE_ADD=C_SPICE_ADD_1+C_SPICE_ADD_2}
+define C_SPICE_POW {lower 0 upper 1600 kind 'FLOW-POWER' units 'CFS'}
+goal C_SPICE_POW_total {C_SPICE_POW=C_SPICE_MIF+C_SPICE_ADD_1}
+
+! North Fork Stanislaus River below McKays Point Diversion Dam (C_NFS007)
+define NFS007_MIF {value min(I_SPICE+I_NFS033+I_NFS009,16.5)} !1997 amendment
+goal SetC_NFS007_MIF {C_NFS007_MIF + C_NFS007_SHTG = NFS007_MIF}
+
+! North Fork Stanislaus River below North Fork Diversion Dam (C_NFS030)
+define NFS032_MIF {value min(I_NFS033,16.5)}
+goal SetC_NFS032_MIF {C_NFS032_MIF +C_NFS032_SHTG = NFS032_MIF}
+
+! Beaver Creek below Beaver Creek Diversion Dam (C_BVC003)
+define BVC007_MIF {value min(I_BVC007,16.5)}
+goal SetC_BVC007_MIF {C_BVC007_MIF + C_BVC007_SHTG = BVC007_MIF}
+
+! Source: Order Approving Minimum Flow Releases Nov 6, 1997
+! Licensee must maintain a year-round minimum flow of 25 cfs 
+! in the North Fork Stanislaus at its confluence with Beaver Creek
+! Fork Stanislaus River at the confluence with Beaver Creek 
+
+! North Fork Stanislaus River at confluence with Beaver Creek (C_NFS005)
+define NFS005_MIF {value 25.}
+goal SetC_NFS005_MIF {C_NFS005_MIF +C_NFS005_SHTG = NFS005_MIF}
+
+!North Fork Stanislaus River at Avery (C_NFS009)
+!define NFS009_MIF {value 0.}
+! Source: CDFG Condition 6? 
+define NFS009_MIF {
+	case oct {
+		condition     month == oct
+	        value         150.}
+	case nov_may {
+		condition     month >= nov .and. month <= may
+	        value         100.}
+	case jun_sep {
+        	condition     month >= jun .and. month <= sep
+	        value         150.}
+	case other  {
+        	condition     always
+	        value         0.}
+			} 
+goal SetC_NFS009_MIF {C_NFS009_MIF + C_NFS009_SHTG = NFS009_MIF}

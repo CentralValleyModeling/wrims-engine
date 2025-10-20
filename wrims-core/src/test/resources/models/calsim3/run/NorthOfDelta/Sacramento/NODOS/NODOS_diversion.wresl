@@ -1,0 +1,292 @@
+! NODOS_diversion.wresl
+! This file contains the diversion logic for the operation of NODOS
+!
+! *******************************************************************
+define NODOS_Stor {std kind 'STORAGE' units 'TAF'}
+
+!
+! Stony Creek flows possibly stored at NODOS - establish a split arc for this purpose
+define C173B_StCr_TCCA  {std kind 'FLOW-CHANNEL' units 'CFS'} !Stony Creek flow through TCCA to TCCA service area
+define C173B_StCr_NODOS {std kind 'FLOW-CHANNEL' units 'CFS'} !Stony Creek flow through TCCA to NODOS
+goal splitC173B_StCr    {C173B_StCr = C173B_StCr_TCCA + C173B_StCr_NODOS}
+goal LimitC173BNODOS    {C173B_StCr_NODOS < CapStnyCrkInter}  !Restrict capacity of the Stony Creek/TCC intertie for NODOS (could be a pipline from Black Butte or whatever)
+!
+! Added Continuity Equations to make sure flows are related properly
+goal AddContinuity17501 {D14401 + C173B_StCr_NODOS - D17501 < 1.}  !make sure GCID diversion and Stony Creek components are routed to NODOS
+!
+define NODOS_NetFill {alias C17601 - C30 - C30A - C30C - D30
+                      - C31 - C31A - C32 - C32A - C32B - C32C - D32
+                      - C33 - D33  - C34 - D34 kind 'FLOW' units 'CFS'}
+!
+! *******************************************************************
+!
+! Condition for Diversion through TCCA and GCID for fill of NODOS
+! Remaining flow below GCID must remain at or above 4000 CFS
+define FlowAbove_C114 {std kind 'FLOW' units 'CFS'}
+define FlowBelow_C114 {std kind 'FLOW' units 'CFS'}
+define IntFlow_C114   {INTEGER std kind 'INTEGER' units 'NONE'}
+goal FindSurplus_C114 {C114 - 4000. = FlowAbove_C114 - FlowBelow_C114}
+goal ForceAbove_C114  {FlowAbove_C114 < 999999.0 - IntFlow_C114*999999.0}
+goal ForceBelow_C114  {FlowBelow_C114 < IntFlow_C114*999999.0}
+goal LimitGCID_C114   {D14401 < 999999.0 - IntFlow_C114*999999.0}
+goal LimitTCCA_C114   {D17501 < 999999.0 - IntFlow_C114*999999.0}
+!
+! Condition for Diversion through New Pipeline for fill of NODOS
+! Remaining flow at the NCP (Wilkens Slough) must remain at or above the desired flow (minflow_C129)
+define FlowAbove_C129 {std kind 'FLOW' units 'CFS'}
+define FlowBelow_C129 {std kind 'FLOW' units 'CFS'}
+define IntFlow_C129   {INTEGER std kind 'INTEGER' units 'NONE'}
+goal FindSurplus_C129 {C129 - minflow_C129 = FlowAbove_C129 - FlowBelow_C129} !USRDOM - May need to change this to consider Daily Adjustments
+goal ForceAbove_C129  {FlowAbove_C129 < 999999.0 - IntFlow_C129*999999.0}
+goal ForceBelow_C129  {FlowBelow_C129 < IntFlow_C129*999999.0}
+goal LimitNewPipeC129 {D124A < 999999.0 - IntFlow_C129*999999.0}
+!
+! *******************************************************************
+!
+! Seasons for Diversion
+! Put limits on Canals
+goal LimitCanals {
+    lhs D17501
+    case NovMar {     ! Primary diversion window
+        condition month >= NOV .and. month <= MAR
+        rhs upperD17501
+        lhs<rhs penalty 0.}
+    case SepOct {     ! Allowed only when recovering ERP flows
+        condition month >= SEP .or. month <= OCT
+        rhs max(ERP_C5MIF - C5_ERPbase,0.)
+        lhs<rhs penalty 0.}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+!
+! *******************************************************************
+!
+! Percent of flow Diverion Limits (45%)
+goal indylimitD112  {D112  < 0.45*D112  + 0.45*C112}      ! Watch out for shortages to existing operations!!
+goal indylimitC173B {C173B_StCr_NODOS < 0.45*C173B_StCr_NODOS  + 0.45*C173A}
+goal indylimitD114  {D114  < 0.45*D114  + 0.45*C114}      ! Watch out for shortages to existing operations!!
+goal indylimitD124A {D124A < 0.45*D124A + 0.45*C124 + 0.45*D124 + 0.45*D117}
+goal totallimtC17601 {C17601 < 0.45*C17601 + 0.45*C124 + 0.45*D124 + 0.45*D117}
+!
+! *******************************************************************
+!
+! Condition for reverse flow through TCC -> GCC Intertie
+! D14401 can not flow until C17502A is reduced to zero
+define IntFlow_C17502   {INTEGER std kind 'INTEGER' units 'NONE'}
+goal Force_C17502  {C17502A + C17502B + C17502 < IntFlow_C17502*999999.0}
+goal Force_D14401   {D14401 < 999999.0 - IntFlow_C17502*999999.0}
+!
+! *******************************************************************
+!
+! Fills of the CVP component of NODOS occur from Excess flows (_norm)
+!   and storage exchange operations with Shasta Lake (_exop)
+! Split of GCID to NODOS fills
+define D14401_norm {std kind 'FLOW-DELIVERY' units 'CFS'}
+define D14401_exop {std kind 'FLOW-DELIVERY' units 'CFS'}
+goal set_D14401_split {D14401 = D14401_norm + D14401_exop}
+!
+! Split of TCCA and GCID to NODOS fills
+define D17501_norm {std kind 'FLOW-DELIVERY' units 'CFS'}
+define D17501_exop {std kind 'FLOW-DELIVERY' units 'CFS'}
+goal set_D17501_split {D17501 = D17501_norm + D17501_exop}
+!
+! Split of New Pipeline to NODOS fills
+define D124A_norm {std kind 'FLOW-DELIVERY' units 'CFS'}
+define D124A_exop {std kind 'FLOW-DELIVERY' units 'CFS'}
+goal set_D124A_split {D124A = D124A_norm + D124A_exop}
+!
+! Split of CVP NODOS fills
+define c177c_norm {std kind 'FLOW-DELIVERY' units 'CFS'}
+define c177c_exop {std kind 'FLOW-DELIVERY' units 'CFS'}
+goal set_c177c_split {c177c = c177c_norm + c177c_exop}
+!
+! add additional continuity to keep split arcs straight
+goal AddCont17501_exop {D14401_exop - D17501_exop < 1.}
+goal AddCont177_exop {D17501_exop + D124A_exop - c177c_exop = 0.}
+!
+! *******************************************************************
+!
+! Excess Fill constraints
+define S30availcapprv {value max(S30_StorTarg - S30(-1),0.)}
+goal maxC177Aexcess {
+    lhs C177A
+    rhs S30availcapprv*taf_cfs
+    lhs>rhs penalty 2000.
+    lhs<rhs penalty 0.
+}
+define S31availcapprv {value max(S31_StorTarg - S31(-1),0.)}
+goal maxC177Bexcess {
+    lhs C177B
+    rhs S31availcapprv*taf_cfs
+    lhs>rhs penalty 2000.
+    lhs<rhs penalty 0.
+}
+define S32availcapprv {value max(S32_StorTarg - S32(-1),0.)}
+goal maxC177Cexcess {
+    lhs C177C_NORM
+    rhs S32availcapprv*taf_cfs
+    lhs>rhs penalty 2000.
+    lhs<rhs penalty 0.
+}
+define S33availcapprv {value max(S33_StorTarg - S33(-1),0.)}
+goal maxC177Dexcess {
+    lhs C177D
+    rhs S33availcapprv*taf_cfs
+    lhs>rhs penalty 2000.
+    lhs<rhs penalty 0.
+}
+define S34availcapprv {value max(S34_StorTarg - S34(-1),0.)}
+goal maxC177Eexcess {
+    lhs C177E
+    rhs S34availcapprv*taf_cfs
+    lhs>rhs penalty 2000.
+    lhs<rhs penalty 0.
+}
+! Share Excess fills according to available account capacities
+define NODOS_excessfill {std kind 'FLOW' units 'CFS'}
+goal setNODOS_excfill {NODOS_excessfill = C177A + C177B + C177C_NORM + C177D + C177E}
+define NODOSavailcapprv {
+    case first_month {
+     condition month == OCT .and. wateryear == BgnWY
+         value max(NODOS_StorMax - 950.,1.)}   ! 950. from initial storage assumptions
+    case otherwise {
+         condition always
+         value max(NODOS_StorMax - NODOS_Stor(-1),1.)}
+}
+!
+! Must always fill local first
+goal shareC177Aexcess {
+!    lhs C177A - NODOS_excessfill * S30availcapprv/NODOSavailcapprv
+    lhs C177A - S30availcapprv*taf_cfs
+    rhs 0.
+    lhs>rhs penalty 10.
+    lhs<rhs penalty 50.
+}
+goal shareC177Bexcess {
+    lhs C177B - NODOS_excessfill * S31availcapprv/NODOSavailcapprv
+    rhs 0.
+    lhs>rhs penalty 10.
+    lhs<rhs penalty 10.
+}
+goal shareC177Cexcess {
+    lhs C177C_NORM - NODOS_excessfill * S32availcapprv/NODOSavailcapprv
+    rhs 0.
+    lhs>rhs penalty 10.
+    lhs<rhs penalty 10.
+}
+goal shareC177Dexcess {
+    lhs C177D - NODOS_excessfill * S33availcapprv/NODOSavailcapprv
+    rhs 0.
+    lhs>rhs penalty 10.
+    lhs<rhs penalty 25.
+}
+goal shareC177Eexcess {
+    lhs C177E - NODOS_excessfill * S34availcapprv/NODOSavailcapprv
+    rhs 0.
+    lhs>rhs penalty 10.
+    lhs<rhs penalty 25.
+}
+!
+! *******************************************************************
+!
+!limit the rate of NODOS/Shasta storage exchange operations
+goal limit_exop_fill_rate {
+    lhs C177C_exop
+    case ShastaColdOffRamp {
+         condition  S1(-1) + S4(-1) < ColdStorTarg .or. wyt_SAC > 3
+         rhs 0.0
+         lhs>rhs penalty 99999}
+    case CritCondOffRamp {
+     condition wyt_NODOS + prev_wyt_SAC >= 8
+         rhs 0.0
+         lhs>rhs penalty 99999}
+    case fillperiod {
+         condition month >= NOV .and. month <= MAR
+! assume CVP excess share to be captured at Shasta
+! (normal values 1350 for 400TAF, 2000 for 600TAF, 2700 for 800TAF)
+         rhs (S32_StorMax-S32(-1))*taf_cfs/(MAR-month+1)      !push it over as fast as possible -
+         lhs<rhs penalty 0
+         lhs>rhs penalty 99999}
+    case otherwise {
+         condition always
+         rhs 0.0
+         lhs>rhs penalty 99999}
+}
+
+! *******************************************************************
+!
+! So has not to harm WQ, put limits on Fills
+! Don't fill during summer if WQ operation included
+goal LimitNewPipeSummer {
+    lhs C17601
+    case JulSep {
+        condition S34(-1) > 10. .and. month >= JUL
+        rhs 0.
+        lhs>rhs penalty 5000.}
+    case Oct {
+        condition S34(-1) > 10. .and. month <= OCT
+        rhs 0.
+        lhs>rhs penalty 5000.}
+    case otherwise {
+        condition always
+    rhs 99999.
+        lhs<rhs penalty 0.}
+}
+!
+! **********************************************************************
+!
+! The following code is to to share storages flexibly in NODOS
+goal setNODOS_Stor {NODOS_Stor = S30 + S31 + S32 + S33 + S34}
+goal limitNODOS_Stor {NODOS_Stor < NODOS_StorMax}
+
+! Reservoir level logic
+! Local
+define S30level3 {value DeadPoolLocal}
+define S30level4 {value S30_StorTarg}
+define S30level5 {value NODOS_StorMax}
+goal S30Zone3 {S30_3 < S30level3-S30level2}
+goal S30Zone4 {S30_4 < S30level4-S30level3}
+goal S30Zone5 {S30_5 < S30level5-S30level4}
+! SWP
+define S31level3 {value S31_RuleCrv}
+define S31level4 {value S31_StorMax}
+define S31level5 {value NODOS_StorMax}
+goal S31Zone3 {S31_3 < S31level3-S31level2}
+goal S31Zone4 {S31_4 < S31level4-S31level3}
+goal S31Zone5 {S31_5 < S31level5-S31level4}
+! CVP
+define S32level3 {value S32_RuleCrv}
+define S32level4 {value S32_StorMax}
+define S32level5 {value NODOS_StorMax}
+goal S32Zone3 {S32_3 < S32level3-S32level2}
+goal S32Zone4 {S32_4 < S32level4-S32level3}
+goal S32Zone5 {S32_5 < S32level5-S32level4}
+! EWA
+define S33level3 {value 0.0}
+define S33level4 {
+    case criticalAPRtoSEP {
+     condition month >= APR .and. wyt_NODOS + prev_wyt_SAC >= 8
+     value     max(S33_StorOff,S33level3)}
+    case rest {
+     condition always
+     value     max(S33_StorTarg,S33level3)}
+}
+define S33level5 {value NODOS_StorMax}
+goal S33Zone3 {S33_3 < S33level3-S33level2}
+goal S33Zone4 {S33_4 < S33level4-S33level3}
+goal S33Zone5 {S33_5 < S33level5-S33level4}
+! WQ
+define S34level3 {value 0.0}
+define S34level4 {
+    case criticalAPRtoSEP {
+     condition month >= APR .and. wyt_NODOS + prev_wyt_SAC >= 8
+     value     max(S34_StorOff,S34level3)}
+    case rest {
+     condition always
+     value     max(S34_StorTarg,S34level3)}
+}
+define S34level5 {value NODOS_StorMax}
+goal S34Zone3 {S34_3 < S34level3-S34level2}
+goal S34Zone4 {S34_4 < S34level4-S34level3}
+goal S34Zone5 {S34_5 < S34level5-S34level4}

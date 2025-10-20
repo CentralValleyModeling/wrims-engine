@@ -1,0 +1,110 @@
+define OroSepTarg     {
+  case a_X{
+    condition wateryear==bgnWY .and. month<=dec
+    !value min(1000. + 0.5*max(S_OROVL(prevSep)-S_OROVL_WTS(prevSep) - 1000. - DrainTar_buffer,0.), S_OROVLlevel5) }
+    value min(1600. , S_OROVLlevel5)} ! for IRP, MTU 6/4/19
+  case b_X{
+    condition always
+    !value min(1000. + 0.5* (swp_allocation_final-tableA_loss)/SWP_TableA*max(S_OROVL(prevSep)-S_OROVL_WTS(prevSep) - 1000. - DrainTar_buffer,0.), S_OROVLlevel5) }
+    value min(1600. , S_OROVLlevel5)}! for IRP MTU 6/4/19 
+}
+    
+define OroNextMonTarg {value min(OroSepTarg + (max(S_OROVL(-1)-S_OROVL_WTS(-1) - OroSepTarg,0.)/(Sep-month+1.))*(Sep-month), S_OROVLlevel5) }
+
+define S_OROVLlevel4  {
+     case JuntoSep  {
+      condition month >= jun
+      value OroNextMonTarg }
+     case Other {
+      condition always
+      value  S_OROVLlevel5 }}
+
+define S_OROVLlevel4dv {alias S_OROVLlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define OroSepTarget {alias OroSepTarg kind 'STORAGE-LEVEL' units 'TAF'}
+define OroPreSepStor {alias S_OROVL(prevSep) kind 'STORAGE' units 'TAF'}
+define OroNextMonTarget {alias OroNextMonTarg kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_OROVLlevel3   {value min(2470.,S_OROVLlevel4) }
+
+define OroInf    {value (I_OROVL + CT_OROVILLE_SV 
+                       + I_RVPHB + I_WBF030 + I_WBF015 + I_WBF006 
+                       + I_NFF029 + I_ALMNR + I_MTMDW  + I_GZL009 + I_BUCKS + I_EBF001 + I_ANTLP + I_BTVLY
+                       + I_DAVIS + I_FRMAN  + I_MFF087 + I_MFF019
+                       + I_LGRSV + I_SLYCK + I_SFF011 + I_SFF008) * cfs_taf}                      
+define OroInfdv {alias OroInf kind 'CUMULATIVE-FLOW' units 'TAF'}                        
+                       
+                       
+define OroInfEst {sum (i=0,SEP-month,1) 
+                         (I_OROVL(i) + CT_OROVILLE_SV(i) 
+			+ I_RVPHB(i) + I_WBF030(i) + I_WBF015(i) + I_WBF006 
+			+ I_NFF029(i)+ I_ALMNR(i) + I_MTMDW (i) + I_GZL009(i) + I_BUCKS(i) + I_EBF001(i) + I_ANTLP(i) + I_BTVLY(i)
+                        + I_DAVIS(i) + I_FRMAN(i) + I_MFF087(i) + I_MFF019(i)
+                        + I_LGRSV(i) + I_SLYCK(i) + I_SFF011(i) + I_SFF008(i)) * cfs_taf(i)}
+                        
+define OroInfEstdv {alias OroInfEst kind 'CUMULATIVE-FLOW' units 'TAF'}                        
+                        
+
+define S_UPPERFEATHER_SV {timeseries kind 'STORAGE' units 'TAF'}
+define UFStorageRelease {
+	       case FirstMonth {
+	          condition month == OCT .and. wateryear == BgnWY
+	          value S_UPPERFEATHER_SV - S_UPPERFEATHER_SV(SEP-month)}
+	       case Otherwise {
+	          condition always
+	          value S_UPPERFEATHER_SV(-1) - S_UPPERFEATHER_SV(SEP-month)
+	       }}
+define UFStorageReleasedv{alias UFStorageRelease kind 'STORAGE-RELEASE' units 'TAF'}
+
+define UF_CULOS {timeseries kind 'CONSUMPTIVE-USE' UNITS 'TAF' convert 'CFS'} ! Consumptive Use
+
+define UFDiv    {value (C_TTC002_SV + D_MIO023_10_NA_SV + D_MIO023_12_NU1_SV + D_OWC000_13_NA_SV + D_WTPMNR_13_NU1_SV + D_MNRRH_13_NU2_SV - D_SLT009_SCT000_SV + C_KRT000_SV + UF_CULOS)*cfs_taf }
+
+define UFDivEst {sum (i=0,SEP-month,1)
+                      (C_TTC002_SV(i) + D_MIO023_10_NA_SV(i) + D_MIO023_12_NU1_SV(i) + D_OWC000_13_NA_SV(i)
+                      + D_WTPMNR_13_NU1_SV(i) + D_MNRRH_13_NU2_SV(i) + C_KRT000_SV(i)- D_SLT009_SCT000_SV(i)
+                      + UF_CULOS(i))*cfs_taf(i) }
+
+define UFDivEstdv {alias UFDivEst kind 'CUMULATIVE-FLOW' units 'TAF'}    
+
+define E_UpperFeather_SV {timeseries kind 'EVAPORATION' units 'TAF' convert 'CFS'}
+define UFEvapEst         {sum (i=0,SEP-month,1) E_UpperFeather_SV(i) * cfs_taf(i)}
+define UFEvapEstdv       {alias UFEvapEst kind 'CUMULATIVE-FLOW' units 'TAF'}  
+
+                                           
+define OroSupEst   {value max(0.0,OroInfEst - UFEvapEst - UFDivEst + UFStorageRelease + S_OROVL(-1)-S_OROVL_WTS(-1) - S_OROVLlevel3)}
+define OroSupEstdv {alias OroSupEst kind 'FORECAST' units 'TAF'}
+define OroFlowTarg {value (OroSupEst/cfs_taf)/(Sep-month+1.) }
+
+! For debugging purposes
+define OroInflowEst {alias OroInfEst - UFEvapEst - UFDivEst + UFStorageRelease kind 'CUMULATIVE-FLOW' units 'TAF'} !Inflow from current month through September
+define OroInflowAct {alias (C_FTR074 + I_OROVL + CT_OROVILLE)*cfs_taf kind 'FLOW' units 'TAF'} !Actual monthly inflow to Lake Oroville
+
+define OroRuleCalc {
+     case JunthruSep {
+          condition month >= may .and. month <= sep
+          value     OroInf - UFDiv - E_UpperFeather_SV*cfs_taf + S_UPPERFEATHER_SV(-1) - S_UPPERFEATHER_SV + S_OROVL(-1)-S_OROVL_WTS(-1) - OroFlowTarg*cfs_taf }
+     case Other {
+          condition always
+          value     S_OROVLlevel3}}
+          
+define OroRuleCalcdv {alias OroRuleCalc kind 'RULE' units 'TAF'}
+
+define S_OROVLlevel3adj{value min(max(OroRuleCalc,S_OROVLlevel2),S_OROVLlevel4)}
+define S_OROVLlevel3dv {alias S_OROVLlevel3adj kind 'STORAGE-LEVEL' units 'TAF'}
+
+goal S_OROVLZone3 {S_OROVL_3 < max(S_OROVLlevel3adj - S_OROVLlevel2,0.)}
+goal S_OROVLZone4 {S_OROVL_4 < max(S_OROVLlevel4 - S_OROVLlevel3adj,0.)}
+goal S_OROVLZone5 {S_OROVL_5 < max(S_OROVLlevel5 - S_OROVLlevel4,0.)}
+goal S_OROVLZone6 {S_OROVL_6 < max(S_OROVLlevel6 - S_OROVLlevel5,0.)}
+
+! Provides the upper bound for C_OROVL_NCF.
+! Fix originated from the issue that Oroville is not releasing enough in Feb 1986 when S_OROVL > S_OROVLLevel5 (flood)
+
+define MaxRelCap_Orovl {
+     case expected_encroachment {
+          condition S_OROVL(-1) + OroInf > S_OrovlLevel5
+          value     max(relcap_orovl,(S_OROVL(-1) + OroInf - S_OROVLlevel5)*TAF_cfs) }
+     case Other {
+          condition always
+          value     Relcap_OROVL}}
+define MaxRelCap_Orovldv {alias MaxRelCap_Orovl kind 'MAX-RELEASE' units 'cfs'}

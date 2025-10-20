@@ -1,0 +1,29 @@
+/*
+File Name: constraints-DeepPercolation.wresl
+CalSim 3.0 System File
+
+Purpose:
+Deep percolation for each demand unit is calculated by CalSIm Hydro. This deep
+percolation is split into two timeseries. Percolation that in areas overlying the groundwater
+finite element grid, and areas lying upslope from the finite element grid. These two sets of
+deep percolation are aggregated to the WBA scale.
+
+Naming takes the following form:
+DP_WBA_{WBA id}_INT
+DP_WBA_{WBA id}_EXT
+
+Only the second timeseries is passed to the groundwater dll
+
+*/
+
+!*********************************************************************
+!*********************************************************************
+!Time series definitions for field level deep percolation
+!from precipitation and irrigation
+!*********************************************************************
+!*********************************************************************
+define DP_60N_INT        {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_60N   {std kind 'deep-percolation' units 'CFS'}
+!@zrc goal setDP_WBATotal60N   {DP_WBATotal_60N = DP_60N_INT + WW_60N_PU} ! TODO -- ADD distribution DP terms... 
+goal setDP_WBATotal60N   {DP_WBATotal_60N = DP_60N_INT +DP_60N_NA1 +DP_60N_NA2 +DP_60N_NA3 +DP_60N_NA4 +DP_60N_NA5 +DP_60N_NU1 +DP_60N_NU2 + WW_60N_PU}
+

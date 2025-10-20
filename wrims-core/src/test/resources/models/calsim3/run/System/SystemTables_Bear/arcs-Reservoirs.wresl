@@ -1,0 +1,123 @@
+/*
+File Name: arcs-reservoirs.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Valley Reservoir, North Fork American River (Reservoir 43 in UAR CalSim Model	!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_LKVLYlevel1 {value 0.001} ! from UAR CalSim, HEC-3 models
+define S_LKVLY_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LKVLYlevel2 {value 1.0} ! Historical minimum
+define S_LKVLY_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LKVLYlevel3 {
+        case Jan        {condition month == JAN value 3.1 + 0.5 } ! From YB/DS Ops Model per communication by Dave Ward (PG&E)
+        case Feb        {condition month == FEB value 3.5 + 0.5}
+        case Mar        {condition month == MAR value 4.7 + 0.5}
+        case Apr        {condition month == APR value 6.1 + 0.5}
+        case May        {condition month == MAY value 7.6 }
+        case Jun        {condition month == JUN value 7.6 }
+        case Jul        {condition month == JUL value 6.8 }
+        case Aug        {condition month == AUG value 6.2 }
+        case Sep        {condition month == SEP value 5.9}
+        case Oct        {condition month == OCT value 3.9 + 1.0}
+        case Nov        {condition month == NOV value 2.9 + 1.0}
+        case Dec        {condition always       value 2.9 + 1.0} }
+define S_LKVLY_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LKVLYlevel4 {  
+			case Oct {condition month == OCT value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Nov {condition month == NOV value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Dec {condition month == DEC value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Jan {condition month == JAN value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Feb {condition month == FEB value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Mar {condition month == MAR value 7.2} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+			case Apr {condition month == APR value 7.9} ! Equivalent to 5784.9 feet, flashboards in
+			case May {condition month == MAY value 7.9} ! Equivalent to 5784.9 feet, flashboards in
+			case Jun {condition month == JUN value 7.9} ! Equivalent to 5784.9 feet, flashboards in
+			case Jul {condition month == JUL value 7.9} ! Equivalent to 5784.9 feet, flashboards in
+			case Aug {condition month == AUG value 7.9} ! Equivalent to 5784.9 feet, flashboards in
+			case otherwise {condition always value 7.2}} ! Equivalent to spillway crest elevation, 5782.4 feet, without flashboards
+define S_LKVLY_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LKVLYlevel5 {value 9.4} ! from UAR CalSim, HEC-3 models
+define S_LKVLY_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LKVLY       {std kind 'STORAGE' units 'TAF'}
+define E_LKVLY       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_LKVLY       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_LKVLY      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_LKVLYlast   {select area from YubaBear_Res_Info given storage=1000*S_LKVLY(-1) use linear where res_num=10}
+define A_LKVLYforward {select area from YubaBear_Res_Info given storage=1050*S_LKVLY(-1) use linear where res_num=10}
+define A_LKVLYback   {select area from YubaBear_Res_Info given storage=950*S_LKVLY(-1) use linear where res_num=10}
+define Coefev_LKVLY  {value (A_LKVLYforward - A_LKVLYback)/(100*max(0.01,S_LKVLY(-1)))}
+define Relcap_LKVLY  {select discharge from YubaBear_Res_Info given storage=1000*S_LKVLY(-1) use linear where res_num=10}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!Rollins Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_RLLNSlevel1 {value 0.559}
+define S_RLLNS_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLLNSlevel2 {
+        case MayAug     {condition month >= MAY .and. month <= SEP value 50.185 }
+        case SepApr     {condition always value 5.566 } }
+define S_RLLNS_2  {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLLNSlevel3 {
+        case Jan        {condition month == JAN value 59.502 }
+        case Feb        {condition month == FEB value 60.371 }
+        case Mar        {condition month == MAR value 63.545 }
+        case Apr        {condition month == APR value 65.580 }
+        case May        {condition month == MAY value 65.996 }
+        case Jun        {condition month == JUN value 65.996 }
+        case Jul        {condition month == JUL value 65.996 }
+        case Aug        {condition month == AUG value 64.355 }
+        case Sep        {condition month == SEP value 61.159}
+        case Oct        {condition month == OCT value 45.004 }
+        case Nov        {condition month == NOV value 57.988 }
+        case Dec        {condition always value 57.988 } }
+define S_RLLNS_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLLNSlevel4 {value 65.996}
+define S_RLLNS_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLLNSlevel5 {value 69.372}
+define S_RLLNS_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLLNS {std kind 'STORAGE' units 'TAF'} !Rollins Reservoir
+define E_RLLNS {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_RLLNS {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_RLLNS {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_RLLNSlast {select area from YubaBear_Res_Info given storage=1000*S_RLLNS(-1) use linear where res_num=8}
+define A_RLLNSforward {select area from YubaBear_Res_Info given storage=1050*S_RLLNS(-1) use linear where res_num=8}
+define A_RLLNSback {select area from YubaBear_Res_Info given storage=950*S_RLLNS(-1) use linear where res_num=8}
+define coefev_RLLNS {value (A_RLLNSforward - A_RLLNSback)/(100*max(0.01,S_RLLNS(-1)))}
+define relcap_RLLNS {select discharge from YubaBear_Res_Info given storage=1000*S_RLLNS(-1) use linear where res_num=8}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!Lake Combie !!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_CMBIElevel1 {value 0.1}
+define S_CMBIE_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMBIElevel2 {value 0.6}
+define S_CMBIE_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMBIElevel3 {
+        case JanJun     {condition month >= JAN .and. month <= JUN value 5.555 }
+        case Jul        {condition month == JUL value 5.400 }
+        case Aug        {condition month == AUG value 5.300 }
+        case Sep        {condition month == SEP value 5.000 }
+        case Oct        {condition month == OCT value 4.600 }
+        case Nov        {condition month == NOV value 4.400 }
+        case Dec        {condition always value 5.200 } }
+define S_CMBIE_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMBIElevel4 {value 5.555}
+define S_CMBIE_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMBIElevel5 {value 5.555}
+define S_CMBIE_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMBIE {std kind 'STORAGE' units 'TAF'} !Lake Combie
+!define F_CMBIE {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_CMBIE {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_CMBIE {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_CMBIE {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_CMBIElast {select area from YubaBear_Res_Info given storage=1000*S_CMBIE(-1) use linear where res_num=9}
+define A_CMBIEforward {select area from YubaBear_Res_Info given storage=1050*S_CMBIE(-1) use linear where res_num=9}
+define A_CMBIEback {select area from YubaBear_Res_Info given storage=950*S_CMBIE(-1) use linear where res_num=9}
+define coefev_CMBIE {value (A_CMBIEforward - A_CMBIEback)/(100*max(0.01,S_CMBIE(-1)))}
+define relcap_CMBIE {select discharge from YubaBear_Res_Info given storage=1000*S_CMBIE(-1) use linear where res_num=9}

@@ -1,0 +1,22 @@
+/*
+BOWMN.wresl; 
+
+Purpose: Meet minimum carryover storage target of 40 TAF at end of December
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! BOWMAN    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define BOWMNTargetReleaseSV {std kind 'FLOW' units 'CFS'}
+
+define BOWMNTargetRelease {
+     case Drawdown {   
+     	          condition month >= JUN .and. month <= SEP
+                  value (S_BOWMN(-1) + S_JKSMD(-1) + S_FRNCH(-1) + I_JKSMD*cfs_taf + I_BOWMN*cfs_taf + I_FRNCH*cfs_taf - 35.0 - 40.0 - 10.0)*taf_cfs/(12-month+1)}     
+     case RefillPriod {
+                  condition always
+                  value 99999.}
+          }  
+          
+!goal setC_BOWMNmax {C_BOWMN < max(BOWMNTargetRelease, MF_CCS009_BUFF)}

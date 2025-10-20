@@ -1,0 +1,235 @@
+! Read in time series of Lake Spaulding precipitation
+
+define Spaulding_Precip	{timeseries kind 'PRECIP' units 'INCHES'}
+define Spaulding_Accumulated_Precip {
+	case BeginOct {
+		condition month == OCT .and. wateryear == BGNWY
+		value 0.0}
+	case BeginWY {
+		condition month <= JUL .and. wateryear == BGNWY
+		sum(i=prevoct, -1, 1) Spaulding_Precip(i)}
+	case Other {
+		condition always
+		sum(i=prevjul, -1, 1) Spaulding_Precip(i)}
+	}
+define AccumulatedPrecip_DV {alias Spaulding_Accumulated_Precip kind 'PRECIP' units 'INCHES'}	
+
+! Water Year Conditions, per the NID-PG&E Consolidated Contract
+define WaterYearConditions_NID_PGE_DV {std kind 'WY-TYPE' units 'NONE'}
+define WaterYearConditions_NID_PGE {
+	case BeginOct {
+		condition month <= DEC .and. wateryear == BGNWY
+		value 1.0}
+	case Jan {
+		condition month == JAN .and. Spaulding_Accumulated_Precip > 19.0
+		value 1.0}
+	case Feb {
+		condition month == FEB .and. Spaulding_Accumulated_Precip > 29.0
+		value 1.0}
+	case Mar {
+		condition month == MAR .and. Spaulding_Accumulated_Precip > 35.0
+		value 1.0}
+	case Apr {
+		condition month == APR .and. Spaulding_Accumulated_Precip > 40.0
+		value 1.0}
+	case May {
+		condition month == MAY .and. Spaulding_Accumulated_Precip > 45.0
+		 value 1.0}
+	case Jun {
+		condition month == JUN .and. Spaulding_Accumulated_Precip > 45.0
+		value 1.0}
+	case BelowNormal {
+		condition month >= JAN .and. month <= JUN
+		value 0.0}
+	case Other {
+		condition always
+		value WaterYearConditions_NID_PGE_DV(-1)}
+	}
+goal setWaterYearConditions_NID_PGE_DV {WaterYearConditions_NID_PGE_DV = WaterYearConditions_NID_PGE}
+	
+	
+! PCWA Contract Amount
+define PCWA_Max_Contract {value 110.4}	!TAF
+
+! Oct-Jun inflow to Lake Spaulding
+define Spaulding_Accumulated_Inflow_DV {std kind 'INFLOW' units 'CFS'}
+define Spaulding_Accumulated_Inflow {
+	case BeginOct {
+		condition month <= JUN .and. wateryear == 1922
+		value 337.0}	!Average inflow 1922-2015
+	case Jul {
+		condition month == JUL
+		sum(i=-9, -1, 1) (I_SPLDG(i) + I_FRDYC(i) + I_SFY048(i)) * cfs_taf(i)}
+	case Other {
+		condition always
+		value Spaulding_Accumulated_Inflow_DV(-1)}
+	}
+goal setSpaulding_Accumulated_Inflow_DV {Spaulding_Accumulated_Inflow_DV = Spaulding_Accumulated_Inflow}
+
+! NID Maximum Contract Amount, annually, per NID-PG&E Consolidation Contract (pg. 26, Section B-12)
+! **Have Sue Sindt confirm this logic**
+define NID_Max_Contract_Amount_Wise {value 13.02*(WaterYearConditions_NID_PGE) + 4.24*(1-WaterYearConditions_NID_PGE) + 7.65*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)}	!TAF
+define NID_Max_Contract_Amount_Deer {value 41.341*(WaterYearConditions_NID_PGE) + 7.295*(1-WaterYearConditions_NID_PGE) + 20.567*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)}	!TAF
+define NID_Max_Contract_Amount_DV {std kind 'VOLUME' units 'TAF'}
+goal setNID_Max_Contract_Amount_DV {NID_Max_Contract_Amount_DV = NID_Max_Contract_Amount_Wise + NID_Max_Contract_Amount_Deer}
+
+! Define PG&E carryover storage target, assuming end of December
+define PGE_Carryover_Storage {value 10.0 + 25.0 + 2.5}	! Fordyce, Spaulding, Lake Valley, respectively
+
+!Define PG&E instream flow requirements remaining for the water year (South Yuba R below Lake Spaulding)
+define Instream_Flow_Reqs_PGE_DV {std kind 'INFLOW' units 'TAF'}
+define Instream_Flow_Reqs_PGE {
+	case BeginWY {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 13.0}	!Average value
+	case Feb {
+		condition month == FEB
+		sum(i=0, 5, 1) 13.0 * cfs_taf(i)}
+	case Mar {
+		condition month == MAR
+		sum(i=0, 4, 1) 13.0 * cfs_taf(i)}
+	case Apr {
+		condition month == APR
+		sum(i=0, 3, 1) 13.0 * cfs_taf(i)}
+	case May {
+		condition month == MAY
+		sum(i=0, 2, 1) 13.0 * cfs_taf(i)}
+	case Other {
+		condition always
+		value Instream_Flow_Reqs_PGE_DV(-1)}
+	}
+goal setInstream_Flow_Reqs_PGE_DV {Instream_Flow_Reqs_PGE_DV = Instream_Flow_Reqs_PGE}
+
+
+!Define Lake Spaulding, Fordyce, and Lake Valley runoff forecast through July, assume perfect foresight
+define Inflow_Forecast_PGE_DV {std kind 'INFLOW' units 'TAF'}
+define Inflow_Forecast_PGE {
+	case BeginWY {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 377.0}	!Average value
+	case Feb {
+		condition month == FEB
+		sum(i=0, 5, 1) (I_SPLDG(i) + I_FRDYC(i) + I_SFY048(i) + I_LKVLY(i)) * cfs_taf(i)}
+	case Mar {
+		condition month == MAR
+		sum(i=0, 4, 1) (I_SPLDG(i) + I_FRDYC(i) + I_SFY048(i) + I_LKVLY(i)) * cfs_taf(i)}
+	case Apr {
+		condition month == APR
+		sum(i=0, 3, 1) (I_SPLDG(i) + I_FRDYC(i) + I_SFY048(i) + I_LKVLY(i)) * cfs_taf(i)}
+	case May {
+		condition month == MAY
+		sum(i=0, 2, 1) (I_SPLDG(i) + I_FRDYC(i) + I_SFY048(i) + I_LKVLY(i)) * cfs_taf(i)}
+	case Other {
+		condition always
+		value Inflow_Forecast_PGE_DV(-1)}
+	}
+goal setInflow_Forecast_PGE_DV {Inflow_Forecast_PGE_DV = Inflow_Forecast_PGE}
+
+!PG&E calendar year water sales to NID to date at Wise PH
+define PGE_Mon_WiseDelivery_NID {alias (D_WSE004_24_NU3_PGE + D_STH000_ABN027_PGE + D_WSE004_24_NA1_PGE) * cfs_taf  kind 'VOLUME' units 'TAF'}
+define PGE_CalYr_WiseDeliveries_NID_DV {std kind 'FLOW' units 'TAF'}
+define PGE_CalYr_WiseDeliveries_NID {
+	case BeginCalYr {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 0.0}
+	case Jan {
+		condition month == JAN
+		value 0.0}
+	case Other {
+		condition always
+		value PGE_CalYr_WiseDeliveries_NID_DV(-1) + PGE_Mon_WiseDelivery_NID(-1)} !TAF
+	}
+goal setPGE_CalYr_WiseDeliveries_NID_DV {PGE_CalYr_WiseDeliveries_NID_DV = PGE_CalYr_WiseDeliveries_NID}
+
+!PG&E calendar year water sales to NID to date at Deer PH
+define PGE_Mon_DeerDelivery_NID {alias (C_SYC020_PGE) * cfs_taf  kind 'VOLUME' units 'TAF'}
+define PGE_CalYr_DeerDeliveries_NID_DV {std kind 'FLOW' units 'TAF'}
+define PGE_CalYr_DeerDeliveries_NID {
+	case BeginCalYr {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 0.0}
+	case Jan {
+		condition month == JAN
+		value 0.0}
+	case Other {
+		condition always
+		value PGE_CalYr_DeerDeliveries_NID_DV(-1) + PGE_Mon_DeerDelivery_NID(-1)} !TAF
+	}
+goal setPGE_CalYr_DeerDeliveries_NID_DV {PGE_CalYr_DeerDeliveries_NID_DV = PGE_CalYr_DeerDeliveries_NID}
+
+!PG&E calendar year deliveries to PCWA to date
+define PGE_Mon_Delivery_PCWA_DV {
+	alias  (D_LBR002_LBC001 + D_CYN009_LBC001 /*- D_LBC030_BEC021 - D_LBC001_LBCLOS*/ + D_BEC021_LBC032 +
+		D_BEC022_WTPBWM_PGE + D_WSE003_LBC040 + D_WSE006_24_NA3 + D_STH003_LBC047_PGE + !Assume natural flow not diverted to Zone 5
+		D_STH003_24_NA3_PGE + D_STH003_WTPFSS_PGE + D_STH005_24_NA3_PGE + D_STH002_ABN026) * cfs_taf 
+		kind 'VOLUME' units 'TAF' }
+
+define PGE_CalYr_Deliveries_PCWA {
+	case BeginCalYr {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 0.0}
+	case Jan {
+		condition month == JAN
+		value 0.0}
+	case Other {
+		condition always
+		value PGE_CalYr_Deliveries_PCWA_DV(-1) + PGE_Mon_Delivery_PCWA_DV(-1)} !TAF
+	}
+define PGE_CalYr_Deliveries_PCWA_DV {alias PGE_CalYr_Deliveries_PCWA kind 'VOLUME' units 'TAF'}
+
+!PCWA/NID annual allocations
+define PGE_Available_Consumptive_Water_DV {lower unbounded kind 'VOLUME' units 'TAF'}
+define PGE_Available_Consumptive_Water {
+	case BeginCalYr {
+		condition month <= JAN .and. wateryear == BGNWY
+		value 0.0}	!
+	case Feb {
+		condition month >= FEB .and. month <= MAY
+		value max(0.0,S_SPLDG(-1) + S_FRDYC(-1) + S_LKVLY(-1) + Inflow_Forecast_PGE - Instream_Flow_Reqs_PGE - PGE_Carryover_Storage)}
+	case Other {
+		condition always
+		value PGE_Available_Consumptive_Water_DV(-1)}
+	}
+goal setPGE_Available_Consumptive_Water_DV {PGE_Available_Consumptive_Water_DV = PGE_Available_Consumptive_Water}
+
+! Update PG&E WY allocations in May
+define PGE_WY_Allocation {
+	case BeginYr {
+		condition month <= APR .and. wateryear == BGNWY
+		value 1.0}	!
+	case ThruMay {
+		condition month == MAY
+		value  max(0.,min(1.0,(PGE_Available_Consumptive_Water + PGE_CalYr_WiseDeliveries_NID + PGE_CalYr_DeerDeliveries_NID + PGE_CalYr_Deliveries_PCWA)/(PCWA_Max_Contract + NID_Max_Contract_Amount_Wise + NID_Max_Contract_Amount_Deer)))}
+	case Other {
+		condition always
+		value PGE_WY_Allocation_DV(-1)}
+}
+define PGE_WY_Allocation_DV {alias PGE_WY_Allocation  kind 'RATIO' units 'NONE'}
+
+!Limit PCWA Zone 3 deliveries based on PG&E WY Allocation
+! Define annual volume of water that may be diverted i.e. the supply
+define CLann_PCWA3 {value 25.}	!TAF
+
+! Calculate annual water demand
+define SumUD_PCWA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumUD_PCWA3_sv {
+    case oct{
+    condition month == oct
+        sum(i=0,11,1) UD_PCWA3(i)*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value SumUD_PCWA3(-1) }}
+
+goal setSumUD_PCWA3 {SumUD_PCWA3=SumUD_PCWA3_sv}
+
+! Determine amount of supply that may be be diverted in the current month (TAF)
+define CLmon_PCWA3 {value max(0.0,CLann_PCWA3*(UD_PCWA3*cfs_taf/SumUD_PCWA3_sv))} 
+
+!Limit diversion to monthly volume
+goal limitD_LBC010_PCWA3 {D_LBC010_PCWA3 < CLmon_PCWA3*taf_cfs * PGE_WY_Allocation}
+
+
+
+
+
+ 

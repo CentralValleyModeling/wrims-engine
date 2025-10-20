@@ -1,0 +1,158 @@
+/*
+File Name: arcs-minflows.wresl
+CalSim 3.0 System File
+
+Purpose: Specify instream flow requirements
+
+Naming takes the following form:
+
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Middle Yuba River below Jackson Meadows Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Below Jackson Meadows Dam
+define WY_P2266 	   {case Wet			{condition SmartvilleUnimpaired_ann > 3240. value 1.}
+						case AboveNormal 	{condition SmartvilleUnimpaired_ann >= 2191. value 2.}
+						case BelowNormal	{condition SmartvilleUnimpaired_ann >= 1461. value 3.}
+						case Dry			{condition SmartvilleUnimpaired_ann >= 901. value 4.}
+						case CritDry		{condition SmartvilleUnimpaired_ann >= 616. value 5.}
+						case ExCritDry		{condition always value 6.}
+}
+define C_JKSMD_MIF 	   {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_JKSMD_ADD 	   {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+
+define MF_JKSMD        {case oldlicense {condition P2266_WQCFlag == 0. select JacksonMeadowsdam from yuba_min_FERC2266 where month=month}
+                                    case WQ_ECD  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select JckMdw_ECD from yuba_min_FERC2266_WQC where month=month}
+                                    case WQ_Crit {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select JckMdw_CDY from yuba_min_FERC2266_WQC where month=month}
+                                    case WQ_Dry {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select JckMdw_DY  from yuba_min_FERC2266_WQC where month=month}
+                                    case WQ_BNY  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select JckMdw_BNY from yuba_min_FERC2266_WQC where month=month}
+                                    case WQ_Abv {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select JckMdw_NY from yuba_min_FERC2266_WQC where month=month}
+                                    case WQ_Wet  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select JckMdw_Wet from yuba_min_FERC2266_WQC where month=month}
+}
+define MF_JKSMD_BUFF    {value MF_JKSMD + 5} ! cfs
+
+! Middle Fork Yuba River below 	Milton Diversion Dam
+define C_MFY044_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_MFY044_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+!According to the WQ certification, "In Wet water years the MIF is 15 cfs unless the precipitation measured at the Licensee’s weather station at Bowman Lake from the previous July 1 up to, 
+!but not including, the first day of the month in which MIFs are being determined, is equal to or less than 75 percent of the annual average precipitation for the same period for the most recent 30 years. 
+!In that case the MIF will be 10 cfs for that month." This condition wasn't applied in the following code since the condition involves complex coding and doesn't have any considerable effects on results.
+
+define MF_MFY044         {case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=month}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=month}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=month}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=month}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where month=month}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=month}
+}
+
+define MF_MFY044_BUFF    {value MF_MFY044 + 1}! cfs
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Creek and Canyon Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! French Creek below French Dam 
+define C_FRNCH_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_FRNCH_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+define MF_FRNCH  	{case Oldlicense {condition P2266_WQCFlag == 0. select Frenchdam from yuba_min_FERC2266 where month=month}
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select French_ECD from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select French_CDY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select French_DY  from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select French_BNY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select French_NY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select French_Wet from yuba_min_FERC2266_WQC where month=month} 
+}
+!Yuba-Bear Project (NID)
+
+
+define MF_FRNCH_BUFF	{value MF_FRNCH + 1.0}! cfs
+
+! Canyon Creek below Bowman-Spaulding diversion dam 
+define C_CCS009_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_CCS009_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! According to WQ certification: "In Wet water years the MIF shall be 20 cfs unless the precipitation measured at the Licensee’s weather station at Bowman Lake from the previous July 1 up to, 
+! but not including, the first day of the month in which MIFs are being determined, is equal to or less than 75 percent of the annual average precipitation for the same period for the most recent 30 years. 
+! In that case the MIF shall be 15 cfs for that month." This condition wasn't applied in the following code since the condition involves complex coding and doesn't have any considerable effects on results.
+
+define MF_CCS009  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month} 
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=month}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=month}	
+}!Yuba-Bear Project (NID)
+define MF_CCS009_BUFF	{value MF_CCS009 + 1.0}! cfs
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Texas, Fall, Rucker Creeks !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Downstream lakes on Texas, Fall, Rucker Creeks (combined)
+define C_LCBRF_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_LCBRF_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+define MF_LCBRF  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSTributaries from yuba_min_FERC2266 where month=month} 
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BSTrib_ECD from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BSTrib_CDY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BSTrib_DY  from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BSTrib_BNY from yuba_min_FERC2266_WQC where month=month}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BSTrib_NY  from yuba_min_FERC2266_WQC where month=month}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BSTrib_Wet from yuba_min_FERC2266_WQC where month=month}	
+}!Yuba-Bear Project (NID)
+define MF_LCBRF_BUFF	{value MF_LCBRF + 1.0}! cfs
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Fordyce Creek and South Yuba River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Fordyce Creek below Fordyce Lake
+define C_FRDYC_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_FRDYC_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define MF_FRDYC    {select Fordycedam from yuba_min_FERC2310 where month=month} !Drum-Spaulding Project (PG&E)
+define MF_FRDYC_BUFF    {value MF_FRDYC + 2.0}! cfs
+
+! South Fork Yuba River below Lake Spaulding
+define C_SPLDG_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SPLDG_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define MF_SPLDG   {select Spauldingdam from yuba_min_FERC2310 where month=month} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_BUFF    {value MF_SPLDG + 2.0}! cfs
+
+! South Fork Yuba River below Langs Crossing 
+define MF_SFY040    	{value 5.0}
+define MF_SFY040_BUFF   {value MF_SFY040 + 2.0}! cfs
+define C_SFY040_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SFY040_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deer Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Deer Creek Powerhouse Reach
+define MF_SFD003    {value 5.0}  !! 5 cfs year round
+define C_SFD003_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_SFD003_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! Deer Creek below Deer Creek Dam - 5 cfs 
+define MF_DER022    {value 5.0}  					!! According to Sierra Streams Institute
+define C_DER022_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_DER022_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+define MF_DER011    {value 5.0}  					!! According to Sierra Streams Institute
+define C_DER011_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_DER011_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! Deer Creek below Lake Wildwood - 5 cfs or natural flow, whichever is less
+define MF_DER004    {value 5.0}  !! 5 cfs year round
+define C_DER004_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_DER004_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}

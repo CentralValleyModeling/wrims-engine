@@ -1,0 +1,110 @@
+! Spring Gap-Stanislaus and Sand Bar Projects minimum flow requirement
+! Chakri 02/26/08
+! Sarah Hamilton 05/04/2020
+! *********************************************************************************
+
+! Middle Fork Stanislaus River at Kennedy Meadows (C_MFS045)
+define MF_KenMea_min_flow {
+	case oct {
+		condition     month == oct
+		value         10. }
+	case may_sep {
+	 	condition     month >= may .and. month <= sep
+		value         10. }
+	case others  {
+		condition     always !November to April
+		value         5. }
+	}
+goal MF_KenMea_min_release {C_MFS047_MIF < MF_KenMea_min_flow}
+
+define C_MFS047_ADD_1 {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define C_MFS047_ADD_2 {std kind 'FLOW-EXCESS-POWER' units 'CFS'}
+goal C_MFS047_ADD_total {C_MFS047_ADD = C_MFS047_ADD_1 + C_MFS047_ADD_2}
+
+define C_MFS047_POW {std kind 'FLOW-POWER' units 'CFS'}
+goal C_MFS047_POW_total {C_MFS047_POW = C_MFS047_MIF + C_MFS047_ADD_1}
+
+define water_avb_relief {value I_RLIEF + I_MFS047 + S_RLIEF(-1)*taf_cfs}
+
+define C_MFS047_target {
+	case sep_dry {
+		condition     month == sep .and. frcst_nmi <= 900
+		select        Sep
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case oct_dry {
+		condition     month == oct .and. frcst_nmi <= 900
+		select        Oct
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case nov_dry {
+		condition     month == nov .and. frcst_nmi <= 900
+		select        Nov
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case dec_dry {
+		condition     month == dec .and. frcst_nmi <= 900
+		select        Dec
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case jan_dry {
+		condition     month == jan .and. frcst_nmi <= 900
+		select        Jan
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case other {
+		condition     always
+		select        Release
+		from          Stanislaus_relief_rel2
+		given         WaterAvb = water_avb_relief
+		use           linear
+		where         Mon = month }
+	}
+
+goal setC_MFS047_target {C_MFS047_POW < C_MFS047_target}
+
+goal setC_MFS047_total {C_MFS047 = C_MFS047_POW + C_MFS047_ADD_2}
+
+define water_avb_reldv {std kind 'INFLOW' units 'CFS'}
+goal checkw_avb {water_avb_reldv = water_avb_relief}
+
+define C_MFS047_targetdv {std kind 'FLOW' units 'CFS'}
+goal checkC_MFS047_target {C_MFS047_targetdv = C_MFS047_target}
+
+
+! Middle Fork Stanislaus River below Sand Bar (C_MFS014)
+! Defining min flow based on min flow condition
+define MF_SB_min_flow {
+	case oct {
+		condition     month == oct
+		value         50. }
+	case may_sep {
+		condition     month >= may .and. month <= sep
+        	value         54. }
+	case others  {
+		condition     always !November to April
+                value         50. }
+	}
+
+! Assigning Minimum of min_flow and Natural flow
+define MF_SandBar_min_flow {value min(MF_SB_min_flow,I_RLIEF+I_MFS047+I_CFS001+I_DONLL+I_MFS047+I_MFS022+I_BEARD)}
+goal MF_SandBar_min_release {C_MFS012_MIF < MF_SandBar_min_flow}
+
+! South Fork Stanislaus River below Strawberry/Philadelphia Div. Res. (C_SFS027)
+define SF_StrBr_min_flow {
+	case oct {
+		condition     month == oct
+		value         10. }
+	case may_sep {
+		condition     month >= may .and. month <= sep
+		value         10. }
+	case others  {
+		condition     always !November to April
+                value         10. }
+	}
+goal SF_StrBr_min_release {C_SFS026_MIF < SF_StrBr_min_flow}

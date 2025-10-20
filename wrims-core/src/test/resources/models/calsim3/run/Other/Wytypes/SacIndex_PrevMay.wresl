@@ -1,0 +1,119 @@
+! SacIndex_PrevMay.wresl
+
+define C_BB_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_SRBB(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define C_BB_PrevOctMar_dv{alias C_BB_PrevOctMar kind 'index' units 'taf'}
+
+define C_BB_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_SRBB(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define C_BB_PrevAprJul_dv{alias C_BB_PrevAprJul kind 'index' units 'taf'}
+
+
+define i_Orovl_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_OROV(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Orovl_PrevOctMar_dv{alias i_Orovl_PrevOctMar kind 'index' units 'taf'}
+
+define i_Orovl_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_OROV(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Orovl_PrevAprJul_dv{alias i_Orovl_PrevAprJul kind 'index' units 'taf'}
+
+
+define i_Folsm_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_FOLS(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Folsm_PrevOctMar_dv{alias i_Folsm_PrevOctMar kind 'index' units 'taf'}
+
+define i_Folsm_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_FOLS(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Folsm_PrevAprJul_dv{alias i_Folsm_PrevAprJul kind 'index' units 'taf'}
+
+
+define yuba_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_YUBA(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define yuba_PrevOctMar_dv{alias yuba_PrevOctMar kind 'index' units 'taf'}
+
+define yuba_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_YUBA(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define yuba_PrevAprJul_dv{alias yuba_PrevAprJul kind 'index' units 'taf'}
+
+
+define SacIndexPrev2{value SacIndexPrev_dv(prevMay)}
+
+define SacIndexPrev{ 
+    case OCTtoDec {
+         condition  month >= OCT .and. month <= Dec !water year type index for Fish and Wildlife standards in ANN (wyt_ann) renew in Jan
+         value SacIndexPrev_dv(prevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value SacIndexPrev_dv(prevMay)
+         }
+    case rest {
+         condition  always
+	 value 0.4*(C_BB_PrevAprJul+i_Orovl_PrevAprJul+i_Folsm_PrevAprJul+yuba_PrevAprJul)+0.3*(C_BB_PrevOctMar+i_Orovl_PrevOctMar+i_Folsm_PrevOctMar+yuba_PrevOctMar)+0.3*min(10000, SacIndexPrev2)
+	}
+}
+define SacIndexPrev_dv{alias SacIndexPrev kind 'index' units 'taf'}

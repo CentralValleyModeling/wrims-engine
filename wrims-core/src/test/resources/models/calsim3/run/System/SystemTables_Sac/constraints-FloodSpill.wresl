@@ -1,0 +1,759 @@
+/*
+File Name: constraints-FloodSpill.wresl
+CalSim 3.0 System File
+
+Purpose:
+To allow flow tops the channel capacity or the reservoir release capacity (RelCap_xxxxx) for flood spill.
+
+Naming takes the following form where {xxxxx} represent the flow node:
+C_{xxxxx}_NCF      -- Normal channel flow (NCF) under channel capacity constraint or normal release under MaxRel constaint
+C_{xxxxx}_Flood    -- Flood release above MaxRel constraint or normal channel capacity
+
+Z.Q. Richard Chen, BDO 3/3/2017 
+Mei Idy Lui, BDO 8/27/209 added more FloodSpill terms
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Trinity River	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_TRNTY_NCF	{lower 0 upper RelCap_TRNTY kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_TRNTY  {C_TRNTY < RelCap_TRNTY}
+define C_TRNTY_Flood	{std kind 'SPILL' units 'CFS'}
+goal   MaxRel_TRNTY  	{C_TRNTY_NCF + C_TRNTY_Flood = C_TRNTY }
+ 
+define C_LWSTN_NCF	{lower 0 upper 6000  kind 'CHANNEL' units 'CFS'} !define C_LWSTN {lower 0 upper 6000  kind 'CHANNEL' units 'CFS'}
+define C_LWSTN_Flood	{std kind 'SPILL' units 'CFS'}
+goal   floodC_LWSTN  	{C_LWSTN_NCF+ C_LWSTN_Flood = C_LWSTN }
+
+!goal   MaxRel_WKYTN  {C_WKYTN < RelCap_WKYTN}   !define C_WKYTN {lower 0 upper 3000 kind 'CHANNEL' units 'CFS'}	
+define NCFCap_WKYTN     {value min(RelCap_WKYTN,3000)} !combine the reservoir release capacity and the channel capacity as normal channel flow capacity
+define C_WKYTN_NCF	{lower 0 upper NCFCap_WKYTN kind 'CHANNEL' units 'CFS'}  
+define C_WKYTN_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_WKYTN  	{C_WKYTN_NCF + C_WKYTN_Flood = C_WKYTN }
+
+!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!! Shasta Lake and Keswick Dam Release
+!!!!!!!!!!!!!!!!!!!!!!
+define C_SHSTA_NCF	{lower 0 upper RelCap_SHSTA kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_SHSTA  {C_SHSTA < RelCap_SHSTA}
+define C_SHSTA_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   MaxRel_SHSTA  	{C_SHSTA_NCF + C_SHSTA_Flood = C_SHSTA }
+
+define C_KSWCK_NCF	{lower 0 upper RelCap_KSWCK kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_KSWCK  {C_KSWCK < RelCap_KSWCK}
+define C_KSWCK_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   MaxRel_KSWCK  	{C_KSWCK_NCF + C_KSWCK_Flood = C_KSWCK }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stony Creek	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_EPARK_NCF	{lower 0 upper RelCap_EPARK kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_EPARK  {C_EPARK < RelCap_EPARK}
+define C_EPARK_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+goal   MaxRel_EPARK  	{C_EPARK_NCF + C_EPARK_Flood = C_EPARK }
+
+define C_SGRGE_NCF	{lower 0 upper RelCap_SGRGE kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_SGRGE  {C_SGRGE < RelCap_SGRGE}
+define C_SGRGE_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+goal   MaxRel_SGRGE  	{C_SGRGE_NCF + C_SGRGE_Flood = C_SGRGE }
+
+define C_BLKBT_NCF	{lower 0 upper RelCap_BLKBT kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_BLKBT  {C_BLKBT < RelCap_BLKBT}
+define C_BLKBT_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+goal   MaxRel_BLKBT  	{C_BLKBT_NCF + C_BLKBT_Flood = C_BLKBT }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! American River	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_FOLSM_NCF	{lower 0 upper RelCap_FOLSM kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_FOLSM  {C_FOLSM < RelCap_FOLSM}
+define C_FOLSM_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+goal   MaxRel_FOLSM  	{C_FOLSM_NCF + C_FOLSM_Flood = C_FOLSM }
+
+define C_NTOMA_NCF	{lower 0 upper 7071*taf_cfs kind 'CHANNEL' units 'CFS'}  !define C_NTOMA  {lower 0 upper 7071*taf_cfs kind 'CHANNEL' units 'CFS'}
+define C_NTOMA_Flood	{std kind 'SPILL' units 'CFS'} !7071*taf = 114999 cfs in 31 days and 127320 cfs in 28 days
+goal   Flood_NTOMA  	{C_NTOMA_NCF + C_NTOMA_Flood = C_NTOMA }
+!goal   MaxRel_NTOMA  {C_NTOMA < RelCap_NTOMA} !not used since RelCap_NTOMA = 169,652 cfs fixed in the res_info table > 7071*taf_cfs
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Feather River	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_OROVL_NCF	{lower 0 upper MaxRelCap_Orovl kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_OROVL  {C_OROVL < RelCap_OROVL}
+define C_OROVL_Flood	{std kind 'SPILL' units 'CFS'}
+goal   MaxRel_OROVL  	{C_OROVL_NCF + C_OROVL_Flood = C_OROVL }
+
+define C_FTR072_NCF	{lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}  
+define C_FTR072_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_FTR072  	{C_FTR072_NCF + C_FTR072_Flood = C_FTR072 }
+
+define C_FTR068_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR068_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR068  	{C_FTR068_NCF + C_FTR068_Flood = C_FTR068 }
+
+define C_FTR067_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR067_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR067  	{C_FTR067_NCF + C_FTR067_Flood = C_FTR067 }
+
+define C_FTR063_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR063_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR063  	{C_FTR063_NCF + C_FTR063_Flood = C_FTR063 }
+
+define C_FTR059_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR059_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR059  	{C_FTR059_NCF + C_FTR059_Flood = C_FTR059 }
+
+define C_FTR053_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR053_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR053  	{C_FTR053_NCF + C_FTR053_Flood = C_FTR053 }
+
+define C_FTR051_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR051_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR051  	{C_FTR051_NCF + C_FTR051_Flood = C_FTR051 }
+
+define C_FTR048_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR048_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR048  	{C_FTR048_NCF + C_FTR048_Flood = C_FTR048 }
+
+define C_FTR045_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR045_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR045  	{C_FTR045_NCF + C_FTR045_Flood = C_FTR045 }
+
+define C_FTR039_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR039_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR039  	{C_FTR039_NCF + C_FTR039_Flood = C_FTR039 }
+
+define C_FTR036_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR036_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR036  	{C_FTR036_NCF + C_FTR036_Flood = C_FTR036 }
+
+define C_FTR031_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR031_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR031  	{C_FTR031_NCF + C_FTR031_Flood = C_FTR031 }
+
+define C_FTR030_NCF     {lower 0 upper 210000 kind 'CHANNEL' units 'CFS'}
+define C_FTR030_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR030  	{C_FTR030_NCF + C_FTR030_Flood = C_FTR030 }
+
+define C_FTR029_NCF	{lower 0 upper 210000 kind 'CHANNEL' units 'CFS'} 
+define C_FTR029_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR029  	{C_FTR029_NCF + C_FTR029_Flood = C_FTR029 }
+
+define C_FTR028_NCF	{lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}  
+define C_FTR028_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_FTR028  	{C_FTR028_NCF + C_FTR028_Flood = C_FTR028 }
+
+define C_FTR025_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR025_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR025  	{C_FTR025_NCF + C_FTR025_Flood = C_FTR025 }
+
+define C_FTR021_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR021_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR021  	{C_FTR021_NCF + C_FTR021_Flood = C_FTR021 }
+
+define C_FTR018_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR018_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR018  	{C_FTR018_NCF + C_FTR018_Flood = C_FTR018 }
+
+define C_FTR016_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR016_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR016  	{C_FTR016_NCF + C_FTR016_Flood = C_FTR016 }
+
+define C_FTR014_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR014_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR014  	{C_FTR014_NCF + C_FTR014_Flood = C_FTR014 }
+
+define C_FTR012_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR012_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR012  	{C_FTR012_NCF + C_FTR012_Flood = C_FTR012 }
+
+define C_FTR008_NCF     {lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}
+define C_FTR008_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_FTR008  	{C_FTR008_NCF + C_FTR008_Flood = C_FTR008 }
+
+define C_FTR003_NCF	{lower 0 upper 320000 kind 'CHANNEL' units 'CFS'}  
+define C_FTR003_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_FTR003  	{C_FTR003_NCF + C_FTR003_Flood = C_FTR003 }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Sutter Bypass 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_SBP031_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SBP031_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SBP031  	{C_SBP031_NCF + C_SBP031_Flood = C_SBP031 }
+
+define C_SBP028_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SBP028_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SBP028  	{C_SBP028_NCF + C_SBP028_Flood = C_SBP028 }
+
+define C_SBP024_NCF	{lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}  
+define C_SBP024_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   Flood_SBP024  	{C_SBP024_NCF + C_SBP024_Flood = C_SBP024 }
+
+define C_SBP021_NCF     {lower 0 upper 180000 kind 'CHANNEL' units 'CFS'}
+define C_SBP021_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SBP021  	{C_SBP021_NCF + C_SBP021_Flood = C_SBP021 }
+
+define C_SBP018_NCF     {lower 0 upper 180000 kind 'CHANNEL' units 'CFS'}
+define C_SBP018_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SBP018  	{C_SBP018_NCF + C_SBP018_Flood = C_SBP018 }
+
+define C_SBP014_NCF     {lower 0 upper 180000 kind 'CHANNEL' units 'CFS'}
+define C_SBP014_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SBP014  	{C_SBP014_NCF + C_SBP014_Flood = C_SBP014 }
+
+define C_SBP012_NCF	{lower 0 upper 180000 kind 'CHANNEL' units 'CFS'}  
+define C_SBP012_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   Flood_SBP012  	{C_SBP012_NCF + C_SBP012_Flood = C_SBP012 }
+
+define C_SSL001_NCF	{lower 0 upper 180000 kind 'CHANNEL' units 'CFS'}  
+define C_SSL001_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_SSL001  	{C_SSL001_NCF + C_SSL001_Flood = C_SSL001 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Sacramento River	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_CCT011_NCF     {lower 0 upper 3300 kind 'CHANNEL' units 'CFS'}
+define C_CCT011_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_CCT011  	{C_CCT011_NCF + C_CCT011_Flood = C_CCT011 }
+
+define C_SPT003_NCF     {lower 0 upper 4200 kind 'CHANNEL' units 'CFS'}
+define C_SPT003_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SPT003  	{C_SPT003_NCF + C_SPT003_Flood = C_SPT003 }
+
+define C_SAC247_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC247_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC247  	{C_SAC247_NCF + C_SAC247_Flood = C_SAC247 }
+
+define C_SAC240_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC240_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC240  	{C_SAC240_NCF + C_SAC240_Flood = C_SAC240 }
+
+define C_SAC232_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC232_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC232  	{C_SAC232_NCF + C_SAC232_Flood = C_SAC232 }
+
+define C_SAC229_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC229_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC229  	{C_SAC229_NCF + C_SAC229_Flood = C_SAC229 }
+
+define C_SAC228_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC228_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC228  	{C_SAC228_NCF + C_SAC228_Flood = C_SAC228 }
+
+define C_SAC224_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC224_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC224  	{C_SAC224_NCF + C_SAC224_Flood = C_SAC224 }
+
+define C_SAC218_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC218_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC218  	{C_SAC218_NCF + C_SAC218_Flood = C_SAC218 }
+
+define C_SAC217_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC217_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC217  	{C_SAC217_NCF + C_SAC217_Flood = C_SAC217 }
+
+define C_SAC214_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC214_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC214  	{C_SAC214_NCF + C_SAC214_Flood = C_SAC214 }
+
+define C_SAC207_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC207_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC207  	{C_SAC207_NCF + C_SAC207_Flood = C_SAC207 }
+
+define C_SAC201_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC201_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC201  	{C_SAC201_NCF + C_SAC201_Flood = C_SAC201 }
+
+define C_SAC196_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC196_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC196  	{C_SAC196_NCF + C_SAC196_Flood = C_SAC196 }
+
+define C_SAC195_NCF	{lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}  
+define C_SAC195_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   Flood_SAC195  	{C_SAC195_NCF + C_SAC195_Flood = C_SAC195 }
+
+define C_SAC193_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC193_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC193  	{C_SAC193_NCF + C_SAC193_Flood = C_SAC193 }
+
+define C_SAC188_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC188_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC188  	{C_SAC188_NCF + C_SAC188_Flood = C_SAC188 }
+
+define C_SAC185_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC185_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC185  	{C_SAC185_NCF + C_SAC185_Flood = C_SAC185 }
+
+define C_SAC182_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC182_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC182  	{C_SAC182_NCF + C_SAC182_Flood = C_SAC182 }
+
+define C_SAC178_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC178_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC178  	{C_SAC178_NCF + C_SAC178_Flood = C_SAC178 }
+
+define C_SAC174_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC174_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC174  	{C_SAC174_NCF + C_SAC174_Flood = C_SAC174 }
+
+define C_SAC169_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC169_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC169  	{C_SAC169_NCF + C_SAC169_Flood = C_SAC169 }
+
+define C_SAC168_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC168_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC168  	{C_SAC168_NCF + C_SAC168_Flood = C_SAC168 }
+
+define C_SAC162_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_SAC162_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC162  	{C_SAC162_NCF + C_SAC162_Flood = C_SAC162 }
+
+define C_SAC159_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC159_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC159  	{C_SAC159_NCF + C_SAC159_Flood = C_SAC159 }
+
+define C_SAC154_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC154_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC154  	{C_SAC154_NCF + C_SAC154_Flood = C_SAC154 }
+
+define C_SAC148_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC148_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC148  	{C_SAC148_NCF + C_SAC148_Flood = C_SAC148 }
+
+define C_SAC146_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC146_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC146  	{C_SAC146_NCF + C_SAC146_Flood = C_SAC146 }
+
+define C_SAC141_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC141_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC141  	{C_SAC141_NCF + C_SAC141_Flood = C_SAC141 }
+
+define C_SAC136_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC136_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC136  	{C_SAC136_NCF + C_SAC136_Flood = C_SAC136 }
+
+define C_SAC134_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC134_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC134  	{C_SAC134_NCF + C_SAC134_Flood = C_SAC134 }
+
+define C_SAC129_NCF     {lower 0 upper 65000 kind 'CHANNEL' units 'CFS'}
+define C_SAC129_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC129  	{C_SAC129_NCF + C_SAC129_Flood = C_SAC129 }
+
+define C_SAC122_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC122_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC122  	{C_SAC122_NCF + C_SAC122_Flood = C_SAC122 }
+
+define C_SAC121_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC121_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC121  	{C_SAC121_NCF + C_SAC121_Flood = C_SAC121 }
+
+define C_SAC120_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC120_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC120  	{C_SAC120_NCF + C_SAC120_Flood = C_SAC120 }
+
+define C_SAC115_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC115_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC115  	{C_SAC115_NCF + C_SAC115_Flood = C_SAC115 }
+
+define C_SAC109_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC109_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC109  	{C_SAC109_NCF + C_SAC109_Flood = C_SAC109 }
+
+define C_SAC106_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC106_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC106  	{C_SAC106_NCF + C_SAC106_Flood = C_SAC106 }
+
+define C_SAC099_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC099_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC099  	{C_SAC099_NCF + C_SAC099_Flood = C_SAC099 }
+
+define C_SAC097_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC097_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC097  	{C_SAC097_NCF + C_SAC097_Flood = C_SAC097 }
+
+define C_SAC093_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC093_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC093  	{C_SAC093_NCF + C_SAC093_Flood = C_SAC093 }
+
+define C_SAC092_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC092_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC092  	{C_SAC092_NCF + C_SAC092_Flood = C_SAC092 }
+
+define C_SAC091_NCF     {lower 0 upper 50000 kind 'CHANNEL' units 'CFS'}
+define C_SAC091_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC091  	{C_SAC091_NCF + C_SAC091_Flood = C_SAC091 }
+
+define C_SAC085_NCF	{lower 0 upper 230000 kind 'CHANNEL' units 'CFS'}   
+define C_SAC085_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   Flood_SAC085  	{C_SAC085_NCF + C_SAC085_Flood = C_SAC085 }
+
+define C_SAC083_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC083_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC083  	{C_SAC083_NCF + C_SAC083_Flood = C_SAC083 }
+
+define C_SAC082_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC082_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC082  	{C_SAC082_NCF + C_SAC082_Flood = C_SAC082 }
+
+define C_SAC081_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC081_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC081  	{C_SAC081_NCF + C_SAC081_Flood = C_SAC081 }
+
+define C_SAC078_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC078_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC078  	{C_SAC078_NCF + C_SAC078_Flood = C_SAC078 }
+
+define C_SAC077_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC077_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC077  	{C_SAC077_NCF + C_SAC077_Flood = C_SAC077 }
+
+define C_SAC075_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC075_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC075  	{C_SAC075_NCF + C_SAC075_Flood = C_SAC075 }
+
+define C_SAC074_NCF     {lower 0 upper 107000 kind 'CHANNEL' units 'CFS'}
+define C_SAC074_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC074  	{C_SAC074_NCF + C_SAC074_Flood = C_SAC074 }
+
+define C_SAC066_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC066_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC066  	{C_SAC066_NCF + C_SAC066_Flood = C_SAC066 }
+
+define C_SAC065_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC065_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC065  	{C_SAC065_NCF + C_SAC065_Flood = C_SAC065 }
+
+define C_SAC064_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC064_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC064  	{C_SAC064_NCF + C_SAC064_Flood = C_SAC064 }
+
+define C_SAC063_NCF	{lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}  
+define C_SAC063_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_SAC063  	{C_SAC063_NCF + C_SAC063_Flood = C_SAC063 }
+
+define C_SAC062_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC062_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC062  	{C_SAC062_NCF + C_SAC062_Flood = C_SAC062 }
+
+define C_SAC061_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC061_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC061  	{C_SAC061_NCF + C_SAC061_Flood = C_SAC061 }
+
+define C_SAC057_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC057_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC057  	{C_SAC057_NCF + C_SAC057_Flood = C_SAC057 }
+
+define C_SAC053_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC053_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC053  	{C_SAC053_NCF + C_SAC053_Flood = C_SAC053 }
+
+define C_SAC050_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC050_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC050  	{C_SAC050_NCF + C_SAC050_Flood = C_SAC050 }
+
+define C_SAC049_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC049_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC049  	{C_SAC049_NCF + C_SAC049_Flood = C_SAC049 }
+
+define C_SAC048_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC048_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC048  	{C_SAC048_NCF + C_SAC048_Flood = C_SAC048 }
+
+define C_SAC041_NCF     {lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}
+define C_SAC041_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_SAC041  	{C_SAC041_NCF + C_SAC041_Flood = C_SAC041 }
+
+define C_SAC036_NCF	{lower 0 upper 110000 kind 'CHANNEL' units 'CFS'}  
+define C_SAC036_Flood	{std kind 'SPILL' units 'CFS'} 
+goal   Flood_SAC036  	{C_SAC036_NCF + C_SAC036_Flood = C_SAC036 }
+
+
+!===========
+!!! Yuba !!!!
+!===========
+!define C_CMT000_NCF     {lower 0 upper 1100 kind 'CHANNEL' units 'CFS'}
+!define C_CMT000_Flood	{std kind 'SPILL' units 'CFS'}
+!goal   Flood_CMT000  	{C_CMT000_NCF + C_CMT000_Flood = C_CMT000 }
+
+!define C_LRT000_NCF     {lower 0 upper 860 kind 'CHANNEL' units 'CFS'}
+!define C_LRT000_Flood	{std kind 'SPILL' units 'CFS'}
+!goal   Flood_LRT000  	{C_LRT000_NCF + C_LRT000_Flood = C_LRT000 }
+
+!define C_NBLDB_NCF	{lower 0 upper RelCap_NBLDB kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_NBLDB  {C_NBLDB < RelCap_NBLDB}
+!define C_NBLDB_Flood	{std kind 'SPILL' units 'CFS'} !New Folsom spillway can handle 312,000 cfs, capacity of 8 radia gates = 567,000 cfs
+!goal   MaxRel_NBLDB  	{C_NBLDB_NCF + C_NBLDB_Flood = C_NBLDB }
+
+!====
+!!! Cache Creek
+!========
+define C_CLRLK_NCF	{lower 0 upper RelCap_CLRLK kind 'CHANNEL' units 'CFS'}   
+define C_CLRLK_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_CLRLK  	{C_CLRLK_NCF + C_CLRLK_Flood = C_CLRLK }
+
+define C_INDVL_NCF	{lower 0 upper RelCap_INDVL kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_INDVL  {C_INDVL < RelCap_INDVL}
+define C_INDVL_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_INDVL  	{C_INDVL_NCF + C_INDVL_Flood = C_INDVL }
+
+!====
+!!! Bear River, Lower Boardman, Wise and South Canals 
+!========
+!define C_LBC001_NCF	{lower 0 upper 40 kind 'CHANNEL' units 'CFS'}   !Assume initial capacity is 40 cfs. PCWA are upgrading the canal - capacity needs to be checked with the agency.
+!define C_LBC001_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LBC001  	{C_LBC001_NCF + C_LBC001_Flood = C_LBC001 }
+
+!define C_LBC010_NCF	{lower 0 upper 40 kind 'CHANNEL' units 'CFS'}  
+!define C_LBC010_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LBC010  	{C_LBC010_NCF + C_LBC010_Flood = C_LBC010 }
+
+!define C_LBC030_NCF	{lower 0 upper 40 kind 'CHANNEL' units 'CFS'}  
+!define C_LBC030_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LBC030  	{C_LBC030_NCF + C_LBC030_Flood = C_LBC030 }
+
+!define C_LBC032_NCF	{lower 0 upper 40 kind 'CHANNEL' units 'CFS'}  
+!define C_LBC032_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LBC032  	{C_LBC032_NCF + C_LBC032_Flood = C_LBC032 }
+
+!define C_LBC038_NCF	{lower 0 upper 40 kind 'CHANNEL' units 'CFS'}  
+!define C_LBC038_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LBC038  	{C_LBC038_NCF + C_LBC038_Flood = C_LBC038 }
+
+!define C_DRM000_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  ! Capacity from PG&E PAD for Drum Spaulding project, 2008.
+!define C_DRM000_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM000  	{C_DRM000_NCF + C_DRM000_Flood = C_DRM000 }
+
+!define C_DRM001_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  
+!define C_DRM001_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM001  	{C_DRM001_NCF + C_DRM001_Flood = C_DRM001 }
+
+!define C_DRM002_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  
+!define C_DRM002_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM002  	{C_DRM002_NCF + C_DRM002_Flood = C_DRM002 }
+
+!define C_DRM008_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  
+!define C_DRM008_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM008  	{C_DRM008_NCF + C_DRM008_Flood = C_DRM008 }
+
+!define C_DRM009_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  
+!define C_DRM009_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM009  	{C_DRM009_NCF + C_DRM009_Flood = C_DRM009 }
+
+!define C_DRM011_NCF	{lower 0 upper 840 kind 'CHANNEL' units 'CFS'}  
+!define C_DRM011_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_DRM011  	{C_DRM011_NCF + C_DRM011_Flood = C_DRM011 }
+
+!define C_LVC001_NCF	{lower 0 upper 36 kind 'CHANNEL' units 'CFS'}  ! Capacity from PG&E PAD for Drum Spaulding project, 2008.
+!define C_LVC001_Flood	{std kind 'SPILL' units 'CFS'} 
+!goal   Flood_LVC001  	{C_LVC001_NCF + C_LVC001_Flood = C_LVC001 }
+
+!define C_TWL005_NCF     {lower 0 upper 42 kind 'CHANNEL' units 'CFS'}
+!define C_TWL005_Flood	{std kind 'SPILL' units 'CFS'}
+!goal   Flood_TWL005  	{C_TWL005_NCF + C_TWL005_Flood = C_TWL005 }
+
+!====
+!!! Butte Creek / Butte Slough 
+!========
+define C_BTC003_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_BTC003_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_BTC003  	{C_BTC003_NCF + C_BTC003_Flood = C_BTC003 }
+
+define C_BSL001a_NCF     {lower 0 upper 250 kind 'CHANNEL' units 'CFS'}
+define C_BSL001a_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_BSL001a  	{C_BSL001a_NCF + C_BSL001a_Flood = C_BSL001a }
+
+define C_BSL001b_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_BSL001b_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_BSL001b  	{C_BSL001b_NCF + C_BSL001b_Flood = C_BSL001b }
+
+define C_BSL004_NCF     {lower 0 upper 150000 kind 'CHANNEL' units 'CFS'}
+define C_BSL004_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_BSL004  	{C_BSL004_NCF + C_BSL004_Flood = C_BSL004 }
+
+goal setC_BSL001a_Flood_c2 {lhs C_BSL001a_Flood case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs C_BSL001a_Flood[GW_INITIAL] lhs < rhs penalty 0 lhs > rhs constrain}} ! Done in 95% LOC study to prevent "spills" to try to meet downstream demands, NOsorio 12/2023
+goal setC_BSL001b_Flood_c2 {lhs C_BSL001b_Flood case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs C_BSL001b_Flood[GW_INITIAL] lhs < rhs penalty 0 lhs > rhs constrain}} ! Done in 95% LOC study to prevent "spills" to try to meet downstream demands, NOsorio 12/2023
+
+!====
+!!! Glenn-Colusa Canal
+!========
+define C_GCC065_NCF     {lower 0 upper 0 kind 'CHANNEL' units 'CFS'}
+define C_GCC065_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_GCC065  	{C_GCC065_NCF + C_GCC065_Flood = C_GCC065 }
+
+!====
+!!! Tehama-Colusa Canal
+!========
+define C_TCC085_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC085_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC085  	{C_TCC085_NCF + C_TCC085_Flood = C_TCC085 }
+
+define C_TCC081_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC081_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC081  	{C_TCC081_NCF + C_TCC081_Flood = C_TCC081 }
+
+define C_TCC066_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC066_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC066  	{C_TCC066_NCF + C_TCC066_Flood = C_TCC066 }
+
+define C_TCC062_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC062_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC062  	{C_TCC062_NCF + C_TCC062_Flood = C_TCC062 }
+
+define C_TCC036_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC036_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC036  	{C_TCC036_NCF + C_TCC036_Flood = C_TCC036 }
+
+define C_TCC031_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC031_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC031  	{C_TCC031_NCF + C_TCC031_Flood = C_TCC031 }
+
+define C_TCC022_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC022_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC022  	{C_TCC022_NCF + C_TCC022_Flood = C_TCC022 }
+
+define C_TCC001_NCF     {lower 0 upper 2530 kind 'CHANNEL' units 'CFS'}
+define C_TCC001_Flood	{std kind 'SPILL' units 'CFS'}
+goal   Flood_TCC001  	{C_TCC001_NCF + C_TCC001_Flood = C_TCC001 }
+
+!define F_SHSTA	{std kind 'SPILL' units 'CFS'}  
+
+Objective obj_Flood = {
+[C_TRNTY_Flood, -900000],
+[C_LWSTN_Flood, -900000],
+[C_WKYTN_Flood, -900000],
+[C_SHSTA_Flood, -900000],
+[C_KSWCK_Flood, -900000],
+[C_EPARK_Flood, -900000],
+[C_SGRGE_Flood, -900000],
+[C_BLKBT_Flood, -900000],
+[C_FOLSM_Flood, -900000],
+[C_NTOMA_Flood, -900000],
+[C_OROVL_Flood, -900000],
+![C_NBLDB_Flood, -900000],
+
+[C_FTR072_Flood, -900000],
+[C_FTR068_Flood, -900000],
+[C_FTR067_Flood, -900000],
+[C_FTR063_Flood, -900000],
+[C_FTR059_Flood, -900000],
+[C_FTR053_Flood, -900000],
+[C_FTR051_Flood, -900000],
+[C_FTR048_Flood, -900000],
+[C_FTR045_Flood, -900000],
+[C_FTR039_Flood, -900000],
+[C_FTR036_Flood, -900000],
+[C_FTR031_Flood, -900000],
+[C_FTR030_Flood, -900000],
+[C_FTR029_Flood, -900000],
+[C_FTR028_Flood, -900000],
+[C_FTR025_Flood, -900000],
+[C_FTR021_Flood, -900000],
+[C_FTR018_Flood, -900000],
+[C_FTR016_Flood, -900000],
+[C_FTR014_Flood, -900000],
+[C_FTR012_Flood, -900000],
+[C_FTR008_Flood, -900000],
+[C_FTR003_Flood, -900000],
+
+[C_SBP031_Flood, -900000],
+[C_SBP028_Flood, -900000],
+[C_SBP024_Flood, -900000],
+[C_SBP021_Flood, -900000],
+[C_SBP018_Flood, -900000],
+[C_SBP014_Flood, -900000],
+[C_SBP012_Flood, -900000],
+[C_SSL001_Flood, -900000],
+
+[C_CCT011_Flood, -900000],
+[C_SPT003_Flood, -900000],
+[C_SAC247_Flood, -900000],
+[C_SAC240_Flood, -900000],
+[C_SAC232_Flood, -900000],
+[C_SAC229_Flood, -900000],
+[C_SAC228_Flood, -900000],
+[C_SAC224_Flood, -900000],
+[C_SAC218_Flood, -900000],
+[C_SAC217_Flood, -900000],
+[C_SAC214_Flood, -900000],
+[C_SAC207_Flood, -900000],
+[C_SAC201_Flood, -900000],
+[C_SAC196_Flood, -900000],
+[C_SAC195_Flood, -900000],
+[C_SAC193_Flood, -900000],
+[C_SAC188_Flood, -900000],
+[C_SAC185_Flood, -900000],
+[C_SAC182_Flood, -900000],
+[C_SAC178_Flood, -900000],
+[C_SAC174_Flood, -900000],
+[C_SAC169_Flood, -900000],
+[C_SAC168_Flood, -900000],
+[C_SAC162_Flood, -900000],
+[C_SAC159_Flood, -900000],
+[C_SAC154_Flood, -900000],
+[C_SAC148_Flood, -900000],
+[C_SAC146_Flood, -900000],
+[C_SAC141_Flood, -900000],
+[C_SAC136_Flood, -900000],
+[C_SAC134_Flood, -900000],
+[C_SAC129_Flood, -900000],
+[C_SAC122_Flood, -900000],
+[C_SAC121_Flood, -900000],
+[C_SAC120_Flood, -900000],
+[C_SAC115_Flood, -900000],
+[C_SAC109_Flood, -900000],
+[C_SAC106_Flood, -900000],
+[C_SAC099_Flood, -900000],
+[C_SAC097_Flood, -900000],
+[C_SAC093_Flood, -900000],
+[C_SAC092_Flood, -900000],
+[C_SAC091_Flood, -900000],
+[C_SAC085_Flood, -900000], 
+[C_SAC083_Flood, -900000],
+[C_SAC082_Flood, -900000],
+[C_SAC081_Flood, -900000],
+[C_SAC078_Flood, -900000],
+[C_SAC077_Flood, -900000],
+[C_SAC075_Flood, -900000],
+[C_SAC074_Flood, -900000],
+[C_SAC066_Flood, -900000],
+[C_SAC065_Flood, -900000],
+[C_SAC064_Flood, -900000],
+[C_SAC063_Flood, -900000], 
+[C_SAC062_Flood, -900000],
+[C_SAC061_Flood, -900000],
+[C_SAC057_Flood, -900000],
+[C_SAC053_Flood, -900000],
+[C_SAC050_Flood, -900000],
+[C_SAC049_Flood, -900000],
+[C_SAC048_Flood, -900000],
+[C_SAC041_Flood, -900000],
+[C_SAC036_Flood, -900000], 
+
+[C_CLRLK_Flood, -900000],
+[C_INDVL_Flood, -900000],
+
+![C_LBC001_Flood, -900000],
+![C_LBC010_Flood, -900000],
+![C_LBC030_Flood, -900000],
+![C_LBC032_Flood, -900000],
+![C_LBC038_Flood, -900000],
+![C_DRM000_Flood, -900000],
+![C_DRM001_Flood, -900000],
+![C_DRM002_Flood, -900000],
+![C_DRM008_Flood, -900000],
+![C_DRM009_Flood, -900000],
+![C_DRM011_Flood, -900000],
+![C_LVC001_Flood, -900000],
+![C_TWL005_Flood, -900000],
+[C_BTC003_Flood, -900000],
+[C_BSL001a_Flood, -900000],
+[C_BSL001b_Flood, -900000],
+[C_BSL004_Flood, -900000],
+[C_GCC065_Flood, -900000],
+[C_TCC085_Flood, -900000],
+[C_TCC081_Flood, -900000],
+[C_TCC066_Flood, -900000],
+[C_TCC062_Flood, -900000],
+[C_TCC036_Flood, -900000],
+[C_TCC031_Flood, -900000],
+[C_TCC022_Flood, -900000],
+[C_TCC001_Flood, -900000],
+
+![C_CMT000_Flood, -900000],
+![C_LRT000_Flood, -900000],
+}
+

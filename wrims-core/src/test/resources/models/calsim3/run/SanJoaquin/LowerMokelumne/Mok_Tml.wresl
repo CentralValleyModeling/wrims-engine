@@ -1,0 +1,33 @@
+! Mok_Tml.wresl
+
+!******************************************************************************
+! EBMUD Terminal Reservoir Operations
+!******************************************************************************
+
+define S_EBTML_TGT {
+    case Oct {condition month == OCT value 118}
+    case Nov {condition month == NOV value 122}
+    case Dec {condition month == DEC value 128}
+    case Jan {condition month == JAN value 132}
+    case Feb {condition month == FEB value 138}
+    case Mar {condition month == MAR value 142}
+    case Apr {condition month == APR value 140}
+    case May {condition month == MAY value 138}
+    case Jun {condition month == JUN value 132}
+    case Jul {condition month == JUL value 128}
+    case Aug {condition month == AUG value 122}
+    case otherwise {condition always value 118}}
+    
+goal setS_EBMUD {S_EBTML < S_EBTML_TGT} !Use large weight to enforce
+
+define EBTML_Loss {timeseries kind 'LOSS' units 'TAF' convert 'CFS'}
+
+define D_EBTML_EBLOS_MIF {std kind 'LOSS' UNITS 'CFS'}
+define D_EBTML_EBLOS_ADD {std kind 'LOSS' UNITS 'CFS'}
+
+goal MinPardeeDraft {D_PARDE_MAQ001 > min(S_PARDE(-1)*taf_cfs,UD_EBMUD, 150.)}
+
+
+goal splitD_EBTML_EBLOS {D_EBTML_EBLOS = D_EBTML_EBLOS_MIF + D_EBTML_EBLOS_ADD}
+
+goal setD_EBTML_EBLOS   {D_EBTML_EBLOS_MIF < EBTML_Loss} !Use large weight to enforce

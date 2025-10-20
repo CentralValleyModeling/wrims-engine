@@ -1,0 +1,243 @@
+! E. Reyes 5/14/99
+! A. Munevar 11/15/99
+! D. Easton 11/1/00
+
+!!! This code defines the reduced export limit during the April 15 - May 15 pulse period.
+!!!    During this period, allowable export is set to certain limits based upon the flow of the
+!!!    San Joaquin River.  The allowable exports for April and May are the weighted averages
+!!!    of allowable exports inside and outside of the pulse period.  The non-pulse period April and May
+!!!    Export is the smaller of the pump capacity and the Export Allowed by thr E/I ratio for that period.
+
+! Delta inflow using the previous cycle SJR flow
+!define Dinflow {alias C_SACtot_ANN+C_MOK019+C_CLV004+C_SJR070est kind 'INFLOW-PULSE' units 'CFS'}
+!To make consistent with inflow used to compute EI ratio cap
+define Dinflow {alias DeltaInflowforNDOI kind 'INFLOW-PULSE' units 'CFS'}
+
+!############ PULSE PERIOD #############################
+! Allowable export is set to certain limits based upon the flow of the
+! San Joaquin River.
+
+! Pulse period export control variable
+
+define PulseExpCtrl {std kind 'EXPORT-CTRL-PULSE' UNITS 'CFS'}
+
+! Total export permissible by pumps and/or permits (TAF) only used in Apr-May
+! (DE) Remove redundant unit conversion
+
+define ExportCapacity {value TracyCapPermit + BanksCapPermit}
+
+! Delta Action #1 - not modeled - Vamp Export Restriction
+/*
+!This portion of the code deals with EXPORT restrictions during the pulse period.
+define PulseExport {
+    case APRlo {
+        condition month == APR .and. C_SJR070[-1] <= 5700.0
+        select    Export
+        from      PulseExportLo
+        given     SJRflow=C_SJR070[-1]
+        use       minimum
+        where     month=month}
+    case APRhi {
+        condition month == APR .and. C_SJR070[-1] > 5700.0
+        select    Export
+        from      PulseExportHi
+        where     year=wateryear}
+    case MAY {
+        condition month == MAY
+        value     PulseExpCtrl(-1)
+    case others  {
+        condition   always
+        value       0.0}
+}
+*/
+
+! Limit exports during the pulse periods to the maximum of 1500 cfs or the SJR flow
+! not including the pulse or Vamp flows (C_SJR070[SJR_WQ2]).
+! (DE) Remove redundant case statements from goal compare_sjrflow.
+
+define PulseExpLimit {
+	case Pulse {
+		condition month==APR .or. month==MAY
+		value max(1500.0, C_SJR070[SJR_WQ2])}
+	case otherwise {
+		condition always
+		value 0.}
+}
+goal compare_sjrflow { PulseExpCtrl < PulseExpLimit}
+
+! Limit to EI ratio (WQCP) during the pulse period.
+! (DE) Remove redundant case statements from goal compare_ratio.
+
+goal compare_ratio {PulseExpCtrl < Dinflow*ExpRatio}
+goal compare_omr_p {PulseExpCtrl < MAXEXP_OMR}
+
+! Limit to pump capacity during the pulse period.
+! (DE) Remove redundant case statements from goal compare_capacity.
+
+goal compare_capacity {PulseExpCtrl < ExportCapacity}
+
+!############ NON-PULSE PERIOD #############################
+! For the non pulse periods in April and May, the allowable export is the smaller of
+! the pump capacity or 0.35*INFLOW.  The allowable export due to the E/I ratio
+! is defined in 'expratio.txt' as 'EiExpCtrl'.
+
+! Non-pulse export restriction variable
+
+define NonPulseExpCtrl {std KIND 'EXPORT-CTRL-NON-PULSE' UNITS 'CFS'}
+
+! Limit to EI ratio
+/*(DE)This was previously commented out but should be included
+because the EI constraint must be met on a 3 day running average.
+Also removed the commented out case for Delta Action #5-May Ramping of exports.
+*/
+
+goal from_ratio {NonPulseExpCtrl < EiExpCtrl}
+goal from_omr_np {NonPulseExpCtrl < MAXEXP_OMR}
+
+! Limit to capacity
+! (DE) Remove redundant case statement from goal from_capacity.
+
+goal from_capacity {NonPulseExpCtrl < ExportCapacity}
+
+!############ WEIGHTED EXPORT RESTRICTION FOR PERIOD (PULSE + NON-PULSE) #############################
+! The monthly allowable export is the day-weighted average of the allowable export in the pulse and
+! non-pulse periods.
+
+! Combination pulse + non-pulse export restriction variable
+
+define AprMayExpCtrl {std kind 'EXPORT-CTRL-APRMAY' units 'CFS'}
+
+! Monthly export restriction - day weighted
+
+goal Export_limit_during_pulse_mon {
+    lhs    AprMayExpCtrl
+        case April {
+            condition     month == APR
+            rhs           NonPulseExpCtrl*14.0/daysin + PulseExpCtrl*16.0/daysin
+            lhs<rhs       penalty 0 }
+        case May {
+            condition     month == MAY
+            rhs           NonPulseExpCtrl*16.0/daysin + PulseExpCtrl*15.0/daysin
+            lhs<rhs       penalty 0 }
+        case otherwise {
+        	condition	always
+        	rhs		99999.
+        	lhs<rhs		penalty 0}
+}
+
+! Limit the actual export to the day weighted average allowable export for each month.
+
+goal Limit_Exports {
+    lhs  ExportActualTD
+        case APR_MAY {
+            condition     month == APR .or. month ==MAY
+            rhs           AprMayExpCtrl
+            lhs<rhs       penalty 0 }
+}
+
+
+! Monthly export restriction - day weighted for each project to take individual pump capacities into account
+
+! 5/6/19. Replaced pre-defined export capacity sharing ratios with a variable defined in ShrngRatios.table
+
+define AprMayTracyCtrl {std kind 'EXPORT-CTRL-APRMAY' units 'CFS'}
+define AprMayTracyCtrl_EI {std kind 'EXPORT-CTRL-APRMAY' units 'CFS'}
+
+goal Export_limit_Tracy_pulse_mon {
+    lhs    AprMayTracyCtrl
+        case April {
+            condition     month == APR
+            rhs           min(MAXEXP_RPA_CVP,MAXEXP_OMR_CVP)*14.0/daysin + PulseExpCtrl*CVPExpCapShare_D1641*16.0/daysin
+            lhs<rhs       penalty 0 }
+        case May {
+            condition     month == MAY
+            rhs           min(MAXEXP_RPA_CVP,MAXEXP_OMR_CVP)*16.0/daysin + PulseExpCtrl*CVPExpCapShare_D1641*15.0/daysin
+            lhs<rhs       penalty 0 }
+        case otherwise {
+        	condition	always
+        	rhs		99999.
+        	lhs<rhs		penalty 0}
+}
+goal Export_limit_Tracy_pulse_EI_mon {
+    lhs    AprMayTracyCtrl_EI
+        case April {
+            condition     month == APR
+            rhs           EiExpCtrl*CVPExpCapShare_D1641*14.0/daysin + PulseExpCtrl*CVPExpCapShare_D1641*16.0/daysin
+            lhs<rhs       penalty 0 }
+        case May {
+            condition     month == MAY
+            rhs           EiExpCtrl*CVPExpCapShare_D1641*16.0/daysin + PulseExpCtrl*CVPExpCapShare_D1641*15.0/daysin
+            lhs<rhs       penalty 0 }
+        case otherwise {
+        	condition	always
+        	rhs		99999.
+        	lhs<rhs		penalty 0}
+}
+
+define AprMayBanksCtrl {std kind 'EXPORT-CTRL-APRMAY' units 'CFS'}
+define AprMayBanksCtrl_EI {std kind 'EXPORT-CTRL-APRMAY' units 'CFS'}
+
+goal Export_limit_Banks_pulse_mon {
+    lhs    AprMayBanksCtrl
+        case April {
+            condition     month == APR
+            rhs           min(MAXEXP_RPA_SWP,MAXEXP_OMR_SWP)*14.0/daysin + PulseExpCtrl*SWPExpCapShare_D1641*16.0/daysin
+            lhs<rhs       penalty 0 }
+        case May {
+            condition     month == MAY
+            rhs           min(MAXEXP_RPA_SWP,MAXEXP_OMR_SWP)*16.0/daysin + PulseExpCtrl*SWPExpCapShare_D1641*15.0/daysin
+            lhs<rhs       penalty 0 }
+        case otherwise {
+        	condition	always
+        	rhs		99999.
+        	lhs<rhs		penalty 0}
+}
+goal Export_limit_Banks_pulse_EI_mon {
+    lhs    AprMayBanksCtrl_EI
+        case April {
+            condition     month == APR
+            rhs           EiExpCtrl*SWPExpCapShare_D1641*14.0/daysin + PulseExpCtrl*SWPExpCapShare_D1641*16.0/daysin
+            lhs<rhs       penalty 0 }
+        case May {
+            condition     month == MAY
+            rhs           EiExpCtrl*SWPExpCapShare_D1641*16.0/daysin + PulseExpCtrl*SWPExpCapShare_D1641*15.0/daysin
+            lhs<rhs       penalty 0 }
+        case otherwise {
+        	condition	always
+        	rhs		99999.
+        	lhs<rhs		penalty 0}
+}
+
+goal Export_limit_C_DMC000 {  ! Prevents Non-Pulse portion of month from being greater than Physical Capacity
+    lhs    C_DMC000_EXP1_TD
+        case April {
+            condition     month == APR .or. month == MAY
+            rhs           AprMayTracyCtrl
+            lhs<rhs       penalty 0 
+            lhs>rhs		  penalty 1285}
+}
+goal Export_limit_C_DMC000_with_EI {  ! Prevents Non-Pulse portion of month from being greater than EI Ratio
+    lhs    C_DMC000_exp1_TD
+        case April {
+            condition     month == APR .or. month == MAY
+            rhs           AprMayTracyCtrl_EI
+            lhs<rhs       penalty 0 
+            lhs>rhs	  penalty 1285}
+}
+
+goal Export_limit_C_CAA003 {  ! Prevents Non-Pulse portion of month from being greater than Physical Capacity
+    lhs    C_CAA003_EXP1_TD
+        case April {
+            condition     month == APR .or. month == MAY
+            rhs           AprMayBanksCtrl
+            lhs<rhs       penalty 0 
+            lhs>rhs		  penalty 1285}
+}
+goal Export_limit_C_CAA003_with_EI {  ! Prevents Non-Pulse portion of month from being greater than Physical Capacity
+    lhs    C_CAA003_exp1_TD
+        case April {
+            condition     month == APR .or. month == MAY
+            rhs           AprMayBanksCtrl_EI
+            lhs<rhs       penalty 0 
+            lhs>rhs	  penalty 1285}
+}

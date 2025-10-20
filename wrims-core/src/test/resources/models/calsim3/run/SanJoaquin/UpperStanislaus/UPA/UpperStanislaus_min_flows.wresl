@@ -1,0 +1,76 @@
+! Utica and Angels Projects minimum flow requirement
+! Chakri 02/26/08
+! Bridget Childs 01/13/2023
+! *********************************************************************************
+! FERC License P-2019 (September 3, 2003): 
+! Release a minimum flow of 1.5 cubic feet per second (cfs) 
+! from May 1 through October 31 and 0.5 cfs from November 1
+! through April 30 for Mill Creek downstream of Hunters dam
+
+! Mill Creek below Hunters Dam (C_MIL003)
+define MIL002_MIF {
+		case MayOct   {
+		     condition month >= may .and. month <= oct
+		     value 1.5}
+		case others    {
+		     condition always !November to April
+		     value 0.5}
+			  }
+goal SetC_MIL002_MIF {C_MIL002_MIF + C_MIL002_SHTG = MIL002_MIF}
+
+
+! FERC License P-2699 (September 3, 2003): 
+! For protection of water quality and beneficial uses, UPA shall provide minimum
+! bypass or release flows of: (a) 5.0 cfs below the Angels Project diversion on Angels
+! Creek; (b) 1.0 cfs minimum flow below the Angels Project diversion on Angels Creek
+! during maintenance outages;
+
+! Below Angels Project diversion on Angels Creek (C_ANG010)
+define ANG014_MIF {value 5.}
+goal SetC_ANG014_MIF {C_ANG014_MIF + C_ANG014_SHTG = ANG014_MIF}
+
+! Source: FERC License P-2019 (September 3, 2003)
+! Article 402. The Licensee must maintain adequate stream flows for recreation at Murphys Park from April 1 to September 3 
+! and on weekends from September 4 to November 1
+! 
+! Source: Review and Comment of the Proposed Flow Release Schedule for Angels Creek in Murphys Park and
+! Flushing Flows for Mill Creek Below Hunter Dam (Feberuary 12, 2004). 
+! 		Note: Article 405. 48-hr flushing flows have not been included in the CalSim3 Model . 
+!		Note: Removed historical diversion constraints, implemented below instead
+! 		Minimum flow schedule for Angels Creek at Murphy's Park 
+
+! Table 13 Proposed MInimum Flow Schedule for Angels Creek at Murphy's Park 
+define ANG017_MIF{ !units of cfs
+	case ScenarioA {
+	     condition    frcst_nmi > 100 .and. frcst_nmi <= 140
+		 value 12.}
+	case ScenarioB_1 {
+	     condition    frcst_nmi > 140 .and. frcst_nmi <= 320 .and. month >= apr .and. month <= sep
+	     value 16.}
+	case ScenarioB_2 {
+	     condition    frcst_nmi > 140 .and. frcst_nmi  <= 320 .and. month >= oct .and. month <= nov
+	     value 12.}	     
+	case ScenarioC_1 {
+	     condition    frcst_nmi > 320 .and. frcst_nmi  <= 400 .and. month >= apr .and. month <= sep
+	     value 22.}
+	case ScenarioC_2 {
+	     condition    frcst_nmi > 320 .and. frcst_nmi <= 400 .and. month >= oct .and. month <= nov
+	     value 16.}	     
+	case ScenarioD_1 {
+	     condition    frcst_nmi > 400 .and. frcst_nmi  <= 500 .and. month >= apr .and. month <= sep
+	     value 26.}
+	case ScenarioD_2 {
+	     condition    frcst_nmi > 400 .and. frcst_nmi  <= 500 .and. month >= oct .and. month <= nov
+	     value 18.}	      	     
+	case ScenarioE_1 {
+	     condition    frcst_nmi >= 500 .and. month >= apr .and. month <= sep
+	     value 30.}
+	case ScenarioE_2 {
+	     condition    frcst_nmi >= 500 .and. month >= oct .and. month <= nov
+	     value 18.}	 
+	case other {
+	     condition always
+	     value 0. }
+		}
+
+goal SetC_ANG017_MIF {C_ANG017_MIF + C_ANG017_SHTG = ANG017_MIF}

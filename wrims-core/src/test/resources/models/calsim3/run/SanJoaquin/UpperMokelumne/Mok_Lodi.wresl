@@ -1,0 +1,299 @@
+! Mok_Lodi.wresl
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!North Fork Mokelumne River!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+North Fork Mokelumne River flows below Electra Diversion Dam and Powerhouse have been established by
+two judgments, Calaveras Case No. 1950 and San Joaquin Case 22415, collectively known as the Lodi Decree.
+*/
+	
+/*CASE 1950
+PARAGRAPH EIGHTH: The flow at the Electra Diversion Dam (plus the powerhouse (i.e. C_TBAUD+C_NFM006)) must be:
+
+	- 200 cfs from Feb - Apr
+	- 300 cfs from May - Jun
+
+PARAGRAPH NINTH: If the aggregate storage in Lower Bear and Salt Springs Reservoirs exceeds 130,000 AF on June 1, 
+the flow at Electra Diversion Dam must be:
+
+	- 500 cfs from Jun - Dec
+	- 300 cfs in the following Jan,
+
+provided that releasing of said flows would not reduce aggregate storage (Lower Bear + Salt Springs) to less than the following levels (in AF):
+
+ 	- June 112,000
+	- July  94,000
+	- Aug   76,000
+	- Sept  58,000
+	- Oct   40,000
+	- Nov   30,000
+	- Dec   20,000
+	- Jan   10,000 (of next calendar year)
+
+PARAGRAPH TENTH: (1) If aggregate storage at the reservoirs is less than 130,000 AF as of June 1, then the following flows must be released:
+ 
+	- 300 cfs from Jun - Sep
+	- 200 cfs from Oct - Jan (of next calendar year),
+
+provided that releasing of said flows would not reduce aggregate storage to less than the following levels (in AF):
+
+ 	- June  30,000
+	- July  30,000
+	- Aug   30,000
+	- Sept  30,000
+	- Oct   18,000
+	- Nov   18,000
+	- Dec   15,000
+	- Jan   10,000 (of next calendar year) 
+
+(2) In addition to the flows specified in PARAGRAPH TENTH (1), flows must be augmented - if applicable - so as 
+to reduce aggregate storage to not more than the following levels (in AF):
+
+	- July  94,000 ![June will be max storage in setting Levels]
+	- Aug   76,000
+	- Sept  58,000
+	- Oct   40,000
+	- Nov   25,000
+	- Dec   20,000
+	- Jan   10,000 (of next calendar year),
+
+provided that releasing of said flows would not increase flow at the Electra Diversion Dam in excess of 500 cfs.
+
+PARAGRAPH ELEVENTH: If aggregate storage is less than 130,000 AF as of June 1, but reaches or exceeds 130,000 AF on or before July 1,
+flow requirements from PARAGRAPH NINTH shall be maintained.
+*/  
+
+/*CASE 22415
+PARAGRAPH FOURTH: (1) When the precipitation at Salt Springs Powerhouse is equal to or greater than that described
+in (4),
+(a) the flow at the Electra Diversion Dam must be at least 500 cfs, provided that
+(b) the release of water shall not reduce aggregate storage to less than the following levels (in AF):
+
+	- June 112,000
+	- July  94,000
+	- Aug   76,000
+	- Sept  58,000
+	- Oct   40,000
+	- Nov   30,000
+	- Dec   20,000
+	- Jan   10,000 (of next calendar year)
+
+(2) When the precipitation at Salt Springs Powerhouse is less than that described in (4),
+(b) the flow at the Electra Diversion Dam must be:
+
+	- 300 cfs from May - Jul
+	- 200 cfs in every other month;
+
+(d)  additionally, flow shall be augmented (if and when necessary) to reduce the aggregate storage to not more than 20 TAF
+at the end of December, provided that at no time shall releases augment flows at the Electra Diversion Dam in excess of 500 cfs.
+
+(4)  The normal amount of precipitation is defined as an accumulation of seasonal precipitation of:
+
+	- Jan	18"
+	- Feb	23"
+	- Mar	28"
+	- Apr	29"
+	- May	30"
+
+*/
+
+!define LodiDecree  {std kind 'FLOW' units 'TAF'} !defined in arcs-minflows.wresl
+!goal setLodiDecree {LodiDecree = C_NFM006 + C_ELT010}
+
+!define PGEStorage  {std kind 'STORAGE' units 'TAF'}
+!goal setPGEStorage {PGEStorage = S_LBEAR + S_SLTSP}
+
+define minflowLodi_CC1950_Base {
+    case FirstYear {condition wateryear == BgnWY .and. month <= Jan value 200.}
+    case FebApr {
+        condition range(month,Feb,Apr)
+        value 200.}
+    case MayJun {
+        condition range(month,May,Jun)
+        value 300. }
+    case otherwise {
+    	condition always
+    	value 0.}
+    }
+define minflowLodi_CC1950_Base_ {alias minflowLodi_CC1950_Base kind 'DEBUG-FLOW' units 'CFS'} 
+        
+define minflowLodi_CC1950_HiJunStorage {
+    case FirstYear {condition wateryear == BgnWY .and. month <= May value 500.} 
+    case JunSep {
+        condition PGEStorage(prevMay) >= 130. .and. month >= Jun
+        value 500.}
+    case OctDec {
+        condition PGEStorage(prevMay) >= 130. .and. month <= Dec
+        value 500.}
+    case Jan {
+        condition PGEStorage(prevMay) >= 130. .and. month == Jan
+        value 300.}
+    case otherwise { 
+        condition always
+        value 0. }
+    }
+define minflowLodi_CC1950_HiJunStorage_ {alias minflowLodi_CC1950_HiJunStorage kind 'DEBUG-FLOW' units 'CFS'}
+
+define minflowLodi_CC1950_LoJunStorage1 {
+    case FirstYear {condition wateryear == BgnWY .and. month <= May value 0.}
+    case JunSep {
+        condition PGEStorage(prevMay) < 130. .and. month >= Jun
+        value 300.}
+    case OctJan {
+        condition PGEStorage(prevMay) < 130. .and. month <= Jan
+        value 200.}
+    case otherwise {
+        condition always
+        value 0. }
+    }
+define minflowLodi_CC1950_LoJunStorage1_ {alias minflowLodi_CC1950_LoJunStorage1 kind 'DEBUG-FLOW' units 'CFS'}
+
+define minflowLodi_CC1950_LoJunStorage2 {
+    case LoPrecip {
+         condition minflowLodi_CC1950_LoJunStorage1 > 1
+         value 500 }
+    case otherwise {
+        condition always
+        value 0. }
+    }
+define minflowLodi_CC1950_LoJunStorage2_ {alias minflowLodi_CC1950_LoJunStorage2 kind 'DEBUG-FLOW' units 'CFS'}
+
+        
+!defining the precipitation threshold for Case 22415's portion of the Lodi Decree
+define LodiPrecipThreshold {
+    case NoRequirement {
+        condition (month <= Dec .or. month >= Jun)
+        value 0.}
+    case Requirement {
+        condition always
+        select Precipitation from Mok_LodiPrecip where month = month}
+}
+
+define LodiPrecipThreshold_ {alias LodiPrecipThreshold kind 'PRECIP' units 'INCHES'}
+define P_Lodi         {timeseries kind 'PRECIP' units 'INCHES' } !Historical precipitation at Salt Springs Powerhouse 
+
+define P_Lodi_accum_    {std kind 'Precip-accum' units 'INCHES'}
+
+define P_Lodi_accum {
+	case FirstYear {condition wateryear == BgnWY .and. month == Oct value 0.}
+	case Requirement {
+        condition month>=Nov
+        value P_Lodi_accum_(-1) + P_Lodi}
+    case NoRequirement { !reset for next season
+        condition month == Oct
+        value 0}
+}
+
+goal setP_Lodi_accum_	{P_Lodi_accum_ = P_Lodi_accum}
+
+define minflowLodi_CC22415_HiPrecip {
+    case FirstYear {condition wateryear == BgnWY .and. month <= May value 0.}
+    case HighPrecip_OutRange {
+        condition (month<=Dec .or. month>=Jun) .and. P_Lodi_accum_(prevMay)>=30
+        value 500.}
+    case HighPrecip_InRange {
+        condition range(month,Jan,May) .and. P_Lodi_accum >= LodiPrecipThreshold
+        value 500.}
+    case otherwise {
+        condition always
+        value 0.}}
+
+define minflowLodi_CC22415_HiPrecip_ {alias minflowLodi_CC22415_HiPrecip kind 'DEBUG-FLOW' units 'CFS'}   
+
+define minflowLodi_CC22415_LoPrecip {
+    case FirstYear {condition wateryear == BgnWY .and. month <= May value 0.}
+        case LowPrecip1_OutRange {
+        condition month == May .and. P_Lodi_accum<30
+        value 300.}
+    case LowPrecip2_OutRange {
+        condition range(month,Jun,Jul) .and. P_Lodi_accum_(prevMay)<30
+        value 300.}
+    case LowPrecip3_OutRange {
+        condition (month<=Dec .or. month>Jul) .and. P_Lodi_accum_(prevMay)<30
+        value 200.}
+    case LowPrecip_InRange {
+        condition range(month,Jan,May) .and. P_Lodi_accum < LodiPrecipThreshold
+        value 200.}
+    case otherwise {
+        condition always
+        value 0.}}
+
+define minflowLodi_CC22415_LoPrecip_ {alias minflowLodi_CC22415_LoPrecip kind 'DEBUG-FLOW' units 'CFS'}       
+
+define minflowLodi_Base {value max(minflowLodi_CC1950_Base,minflowLodi_CC22415_LoPrecip)}
+define minflowLodi_Aug2 {value max(0,max(minflowLodi_CC1950_HiJunStorage,minflowLodi_CC22415_HiPrecip,minflowLodi_CC1950_LoJunStorage2) - max(minflowLodi_CC1950_Base,minflowLodi_CC22415_LoPrecip))}
+define minflowLodi_Aug1 {value max(0,
+                              minflowLodi_CC1950_LoJunStorage1 
+                            - max(minflowLodi_CC1950_Base,minflowLodi_CC22415_LoPrecip)
+                            - max(0,max(minflowLodi_CC1950_HiJunStorage,minflowLodi_CC22415_HiPrecip,minflowLodi_CC1950_LoJunStorage2) - max(minflowLodi_CC1950_Base,minflowLodi_CC22415_LoPrecip))
+                            )}
+
+define minflowLodi_Base_  {alias minflowLodi_Base kind 'DEBUG-FLOW' units 'CFS'}                        
+define minflowLodi_Aug1_  {alias minflowLodi_Aug1 kind 'DEBUG-FLOW' units 'CFS'}                              
+define minflowLodi_Aug2_  {alias minflowLodi_Aug2 kind 'DEBUG-FLOW' units 'CFS'}                             
+                            
+
+define minflowLodi_Base_Net {value max(0,minflowLodi_Base /*- minflow_C_NFM006*/)}
+define minflowLodi_Aug1_net {value max(0,max(0,minflowLodi_Base + minflowLodi_Aug1 /*- minflow_C_NFM006*/) - minflowLodi_Base_Net)}
+define minflowLodi_Aug2_net {value max(0,max(0,minflowLodi_Base + minflowLodi_Aug1 + minflowLodi_Aug2 /*- minflow_C_NFM006*/) - minflowLodi_Base_Net - minflowLodi_Aug1_net)}
+
+define minflowLodi_Base_Net_  {alias minflowLodi_Base_Net kind 'DEBUG-FLOW' units 'CFS'}                        
+define minflowLodi_Aug1_Net_  {alias minflowLodi_Aug1_Net kind 'DEBUG-FLOW' units 'CFS'}                              
+define minflowLodi_Aug2_Net_  {alias minflowLodi_Aug2_Net kind 'DEBUG-FLOW' units 'CFS'} 
+
+
+! Combined flow below Electra Diversion Dam and through Electra Powerhouse
+define LodiDecreeFlow      {std kind 'FLOW' units 'CFS'}
+define LodiDecreeFlow_MIF  {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define LodiDecreeFlow_ADD  {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+define C_NFM006_MIF_LODI     {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFM006_MIF_NONLODI  {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define C_NFM006_ADD_LODI     {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NFM006_ADD_NONLODI  {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+goal setC_NFM006_MIF2   {C_NFM006_MIF = C_NFM006_MIF_LODI + C_NFM006_MIF_NONLODI}
+goal setC_NFM006_MIF3   {C_NFM006_ADD = C_NFM006_ADD_LODI + C_NFM006_ADD_NONLODI}
+
+
+define C_ELT010_PWRMIN          {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRADD          {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRMIN_LODI     {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRMIN_NONLODI  {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRADD_LODI     {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRADD_NONLODI  {std kind 'FLOW' units 'CFS'}
+
+define C_ELT010_PWRADD_NONLODI_FebMay {std kind 'FLOW' units 'CFS'}
+define C_ELT010_PWRADD_NONLODI_JunJan {std kind 'FLOW' units 'CFS'}
+goal continuityC_ELT010_PWRADD_NONLODI {C_ELT010_PWRADD_NONLODI = C_ELT010_PWRADD_NONLODI_FebMay+C_ELT010_PWRADD_NONLODI_JunJan}
+
+define Flag_FebMay {case FebMay {condition month >= Feb .and. month <= May value 1.}
+					case Otherwise {condition always value 0.}
+}
+
+goal set_C_ELT010_PWRADD_NONLODI_JunJan {C_ELT010_PWRADD_NONLODI_JunJan < 9999.-9999.*Flag_FebMay}
+goal set_C_ELT010_PWRADD_NONLODI_FebMay {C_ELT010_PWRADD_NONLODI_FebMay < 9999.*Flag_FebMay}
+
+goal setElectraPower3   {C_ELT010 = C_ELT010_PWRMIN + C_ELT010_PWRADD}
+goal setElectraPower4   {C_ELT010_PWRMIN = C_ELT010_PWRMIN_LODI + C_ELT010_PWRMIN_NONLODI}
+goal setElectraPower5   {C_ELT010_PWRADD = C_ELT010_PWRADD_LODI + C_ELT010_PWRADD_NONLODI}
+
+define LodiDecreeFlow_Base  {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define LodiDecreeFlow_Aug1  {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define LodiDecreeFlow_Aug2  {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+
+
+goal LodiDecreeTotal        {LodiDecreeFlow  = LodiDecreeFlow_MIF  + LodiDecreeFlow_ADD}
+goal setLodiDecreeFlow      {LodiDecreeFlow  = C_ELT010  + C_NFM006}
+goal setLodiDecreeFlowMIF1   {LodiDecreeFlow_MIF  = LodiDecreeFlow_Base + LodiDecreeFlow_Aug1 + LodiDecreeFlow_Aug2}
+
+goal setLodiDecreeFlowMIF2   {LodiDecreeFlow_MIF  = C_NFM006_MIF_LODI+C_NFM006_ADD_LODI+C_ELT010_PWRMIN_LODI+C_ELT010_PWRADD_LODI}
+
+
+goal setLodiDecreeFlow_Base   {LodiDecreeFlow_Base  < minflowLodi_Base_Net}
+goal setLodiDecreeFlow_Aug1   {LodiDecreeFlow_Aug1  < minflowLodi_Aug1_net}
+goal setLodiDecreeFlow_Aug2   {LodiDecreeFlow_Aug2  < minflowLodi_Aug2_net}
+
+

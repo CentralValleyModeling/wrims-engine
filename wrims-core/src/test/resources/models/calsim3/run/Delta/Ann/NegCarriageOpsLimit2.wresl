@@ -1,0 +1,140 @@
+! NegCarriageOpsLimit.wresl
+
+define est_exp_2 {value max(ExportCap,EstTotExpTD)}
+define exp_est_total_2 {alias est_exp_2 kind 'ESTIMATE' units 'CFS'}
+
+!Emmaton
+define est_req_sac_em {
+  case NegCarriage{
+    condition EM_m_sv >= 1.0
+    value (est_exp_2-EM_b_sv)/EM_m_sv}
+  case Normal {
+    condition always
+    value 0.}
+}
+define req_sac_est_em {alias est_req_sac_em kind 'ESTIMATE' units 'CFS'}
+
+!Rock Slough
+define est_req_sac_rs {
+  case NegCarriage{
+    condition RS_m_1_sv >= 1.0
+    value (est_exp_2-RS_b_1_sv)/RS_m_1_sv}
+  case Normal {
+    condition always
+    value 0.}
+}
+define req_sac_est_rs {alias est_req_sac_RS kind 'ESTIMATE' units 'CFS'}
+
+/* !@jmg 2017.12.11 - CurrentOps update below vvv */
+define NegCWcondition {
+	case NegCW {
+		condition EM_m_sv >= 1.0 .or. RS_m_1_sv >= 1.0
+		value 1.0 }
+	case otherwise {
+		condition always
+		value 0. }
+}
+define NegCWcondition_dv {alias NegCWcondition kind 'CONTROL' units 'CFS'}
+
+define EM_Salinity_control {
+	case control {
+	condition (NDOI_ADD_CVP[-1] + NDOI_ADD_SWP[-1] < 0.1) .and. (abs(EM_MRDO[-1] - (NDOI_MIN[-1] + NDOI_ADD_ANN[-1])) < 0.5)
+		value 1. }
+	case otherwise {
+	condition always 
+		value 0. }
+}
+define EM_Salinity_control_dv {alias EM_Salinity_control kind 'CONTROL' units 'CFS'}
+
+define RS1_Salinity_control {
+	case control {
+	condition (NDOI_ADD_CVP[-1] + NDOI_ADD_SWP[-1] < 0.1) .and. (abs(RS_MRDO_1[-1] - (NDOI_MIN[-1] + NDOI_ADD_ANN[-1])) < 0.5)
+		value 1. }
+	case otherwise {
+	condition always 
+		value 0. }
+}
+define RS1_Salinity_control_dv {alias RS1_Salinity_control kind 'CONTROL' units 'CFS'}
+!**************************************************************************************************************************************
+define EM_NCW_control {
+	case control {
+	condition EM_m_sv >= 1.0 .and. EM_Salinity_control> 0.5 .and. (S_SHSTA(-1)<ShastaNCPLow-500. .or. C_OROVL_EXP_MAX_ < 0.1) 
+		value 1. }
+	case otherwise {
+	condition always 
+		value 0. }
+}
+define EM_NCW_control_dv {alias EM_NCW_control kind 'CONTROL' units 'CFS'}
+
+define RS1_NCW_control {
+	case control {
+	condition RS_m_1_sv >= 1.0 .and. RS1_Salinity_control> 0.5 .and. (S_SHSTA(-1)<ShastaNCPLow-500. .or. C_OROVL_EXP_MAX_ < 0.1) 
+		value 1. }
+	case otherwise {
+	condition always 
+		value 0. }
+}
+define RS1_NCW_control_dv {alias RS1_NCW_control kind 'CONTROL' units 'CFS'}
+
+
+
+!*******************************************************************************************************************************
+/*
+goal EM_MRDO_NegCarriage {
+  lhs     EM_MRDO
+   case NegCW {
+    condition EM_m_sv >= 1.0 .and. EMcontrol> 0.5 .and. S_SHSTA(-1)<ShastaNCPLow-500.
+    rhs     EM_MRDO[-1]
+    lhs>rhs penalty 0
+    lhs<rhs penalty 99999}
+}*/
+goal EM_MaxExport_NegCarriage {
+  lhs     EM_MaxExport
+   case NegCW {
+    condition EM_m_sv >= 1.0 .and. EM_Salinity_control> 0.5 .and. S_SHSTA(-1)<ShastaNCPLow-500.
+    rhs     EM_MaxExport[-1]
+    lhs>rhs penalty 99999
+    lhs<rhs penalty 0}
+}
+
+/*goal RS_MRDO_1_NegCarriage {
+  lhs     RS_MRDO_1
+   case NegCW {
+    condition RS_m_1_sv >= 1.0 .and. RS1control> 0.5 .and. S_SHSTA(-1)<ShastaNCPLow-500.
+    rhs     RS_MRDO_1[-1]
+    lhs>rhs penalty 0
+    lhs<rhs penalty 99999}
+
+}*/
+goal RS_MaxExport_1_NegCarriage {
+  lhs     RS_MaxExport_1
+   case NegCW {
+    condition RS_m_1_sv >= 1.0 .and. RS1_Salinity_control> 0.5 .and. S_SHSTA(-1)<ShastaNCPLow-500.
+    rhs     RS_MaxExport_1[-1]
+    lhs>rhs penalty 99999
+    lhs<rhs penalty 0}
+
+}
+
+
+goal target_sac{
+  lhs C_SAC041_ANN - C_SAC041_reop + D_SAC041_ISF001
+!/* Don't use this goal if IF is available as alternate export pathway
+  /*case NegCarriageLowStorage {                                   
+  	condition NegCWcondition>0.5 .and. S_SHSTA(-1)<ShastaNCPLow-500.
+  	rhs max(est_req_sac_em,est_req_sac_rs)
+    lhs>rhs penalty 1284
+    lhs<rhs penalty 0}*/
+
+  case NegCarriage{                                               !@jmg 2017.12.11 - CurrentOps update - this case modified
+    condition NegCWcondition > 0.5
+    rhs max(est_req_sac_em,est_req_sac_rs)
+    lhs>rhs penalty 1000
+    lhs<rhs penalty 0}
+!*/
+  case Normal {
+    condition always
+    rhs 0.
+    lhs>rhs penalty 0
+    lhs<rhs penalty 0}
+}

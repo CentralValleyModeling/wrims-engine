@@ -1,0 +1,199 @@
+! MokWYT.wresl
+
+/*
+Define two water year types:
+  1) For Joint Settlement Agreement that governs flow requirements on the lower Mokelumne River below Camanche Reservoir
+  2) FERC requirements for PG&E Project 137 on the North Fork Mokelumne River (code moved to upper Mokelumne folder)
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! Mokelumne River near Mokelumne Hill !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define unimpaired mokelumne river inflow time series
+define annMOK079FNFdv {std kind 'Unimpaired-Flow' units 'TAF'}
+
+! Calculate annual inflow based on runoff to date plus forecasted (perfect foresight)
+define annMOK079FNF {
+    case FirstYear {
+        condition wateryear == BgnWY .and. month <= JAN
+        value 731 }! Based on average of 1922-2009 period
+    case Feb {
+        condition   month == FEB
+        sum(i=1-month,12-month,1) (I_BCM003(i)+I_COL003(i)+I_MFM008(i)+I_MOK079(i)+I_NFM010(i)+I_SFM005(i)+I_SLTSP(i)+I_TGC003(i)+I_UBEAR(i))*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value annMOK079FNFdv(-1)}
+}
+
+goal setannMOK079FNF {annMOK079FNFdv = annMOK079FNF}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! 1996 Joint Settlement Agreement !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+Define the wateryear type on which the flow standard are based:
+   October through March:
+      -Water year types are determined by combined Pardee and Camanche storage on November 5th. Year type strage limits are 
+       based on Pardee and Camanche capacities in 1995.
+      -Maximum allowable storage on November 5th is determined by USACE Water Control Manual for Camanche
+      
+   April through September:
+       -Water year types are determined by water year unimpaired runoff forecast into Pardee Reservoir as forecasted by DWR in the April 1st Bulletin 120 Report,
+        except when the forecasted Pardee/Camanche storage on November 5th is projected to be less than 200 TAF in which case the year type is critically dry
+*/
+
+! Define unimpaired mokelumne river inflow time series
+define annPARDEEFNFdv {std kind 'Unimpaired-Flow' units 'TAF'}
+
+! Calculate annual inflow based on runoff to date plus forecasted (perfect foresight)
+define annPARDEEFNF {
+    case FirstYear {
+        condition wateryear == BgnWY .and. month <= JAN
+        value 731 }! Based on average of 1922-2009 period
+    case Feb {
+        condition   month == FEB
+        sum(i=1-month,12-month,1)(I_COL003(i)+I_TGC003(i)+I_NFM010(i)+I_SFM005(i)+I_MFM008(i)+I_BCM003(i)+I_SLTSP(i)+I_UBEAR(i)+I_MOK079(i)+I_PARDE(i)+CT_PARDE_SV(i))*cfs_taf(i)} 
+    case otherwise {
+        condition always
+        value annPARDEEFNFdv(-1)}
+}
+goal setannPARDEEFNF {annPARDEEFNFdv = annPARDEEFNF}
+
+
+
+!Obtain river flow at Mokelumne Hill from previous cycle or input SV fie
+define MokelumneHillFlow {
+	                  case WatershedsOn {condition simulateUpperMokelumne >= 0.5 value C_MOK079[UPPERMOKELUMNE]}
+                          case Otherwise    {condition always                        value C_MOK079_SV}}
+
+!Estimate flow requirement below Camanche Dam using previous water year type
+define MinFlowForecast {
+	         case FirstMonth {condition wateryear==BgnWY .and. month == OCT
+	         	   select minCamanche from Mok_JSAFlow where month=month, wyt=int(2)
+	         	   }
+	         case otherwise {condition always select minCamanche from Mok_JSAFlow where month=month, wyt=int(wyt_MokJSAdv(-1)+0.1)}
+}
+
+!Forecast end of October storage at beginning of October
+define OctoberStorageForecast {
+		      case FirstMonth {condition wateryear==BgnWY .and. month == OCT
+	         	   value min(S_PARDElevel4+S_CMCHElevel4, max(S_PARDE(-1)+S_CMCHE(-1)
+                         + MokelumneHillFlow*cfs_taf + I_PARDE*cfs_taf + CT_PARDE_SV*cfs_taf + I_CMCHE*cfs_taf
+                         -A_PARDElast*ER_PARDE/12000. - A_CMCHElast*ER_CMCHE/12000.
+                         -UD_EBMUD*cfs_taf
+                         +S_EBTML(-1)- S_EBTMLlevel4 + I_EBTML*cfs_taf - EBTML_Loss*cfs_taf
+                         -MinFlowForecast*cfs_taf,0.0))
+	         	   }
+	           case otherwise {condition always
+	                value min(S_PARDElevel4+S_CMCHElevel4,
+                    max(S_PARDE(-1)+S_CMCHE(-1)
+                    + MokelumneHillFlow*cfs_taf + I_PARDE*cfs_taf + CT_PARDE_SV*cfs_taf + I_CMCHE*cfs_taf
+                    -A_PARDElast*ER_PARDE/12000. - A_CMCHElast*ER_CMCHE/12000.
+                    -UD_EBMUD*cfs_taf*EBMUD_PerDeldv(-1) ! Used previous timestep to avoid using before defining
+                    +S_EBTML(-1)- S_EBTMLlevel4 + I_EBTML*cfs_taf - EBTML_Loss*cfs_taf
+                    +D_FSC027_MAQ012(-1)*cfs_taf ! Assume Freeport supply same as last month
+                    -MinFlowForecast*cfs_taf,0.0))}}
+              
+define OctoberStorageForecastdv {std kind 'STORAGE-FORECAST' units 'TAF'}  
+goal setOctoberStorageForecastdv {OctoberStorageForecastdv = OctoberStorageForecast}             
+
+!Determine JSA water year type
+! Initial storage for Pardee and Camanche are from an EBMUDSIM run dated 12/11/12 for a 2005 LOD (demand=214MGD)
+
+
+define wyt_MokJSAdv {std kind 'WATER-YEAR-TYPE' units 'NONE'}
+define wyt_MokJSA {
+    case Oct_critical {
+        condition month==OCT .and. OctoberStorageForecast <270.
+        value int(4)}
+    case Oct_dry {
+        condition month==OCT .and. OctoberStorageForecast <400.
+        value int(3)}
+    case Oct_blwnor {
+        condition month==OCT .and. OctoberStorageForecast <S_Pardelevel5 + S_Cmchelevel5 - 200. ! - EBMUDFldSpcReq !Capacity (198+417) less flood control on November 5th
+        value int(2)}
+    case Oct_norabvnor {
+        condition month==OCT 
+        value int(1)}
+    case OctMar_critical {
+        condition month <= MAR .and. S_Parde(prevOct)+S_Cmche(prevOct)<270.
+        value int(4)}
+    case OctMar_dry {
+        condition month <= MAR .and. S_Parde(prevOct)+S_Cmche(prevOct)<400.
+        value int(3)}
+    case OctMar_blwnor {
+        condition month <= MAR .and. S_Parde(prevOct)+S_Cmche(prevOct)<S_Pardelevel5 + S_Cmchelevel5 - 200. !- EBMUDFldSpcReq !Capacity (198+417) less flood control on November 5th
+        value int(2)}
+    case OctMar_norabvnor {
+        condition month <= MAR 
+        value int(1)}
+    case Apr_critical {
+        condition month == APR .and. annPARDEEFNF <300.
+        value int(4)}
+    case Apr_dry {
+        condition month == APR .and. annPARDEEFNF <500.
+        value int(3)}
+    case Apr_blwnor {
+        condition month == APR .and. annPARDEEFNF <890.
+        value int(2)}
+    case Apr_norabvnor {
+        condition month == APR 
+        value int(1)}
+    case otherwise {
+        condition always 
+        value int(wyt_MokJSAdv(-1)+0.1)}        
+}
+
+goal setwyt_MokJSAdv {wyt_MokJSAdv = wyt_MokJSA}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! Riparian Diverters !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+! Define unimpaired flow mokelumne river at Pardee
+define OctJunPardeeFNFdv {std kind 'Unimpaired-Flow' units 'TAF'}
+
+! Calculate annual inflow based on runoff to date plus forecasted (perfect foresight)
+define OctJunPardeeFNF {
+    case FirstYear {
+        condition wateryear == BgnWY .and. month <= JAN
+        value 731 }! Based on average of 1922-2009 period
+    case Feb {
+        condition   month == FEB
+        sum(i=1-month,9-month,1) (I_COL003(i)+I_TGC003(i)+I_NFM010(i)+I_SFM005(i)+I_MFM008(i)+I_BCM003(i)+I_SLTSP(i)+I_UBEAR(i)+I_MOK079(i)+I_PARDE(i)+CT_PARDE_SV(i))*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value OctJunPardeeFNFdv(-1)}
+}
+goal setOctJunPardeeFNF {OctJunPardeeFNFdv = OctJunPardeeFNF}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! Woodbridge Irrigation District !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+! Define unimpaired flow mokelumne river at Pardee
+define annPardeeFNFdv {std kind 'Unimpaired-Flow' units 'TAF'}
+
+! Calculate annual inflow based on runoff to date plus forecasted (perfect foresight)
+define annPardeeFNF {
+    case FirstYear {
+        condition wateryear == BgnWY .and. month <= JAN
+        value 731 }! Based on average of 1922-2009 period
+    case Feb {
+        condition   month == FEB
+        sum(i=1-month,Sep-month,1) (I_COL003(i)+I_TGC003(i)+I_NFM010(i)+I_SFM005(i)+I_MFM008(i)+I_BCM003(i)+I_SLTSP(i)+I_UBEAR(i)+I_MOK079(i)+I_PARDE(i)+CT_PARDE_SV(i))*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value AnnPardeeFNFdv(-1)}
+}
+goal setAnnPardeeFNF {AnnPardeeFNFdv = AnnPardeeFNF}
+*/
+

@@ -1,0 +1,431 @@
+/*
+File Name: Yuba_AnnualAllocations_LYRA.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Calculate annual allocation to Yuba County Water Agency Member Units under LYRA operations
+
+*/
+
+!***********************************************************************************************************************************************************
+! The variable 'YCWA_Alloc' is set in April. It is the annual allocation decision for YCWA based on !a multi-period optimization for the period April-September
+! It is defined in the lower Yuba system files constraints-contracts.wresl
+!***********************************************************************************************************************************************************
+
+goal set_YCWA_Alloc_LYRA {lhs YCWA_Alloc_LYRA
+    case first5months {condition month <= MAR .and. wateryear == bgnWY rhs 1.0 lhs>rhs constrain lhs<rhs constrain}
+        case April    {condition month == APR rhs 1.0 lhs>rhs constrain lhs<rhs penalty 0}
+        case Other    {condition always rhs YCWA_Alloc_LYRA(-1) lhs>rhs constrain lhs<rhs constrain}}
+ 
+!The carryover storage requirement is relaxed when it would result in a delivery shortage of more than 50 percent in the current year. This is because YCWA would not operate the Yuba
+!Project so as to impose deficiencies of 50 percent or greater in the current year to protect against the risk of a 50 percent curtailment in the following year. 
+goal set_allocation_lower {lhs YCWA_Alloc rhs 0.5 lhs>rhs penalty 0. lhs<rhs penalty 99999} ! For CC run, 11/2023
+
+!***********************************************************************************************************************************************************
+! Set initial conditions in New Bullards Bar Reservoir for forecasting operations April-September
+!***********************************************************************************************************************************************************
+goal set_S_NBB_MAR_LYRA  {lhs S_NBB_MAR_LYRA
+    case April      {condition month == APR rhs S_NBLDB_LYRA(-1) lhs>rhs constrain lhs<rhs constrain}
+    case other      {condition always rhs 0.0 lhs>rhs constrain lhs<rhs constrain}}
+
+!***********************************************************************************************************************************************************
+! Apply a large penalty if the forecasted carryover storage is less than the target carryover storage
+!***********************************************************************************************************************************************************
+
+goal set_carryover_NBB_LYRA {
+	lhs S_NBB_SEP_LYRA 
+	rhs carryover_NBB_target 
+	lhs<rhs penalty 100000.*taf_cfs lhs>rhs penalty 0.}
+
+!**********************************************************************************************************************************************************
+! Write continuity equations based on a simplified network of tyhe following nodes
+! New Bullards Bar; Englebright; and Daguerrepoint Dam
+! C_NBB = release from New Bullards Bar
+! C_EB = release from Englebright
+! C_DP = flow below Daguerre Point Diversion Dam
+!*********************************************************************************************************************************************************** 
+
+!continuity for New Bullards Bar
+goal continuityNBB_APR_LYRA {I_NBB_APR-C_NBB_APR_LYRA=S_NBB_APR_LYRA*taf_cfs-S_NBB_MAR_LYRA*taf_cfs}
+goal continuityNBB_MAY_LYRA {I_NBB_MAY-C_NBB_MAY_LYRA=S_NBB_MAY_LYRA*taf_cfs*30/31-S_NBB_APR_LYRA*taf_cfs*30/31}
+goal continuityNBB_JUN_LYRA {I_NBB_JUN-C_NBB_JUN_LYRA=S_NBB_JUN_LYRA*taf_cfs-S_NBB_MAY_LYRA*taf_cfs}
+goal continuityNBB_JUL_LYRA {I_NBB_JUL-C_NBB_JUL_LYRA=S_NBB_JUL_LYRA*taf_cfs*30/31-S_NBB_JUN_LYRA*taf_cfs*30/31}
+goal continuityNBB_AUG_LYRA {I_NBB_AUG-C_NBB_AUG_LYRA=S_NBB_AUG_LYRA*taf_cfs*30/31-S_NBB_JUL_LYRA*taf_cfs*30/31}
+goal continuityNBB_SEP_LYRA {I_NBB_SEP-C_NBB_SEP_LYRA=S_NBB_SEP_LYRA*taf_cfs-S_NBB_AUG_LYRA*taf_cfs}
+
+!continuity for Englebright
+goal continuityEB_APR_LYRA {I_EB_APR+C_NBB_APR_LYRA=C_EB_APR_LYRA} 
+goal continuityEB_MAY_LYRA {I_EB_MAY+C_NBB_MAY_LYRA=C_EB_MAY_LYRA} 
+goal continuityEB_JUN_LYRA {I_EB_JUN+C_NBB_JUN_LYRA=C_EB_JUN_LYRA} 
+goal continuityEB_JUL_LYRA {I_EB_JUL+C_NBB_JUL_LYRA=C_EB_JUL_LYRA} 
+goal continuityEB_AUG_LYRA {I_EB_AUG+C_NBB_AUG_LYRA=C_EB_AUG_LYRA} 
+goal continuityEB_SEP_LYRA {I_EB_SEP+C_NBB_SEP_LYRA=C_EB_SEP_LYRA} 
+
+!continuity for Daguerre Point
+goal continuityDGR_APR_LYRA {I_DGR_APR+C_EB_APR_LYRA=C_DGR_APR_LYRA+D_DGR_APR_LYRA}
+goal continuityDGR_MAY_LYRA {I_DGR_MAY+C_EB_MAY_LYRA=C_DGR_MAY_LYRA+D_DGR_MAY_LYRA}
+goal continuityDGR_JUN_LYRA {I_DGR_JUN+C_EB_JUN_LYRA=C_DGR_JUN_LYRA+D_DGR_JUN_LYRA}
+goal continuityDGR_JUL_LYRA {I_DGR_JUL+C_EB_JUL_LYRA=C_DGR_JUL_LYRA+D_DGR_JUL_LYRA}
+goal continuityDGR_AUG_LYRA {I_DGR_AUG+C_EB_AUG_LYRA=C_DGR_AUG_LYRA+D_DGR_AUG_LYRA}
+goal continuityDGR_SEP_LYRA {I_DGR_SEP+C_EB_SEP_LYRA=C_DGR_SEP_LYRA+D_DGR_SEP_LYRA}
+
+!**********************************************************************************************************************************************************
+! Limit forecasted diversions at Daguerrepoint Dam to sum of water rights and YWA allocation
+! CL_DGR is 12-month repeating timeseries data equal to 162.46 TAF
+!   BVID = 24.462
+!   CID  = 60.000
+!   HIC  = 78.000
+! WR_DGR is 12-month repeating timeseries data equal to 226.04 TAF
+!   BVID = 9.500
+!   BWD  = 75.647
+!   SYWD = 44.330
+!   DCMWC = 16.743
+!   WWD  = 40.230
+!   CID  = 12.000
+!   RWD  = 25.101
+!   Marysville = 2.500
+! Total is 388.513 TAF (which is larger than actual diversions)
+!*********************************************************************************************************************************************************** 
+
+! Daguerre Point deliveries based on water rights and allocations
+! Demand is approximately 80% of full entitlement
+! The adjustment should drop to zero once the allocation drops below 1.
+! Code below adjusts the contract/water right when allocations are 1 (ie non-binding, and crop water demand is binding)
+! and removes adjustment when allocations are less than 1 (ie binding and crop water demand is non-binding)
+! Goal of code: when YCWA_Alloc <1, int_YCWA_alloc2=1, int_YCWA_alloc=0
+!				when YCWA_Alloc =1, int_YCWA_alloc2=0, int_YCWA_alloc=1
+
+define int_YCWA_alloc_LYRA  {integer std kind 'INTEGER' units 'NONE'}
+define int_YCWA_alloc2_LYRA {integer std kind 'INTEGER' units 'NONE'} ! Fixed to be properly defined as an integer, NSO 06/21/2022
+goal setint_YCWA_alloc1_LYRA {int_YCWA_alloc2_LYRA < 99999 - 99999*YCWA_Alloc_LYRA}
+goal setint_YCWA_alloc2_LYRA {int_YCWA_alloc2_LYRA > 1-YCWA_Alloc_LYRA}
+goal setint_YCWA_alloc3_LYRA {int_YCWA_alloc_LYRA = 1-int_YCWA_alloc2_LYRA}
+
+goal allocation_APR2_LYRA {D_DGR_APR_LYRA=D_DGR_APR1_LYRA+ D_DGR_APR2_LYRA}
+goal allocation_MAY2_LYRA {D_DGR_MAY_LYRA=D_DGR_MAY1_LYRA+ D_DGR_MAY2_LYRA}
+goal allocation_JUN2_LYRA {D_DGR_JUN_LYRA=D_DGR_JUN1_LYRA+ D_DGR_JUN2_LYRA}
+goal allocation_JUL2_LYRA {D_DGR_JUL_LYRA=D_DGR_JUL1_LYRA+ D_DGR_JUL2_LYRA}
+goal allocation_AUG2_LYRA {D_DGR_AUG_LYRA=D_DGR_AUG1_LYRA+ D_DGR_AUG2_LYRA}
+goal allocation_SEP2_LYRA {D_DGR_SEP_LYRA=D_DGR_SEP1_LYRA+ D_DGR_SEP2_LYRA}
+
+goal allocation_APR1_LYRA {D_DGR_APR1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR   + AprilFlag*WR_DGR   }
+goal allocation_MAY1_LYRA {D_DGR_MAY1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(1)+ AprilFlag*WR_DGR(1)}
+goal allocation_JUN1_LYRA {D_DGR_JUN1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(2)+ AprilFlag*WR_DGR(2)}
+goal allocation_JUL1_LYRA {D_DGR_JUL1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(3)+ AprilFlag*WR_DGR(3)}
+goal allocation_AUG1_LYRA {D_DGR_AUG1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(4)+ AprilFlag*WR_DGR(4)}
+goal allocation_SEP1_LYRA {D_DGR_SEP1_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(5)+ AprilFlag*WR_DGR(5)}
+
+goal allocation_APR_LYRA {D_DGR_APR_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR   + AprilFlag*WR_DGR   -  5*taf_cfs   *AprilFlag*int_YCWA_alloc2_LYRA}
+goal allocation_MAY_LYRA {D_DGR_MAY_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(1)+ AprilFlag*WR_DGR(1)- 10*taf_cfs(1)*AprilFlag*int_YCWA_alloc2_LYRA}
+goal allocation_JUN_LYRA {D_DGR_JUN_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(2)+ AprilFlag*WR_DGR(2)- 10*taf_cfs(2)*AprilFlag*int_YCWA_alloc2_LYRA}
+goal allocation_JUL_LYRA {D_DGR_JUL_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(3)+ AprilFlag*WR_DGR(3)- 10*taf_cfs(3)*AprilFlag*int_YCWA_alloc2_LYRA}
+goal allocation_AUG_LYRA {D_DGR_AUG_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(4)+ AprilFlag*WR_DGR(4)- 10*taf_cfs(4)*AprilFlag*int_YCWA_alloc2_LYRA}
+goal allocation_SEP_LYRA {D_DGR_SEP_LYRA=AprilFlag*YCWA_Alloc_LYRA*CL_DGR(5)+ AprilFlag*WR_DGR(5)-  5*taf_cfs(5)*AprilFlag*int_YCWA_alloc2_LYRA}
+
+define D_DGR_total_LYRA {std kind 'DELIVERY' units 'TAF'}
+goal setD_DGR_total_LYRA {D_DGR_total_LYRA = D_DGR_APR_LYRA*cfs_taf + D_DGR_MAY_LYRA*cfs_taf(1) + D_DGR_JUN_LYRA*cfs_taf(2) + D_DGR_JUL_LYRA*cfs_taf(3)
+	+ D_DGR_AUG_LYRA*cfs_taf(4)+ D_DGR_SEP_LYRA*cfs_taf(5)}
+
+!**********************************************************************************************************************************************************
+! Spit arcs into MIF and ADD components to model flow requirements for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+goal continuityCDGR_APR_LYRA {C_DGR_APR_LYRA=C_DGR_MIF_APR_LYRA+C_DGR_ADD_APR_LYRA}
+goal continuityCDGR_MAY_LYRA {C_DGR_MAY_LYRA=C_DGR_MIF_MAY_LYRA+C_DGR_ADD_MAY_LYRA}
+goal continuityCDGR_JUN_LYRA {C_DGR_JUN_LYRA=C_DGR_MIF_JUN_LYRA+C_DGR_ADD_JUN_LYRA}
+goal continuityCDGR_JUL_LYRA {C_DGR_JUL_LYRA=C_DGR_MIF_JUL_LYRA+C_DGR_ADD_JUL_LYRA}
+goal continuityCDGR_AUG_LYRA {C_DGR_AUG_LYRA=C_DGR_MIF_AUG_LYRA+C_DGR_ADD_AUG_LYRA}
+goal continuityCDGR_SEP_LYRA {C_DGR_SEP_LYRA=C_DGR_MIF_SEP_LYRA+C_DGR_ADD_SEP_LYRA}
+
+goal continuityCEB_APR2_LYRA {C_EB_APR_LYRA=C_EB_MIF_APR_LYRA+C_EB_ADD_APR_LYRA}
+goal continuityCEB_MAY2_LYRA {C_EB_MAY_LYRA=C_EB_MIF_MAY_LYRA+C_EB_ADD_MAY_LYRA}
+goal continuityCEB_JUN2_LYRA {C_EB_JUN_LYRA=C_EB_MIF_JUN_LYRA+C_EB_ADD_JUN_LYRA}
+goal continuityCEB_JUL2_LYRA {C_EB_JUL_LYRA=C_EB_MIF_JUL_LYRA+C_EB_ADD_JUL_LYRA}
+goal continuityCEB_AUG2_LYRA {C_EB_AUG_LYRA=C_EB_MIF_AUG_LYRA+C_EB_ADD_AUG_LYRA}
+goal continuityCEB_SEP2_LYRA {C_EB_SEP_LYRA=C_EB_MIF_SEP_LYRA+C_EB_ADD_SEP_LYRA}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Smartville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 4 (Accord)
+!***********************************************************************************************************************************************************
+
+define MF_YUB024_APR_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}}
+        
+define MF_YUB024_MAY_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case AN {
+        condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case BN {
+        condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case Dry {
+        condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case Crit {
+        condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}}
+
+define MF_YUB024_JUN_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case AN {
+        condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case BN {
+        condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case Dry {
+        condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case Crit {
+        condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}}
+
+define MF_YUB024_JUL_LYRA {        
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case otherwise {
+            condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}}
+        
+define MF_YUB024_AUG_LYRA {         
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case otherwise {
+            condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}}
+
+define MF_YUB024_SEP_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case otherwise {
+             condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}}
+
+goal minflowEB_APR_LYRA {C_EB_MIF_APR_LYRA=MF_YUB024_APR_LYRA*AprilFlag}
+goal minflowEB_MAY_LYRA {C_EB_MIF_MAY_LYRA=MF_YUB024_MAY_LYRA*AprilFlag}
+goal minflowEB_JUN_LYRA {C_EB_MIF_JUN_LYRA=MF_YUB024_JUN_LYRA*AprilFlag}
+goal minflowEB_JUL_LYRA {C_EB_MIF_JUL_LYRA=MF_YUB024_JUL_LYRA*AprilFlag}
+goal minflowEB_AUG_LYRA {C_EB_MIF_AUG_LYRA=MF_YUB024_AUG_LYRA*AprilFlag}
+goal minflowEB_SEP_LYRA {C_EB_MIF_SEP_LYRA=MF_YUB024_SEP_LYRA*AprilFlag}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Marysville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 4 (Accord)
+!***********************************************************************************************************************************************************
+
+define MF_YUB006_APR_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}}
+        
+define MF_YUB006_MAY_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case AN {
+        condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case BN {
+        condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case Dry {
+        condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case Crit {
+        condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}}
+
+define MF_YUB006_JUN_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case AN {
+        condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case BN {
+        condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case Dry {
+        condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case Crit {
+        condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}}
+
+define MF_YUB006_JUL_LYRA {        
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}}
+        
+define MF_YUB006_AUG_LYRA {         
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}}
+
+define MF_YUB006_SEP_LYRA {
+    case Wet {
+            condition YrType_Accord_LYRA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case AN {
+            condition YrType_Accord_LYRA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case BN {
+            condition YrType_Accord_LYRA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case Dry {
+            condition YrType_Accord_LYRA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case Crit {
+            condition YrType_Accord_LYRA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}}
+
+goal minflowDGR_APR_LYRA {C_DGR_MIF_APR_LYRA=MF_YUB006_APR_LYRA*AprilFlag}
+goal minflowDGR_MAY_LYRA {C_DGR_MIF_MAY_LYRA=MF_YUB006_MAY_LYRA*AprilFlag}
+goal minflowDGR_JUN_LYRA {C_DGR_MIF_JUN_LYRA=MF_YUB006_JUN_LYRA*AprilFlag}
+goal minflowDGR_JUL_LYRA {C_DGR_MIF_JUL_LYRA=MF_YUB006_JUL_LYRA*AprilFlag}
+goal minflowDGR_AUG_LYRA {C_DGR_MIF_AUG_LYRA=MF_YUB006_AUG_LYRA*AprilFlag}
+goal minflowDGR_SEP_LYRA {C_DGR_MIF_SEP_LYRA=MF_YUB006_SEP_LYRA*AprilFlag}
+
+
+!**********************************************************************************************************************************************************
+!  Define maximum reservoir storage levels for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+define S_NBBlevel4_APR_LYRA {select target from res_level where res_num=93,level=4,month=7}
+define S_NBBlevel4_MAY_LYRA {select target from res_level where res_num=93,level=4,month=8}
+define S_NBBlevel4_JUN_LYRA {select target from res_level where res_num=93,level=4,month=9}
+define S_NBBlevel4_JUL_LYRA {select target from res_level where res_num=93,level=4,month=10}
+define S_NBBlevel4_AUG_LYRA {select target from res_level where res_num=93,level=4,month=11}
+define S_NBBlevel4_SEP_LYRA {select target from res_level where res_num=93,level=4,month=12}
+
+!**********************************************************************************************************************************************************
+!  Apply a large penalty if the forecasted storage is greater than top of conservation
+!***********************************************************************************************************************************************************
+
+goal set_maxS_NBB_APR_LYRA {lhs S_NBB_APR_LYRA rhs S_NBBlevel4_APR_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_MAY_LYRA {lhs S_NBB_MAY_LYRA rhs S_NBBlevel4_MAY_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUN_LYRA {lhs S_NBB_JUN_LYRA rhs S_NBBlevel4_JUN_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUL_LYRA {lhs S_NBB_JUL_LYRA rhs S_NBBlevel4_JUL_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_AUG_LYRA {lhs S_NBB_AUG_LYRA rhs S_NBBlevel4_AUG_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_SEP_LYRA {lhs S_NBB_SEP_LYRA rhs S_NBBlevel4_SEP_LYRA lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}

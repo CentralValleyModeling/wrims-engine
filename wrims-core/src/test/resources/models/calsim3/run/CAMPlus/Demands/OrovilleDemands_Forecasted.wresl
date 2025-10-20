@@ -1,0 +1,20 @@
+! Aggregate collection of demands above thermalito reservoir.
+
+! Ryan Wilbur 8-7-03
+
+! swp water rights on feather river (above Thermalito) - not subject to cuts
+define(fm) SWPWR1_NTHRM_fm {select SWPWR1_NTHRM from CAM_WaterRight_NTHRM where month=mv($m)}
+
+! swp water rights on feather river (above Thermalito) - subject to 50% cuts if oroville drought year
+define(fm) SWPWR2_NTHRM_tem_fm {select SWPWR2_NTHRM from CAM_WaterRight_NTHRM where month=mv($m)} 
+define(fm) SWPWR2_NTHRM_fm {value  SWPWR2_NTHRM_tem_fm($m)*(1.-0.5*OrovilleDrought)}
+
+! swp contractors on feather river (above Thermalito) - subject to cuts	(cuts not applied)
+define(fm) SWPC_NTHRM_fm {select Butte_TA from CAM_SWPDem_NOD where month= mv($m)}
+
+! wildlife refuge
+define(fm) WR_NTHRM_fm {select WR_NTHRM from CAM_WaterRight_NTHRM where month=mv($m)} 
+
+! oroville demand:
+define(fm) D4_fm {value /*SWPWR1_NTHRM_fm($m) +*/ SWPWR2_NTHRM_fm($m) + SWPC_NTHRM_fm($m) + WR_NTHRM_fm($m)}
+define(fm) D4_dv_fm {alias D4_fm($m) kind 'FLOW' units 'TAF'}

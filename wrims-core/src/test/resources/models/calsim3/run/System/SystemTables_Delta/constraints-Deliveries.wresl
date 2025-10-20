@@ -1,0 +1,39 @@
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+
+!======================================================================
+! DELTA
+!======================================================================
+goal setDD_SAC017_SACS   {DD_SAC017_SACS < DD_SAC_South}
+
+goal setDD_SAC041_SACN   {DD_SAC041_SACN < DD_SAC_North}
+
+goal setDD_SAC000_SACW   {DD_SAC000_SACW < DD_SAC_West}
+ 
+goal setDD_OMR027_OMR    {DD_OMR027_OMR  < DD_OMR}
+
+goal setDD_SJR026_SJRE   {DD_SJR026_SJRE < DD_SJR_East}
+
+goal setDD_SJR013_SJRW   {DD_SJR013_SJRW  < DD_SJR_West}
+
+goal setDD_MOK004_MOK    {DD_MOK004_MOK  <  DD_MOK}
+
+
+
+!Byron-Bethany ID; Depletion and Accretion of BBID is from DCD model   
+!Diversion to BBID from Clifton Court Forebay, D_CAA002_50_PA2 is set to meet DD_50_PA2
+goal setD_CAA002_50_PA2  {lhs D_CAA002_50_PA2 rhs DD_50_PA2 lhs<rhs penalty 999999 } !goal setD_CAA002_50_PA2  {D_CAA002_50_PA2 = DD_50_PA2} 
+
+! zero diversion of SRSC transfer in DCR base study
+! hard constraint (=0) is preferrable in this situation rather than the conditional goal.
+! There are some minor differences in results for some reason.
+goal zeroSRSC_LFtx {D_OMR028_SRSC = 0.}

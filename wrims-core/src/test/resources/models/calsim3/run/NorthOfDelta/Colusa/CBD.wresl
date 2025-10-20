@@ -1,0 +1,45 @@
+/*
+CALSIM 3.0
+CBD.WRESL
+
+Edited ajdraper, MWH, August 27, 2010
+*/
+
+! Diversion Logic for Colusa Basin Drain
+! Diversions by entitities other than the Colusa Basin Drain Mutual Water Company are restricted to the sum of surface runoff arcs and
+! groundwater inflow. Recapture of tailwater is implicitly modeled using a reuse factor.
+
+
+! Assume that delivery from drain to Sacramento NWR is limited to 4% of supply (Colusa NWR Water Management Plan, 2006)
+! Weight on drain deliveries greater than that on deliveries Glenn-Colusa Canal
+goal setD_CBD037_08S_PR {D_CBD037_08S_PR < 0.04 * D_GCC056_08S_PR}
+
+
+/*
+!PCG diversion
+goal setD_CBD049_08N_SA1 {
+	lhs	D_CBD049_08N_SA1
+	rhs	SR_08N_CBD049 + SR_07N_CBD049 + SR_06_CBD049 + SG_CBD049_220
+	lhs>rhs		penalty 9999
+	lhs<rhs		penalty 0
+}	
+
+!Maxwell ID et al  diversion and GCID diversion
+goal setD_CBD041_08S_SA1 {
+	lhs	D_CBD041_08S_SA1 + D_CBD041_08S_SA2 + D_CBD049_08N_SA1 
+	rhs	SR_08N_CBD049 + SR_07N_CBD049 + SR_06_CBD049 + SG_CBD049_220 + SG_CBD044_239 + SG_CBD041_253
+	lhs>rhs		penalty 9999
+	lhs<rhs		penalty 0
+}	
+						
+!RD108 diversion
+goal setD_CBD028_08S_SA3 {
+	lhs	D_CBD041_08S_SA1 + D_CBD041_08S_SA2 + D_CBD049_08N_SA1 + D_CBD028_08S_SA3
+	rhs	SR_08N_CBD049 + SR_07N_CBD049 + SR_06_CBD049 + SR_07S_CBD028 + SR_08S_CBD028 + SG_CBD049_220 + SG_CBD044_239 + SG_CBD041_253 + SG_CBD031_268 + SG_CBD028_275
+	lhs>rhs		penalty 9999
+	lhs<rhs		penalty 0
+}
+*/
+						
+! In the weight.wresl  file set weights on diversions from CBD to be above above weights on diversions from Sacramento River.
+! Set weight on setllement diversions above those by Colusa Basin Drain MWC

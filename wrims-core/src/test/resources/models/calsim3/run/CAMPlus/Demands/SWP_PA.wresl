@@ -1,0 +1,288 @@
+! Defines SWP sout of delta demands.
+! Demand pattern varies according to the allocation amount.
+! All contractors (AG and MI) are reduced the same percent for all allocation decisions.
+! Maximum demand varies by year.
+
+! Ryan Wilbur 8-1-03
+
+! swp demand allocation:
+define SWP_Scale {lower 0 upper 1.0 kind 'Percent' units 'none'}
+define SWP_Makeup {lower 0 upper 1.0 kind 'Fraction' units 'none'}
+
+define SWP_Delivery_tot {lower 0 upper 5000. kind 'Delivery' units 'TAF'}
+define SWP_Delivery {lower 0 upper 5000. kind 'Delivery' units 'TAF'}
+
+! limit total demand to requested amount:
+define max_swp_del {select Total from TableA where Factor=1}
+goal maxSWPDemand {SWP_Delivery + 64.5 < max_swp_del}
+
+define swp_last {case a{condition month==Jan value 0.5}
+!                 case b{condition always     value (SWP_Delivery(-1)+S_Orovl_Dec(-1)-55.)/max_swp_del}}
+                 case b{condition always     value SWP_Delivery(-1)/max_swp_del}}
+
+define art_21_tot {lower 0 upper 10000 kind 'DELIVERY' units 'TAF'} !Total Article 21 delivery
+
+! demand pattern
+define SWP_Pattern {!options: 30%, 50% or 100%
+  case aa{
+    condition month==Jan
+    value 0.5}
+  case a{
+    condition month>=Feb .and. month<=Jun .and. swp_last<=0.4   !per John Leahigh (DWR) on 7/13/04
+    value 0.3} 
+  case b{
+    condition month>=Feb .and. month<=Jun .and. swp_last<=0.65 !per John Leahigh (DWR) on 7/13/04
+    value 0.5}
+  case c{
+    condition always
+    value 1.0}  
+}
+define SWP_PAT_ALIAS {alias SWP_Pattern kind 'Percent' units 'none'}
+define(fm) SWP_DP_1_fm {case low{condition SWP_Pattern<=0.40 select Dem30 from CAM_SWPDem_SOD where month= mv($m)} case half{condition SWP_Pattern<=0.65 select Dem50 from CAM_SWPDem_SOD where month= mv($m)} case high{condition always select Dem100 from CAM_SWPDem_SOD where month= mv($m)}}
+
+define(fm) SWP_DP_1dv_fm {alias SWP_DP_1_fm($m) kind 'DEMAND' units 'TAF'}
+
+define SWP_pat_per {value SWP_Pattern*100}
+!determine previous year's carryover demand volume:
+define CO_AVAILABLE_DV {std kind 'CARRYOVER' units 'TAF'} !define del_swp_codv {std kind 'DEL-TARGET' units 'TAF'} !
+!define swp_co {std kind 'del-target' units 'taf'}
+define BANKSALLOWOUT {std kind 'flow-allow-banks' units 'cfs'}
+define NDOI_ADD {std kind 'flow' units 'cfs'}
+define swp_IN_total {std kind 'swp_delivery' units 'cfs'}
+
+define co_del_act {
+  case a {condition wateryear==1922 .and. month==Oct value 0}
+  case b {condition month==jan                       value 0}
+  case c {condition always                           value swp_CO_total(-1)*cfs_taf(-1)}
+}
+define co_del_act_ {alias co_del_act kind 'A56_ACTUAL' units 'taf'}
+
+define co_stor_lost {
+  case a {condition S_SLUIS_SWP(-1)>=1067 value min(max(CO_AVAILABLE_DV(-1) - co_del_act,0.), swp_IN_total(-1)*cfs_taf(-1) + max(0.,min(NDOI_ADD(-1),BANKSALLOWOUT(-1)-C_CAA003(-1))) * cfs_taf(-1))} !Updated to limit spill to excess - AMiller 11/28/11
+  case b {condition always        value 0}
+}
+define co_stor_lost_ {alias co_stor_lost kind 'A56_LOST' units 'taf'}
+
+define swp_co_1 {
+!  case PA {condition month==jan                       value 405.} !initialize for position analysis
+!  case c1 {condition month==jan .and. wateryear==1922 value 0.} !initialize
+   case c2 {condition month==jan                       value S_SLUIS_SWP(-1)-42. }!min(del_swp_codv(prevMay),S_SLUIS_SWP(-1)-42.)} !initialize
+!  case c2 {condition month==jan                       value min(CO_AVAILABLE_DV(-1),S_SLUIS_SWP(-1)-42.)} !initialize
+  case d  {condition month>=feb .and. month<=sep      value max(0., CO_AVAILABLE_DV(-1) - co_del_act - co_stor_lost)} !
+  case e  {condition always                           value 0}
+}
+
+define swp_co_1dv {alias swp_co_1 kind 'A56-REMAIN' units 'taf'}
+define co_pct_scale {
+		case a {condition month==jan value 1.0}
+		case b {condition max(0., CO_AVAILABLE_DV(-1) - co_del_act - co_stor_lost) > 1.0 value CO_AVAILABLE_DV(prevJan) / max(0., CO_AVAILABLE_DV(-1) - co_del_act - co_stor_lost)}
+		case b {condition max(0., CO_AVAILABLE_DV(-1) - co_del_act - co_stor_lost) > 1.0 value CO_AVAILABLE_DV(prevJan) / max(0., CO_AVAILABLE_DV(-1) - co_del_act - co_stor_lost)}
+		case c {condition always value 1.0}}
+
+define co_scale_ {alias co_pct_scale kind 'A56-SCALE' units 'none'}
+
+!test - read percent from table
+define(fm) co_pct_fm {select pct_mon from CAM_swp_a56_del given percent=SWP_pat_per use linear where month=mv($m)}
+
+define(fm) SWP_DP_2_fm {value co_pct_fm($m)*swp_co_1*co_pct_scale}
+define(fm) SWP_DP_2dv_fm {alias SWP_DP_2_fm($m) kind 'DEMAND' units 'TAF'}
+
+!previous year carryover demand:
+! define SWP_DP_Jan_2 {case January{condition month==jan value 0.45*swp_co_1} case otherwise{condition always value swp_co_total(prevJan)*cfs_taf(prevJan)}}
+! define SWP_DP_Feb_2 {case January{condition month==jan value 0.40*swp_co_1} case February{condition month==feb value 0.73*swp_co_1} case otherwise{condition always value swp_co_total(prevFeb)*cfs_taf(prevFeb)}}
+! define SWP_DP_Mar_2 {case January{condition month==jan value 0.15*swp_co_1} case February{condition month==feb value 0.27*swp_co_1} case March{condition month==mar value swp_co_1} case otherwise{condition always value swp_co_total(prevMar)*cfs_taf(prevMar)}}
+! define SWP_DP_Apr_2 {case Before{condition range(month,jan,mar) value 0.} case April{condition month==apr value swp_co_1} case otherwise{condition always value swp_co_total(prevApr)*cfs_taf(prevApr)}}
+! define SWP_DP_May_2 {case Before{condition range(month,jan,apr) value 0.} case May{condition month==may value swp_co_1} case otherwise{condition always value swp_co_total(prevMay)*cfs_taf(prevMay)}}
+! define SWP_DP_Jun_2 {value 0.}
+! define SWP_DP_Jul_2 {value 0.}
+! define SWP_DP_Aug_2 {value 0.}
+! define SWP_DP_Sep_2 {value 0.}
+! define SWP_DP_Oct_2 {value 0.}
+! define SWP_DP_Nov_2 {value 0.}
+! define SWP_DP_Dec_2 {value 0.}
+
+
+
+!get carryover storage volume:
+define SWP_Carryover {
+  case low {condition SWP_Pattern<=0.40 select Dem30  from CAM_SWPDem_SOD where month=99} 
+  case half{condition SWP_Pattern<=0.65 select Dem50  from CAM_SWPDem_SOD where month=99} 
+  case high{condition always            select Dem100 from CAM_SWPDem_SOD where month=99}
+}
+
+define swp_Carryoverdv {alias SWP_Carryover kind 'A56' units 'taf'}
+
+!******************************************************DE
+!Limit SWP_makeup to delivery shortage in previous timesteps of current calendar year.
+
+!Sum calendar year SOD TA deliveries
+define swp_sodTAdel {
+	case January {
+		condition	month == jan
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		sum(i=-1,prevJAN,-1) (swp_TA_total(i) - swp_TA_Feath(i) - swp_TA_NBay(i))*cfs_taf(i)
+	}
+}
+
+!Retrieve remaining deliveries given 100% allocation and delivery schedule found in CAM_SWPDem_SOD.table
+define swp_sodREM100 {select Rem100 from CAM_SWPDem_SOD where month= month}
+
+!Retrieve annual SOD TA entitlement excluding Article 56 requests
+define swp_sodFULL100 {select Rem100 from CAM_SWPDem_SOD where month= 4}
+
+!Deterine TA deliveries scheduled for previous months if there was 100% allocation if effect.
+define swp_sodPRV100 {value swp_sodFULL100 - swp_sodREM100}
+
+!Determine delivery shortage in previous months.
+define swp_sodTAshort {value max(swp_sodPRV100 - swp_sodTAdel,0.0)}
+
+!Determine makeup fraction for remaining months.
+define swp_makeup_lim {value swp_sodTAshort/swp_sodREM100}
+
+!Limit SWP_Makeup to makeup fraction.
+goal limit_swp_makeup {SWP_Makeup < swp_makeup_lim}
+
+!Only allow makeup water when already delivering full schedule over remaining months.
+define int_makeup {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal set_makeup_switch {int_makeup < swp_scale}
+goal turn_on_off_makeup {swp_makeup < int_makeup}
+
+!Save makeup parameters.
+define swp_sodTAdel_ {alias swp_sodTAdel kind 'makeup-parameter' units 'taf'}
+define swp_sodREM100_ {alias swp_sodREM100 kind 'makeup-parameter' units 'taf'}
+define swp_sodFULL100_ {alias swp_sodFULL100 kind 'makeup-parameter' units 'taf'}
+define swp_sodPRV100_ {alias swp_sodPRV100 kind 'makeup-parameter' units 'taf'}
+define swp_sodTAshort_ {alias swp_sodTAshort kind 'makeup-parameter' units 'taf'}
+define swp_makeup_lim_ {alias swp_makeup_lim kind 'makeup-parameter' units 'none'}
+!*************************************************************************
+
+! set swp demands
+goal(fm) set_D6_fm{
+		lhs D6_fm($m) 
+		case a{condition mv($m)<=JAN rhs SWP_Scale*SWP_DP_1_fm($m) + SWP_DP_2_fm($m) + SWP_LS_fm($m)} 
+!		case b{condition always     rhs SWP_Scale*SWP_DP_1_fm($m) + SWP_Makeup*SWP_DP_1_fm($m) + SWP_DP_2_fm($m) + SWP_LS_fm($m)}
+!		case b{condition always     rhs SWP_Scale*SWP_DP_1_fm($m) + SWP_Makeup*SWP_DP_1_fm($m) + SWP_DP_2_fm($m) + SWP_LS_fm($m) - XXd6_fm($m)  }   ! test, MYT, 20191107
+
+		case b{condition always     rhs SWP_Scale*SWP_DP_1_fm($m) + SWP_Makeup*SWP_DP_1_fm($m) + SWP_DP_2_fm($m) + SWP_LS_fm($m)
+		lhs<rhs penalty -wt_XXD6_fm($m) lhs>rhs penalty -wt_XXD6_fm($m)}   ! test, MYT, 20191107
+}
+
+define D6_Jan {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Feb {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Mar {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Apr {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_May {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Jun {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Jul {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Aug {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Sep {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Oct {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Nov {STD KIND 'DELIVERY' UNITS 'TAF'}
+define D6_Dec {STD KIND 'DELIVERY' UNITS 'TAF'}
+
+goal set_D6_Jan {lhs D6_Jan case a{condition month<=JAN rhs D6_fm(Jan-month)} case b{condition always rhs del_swp_SOD_Jan}}
+goal set_D6_Feb {lhs D6_Feb case a{condition month<=Feb rhs D6_fm(Feb-month)} case b{condition always rhs del_swp_SOD_Feb}}
+goal set_D6_Mar {lhs D6_Mar case a{condition month<=Mar rhs D6_fm(Mar-month)} case b{condition always rhs del_swp_SOD_Mar}}
+goal set_D6_Apr {lhs D6_Apr case a{condition month<=Apr rhs D6_fm(Apr-month)} case b{condition always rhs del_swp_SOD_Apr}}
+goal set_D6_May {lhs D6_May case a{condition month<=May rhs D6_fm(May-month)} case b{condition always rhs del_swp_SOD_May}}
+goal set_D6_Jun {lhs D6_Jun case a{condition month<=Jun rhs D6_fm(Jun-month)} case b{condition always rhs del_swp_SOD_Jun}}
+goal set_D6_Jul {lhs D6_Jul case a{condition month<=Dec rhs D6_fm(Jul-12-month)} case b{condition always rhs D6_fm(Jul-month)}}                     
+goal set_D6_Aug {lhs D6_Aug case a{condition month<=Dec rhs D6_fm(Aug-12-month)} case b{condition always rhs D6_fm(Aug-month)}}                    
+goal set_D6_Sep {lhs D6_Sep case a{condition month<=Dec rhs D6_fm(Sep-12-month)} case b{condition always rhs D6_fm(Sep-month)}}                  
+goal set_D6_Oct {lhs D6_Oct case a{condition month<=Dec rhs D6_fm(Oct-month)} case b{condition always rhs D6_fm(Oct+12-month)}}                    
+goal set_D6_Nov {lhs D6_Nov case a{condition month<=Dec rhs D6_fm(Nov-month)} case b{condition always rhs D6_fm(Nov+12-month)}}                     
+goal set_D6_Dec {lhs D6_Dec case a{condition month<=Dec rhs D6_fm(Dec-month)} case b{condition always rhs D6_fm(Dec+12-month)}}                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                
+define D6_Jandv {alias D6_Jan kind 'DEMAND' units 'TAF'}
+define D6_Febdv {alias D6_Feb kind 'DEMAND' units 'TAF'}
+define D6_Mardv {alias D6_Mar kind 'DEMAND' units 'TAF'}
+define D6_Aprdv {alias D6_Apr kind 'DEMAND' units 'TAF'}
+define D6_Maydv {alias D6_May kind 'DEMAND' units 'TAF'}
+define D6_Jundv {alias D6_Jun kind 'DEMAND' units 'TAF'}
+define D6_Juldv {alias D6_Jul kind 'DEMAND' units 'TAF'}
+define D6_Augdv {alias D6_Aug kind 'DEMAND' units 'TAF'}
+define D6_Sepdv {alias D6_Sep kind 'DEMAND' units 'TAF'}
+define D6_Octdv {alias D6_Oct kind 'DEMAND' units 'TAF'}
+define D6_Novdv {alias D6_Nov kind 'DEMAND' units 'TAF'}
+define D6_Decdv {alias D6_Dec kind 'DEMAND' units 'TAF'}
+
+define Accum_D33C{
+	case Jan {condition month==Jan value D33C_fm}
+	case other{condition always value Accum_D33C_dv(-1)+D33C_fm}
+}
+define Accum_D33C_dv{lower unbounded upper unbounded kind 'demand' units 'taf'}
+goal setAccum_D33C_dv{Accum_D33C_dv=Accum_D33C}
+
+define Accum_SWPC_STHRM{
+	case Jan {condition month==Jan value SWPC_STHRM_fm}
+	case other{condition always value Accum_SWPC_STHRM_dv(-1)+SWPC_STHRM_fm}
+}
+define Accum_SWPC_STHRM_dv{lower unbounded upper unbounded kind 'demand' units 'taf'}
+goal setAccum_SWPC_STHRM_dv{Accum_SWPC_STHRM_dv=Accum_SWPC_STHRM}
+
+define Accum_SWPC_NTHRM{
+	case Jan {condition month==Jan value SWPC_NTHRM_fm}
+	case other{condition always value Accum_SWPC_NTHRM_dv(-1)+SWPC_NTHRM_fm}
+}
+define Accum_SWPC_NTHRM_dv{lower unbounded upper unbounded kind 'demand' units 'taf'}
+goal setAccum_SWPC_NTHRM_dv{Accum_SWPC_NTHRM_dv=Accum_SWPC_NTHRM}
+
+
+! total swp demand:                                                                                                                                                                                                                         
+goal set_SWP_Del_tot {SWP_Delivery_tot = Accum_D33C       + (sum(i=1, fm, 1) D33C_fm(i)) +
+										 Accum_SWPC_STHRM + (sum(i=1, fm, 1) SWPC_STHRM_fm(i)) + 
+										 Accum_SWPC_NTHRM + (sum(i=1, fm, 1) SWPC_NTHRM_fm(i)) +
+										 D6_Jan +
+                                         D6_Feb +
+                                         D6_Mar + 
+                                         D6_Apr + 
+                                         D6_May + 
+                                         D6_Jun + 
+                                         D6_Jul + 
+                                         D6_Aug + 
+                                         D6_Sep + 
+                                         D6_Oct + 
+                                         D6_Nov + 
+                                         D6_Dec}
+                                                                                 
+!total actual A56 deliveries
+define swp_co_annual {
+	case January {
+		condition	month == jan
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		sum(i=-1,prevJAN,-1) swp_co_total(i) * cfs_taf(i)
+	}
+}
+define swp_co_annualdv {alias swp_co_annual kind 'A56-SUMMATION' units 'taf'}
+
+goal set_SWP_Del {SWP_Delivery = SWP_Delivery_tot - 64.5 - swp_co_1 - swp_co_annual + SWP_Scale*SWP_Carryover} 
+                               
+
+!do not let allocation drop below april's decision
+goal noreduction {
+  lhs SWP_Delivery
+  
+  case damp1{! Damping routine to reduce big reductions in the allocations (Experimental)
+    condition month>=Feb .and. month<=Jun                      
+    rhs SWP_Delivery(-1) * 0.8
+    lhs>rhs penalty 0 
+    lhs<rhs penalty 19000}
+  case a{
+    condition month>=Jan .and. month<=Jun 
+    rhs 0 
+    lhs>rhs penalty 0 
+    lhs<rhs penalty 0}
+  case b{
+    condition always                      
+    rhs SWP_Delivery(-1) 
+    lhs>rhs penalty 0 
+    lhs<rhs penalty 19000}
+}
+
+

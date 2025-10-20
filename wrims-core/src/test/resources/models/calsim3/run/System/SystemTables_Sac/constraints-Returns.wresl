@@ -1,0 +1,758 @@
+/*
+Constraints-returns.wresl
+CalSim 3.0 System File
+
+Purpose:
+Calculate return flow from demand units
+
+Naming takes the following form:
+R_{DEMAND UNIT}         - return flow from specific demand unit
+R_{WBA}_{DESTINATION}   - aggregated return from WBA to specific location
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! DIVERSIONS TO WBAS, AND SUB-ARCS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 1       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Not used
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 2       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_02_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_02_NA_CWD004  {R_02_NA_CWD004 = TW_02_NA + LF_02_NA + OS_02_NA - RU_02_NA}
+
+define TW_02_PA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_02_PA_SAC273  {R_02_PA_SAC273 = TW_02_PA + LF_02_PA + OS_02_PA - RU_02_PA}
+
+define WW_02_PU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_02_PU_CCWWTP  {R_02_PU_CCWWTP = WW_02_PU}
+
+define WW_02_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_02_NU_SAC281  {R_02_NU_SAC281 = WW_02_NU}
+
+define TW_02_SA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_02_SA_SAC273  {R_02_SA_SAC273 = TW_02_SA + LF_02_SA + OS_02_SA - RU_02_SA}
+
+define WW_02_SU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_02_SU_CCWWTP  {R_02_SU_CCWWTP = WW_02_SU}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 3       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define WW_03_PU1            {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_03_PU1_KSWCK  {R_03_PU1_KSWCK = WW_03_PU1}
+
+define WW_03_SU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_03_SU_SWWWTP  {R_03_SU_SWWWTP = WW_03_SU}
+
+define WW_03_PU2            {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_03_PU2_SWWWTP {R_03_PU2_SWWWTP = WW_03_PU2}
+
+!define WW_03_PU3            {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+!goal setR_03_PU3_SWWWTP {R_03_PU3_SWWWTP = WW_03_PU3}
+
+define TW_03_PA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_03_PA_SAC287  {R_03_PA_SAC287 = TW_03_PA + LF_03_PA + OS_03_PA - RU_03_PA}
+
+define TW_03_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_03_NA_SAC269  {R_03_NA_SAC269 = TW_03_NA + LF_03_NA + OS_03_NA - RU_03_NA}
+
+define TW_03_SA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_03_SA_SAC281  {R_03_SA_SAC281 = TW_03_SA + LF_03_SA + OS_03_SA - RU_03_SA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 4       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define WW_04_NU1        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_04_NU1_SAC240 {R_04_NU1_SAC240 = WW_04_NU1}
+
+define WW_04_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_04_NU2_SAC217 {R_04_NU2_SAC217 = WW_04_NU2}
+
+define TW_04_PA1            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_04_PA1_THM005 {R_04_PA1_THM005 = TW_04_PA1 + LF_04_PA1 + OS_04_PA1 - RU_04_PA1}
+
+define TW_04_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_04_NA_SAC207  {R_04_NA_SAC207 = TW_04_NA + LF_04_NA + OS_04_NA - RU_04_NA}
+
+define TW_04_PA2            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_04_PA2_SAC207 {R_04_PA2_SAC207 = TW_04_PA2 + LF_04_PA2 + OS_04_PA2 - RU_04_PA2}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 5       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_05_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_05_NA_SAC201  {R_05_NA_SAC201 = TW_05_NA + LF_05_NA + OS_05_NA - RU_05_NA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 6       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_06_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_06_PA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+goal setR_06_NA_CBD044 {R_06_NA_CBD044 = TW_06_NA - RU_06_NA}
+goal setR_06_PA_STN009 {R_06_PA_STN009 = TW_06_PA + LF_06_PA + OS_06_PA - RU_06_PA}
+! No return flow arc defined
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-North     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_07N_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_07N_NA_CBD044 {R_07N_NA_CBD044 = TW_07N_NA /*+ LF_07N_NA + OS_07N_NA*/ - RU_07N_NA}
+
+define WW_07N_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_07N_NU_CBD049 {R_07N_NU_CBD049 = WW_07N_NU}
+
+define TW_07N_PA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_07N_PA_CBD044 {R_07N_PA_CBD044 = TW_07N_PA + LF_07N_PA + OS_07N_PA - RU_07N_PA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-South     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_07S_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_07S_NA_CBD044 {R_07S_NA_CBD044 = TW_07S_NA /*+ LF_07S_NA + OS_07S_NA*/ - RU_07S_NA}
+
+define TW_07S_PA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_07S_PA_CBD028 {R_07S_PA_CBD028 = TW_07S_PA + LF_07S_PA + OS_07S_PA - RU_07S_PA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-North     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_08N_NA        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_NA_CBD049     {R_08N_NA_CBD049 = TW_08N_NA + LF_08N_NA + OS_08N_NA - RU_08N_NA}
+
+define TW_08N_SA2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_SA2_CBD049    {R_08N_SA2_CBD049 = TW_08N_SA2 + LF_08N_SA2 + OS_08N_SA2 - RU_08N_SA2}
+
+define TW_08N_PR1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_PR1_CBD049    {R_08N_PR1_CBD049 = TW_08N_PR1 + LF_08N_PR1 + OS_08N_PR1 - RU_08N_PR1}
+
+define TW_08N_PR2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_PR2_CBD044    {R_08N_PR2_CBD044 = TW_08N_PR2 + LF_08N_PR2 + OS_08N_PR2 - RU_08N_PR2}
+
+define TW_08N_SA1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_SA1_CBD044    {R_08N_SA1_CBD044 = TW_08N_SA1 + LF_08N_SA1 + OS_08N_SA1 - RU_08N_SA1}
+
+define TW_08N_PA        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08N_PA_CBD044     {R_08N_PA_CBD044 = TW_08N_PA + LF_08N_PA + OS_08N_PA - RU_08N_PA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 08S     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_08S_SA2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_SA2_CBD037    {R_08S_SA2_CBD037 = TW_08S_SA2 + LF_08S_SA2 + OS_08S_SA2 - RU_08S_SA2}
+
+define TW_08S_PA        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_PA_CBD012     {R_08S_PA_CBD012 = TW_08S_PA + LF_08S_PA + OS_08S_PA - RU_08S_PA}
+
+define TW_08S_PR        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_PR_CBD031     {R_08S_PR_CBD031 = TW_08S_PR + LF_08S_PR + OS_08S_PR - RU_08S_PR}
+
+define TW_08S_NA1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_NA1_CBD031    {R_08S_NA1_CBD031 = TW_08S_NA1 + LF_08S_NA1 + OS_08S_NA1 - RU_08S_NA1}
+
+define TW_08S_SA1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_SA1_CBD031    {R_08S_SA1_CBD031 = TW_08S_SA1 + LF_08S_SA1 + OS_08S_SA1 - RU_08S_SA1}
+
+define TW_08S_NA2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_NA2_RFS8S     {R_08S_NA2_RFS8S = TW_08S_NA2 + LF_08S_NA2 + OS_08S_NA2 - RU_08S_NA2}
+
+define TW_08S_SA3       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_08S_SA3_RFS8S     {R_08S_SA3_RFS8S = TW_08S_SA3 + LF_08S_SA3 + OS_08S_SA3 - RU_08S_SA3}
+
+goal setR_RFS8S         {R_RFS8S_SAC097 = 5*R_RFS8S_SAC093} !Based on flow records 1949-1985
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 9       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_09_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_09_NA_LCC016  {R_09_NA_LCC016 = TW_09_NA + LF_09_NA + OS_09_NA - RU_09_NA}
+
+define TW_09_SA1            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_09_SA1_LCC026 {R_09_SA1_LCC026 = TW_09_SA1 + LF_09_SA1 + OS_09_SA1 - RU_09_SA1}
+
+define TW_09_SA2            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_09_SA2_BTC007 {R_09_SA2_BTC007 = TW_09_SA2 + LF_09_SA2 + OS_09_SA2 - RU_09_SA2}
+
+define TW_09_PR         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_09_PR_LCC016  {R_09_PR_LCC016 = TW_09_PR + LF_09_PR + OS_09_PR - RU_09_PR}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_10_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!zrc@ goal setR_10_NA_BTC032  {R_10_NA_BTC032 = TW_10_NA + LF_10_NA + OS_10_NA - RU_10_NA}
+
+define WW_10_NU1        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_10_NU1_CHWWTP {R_10_NU1_CHWWTP = WW_10_NU1}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 11      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define R_11_SA1             {timeseries kind 'RETURN-FLOW' units 'TAF' convert 'CFS'}
+define R_11_SA2             {timeseries kind 'RETURN-FLOW' units 'TAF' convert 'CFS'}
+define R_11_SA3             {timeseries kind 'RETURN-FLOW' units 'TAF' convert 'CFS'}
+define R_11_SA4             {timeseries kind 'RETURN-FLOW' units 'TAF' convert 'CFS'}
+
+define TW_11_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_11_NA_DWRPS2  {R_11_NA_DWRPS2 = TW_11_NA + LF_11_NA + OS_11_NA - RU_11_NA}
+
+define WW_11_NU1        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_11_NU1_ORWWTP {R_11_NU1_ORWWTP = WW_11_NU1}
+
+!define WW_11_NU2       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'} !Not represented, assume 100% to groundwater
+!goal setR_11_NU2_BGWWTP{R_11_NU2_BGWWTP = WW_11_NU2}
+! Changed soft constraint to hard constraint to prevent return flows from changing in the last cycle
+define TW_11_SA1            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_11_SA1_CRK005    {R_11_SA1_CRK005 = TW_11_SA1 + LF_11_SA1 + OS_11_SA1 - RU_11_SA1}
+goal setR_11_SA1_CRK005 {lhs R_11_SA1_CRK005 rhs TW_11_SA1 -(1-decomp_return_per)*R_11_SA1 + LF_11_SA1 + OS_11_SA1 - RU_11_SA1} 
+
+
+define TW_11_SA2            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_11_SA2_CRK005    {R_11_SA2_CRK005 = TW_11_SA2 + LF_11_SA2 + OS_11_SA2 - RU_11_SA2}
+goal setR_11_SA2_CRK005 {lhs R_11_SA2_CRK005 rhs TW_11_SA2 -(1-decomp_return_per)*R_11_SA2 + LF_11_SA2 + OS_11_SA2 - RU_11_SA2 lhs>rhs penalty 99999 lhs<rhs penalty 99999}
+
+define TW_11_SA3            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_11_SA3_RFS11 {R_11_SA3_RFS11 = TW_11_SA3 + LF_11_SA3 + OS_11_SA3 - RU_11_SA3}
+goal setR_11_SA3_RFS11  {lhs R_11_SA3_RFS11 rhs TW_11_SA3 -(1-decomp_return_per)*R_11_SA3 + LF_11_SA3 + OS_11_SA3 - RU_11_SA3 lhs>rhs penalty 99999 lhs<rhs penalty 99999}
+goal setR_RFS11_WWC006   {R_RFS11_WWC006 = 0.75 * R_11_SA3_RFS11 } !Split return flows approximately 75% to Wadsworth Canal, 25% to Butte Creek/Butte Slough
+
+define TW_11_SA4            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_11_SA4_DWRPS2    {R_11_SA4_DWRPS2 = TW_11_SA4 + LF_11_SA4 + OS_11_SA4 - RU_11_SA4}
+goal setR_11_SA4_DWRPS2 {lhs R_11_SA4_DWRPS2 rhs TW_11_SA4 -(1-decomp_return_per)*R_11_SA4 + LF_11_SA4 + OS_11_SA4 - RU_11_SA4 lhs>rhs penalty 99999 lhs<rhs penalty 99999}
+
+define TW_11_PR         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!zrc@ goal setR_11_PR_BTC017  {R_11_PR_BTC017 = TW_11_PR + LF_11_PR + OS_11_PR - RU_11_PR}
+
+goal setR_JBC008_FTR048 {R_JBC008_FTR048 < .015 * D_THRMA_JBC000} ! Cox spill
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_12_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_12_NA_HON004  {R_12_NA_HON004 = TW_12_NA + LF_12_NA + OS_12_NA - RU_12_NA}
+
+define TW_12_SA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_12_SA_FTR045  {R_12_SA_FTR045 = TW_12_SA + LF_12_SA + OS_12_SA - RU_12_SA}
+
+define WW_12_NU1        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_12_NU1_ORWWTP {R_12_NU1_ORWWTP = WW_12_NU1}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_13_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_13_NA_RFS13       {R_13_NA_RFS13 = TW_13_NA + LF_13_NA + OS_13_NA - RU_13_NA}
+
+define WW_13_NU1            {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_13_NU1_ORWWTP {R_13_NU1_ORWWTP = WW_13_NU1}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_14_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_14_NA_RFS14       {R_14_NA_RFS14 = TW_14_NA + LF_14_NA + OS_14_NA - RU_14_NA}
+goal setRFS14_YUB014        {R_RFS14_YUB014 = 0.3*R_14_NA_RFS14}! This is a guess need to undertake GIS analysis
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_15N_NA1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15N_NA1_FTR031    {R_15N_NA1_FTR031 = TW_15N_NA1 /*+ LF_15N_NA1 + OS_15N_NA1*/ - RU_15N_NA1}
+
+define TW_15N_NA2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15N_NA2_JCK002    {R_15N_NA2_JCK002 = TW_15N_NA2 + LF_15N_NA2 + OS_15N_NA2 - RU_15N_NA2}
+
+define TW_15N_SA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15N_SA_FTR031     {R_15N_SA_FTR031 = TW_15N_SA + LF_15N_SA + OS_15N_SA - RU_15N_SA}
+
+define WW_15N_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_15N_NU_LCWWTP     {R_15N_NU_LCWWTP = WW_15N_NU }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_15S_SA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15S_SA_FTR014 {R_15S_SA_FTR014 = TW_15S_SA + LF_15S_SA + OS_15S_SA - RU_15S_SA}
+
+define TW_15S_NA1       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15S_NA1_DHC001    {R_15S_NA1_DHC001 = TW_15S_NA1 /*+ LF_15S_NA1 + OS_15S_NA1*/ - RU_15S_NA1}
+
+define TW_15S_NA2       {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_15S_NA2_DHC001    {R_15S_NA2_DHC001 = TW_15S_NA2 + LF_15S_NA2 + OS_15S_NA2 - RU_15S_NA2}
+
+define WW_15S_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_15S_NU_DHC001     {R_15S_NU_DHC001 + R_15S_NU_LCWWTP = WW_15S_NU }
+!Permitted capacity for Olivehurst is 3 MGD, permitted capacity for Linda County is 5 MGD
+goal setR_15S_NU_LCWWTP     {R_15S_NU_LCWWTP = (5./8.)* WW_15S_NU } ! Added so that discharging water from 15S_NU won't bounce between the Feather River and Bear River
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 16      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_16_NA1            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_16_NA1_DWRPS2 {R_16_NA1_DWRPS2 = TW_16_NA1 /*+ LF_16_NA1 + OS_16_NA1*/ - RU_16_NA1}
+
+define TW_16_NA2            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_16_NA2_DWRPS1 {R_16_NA2_DWRPS1 = TW_16_NA2 + LF_16_NA2 + OS_16_NA2 - RU_16_NA2}
+
+define TW_16_PA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_16_PA_DWRPS2  {R_16_PA_DWRPS2 = TW_16_PA + LF_16_PA + OS_16_PA - RU_16_PA}
+
+define TW_16_SA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_16_SA_DWRPS1  {R_16_SA_DWRPS1 = TW_16_SA + LF_16_SA + OS_16_SA - RU_16_SA}
+
+define WW_16_PU             {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_16_PU_YCWWTP  {R_16_PU_YCWWTP = WW_16_PU}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_17N_PR            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17N_PR_CRK005 {R_17N_PR_CRK005 = TW_17N_PR + LF_17N_PR + OS_17N_PR - RU_17N_PR}
+
+define TW_17N_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17N_NA_BTC003 {R_17N_NA_BTC003 = TW_17N_NA /*+ LF_17N_NA + OS_17N_NA*/ - RU_17N_NA}
+
+define TW_17N_NR            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17N_NR_BTC003 {R_17N_NR_BTC003 = TW_17N_NR + LF_17N_NR + OS_17N_NR - RU_17N_NR}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_17S_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17S_NA_SSL001 {R_17S_NA_SSL001 = TW_17S_NA + LF_17S_NA + OS_17S_NA - RU_17S_NA}
+
+define TW_17S_SA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17S_SA_SAC085 {R_17S_SA_SAC085 = TW_17S_SA + LF_17S_SA + OS_17S_SA - RU_17S_SA}
+
+define TW_17S_PR            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_17S_PR_SBP021 {R_17S_PR_SBP021 = TW_17S_PR + LF_17S_PR + OS_17S_PR - RU_17S_PR}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 18      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_18_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_18_NA_RFS18       {R_18_NA_RFS18 = TW_18_NA + LF_18_NA + OS_18_NA - RU_18_NA}
+
+define TW_18_SA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_18_SA_RFS18       {R_18_SA_RFS18 = TW_18_SA + LF_18_SA + OS_18_SA - RU_18_SA}
+
+goal setR_RFS18_SAC122  {R_RFS18_SAC122 = 0.5*R_18_SA_RFS18 + 0.5*R_18_NA_RFS18 + 0.5*SR_18_RFS18} !0.5 is placeholder.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 19      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define TW_19_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_19_NA_RD1500 {R_19_NA_RD1500 = TW_19_NA + LF_19_NA + OS_19_NA - RU_19_NA}
+
+define TW_19_SA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_19_SA_RD1500  {R_19_SA_RD1500 = TW_19_SA + LF_19_SA + OS_19_SA - RU_19_SA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 20      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_20_PA     {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define WW_20_NU1    {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define TW_20_NA1    {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_20_NA2    {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+goal setR_20_NU1_YBP032 {R_20_NU1_WLWWTP + R_20_NU1_DVWWTP = WW_20_NU1}
+goal setR_20_NA1_WLW000 {R_20_NA1_WLW000 = TW_20_NA1 + LF_20_NA1 + OS_20_NA1 - RU_20_NA1}
+goal setR_20_NA2_WLW000 {R_20_NA2_WLW000 = TW_20_NA2 /*+ LF_20_NA2 + OS_20_NA2*/ - RU_20_NA2} !Groundwater only
+goal setR_20_PA_PTH011  {R_20_PA_PTH011 = TW_20_PA + LF_20_PA + OS_20_PA - RU_20_PA}
+goal shrR_20_NU1 {lhs R_20_NU1_WLWWTP rhs R_20_NU1_DVWWTP lhs<rhs penalty 1 lhs>rhs penalty 1} !Prevent non-unique solution
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 21      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_21_PA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_21_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define WW_21_PU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define TW_21_SA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+goal setR_21_NA_YBP032  {R_21_NA_YBP032 = TW_21_NA + LF_21_NA + OS_21_NA - RU_21_NA} !Groundwater only
+goal setR_21_PU_SRWWTP  {R_21_PU_SRWWTP = WW_21_PU}
+goal setR_21_SA_YBP020  {R_21_SA_YBP020 = TW_21_SA + LF_21_SA + OS_21_SA - RU_21_SA}
+goal setR_21_PA_YBP032  {R_21_PA_YBP032 = TW_21_PA + LF_21_PA + OS_21_PA - RU_21_PA}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 22      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_22_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}  
+define TW_22_SA1        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_22_SA2        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+goal setR_22_NA_RFS22       {R_22_NA_RFS22  = TW_22_NA + LF_22_NA + OS_22_NA - RU_22_NA} !Groundwater only
+goal setR_22_SA1_RFS22  {R_22_SA1_RFS22  = TW_22_SA1 + LF_22_SA1 + OS_22_SA1 - RU_22_SA1}
+goal setR_22_SA2_SAC083 {R_22_SA2_SAC083  = TW_22_SA2 + LF_22_SA2 + OS_22_SA2 - RU_22_SA2}
+goal setR_RFS22_EMD001  {R_RFS22_EMD001 = 0.5 * R_22_NA_RFS22 + 0.5 * R_22_SA1_RFS22}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_23_NA             {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+goal setR_23_NA_RFS23       {R_23_NA_RFS23  = TW_23_NA + LF_23_NA + OS_23_NA - RU_23_NA}
+goal setR_RFS23_BRR004      {R_RFS23_BRR004 = 0.5 * R_23_NA_RFS23}
+! goal setR_RFS23_CCK007    {R_RFS23_CCK007 = 0.5 * R_23_NA_RFS23}  !Over constrained
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_24_NA1        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_24_NA2        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_24_NA3        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU1        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU3        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+goal setR_24_NA1_CCK022 {R_24_NA1_CCK022  = TW_24_NA1 + LF_24_NA1 + OS_24_NA1 - RU_24_NA1}
+goal setR_24_NA2_ABN000 {R_24_NA2_ABN000  = TW_24_NA2 + LF_24_NA2 + OS_24_NA2 - RU_24_NA2}
+goal setR_24_NA3_SCR002 {R_24_NA3_SCR002  = 2.5*TW_24_NA3 + LF_24_NA3 + OS_24_NA3 - RU_24_NA3}
+goal setR_24_NU2_RFS26N {R_24_NU2_RFS26N   = WW_24_NU2}
+goal setR_24_NU1_ABN027     {R_24_NU1_ABN027  = WW_24_NU1}
+goal setR_24_NU3_CCK038     {R_24_NU3_CCK038 = WW_24_NU3}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 25      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_25_NA         {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_25_PA1        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define TW_25_PA2        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+define WW_25_PU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+goal setR_25_NA         {R_25_NA_CSL005  = TW_25_NA + LF_25_NA + OS_25_NA - RU_25_NA}
+goal setR_25_PA1        {R_25_PA1_RFS25  = TW_25_PA1 + LF_25_PA1 + OS_25_PA1 - RU_25_PA1}
+goal setR_25_PA2        {R_25_PA2_CSL005 = TW_25_PA2 + LF_25_PA2 + OS_25_PA2 - RU_25_PA2}
+goal setR_25_PU_EAWWTP      {R_25_PU_EAWWTP  = WW_25_PU}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26N     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define TW_26N_NA        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+
+define WW_26N_PU1       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_PU2       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_PU3       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_NU1       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_NU2       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_NU3       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_NU4       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26N_NU5       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU1       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU2       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_NU1       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU4       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_NU2       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU5       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_NU3       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_NU4       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU6       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+goal setR_26N_NA_EMD007 {R_26N_NA_EMD007 = TW_26N_NA /*+ LF_26N_NA + OS_26N_NA*/ - RU_26N_NA} !Groundwater only
+
+/*
+goal setWW_26N_PU1 {
+    lhs WW_26N_PU1
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_PU1(2),UD_26N_PU1(3),UD_26N_PU1(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_PU1(-1)
+    }
+}
+
+goal setWW_26N_PU2 {
+    lhs WW_26N_PU2
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_PU2(2),UD_26N_PU2(3),UD_26N_PU2(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_PU2(-1)
+    }
+}
+
+goal setWW_26N_PU3 {
+    lhs WW_26N_PU3
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_PU3(2),UD_26N_PU3(3),UD_26N_PU3(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_PU3(-1)
+    }
+}
+
+goal setWW_26N_NU1 {
+    lhs WW_26N_NU1
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_NU1(2),UD_26N_NU1(3),UD_26N_NU1(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_NU1(-1)
+    }
+}
+
+goal setWW_26N_NU2 {
+    lhs WW_26N_NU2
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_NU2(2),UD_26N_NU2(3),UD_26N_NU2(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_NU2(-1)
+    }
+}
+
+goal setWW_26N_NU3 {
+    lhs WW_26N_NU3
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_NU3(2),UD_26N_NU3(3),UD_26N_NU3(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_NU3(-1)
+    }
+}
+
+goal setWW_26N_NU4 {
+    lhs WW_26N_NU4
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_NU4(2),UD_26N_NU4(3),UD_26N_NU4(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_NU4(-1)
+    }
+}
+
+goal setWW_26N_NU5 {
+    lhs WW_26N_NU5
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26N_NU5(2),UD_26N_NU5(3),UD_26N_NU5(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26N_NU5(-1)
+    }
+}
+*/
+
+goal setR_26N_PU1_RFS26N    {R_26N_PU1_RFS26N = WW_26N_PU1}
+goal setR_26N_PU2_SRWWTP    {R_26N_PU2_SRWWTP = WW_26N_PU2}
+goal setR_26N_PU3_SRWWTP    {R_26N_PU3_SRWWTP = WW_26N_PU3}
+goal setR_26N_NU1_SRWWTP    {R_26N_NU1_SRWWTP = WW_26N_NU1}
+goal setR_26N_NU2_SRWWTP    {R_26N_NU2_SRWWTP = WW_26N_NU2}
+goal setR_26N_NU3_SRWWTP    {R_26N_NU3_SRWWTP = WW_26N_NU3}
+goal setR_26N_NU4_SRWWTP    {R_26N_NU4_SRWWTP = WW_26N_NU4}
+goal setR_26N_NU5_SRWWTP    {R_26N_NU5_SRWWTP = WW_26N_NU5}
+
+goal setR_RFS26N_PGWWTP     {R_RFS26N_PGWWTP = 0.25*R_24_NU2_RFS26N + 0.50*R_26N_PU1_RFS26N}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26S     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!define TW_26S_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+!goal setR_26S_NA_MOK019 {R_26S_NA_MOK019 = TW_26S_NA /* +LF_26S_NA + OS_26S_NA */ - RU_26S_NA}  !add by Richard 5/22/2013
+
+/*
+goal setWW_26S_PU1 {
+    lhs WW_26S_PU1
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_PU1(2),UD_26S_PU1(3),UD_26S_PU1(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_PU1(-1)
+    }
+}
+
+goal setWW_26S_PU2 {
+    lhs WW_26S_PU2
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_PU2(2),UD_26S_PU2(3),UD_26S_PU2(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_PU2(-1)
+    }
+}
+
+goal setWW_26S_NU1 {
+    lhs WW_26S_NU1
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_NU1(2),UD_26S_NU1(3),UD_26S_NU1(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_NU1(-1)
+    }
+}
+
+goal setWW_26S_PU4 {
+    lhs WW_26S_PU4
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_PU4(2),UD_26S_PU4(3),UD_26S_PU4(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_PU4(-1)
+    }
+}
+
+goal setWW_26S_NU2 {
+    lhs WW_26S_NU2
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_NU2(2),UD_26S_NU2(3),UD_26S_NU2(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_NU2(-1)
+    }
+}
+
+goal setWW_26S_PU5 {
+    lhs WW_26S_PU5
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_PU5(2),UD_26S_PU5(3),UD_26S_PU5(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_PU5(-1)
+    }
+}
+
+goal setWW_26S_NU3 {
+    lhs WW_26S_NU3
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_NU3(2),UD_26S_NU3(3),UD_26S_NU3(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_NU3(-1)
+    }
+}
+
+goal setWW_26S_NU4 {
+    lhs WW_26S_NU4
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_NU4(2),UD_26S_NU4(3),UD_26S_NU4(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_NU4(-1)
+    }
+}
+
+goal setWW_26S_PU6 {
+    lhs WW_26S_PU6
+    case OCT {
+        condition month == OCT
+        rhs MIN(UD_26S_PU6(2),UD_26S_PU6(3),UD_26S_PU6(4))
+    }
+    case NOV_SEP {
+        condition always
+        rhs WW_26S_PU6(-1)
+    }
+}
+*/
+
+goal setR_26S_PU1_SRWWTP    {R_26S_PU1_SRWWTP = WW_26S_PU1}
+goal setR_26S_PU2_SRWWTP    {R_26S_PU2_SRWWTP = WW_26S_PU2}
+goal setR_26S_NU1_SRWWTP    {R_26S_NU1_SRWWTP = WW_26S_NU1}
+goal setR_26S_PU4_SRWWTP    {R_26S_PU4_SRWWTP = WW_26S_PU4}
+goal setR_26S_NU2_SRWWTP    {R_26S_NU2_SRWWTP = WW_26S_NU2}
+goal setR_26S_PU5_SRWWTP    {R_26S_PU5_SRWWTP = WW_26S_PU5}
+goal setR_26S_NU3_SRWWTP    {R_26S_NU3_SRWWTP = WW_26S_NU3}
+goal setR_26S_PU6_SRWWTP    {R_26S_PU6_SRWWTP = WW_26S_PU6}
+goal setR_26S_NU4_RFS26S    {R_26S_NU4_RFS26S = WW_26S_NU4}
+
+goal setR_RFS26S_SRWWTP     {R_RFS26S_AMR020 = min((6.67/12)* taf_cfs,WW_26S_NU4)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Misc.       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setR_NIDDC_RLLNS   {R_NIDDC_RLLNS = 0.}
+!goal setR_50_PA2_OMR027 {R_50_PA2_OMR027 = DA_50_PA2}  !Return flow from BBID
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Upper American River Watershed  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WW_GDPUD_NU           {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+
+goal setR_GDPUD_NU_NFA011 {R_GDPUD_NU_NFA011 = WW_GDPUD_NU} ! Wastewater is disposed through septic lanks and leach fields. Since groundwater is not modeled, it is assumed that this water returns to the surface water system
+
+define WW_GDPUD_PU           {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+goal setR_GDPUD_PU_NFA011 {R_GDPUD_PU_NFA011 = WW_GDPUD_PU} ! Wastewater is disposed through septic lanks and leach fields. Since groundwater is not modeled, it is assumed that this water returns to the surface water system
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Wastewater goes to deep percolation  "constrans-DeepPercolation.wresl"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WW_03_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_05_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_06_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_07S_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_08N_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_08S_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_09_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_10_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_11_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_12_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_13_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_14_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_16_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_17N_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_17S_NU        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_18_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_19_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_20_NU2        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_21_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_22_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_23_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_24_NU4        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_25_NU         {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_26S_PU3       {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+
+
+
+
+
+
+
+
+
+
+

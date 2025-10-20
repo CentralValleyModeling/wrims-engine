@@ -1,0 +1,101 @@
+! THIS MODULE FINDS THE MAX DELTA OUTFLOW REQUIREMENT OF ALL
+! IMPOSED CONSTRAINTS (Flow, Salinity and X2) AND APPLIES THIS
+! AS THE DEMAND AT D541
+! A. Munevar 11/22/98
+
+! Define external function
+!define getFinalMrdo {EXTERNAL f90}
+
+! Determine max required flow of Flow standard, Salinity requirements, and X2
+! External function 'getFinalMRDO' takes as input the Delta Outflow required (cfs), beginning
+! day, and ending day for each standard.  Also takes the year, month, and days in month.
+! getFinalMrdo.obj must be located in External directory.
+define MRDO_final {value getFinalMrdo ( DO_req_X2roe, int(begday_roe),  int(endday_roe),
+                                        DO_req_X2chs, int(begday_chs),  int(endday_chs),
+                                        DO_req_X2cnf, int(begday_cnf),  int(endday_cnf),
+                                        DO_req_emt1,  int(begday_emt1), int(endday_emt1),
+                                        DO_req_emt2,  int(begday_emt2), int(endday_emt2),
+                                        DO_req_jpt1,  int(begday_jpt1), int(endday_jpt1),
+                                        DO_req_jpt2,  int(begday_jpt2), int(endday_jpt2),
+                                        DO_req_col1,  int(begday_col1), int(endday_col1),
+                                        DO_req_col2,  int(begday_col2), int(endday_col2),
+                                        DO_req_rsl1,  int(begday_rsl1), int(endday_rsl1),
+                                        DO_req_rsl2,  int(begday_rsl2), int(endday_rsl2),
+                                        DO_req_flow,  int(begday_flw),  int(endday_flw),
+                                        wateryear, month, daysin )
+}
+define MRDO_finaldv {alias MRDO_final KIND 'FLOW-REQ-MRDO' UNITS 'CFS'}
+
+! with uncapped X2
+define MRDO_X2nocap {value getFinalMrdo ( DO_req_X2roe_nocap, int(begday_roe),  int(endday_roe),
+                                        DO_req_X2chs_nocap, int(begday_chs),  int(endday_chs),
+                                        DO_req_X2cnf_nocap, int(begday_cnf),  int(endday_cnf),
+                                        DO_req_emt1,  int(begday_emt1), int(endday_emt1),
+                                        DO_req_emt2,  int(begday_emt2), int(endday_emt2),
+                                        DO_req_jpt1,  int(begday_jpt1), int(endday_jpt1),
+                                        DO_req_jpt2,  int(begday_jpt2), int(endday_jpt2),
+                                        DO_req_col1,  int(begday_col1), int(endday_col1),
+                                        DO_req_col2,  int(begday_col2), int(endday_col2),
+                                        DO_req_rsl1,  int(begday_rsl1), int(endday_rsl1),
+                                        DO_req_rsl2,  int(begday_rsl2), int(endday_rsl2),
+                                        DO_req_flow,  int(begday_flw),  int(endday_flw),
+                                        wateryear, month, daysin )
+}
+!define MRDO_X2nocapdv {std KIND 'FLOW-REQ-MRDO' UNITS 'CFS'}  ! moved to ANNCommon
+goal saveMRDO_X2nocap {MRDO_X2nocapdv = MRDO_X2nocap }
+
+! without X2
+define MRDO_X2off {value getFinalMrdo ( 0., int(begday_roe),  int(endday_roe),
+                                        0., int(begday_chs),  int(endday_chs),
+                                        0., int(begday_cnf),  int(endday_cnf),
+                                        DO_req_emt1,  int(begday_emt1), int(endday_emt1),
+                                        DO_req_emt2,  int(begday_emt2), int(endday_emt2),
+                                        DO_req_jpt1,  int(begday_jpt1), int(endday_jpt1),
+                                        DO_req_jpt2,  int(begday_jpt2), int(endday_jpt2),
+                                        DO_req_col1,  int(begday_col1), int(endday_col1),
+                                        DO_req_col2,  int(begday_col2), int(endday_col2),
+                                        DO_req_rsl1,  int(begday_rsl1), int(endday_rsl1),
+                                        DO_req_rsl2,  int(begday_rsl2), int(endday_rsl2),
+                                        DO_req_flow,  int(begday_flw),  int(endday_flw),
+                                        wateryear, month, daysin )
+}
+define MRDO_X2offdv {alias MRDO_X2off KIND 'FLOW-REQ-MRDO' UNITS 'CFS'}
+! with X2 only
+define MRDO_X2only {value getFinalMrdo (  DO_req_X2roe, int(begday_roe),  int(endday_roe),
+                                        DO_req_X2chs, int(begday_chs),  int(endday_chs),
+                                        DO_req_X2cnf, int(begday_cnf),  int(endday_cnf),
+                                        0,  int(begday_emt1), int(endday_emt1),
+                                        0,  int(begday_emt2), int(endday_emt2),
+                                        0,  int(begday_jpt1), int(endday_jpt1),
+                                        0,  int(begday_jpt2), int(endday_jpt2),
+                                        0,  int(begday_col1), int(endday_col1),
+                                        0,  int(begday_col2), int(endday_col2),
+                                        0,  int(begday_rsl1), int(endday_rsl1),
+                                        0,  int(begday_rsl2), int(endday_rsl2),
+                                        0,  int(begday_flw),  int(endday_flw),
+                                        wateryear, month, daysin )
+}
+define MRDO_X2onlydv {alias MRDO_X2only KIND 'FLOW-REQ-MRDO' UNITS 'CFS'}
+
+! put the individual values into DSS for output purposes only
+define DO_req_X2roe_out {alias DO_req_X2roe KIND 'FLOW-REQ-X2ROE' UNITS 'CFS'}
+define DO_req_X2chs_out {alias DO_req_X2chs KIND 'FLOW-REQ-X2CHS' UNITS 'CFS'}
+define DO_req_X2cnf_out {alias DO_req_X2cnf KIND 'FLOW-REQ-X2CNF' UNITS 'CFS'}
+define DO_req_X2roe_nc {alias DO_req_X2roe_nocap KIND 'FLOW-REQ-X2ROE' UNITS 'CFS'}
+define DO_req_X2chs_nc {alias DO_req_X2chs_nocap KIND 'FLOW-REQ-X2CHS' UNITS 'CFS'}
+define DO_req_X2cnf_nc {alias DO_req_X2cnf_nocap KIND 'FLOW-REQ-X2CNF' UNITS 'CFS'}
+define DO_req_emt1_out {alias DO_req_emt1 KIND 'FLOW-REQ-EMT1' UNITS 'CFS'}
+define DO_req_emt2_out {alias DO_req_emt2 KIND 'FLOW-REQ-EMT2' UNITS 'CFS' }
+define DO_req_jpt1_out {alias DO_req_jpt1 KIND 'FLOW-REQ-JPT1' UNITS 'CFS' }
+define DO_req_jpt2_out {alias DO_req_jpt2 KIND 'FLOW-REQ-JPT2' UNITS 'CFS' }
+define DO_req_col1_out {alias DO_req_col1 KIND 'FLOW-REQ-COL1' UNITS 'CFS' }
+define DO_req_col2_out {alias DO_req_col2 KIND 'FLOW-REQ-COL2' UNITS 'CFS' }
+define DO_req_rsl1_out {alias DO_req_rsl1 KIND 'FLOW-REQ-RSL1' UNITS 'CFS' }
+define DO_req_rsl2_out {alias DO_req_rsl2 KIND 'FLOW-REQ-RSL2' UNITS 'CFS' }
+define DO_req_flow_out {alias DO_req_flow KIND 'FLOW-REQ-NDOI' UNITS 'CFS' }
+define DO_req_X2BDCPout {alias flowmin_DecA4 KIND 'FLOW-REQ-BDCP' UNITS 'CFS' }
+
+
+! Set the final Delta outflow requirement as the demand at NDOI_MIN
+goal meetMRDO {NDOI_MIN < max(MRDO_final,0,flowmin_DecA4) + C_SAC041_WQ} ! ERP_NDOI_MIN = 0
+

@@ -1,0 +1,89 @@
+
+define pct_sjr_exp {
+	case W_AN{
+		condition wyt_SJR<2.5
+		value 0.25
+	}
+	case BN{
+		condition wyt_SJR<3.5
+		value 0.33
+	}	
+	case Dry{
+		condition wyt_SJR<4.5
+		value 0.5
+	}
+	case Critical{
+		condition always
+		value 1.0
+	}
+} !SJR IE level - Allowable percent of SJR flow that can be exported by each project
+
+define(fm) max_sjr_ie_fm {
+	case AprMay{
+		condition mv($m)==Apr .or. mv($m)==May
+		value pct_sjr_exp*I33B_fm($m)
+	}
+	case other{
+		condition always
+		value 999999.
+	}
+}
+
+define(fm) max_swp_sjr_ie_fm {
+	case AprMay{
+		condition mv($m)==Apr .or. mv($m)==May
+		value max(600.,pct_sjr_exp*I33B_fm($m)*taf_cfs($m))*cfs_taf($m)
+	}
+	case other{
+		condition always
+		value 999999.
+	}
+}
+
+define(fm) max_cvp_sjr_ie_fm {
+	case AprMay{
+		condition mv($m)==Apr .or. mv($m)==May
+		value max(900.,pct_sjr_exp*I33B_fm($m)*taf_cfs($m))*cfs_taf($m)
+	}
+	case other{
+		condition always
+		value 999999.
+	}
+}
+
+define(fm) max_swp_sjr_ie_dv_fm {alias max_swp_sjr_ie_fm($m) kind 'EXPORT-LIMIT' units 'TAF'}
+define(fm) max_cvp_sjr_ie_dv_fm {alias max_cvp_sjr_ie_fm($m) kind 'EXPORT-LIMIT' units 'TAF'}
+
+/*
+goal set_NMFS_SWP_Apr {
+  lhs D33D_Apr
+  rhs max(700.,0.125*I33B_Apr*taf_cfs(7-month))*cfs_taf(7-month)
+  lhs>rhs penalty 100000
+  lhs<rhs penalty    0
+}
+
+goal set_NMFS_SWP_May {
+  lhs D33D_May
+  rhs max(700.,0.125*I33B_May*taf_cfs(8-month))*cfs_taf(8-month)
+  lhs>rhs penalty 100000
+  lhs<rhs penalty    0
+}
+
+
+!**********************
+
+goal set_NMFS_CVP_Apr {
+  lhs D33E_Apr
+  rhs max(800.,0.125*I33B_Apr*taf_cfs(7-month))*cfs_taf(7-month)
+  lhs>rhs penalty 100000
+  lhs<rhs penalty    0
+}
+
+goal set_NMFS_CVP_May {
+  lhs D33E_May
+  rhs max(800.,0.125*I33B_May*taf_cfs(8-month))*cfs_taf(8-month)
+  lhs>rhs penalty 100000
+  lhs<rhs penalty    0
+}
+*/
+!*********************************************************************************************

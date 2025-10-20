@@ -1,0 +1,290 @@
+!Given TOC, TDS, and Br at Banks and Tracy, calculate
+!water quality at various nodes in on the aqueduct.
+
+!Define WQ state and decision variables
+
+!Millerton
+define TOC18 {value 1.} !mg/L
+define TDS18 {value 30.} !mg/L
+define BR18 {value 0.001} !mg/L
+
+!Groundwater at TVC
+define TOC933 {value 0.1} !mg/L
+define TDS933 {value 100.} !mg/L
+define BR933 {value 0.000001} !mg/L
+
+!Groundwater at SWC
+define TOC938 {value 0.1} !mg/L
+define TDS938 {value 100.} !mg/L
+define BR938 {value 0.000001} !mg/L
+
+!Groundwater at AEI
+define TOC952 {value 0.1} !mg/L
+define TDS952 {value 100.} !mg/L
+define BR952 {value 0.000001} !mg/L
+
+!Banks and Tracy
+define TOC419 {timeseries kind 'water-quality' units 'mg/l'}
+define TDS419 {timeseries kind 'water-quality' units 'mg/l'}
+define BR419 {timeseries kind 'water-quality' units 'mg/l'}
+define TOC418 {timeseries kind 'water-quality' units 'mg/l'}
+define TDS418 {timeseries kind 'water-quality' units 'mg/l'}
+define BR418 {timeseries kind 'water-quality' units 'mg/l'}
+ 
+!Intertie
+define TOC800 {std kind 'water-quality' units 'mg/l'}
+define TDS800 {std kind 'water-quality' units 'mg/l'}
+define BR800 {std kind 'water-quality' units 'mg/l'}
+
+!O'Neill Forebay
+define TOC805 {std kind 'water-quality' units 'mg/l'}
+define TDS805 {std kind 'water-quality' units 'mg/l'}
+define BR805 {std kind 'water-quality' units 'mg/l'}
+
+!San Luis
+define TOC12 {std kind 'water-quality' units 'mg/l'}
+define TDS12 {std kind 'water-quality' units 'mg/l'}
+define BR12 {std kind 'water-quality' units 'mg/l'}
+
+!California Aqueduct at Trans Valley Canal intertie
+define TOC848 {std kind 'water-quality' units 'mg/l'}
+define TDS848 {std kind 'water-quality' units 'mg/l'}
+define BR848 {std kind 'water-quality' units 'mg/l'}
+
+!Local diversion and groundwater bank return on TVC
+define TOC931 {std kind 'water-quality' units 'mg/l'}
+define TDS931 {std kind 'water-quality' units 'mg/l'}
+define BR931 {std kind 'water-quality' units 'mg/l'}
+
+!FK at TVC intertie
+define TOC930 {std kind 'water-quality' units 'mg/l'}
+define TDS930 {std kind 'water-quality' units 'mg/l'}
+define BR930 {std kind 'water-quality' units 'mg/l'}
+
+!California Aqueduct at Shafter Wasco Canal intertie
+define TOC851 {std kind 'water-quality' units 'mg/l'}
+define TDS851 {std kind 'water-quality' units 'mg/l'}
+define BR851 {std kind 'water-quality' units 'mg/l'}
+
+!Local diversion and groundwater bank return on SWC
+define TOC936 {std kind 'water-quality' units 'mg/l'}
+define TDS936 {std kind 'water-quality' units 'mg/l'}
+define BR936 {std kind 'water-quality' units 'mg/l'}
+
+!FK at SWC intertie
+define TOC935 {std kind 'water-quality' units 'mg/l'}
+define TDS935 {std kind 'water-quality' units 'mg/l'}
+define BR935 {std kind 'water-quality' units 'mg/l'}
+
+!CA at Cross Valley Canal
+define TOC855 {std kind 'water-quality' units 'mg/l'}
+define TDS855 {std kind 'water-quality' units 'mg/l'}
+define BR855 {std kind 'water-quality' units 'mg/l'}
+
+!FK at Cross Valley Canal
+define TOC940 {std kind 'water-quality' units 'mg/l'}
+define TDS940 {std kind 'water-quality' units 'mg/l'}
+define BR940 {std kind 'water-quality' units 'mg/l'}
+
+!CA at Arvin-Edison Intertie
+define TOC861 {std kind 'water-quality' units 'mg/l'}
+define TDS861 {std kind 'water-quality' units 'mg/l'}
+define BR861 {std kind 'water-quality' units 'mg/l'}
+
+!Local diversion and groundwater bank return on AEI
+define TOC950 {std kind 'water-quality' units 'mg/l'}
+define TDS950 {std kind 'water-quality' units 'mg/l'}
+define BR950 {std kind 'water-quality' units 'mg/l'}
+
+
+!Calculate water quality at CA locations
+
+!Intertie
+goal calc_TOC800 {TOC800 = (TOC419*C_CAA003[BASE] + TOC418*C700A[BASE])/(C_CAA003[BASE] + C700A[BASE])}
+goal calc_TDS800 {TDS800 = (TDS419*C_CAA003[BASE] + TDS418*C700A[BASE])/(C_CAA003[BASE] + C700A[BASE])}
+goal calc_BR800 {BR800 = (BR419*C_CAA003[BASE] + BR418*C700A[BASE])/(C_CAA003[BASE] + C700A[BASE])}
+
+!O'Neill Forebay
+define fact_805 {value 1./(C803[BASE]+D703[BASE]+C11[BASE]+C12[BASE])}
+goal calc_TOC805 {TOC805 = C803[BASE]*fact_805*TOC800 + D703[BASE]*fact_805*TOC418 + (C11[BASE]+C12[BASE])*fact_805*TOC12(-1)}
+goal calc_TDS805 {TDS805 = C803[BASE]*fact_805*TDS800 + D703[BASE]*fact_805*TDS418 + (C11[BASE]+C12[BASE])*fact_805*TDS12(-1)}
+goal calc_BR805 {BR805 = C803[BASE]*fact_805*BR800 + D703[BASE]*fact_805*BR418 + (C11[BASE]+C12[BASE])*fact_805*BR12(-1)}
+
+!San Luis
+define fact_12 {value 1./(S12(-1)*taf_cfs + D703[BASE] + D805[BASE])}
+goal calc_TOC12 {TOC12 = S12(-1)*TAF_CFS*FACT_12*TOC12(-1) + (D703[BASE]+D805[BASE])*FACT_12*TOC805}
+goal calc_TDS12 {TDS12 = S12(-1)*TAF_CFS*FACT_12*TDS12(-1) + (D703[BASE]+D805[BASE])*FACT_12*TDS805}
+goal calc_BR12 {BR12 = S12(-1)*TAF_CFS*FACT_12*BR12(-1) + (D703[BASE]+D805[BASE])*FACT_12*BR805}
+
+!California Aqueduct at Trans Valley Canal intertie
+define CA_MIX848 {
+    case more_CA {
+        condition   C847[base] > D848[base]
+        value       C847[base] - D848[base]
+    }
+    case otherwise {
+        condition   always
+        value       0.
+    }
+}
+define fact_848 {value 1./(CA_MIX848 + C848_TVC_R[BASE])}
+goal calc_TOC848 {TOC848 = CA_MIX848*fact_848*TOC805 + C848_TVC_R[BASE]*fact_848*TOC931}
+goal calc_TDS848 {TDS848 = CA_MIX848*fact_848*TDS805 + C848_TVC_R[BASE]*fact_848*TDS931}
+goal calc_BR848 {BR848 = CA_MIX848*fact_848*BR805 + C848_TVC_R[BASE]*fact_848*BR931}
+
+!Local TVC
+Define TVC_933_GWP {value max(0., D933_GWP[BASE] - D931A_C2[BASE] - D931A_SD[BASE] - D931B_C2[BASE] - D931B_SD[BASE])}
+Define fact_931 {
+    case no_water {
+        condition   C848_TVC_F[BASE] + C931_TVC_R[BASE] + TVC_933_GWP < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C848_TVC_F[BASE] + C931_TVC_R[BASE] + TVC_933_GWP)
+    }
+}
+goal calc_TOC931 {TOC931 = C848_TVC_F[BASE]*fact_931*TOC848 + C931_TVC_R*fact_931*TOC18 + TVC_933_GWP*fact_931*TOC933}
+goal calc_TDS931 {TDS931 = C848_TVC_F[BASE]*fact_931*TDS848 + C931_TVC_R*fact_931*TDS18 + TVC_933_GWP*fact_931*TDS933}
+goal calc_BR931 {BR931 = C848_TVC_F[BASE]*fact_931*BR848 + C931_TVC_R*fact_931*BR18 + TVC_933_GWP*fact_931*BR933}   
+
+!FK at TVC intertie
+define FRIANT_MIX930 {
+    CASE MORE_FRIANT {
+        CONDITION   C920[BASE] > D930[BASE]
+        VALUE       C920[BASE] - D930[BASE]
+    }
+    CASE OTHERWISE {
+        CONDITION   ALWAYS
+        VALUE       0.
+    }
+}
+DEFINE fact_930 {
+    case no_water {
+        condition   C931_TVC_F[BASE] + FRIANT_MIX930 < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C931_TVC_F[BASE] + FRIANT_MIX930)
+    }
+}
+goal calc_TOC930 {TOC930 = C931_TVC_F[BASE]*fact_930*TOC931 + FRIANT_MIX930*fact_930*TOC18}
+goal calc_TDS930 {TDS930 = C931_TVC_F[BASE]*fact_930*TDS931 + FRIANT_MIX930*fact_930*TDS18}
+goal calc_BR930 {BR930 = C931_TVC_F[BASE]*fact_930*BR931 + FRIANT_MIX930*fact_930*BR18}
+
+!California Aqueduct at Shafter Wasco Canal intertie
+define CA_MIX851 {
+    case more_CA {
+        condition   C850[base] > D851[base]
+        value       C850[base] - D851[base]
+    }
+    case otherwise {
+        condition   always
+        value       0.
+    }
+}
+
+define fact_851 {value 1./(CA_MIX851 + C851_SW_R[BASE])}
+goal calc_TOC851 {TOC851 = CA_MIX851*fact_851*TOC848 + C851_SW_R[BASE]*fact_851*TOC936}
+goal calc_TDS851 {TDS851 = CA_MIX851*fact_851*TDS848 + C851_SW_R[BASE]*fact_851*TDS936}
+goal calc_BR851 {BR851 = CA_MIX851*fact_851*BR848 + C851_SW_R[BASE]*fact_851*BR936}
+
+!Local SWC
+define SW_938_GWP {value max(0., D938_GWP[BASE] - D936_C2[BASE] - D936_SD[BASE])}
+Define fact_936 {
+    case no_water {
+        condition   C851_SW_F[BASE] + C936_SW_R[BASE] + SW_938_GWP < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C851_SW_F[BASE] + C936_SW_R[BASE] + SW_938_GWP)
+    }
+}
+goal calc_TOC936 {TOC936 = C851_SW_F[BASE]*fact_936*TOC851 + C936_SW_R[BASE]*fact_936*TOC935 + SW_938_GWP*fact_936*TOC938}
+goal calc_TDS936 {TDS936 = C851_SW_F[BASE]*fact_936*TDS851 + C936_SW_R[BASE]*fact_936*TDS935 + SW_938_GWP*fact_936*TDS938}
+goal calc_BR936 {BR936 = C851_SW_F[BASE]*fact_936*BR851 + C936_SW_R[BASE]*fact_936*BR935 + SW_938_GWP*fact_936*BR938}   
+
+!FK at SWC intertie
+define FRIANT_MIX935 {
+    CASE MORE_FRIANT {
+        CONDITION   C930[BASE] > D935[BASE]
+        VALUE       C930[BASE] - D935[BASE]
+    }
+    CASE OTHERWISE {
+        CONDITION   ALWAYS
+        VALUE       0.
+    }
+}
+DEFINE fact_935 {
+    case no_water {
+        condition   C936_SW_F[BASE] + FRIANT_MIX935 + C941A_CVC_F[BASE] < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C936_SW_F[BASE] + FRIANT_MIX935 + C941A_CVC_F[BASE])
+    }
+}
+goal calc_TOC935 {TOC935 = C936_SW_F[BASE]*fact_935*TOC936 + FRIANT_MIX935*fact_935*TOC930 + C941A_CVC_F[BASE]*fact_935*TOC855}
+goal calc_TDS935 {TDS935 = C936_SW_F[BASE]*fact_935*TDS936 + FRIANT_MIX935*fact_935*TDS930 + C941A_CVC_F[BASE]*fact_935*TDS855}
+goal calc_BR935 {BR935 = C936_SW_F[BASE]*fact_935*BR936 + FRIANT_MIX935*fact_935*BR930 + C941A_CVC_F[BASE]*fact_935*BR855}
+
+!California Aqueduct at Cross Valley Canal
+define CA_MIX855 {
+    case more_CA {
+        condition   C854[base] > D855[base]
+        value       C854[base] - D855[base]
+    }
+    case otherwise {
+        condition   always
+        value       0.
+    }
+}
+define base_flow_cor {value min(flow_C855_CVC_R - flow_C855_CVC_F, 0.)}
+define C855_CVC_R_cor {value max(0., C855_CVC_R[BASE] + base_flow_cor)}
+
+define fact_855 {value 1./(CA_MIX855 + C855_CVC_R_cor)}
+goal calc_TOC855 {TOC855 = CA_MIX855*fact_855*TOC851 + C855_CVC_R_cor*fact_855*TOC940}
+goal calc_TDS855 {TDS855 = CA_MIX855*fact_855*TDS851 + C855_CVC_R_cor*fact_855*TDS940}
+goal calc_BR855 {BR855 = CA_MIX855*fact_855*BR851 + C855_CVC_R_cor*fact_855*BR940}
+
+!Frian-Kern Canal at Cross Valley Canal
+
+DEFINE fact_940 {
+    case no_water {
+        condition   C941B_CVC_F[BASE] + C935[BASE] < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C941B_CVC_F[BASE] + C935[BASE])
+    }
+}
+goal calc_TOC940 {TOC940 = C941B_CVC_F[BASE]*fact_940*TOC855 + C935[BASE]*fact_940*TOC935}
+goal calc_TDS940 {TDS940 = C941B_CVC_F[BASE]*fact_940*TDS855 + C935[BASE]*fact_940*TDS935}
+goal calc_BR940 {BR940 = C941B_CVC_F[BASE]*fact_940*BR855 + C935[BASE]*fact_940*BR935}
+
+
+!California Aqueduct at Arvin-Edison Intertie
+define fact_861 {value 1./(C860[BASE] + C861_AEI_R[BASE])}
+goal calc_TOC861 {TOC861 = C860[BASE]*fact_861*TOC855 + C861_AEI_R[BASE]*fact_861*TOC950}
+goal calc_TDS861 {TDS861 = C860[BASE]*fact_861*TDS855 + C861_AEI_R[BASE]*fact_861*TDS950}
+goal calc_BR861 {BR861 = C860[BASE]*fact_861*BR855 + C861_AEI_R[BASE]*fact_861*BR950}
+
+!Local AEI
+define AEI_952_GWP {value max(0., D952_GWP[BASE] - D950_C2[BASE] - D950_SD[BASE])}
+Define fact_950 {
+    case no_water {
+        condition   C861_AEI_F[BASE] + C940[BASE] + AEI_952_GWP < 0.01
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       1./(C861_AEI_F[BASE] + C940[BASE] + AEI_952_GWP)
+    }
+}
+goal calc_TOC950 {TOC950 = C861_AEI_F[BASE]*fact_950*TOC861 + C940[BASE]*fact_950*TOC940 + AEI_952_GWP*fact_950*TOC952}
+goal calc_TDS950 {TDS950 = C861_AEI_F[BASE]*fact_950*TDS861 + C940[BASE]*fact_950*TDS940 + AEI_952_GWP*fact_950*TDS952}
+goal calc_BR950 {BR950 = C861_AEI_F[BASE]*fact_950*BR861 + C940[BASE]*fact_950*BR940 + AEI_952_GWP*fact_950*BR952}  

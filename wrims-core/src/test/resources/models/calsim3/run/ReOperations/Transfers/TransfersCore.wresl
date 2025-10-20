@@ -1,0 +1,20 @@
+! TransfersCore.wresl
+!
+!******************************************************************************
+! Get defines
+include 'TransfersDefines.wresl'
+!******************************************************************************
+! Include LYRA non-discretionary SW and GW water transfers
+
+! By default, the LYRA operations are ON in the Lower Yuba module; the LYRA transferrable amounts are
+! included in C_YUB002. To prevent LYRA water from being circulated
+! in earlier cycles, the additional surface water amount (C_YUB002_LYRA) is subtracted at the Feather-Yuba confluence in the connectivity.
+! In the Transfer cycle, we no longer want to subtract out the additional LYRA supplies (as we now want the LYRA colored water to enter the system)
+! so the amount to subtract out is zeroed.
+goal setC_YUB002_LYRA_TXFR_Cyc {lhs C_YUB002_LYRA rhs 0 lhs<rhs constrain lhs>rhs constrain} !Amount to subtract out of connectivity
+
+define C_YUB002_LYRA_DeltaCyc {alias C_YUB002_LYRA[DELTA] kind 'DEBUG' units 'CFS'}
+define C_YUB002_LYRA_TransferCyc {alias C_YUB002_LYRA kind 'DEBUG' units 'CFS'}
+
+include 'LYRA_Main.wresl'
+!******************************************************************************

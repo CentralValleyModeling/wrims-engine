@@ -1,0 +1,180 @@
+!Chili Bar Operations as part of UARP Operating Rules
+!Matt Bachman, 11/2017
+
+! Implement flow requirements as specified in Appendix A of FERC License No. 2155-024
+! This includes minimum instream flow requirements to protect aquatic life beneficial uses,
+! as well as recreational streamflows to protect recreational uses
+
+! Include 2 cfs buffer on all minimum flow requirements to ensure compliance
+define MIF_PGECh_buffer {value 2.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Project Water Year !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WY_PGECh_lastyr{
+	case FirstYear {
+		condition wateryear == BgnWY
+		select ChiliBar_hist from ChiliBarYrType_hist
+		where year = wateryear 
+		}
+	case February {
+		condition month == FEB
+		value WY_PGEChdv(-1)
+		}
+	case Other {
+		condition always
+		value WY_PGECh_lastyrdv(-1)
+		}
+	}	
+define WY_PGECh_lasttwoyr{
+	case FirstYear {
+		condition wateryear == BgnWY
+		select ChiliBar_hist from ChiliBarYrType_hist
+		where year = wateryear-1
+		}
+	case SecondYear {
+		condition wateryear == BgnWY + 1
+		select ChiliBar_hist from ChiliBarYrType_hist
+		where year = wateryear
+		}
+	case February {
+		condition month == FEB
+		value WY_PGEChdv(-13)
+		}
+	case Other {
+		condition always
+		value WY_PGECh_lasttwoyrdv(-1)  ! TODO Ask Jeff if this should look back 13 month
+		}
+	}
+define WY_PGECh{
+	case SuperDry_CD{
+		condition amer_annual < 900 .and. WY_PGECh_lastyr>=5.
+		value 6.
+		}
+	case SuperDry_D{
+		condition (amer_annual >= 900 .and. amer_annual < 1700) .and. (WY_PGECh_lastyr>=4. .and. WY_PGECh_lasttwoyr>=4.)
+		value 6.
+		}
+	case Wet{
+		condition amer_annual >= 3500
+		value 1.
+		}
+	case AboveNormal{
+		condition amer_annual >= 2600
+		value 2.
+		}
+	case BelowNormal{
+		condition amer_annual >= 1700
+		value 3.
+		}
+	case Dry{
+		condition amer_annual >= 900
+		value 4.
+		}	
+	case CriticallyDry{
+		condition always
+		value 5.
+		}
+	}
+
+define WY_PGECh_lastyrdv {std kind 'INDEX' units 'NONE'}
+define WY_PGECh_lasttwoyrdv {std kind 'INDEX' units 'NONE'}
+define WY_PGEChdv {std kind 'INDEX' units 'NONE'}
+goal setWY_PGECh_lastyrdv {WY_PGECh_lastyrdv=WY_PGECh_lastyr}
+goal setWY_PGECh_lasttwoyrdv {WY_PGECh_lasttwoyrdv=WY_PGECh_lasttwoyr}
+goal setWY_PGEChdv {WY_PGEChdv=WY_PGECh}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Flow Requirements !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! MIF below Chili Bar Dam 
+! This is just calculated as an extra data point - full flow requirements (i.e. including recreational flows)
+! are contained in MIF_PGECh_req
+define MIF_PGECh_SFA030{
+	case Wet{
+		condition WY_PGECh == 1
+		select Wet from MIF_PGECh
+		where month = month
+		}
+	case AboveNormal{
+		condition WY_PGECh == 2
+		select AboveNormal from MIF_PGECh
+		where month = month
+		}
+	case BelowNormal{
+		condition WY_PGECh == 3
+		select BelowNormal from MIF_PGECh
+		where month = month
+		}
+	case Dry{
+		condition WY_PGECh == 4
+		select Dry from MIF_PGECh
+		where month = month
+		}
+	case CriticallyDry{
+		condition WY_PGECh == 5
+		select CriticalDry from MIF_PGECh
+		where month = month
+		}
+	case CriticallyDry{
+		condition WY_PGECh == 6
+		select SuperDry from MIF_PGECh
+		where month = month
+		}
+	}
+
+
+! Total flow requirements below Chili Bar Dam 
+/*Total required flows include recreational flows (Table 4 of Appendix A), and minimum instream flow requirements (Table 2)
+Monthly requirements were developed by first calculating the daily flow-weighted flow requirement, assuming that:
+		1) Recreational flow requirements are met for the specified number of hours (with respect to day of year, day of week, and water year type)
+		2) Instream requirements are met for the remaining hours of the day
+This assumption was applied to every day from 1/1/1922-12/31/2015
+Monthly requirements represent the average of the flow-weighted requirements of every day in that month from 1922-2015
+See ChiliBar_RequiredFlows.xls for breakdown of calculations of final averaged flow-weighted requirements*/
+define MIF_PGECh_req_SFA030{
+	case Wet{
+		condition WY_PGECh == 1
+		select Wet from MIF_PGECh_req
+		where month = month
+		}
+	case AboveNormal{
+		condition WY_PGECh == 2
+		select AboveNormal from MIF_PGECh_req
+		where month = month
+		}
+	case BelowNormal{
+		condition WY_PGECh == 3
+		select BelowNormal from MIF_PGECh_req
+		where month = month
+		}
+	case Dry{
+		condition WY_PGECh == 4
+		select Dry from MIF_PGECh_req
+		where month = month
+		}
+	case CriticallyDry{
+		condition WY_PGECh == 5
+		select CriticalDry from MIF_PGECh_req
+		where month = month
+		}
+	case CriticallyDry{
+		condition WY_PGECh == 6
+		select SuperDry from MIF_PGECh_req
+		where month = month
+		}
+	}
+
+goal ChiliBarRel {C_SFA030_mif < MIF_PGECh_req_SFA030}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define MIF_PGECh_SFA030dv     {alias MIF_PGECh_SFA030 kind 'MIF' units 'CFS'}
+define MIF_PGECh_req_SFA030dv {alias MIF_PGECh_req_SFA030 kind 'MIF_REQ' units 'CFS'}

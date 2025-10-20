@@ -1,0 +1,490 @@
+/*
+Summary
+-------
+The purpose of this module is to calculate the salinity concentration in the
+Upper San Joaquin River, from Friant Dam (C_SJR265) to Stevinson (C_SJR123),
+via a mass balance approach. Electrical Conductivity (EC) is a measurement of
+water volume's salinity concentration.
+
+Acronyms
+--------
+EC          Electrical Conductivity
+SJR         San Joaquin River
+
+*/
+! Calculate EC at SJR Mile 265.
+define EC_SJR265 {
+    case NearZero {
+        condition (  C_MLRTN[SJRBASE_GW4]
+                   + I_SJR265 ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_MLRTN   * C_MLRTN[SJRBASE_GW4]
+               + EC_ISJR265 * I_SJR265 )
+              / (  C_MLRTN[SJRBASE_GW4]
+                 + I_SJR265 ) }
+}
+! Calculate EC at SJR Mile 263.
+define EC_SJR263 {
+    case NearZero {
+        condition (  C_SJR265[SJRBASE_GW4]
+                   + SG54_SJR263_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR265       * C_SJR265[SJRBASE_GW4]
+               + EC_SJR265       * min(SG54_SJR263_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG54_SJR263_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR265[SJRBASE_GW4]
+                 + SG54_SJR263_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 258.
+define EC_SJR258 {
+    case NearZero {
+        condition (  C_SJR263[SJRBASE_GW4]
+                   + I_SJR258 ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR263  * C_SJR263[SJRBASE_GW4]
+               + EC_ISJR258 * I_SJR258 )
+              / (  C_SJR263[SJRBASE_GW4]
+                 + I_SJR258 ) }
+}
+! Calculate EC at SJR Mile 256.
+define EC_SJR256 {
+    case NearZero {
+        condition (  C_SJR258[SJRBASE_GW4]
+                   + SG55_SJR256_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR258       * C_SJR258[SJRBASE_GW4]
+               + EC_SJR258       * min(SG55_SJR256_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG55_SJR256_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR258[SJRBASE_GW4]
+                 + SG55_SJR256_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 249.
+define EC_SJR249 {
+    case NearZero {
+        condition (  C_SJR256[SJRBASE_GW4]
+                   + SG56_SJR249_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR256       * C_SJR256[SJRBASE_GW4]
+               + EC_SJR256       * min(SG56_SJR249_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG56_SJR249_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR256[SJRBASE_GW4]
+                 + SG56_SJR249_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 242.
+define EC_SJR242 {
+    case NearZero {
+        condition (  C_SJR249[SJRBASE_GW4]
+                   + SG57_SJR242_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR249       * C_SJR249[SJRBASE_GW4]
+               + EC_SJR249       * min(SG57_SJR242_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG57_SJR242_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR249[SJRBASE_GW4]
+                 + SG57_SJR242_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 235.
+define EC_SJR235 {
+    case NearZero {
+        condition (  C_SJR242[SJRBASE_GW4]
+                   + SG58_SJR235_7[SJRBASE_GW4]
+                   + R_64_PA1_SJR235[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR242       * C_SJR242[SJRBASE_GW4]
+               + EC_SJR242       * min(SG58_SJR235_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG58_SJR235_7[SJRBASE_GW4], 0.)
+               + EC_R_64PA1      * R_64_PA1_SJR235[SJRBASE_GW4] )
+              / (  C_SJR242[SJRBASE_GW4]
+                 + SG58_SJR235_7[SJRBASE_GW4]
+                 + R_64_PA1_SJR235[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 227.
+define EC_SJR227 {
+    case NearZero {
+        condition (  C_SJR235[SJRBASE_GW4]
+                   + SR_64_SJR227[SJRBASE_GW4]
+                   + SG59_SJR227_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR235      * C_SJR235[SJRBASE_GW4]
+               + EC_SR_64       * SR_64_SJR227[SJRBASE_GW4]
+               + EC_SJR235      * min(SG59_SJR227_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG59_SJR227_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR235[SJRBASE_GW4]
+                 + SR_64_SJR227[SJRBASE_GW4]
+                 + SG59_SJR227_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 225.
+define EC_SJR225 {value EC_SJR227}
+! Calculate EC at SJR Mile 221.
+define EC_SJR221 {
+    case NearZero {
+        condition (  C_SJR225[SJRBASE_GW4]
+                   + SG60_SJR221_7[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR225       * C_SJR225[SJRBASE_GW4]
+               + EC_SJR225       * min(SG60_SJR221_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG60_SJR221_7[SJRBASE_GW4], 0.) )
+              / (  C_SJR225[SJRBASE_GW4]
+                 + SG60_SJR221_7[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 214.
+define EC_SJR214 {
+    case NearZero {
+        condition (  C_SJR221[SJRBASE_GW4]
+                   + SG61_SJR214_7[SJRBASE_GW4]
+                   + SR_64_SJR214[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR221      * C_SJR221[SJRBASE_GW4]
+               + EC_SJR221      * min(SG61_SJR214_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG61_SJR214_7[SJRBASE_GW4], 0.)
+               + EC_SR_64       * SR_64_SJR214[SJRBASE_GW4] )
+              / (  C_SJR221[SJRBASE_GW4]
+                 + SG61_SJR214_7[SJRBASE_GW4]
+                 + SR_64_SJR214[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 213.
+define EC_SJR213 {value EC_SJR214}
+! Calculate EC at SJR Mile 205.
+define EC_SJR205 {
+    case NearZero {
+        condition (  C_SJR213[SJRBASE_GW4]
+                   + SG62_SJR205_7[SJRBASE_GW4]
+                   + SG63_SJR205_8[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR213       * C_SJR213[SJRBASE_GW4]
+               + EC_SJR213       * min(SG62_SJR205_7[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG62_SJR205_7[SJRBASE_GW4], 0.)
+               + EC_SJR213       * min(SG63_SJR205_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG63_SJR205_8[SJRBASE_GW4], 0.) )
+              / (  C_SJR213[SJRBASE_GW4]
+                 + SG62_SJR205_7[SJRBASE_GW4]
+                 + SG63_SJR205_8[SJRBASE_GW4] ) }
+}
+! Calculate EC from Mendota Pool.
+define EC_MDOTA {
+    case NearZero {
+        condition (  C_SJR205[SJRBASE_GW4]
+                   + SG_MDOTA_872[SJRBASE_GW4]
+                   + C_DMC116[SJRBASE_GW4]
+                   + C_FSL005[SJRBASE_GW4] ) < small_flow
+        value 0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR205       * C_SJR205[SJRBASE_GW4]
+               + EC_SJR205       * min(SG_MDOTA_872[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG_MDOTA_872[SJRBASE_GW4], 0.)
+               + EC_DMC116       * C_DMC116[SJRBASE_GW4]
+               + EC_FSL005       * C_FSL005[SJRBASE_GW4] )
+              / (  C_SJR205[SJRBASE_GW4]
+                 + SG_MDOTA_872[SJRBASE_GW4]
+                 + C_DMC116[SJRBASE_GW4]
+                 + C_FSL005[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 201.
+define EC_SJR201 {
+    case NearZero {
+        condition (  C_MDOTA[SJRBASE_GW4]
+                   + D_SJR205_SJR201[SJRBASE_GW4] ) < small_flow
+        value     0.0}
+    case otherwise {
+        condition always
+        value (  EC_MDOTA  * C_MDOTA[SJRBASE_GW4]
+               + EC_SJR205 * D_SJR205_SJR201[SJRBASE_GW4] )
+              / (  C_MDOTA[SJRBASE_GW4]
+                 + D_SJR205_SJR201[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 200.
+define EC_SJR200 {value EC_SJR201}
+! Calculate EC at SJR Mile 198.
+define EC_SJR198 {
+    case NearZero {
+        condition (  C_SJR200[SJRBASE_GW4]
+                   + SG64_SJR198_8[SJRBASE_GW4] ) < small_flow
+        value     0.0}
+    case otherwise {
+        condition always
+        value (  EC_SJR200       * C_SJR200[SJRBASE_GW4]
+               + EC_SJR200       * min(SG64_SJR198_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG64_SJR198_8[SJRBASE_GW4], 0.) )
+              / (  C_SJR200[SJRBASE_GW4]
+                 + SG64_SJR198_8[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 195.
+define EC_SJR195 {
+    case NearZero {
+        condition (  C_SJR198[SJRBASE_GW4]
+                   + C_FBW001[SJRBASE_GW4] ) < small_flow
+        value     0.0}
+    case otherwise {
+        condition always
+        value (  EC_SJR198   * C_SJR198[SJRBASE_GW4]
+               + EC_WWTPR_GD * C_FBW001[SJRBASE_GW4] )
+              / (  C_SJR198[SJRBASE_GW4]
+                 + C_FBW001[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 192.
+define EC_SJR192 {
+    case NearZero {
+        condition (  C_SJR195[SJRBASE_GW4]
+                   + SG65_SJR192_8[SJRBASE_GW4] ) < small_flow
+        value     0.0}
+    case otherwise {
+        condition always
+        value (  EC_SJR195       * C_SJR195[SJRBASE_GW4]
+               + EC_SJR195       * min(SG65_SJR192_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR  * max(SG65_SJR192_8[SJRBASE_GW4], 0.) )
+              / (  C_SJR195[SJRBASE_GW4]
+                 + SG65_SJR192_8[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 185.
+define EC_SJR185 {
+    case NearZero {
+        condition (  C_SJR192[SJRBASE_GW4]
+                   + SG66_SJR185_8[SJRBASE_GW4]
+                   + R_64_XA_SJR185[SJRBASE_GW4] ) < small_flow
+        value     0.0}
+    case otherwise {
+        condition always
+        value (  EC_SJR192      * C_SJR192[SJRBASE_GW4]
+               + EC_SJR192      * min(SG66_SJR185_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG66_SJR185_8[SJRBASE_GW4], 0.)
+               + EC_R_64_XA     * R_64_XA_SJR185[SJRBASE_GW4] )
+              / (  C_SJR192[SJRBASE_GW4]
+                 + SG66_SJR185_8[SJRBASE_GW4]
+                 + R_64_XA_SJR185[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 180.
+define EC_SJR180 {
+    case NearZero {
+        condition (  C_SJR185[SJRBASE_GW4]
+                   + SG67_SJR180_8[SJRBASE_GW4]
+                   + SR_64_SJR180[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR185      * C_SJR185[SJRBASE_GW4]
+               + EC_SJR185      * min(SG67_SJR180_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG67_SJR180_8[SJRBASE_GW4], 0.)
+               + EC_SR_64       * SR_64_SJR180[SJRBASE_GW4] )
+              / (  C_SJR185[SJRBASE_GW4]
+                 + SG67_SJR180_8[SJRBASE_GW4]
+                 + SR_64_SJR180[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 179.
+define EC_SJR179 {value EC_SJR180}
+! Calculate EC at SJR Mile 173.
+define EC_SJR173 {
+    case NearZero {
+        condition (  C_SJR179[SJRBASE_GW4]
+                   + SG68_SJR173_8[SJRBASE_GW4]
+                   + SG78_SJR173_10[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR179      * C_SJR179[SJRBASE_GW4]
+               + EC_SJR179      * min(SG68_SJR173_8[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG68_SJR173_8[SJRBASE_GW4], 0.)
+               + EC_SJR179      * min(SG78_SJR173_10[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG78_SJR173_10[SJRBASE_GW4], 0.) )
+              / (  C_SJR179[SJRBASE_GW4]
+                 + SG68_SJR173_8[SJRBASE_GW4]
+                 + SG78_SJR173_10[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 166.
+define EC_SJR166 {
+    case NearZero {
+        condition (  C_SJR173[SJRBASE_GW4]
+                   + SG79_SJR166_10[SJRBASE_GW4]
+                   + SG89_SJR166_12[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR173      * C_SJR173[SJRBASE_GW4]
+               + EC_SJR173      * min(SG79_SJR166_10[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG79_SJR166_10[SJRBASE_GW4], 0.)
+               + EC_SJR173      * min(SG89_SJR166_12[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG89_SJR166_12[SJRBASE_GW4], 0.) )
+              / (  C_SJR173[SJRBASE_GW4]
+                 + SG79_SJR166_10[SJRBASE_GW4]
+                 + SG89_SJR166_12[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 157.
+define EC_SJR157 {
+    case NearZero {
+        condition (  C_SJR166[SJRBASE_GW4]
+                   + SG90_SJR157_12[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR166      * C_SJR166[SJRBASE_GW4]
+               + EC_SJR166      * min(SG90_SJR157_12[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG90_SJR157_12[SJRBASE_GW4], 0.) )
+              / (  C_SJR166[SJRBASE_GW4]
+                 + SG90_SJR157_12[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 152.
+define EC_SJR152 {
+    case NearZero {
+        condition (  C_SJR157[SJRBASE_GW4]
+                   + SG91_SJR152_12[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR157      * C_SJR157[SJRBASE_GW4]
+               + EC_SJR157      * min(SG91_SJR152_12[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG91_SJR152_12[SJRBASE_GW4], 0.) )
+              / (  C_SJR157[SJRBASE_GW4]
+                 + SG91_SJR152_12[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 145.
+define EC_SJR145 {
+    case NearZero {
+        condition (  C_SJR152[SJRBASE_GW4]
+                   + SG92_SJR145_12[SJRBASE_GW4]
+                   + SG102_SJR145_14[SJRBASE_GW4]
+                   + SP_EBP041_SJR145[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR152      * C_SJR152[SJRBASE_GW4]
+               + EC_SJR152      * min(SG92_SJR145_12[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG92_SJR145_12[SJRBASE_GW4], 0.)
+               + EC_SJR152      * min(SG102_SJR145_14[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG102_SJR145_14[SJRBASE_GW4], 0.)
+               + EC_SP_EBP041_SJR145 * SP_EBP041_SJR145[SJRBASE_GW4] )
+              / (  C_SJR152[SJRBASE_GW4]
+                 + SG92_SJR145_12[SJRBASE_GW4]
+                 + SG102_SJR145_14[SJRBASE_GW4]
+                 + SP_EBP041_SJR145[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 141.
+define EC_SJR141 {
+    case NearZero {
+        condition (  C_SJR145[SJRBASE_GW4]
+                   + SG103_SJR141_14[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR145      * C_SJR145[SJRBASE_GW4]
+               + EC_SJR145      * min(SG103_SJR141_14[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG103_SJR141_14[SJRBASE_GW4], 0.) )
+              / (  C_SJR145[SJRBASE_GW4]
+                 + SG103_SJR141_14[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 134.
+define EC_SJR134 {
+    case NearZero {
+        condition (  C_SJR141[SJRBASE_GW4]
+                   + SG104_SJR134_14[SJRBASE_GW4]
+                   + SG113_SJR134_16[SJRBASE_GW4]
+                   + SR_63_SJR134[SJRBASE_GW4]
+                   + R_63_PR3_SJR134[SJRBASE_GW4]
+                   + C_EBP050[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR141      * C_SJR141[SJRBASE_GW4]
+               + EC_SJR141      * min(SG104_SJR134_14[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG104_SJR134_14[SJRBASE_GW4], 0.)
+               + EC_SJR141      * min(SG113_SJR134_16[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG113_SJR134_16[SJRBASE_GW4], 0.)
+               + EC_SR_63       * SR_63_SJR134[SJRBASE_GW4]
+               + EC_R_63_PR3    * R_63_PR3_SJR134[SJRBASE_GW4]
+               + EC_EBP050      * C_EBP050[SJRBASE_GW4] )
+              / (  C_SJR141[SJRBASE_GW4]
+                 + SG104_SJR134_14[SJRBASE_GW4]
+                 + SG113_SJR134_16[SJRBASE_GW4]
+                 + SR_63_SJR134[SJRBASE_GW4]
+                 + R_63_PR3_SJR134[SJRBASE_GW4]
+                 + C_EBP050[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR Mile 131.
+define EC_SJR131 {value EC_SJR134}
+! Calculate EC at SJR 127.
+define EC_SJR127 {
+    case NearZero {
+        condition (  C_SJR131[SJRBASE_GW4]
+                   + C_SAL006[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR131 * C_SJR131[SJRBASE_GW4]
+               + EC_SAL006 * C_SAL006[SJRBASE_GW4] )
+              / (  C_SJR131[SJRBASE_GW4]
+                 + C_SAL006[SJRBASE_GW4] ) }
+}
+! Calculate EC at SJR 123.
+define EC_SJR123 {
+    case NearZero {
+        condition (  C_SJR127[SJRBASE_GW4]
+                   + SG114_SJR123_16[SJRBASE_GW4]
+                   + CT_Stevinson[SJRBASE_GW4] ) < small_flow
+        value     0.0 }
+    case otherwise {
+        condition always
+        value (  EC_SJR127      * C_SJR127[SJRBASE_GW4]
+               + EC_SJR127      * min(SG114_SJR123_16[SJRBASE_GW4], 0.)
+               + EC_SG_UpperSJR * max(SG114_SJR123_16[SJRBASE_GW4], 0.)
+               + EC_SJR127      * min(CT_Stevinson[SJRBASE_GW4], 0.)
+               + EC_STEVE_GD    * max(CT_Stevinson[SJRBASE_GW4], 0.) )
+              / (  C_SJR127[SJRBASE_GW4]
+                 + SG114_SJR123_16[SJRBASE_GW4]
+                 + CT_Stevinson[SJRBASE_GW4] ) }
+}
+! Output results to DV file.
+define EC_MLRTN_DV  {alias EC_MLRTN  kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR265_DV {alias EC_SJR265 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR263_DV {alias EC_SJR263 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR258_DV {alias EC_SJR258 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR256_DV {alias EC_SJR256 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR249_DV {alias EC_SJR249 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR242_DV {alias EC_SJR242 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR235_DV {alias EC_SJR235 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR227_DV {alias EC_SJR227 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR225_DV {alias EC_SJR225 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR221_DV {alias EC_SJR221 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR214_DV {alias EC_SJR214 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR213_DV {alias EC_SJR213 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR205_DV {alias EC_SJR205 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_MDOTA_DV  {alias EC_MDOTA  kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR201_DV {alias EC_SJR201 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR200_DV {alias EC_SJR200 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR198_DV {alias EC_SJR198 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR195_DV {alias EC_SJR195 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR192_DV {alias EC_SJR192 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR185_DV {alias EC_SJR185 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR180_DV {alias EC_SJR180 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR179_DV {alias EC_SJR179 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR173_DV {alias EC_SJR173 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR166_DV {alias EC_SJR166 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR157_DV {alias EC_SJR157 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR152_DV {alias EC_SJR152 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR145_DV {alias EC_SJR145 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR141_DV {alias EC_SJR141 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_EBP050_DV {alias EC_EBP050 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR134_DV {alias EC_SJR134 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR131_DV {alias EC_SJR131 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SAL006_DV {alias EC_SAL006 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR127_DV {alias EC_SJR127 kind 'EC-DEBUG' units 'UMHOS/CM'}
+define EC_SJR123_DV {alias EC_SJR123 kind 'EC-DEBUG' units 'UMHOS/CM'}

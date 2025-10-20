@@ -1,0 +1,147 @@
+/*
+File Name: SlateCreekDiversion.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose: Determine allowable diversion from Slate Creek to Sly Creek Reservoir
+
+Created A Draper M Bachman, MWH/Stantec, 06.08.17 
+
+/*
+
+/*
+OWID Water-Right License and Permit – Slate Creek (tributary to North Yuba River)
+
+License 10940 (Application 13956):
+Direct diversion right of 300 cfs, year-round;
+Storage right of 34,200 af/yr, with a 300 cfs maximum diversion rate to offstream storage,between January 1 and July 1; Priority Date: 9/20/50
+
+Permit 11516 (Application 13957): Direct diversion right of 300 cfs, year-round; Storage right of 35,000 af/yr, with a 300 cfs maximum diversion rate to offstream storage,
+between January 1 and July 1; Priority Date: 9/20/50
+
+Note: The total direct-diversion rate under License 10940 and Permit 11516 is 300 cfs,
+the total diversion-to-storage rate is 300 cfs, and the total direct diversion and diversion to storage rate is 600 cfs.
+*/
+
+!*******************************
+! Junior to YCWA water right
+!*******************************
+
+! No OWID diversions from Slate Creek are authorized when flows into New Bullards Bar Reservoir from the North Yuba River are less than 800 cfs.
+
+define NewBullardsBarFNFFlag {value min(1.,max (I_SLT009 + I_NFY029 + I_NBLDB - 800,0))}
+
+!*******************************
+! Maximum diversion rate
+!*******************************
+define maxDiversionRate {
+       case JanJul    {condition month>=Jan .and. month <=Jul value 600.} 
+       case Otherwise {condition always value 300}}
+             
+
+!*********************************************
+! Cumulative diversion restriction Oct 1-Mar 1
+!*********************************************
+
+! No OWID diversions from Slate Creek are authorized until 5,335 acre-feet of water above 800 cfs has flowed into New Bullards Bar Reservoir during
+! the October 1 to March 1 storage season.
+
+define NBBCumInflowdv {std kind 'DIVERSION' units 'TAF'}
+
+define NBBCumInflow {
+       case October   {condition month==Oct value 0} 
+       case Otherwise {condition always value max(0,I_SLT009(-1)*cfs_taf(-1)+I_NFY029(-1)*cfs_taf(-1)+I_NBLDB(-1)*cfs_taf(-1)-D_SLT009_SCT000(-1)*cfs_taf(-1)-800*cfs_taf)+NBBCumInflowdv(-1)}}
+
+goal set_NBBCumInflowdv {NBBCumInflowdv=NBBCumInflow}
+
+
+define SlateCreekCumDivFlag{
+       case OctFeb     {condition month <=FEB value 1.} 
+       case Otherwise  {condition always value 0.}}
+       
+       
+!***********************************************
+! Cumulative diversion restriction Dec 15-Jul 15
+!***********************************************
+
+! No OWID diversions from Slate Creek are authorized until 30,000 acre-feet of water above 800 cfs (and, during October 1 to March 1, above the 5,335 af)
+! has flowed into New Bullards Bar Reservoir between Dec 15 and Jul 15.  
+
+define NBBCumInflow2dv {std kind 'DIVERSION' units 'TAF'}
+
+ define NBBCumInflow2 {
+       case OctDec    {condition month<=DEC value 0.}
+       case Jan       {condition month==JAN value (16/31)*max(0,I_SLT009(-1)*cfs_taf(-1)+I_NFY029(-1)*cfs_taf(-1)+I_NBLDB(-1)*cfs_taf(-1)-D_SLT009_SCT000(-1)*cfs_taf(-1)-800.*cfs_taf)}
+       case FebJul    {condition month>=FEB .and. month<=JUL value max(0,I_SLT009(-1)*cfs_taf(-1)+I_NFY029(-1)*cfs_taf(-1)+I_NBLDB(-1)*cfs_taf(-1)-D_SLT009_SCT000(-1)*cfs_taf(-1)-800.*cfs_taf(-1))+NBBCumInflow2dv(-1)}
+       case Otherwise {condition always value 0.}}
+
+goal set_NBBCumInflow2dv {NBBCumInflow2dv=NBBCumInflow2}
+
+
+define SlateCreekCumDivFlag2{
+       case OctFeb     {condition month >=DEC .and. month<=JUL value 1.}
+       case Otherwise  {condition always value 0.}}
+       
+define DecemberFlag{
+       case Dec        {condition month ==DEC value 0.5}
+       case Otherwise  {condition always value 1.}}
+        
+
+!***********************************
+! Disaggregate diversions into direct diversion and diversion to storage
+!***********************************
+!OWID is authorized to divert 300 cfs year-around, and up to 600 cfs between January 1 through July 1. The total diversion to storage may not exceed 35,000 acre-feet.
+define D_SLT009_SCT000_DD {upper 300. kind 'CHANNEL' units 'cfs'} !year-round direct diversion
+define D_SLT009_SCT000_DS {upper 300. kind 'CHANNEL' units 'cfs'} !diversion to storage January 1 and July 1
+goal sumD_SLT009_SCT000   {D_SLT009_SCT000 = D_SLT009_SCT000_DD + D_SLT009_SCT000_DS}
+
+define SlateCreekCumDSdv {std kind 'DIVERSION' units 'TAF'}
+define SlateCreekCumDS {
+       case October   {condition month==Oct value 0.} 
+       case Otherwise {condition always value + SlateCreekCumDSdv(-1) + D_SLT009_SCT000_DS(-1)*cfs_taf(-1) }}
+       
+goal set_SlateCreekCumDSdv {SlateCreekCumDSdv=SlateCreekCumDS}
+
+
+
+
+!**********************************************
+! Diversion Limits based on Historical Operations
+!**********************************************
+define HistoricalDiversion {
+	case MarMay   {condition month>=  MAR .and. month <= MAY value 250. * (9-P2088_WYT)/6}
+	case Feb      {condition month==  FEB value 200. * (9-P2088_WYT)/6} 
+	case Jan      {condition month==  JAN value 175. * (9-P2088_WYT)/6}  
+	case Dec      {condition month==  DEC value 125. * (9-P2088_WYT)/6}  
+	case Jun      {condition month==  JUN value 125. * (9-P2088_WYT)/6} 
+	case Otherwise {condition always value 600.}}
+	
+	
+!**********************************************
+! Temperature Limits
+!**********************************************	
+! SWWPA propose to cease diversions at Slate Creek Diversion Dam when mean daily water temperature reaches 20°C to
+! protect downstream Cold Freshwater Habitat.
+define TemperatureConstraint {
+	case JulSep    {condition month >=  JUL .and. month <= SEP value 0.}
+	case Oct       {condition month ==  OCT value 0.} 
+	case Otherwise {condition always value 0.}}
+
+!***********************************
+! Set diversion constraints
+!***********************************
+
+!goal set1_D_SLT009_SCT000 {D_SLT009_SCT000 < max(0,I_SLT009+I_NFY029+I_NBLDB-800.+NBBCumInflow*taf_cfs*SlateCreekCumDivFlag - 5.335*taf_cfs*SlateCreekCumDivFlag)}
+
+!goal set2_D_SLT009_SCT000 {D_SLT009_SCT000 < max(0,I_SLT009*DecemberFlag+I_NFY029*DecemberFlag+I_NBLDB*DecemberFlag-800.*DecemberFlag+NBBCumInflow2*taf_cfs*SlateCreekCumDivFlag2 - 35.000*taf_cfs*SlateCreekCumDivFlag2)}
+                                                
+!goal set3_D_SLT009_SCT000 {D_SLT009_SCT000 < maxDiversionRate*NewBullardsBarFNFFlag}
+
+goal setD_SLT009_SCT000_DS_1 {D_SLT009_SCT000_DS < maxDiversionRate - 300.} ! Only divert to storage from January 1 and July 1
+goal setD_SLT009_SCT000_DS_2 {D_SLT009_SCT000_DS < max(0., 35.0*taf_cfs - SlateCreekCumDS*taf_cfs)}
+
+goal set6_D_SLT009_SCT000 {D_SLT009_SCT000 < 470 } ! Based on observed data and to discourage large diversions in simulation.
+
+goal HistoricalD_SLT009_SCT000 {D_SLT009_SCT000 < HistoricalDiversion} ! Based on observed data and to discourage large diversions in simulation.
+
+goal TemeratureD_SLT009_SCT000 {D_SLT009_SCT000 < TemperatureConstraint} !
+     

@@ -1,0 +1,116 @@
+/*
+CALSIM 3.0
+PUTAHCK.WRESL
+
+Edited ajdraper, Stantec, September 21, 2021
+*/
+
+!***************************************************
+!****  Upper Watershed Demands and Operations ******
+!***************************************************
+
+define UpperPutahDemandSV {
+ 	Case mNov {condition month == NOV value 13.*0.15}
+ 	Case mDec {condition month == DEC value 13.*0.25}
+ 	Case mJan {condition month == Jan value 13.*0.30}
+ 	Case mFeb {condition month == Feb value 13.*0.20}
+ 	Case mMar {condition month == Mar value 13.*0.10}
+ 	Case Otherwise {condition always value 0.}}
+ 	
+define UpperPutahDemandDV  {std kind 'DEMAND' units 'TAF'} 	
+goal setUpperPutahDemandDV {UpperPutahDemandDV=UpperPutahDemandSV}
+
+define UpperPutahUnmetDemandDV {std kind 'DEMAND' units 'TAF'}
+define UpperPutahUnmetDemandSV {
+	Case mOct      {condition month == OCT value 0.}
+	Case otherwise {condition always value max(0., UpperPutahUnmetDemandDV(-1) + UpperPutahDemandDV(-1) - D_PTH070_PUTAH(-1)*cfs_taf(-1))}}
+
+goal setUpperPutahUnmetDemand {UpperPutahUnmetDemandDV=UpperPutahUnmetDemandSV}
+
+goal setD_PTH070_PUTAH {D_PTH070_PUTAH < UpperPutahDemandSV*taf_cfs + UpperPutahUnmetDemandSV*taf_cfs}
+
+
+!***************************************************
+!****  Lakeside Demands and Operations *************
+!***************************************************
+
+! See code
+!CALSIM\Run\System\SystemTables_SOD\Weight-table.wresl(444):             [D_BRYSA_NAPA2 ,   5050],
+!CALSIM\Run\System\SystemTables_Sac\arcs-Diversions.wresl(429):          define D_BRYSA_NAPA2  {std kind 'DIVERSION' units 'CFS'}
+!CALSIM\Run\System\SystemTables_Sac\constraints-Connectivity.wresl(532): goal continuityBRYSA  {C_PTH070 - D_BRYSA_NAPA2 - C_BRYSA - E_BRYSA                = S_BRYSA * taf_cfs - S_BRYSA(-1) * taf_cfs + 0. }  ! Beressa
+!CALSIM\Run\System\SystemTables_Sac\constraints-Deliveries.wresl(1345):  goal setD_BRYSA_NAPA2 {D_BRYSA_NAPA2 < UD_NAPA2}
+
+
+!***************************************************
+!****  Lake Berryessa Storage Water Right **********
+!***************************************************
+
+define BerryessaFlag {
+	case NovMay    {condition month >= NOV .and. month <= MAY value 1.}
+    case otherwise {condition always value 0.}}
+
+goal setBerryessa {S_BRYSA < S_BRYSA(-1) + BerryessaFlag*9999}
+
+
+!***************************************************
+!****  Water Year Types for Minimum Flows **********
+!***************************************************
+
+define PutahDroughtDurationDV {std kind 'FLAG' units 'DAYS'}
+
+define PutahAprilTriggerDV {std kind 'FLAG' units 'DAYS'}
+define PutahAprilTriggerSV {
+	case FirstMonth {condition wateryear == BgnWY .and. month <= MAR value 0.}
+	case AprilDry1  {condition month == APR .and. PutahDroughtDurationDV(-1) >=23 .and. S_BRYSA(-1) > 400. value 1.}
+	case AprilDry2  {condition month == APR .and. PutahDroughtDurationDV(-1) >=23 .and. S_BRYSA(-1) < 400. value 0.}
+	case AprilDry3  {condition month == APR .and. PutahDroughtDurationDV(-1) <=22                          value 0.}
+	case Otherwise  {condition always value PutahAprilTriggerDV(-1)}}
+	
+goal setPutahAprilTriggerDV {PutahAprilTriggerDV = PutahAprilTriggerSV}
+
+define PutahDroughtIndicatorDV {std kind 'FLAG' units 'DAYS'}
+define PutahDroughtIndicatorSV {
+	case FirstMonth    {condition wateryear == BgnWY .and. month <= MAR value 0.}
+	case AprilTrigger  {condition PutahAprilTriggerSV >=0.5 value 0.} ! Trigger for 12 months of non-drought flows
+	case Dry1          {condition month == APR .and. S_BRYSA(-1) < 750. value 1.} ! Drought if April storage low
+	case Dry2          {condition PutahDroughtIndicatorDV(-1) >=0.5 .and. S_BRYSA(-1) >750. value 0.} !Drought ends if Berryessa storage rises above 750 TAF
+	case Otherwise     {condition always value PutahDroughtIndicatorDV(-1)}}
+	
+goal setPutahDroughtIndicatorDV {PutahDroughtIndicatorDV = PutahDroughtIndicatorSV}	
+
+
+define PutahDroughtDurationSV {
+	case FirstMonth {condition wateryear == BgnWY .and. month == OCT value 0.}
+	case PrevNotDry {condition PutahDroughtIndicatorSV <=0.5 value 0.}
+	case Otherwise  {condition always value PutahDroughtDurationDV(-1) + 1 }}
+
+goal setPutahDroughtDurationDV {PutahDroughtDurationDV = PutahDroughtDurationSV}
+
+
+	
+	
+
+!***************************************************
+!****  Minimum Instream flow requirements **********
+!***************************************************
+
+define    Qmin_PTH024    {select PDDflow   from putah_minflow where wytype = round(PutahDroughtIndicatorSV), month = month} ! Below Diversion Dam
+define    Qmin_PTH011    {select I80flow   from putah_minflow where wytype = round(PutahDroughtIndicatorSV), month = month} ! InterState 80 Road Bridge
+define    Qmin_PTH007    {select Davisflow from putah_minflow where wytype = round(PutahDroughtIndicatorSV), month = month} ! Davis Road Bridge
+
+!VA Requirement: Turned off in WSIDI run
+define VAFlow {
+	/*case NoVA   {condition SimulateVA_Pth <= 0.5 value 0.}
+	case PreITP {condition cyclenum <= cn_WHEELJPOD value 0.}
+	case mNov   {condition month == NOV value 2.5*(30/45)}
+	case mDec   {condition month == NOV value 2.5*(15/45)+2.5*(16/106)}
+	case mJan   {condition month == NOV value 2.5*(31/106)}
+	case mFeb   {condition month == NOV value 2.5*(28/106)}
+	case mMar   {condition month == NOV value 2.5*(31/106)}
+	case mApr   {condition month == NOV value 1.0*(30/61)}
+	case mMay   {condition month == NOV value 1.0*(31/61)}*/
+	case otherwise {condition always value 0.}}
+
+goal setC_PTH024_MIF {C_PTH024_MIF < Qmin_PTH024}
+goal setC_PTH011_MIF {C_PTH011_MIF < Qmin_PTH011}
+goal setC_PTH007_MIF {C_PTH007_MIF < Qmin_PTH007 + VAFlow*taf_cfs}

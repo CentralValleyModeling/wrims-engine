@@ -1,0 +1,83 @@
+! OMR_stub.wresl
+!
+! place holder for potential OMR constraints
+!
+define OMR_RPA_LF {value -99999}
+define OMR_RPA {value max(OMR_RPA_FWS,OMR_RPA_LF)}
+!
+
+! How much of CCWD estimated demand will impact OMR flows?
+define CCWDFraction {value (D408_OR_max + D408_VC_max)/(D408_RS_max + D408_OR_max + D408_VC_max)}
+define Qsod_noExp { value 0. + D408D416_est*CCWDFraction + netDICU_SOD}
+
+! Action triggers
+define C_OMR014_limit_init {
+     case DEC_MAR{
+          condition month>=DEC .and. month<=MAR .and. OMR_RPA >= -12000.
+          value OMR_RPA}
+     case Apr{
+          condition month==APR .and. OMR_RPA >= -12000.
+!  doing full 60 day NMFS Action at the pumps so this calc does not matter
+!          value OMR_RPA*14./daysin + max(Qomr_VAMPperiod,OMR_RPA)*(daysin-14.)/daysin}
+          value OMR_RPA}
+     case May{
+          condition month==MAY .and. OMR_RPA >= -12000.
+!  doing full 60 day NMFS Action at the pumps so this calc does not matter
+!          value max(Qomr_VAMPperiod,OMR_RPA)*15./daysin + OMR_RPA*(daysin-15.)/daysin}
+          value OMR_RPA}
+     case Jun{
+          condition month==JUN .and. OMR_RPA >= -12000.
+          value OMR_RPA}
+     case otherwise{
+          condition always
+          value -99999.}
+}
+!
+! **********************************************************************************************
+!
+! Determine health and safety level at OMR that must be allowed
+define HandS_minpump {
+     case JanMay {
+          condition month>=JAN .and. month<=MAY
+          value 1500.}
+     case Jun {
+          condition month==JUN
+!          value 2000.}
+          value 1500.}
+     case other {
+          condition always
+          value 0.}
+}
+define Qsod_HandS { value max(tracyminpump + banksminpump,HandS_minpump) + D408D416_est*CCWDFraction + netDICU_SOD}
+define Qomr_HandS { value coefA*C_SJR070est+coefb*Qsod_HandS+coefc}  
+define Qomr_HandSdv {alias Qomr_HandS kind 'FLOW-CHANNEL' units 'CFS'}
+define C_OMR014_limit {value min(C_OMR014_limit_init,Qomr_HandS)}
+!define C_OMR014_limit {value min(C_OMR014_limit_init,Qomr_noExp)}                 !AK as per Nancy Zero Banks Fix 09/03/2019
+define C_OMR014_LBound  {alias C_OMR014_limit kind 'FLOW-LBOUND' units 'CFS'}
+!
+!goal bound_Qomr { C_OMR014 > C_OMR014_limit }
+
+!
+! Split arcs and Goals to force impacts of actions at pumps
+!*********************************************************************************************
+! C_OMR014_Base represents the OMR flow not including COA related pumping at Banks or Tracy
+define C_OMR014_NoEXP1  {lower -99999*taf_cfs upper 99999*taf_cfs kind 'FLOW-CHANNEL' units 'CFS'}
+goal set_C_OMR014NoEXP1 {C_OMR014_NoEXP1 - C_OMR014 = C_CAA003_EXP1_TD + C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SB_E1 + D408_P_WHL_SF_E1}
+!
+/*goal bound_C_CAA003 {
+  lhs     C_CAA003_EXP1_TD + D408_P_WHL_SB_E1
+  case FWSBOActions{
+  condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}
+!
+goal bound_C_DMC000 {
+  lhs     C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SF_E1
+  case FWSBOActions{
+    condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}*/

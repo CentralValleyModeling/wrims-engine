@@ -1,0 +1,41 @@
+! stan_FW_pulse.wresl
+! Edward Chang
+! 5/01/2000
+! Joint Model
+! This code calculates the Stanislaus operations for fish and wildlife pulse flows
+!########################################################################################
+/*
+The minimum fish and wildlife flows are determined using the New Melones forecast, NMforeast1.
+This forecast determines an annual delivery requirement from a look-up table.  From the annual
+delivery requirement another look-up table is used to determine the monthly requirements.
+In April and May, a pulse flow requirement is also calculated, but the pulse flow only applies
+during the last 16 days in April and the first 15 days in May.  The goal of the resulting monthly
+requirement is to maintain a minimum fish and wildlife flow downstream of Goodwin Dam.  To ensure
+a minimum flow, it is only necessary to impose this requirement on reaches C_STS059 and C_STS017
+*/
+/*
+Fish & Wildlife flows
+*/
+! Define Cycle 3 minimum Stanislaus F & W pulse flows Apr 15 - May 15
+! RPA std
+define stanfish_yr {select stanf from stanf_yr given SJRI = wyt_SJR_Stan  use linear}
+! Alias stanfish_yr for output
+define stanfish_yrDV {alias stanfish_yr units 'taf'}
+
+define stanpulse {
+    case April {
+        condition       month == apr
+        select          aprpulse from stan_pulse_rpa given stanyr = stanfish_yr use linear }
+    case May {
+        condition       month == may
+        select          maypulse from stan_pulse_rpa given stanyr = stanfish_yr use linear }
+    case otherwise {
+        condition       always
+        value           0. }
+        }
+define stanpulse_dv {alias stanpulse kind 'fish-pulse-req' units 'cfs'}
+
+
+! Stanislaus F & W pulse flows for Cycle 3 April-May release
+goal setC_STS059cycle3 {C_STS059_mif < stanpulse}
+

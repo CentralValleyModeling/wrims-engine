@@ -1,0 +1,96 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+! R.Wilbur & S. Wu 5/10/05
+/*
+
+    ARTIFICIAL NEURAL NETWORK
+    DELTA SALINITY MODELING
+
+    ANN determines salinity (micro-mhos/cm) at various locations in the Delta given flows
+    (Sac, SWP pumping, CVP pumping, SJR, Channel depletions) and the Delta cross-channel
+    position for the past 118 days
+
+    In this CALSIM modeling implementation the 78 days are split into three parts: previous two months
+    and current month.  The previous months flows and gate positions are known values, while the
+    current month flows (at least SAC and Exports) are unknown variables. These
+    are the 2 knobs used to meet salinity standards in the Delta.
+
+    this part of WRESL code defines some variables used for X2 estimation with ANN.
+
+   AVE_TYPE KEY:
+      1 = monthly average
+      2 = first day of month value
+      3 = last day of month value
+      4 = maximum daily value
+      5 = minimum daily vlaue
+      6 = maximum 14-day value
+      7 = average for first 15 days
+      8 = average for last 15 days
+      37 = average for last 7 day
+
+*/
+
+define monthly_ave {value 1}
+define first_day {value 2}
+define last_day {value 3}
+define max_day {value 4}
+define min_day {value 5}
+define max_14day_running_ave {value 6}
+define ave_first_15days {value 7}
+define ave_last_15days {value 8}
+define ave_last_7days {value 37}
+
+!define daysindv {alias daysin kind 'DAYS' units 'DAYS'}
+
+!*************************************************************************************************************
+! define the other flows that go into making the export component
+define net_delta_cu { value                     
+!        DND_SAC_North +    ! Don't include this because it occurs upstream of C_SAC041
+        DND_SAC_South +
+        DND_SAC_West +
+        DND_MOK +
+        DND_SJR_East +
+        DND_SJR_West +
+        DND_OMR + 
+        DND_50_PA2
+}
+define net_delta_cuSV { ALIAS net_delta_cu KIND 'NET-DICU' UNITS 'CFS' }
+
+define net_DICU{ lower unbounded kind 'DICU_FLOW' units 'CFS' }!shengjun add 2/24/2005
+goal def_net_DICU{ net_DICU=
+!        DND_SAC_North +    ! Don't include this because it occurs upstream of C_SAC041
+        DND_SAC_South +
+        DND_SAC_West +
+        DND_MOK +
+        DND_SJR_East +
+        DND_SJR_West +
+        DND_OMR + 
+        DND_50_PA2
+}
+
+! Net Delta Consumptive Use decision variable for calculating ANN MRDO
+define net_delta_cuDV { ALIAS net_DICU KIND 'NET-DICU' UNITS 'CFS' }
+
+!*************************************************************************************************************
+! other defines
+define DXC { std kind 'GATE-DAYS-OPEN' units 'NONE'}
+define sac_oth { lower unbounded kind 'FLOW-INFLOW' units 'CFS' }
+define exp_oth { lower unbounded kind 'FLOW-EXPORTS' units 'CFS' }
+define VernWQfinal {std kind 'Salinity-EC' units 'umhos/cm'}
+define MRDO_X2nocapdv {std KIND 'FLOW-REQ-MRDO' UNITS 'CFS'}
+
+!*************************************************************************************************************

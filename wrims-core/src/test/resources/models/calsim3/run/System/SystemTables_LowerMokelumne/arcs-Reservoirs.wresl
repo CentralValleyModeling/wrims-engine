@@ -1,0 +1,210 @@
+/*
+Arcs-Reservoirs.wresl
+*/
+
+! Needed for flood control calculations
+!define S_SLTSP {std kind 'STORAGE' units 'TAF'} !Salt Springs  
+!define S_LBEAR {std kind 'STORAGE' units 'TAF'} !Lower Bear  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Pardee Reservoir, Mokelumne River       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Pardee has a permitted capacity of 209,950 acre-feet
+! The spillway crest elevation is 567.65 ft (local datum), equivalent to 203,795 acre-feet (2014 updated bathymetry)
+! The dead storage elevation is 396.52 ft (local datum), equivalent to 16,057 acre-feet (2014 updated bathymetry)
+! The maximum normal operating elevation is 565.06? ft (local datum), equivalent to 198,065 acre-feet (2014 updated bathymetry)
+
+
+define S_PARDElevel1    {value  11.512} !From EBMUD model, 380.0 ft (11,512.31 acre-feet) minimum storage when Pardee releases to Camanche goes to zero
+define S_PARDElevel2    {value  15.895} !From EBMUD model, 396.0 ft (15,895 acre-feet) minimum storage for Pardee supporting Camanche releases
+define S_PARDElevel3    {value 198.065}   
+define S_PARDElevel4    {value 198.065}
+define S_PARDElevel5    {value 198.065}
+
+define S_PARDE_1        {std kind 'STORAGE-ZONE' units 'TAF'}                                                                                                                                         
+define S_PARDE_2        {std kind 'STORAGE-ZONE' units 'TAF'}                                                                                                                  
+define S_PARDE_3        {std kind 'STORAGE-ZONE' units 'TAF'}                                                                                                                  
+define S_PARDE_4        {std kind 'STORAGE-ZONE' units 'TAF'}                                                                                                                  
+define S_PARDE_5        {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+                                                            
+define S_PARDE          {std kind 'STORAGE' units 'TAF'} !Pardee Reservoir                                            
+                                                      
+define F_PARDE          {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}                                                 
+define E_PARDE          {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_PARDE          {std kind 'SURFACE-AREA' units 'ACRES'} 
+
+define ER_PARDE         {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}  
+!define SG_PARDE         {timeseries kind 'SEEPAGE' units 'TAF' convert 'CFS'}
+
+define A_PARDElast      {select area from Mok_ResInfo given storage=1000*S_PARDE(-1) use linear where ResNum=1}        
+define A_PARDEforward   {select area from Mok_ResInfo given storage=1050*S_PARDE(-1) use linear where ResNum=1}     
+define A_PARDEback      {select area from Mok_ResInfo given storage= 950*S_PARDE(-1) use linear where ResNum=1}         
+define coefev_PARDE     {value (A_PARDEforward - A_PARDEback)/(100*max(0.01,S_PARDE(-1)))} 
+
+define relcap_PARDE     {select discharge from Mok_ResInfo given storage=1000*S_PARDE(-1) use linear where ResNum=1}
+
+define SL_PARDE    {std kind 'SEEPAGE' units 'CFS'} ! Seepage loss
+define SL_PARDE_SV {value 15.} ! CFS. Seepage loss from Pardee Reservoir. Need to replace by head-dependent function. Values from EBMUD
+      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Camanche Reservoir, Mokelumne River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Camanche has a permitted capacity of 431,500 acre-feet
+! The spillway crest elevation is 235.50 ft (local datum), equivalent to 417,120 acre-feet
+! The dead storage elevation is 119.00 ft (local datum), equivalent to 4,290 acre-feet
+! The maximum normal operating elevation is 235.50? ft (local datum), equivalent to 417,120 acre-feet
+
+
+
+define S_CMCHElevel2rel {select target from Mok_ResLevel where ResNum=2,level=2,month=month}
+
+define S_CMCHElevel1    {value 4.025} ! From EBMUD model 118.60 ft (4,025 acre-feet)
+define S_CMCHElevel2    {value S_CMCHElevel2rel + S_CMCHElevel1}
+define S_CMCHElevel3    {value 417.120}  
+define S_CMCHElevel4    {value 417.120}  
+define S_CMCHElevel5    {value 417.120}  
+
+define S_CMCHE_1        {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_CMCHE_2        {std kind 'STORAGE-ZONE' units 'TAF'}  
+define S_CMCHE_3        {std kind 'STORAGE-ZONE' units 'TAF'} 
+define S_CMCHE_4        {std kind 'STORAGE-ZONE' units 'TAF'} 
+define S_CMCHE_5        {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define S_CMCHE          {std kind 'STORAGE' units 'TAF'} !Camanche Reservoir                                          
+
+define F_CMCHE          {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}                                                 
+define E_CMCHE          {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_CMCHE          {std kind 'SURFACE-AREA' units 'ACRES'}  
+
+define ER_CMCHE         {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}    
+!define SG_CMCHE         {timeseries kind 'SEEPAGE' units 'TAF' convert 'CFS'}
+
+define A_CMCHElast      {select area from Mok_ResInfo given storage=1000*S_CMCHE(-1) use linear where ResNum=2}        
+define A_CMCHEforward   {select area from Mok_ResInfo given storage=1050*S_CMCHE(-1) use linear where ResNum=2}     
+define A_CMCHEback      {select area from Mok_ResInfo given storage= 950*S_CMCHE(-1) use linear where ResNum=2}         
+define coefev_CMCHE     {value (A_CMCHEforward - A_CMCHEback)/(100*max(0.01,S_CMCHE(-1)))}                                   
+                                       
+define relcap_CMCHE     {select discharge from Mok_ResInfo given storage=1000*S_CMCHE(-1) use linear where ResNum=2}  
+
+define SL_CMCHE    {std kind 'SEEPAGE' units 'CFS'} ! Seepage loss
+define SL_CMCHE_SV {value 10.} ! CFS. Seepage loss from Camanche Reservoir. Need to replace by head-dependent function. Values from EBMUD
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! EBMUD Terminal Reservoirs     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                    
+
+define S_EBTMLlevel1    {value 1.0} 
+define S_EBTMLlevel2    {value 1.0}
+define S_EBTMLlevel3    {value 1.0}  
+define S_EBTMLlevel4    {select target from Mok_ResLevel where ResNum=3,level=4,month=month} 
+define S_EBTMLlevel5    {value 142.0}  
+
+
+define S_EBTML_1        {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_EBTML_2        {std kind 'STORAGE-ZONE' units 'TAF'}  
+define S_EBTML_3        {std kind 'STORAGE-ZONE' units 'TAF'} 
+define S_EBTML_4        {std kind 'STORAGE-ZONE' units 'TAF'} 
+define S_EBTML_5        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EBTML          {std kind 'STORAGE' units 'TAF'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Jenkinson Lake, Upper Cosumnes Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+define S_JNKSNlevel5     {value 41.0} ! full capacity                                                    
+define S_JNKSNlevel1     {value  0.48}  ! dead pool !@jmg 2017.08.07 - from Jenkinson Lake Mgmt Plan 1963
+define S_JNKSNlevel4     {value 41.0} ! Top of conservation - assume no flood control requied                                        
+define S_JNKSNlevel3     {value 41.0}                                                                    
+define S_JNKSNlevel2     {value  0.48}                                                                              
+
+define S_JNKSN_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_JNKSN_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_JNKSN_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_JNKSN_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_JNKSN_5    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_JNKSN      {std kind 'STORAGE' units 'TAF'}
+
+define F_JNKSN      {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}                                                 
+define E_JNKSN      {std kind 'EVAPORATION' units 'CFS'}           !@jmg 2017.08.07 - changed kind from unbounded to std                                   
+define A_JNKSN      {std kind 'SURFACE-AREA' units 'ACRES'}
+
+define ER_JNKSN   {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}                                        
+
+define A_JNKSNlast     {select area from res_info given storage=1000*S_JNKSN(-1) use linear where res_num=94}        
+define A_JNKSNforward  {select area from res_info given storage=1050*S_JNKSN(-1) use linear where res_num=94}     
+define A_JNKSNback     {select area from res_info given storage= 950*S_JNKSN(-1) use linear where res_num=94}         
+!define coefev_JNKSN    {value (A_JNKSNforward - A_JNKSNback)/(100*max(0.01,S_JNKSN(-1)))}
+                               
+define coefev_JNKSN  {
+	case NEARZERO { condition S_JNKSN(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=94 }
+	case Otherwise { condition always
+		value (A_JNKSNforward - A_JNKSNback)/(100*max(0.01,S_JNKSN(-1)))}
+}   
+                  
+define relcap_JNKSN     {select discharge from res_info given storage=1000*S_JNKSN(-1) use linear where res_num=94}  !@jmg 2017.08.07 - changed res_num from 92 to 94
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Local reservoirs (see note below), Upper Cosumnes Waterhsed     !!!!!!!!!!!!!  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! RNCHO represents three local reservoirs (Lakes Calero, Chesbro, Clementia) used to distribute water
+! to Rancho Murieta CSD under Water Right Permit 16762 (Application No. 23416) 
+                                               
+define S_RNCHOlevel1     {value  0.0} 
+define S_RNCHOlevel5     {value  6.368} ! Set to maximum total diversion under WR permit, assumed no carryover  
+define S_RNCHOlevel2     {value  S_RNCHOlevel5}                                                                              
+define S_RNCHOlevel3     {value  S_RNCHOlevel5}
+define S_RNCHOlevel4     {value  S_RNCHOlevel5}                               
+                                                              
+define S_RNCHO_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_RNCHO_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_RNCHO_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_RNCHO_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_RNCHO_5    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_RNCHO      {std kind 'STORAGE' units 'TAF'}
+
+define E_RNCHO      {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_RNCHO      {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_RNCHO   {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}                                        
+
+define A_RNCHOlast     {select area      from Mok_ResInfo given storage=1000*S_RNCHO(-1) use linear where resnum=8}        
+define A_RNCHOforward  {select area      from Mok_ResInfo given storage=1050*S_RNCHO(-1) use linear where resnum=8}     
+define A_RNCHOback     {select area      from Mok_ResInfo given storage= 950*S_RNCHO(-1) use linear where resnum=8}
+define relcap_RNCHO    {select discharge from Mok_ResInfo given storage=1000*S_RNCHO(-1) use linear where resnum=8}         
+define coefev_RNCHO    {value (A_RNCHOforward - A_RNCHOback)/(100*max(0.01,S_RNCHO(-1)))}                
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Amador, Jackson Creek Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_AMADRlevel1     {value  0.0} ! dead pool
+define S_AMADRlevel2     {value  0.0}                                                                              
+define S_AMADRlevel3     {value 22.0}                                                                    
+define S_AMADRlevel4     {value 22.0} ! Top of conservation - assume no flood control requied                                        
+define S_AMADRlevel5     {value 22.0} ! full capacity                                                    
+
+define S_AMADR_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_AMADR_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_AMADR_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_AMADR_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_AMADR_5    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_AMADR      {std kind 'STORAGE' units 'TAF'}
+
+                                                 
+!define E_AMADR      {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+!define A_AMADR      {std kind 'SURFACE-AREA' units 'ACRES'}
+
+!define ER_AMADR   {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+
+!define A_AMADRlast     {select area from res_info given storage=1000*S_AMADR(-1) use linear where res_num=94}        
+!define A_AMADRforward  {select area from res_info given storage=1050*S_AMADR(-1) use linear where res_num=94}     
+!define A_AMADRback     {select area from res_info given storage= 950*S_AMADR(-1) use linear where res_num=94}         
+!define coefev_AMADR    {value (A_AMADRforward - A_AMADRback)/(100*max(0.01,S_AMADR(-1)))}                                   
+                                       
+!define relcap_AMADR     {select discharge from res_info given storage=1000*S_AMADR(-1) use linear where res_num=92}  
+define F_AMADR      {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+

@@ -1,0 +1,85 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+CalSim 3.0
+FRSA.wresl
+
+Edited A Draper, MWH, June 6, 2011
+*/
+
+
+!Western Canal is closed for maintenance from January through April
+!The timing varies according to rainfall and rice planting dates
+!During years of late rainfall, the canal may be kept open in January until there is sufficient flow in Butte Creek
+!to meet obligations to Duck Clubs
+
+
+goal setD_WEC005_11_SA1 {
+     lhs D_WEC005_11_SA1
+     case NonSeason {
+         !condition month >= JAN .and. month <= MAR 
+         !Let Western Canal open in January so that rice decomposition water is not from GW pumping. Z.Q. Richard Chen, DWR 8/28/2017
+          condition month >= FEB .and. month <= MAR  
+          rhs 0.0
+	  lhs>rhs     constrain
+    	  lhs<rhs     penalty 0
+     }
+!     case other {
+!          condition always
+!          rhs 99999.
+!          lhs>rhs     constrain
+!    	  lhs<rhs     penalty 0
+!     }
+}
+
+! Richvale Irrigation District receivew water from (Richvale Canal USGS 11406890) and from the
+! Joint Board Main Canal at Minderman Weir
+! Average annual flows 1968-1993 are: Richvale Canal at Intake 80,696 AF, Biggs Extension at Minderman Weir 52,678 AF.
+goal setD_JBC002_RVC005 {D_JBC002_RVC005 = 0.65 * D_THRMA_RVC000}
+
+
+!Conversation with Ted Trimble, GM for Western Canal WD
+!Generally supply water to Butte Creek from after rice harvest to mid-January when canal closes. In wet years, deliveries may terminate in November.
+! Following is based on analysis of deliveries 1998 - 2009.
+
+goal setD_WEC005_BTC032 {
+     lhs D_WEC005_BTC032
+     case September {
+          condition month == SEP .and. I_BTC048 <= 15. * taf_cfs
+          rhs 40.
+          lhs>rhs     constrain
+    	  lhs<rhs     penalty 9999
+     }
+     case October {
+           condition month == OCT .and. I_BTC048 <= 15. * taf_cfs
+           rhs 140.
+          lhs>rhs     constrain
+    	  lhs<rhs     penalty 9999
+     }
+     case November {
+           condition month == NOV .and. I_BTC048 <= 15. * taf_cfs
+           rhs 30.
+          lhs>rhs     constrain
+    	  lhs<rhs     penalty 9999
+     }
+     case other {
+          condition always
+          rhs 0.
+          lhs>rhs     constrain
+    	  lhs<rhs     penalty 0
+     }
+}

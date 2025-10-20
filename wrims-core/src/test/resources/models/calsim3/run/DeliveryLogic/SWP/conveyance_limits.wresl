@@ -1,0 +1,97 @@
+/* 
+
+Both pumping plant unit outages and aqueduct restrictions place conveyance
+limits to the ability to move water through the State Water Project facilities.
+
+Unit outages, both scheduled or unscheduled, come from historical 2001-2006 monthly
+outage reports.
+
+Source of data: DWR SWP-OCO; Tuan Bui and Tio Zasso were consulted in Feb 2007; 
+based on reports provided by Dick Oravetz.
+
+Ryan Wilbur 
+
+*/
+
+!Oroville Complex
+!Hyatt Power Plant
+!Thermalito Power Plant
+
+!Delta
+!Banks Pumping Plant
+define max_ba {select data from swp_limits where plant=1,month=month}
+goal max_ba2 {C_CAA003 < max_ba}
+
+define max_ba_dv {alias max_ba kind 'alias' units 'cfs'}
+!Gianelli
+
+!Aqueduct
+!Dos Amigos Pumping Plant - split swp=54.2%; cvp=45.8%
+!(per 1981 "Operating procedure between DWR-OCO & USBR CVO for
+!scheduling and dispatching San Luis joint use facilitites")
+define max_da {select data from swp_limits where plant=2,month=month}
+define swp_da_cap {value 0.542*max_da}
+define cvp_da_cap {value 0.458*max_da}
+
+!Available capacity is determined by comparing BASE cap with utilization in previous cycle.
+define avail_cvp_cap {
+	case cyc_cam2 {condition cyclenum==cn_GW_INITIAL value 0.} 
+	case otherwise {condition always value max((cvp_da_cap - c_caa087_cvp[-1]),0.)} 
+}
+define avail_swp_cap {
+	case cyc_cam2 {condition cyclenum==cn_GW_INITIAL value 0.} 
+	case otherwise {condition always value max((swp_da_cap - c_caa087_swp[-1]),0.)}
+}
+
+!The BASE capacity is prescribed according to the 1981 Operating Procedure.
+goal limit_swp_da_base {C_CAA087_SWP_BASECAP < swp_da_cap} 
+goal limit_cvp_da_base {C_CAA087_CVP_BASECAP < cvp_da_cap}
+
+!Borrowed capacity can only be used if the lending project has available capacity.
+goal limit_swp_da_borrow {C_CAA087_SWP_BORROWEDCAP < avail_cvp_cap} 
+goal limit_cvp_da_borrow {C_CAA087_CVP_BORROWEDCAP < avail_swp_cap} 
+
+!Each project's water has a BASE and BORROWED component.
+goal limit_swp_da {C_CAA087_SWP = C_CAA087_SWP_BASECAP + C_CAA087_SWP_BORROWEDCAP} 
+goal limit_cvp_da {C_CAA087_CVP = C_CAA087_CVP_BASECAP + C_CAA087_CVP_BORROWEDCAP} 
+
+!Total of both SWP and CVP must not exceed prescribed operational availability limits.
+goal limit_total_da {C_CAA087_SWP + C_CAA087_CVP < max_da} 
+
+! Output for debugging
+define swp_da_cap_ {alias swp_da_cap kind 'debug' units 'cfs'}
+define cvp_da_cap_ {alias cvp_da_cap kind 'debug' units 'cfs'}
+define avail_cvp_cap_ {alias avail_cvp_cap kind 'debug' units 'cfs'}
+define avail_swp_cap_ {alias avail_cvp_cap kind 'debug' units 'cfs'}
+
+!Buena Vist Pumping Plant
+define max_bv {select data from swp_limits where plant=4,month=month}
+goal max_bv2 {C_CAA245 < max_bv}
+!Teerink (Wheeler Ridge) Pumping Plant
+define max_tr {select data from swp_limits where plant=5,month=month}
+goal max_tr2 {C_CAA278 < max_tr}
+!Chrisman (Wind Gap) Pumping Plant
+define max_ch {select data from swp_limits where plant=6,month=month}
+goal max_cd2 {C_CAA280 < max_ch}
+!Edmonston Pumping Plant
+define max_ed {select data from swp_limits where plant=7,month=month}
+goal max_ed2 {C_CAA293 < max_ed}
+
+!Coastal Branch
+!Las Perillas Pumping Plant
+define max_lp {select data from swp_limits where plant=3,month=month}
+goal max_lp2 {D_CAA185_CSB001 < max_lp}
+
+!West Branch
+!Oso Pumping Plant
+define max_os {select data from swp_limits where plant=10,month=month}
+goal max_os2 {C_WSB001 < max_os}
+
+!East Branch
+!Pearblossom Pumping Plant
+define max_pb {select data from swp_limits where plant=8,month=month}
+goal max_pb2 {C_ESB361 < max_pb}
+!Pool 49 - cannot get more than 2105 cfs due to channel restrictions
+!Mojave Siphon
+define max_mj {select data from swp_limits where plant=9,month=month}
+goal max_mj2 {C_ESB406 < max_mj}

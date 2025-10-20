@@ -1,0 +1,34 @@
+/*
+Constraints-connectivity_D1644.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!North Yuba
+goal continuityNBLDB_D1644    {I_NBLDB + C_NFY017 + C_CMT000 - D_NBLDB_CGT005_D1644 - C_NBLDB_D1644 - E_NBLDB_D1644  = S_NBLDB_D1644 * taf_cfs - S_NBLDB_D1644(-1) * taf_cfs + 0. }! New Bullards Bar Reservoir 
+goal continuityNFY002_D1644   {C_NBLDB_D1644 - C_NFY002_D1644 = 0.}
+
+!Yuba River
+goal continuityYUB039_D1644   {C_NFY002_D1644 + C_MFY005 - C_YUB039_D1644 = 0. }! Confluence: Middle Fork Yuba
+goal continuityYUB034_D1644   {C_YUB039_D1644 + C_CGT006_D1644 - C_YUB034_D1644 = 0.}
+goal continuityYUB030_D1644   {C_YUB034_D1644 + C_SFY007 - C_YUB030_D1644 = 0. }! Confluence: South Fork Yuba
+goal continuityENGLB_D1644   {I_ENGLB + C_YUB030_D1644 + CT_Smartville - C_ENGLB_D1644 - E_ENGLB	= S_ENGLB * taf_cfs - S_ENGLB(-1) * taf_cfs + 0. }! Englebright Reservoir 
+goal continuityYUB024_D1644   {C_ENGLB_D1644 - C_YUB024_D1644 = 0. }! Smartsville gage (USGS ####), flow requirement
+goal continuityYUB023_D1644   {C_DER001 + C_YUB024_D1644 - C_YUB023_D1644 = 0. }! Confluence: Deere Creek
+goal continuityYUB022_D1644   {C_YUB023_D1644 - C_YUB022_D1644 = 0.} ! Yuba River at Smartville gage (discontinued)
+goal continuityYUB014_D1644   {C_YUB022_D1644 + C_FDC006 + R_RFS14_YUB014_D1644 - C_YUB014_D1644 = 0. }! Confluence: French Dry Creek
+goal continuityYUB013_D1644   {C_YUB014_D1644 - D_YUB013_14_NA_D1644 - C_YUB013_D1644 = 0. }! BVID Pipeline Canal Diversion
+goal continuityYUB011_D1644   {C_YUB013_D1644 /*+ SG349_YUB011_60*/ + SR_14_YUB011 - D_YUB011_15N_NA2_D1644 - D_YUB011_15S_NA2_D1644 - C_YUB011_D1644   = 0. }! Degeurre Dam & diversions for N. and S. Canals
+goal continuityYUB006_D1644   {C_YUB011_D1644 /*+ SG350_YUB006_60*/ - C_YUB006_D1644 = 0. }! Marysville gage (USGS ####), flow requirement
+goal continuityYUB003_D1644   {C_YUB006_D1644 - D_YUB003_15N_NU - C_YUB003_D1644 = 0. }! Diversion for Marysville's Lake Ellis (presumed)
+
+!Colgate Tunnel
+goal continuityCGT005_D1644   {D_NBLDB_CGT005_D1644 /*- D_CGT005_14_NA*/ - C_CGT005_D1644 = 0.} !Colgate diversion abandoned long ago
+goal continuityCGT006_D1644   {C_CGT005_D1644 - C_CGT006_D1644 = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS14_D1644    {R_14_NA_RFS14_D1644 - R_RFS14_YUB014_D1644 - R_RFS14_JCK002 = 0. }

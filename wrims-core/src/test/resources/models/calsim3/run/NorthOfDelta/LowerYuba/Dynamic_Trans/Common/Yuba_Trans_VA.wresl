@@ -1,0 +1,176 @@
+/*
+File Name: Yuba_Trans_VA.wresl
+CalSim 3.0  File for computing volume of LYRA and VA transfers
+
+Purpose: Operational Logic for LYRA and VA Transfer Volumes
+
+*/
+!Define Yuba {std kind 'Debug' units 'NONE'}  !for some reason, get error message when this is not included.  It makes no sense at all.
+
+!VA Transfer is the difference between the VA flow at Marysville and the LYRA flow at Marysville.
+!LYRA transfer is the differnence between the LYRA flow at Marysville and the D1644 flow at Marysville.  
+!VA Transfer takes priority over the LYRA transfer
+/*define EI_Control_LYRA {
+    case Controlling {
+        condition abs(EiExpCtrl[-1] - ExportActualTD[-1]) < 0.1 .and. ExportActualTD[-1]*.65 < TracyMaxAllow
+        value 1.0 }
+    case otherwise {
+        condition always
+        value 0.0 }
+}
+!Next check to see if San Luis is driving the South Delta exports
+!-KS, 9/20/18. There is some debate about the 1000 cfs trigger. After conferring with R Leaf and C Chilmakuri, we agreed that we should not cap to 1000 cfs and capture all instances when the project pay the EI tax.
+!-KS, 9/20/18. Also, only include project specific C407 triggers. (R Leaf and C Chilmakuri)
+define RuleCVControl_LYRA {
+    case CVPRule {
+        condition (abs(S_SLUIS_CVP[-1] - CVPrulecv[-1])<.1 .or. S_SLUIS_CVP[-1] < CVPrulecv[-1])
+                   .and. NDOI_ADD_cvp[-1] > 0.1    !-KS, 9/18/18. Projects are paying tax to move water South to fill San Luis.
+        value 1.}
+    case SWPRule {
+        condition (abs(S_SLUIS_SWP[-1] - SWPrulecv[-1])<.1 .or. S_SLUIS_SWP[-1] < SWPrulecv[-1])
+                   .and. NDOI_ADD_swp[-1] > 0.1    !-KS, 9/18/18. Projects are paying tax to move water South to fill San Luis.
+        value 1.}
+    case otherwise {
+        condition always
+        value 0.}
+}
+*/
+define EI_Balanced_LYRA {
+    case LowExcessDO {  !projects are operating to meet required Delta Outflow standards and make use of the Delta Inflow to export up to EI limit (NDOI_ADD - NDOI_ADD_ANN < 0.1 or NDOI_ADD_CVP + NDOI_ADD_SWP < 0.1)
+        condition EI_Control[-1]>.5 .and. NDOI_ADD_cvp[-1] + NDOI_ADD_swp[-1] < .1
+        value 1.}
+    case ForRuleCurve {	!projects are paying the "tax" - releasing above the required Delta Outflow - to move water
+        condition EI_Control[-1]>.5 .and. RuleCVControl[-1]>.5
+        value 1.}
+    case otherwise {
+        condition always
+        value 0.}
+}    
+
+define Balanced_D1641_LYRA {
+    case Balanced {
+        condition NDOI_ADD_cvp[-1] + NDOI_ADD_swp[-1] < 0.1   !same as NDOI_ADD - NDOI_ADD_ANN < 0.1; NDOI_ADD_WTS, NDOI_ADD_WHLCV, and NDOI_ADD_WHLJP = 0 until wheeling operations are turned on in the last cycle.
+                    .or. EI_Balanced[-1] > 0.5
+        value 1.0 }
+    case Excess {
+        condition always
+        value 0.0 }
+}
+
+! the 40-30-30 index for Sacramento Basin
+define wyt_SAC_LYRA {
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= JAN 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case rest {
+         condition  always
+         value round(WYT_SAC_Frcst)}
+}
+
+!Computing VA Transfer Volumes
+Define YWA_VA_Transfer_LYRA {
+		Case AprJun {	
+			Condition SimulateVA_Yub >0.5 .and. month >= APR .and. month <= JUN .and. (wyt_SAC_LYRA >=2 .and. wyt_SAC_LYRA <= 4) .and. Balanced_D1641_LYRA < 0.5  !Between April and July of VA years of excess conditions
+			value max(0, C_YUB006_LYRA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA])}
+		case Other {
+			condition always
+			value 0.0}
+}
+Define YWA_VA_Transfer_LYRA_SV {alias YWA_VA_Transfer_LYRA kind 'TRANSFER' units 'CFS'}
+
+Define YWA_VA_Transfer_VA {
+	Case AprJun {
+		Condition SimulateVA_Yub >0.5 .and. month >= APR .and. month <=JUN .and. wyt_SAC_LYRA >=2 .and. wyt_SAC_LYRA <= 4 !Between April and July of VA years
+		value max(0, C_YUB006_VA[LOWERYUBA] - C_YUB006_LYRA[LOWERYUBA])}
+	Case Other {
+		Condition Always
+		value 0.0}
+}
+
+Define YWA_VA_Transfer_VA_DV {alias YWA_VA_Transfer_VA kind 'TRANSFER' units 'CFS'}
+
+Define YWA_VA_Transfer {value YWA_VA_Transfer_LYRA + YWA_VA_Transfer_VA } !VA includes total volume of Repurposed LYRA and VA storage releases
+Define YWA_VA_Transfer_DV {alias YWA_VA_Transfer kind 'TRANSFER' units 'CFS'}
+
+!Compute VA Refill for information only
+Define YWA_NBB_Refill_VA {
+	Case NovJun {
+		Condition SimulateVA_Yub > 0.5 .and. (month>=NOV .and. month <=JUN) .and. C_YUB006_VA[LOWERYUBA] >= MF_YUB006_LYRA[LOWERYUBA]
+		value min(C_YUB006_VA[LOWERYUBA] - C_YUB006_LYRA[LOWERYUBA],0) }
+	Case Other {
+		Condition Always 
+		value 0.0 }
+}
+Define YWA_NBB_Refill_VA_DV {alias YWA_NBB_Refill_VA kind 'TRANSFER_REFILL' units 'CFS'}
+
+!Computing LYRA Transfer Volumes
+Define YWA_YRO_Trans {
+		Case BufferOnly_VA { !If minimums are the same and the only transferrable flow is the buffer flow, then no transfer
+			Condition SimulateVA_Yub > 0.5 .and. MF_YUB006_VA[LOWERYUBA] == MF_YUB006_D1644[LOWERYUBA] .and. C_YUB006_VA[LOWERYUBA] <= MF_YUB006_VA[LOWERYUBA] + MF_YUB_BUF[LOWERYUBA]
+			value 0.0 }
+		Case BufferOnly_LYRA { !If minimums are the same and the only transferrable flow is the buffer flow, then no transfer
+			Condition SimulateVA_Yub < 0.5 .and. MF_YUB006_LYRA[LOWERYUBA] == MF_YUB006_D1644[LOWERYUBA] .and. C_YUB006_LYRA[LOWERYUBA] <=  MF_YUB006_LYRA[LOWERYUBA] + MF_YUB_BUF[LOWERYUBA]
+			value 0.0 }
+		Case VA {	!If doing a Voluntary Agreement
+			Condition SimulateVA_Yub > 0.5 
+			value Balanced_D1641_LYRA * max(0,(C_YUB006_VA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA] - YWA_VA_Transfer)) }
+		Case LYRA { !If not doing a VA
+			Condition SimulateVA_Yub < 0.5
+			value Balanced_D1641_LYRA * max(0,(C_YUB006_LYRA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA])) }
+		Case Other {
+			Condition Always
+			value 0.0 }
+}
+Define YWA_YRO_Trans_DV {alias YWA_YRO_Trans kind 'TRANSFER' units 'CFS'}
+
+Define YWA_Neg_Trans {
+		Case VA {	!If doing a Voluntary Agreement
+			Condition SimulateVA_Yub > 0.5 .and. C_YUB006_LYRA[LOWERYUBA] < MF_YUB006_D1644[LOWERYUBA]
+			value min(0,(C_YUB006_VA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA] - YWA_VA_Transfer)) }
+		Case LYRA { !If not doing a VA
+			Condition SimulateVA_Yub < 0.5 .and. C_YUB006_LYRA[LOWERYUBA] < MF_YUB006_D1644[LOWERYUBA]
+			value min(0,(C_YUB006_LYRA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA])) }
+		Case Other {
+			Condition Always
+			value 0.0 }
+}
+Define YWA_Neg_Trans_DV {alias YWA_Neg_Trans kind 'TRANSFER' units 'CFS'}
+
+Define YWA_Neg_Trans_Impact {value Balanced_D1641_LYRA * YWA_Neg_Trans}  !Negative transfers have an impact if negative transfers occur during balanced conditions
+Define YWA_Neg_Trans_Impact_DV {alias YWA_Neg_Trans_Impact kind 'TRANSFER_IMPACT' units 'CFS'}
+
+!Accounting for LYRA transfer refills
+Define YWA_NBB_Refill_LYRA {
+		Case VA {
+			Condition SimulateVA_Yub > 0.5 
+			value min(0, C_YUB006_VA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA] - YWA_Neg_Trans - YWA_NBB_Refill_VA) }
+		Case LYRA {
+			Condition SimulateVA_Yub < 0.5
+			value min(0, C_YUB006_LYRA[LOWERYUBA] - C_YUB006_D1644[LOWERYUBA] - YWA_Neg_Trans,0) }
+		Case Other {
+			Condition Always
+			value 0.0 }
+}
+Define YWA_NBB_Refill_LYRA_DV {alias YWA_NBB_Refill_LYRA kind 'TRANSFER_REFILL' units 'CFS'}
+
+Define YWA_NBB_Refill_LYRA_Balance {Value max(0, YWA_NBB_Refill_LYRA_Balance_DV(-1) + (YWA_YRO_Trans + YWA_NBB_Refill_LYRA) *cfs_af)} !Unrefilled Yuba LYRA transfers
+Define YWA_NBB_Refill_LYRA_Balance_DV {alias YWA_NBB_Refill_LYRA_Balance kind 'Transfer_Refill' units 'AF'}
+
+Define YWA_NBB_Refill_LYRA_Impact {Value min(0, Balanced_D1641_LYRA * (YWA_NBB_Refill_LYRA_Balance - YWA_NBB_Refill_LYRA_Balance_DV(-1)))} !Refill impacts occur if refill occurs during balanced conditions
+Define YWA_NBB_Refill_LYRA_Impact_DV {alias YWA_NBB_Refill_LYRA_Impact kind 'Transfer_Impact' units 'AF'}
+
+Define YWA_NBB_Refill_LYRA_Impact_Cum {Value min(0, YWA_NBB_Refill_LYRA_Impact_Cum_DV(-1) + YWA_NBB_Refill_LYRA_Impact + YWA_YRO_Trans*cfs_af)} !Tracking cumulative refill impacts
+Define YWA_NBB_Refill_LYRA_Impact_Cum_DV {alias YWA_NBB_Refill_LYRA_Impact_Cum kind 'Transfer_Impact' units 'AF'}
+
+Define YWA_Neg_Trans_Impact_Cum {Value min(0, YWA_Neg_Trans_Impact_Cum_DV(-1) + (YWA_Neg_Trans_Impact + YWA_YRO_Trans)*cfs_af - (YWA_NBB_Refill_LYRA_Impact_Cum  - YWA_NBB_Refill_LYRA_Impact_Cum_DV(-1)))} !Tracking cumulative negative transfer impacts
+Define YWA_Neg_Trans_Impact_Cum_DV {alias YWA_Neg_Trans_Impact_Cum kind 'Transfer_Impact' units 'AF'}
+
+Define Yuba_Trans {Value min(YWA_YRO_Trans, (YWA_YRO_Trans - (YWA_NBB_Refill_LYRA_Impact_Cum - YWA_NBB_Refill_LYRA_Impact_Cum_DV(-1))*af_cfs - (YWA_Neg_Trans_Impact_Cum - YWA_Neg_Trans_Impact_Cum_DV(-1))*af_cfs))}
+Define Yuba_Trans_DV {alias Yuba_Trans kind 'TRANSFER' units 'CFS'}
+
+!goal setWTS_YubaSW {WTS_YubaSW = Yuba_Trans}

@@ -1,0 +1,287 @@
+! SJR_Rest_Cycle4.wresl
+
+! Retrieve SJR Restoration Settlement flow requirements.
+! This file is included in the pulse period cycle and uses the restoration flow
+! requirements for April 16-30 in April.  The flow requirement is the same for the 
+! whole month of May, so it is just defined as such.
+
+! ensure that total Millerton release is at least the restoration release target
+goal setMLRTN_rel {C_MLRTN > MLRTN_rel}  
+
+define SJRR_rel {
+        case April {
+                condition   month==APR
+                value       rest_req_p*taf_cfs*30./16.}
+        case MayOtherwise {
+                condition   always
+                value       MLRTN_rel}
+}
+define SJRR_relDV {alias SJRR_rel kind 'flow-min-requirement' units 'cfs'}
+
+define SJRR_rel_np {
+    case April {
+        condition   month==APR
+        value       rest_req_np*taf_cfs*30./14.
+    }
+    case Otherwise {
+        condition   always
+        value       MLRTN_rel
+    }
+}
+define SJRR_rel_pDV {alias SJRR_rel_np kind 'flow-min-requirement' units 'cfs'}
+
+define rel_def_np {value max(0., SJRR_rel - SJRR_rel_np)}
+define rel_def_p {value max(0., SJRR_rel_np - SJRR_rel)}
+
+define rel_add_np {value min(rel_def_np, Fr_snow_rel*taf_cfs*30./14.)}
+define rel_add_p {value min(rel_def_p, Fr_snow_rel*taf_cfs*30./16.)}
+define rel_add_mon {value max(0.,Fr_snow_rel*taf_cfs - rel_add_np*14./30. - rel_add_p*16./30.)}
+
+define rel_add_np_dv {alias rel_add_np kind 'alias' units 'cfs'}
+define rel_add_p_dv {alias rel_add_p kind 'alias' units 'cfs'}
+define rel_add_mon_dv {alias rel_add_mon kind 'alias' units 'cfs'}
+
+!Set snowmelt release
+!goal set_C_MLRTNa { C_MLRTNa < rel_add_p + rel_add_mon}
+goal set_C_MLRTNa { 
+    lhs C_MLRTNa 
+    case April {
+        condition month==APR
+        rhs C_MLRTNA[SJR_PULSE]
+        }
+    case MayOtherwise {
+        condition always
+        rhs C_MLRTNA[SJR_WQ1]     
+        }
+}
+
+
+
+! restrict the release from Friant to be the restoration release target
+! this value includes Gravelly Ford diversions and losses.  Set the segment
+! of flow below Gravelly Ford as the actual restoration flow - this will be
+! passed on to the restoration channel in SJR_Restrict.wresl
+! For CalSim 3, updated this calculation to include all water budget components from Millerton down to the restoration reach
+! This calculation happens only in the WQ cycles, based on prior cycle values.  Only releases needed to meet SJRR flows go into C_MLRTNM.
+! Releases that were not needed for SJRR flows will be moved into C_MLRTNF in this cycle
+define upstr_accretionstoSJRR_np {value I_SJR265 + SG54_SJR263_7[SJRBASE_GW4] + I_SJR258 + SG55_SJR256_7[SJRBASE_GW4] + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+                        + SG58_SJR235_7[SJRBASE_GW4] + R_64_PA1_SJR235[SJRBASE_GW4] + SR_64_SJR227[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4] - D_SJR227_64_PA3[SJRBASE_GW4] 
+                        + TD_SJR227_059[SJRBASE_GW4] + SG60_SJR221_7[SJRBASE_GW4] + SG61_SJR214_7[SJRBASE_GW4] + SR_64_SJR214[SJRBASE_GW4] 
+                        + SG62_SJR205_7[SJRBASE_GW4] + SG63_SJR205_8[SJRBASE_GW4]+ CT_GRAVELLYFORD[SJRBASE_GW4]}
+
+!Also need to calculate minimum accretions at locations between C_SJR227 and C_SJR214 when flow is at zero, since that can control releases
+!Only time this matters is when there are net depletions, so set to 99999 if flow not at 0, and the accretion calculation above will be the final result
+define upstr_accretions_SJR227_np {
+	case flowzero {
+	condition C_SJR227[SJRBASE_GW4] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJRBASE_GW4] + I_SJR258 + SG55_SJR256_7[SJRBASE_GW4] + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+              + SG58_SJR235_7[SJRBASE_GW4] + R_64_PA1_SJR235[SJRBASE_GW4] + SR_64_SJR227[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4] - D_SJR227_64_PA3[SJRBASE_GW4] 
+              + TD_SJR227_059[SJRBASE_GW4] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                        
+define upstr_accretions_SJR225_np {
+	case flowzero {
+	condition C_SJR227[SJRBASE_GW4] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJRBASE_GW4] + I_SJR258 + SG55_SJR256_7[SJRBASE_GW4] + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+              + SG58_SJR235_7[SJRBASE_GW4] + R_64_PA1_SJR235[SJRBASE_GW4] + SR_64_SJR227[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4] - D_SJR227_64_PA3[SJRBASE_GW4] 
+              + TD_SJR227_059[SJRBASE_GW4] + CT_GRAVELLYFORD[SJRBASE_GW4] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                        
+define upstr_accretions_SJR221_np {
+	case flowzero {
+	condition C_SJR227[SJRBASE_GW4] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJRBASE_GW4] + I_SJR258 + SG55_SJR256_7[SJRBASE_GW4] + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+              + SG58_SJR235_7[SJRBASE_GW4] + R_64_PA1_SJR235[SJRBASE_GW4] + SR_64_SJR227[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4] - D_SJR227_64_PA3[SJRBASE_GW4] 
+              + TD_SJR227_059[SJRBASE_GW4] + CT_GRAVELLYFORD[SJRBASE_GW4] + SG60_SJR221_7[SJRBASE_GW4] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                       
+define upstr_accretions_SJR214_np {
+	case flowzero {
+	condition C_SJR227[SJRBASE_GW4] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJRBASE_GW4] + I_SJR258 + SG55_SJR256_7[SJRBASE_GW4] + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+              + SG58_SJR235_7[SJRBASE_GW4] + R_64_PA1_SJR235[SJRBASE_GW4] + SR_64_SJR227[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4] - D_SJR227_64_PA3[SJRBASE_GW4] 
+              + TD_SJR227_059[SJRBASE_GW4] + CT_GRAVELLYFORD[SJRBASE_GW4] + SG60_SJR221_7[SJRBASE_GW4] + SG61_SJR214_7[SJRBASE_GW4] + SR_64_SJR214[SJRBASE_GW4]}
+    case otherwise {
+    condition always
+    	value 99999. }}
+
+define upstr_accretions_otherlocs_np {value min(upstr_accretions_SJR227_np, upstr_accretions_SJR225_np, upstr_accretions_SJR221_np, upstr_accretions_SJR214_np)}
+
+define upstr_accretions_np {value min(upstr_accretionstoSJRR_np,upstr_accretions_otherlocs_np)}
+
+define accr_beyond_SJRR_np {value max (0., upstr_accretions_np - REST_RCH_NP)}
+define SJRR_rel_new_np {value max(0., MLRTN_rel - C_MLRTNA[SJRBASE_GW4], REST_RCH_NP - C_MLRTNA[SJRBASE_GW4], REST_RCH_NP - (upstr_accretions_np - accr_beyond_SJRR_np)  - C_MLRTNA[SJRBASE_GW4])}  !Need to account for C_MLRTNA here, so that does no change in this cycle
+
+define upstr_accretionstoSJRR_p {value I_SJR265 + SG54_SJR263_7[SJR_PULSE] + I_SJR258 + SG55_SJR256_7[SJR_PULSE] + SG56_SJR249_7[SJR_PULSE] + SG57_SJR242_7[SJR_PULSE] 
+                        + SG58_SJR235_7[SJR_PULSE] + R_64_PA1_SJR235[SJR_PULSE] + SR_64_SJR227[SJR_PULSE] + SG59_SJR227_7[SJR_PULSE] - D_SJR227_64_PA3[SJR_PULSE] 
+                        + TD_SJR227_059[SJR_PULSE] + SG60_SJR221_7[SJR_PULSE] + SG61_SJR214_7[SJR_PULSE] + SR_64_SJR214[SJR_PULSE]
+                        + SG62_SJR205_7[SJR_PULSE] + SG63_SJR205_8[SJR_PULSE]+ CT_GRAVELLYFORD[SJR_PULSE]}
+
+!Also need to calculate minimum accretions at locations between C_SJR227 and C_SJR214 when flow is at zero, since that can control releases
+!Only time this matters is when there are net depletions, so set to 99999 if flow not at 0, and the accretion calculation above will be the final result
+define upstr_accretions_SJR227_p {
+	case flowzero {
+	condition C_SJR227[SJR_PULSE] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJR_PULSE] + I_SJR258 + SG55_SJR256_7[SJR_PULSE] + SG56_SJR249_7[SJR_PULSE] + SG57_SJR242_7[SJR_PULSE] 
+              + SG58_SJR235_7[SJR_PULSE] + R_64_PA1_SJR235[SJR_PULSE] + SR_64_SJR227[SJR_PULSE] + SG59_SJR227_7[SJR_PULSE] - D_SJR227_64_PA3[SJR_PULSE] 
+              + TD_SJR227_059[SJR_PULSE] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                        
+define upstr_accretions_SJR225_p {
+	case flowzero {
+	condition C_SJR227[SJR_PULSE] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJR_PULSE] + I_SJR258 + SG55_SJR256_7[SJR_PULSE] + SG56_SJR249_7[SJR_PULSE] + SG57_SJR242_7[SJR_PULSE] 
+              + SG58_SJR235_7[SJR_PULSE] + R_64_PA1_SJR235[SJR_PULSE] + SR_64_SJR227[SJR_PULSE] + SG59_SJR227_7[SJR_PULSE] - D_SJR227_64_PA3[SJR_PULSE] 
+              + TD_SJR227_059[SJR_PULSE] + CT_GRAVELLYFORD[SJR_PULSE] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                        
+define upstr_accretions_SJR221_p {
+	case flowzero {
+	condition C_SJR227[SJR_PULSE] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJR_PULSE] + I_SJR258 + SG55_SJR256_7[SJR_PULSE] + SG56_SJR249_7[SJR_PULSE] + SG57_SJR242_7[SJR_PULSE] 
+              + SG58_SJR235_7[SJR_PULSE] + R_64_PA1_SJR235[SJR_PULSE] + SR_64_SJR227[SJR_PULSE] + SG59_SJR227_7[SJR_PULSE] - D_SJR227_64_PA3[SJR_PULSE] 
+              + TD_SJR227_059[SJR_PULSE] + CT_GRAVELLYFORD[SJR_PULSE] + SG60_SJR221_7[SJR_PULSE] }
+    case otherwise {
+    condition always
+    	value 99999. }}
+                       
+define upstr_accretions_SJR214_p {
+	case flowzero {
+	condition C_SJR227[SJR_PULSE] < 0.001
+		value I_SJR265 + SG54_SJR263_7[SJR_PULSE] + I_SJR258 + SG55_SJR256_7[SJR_PULSE] + SG56_SJR249_7[SJR_PULSE] + SG57_SJR242_7[SJR_PULSE] 
+              + SG58_SJR235_7[SJR_PULSE] + R_64_PA1_SJR235[SJR_PULSE] + SR_64_SJR227[SJR_PULSE] + SG59_SJR227_7[SJR_PULSE] - D_SJR227_64_PA3[SJR_PULSE] 
+              + TD_SJR227_059[SJR_PULSE] + CT_GRAVELLYFORD[SJR_PULSE] + SG60_SJR221_7[SJR_PULSE] + SG61_SJR214_7[SJR_PULSE] + SR_64_SJR214[SJR_PULSE]}
+    case otherwise {
+    condition always
+    	value 99999. }}
+
+define upstr_accretions_otherlocs_p {value min(upstr_accretions_SJR227_p, upstr_accretions_SJR225_p, upstr_accretions_SJR221_p, upstr_accretions_SJR214_p)}
+
+define upstr_accretions_p {value min(upstr_accretionstoSJRR_p,upstr_accretions_otherlocs_p)}
+
+define accr_beyond_SJRR_p {value max (0., upstr_accretions_p - REST_RCH_P)}
+define SJRR_rel_new_p {value max(0., MLRTN_rel - C_MLRTNA[SJR_PULSE], REST_RCH_P - C_MLRTNA[SJR_PULSE], REST_RCH_P - (upstr_accretions_p - accr_beyond_SJRR_p) - C_MLRTNA[SJR_PULSE])}  !Need to account for C_MLRTNA here, so that does no change in this cycle, ! To check if flood flows can minimize Friant restoration releases
+
+define upstr_accretions {
+    case April {
+        condition month==APR
+        value upstr_accretions_p } 
+    case MayOtherwise {
+        condition always
+        value upstr_accretions_np }
+}
+
+define accr_beyond_SJRR {
+    case April {
+        condition month==APR
+        value accr_beyond_SJRR_p } 
+    case MayOtherwise {
+        condition always
+        value accr_beyond_SJRR_np }
+}
+
+define SJRR_rel_new {
+    case April {
+        condition month==APR
+        value SJRR_rel_new_p } 
+    case MayOtherwise {
+        condition always
+        value SJRR_rel_new_np }
+}
+
+goal boundC_MLRTNmain { C_MLRTNM = SJRR_rel_new  }  
+
+! target restoration reach flow
+goal meetSJRR {
+    lhs D_SJR205_SJR201 
+    case April {
+        condition month==APR
+        rhs REST_RCH_P }
+!        lhs<rhs penalty 0}
+    case MayOtherwise {
+        condition always
+        rhs REST_RCH_NP }
+ !       lhs<rhs penalty 0}
+}
+
+define assumed_MLRTNF {
+    case April {
+        condition month==APR
+        value max(0., C_MLRTNM[SJR_PULSE] - SJRR_rel_new_p)
+        }
+    case MayOtherwise {
+        condition always
+        value max(0., C_MLRTNM[SJRBASE_GW4] - SJRR_rel_new_np)      
+        }
+}
+
+goal set_C_MLRTNf { 
+    lhs C_MLRTNf 
+    case April {
+        condition month==APR
+        rhs max(0., C_MLRTNM[SJR_PULSE] - SJRR_rel_new_p)
+        }
+    case MayOtherwise {
+        condition always
+        rhs C_MLRTNf[SJR_WQ1]     
+        }
+}
+
+
+!Computes volume of SJRR flows that make it to the Merced
+include '..\..\VSA\VA_Friant_flow_calcs_SJRWQ2.wresl'
+
+!******************************************************************************
+! SJRR Recapture Logic
+
+! Set to results of SJRBASE_GW4 cycle
+! If Friant was in flood control, recapture is set to zero
+
+define SJRR_flow_at_Merced {value min(D_SJR205_SJR201[SJR_PULSE],SJR116_SJRRflow)} !min of SJRR flows and SJRR flows computed to make it past the Merced
+goal set_SRRP_lmt  { 
+    lhs D_SJR096_SJRRrecap + D_SJR082_SJRRrecap + D_SJR070_SJRRrecap + D_SJR070_SJRRremove
+!    case flood {
+!        condition C_MLRTNA[SJR_PULSE] + assumed_MLRTNF > 0.5
+!        rhs 0.}
+    case otherwise {
+        condition always
+        rhs SJRR_flow_at_Merced
+        lhs<rhs penalty 0.}
+}
+
+define recap_D_SJR096_SJR_max {select D_SJR096 from SRRP_Recapture_Pot where mon=month}
+define recap_D_SJR082_SJR_max {select D_SJR082 from SRRP_Recapture_Pot where mon=month}
+define recap_D_SJR070_SJR_max {select D_SJR070 from SRRP_Recapture_Pot where mon=month}
+define recap_max {value recap_D_SJR096_SJR_max + recap_D_SJR082_SJR_max + recap_D_SJR070_SJR_max }
+
+goal set_SRRP_lmt1  { D_SJR096_SJRRrecap + D_SJR082_SJRRrecap + D_SJR070_SJRRrecap < SJRR_flow_at_Merced }
+
+goal set_D_SJR096_SJRRrecap_lmt1 { D_SJR096_SJRRrecap < recap_D_SJR096_SJR_max} ! SRRP flow recapture - Patterson ID
+goal set_D_SJR096_SJRRrecap_lmt2 { D_SJR096_SJRRrecap < SJRR_flow_at_Merced * recap_D_SJR096_SJR_max/recap_max}
+
+goal set_D_SJR082_SJRRrecap_lmt1 { D_SJR082_SJRRrecap < recap_D_SJR082_SJR_max}   ! SRRP flow recapture - West Stanislaus ID
+goal set_D_SJR082_SJRRrecap_lmt2 { D_SJR082_SJRRrecap < SJRR_flow_at_Merced * recap_D_SJR082_SJR_max/recap_max}
+
+goal set_C_SJR070_SJRRrecap_lmt1 { D_SJR070_SJRRrecap < recap_D_SJR070_SJR_max}   ! SRRP flow recapture - Banta Carbona ID
+goal set_C_SJR070_SJRRrecap_lmt2 { D_SJR070_SJRRrecap < SJRR_flow_at_Merced * recap_D_SJR070_SJR_max/recap_max}
+
+! Remaining SRRP flow - remove from SJR until the final cycle
+goal D_SJR070_SJRRremove_lmt1 {D_SJR070_SJRRremove < SJRR_flow_at_Merced - D_SJR096_SJRRrecap - D_SJR082_SJRRrecap - D_SJR070_SJRRrecap } 
+
+define upstr_accretions_np_dv {alias upstr_accretions_np kind 'alias' units 'cfs'}
+define upstr_accretions_p_dv {alias upstr_accretions_p kind 'alias' units 'cfs'}
+define upstr_accretions_dv {alias upstr_accretions kind 'alias' units 'cfs'}
+define accr_beyond_SJRR_dv {alias accr_beyond_SJRR kind 'alias' units 'cfs'}
+define SJRR_rel_new_dv {alias SJRR_rel_new kind 'alias' units 'cfs'}
+define assumed_MLRTNF_dv {alias assumed_MLRTNF kind 'alias' units 'cfs'}
+define SJRR_flow_at_Merced_dv {alias SJRR_flow_at_Merced kind 'alias' units 'cfs'}

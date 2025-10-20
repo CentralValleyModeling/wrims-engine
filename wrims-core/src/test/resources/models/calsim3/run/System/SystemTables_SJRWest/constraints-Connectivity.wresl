@@ -1,0 +1,214 @@
+/*
+ASSURE CONTINUITY IN SURFACE WATER NETWORK
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Arroyo Canal        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityARY010       {D_SJR180_ARY010 - D_ARY010_72_XA1 - D_ARY010_72_PR3 - D_ARY010_72_PR4 - D_ARY010_72_PR6 = 0.} 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! California Aqueduct     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCAA000       {D_OMR027_CAA000 - C_CAA000							= 0.}!CLIFTON COURT FOREBAY
+goal continuityCAA002       {C_CAA000  - D_CAA002_50_PA2 - C_CAA002					= 0.}
+goal continuityCAA003       {C_CAA002  - C_CAA003							= 0.}!BANKS PUMPING PLANT
+goal continuityCAA005       {C_CAA003  - D_CAA005_SBA000 - C_CAA005 + D_CAA005_CAALOS			= 0.}
+goal continuityCAA006       {C_CAA005  - C_CAA006 + D_CAA006_CAALOS					= 0.}
+goal continuityCAA009       {C_CAA006  + D_DMC007_CAA009 - D_CAA009_DMC007 - C_CAA009 + D_CAA009_CAALOS = 0.}!CA-DMC INTERTIE
+goal continuityCAA012       {C_CAA009  - D_CAA012_71_PU1 - C_CAA012 + D_CAA012_CAALOS			= 0.}
+goal continuityCAA024       {C_CAA012  - C_CAA024 + D_CAA024_CAALOS					= 0.}
+goal continuityCAA046       {C_CAA024  - D_CAA046_71_PA7 - C_CAA046 + D_CAA046_CAALOS			= 0.}
+goal continuityCAA051       {C_CAA046  - C_CAA051 + D_CAA051_CAALOS					= 0.}
+goal continuityCAA066       {C_CAA051  - D_CAA066_71_PU2 - C_CAA066 + D_CAA066_CAALOS			= 0.}
+goal continuityCAA067       {C_CAA066  - C_CAA067 + D_CAA067_CAALOS					= 0.}
+goal continuityCAA069       {C_CAA067  + C_SLUIS + D_DMC070_CAA069 - D_CAA069_DMC070 
+                                       - D_CAA069_SLUIS - C_CAA069 + D_CAA069_CAALOS			= 0.}
+goal continuityCAA069_SWP   {C_CAA067_SWP + C_SLUIS_SWP - D_CAA069_SLUIS_S - C_CAA069_SWP + D_CAA069_CAALOS_SWP = 0.}
+goal continuityCAA069_CVP   {C_CAA067_CVP + C_SLUIS_CVP + D_DMC070_CAA069 
+                             - D_CAA069_SLUIS_F - D_CAA069_DMC070 - C_CAA069_CVP + D_CAA069_CAALOS_CVP	= 0.}
+
+goal continuityCAA071       {C_CAA069  - C_CAA071 + D_CAA071_CAALOS					= 0.}
+goal continuityCAA087       {C_CAA071  - D_CAA087_73_PA1 - C_CAA087 + D_CAA087_CAALOS			= 0.}!DOS AMIGOS PP
+goal continuityCAA095       {C_CAA087  - C_CAA095 + D_CAA095_CAALOS			= 0.}
+goal continuityCAA109       {C_CAA095  - D_CAA109_73_PA3 - D_CAA109_90_PA1 - C_CAA109 + D_CAA109_CAALOS = 0.}
+goal continuityCAA143       {C_CAA109  - D_CAA143_90_PA2 - D_CAA143_90_PA1 
+                                       - D_CAA143_90_PU  - C_CAA143 + D_CAA143_CAALOS			= 0.}
+goal continuityCAA155       {C_CAA143  - D_CAA155_90_PA1 - C_CAA155 + D_CAA155_CAALOS			= 0.}
+goal continuityCAA156       {C_CAA155  - D_CAA156_90_PU  - C_CAA156 + D_CAA156_CAALOS			= 0.}
+goal continuityCAA165       {C_CAA156  - D_CAA165_90_PU  - C_CAA165 + D_CAA165_CAALOS			= 0.}
+goal continuityCAA172       {C_CAA165  - D_CAA172_90_PA1 - C_CAA172 + D_CAA172_CAALOS			= 0.}  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Corral Hollow and minor creeks (West of CAA) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCHC000       {I_CHC000 + SG_CHC000_609							= 0.}!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Capita Canyon and minor streams (West of CAA) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCAP000       {I_CAP000 + SG_CAP000_854							= 0.}!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Del Puerto Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDPC008       {max(0,I_DPC008) - C_DPC008							= 0.}  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Delta Mendota Canal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDMC000       {D_OMR028_DMC000 - C_DMC000							= 0.} !JONES PUMPING PLANT
+goal continuityDMC003       {C_DMC000 - C_DMC003 + D_DMC003_DMCLOS					= 0.}
+goal continuityDMC007       {C_DMC003 + D_CAA009_DMC007 - D_DMC007_CAA009 - C_DMC007 + D_DMC007_DMCLOS	= 0.}
+goal continuityDMC011       {C_DMC007 - D_DMC011_71_PA8 - C_DMC011 + D_DMC011_DMCLOS			= 0.}
+goal continuityDMC016       {C_DMC011 - D_DMC016_WTPJJO - C_DMC016 + D_DMC016_DMCLOS			= 0.}
+goal continuityDMC021       {C_DMC016 - D_DMC021_50_PA1  - C_DMC021 + D_DMC021_DMCLOS			= 0.}
+goal continuityDMC024       {C_DMC021 - C_DMC024 + D_DMC024_DMCLOS					= 0.}
+goal continuityDMC030       {C_DMC024 - D_DMC030_71_PA1 - C_DMC030 + D_DMC030_DMCLOS			= 0.}
+goal continuityDMC034       {C_DMC030 - D_DMC034_71_PA2 - D_DMC034_WWW001
+                                      - D_DMC034_71_PA3 - C_DMC034 + D_DMC034_DMCLOS			= 0.}
+goal continuityDMC039       {C_DMC034 - C_DMC039 + D_DMC039_DMCLOS					= 0.}
+goal continuityDMC044       {C_DMC039 - D_DMC044_71_PA4 - D_DMC044_71_PA5 - C_DMC044 + D_DMC044_DMCLOS	= 0.}
+goal continuityDMC049       {C_DMC044 - C_DMC049 + D_DMC049_DMCLOS					= 0.}
+goal continuityDMC054       {C_DMC049 - D_DMC054_NMW004 - C_DMC054 + D_DMC054_DMCLOS			= 0.}
+goal continuityDMC058       {C_DMC054 - C_DMC058 + D_DMC058_DMCLOS					= 0.}
+goal continuityDMC064       {C_DMC058 - D_DMC064_71_PA6 - C_DMC064 + D_DMC064_DMCLOS			= 0.}
+goal continuityDMC070       {C_DMC064 + D_CAA069_DMC070 - D_DMC070_CAA069
+                                      - D_DMC070_73_PA1 - D_DMC070_VLW008 - C_DMC070 + D_DMC070_DMCLOS	= 0.}                                                                                     
+goal continuityDMC074       {C_DMC070 - C_DMC074 + D_DMC074_DMCLOS					= 0.}
+goal continuityDMC076       {C_DMC074 - D_DMC076_XCC043 - C_DMC076 + D_DMC076_DMCLOS			= 0.}
+goal continuityDMC080       {C_DMC076 - C_DMC080 + D_DMC080_DMCLOS					= 0.}
+goal continuityDMC085       {C_DMC080 - C_DMC085 + D_DMC085_DMCLOS					= 0.}
+goal continuityDMC091       {C_DMC085 - D_DMC091_73_PA3 - C_DMC091 + D_DMC091_DMCLOS			= 0.}       
+goal continuityDMC097       {C_DMC091 - C_DMC097 + D_DMC097_DMCLOS					= 0.}
+goal continuityDMC105       {C_DMC097 - D_DMC105_73_PA2 - C_DMC105 + D_DMC105_DMCLOS			= 0.}
+goal continuityDMC111       {C_DMC105 - D_DMC111_73_XA - D_DMC111_FBW001 - C_DMC111 + D_DMC111_DMCLOS	= 0.}
+
+goal continuityDMC116       {C_DMC111 - C_DMC116 + D_DMC116_DMCLOS					= 0.} !DISCHARGE TO MENDOTA POOL
+
+goal continuityWTPJJO       {D_DMC016_WTPJJO - D_WTPJJO_50_PU						= 0.}
+!goal continuityTCWWTP       {R_50_PU_TCWWTP  - R_TCWWTP_OMR039						= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Delta Mendota Canal Wasteways !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityWWW001       {D_DMC034_WWW001 + R_71_PA3_WWW001 - C_WWW001				= 0.}
+goal continuityNMW004       {D_DMC054_NMW004 + R_71_PA6_NMW004 - C_NMW004				= 0.}
+goal continuityVLW008       {D_DMC070_VLW008 - D_VLW008_72_PR1 - D_VLW008_72_PR5 - C_VLW008				= 0.}
+goal continuityFBW001       {D_DMC111_FBW001 - C_FBW001							= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Fresno Slough and James Bypass   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityJBP006       {I_JBP006 - C_JBP006							= 0.} 
+goal continuityFSL012       {I_FSL012 + C_JBP006 + R_91_PA_FSL012 + SG51_FSL012_4 - C_FSL012		= 0.} 
+goal continuityFSL005       {C_FSL012 + R_91_PR_FSL005 + SG52_FSL005_4  + SG53_FSL005_4 + TD_GWR15_052 + TD_WBA90_053 - C_FSL005	= 0.} 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Garzas Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityGRZ012       {I_GRZ012 - C_GRZ012							= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Hospital & Ingram Creeks    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityING008       {I_ING008 - C_ING008							= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Little Panoche Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityLPC007       {I_LPC007 - C_LPC007							= 0.} 
+goal continuityLPC000       {C_LPC007 + SG_LPC000_840							= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Los Banos Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBANOS        {I_BANOS - C_BANOS								= 0.}
+goal continuityLBN025       {C_BANOS  + R_73_PA1_LBN025 - C_LBN025					= 0.} 
+goal continuityLBN012       {C_LBN025 + C_VLW008 + R_72_PR1_LBN012 - C_LBN012				= 0.} 
+goal continuityLBN008       {C_LBN012 /*+ D_XCC054_LBN008*/ + C_QNT005 - C_LBN008					= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Main Canal (CCID)      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityXCC010       {D_MDOTA_XCC010 - D_XCC010_72_XA2 - C_XCC010				= 0.} 
+goal continuityXCC025       {C_XCC010 - D_XCC025_72_PA - D_XCC025_72_PR6 - C_XCC025			= 0.} 
+goal continuityXCC033       {C_XCC025 - D_XCC033_72_PR2 - D_XCC033_72_PR4 - C_XCC033			= 0.} 
+goal continuityXCC043       {C_XCC033 + D_DMC076_XCC043 - C_XCC043					= 0.}
+goal continuityXCC053       {C_XCC043 /*+ C_QNT005*/ - C_XCC053						= 0.}
+goal continuityXCC054       {C_XCC053 /*+ C_GRZ012*/ + R_71_PA6_XCC054 /*- D_XCC054_LBN008*/ - D_XCC054_72_PR5 - D_XCC054_72_XA3 = 0.} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mud Slough (North)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMSN009       {C_SLD002 + R_72_PR5_MSN009 - C_MSN009					= 0.}
+goal continuityMSN005       {C_MSN009 - C_MSN005 + CT_MudSlough							= 0.}
+goal continuityMSN004       {C_MSN005 + C_LBN008 + SR_71_MSN004 + SR_72_MSN004 + SR_73_MSN004 + R_72_PR2_MSN004 + R_72_XA3_MSN004 - C_MSN004 + TD_MSN004_114 + TD_MSN004_115 + TD_MSN004_104 = 0.} 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mud Slough (South)  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMSS014       {R_72_PR6_MSS014 + R_72_PA_MSS014 - C_MSS014				= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Orestimba Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityORT014       {I_ORT014 + SG128_ORT014_19 - C_ORT014					= 0.}!RsdPos_ORT014 - RsdNeg_ORT014}
+goal continuityORT009       {C_ORT014 + SG129_ORT009_19 - C_ORT009					= 0.} 
+goal continuityORT001       {C_ORT009 + SG130_ORT001_19 - C_ORT001					= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Ortigalita Creek         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityORG000       {I_ORG000 + SG_ORG000_793							= 0.}!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Quinto Creek !!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityQNT005       {I_QNT005 - C_QNT005							= 0.} 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Return Flow Splits  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS71A       {R_71_PA8_RFS71A - D_RFS71A_50_PA1  - R_RFS71A_OMR039			= 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Salido Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySLO007       {I_SLO007 - C_SLO007							= 0.}
+goal continuitySLO000       {C_SLO007 + SG_SLO000_659							= 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Salt Slough !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySAL017       {C_MSS014 + R_72_XA1_SAL017 + R_72_XA2_SAL017 - C_SAL017			= 0.}
+goal continuitySAL006       {C_SAL017 + SR_72_SAL006 + R_72_PR3_SAL006 + R_72_PR4_SAL006 - C_SAL006 + TD_SAL006_113 + CT_SaltSlough	= 0.} !USGS 11261100 Salt Slough at Hwy 165 nr Stevinson
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Joaquin River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMDOTA        {C_SJR205  + SG_MDOTA_872 + C_DMC116 + C_FSL005 /*+ I_MDOTA_WTS*/ - C_MDOTA  - D_MDOTA_64_XA - D_MDOTA_73_XA - D_MDOTA_90_PA1 
+                            - D_MDOTA_91_PR - D_MDOTA_91_PA - D_MDOTA_XCC010				= 0.} !Mendota Pool
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Luis Drain  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySLD027       {SR_73_SLD027 + R_73_PA2_SLD027 + R_73_PA3_SLD027 + R_73_XA_SLD027 - C_SLD027 + TD_SLD027_102 = 0.}
+goal continuitySLD002       {C_SLD027 - C_SLD002 = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Luis Reservoir  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySLUIS_F  {I_SLUIS*.4767 + D_CAA069_SLUIS_F - D_SLUIS_PCH000 - C_SLUIS_CVP - E_SLUIS_CVP 
+                        = S_SLUIS_CVP*taf_cfs - S_SLUIS_CVP(-1)*taf_cfs } !  + RsdPos_SLUIS_F - RsdNeg_SLUIS_F}!San Luis Reservoir (CVP)
+
+goal continuitySLUIS_S  {I_SLUIS*.5233 + D_CAA069_SLUIS_S - C_SLUIS_SWP - E_SLUIS_SWP - WTS_deliv
+                        = S_SLUIS_SWP*taf_cfs - S_SLUIS_SWP(-1)*taf_cfs} !  + RsdPos_SLUIS_S - RsdNeg_SLUIS_S}!San Luis Reservoir (SWP)
+
+goal continuityPCH000   {D_PCH000_SCVWD + D_PCH000_SBCWD - D_SLUIS_PCH000				= 0.}
+
+goal continuitySCVWD    {D_PCH000_SCVWD = D_PCH000_SCVWD_PA + D_PCH000_SCVWD_PU}
+goal continuitySBCWD    {D_PCH000_SBCWD = D_PCH000_SBCWD_PA + D_PCH000_SBCWD_PU}

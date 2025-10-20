@@ -1,0 +1,321 @@
+/*
+RETURN FLOWS FROM DEMAND UNITS
+
+NAMING TAKES THE FOLLOWING FORMS:
+R_{DEMAND UNIT}     - return flow from specific demand unit
+R_{WBA}_{DESTINATION}   - aggregated return from WBA to specific location
+
+Update:     J. Gilbert (USBR) 2017.07.05
+			- separating contract-limited (CL) from applied water (AW)
+				based formulations; This file (constraints-ReturnsAW.wresl)
+				does not limit return flows by contract amount but rather uses
+				the tailwater directly as input to CalSim3 from CalSimHydro
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 50      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 50_PA1 - Banta Carbona ID/Westside ID - Ag
+!==============================
+goal setR_50_PA1        {R_50_PA1         = TW_50_PA1 + LF_50_PA1 + OS_50_PA1 - RU_50_PA1 }
+goal setR_50_PA1_SJR056 {R_50_PA1_SJR056  = R_50_PA1 }
+ 
+
+!==============================
+! 50_PU - City of Tracy - M&I
+!==============================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+!define RFF_TCWWTP   {select RFFactor from WWTP_Factors where Plant = 68}
+!define WW_50_PU {
+!    case final {
+!        condition wateryear == EndWY
+!        value RFF_TCWWTP * min(UD_50_PU(prevdec),UD_50_PU(prevjan),UD_50_PU(prevfeb),UD_50_PU(prevmar))}
+!    case otherwise {
+!        condition   always
+!        value RFF_TCWWTP * min(UD_50_PU(3-month),UD_50_PU(4-month),UD_50_PU(5-month),UD_50_PU(6-month))}  
+!        }
+    
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_50_PU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+ !goal setR_50_PU_TCWWTP {R_50_PU_TCWWTP = WW_50_PU}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 71_PA1 - Hospital WD - Ag
+!==============================
+goal setR_71_PA1        {R_71_PA1        = TW_71_PA1 + LF_71_PA1 + OS_71_PA1 - RU_71_PA1 }
+goal setR_71_PA1_SJR075 {R_71_PA1_SJR075 = R_71_PA1 }
+
+
+!==============================
+! 71_PA2 - West Stanislaus ID - Ag
+!==============================
+goal setR_71_PA2        {R_71_PA2        = TW_71_PA2 + LF_71_PA2 + OS_71_PA2 - RU_71_PA2 }
+goal setR_71_PA2_SJR075 {R_71_PA2_SJR075 = R_71_PA2 }
+
+
+!==============================
+! 71_PA3 - Kern Canon WD - Ag
+!==============================
+goal setR_71_PA3        {R_71_PA3        = TW_71_PA3 + LF_71_PA3 + OS_71_PA3 - RU_71_PA3 }
+goal setR_71_PA3_WWW001 {R_71_PA3_WWW001 = R_71_PA3 }
+
+
+!==============================
+! 71_PA4 - Patterson ID - Ag
+!==============================
+goal setR_71_PA4        {R_71_PA4        = TW_71_PA4 + LF_71_PA4 + OS_71_PA4 - RU_71_PA4 }
+goal setR_71_PA4_SJR091 {R_71_PA4_SJR091 = R_71_PA4 }
+
+
+!==============================
+! 71_PA5 - Del Puerto, Salado WD, Orestimba, Sunflower - Ag
+!==============================
+! In CalSimII, Orestimba WD is the only contractor which produces return flows to the SJR
+! The factor .428 represents the portion of the total contract amount that is Orestimba
+! Default split is half to MilePost91 and half to MilePost106
+goal setR_71_PA5        {R_71_PA5        = TW_71_PA5 + LF_71_PA5 + OS_71_PA5 - RU_71_PA5 }
+goal setR_71_PA5_SJR106 {R_71_PA5_SJR106 + R_71_PA5_SJR091 = R_71_PA5 }
+
+goal setR_71_PA5_SJR091  {R_71_PA5_SJR091 = 0.5 * R_71_PA5}
+!goal setR_71_PA5_SJR106 {R_71_PA5_SJR106 = 0.5 * R_71_PA5}
+
+
+
+!==============================
+! 71_PA6 - Davis, Foothill, Mestang, Qu9into, Romero, Centinella - Ag
+!==============================
+! In CalSimII, Foothill WD is the only contractor which produces return flows to the SJR
+! The factor .23 represents the portion of the total contract amount that is Foothill
+goal setR_71_PA6        {R_71_PA6        = TW_71_PA6 + LF_71_PA6 + OS_71_PA6 - RU_71_PA6 }
+goal setR_71_PA6_RFS71C {R_71_PA6_XCC054 + R_71_PA6_NMW004 = R_71_PA6 }
+
+goal setR_RFS71C_NMW004  {R_71_PA6_NMW004 = 0.5 * R_71_PA6}
+!goal setR_RFS71C_XCC054 {R_71_PA6_XCC054 = 0.5 * R_71_PA6}
+
+
+
+!==============================
+! 71_PA7 - Oak Flat - Ag
+!==============================
+goal fixR_71_PA7          {R_71_PA7        = 0.0}
+goal fixR_71_PA7_SJR091   {R_71_PA7_SJR091 = 0.0}
+
+
+!==============================
+! 71_PA8 - Byron-Bethany ID (portion formerly called Plainview) - Ag
+!==============================
+goal setR_71_PA8        {R_71_PA8        = TW_71_PA8 + LF_71_PA8 + OS_71_PA8 - RU_71_PA8 }
+goal setR_71_PA8_RFS71A {R_71_PA8_RFS71A = R_71_PA8 }
+
+
+!==============================
+! 71_NA1 - Non-District - Riparian Ag
+!==============================
+goal setR_71_NA1        {R_71_NA1        = TW_71_NA1 + LF_71_NA1 + OS_71_NA1 - RU_71_NA1 }
+goal setR_71_NA1_SJR091 {R_71_NA1_SJR091 = R_71_NA1 }
+
+
+!==============================
+! 71_NA2 - El Solyo WD, Non-District Ag
+!==============================
+goal setR_71_NA2        {R_71_NA2        = TW_71_NA2 + LF_71_NA2 + OS_71_NA2 - RU_71_NA2 }
+goal setR_71_NA2_SJR070 {R_71_NA2_SJR070 = R_71_NA2 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 72_PA - Laguna WD - Ag
+!==============================
+goal setR_72_PA         {R_72_PA         = TW_72_PA  + LF_72_PA  + OS_72_PA  - RU_72_PA  }
+goal setR_72_PA_MSS014  {R_72_PA_MSS014  = R_72_PA  }
+
+
+!==============================
+! 72_XA1 - San Luis Canal Co Exchange Contractors - Ag
+!==============================
+goal setR_72_XA1        {R_72_XA1        = TW_72_XA1 + LF_72_XA1 + OS_72_XA1 - RU_72_XA1 }
+goal setR_72_XA1_SAL017 {R_72_XA1_SAL017 = R_72_XA1 }
+
+
+!==============================
+! 72_XA2 - Central California ID South Exchange Contractors - Ag
+!==============================
+goal setR_72_XA2        {R_72_XA2        = TW_72_XA2 + LF_72_XA2 + OS_72_XA2 - RU_72_XA2 }
+goal setR_72_XA2_SAL017 {R_72_XA2_SAL017 = R_72_XA2 }
+
+
+!==============================
+! 72_XA3 - Central California ID North Exchange Contractors - Ag
+!==============================
+goal setR_72_XA3        {R_72_XA3        = TW_72_XA3 + LF_72_XA3 + OS_72_XA3 - RU_72_XA3 }
+goal setR_72_XA3_RFS72B {R_72_XA3_MSN004 + R_72_XA3_SJR106 = R_72_XA3 }
+
+goal setR_RFS72B_MSN004 {R_72_XA3_SJR106 = 0.07 * R_72_XA3}
+!goal setR_RFS72B_MSN004 {R_72_XA3_MSN004 = 0.93 * R_72_XA3} 
+
+
+!==============================
+! 72_PR1 - Volta WA - Refuge
+!==============================
+goal setR_72_PR1        {R_72_PR1        = TW_72_PR1 + LF_72_PR1 + OS_72_PR1 - RU_72_PR1 }        !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR1_LBN012 {R_72_PR1_LBN012 = R_72_PR1 }
+
+
+!==============================
+! 72_PR2 - Kesterson, Freitas, & Blue Goose units of San Luis NWR, China Island unit of North Grassland - Refuge
+!==============================
+goal setR_72_PR2        {R_72_PR2        = TW_72_PR2 + LF_72_PR2 + OS_72_PR2 - RU_72_PR2 }   !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR2_MSN004 {R_72_PR2_MSN004 = R_72_PR2 }
+
+
+!==============================
+! 72_PR3 - West Bear Ck and San Luis units of San Luis NWR - Refuge
+!==============================
+goal setR_72_PR3        {R_72_PR3        = TW_72_PR3 + LF_72_PR3 + OS_72_PR3 - RU_72_PR3 }   !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR3_SAL006 {R_72_PR3_SAL006 = R_72_PR3 }
+
+
+!==============================
+! 72_PR4 - Los Banos WA, Salt Slouth and Gadwall units of North Grassland - Refuge
+!==============================
+goal setR_72_PR4        {R_72_PR4        = TW_72_PR4 + LF_72_PR4 + OS_72_PR4 - RU_72_PR4 }  !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR4_SAL006 {R_72_PR4_SAL006 = R_72_PR4 }
+
+
+!==============================
+! 72_PR5 - Grassland WD North - Refuge
+!==============================
+goal setR_72_PR5        {R_72_PR5        = TW_72_PR5 + LF_72_PR5 + OS_72_PR5 - RU_72_PR5 }  !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR5_MSN009 {R_72_PR5_MSN009 = R_72_PR5 }
+
+
+!==============================
+! 72_PR6 - Grassland WD South - Refuge
+!==============================
+goal setR_72_PR6        {R_72_PR6        = TW_72_PR6 + LF_72_PR6 + OS_72_PR6 - RU_72_PR6 } !@jmg 2017.05.31 - reducing tailwater by ratio of net delivery to applied water
+goal setR_72_PR6_MSS014 {R_72_PR6_MSS014 = R_72_PR6 }
+
+
+!==============================
+! 72_NA1 - West Bank of SJR below Merced - Riparian Ag
+!==============================
+goal setR_72_NA1        {R_72_NA1        = TW_72_NA1 + LF_72_NA1 + OS_72_NA1 - RU_72_NA1 }  
+goal setR_72_NA1_SJR106 {R_72_NA1_SJR106 = R_72_NA1 }
+
+
+!==============================
+! 72_NA2
+!==============================
+! 72_NA2 -- no returns
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 73_PA1 - San Luis WD - Ag
+!==============================
+goal setR_73_PA1        {R_73_PA1        = TW_73_PA1 + LF_73_PA1 + OS_73_PA1 - RU_73_PA1 }
+goal setR_73_PA1_LBN025 {R_73_PA1_LBN025 = R_73_PA1 }
+
+
+!==============================
+! 73_PA2 - Eagle Field WD, Mercy Springs WD, Oro Loma WD - Ag
+!==============================
+!goal setR_73_PA2        {R_73_PA2        = TW_73_PA2 + LF_73_PA2 + OS_73_PA2 - RU_73_PA2 }
+goal setR_73_PA2        {
+	lhs R_73_PA2        
+	rhs TW_73_PA2 + LF_73_PA2 + OS_73_PA2 - RU_73_PA2
+	lhs < rhs penalty 99999
+	lhs > rhs penalty 99999
+}
+goal setR_73_PA2_SLD027 {R_73_PA2_SLD027 = R_73_PA2 }
+
+
+!==============================
+! 73_PA3 - San Luis WD (S), Pacheco WD, Panoche WD - Ag
+!==============================
+!goal setR_73_PA3        {R_73_PA3        = TW_73_PA3 + LF_73_PA3 + OS_73_PA3 - RU_73_PA3 }
+goal setR_73_PA3        {
+	lhs R_73_PA3        
+	rhs TW_73_PA3 + LF_73_PA3 + OS_73_PA3 - RU_73_PA3
+	lhs < rhs penalty 99999
+	lhs > rhs penalty 99999
+}
+goal setR_73_PA3_SLD027 {R_73_PA3_SLD027 = R_73_PA3 }
+
+
+!==============================
+! 73_XA - Firebaugh Canal Company - Ag
+!==============================
+goal setR_73_XA         {R_73_XA         = TW_73_XA  + LF_73_XA  + OS_73_XA  - RU_73_XA  }
+goal setR_73_XA_SLD027  {R_73_XA_SLD027  = R_73_XA  }
+
+
+!==============================
+! 73_NA
+!==============================
+! 73_NA -- no returns
+
+
+!==============================
+! 73_NU
+!==============================
+! 73_NU -- no returns
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! no return flows coded for WBA90
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 91_PA - Mendota Pool Contractors - Ag
+!==============================
+goal setR_91_PA         {R_91_PA         = TW_91_PA  + LF_91_PA  + OS_91_PA  - RU_91_PA  }
+goal setR_91_PA_FSL012  {R_91_PA_FSL012  = R_91_PA  }
+
+
+!==============================
+! 91_PR - Mendota WA - Refuge
+!==============================
+goal setR_91_PR         {R_91_PR         = TW_91_PR  + LF_91_PR  + OS_91_PR  - RU_91_PR  }
+goal setR_91_PR_FSL005  {R_91_PR_FSL005  = R_91_PR  }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Wastewater (returns) from urban demand units which have no specified return pathway goes to deep percolation         !!!!!!!!!!
+!!! see constraints-DeepPercolation.wresl                                                                                !!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WW_71_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_71_PU1    {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_71_PU2    {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_72_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_73_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_90_PU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+

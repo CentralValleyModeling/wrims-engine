@@ -1,0 +1,39 @@
+! ClearCk.wresl
+! Clear Creek operation under 2019 BiOp
+! Base flow (table lookup)
+!   - 200 cfs Oct-May
+!   - 150 cfs Jun-Sep and all months of critical years
+!   - critical year releases can be lower than 150 (not modeled)
+! Channel Maintenance in Wet, AN, and BN years - 10 taf in Feb
+! Spring (June) Pulse in Critical years - 3 days at 900 cfs 
+! Spring (June) Pulse in other years - 10 TAF
+
+define clear_base { select flow
+                  from   clear_ck_min_PA
+                  where  month=month,wytype=wyt_SAC }
+                  
+define clear_basedv {alias clear_base kind 'flow-min-required' units 'cfs'} 
+
+define clear_min{
+            case JanorFeb {
+                condition month==FEB .and. wyt_SAC <= 3. ! Jan or Feb; not in D or C years
+                value clear_base + 10.*taf_cfs} ! 10 TAF channel maintenance
+            case JuneCrit {
+                condition month==JUN .and. wyt_SAC > 4.5 ! critical year pulse
+                value clear_base*27./30. + 900.*3./30. } !3 days X 900 cfs
+            case June {
+                condition month==JUN .and. wyt_SAC < 4.5 ! non-critical years
+                value clear_base + 10.*taf_cfs} !10 TAF spring pulse
+            case otherwise {
+                condition always
+                value clear_base}
+                }
+
+define minflow_ClearCk {alias clear_min kind 'flow-min-required' units 'cfs'}  
+
+   
+! Limit the Spring Creek tunnel to the capacity.
+goal limit_spring {D_WKYTN_SPT003 < 4200.0}   !4200 cfs is the Spring Creek tunnel capacity.
+
+! Set surface water diversions to Clear Creek to zero (following the removal of Saeltzer Dam in 2000)
+goal limit_D_CLR009_02_NA {D_CLR009_02_NA = 0.0}

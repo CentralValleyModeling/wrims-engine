@@ -1,0 +1,448 @@
+! Upper American River Project Minimum Instream Flow Requirements
+! M. Bachman 12/2017
+!*********************************************************************************
+
+! Minimum flow requirements specified in Condition 1 of Appendix A of FERC Project No. 2101-084
+
+!---------- UARP Water Year ----------
+!Super Dry year type is specified in license, but is never used in determining requirements, so is not calculated here
+define UARPYrType{
+	case Wet{
+		condition amer_annual >= 3500
+		value 1.
+		}
+	case AboveNormal{
+		condition amer_annual >= 2600
+		value 2.
+		}
+	case BelowNormal{
+		condition amer_annual >= 1700
+		value 3.
+		}
+	case Dry{
+		condition amer_annual >= 900
+		value 4.
+		}
+	case CriticalDry{
+		condition always
+		value 5.
+		}
+	}
+define UARPYrTypedv {std kind 'TYPE' units 'NONE'}
+goal OutputUARPYrType {UARPYrTypedv=UARPYrType}
+
+!!!!!!!!!! Minimum flow requirements !!!!!!!!!!
+!---------- Rubicon River below Rubicon Reservoir Dam ----------
+define Rubicon_min_flow1{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_RUB044
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_RUB044
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_RUB044
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_RUB044
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_RUB044
+		where month = month
+		}
+	}
+!Accounting for months where flow requirement is minimum of specified requirement and the natural flow
+define Rubicon_min_flow{ 
+	case NaturalFlowReq1{
+		condition range(month,Oct,Feb) .or. range(month,Jul,Sep)
+		value min(Rubicon_min_flow1,I_RUB047)
+		}
+	case NaturalFlowReq2{
+		condition UARPYrType == 5 .and. (month==6 .or. month==9)
+		value min(Rubicon_min_flow1,I_RUB047)
+		}
+	case NoNaturalFlowReq{
+		condition always
+!		value Rubicon_min_flow1
+                value min(Rubicon_min_flow1,I_RUB047) !Jay
+		}
+	}		
+define Rubicon_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputRubicon_min_flow {Rubicon_min_flowdv=Rubicon_min_flow}
+
+goal Rubicon_min_release {C_RUB044_mif + C_RUB044_sht = Rubicon_min_flow}
+
+!---------- Little Rubicon River below Buck Island Reservoir Dam ----------
+define LittleRubicon_min_flow1{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_LRB003
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_LRB003
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_LRB003
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_LRB003
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_LRB003
+		where month = month
+		}
+	}
+!Accounting for months where flow requirement is minimum of specified requirement and the natural flow
+define LittleRubicon_min_flow{
+	case NaturalFlowReq1{
+		condition range(month,Oct,Feb) .or. range(month,Jul,Sep)
+		value min(LittleRubicon_min_flow1,I_LRB004)
+		}
+	case NaturalFlowReq2{
+		condition UARPYrType == 5 .and. (month==6 .or. month==9)
+		value min(LittleRubicon_min_flow1,I_LRB004)
+		}
+	case NoNaturalFlowReq{
+		condition always
+!		value LittleRubicon_min_flow1
+                value min(LittleRubicon_min_flow1,I_LRB004) !Jay
+		}
+	}		
+define LittleRubicon_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputLittleRubicon_min_flow {LittleRubicon_min_flowdv=LittleRubicon_min_flow}
+
+goal LittleRubicon_min_release {C_LRB003_mif + C_LRB003_sht = LittleRubicon_min_flow}
+
+!---------- Gerle Creek below Loon Lake Reservoir Dam ----------
+define LoonGerle_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_GRL010
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_GRL010
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_GRL010
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_GRL010
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_GRL010
+		where month = month
+		}
+	}
+define LoonGerle_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputLoonGerle_min_flow {LoonGerle_min_flowdv=LoonGerle_min_flow}
+
+/*
+Project No. 2101-084
+FERC license Appendix A Condition 2. Pulse Flows
+
+The Licensee shall provide pulse flows timed to coincide with spring snowmelt runoff as specified
+in the five-day schedule outlined in Table 15 or as modified by the USFS with concurrence from the
+Deputy Director.
+*/
+
+define Gerle_pulse_flow { !Pulse flow
+	case Wet{condition UARPYrType == 1 value 628.}
+	case AN {condition UARPYrType == 2 value 210.}
+	case BN {condition UARPYrType == 3 value 136.}
+	case Dry{condition UARPYrType == 4 value   0.}
+	case CriticallyDry{condition always value  0.}}
+	
+define GerlePulseFlowTrigger {
+       case AprilPeak {condition month == APR .and. I_LOONL >= I_LOONL(7-month+1) value 1.}
+       case MayPeak   {condition month == MAY .and. I_LOONL >= I_LOONL(8-month-1) value 1.}
+       case otherwise {condition always value 0.}}
+       
+define GerlePulseFlow {value Gerle_pulse_flow * (5./daysin) * GerlePulseFlowTrigger}   
+
+goal LoonGerle_min_release {C_GRL010_mif + C_GRL010_sht = LoonGerle_min_flow + GerlePulseFlow}
+
+!---------- Gerle Creek below Gerle Creek Reservoir Dam ----------
+define GerleCreek_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_GRL001
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_GRL001
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_GRL001
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_GRL001
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_GRL001
+		where month = month
+		}
+	}
+define GerleCreek_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputGerleCreek_min_flow {GerleCreek_min_flowdv=GerleCreek_min_flow}
+
+
+
+goal GerleCreek_min_release {C_GRL001_mif + C_GRL001_sht = GerleCreek_min_flow + GerlePulseFlow}
+
+!---------- South Fork Rubicon River below Robbs Peak Reservoir Dam ----------
+define SFRubicon_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_SFR006
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_SFR006
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_SFR006
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_SFR006
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_SFR006
+		where month = month
+		}
+	}
+define SFRubicon_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputSFRubicon_min_flow {SFRubicon_min_flowdv=SFRubicon_min_flow}
+
+goal SFRubicon_min_release {C_SFR006_mif + C_SFR006_sht = SFRubicon_min_flow}
+
+!---------- South Fork Silver Creek below Ice House Reservoir Dam ----------
+define SFSilver_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_SSV013
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_SSV013
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_SSV013
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_SSV013
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_SSV013
+		where month = month
+		}
+	}
+define SFSilver_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputSFSilver_min_flow {SFSilver_min_flowdv=SFSilver_min_flow}
+
+/*
+Project No. 2101-084
+FERC license Appendix A Condition 2. Pulse Flows
+
+Pulse flows may be timed to coincide with winter storm events in the period between December 15 and April 10. Pulse flow
+events timed with winter storm events prior to April 10 shall be based on the prior water year type
+and shall be deemed complete regardless of revisions in water year type occurring after the pulse
+flow event takes place. Pulse flows after April 10 shall be timed to coincide with spring snowmelt runoff.
+*/
+
+
+define SFSilver_pulse_flow { !Pulse flow
+	case Wet{condition UARPYrType == 1 value 636.}
+	case AN {condition UARPYrType == 2 value 570.}
+	case BN {condition UARPYrType == 3 value 470.}
+	case Dry{condition UARPYrType == 4 value   0.}
+	case CriticallyDry{condition always value  0.}}
+	
+define SFSilverPulseFlowTrigger {
+       case AprilPeak {condition month == APR .and. I_ICEHS >= I_ICEHS(7-month+1) value 1.}
+       case MayPeak   {condition month == MAY .and. I_ICEHS >= I_ICEHS(8-month-1) value 1.}
+       case otherwise {condition always value 0.}}
+       
+define SFSIlverPulseFlow {value SFSilver_pulse_flow * (5./daysin) * SFSilverPulseFlowTrigger}   
+
+goal SFSilver_min_release {C_SSV013_mif + C_SSV013_sht = SFSilver_min_flow + SFSIlverPulseFlow}
+
+!---------- Silver Creek below Junction Reservoir Dam ----------
+define Junction_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_SLV014
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_SLV014
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_SLV014
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_SLV014
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_SLV014
+		where month = month
+		}
+	}
+define Junction_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputJunction_min_flow {Junction_min_flowdv=Junction_min_flow}
+
+goal Junction_min_release {C_SLV014_mif + C_SLV014_sht = Junction_min_flow}
+
+!---------- Silver Creek below Camino Reservoir Dam ----------
+define Camino_min_flow{
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_SLV005
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_SLV005
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_SLV005
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_SLV005
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_SLV005
+		where month = month
+		}
+	}
+define Camino_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputCamino_min_flow {Camino_min_flowdv=Camino_min_flow}
+
+goal Camino_min_release {C_SLV005_mif + C_SLV005_SHT = Camino_min_flow}
+
+!---------- Brush Creek below Brush Creek Reservoir Dam ----------
+define Brush_min_flow1 {
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_BSH002
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_BSH002
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_BSH002
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_BSH002
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_BSH002
+		where month = month
+		}
+	}
+!Flow requirement is minimum of specified requirement and the natural flow
+define Brush_min_flow {value min(Brush_min_flow1,I_BSH003)}
+define Brush_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputBrush_min_flow {Brush_min_flowdv=Brush_min_flow}
+
+goal Brush_min_release {C_BSH002_mif + C_BSH002_sht = Brush_min_flow}
+
+!---------- South Fork American River below Slab Creek Reservoir Dam ----------
+!Modeled requirements taken from Table 14 (requirements for Year 4+ after License adoption)
+define SlabCreek_min_flow {
+	case Wet{
+		condition UARPYrType == 1
+		select Wet from UARPmif_SFA039
+		where month = month
+		}
+	case AboveNormal{
+		condition UARPYrType == 2
+		select AboveNormal from UARPmif_SFA039
+		where month = month
+		}
+	case BelowNormal{
+		condition UARPYrType == 3
+		select BelowNormal from UARPmif_SFA039
+		where month = month
+		}
+	case Dry{
+		condition UARPYrType == 4
+		select Dry from UARPmif_SFA039
+		where month = month
+		}
+	case Critical{
+		condition UARPYrType == 5
+		select Critical from UARPmif_SFA039
+		where month = month
+		}
+	}
+define SlabCreek_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal OutputSlabCreek_min_flow {SlabCreek_min_flowdv=SlabCreek_min_flow}
+
+goal SlabCreek_min_release {C_SFA039_mif + C_SFA039_sht = SlabCreek_min_flow}

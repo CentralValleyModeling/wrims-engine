@@ -1,0 +1,436 @@
+/*
+CALSIM 3 SYSTEM FILE
+ARCS-CONTRACTS.WRESL
+
+NAMING TAKES THE FOLLOWING FORMS:
+
+NAMING TAKES THE FOLLOWING FORMS:
+CL_{ORIGIN PREFIX}_{DESTINATION} - contract limitation on diversion from particular source
+WL_{ORIGIN PREFIX}_{DESTINATION} - water right limitation on diversion from particular source
+
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 61  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*****************************************************************************
+! Demand Unit 61_NA1  Non-District East
+! No surface water use - groundwater only
+
+
+
+!*****************************************************************************
+! Demand Unit 61_NA2  Modesto ID
+! Code moved to Tuolumne_ops.wresl
+
+
+
+!*****************************************************************************
+! Demand Unit 61_NA3  Tuolumne River Riparian and Appropriative diverters, Right Bank
+
+define SumAW_61_NA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_61_NA3_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_61_NA3(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_61_NA3(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_61_NA3(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_61_NA3(-1) }
+        }
+goal setSumAW_61_NA3       {SumAW_61_NA3=SumAW_61_NA3_sv}
+
+define WRmon_TUO047_61_NA3 {value 3.0*AWO_61_NA3*cfs_taf / SumAW_61_NA3_sv + 3.*cfs_taf}
+define WR_TUO047_61_NA3    {alias WRmon_TUO047_61_NA3 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+define WRmon_TUO015_61_NA3 {value 11.0*AWO_61_NA3*cfs_taf / SumAW_61_NA3_sv + 21.7*cfs_taf}
+define WR_TUO015_61_NA3    {alias WRmon_TUO015_61_NA3 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+!*****************************************************************************
+! Demand Unit 61_NA4  Stanislaus River Riparian and Appropriative diverters, Left and Right Banks
+
+
+
+!*****************************************************************************
+! Demand Unit 61_NA5  San Joaquin River Riparian diverters and Appropriative diverters, Right Bank
+
+!This demand unit represents lands that are located on the right bank of the San Joaquin River,
+!between The Tuolumne and Stanislaus Rivers. It includes Mape's Ranch, Gallo Winery, and the San Joaquin River NWR.
+!For modeling purposes, it is assumed that diversions are limited to 9 TAF/year based on recent statements of water use
+! S014001, S014002, S017293, S017388
+
+define SumAW_61_NA5 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_61_NA5_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_61_NA5(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_61_NA5(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_61_NA5(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_61_NA5(-1) }
+        }
+goal setSumAW_61_NA5       {SumAW_61_NA5=SumAW_61_NA5_sv}
+
+define WRmon_SJR081_61_NA5 {value 9.0*AWO_61_NA5*cfs_taf / SumAW_61_NA5_sv}
+define WR_SJR081_61_NA5    {alias WRmon_SJR081_61_NA5 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+
+!*****************************************************************************
+! Demand Unit 61_NA6  Riparian diverters
+
+!This demand unit represents lands that are located on the right bank of the San Joaquin River,
+!outside of the CalSim 3 "DETAW" region but within the Legal Delta. It comprises parts of Reclamation Districts 2064, 2075, 2094, and 2096
+!These districts lie within the legal Delta but are partly inside and partly outside of the DETAW region.
+
+!For modeling purposes, it is assumed that diversions from the Stanislaus River supply irrigated lands outside of the CalSim Delta
+
+! A004460: River Junction Reclamation District No 2064. Diverts from Right Bank at RM 4.00
+! March 1 - October 1 period of diversion up to 72.29 cfs
+! Irrigation of 5,200 acres
+
+! A005316: McMullin Reclamation District No 2075. Diverts from Right Bank at RM 4.05
+! January 1 - December 31 period of diversion up to 48.75 cfs
+! Irrigation of 2,991 acres
+
+! A017966: McMullin Reclamation District No 2075. Diverts from Right Bank at RM 4.05
+! April 1 - April 30 period of diversion up to 8.22 cfs
+! Irrigation of 3,000 acres
+
+define WRmon_STS004_61_NA6_CFS { !in cfs
+	case OctFeb    {condition range(month,Oct,Feb) value 48.75}
+	case March     {condition month == Mar value 48.75 + 72.29}
+	case April     {condition month == Apr value 48.75 + 72.29 + 8.22}
+	case Otherwise {condition always value 48.75 + 72.29}
+}
+
+define WRmon_STS004_61_NA6 {value WRmon_STS004_61_NA6_CFS * cfs_taf}
+define WR_STS004_61_NA6 {alias WRmon_STS004_61_NA6 kind 'WATER-RIGHT' UNITS 'TAF'}
+
+
+!*****************************************************************************
+! Demand Unit 61_PA1  Oakdale ID north, South San Joaquin ID
+
+
+
+!*****************************************************************************
+! Demand Unit 61_PA2  Oakdale ID south
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 62  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!******************************************
+! Demand Unit 62_NA1  Non-District - East
+! No surface water use - groundwater only
+
+
+!******************************************
+! Demand Unit 62_NA2  Merced River Riparian right-bank diverters
+
+!The 19-mile reach of the river from Crocker-Huffman diversion dam (RM 52.0) to Shaffer Bridge (RM 32.8)
+!is affected by water withdrawals, agricultural water returns, and land use activities. 
+!The major water withdrawals are associated with the Cowell Agreement water users and riparian water users
+!who have the right to divert up to approximately 94,000 AF of water annually from this section of river
+!and have maintained 11 channel diversions since the mid-1800s.
+
+!The Cowell Agreement was established in January 1926 to supply riparian diverters and pre-1914 claims of
+!water rights with releases from Lake McClure. 
+
+!The water diverted under the Cowell Agreement is used on acreage outside the Merced ID service area.
+!Between Crocker-Huffman Dam and the Shaffer Bridge, CAD and riparian water users divert up to 94,000 AF
+!annually and have maintained seven main channel diversions since the 1840s.
+
+! D_MCD050_62_NA2 – Merced River Right Bank Diverters
+!	S017517 Canevaro Ditch              -  4.74 TAF
+!	S018779 Fagundes Dairy Ruddle Ditch - 21.75 TAF
+!	S017509 Dale Scott Ditch            -  6.36 TAF
+!	S019279 Schmidt                     -  0.72 TAF
+!	S020244 G3 Enterprises Inc.         -  0.45 TAF
+!	S020055 Gallo Vineyards             - 18.26 TAF
+!   Total Right Bank Diversion          - 52.28 TAF
+
+define SumAW_62_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_62_NA2_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_62_NA2(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_62_NA2(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_62_NA2(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_62_NA2(-1) }
+        }
+goal setSumAW_62_NA2       {SumAW_62_NA2=SumAW_62_NA2_sv}
+
+define WRmon_MCD050_62_NA2 {value 52.28*AWO_62_NA2*cfs_taf / SumAW_62_NA2_sv}
+define WR_MCD050_62_NA2    {alias WRmon_MCD050_62_NA2 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+!******************************************
+! Demand Unit 62_NA3  Turlock ID
+! Code moved to Tuolumne_ops.wresl
+
+
+
+!******************************************
+! Demand Unit 62_NA4  Tuolumne River riparian and appropriative left bank diverters
+
+define SumAW_62_NA4 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_62_NA4_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_62_NA4(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_62_NA4(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_62_NA4(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_62_NA4(-1) }
+        }
+goal setSumAW_62_NA4       {SumAW_62_NA4=SumAW_62_NA4_sv}
+
+define WRmon_TUO047_62_NA4 {value 2.0*AWO_62_NA4*cfs_taf / SumAW_62_NA4_sv + 0.3*cfs_taf}
+define WR_TUO047_62_NA4    {alias WRmon_TUO047_62_NA4 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+define WRmon_TUO015_62_NA4 {value 8.0*AWO_62_NA4*cfs_taf / SumAW_62_NA4_sv + 2.7*cfs_taf}
+define WR_TUO015_62_NA4    {alias WRmon_TUO015_62_NA4 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+
+
+!******************************************
+! Demand Unit 62_NA5  San Joaquin River riparian and appropriative right bank diverters
+! A004507, A006393, A006467, A006467, A013552, A013553, A013555, A016662
+! S007393, S016820, S017293, S017388, S018230, S020429, S020595, S020850, S021829, S022083, S022084, S022085, S024785, S025975, S026064, S027261
+! Post-1914 water right ~13 cfs of various periods of diversions
+! Pre-1914 diversions ~10 TAF/year based on 2019 reports to State Water Board
+
+
+define SumAW_62_NA5 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_62_NA5_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_62_NA5(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_62_NA5(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_62_NA5(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_62_NA5(-1) }
+        }
+goal setSumAW_62_NA5       {SumAW_62_NA5=SumAW_62_NA5_sv}
+
+define WRmon_SJR114_62_NA5 {value 10.0*AWO_62_NA5*cfs_taf / SumAW_62_NA5_sv + 13.*cfs_taf}
+define WR_SJR114_62_NA5    {alias WRmon_SJR114_62_NA5 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+!******************************************
+! Demand Unit 62_NA6  Merced ID north
+! Code moved to Merced_Ops.wresl
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 63  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!******************************************
+! Demand Unit 63_NA1  Non-District
+! No surface water use - groundwater only
+
+
+
+
+!******************************************
+! Demand Unit 63_NA2  Merced River Riparian left-bank diverters
+! Part of the Cowell Diverters
+! S021177 Bettencourt Family Property - 2.98 TAF
+! S020054 G3 Enterprises Inc.         - 4.29 TAF
+! 	Total				              - 7.27 TAF
+
+define SumAW_63_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_63_NA2_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_63_NA2(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_63_NA2(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_63_NA2(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_63_NA2(-1) }
+        }
+goal setSumAW_63_NA2 {SumAW_63_NA2=SumAW_63_NA2_sv}
+
+define WRmon_MCD042_63_NA2 {value 7.27*AWO_63_NA2*cfs_taf / SumAW_63_NA2_sv}
+define WR_MCD042_63_NA2    {alias WRmon_MCD042_63_NA2 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+
+!******************************************
+! Demand Unit 63_NA3  Merced ID
+! Code moved to Merced_Ops.wresl
+
+
+!******************************************
+! Demand Unit 63_NA4  Riparian diverters
+
+define SumAW_63_NA4 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_63_NA4_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1)  AWO_63_NA4(i)*cfs_taf(i) } 
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWO_63_NA4(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWO_63_NA4(i)*cfs_taf(i)}
+    case otherwise {
+        condition   always
+        value SumAW_63_NA4(-1) }
+        }
+
+goal setSumAW_63_NA4       {SumAW_63_NA4=SumAW_63_NA4_sv}
+
+define WRmon_MCD021_63_NA4 {value 14.0 * AWO_63_NA4*cfs_taf / SumAW_63_NA4_sv} !Riperian use of 14 TAF/year computed using data reported in year 2019 (eWRIMS)
+
+define WRmon_MCD002_63_NA4 {case October   {condition month == Oct value 34.4*0.3*cfs_taf}			!0.3 used to replicate the historical amount
+			    case MarSep    {condition month >= Mar .and. month <= Sep value 34.4*0.3*cfs_taf}
+			    case Otherwise {condition always value 0.}}
+
+define WR_MCD021_63_NA4    {alias WRmon_MCD021_63_NA4 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+define WR_MCD002_63_NA4    {alias WRmon_MCD002_63_NA4 kind 'WATER-RIGHT-LIMIT' units 'TAF'}
+
+
+
+!******************************************
+! Demand Unit 63_NA5  El Nido ID
+! Code moved to Merced_Ops.wresl
+
+
+!******************************************
+! 63_PR1 Arena Plains Unit of Merced NWR
+! Code moved to Merced_Ops.wresl
+
+
+!******************************************
+! 63_PR2 Merced Unit of Merced NWR
+! Code moved to Merced_Ops.wresl
+
+
+!******************************************
+! 63_PR3 East Bear Creek Unit of San Luis Refuge
+! Code moved to Merced_Ops.wresl
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 64  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*******************************************
+! Demand Unit 64_NA1 Non-District
+! No surface water use - groundwater only
+
+
+!*******************************************
+! Demand Unit 64_NA2 Non-District
+! Diversions from Eastside Bypass and irrgation return flows
+
+
+
+!*******************************************
+!Demand Unit 64_XA  Columbia Canal Company
+
+define  CL_64_XA       {select contract from CVP_SOD_Contracts where contractor=6441} ! Annual contract amount from lookup table
+
+define AW_64_XA_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_64_XA_ann    {
+    case firstMon {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==BgnWY
+         sum(i=0,11,1) ((AWO_64_XA(i)+AWR_64_XA(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_64_XA_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_64_XA(i)+AWR_64_XA(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_64_XA_ann_dv(-1))}
+}         
+goal set_64_XA_ann_dv  {AW_64_XA_ann_dv = AW_64_XA_ann}
+
+define DIST_64_XA_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_64_XA      {value  (AWO_64_XA+AWR_64_XA)*cfs_taf/AW_64_XA_ann}
+goal set_DIST_64_XA_dv {DIST_64_XA_dv = DIST_64_XA}
+
+define CLM_64_XA       {value CL_64_XA * DIST_64_XA}
+define CLM_64_XA_      {alias CL_64_XA * DIST_64_XA     kind 'contract-limit' units 'taf'}
+
+!*******************************************
+!Demand Unit 64_PA1 Madera ID, Madera WD
+
+
+!*******************************************
+!Demand Unit 64_PA2 Chowchilla WD
+
+
+!*******************************************
+!Demand Unit 64_PA3 Gravelly Ford WD, Root Creek WD
+
+define  CL_64_PA3       {select contract from CVP_SOD_Contracts where contractor=6431} ! Annual contract amount from lookup table
+
+define AW_64_PA3_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_64_PA3_ann    {
+    case firstMon {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==BgnWY
+         sum(i=0,11,1) ((AWO_64_PA3(i)+AWR_64_PA3(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_64_PA3_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_64_PA3(i)+AWR_64_PA3(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_64_PA3_ann_dv(-1))}
+}         
+goal set_64_PA3_ann_dv  {AW_64_PA3_ann_dv = AW_64_PA3_ann}
+
+define DIST_64_PA3_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_64_PA3      {value  (AWO_64_PA3+AWR_64_PA3)*cfs_taf/AW_64_PA3_ann}
+goal set_DIST_64_PA3_dv {DIST_64_PA3_dv = DIST_64_PA3}
+
+define CLM_64_PA3       {value CL_64_PA3 * DIST_64_PA3}
+define CLM_64_PA3_      {alias CL_64_PA3 * DIST_64_PA3     kind 'contract-limit' units 'taf'}

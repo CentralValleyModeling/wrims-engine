@@ -1,0 +1,593 @@
+! FWS_SMELT_BO_RPA_Testing.wresl
+!
+! Implements 15 Dec 2008 FWS Delta Smelt BO RPA Actions 1-3.
+! Action 1: Limit Exports so OMR flows >= -2,000 cfs (14-day avg.) w/ 5-day running avg. + 25%
+! Action 2: Limit Exports so OMR flows >= -1,250 to -5,000 cfs (as determined weekly by SWG)
+! Action 3: Limit Exports so OMR flows >= -1,250 to -5,000 cfs (14-day avg.) w/ 5-day running avg. +/- 25%
+!
+! Action 4, the fall X2 action in W and AN years, is not included in this model
+!
+! Action 5: Do not install HORB if delta smelt is a concern. If HORB installed (no smelt
+! concerns) tie open TBP flap gates (until 15-May)
+! HORB barrier is assumed to be in place but gates fully opened.
+! See SoDeltaChannels code for this modification and other information used in this code.
+!
+! This code could be used as a prescriptive use of export restrictions 
+!
+! **********************************************************************************************
+define OMR_background {        ! this is used as the background OMR condition in computing monthly values for partial month conditions
+        case noA1{
+                condition month>=JAN .and. month<=MAR
+                value -5000.}
+        case otherwise {
+                condition always
+                value -8000.}
+}
+
+! **********************************************************************************************
+! Define triggers and offramps and target OMR flows for all Actions
+!***********************************************************************************************
+!ACTION 1
+!Action 1 Turbidity Trigger
+!Assumes monthly sum of unimpaired flows for four rivers in Sacramento River Basin (Sac, American, Yuba, and Feather) exceeding 20,000 cfs is a good
+!but conservative indicator of turbidty (12NTU) at the three turbidity stations defined in the FWS BO ( Holland Cut, Prisoner's Point, and Victoria Canal).
+define TurbT_Thresh {value 20000.}
+!define SAC_RI {timeseries kind 'SRI_FLOW' units 'CFS'}
+define SAC_RI{value (UNIMP_OROV + UNIMP_FOLS + UNIMP_YUBA + UNIMP_SRBB)*taf_cfs} !CDEC unimpaired flow at FTO,AMF,YRS,SBB
+define SRIdv {alias SAC_RI kind 'FLOW-CHANNEL' units 'CFS'}
+
+define A1_TurbTdv {std kind 'RPA-A1' units 'NONE'}
+define A1_TurbT {
+        case Initialize {
+            condition month==OCT .and. wateryear==BgnWY
+                value 99.}
+    case Oct_Dec {
+            condition month>=OCT .and. month<DEC
+                value 99.}
+    case Oct_Mar {
+                condition month>=OCT .and. month<MAR .and. SAC_RI<TurbT_Thresh
+                value 99.}
+        case ON_Dec {
+        ! If triggered in December, it is assumed that the action will take place after December 21st for 14 days. (Dec 21 - Jan 3)
+                condition month==DEC .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+    case ON_Jan{
+            ! If triggered in January, it is assumed that the action will take place after January 1st for 14 days. (Jan 1 - Jan 14)
+                condition month==JAN .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 2.}
+    case ON_Feb {
+        ! If triggered in February, it is assumed that the action will take place after February 1st for 14 days. (Feb 1 - Feb 14)
+                condition month==FEB .and. A1_TurbTdv(-2)==99. .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 3.}
+    case ON_Mar {
+        ! If triggered in March, it is assumed that the action will take place after March 1st for 14 days. (Mar 1 - Mar 14)
+                condition month==MAR .and. A1_TurbTdv(-3)==99. .and.A1_TurbTdv(-2)==99. .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 4.}
+    case OFF {
+        condition always
+                value 99.}
+}
+goal setA1_TurbTdv {A1_TurbTdv = A1_TurbT}
+
+define A1_TurbTCdv {std kind 'RPA-A1' units 'NONE'}
+define A1_TurbTC {
+        case Initialize {
+                condition month==OCT .and. wateryear==BgnWY
+                value 0.}
+        case Oct_Dec {
+                condition month>=OCT .and. month<DEC
+                value 0.}
+        case Oct_Mar {
+                condition month>=OCT .and. month<MAR .and. SAC_RI<TurbT_Thresh
+                value A1_TurbTCdv(-1)}
+        case ON_Dec {
+                condition month==DEC .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+        case ON_Jan{
+                condition month==JAN .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+        case ON_Feb {
+                condition month==FEB .and. A1_TurbTdv(-2)==99. .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+        case ON_Mar {
+                condition month==MAR .and. A1_TurbTdv(-3)==99. .and.A1_TurbTdv(-2)==99. .and. A1_TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+        case OFF {
+                condition always
+                value A1_TurbTCdv(-1)}
+}
+goal setA1_TurbTCdv {A1_TurbTCdv = A1_TurbTC}
+
+define A1_OMR_Targ { value -2000.}
+define A1_OMR_Targdv {alias A1_OMR_Targ kind 'FLOW' units 'CFS'}
+
+!************************************************************************************************
+! ACTION 2
+define Freeportdv {alias Freeport kind 'FLOW-CHANNEL' units 'CFS'}
+define Vernalisdv {alias Vernalis kind 'FLOW-CHANNEL' units 'CFS'}
+
+!Action 2 - X2 Threshold for OMR flows
+define X2_A2 {
+    case E_Roe {
+                condition X2_last > 64.
+        value 1}
+    case W_Roe {
+        condition always
+        value 2}
+}
+define X2_A2dv {alias X2_A2 kind 'X2-POSITION-A2' units 'KM'}
+
+! Hutton's methodology(12/16/08 appendix 4)to estimate prob of 3-day average SACR at Rio Vista > 90,000 cfs
+!and 3-day average SJR at Vernalis > 10,000 cfs
+define RioVista_Freq {value min(max((Freeport*0.00289 - 146.)/100.,0.),1.)}
+define Vernalis_Freq {value min(max((Vernalis*0.00901 - 49.)/100.,0.),1.)}
+
+define RioVista_Freqdv {alias RioVista_Freq kind 'FREQUENCY' units 'NONE'}
+define Vernalis_Freqdv {alias Vernalis_Freq kind 'FREQUENCY' units 'NONE'}
+
+! Suspension Trigger
+define Suspen_trig {
+    case suspension {
+!                condition Riovista_Freq * Vernalis_Freq >= 0.5
+                condition Riovista_Freq>=0.5.and.Vernalis_Freq >= 0.5
+        value 1.}
+    case otherwise {
+        condition always
+        value 0.}
+}
+
+define Suspen_trigdv {alias Suspen_trig kind 'TRIGGER' units 'NONE'}
+
+define A2_OMR_Targ{
+          case Suspension{
+                condition Suspen_trig == 1.
+                value OMR_background}
+      case E_Roe{
+                condition X2_A2==1.
+        select X2_E_Roe
+        from FWS_BO_A2_X2
+        where  WYT=wyt_SAC}
+      case W_Roe{
+        condition always !X2_A2==2
+        select X2_W_Roe
+        from FWS_BO_A2_X2
+        where  WYT=wyt_SAC}
+}
+
+define A2_OMR_Targdv {alias A2_OMR_Targ kind 'FLOW' units 'CFS'}
+
+!***************************************************************************************************
+!ACTION 3
+
+!Action 3 temperature trigger:
+!Sacramento Executive Airport air temperature is assumed to correlate with the three stations (Antioch, Mossdale, and Rio Vista) on a monthly basis.
+!Then, assuming the avergae monthly temperature occurs in mid-month, daily water temperature is estiamted by interpolation.
+!Dates of occurence for each year is pre-processed and provided as an input to CALSIM II.
+define temp_trig_mo    {select WMonth from FWS_BO_A3_Temp where  YEAR= wateryear}
+define temp_trig_da    {select Day from FWS_BO_A3_Temp where  YEAR= wateryear}
+
+define temp_trig_modv {alias temp_trig_mo kind 'TRIGGER' units 'NONE'}
+define temp_trig_dadv {alias temp_trig_da kind 'TRIGGER' units 'NONE'}
+
+!Action 3 biological trigger:
+!Reads the month and the day that it is most likely to observe a spent female smelt in SKT or at pumping facilities.
+define bio_trig_mo    {select Values from FWS_BO_A3_Bio where  Parameter=1}
+define bio_trig_da    {select Values from FWS_BO_A3_Bio where  Parameter=2}
+
+define bio_trig_modv {alias bio_trig_mo kind 'TRIGGER' units 'NONE'}
+define bio_trig_dadv {alias bio_trig_da kind 'TRIGGER' units 'NONE'}
+
+!Action 3 trigger:
+define A3_trig_da{
+    case Temp {
+        condition temp_trig_mo<bio_trig_mo
+        value  temp_trig_da}
+    case Bio {
+        condition temp_trig_mo>bio_trig_mo
+        value  bio_trig_da}
+    case same_mo {
+        condition always!temp_trig_mo==bio_trig_mo
+        value  min(temp_trig_da, bio_trig_da)}
+}
+define A3_trig_mo{ value min(bio_trig_mo, temp_trig_mo)}
+
+define A3_trig_dadv {alias A3_trig_da kind 'TRIGGER' units 'NONE'}
+define A3_trig_modv {alias A3_trig_mo kind 'TRIGGER' units 'NONE'}
+
+!Action 3 offramp:
+!Determines offramp dates based on the criteria stated in the lookup table.
+define temp_offramp_mo    {select WMonth from FWS_BO_A3_Offramp where  WYT= wyt_SAC}
+define temp_offramp_da    {select Day from FWS_BO_A3_Offramp where  WYT=wyt_SAC}
+define A3_offramp_da{
+    case Temperature {
+        condition temp_offramp_mo<JUN
+        value  temp_offramp_da}
+    case Temporal {
+        condition temp_trig_mo>JUN
+        value  30.}
+    case same_mo {
+        condition always !temp_trig_mo==JUN
+        value  min(temp_offramp_da, 30.)}
+}
+
+define A3_offramp_mo{ value min(9., temp_offramp_mo)}
+
+define temp_offrmp_modv {alias temp_offramp_mo kind 'TRIGGER' units 'NONE'}
+define temp_offrmp_dadv {alias temp_offramp_da kind 'TRIGGER' units 'NONE'}
+define A3_offramp_dadv {alias A3_offramp_da kind 'TRIGGER' units 'NONE'}
+define A3_offramp_modv {alias A3_offramp_mo kind 'TRIGGER' units 'NONE'}
+define X2_lastdv {alias X2_last kind 'X2-POSITION-PREV' units 'KM'}
+
+! Action 3 - X2 Threshold for OMR flows
+define X2_A3 {
+    case Initialize {
+            condition month==OCT .and. wateryear==BgnWY
+                value 3.}
+    case J_E_Roe {
+                condition month==JUN .and. X2_lastdv(-1) > 74.
+        value 1.}
+    case J_W_Roe {
+                condition month==JUN .and. X2_lastdv(-1) < 64.
+        value 2.}
+    case J_in_btw {
+        condition  month==JUN
+        value 3.}
+    case E_Roe {
+                condition X2_last > 74.
+        value 1.}
+    case W_Roe {
+                condition  X2_last < 64.
+        value 2.}
+    case in_btw {
+        condition  always
+        value 3.}
+}
+
+define X2_A3dv {alias X2_A3 kind 'X2-POSITION-A3' units 'KM'}
+
+define A3_OMR_Targ{
+      case E_Roe{
+                condition X2_A3==1.
+        select X2_E_Roe
+        from FWS_BO_A3_X2
+        where  WYT=wyt_SAC}
+      case W_Roe{
+                condition X2_A3==2.
+        select X2_W_Roe
+        from FWS_BO_A3_X2
+        where  WYT=wyt_SAC}
+      case otherwise {
+        condition always
+        select X2_in_between
+        from FWS_BO_A3_X2
+        where  WYT=wyt_SAC}
+}
+
+define A3_OMR_Targdv {alias A3_OMR_Targ kind 'FLOW' units 'CFS'}
+
+!OMR FWS RPA 14 day average
+define OMR_RPA_1{
+    case Initialize {
+            condition month==OCT .and. wateryear==BgnWY
+                value -99999.}
+        case Oct_Dec {
+            condition month>=OCT .and. month<DEC
+                value -99999.}
+
+    case OFF_DEC {
+        condition month==DEC .and. A1_TurbT==99.
+                value -99999.}
+    case A1_DEC {
+        condition month==DEC .and. A1_TurbT==1.
+                value (OMR_background*20.+A1_OMR_Targ*(daysin-20.))/daysin}
+        case otherwise_DEC {
+                condition month==DEC
+                value -99999.}
+
+        case A1_Dec_Jan{
+                condition month==JAN .and. A1_TurbTdv(-1)==1.
+        ! Average of -2000 cfs for 3 days and a Action 2 OMR for the remainder of the month.
+        value (A1_OMR_Targ*3.+A2_OMR_Targ*28.)/daysin}
+    case A1_JAN{
+        condition month==JAN .and. A1_TurbT==2.
+        ! Average of -2000 cfs for 14 days and Action 2 OMR for the remainder of the month.
+        value (A1_OMR_Targ*14.+A2_OMR_Targ*17.)/daysin}
+        case otherwise_JAN {
+                condition month==JAN
+                value -99999.}
+
+        case A1_DJ_A3_F {
+        condition month==FEB .and. A1_TurbTdv(-1)==2. .and.  A3_trig_mo==5.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+    case A1_DJ_A3_F2 {
+                condition month==FEB .and. A1_TurbTdv(-2)==1. .and.  A3_trig_mo==5.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case A1_DJ {
+        condition month==FEB .and. A1_TurbTdv(-1)==2. .and.  A3_trig_mo>5.
+        value A2_OMR_Targ}
+        case A1_DJ2 {
+        condition month==FEB .and. A1_TurbTdv(-2)==1. .and.  A3_trig_mo>5.
+        value A2_OMR_Targ}
+
+    case A1_F_A3_F {
+        condition month==FEB .and. A1_TurbT==3. .and.  A3_trig_mo==5.
+                value (A1_OMR_Targ*min(14.,A3_trig_da-1.)+A2_OMR_Targ*max((A3_trig_da-min(14.,A3_trig_da)-1.),0.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+    case A1_F {
+        condition month==FEB .and. A1_TurbT==3. .and.  A3_trig_mo>5.
+                value (A1_OMR_Targ*14.+A2_OMR_Targ*(daysin-14.))/daysin}
+        case otherwise_FEB {
+                condition month==FEB
+                value -99999.}
+
+        case A1_F_M {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo>6.
+        value A2_OMR_Targ}
+
+    case A1_M {
+        condition month==MAR .and. A1_TurbT==4. .and.  A3_trig_mo==6.
+                value (A1_OMR_Targ*min(14.,A3_trig_da-1.)+A2_OMR_Targ*max((A3_trig_da-min(14.,A3_trig_da)-1.),0.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+
+        case A3_FEB_M {
+        condition month==MAR .and. A1_TurbTdv(-2)==2. .and.  A3_trig_mo==5.
+        value A3_OMR_Targ}
+    case A3_FEB_M2 {
+        condition month==MAR .and. A1_TurbTdv(-3)==1. .and.  A3_trig_mo==5.
+        value A3_OMR_Targ}
+    case A3_FEB_M3 {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo==5.
+        value A3_OMR_Targ}
+    case A3_FEB_M4 {
+        condition month==MAR .and. A1_TurbT==4. .and.  A3_trig_mo==5.
+        value A3_OMR_Targ}
+
+        case A3_M {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo==6.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+    case A3_M2 {
+        condition month==MAR .and. A1_TurbTdv(-2)==2. .and.  A3_trig_mo==6.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1))/daysin}
+        case A3_M3 {
+                condition month==MAR .and. A1_TurbTdv(-3)==1. .and.  A3_trig_mo==6.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case A3_M4 {
+                condition month==MAR .and. A3_trig_mo==7. .and. A1_TurbTC==1
+                value A2_OMR_Targ}
+        case otherwise_MAR {
+                condition month==MAR
+                value -99999.}
+
+        case A3_APR {
+                condition month==APR .and. A3_trig_mo<7.
+                value A3_OMR_Targ}
+        case A3_APR3 {
+                condition month==APR .and. A3_trig_mo==7. .and. A1_TurbTdv(-4)==99. .and. A1_TurbTdv(-3)==99. .and. A1_TurbTdv(-2)==99. .and. A1_TurbTdv(-1)==99.
+                value (OMR_background*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case A3_APR2 {
+                condition month==APR .and. A3_trig_mo==7.
+                value (A2_OMR_Targ*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case otherwise_APR {
+                condition month==APR
+                value -99999.}
+
+        case A3_MAY {
+                condition month==MAY .and. A3_offramp_mo==8.
+                value (A3_OMR_Targ*(A3_offramp_da)+OMR_background*(daysin-A3_offramp_da))/daysin}
+        case A3_MAY_J {
+                condition month==MAY .and. A3_offramp_mo==9.
+                value A3_OMR_Targ}
+        case otherwise_MAY {
+                condition month==MAY
+                value -99999.}
+
+        case A3_JUN {
+                condition month==JUN .and. A3_offramp_mo==9.
+                value (A3_OMR_Targ*(A3_offramp_da)+OMR_background*(daysin-A3_offramp_da))/daysin}
+        case otherwise_JUN {
+        condition always
+                value -99999.}
+}
+
+define OMR_RPA_1dv {alias OMR_RPA_1 kind 'FLOW' units 'CFS'}
+
+!Check for QA/QC
+define OMR_RPA_1con{
+    case Initialize {
+            condition month==OCT .and. wateryear==BgnWY
+                value -99999.}
+        case Oct_Dec {
+            condition month>=OCT .and. month<DEC
+                value -99999.}
+    case OFF_DEC {
+        condition month==DEC .and. A1_TurbT==99.
+                value -99999.}
+    case A1_DEC {
+        condition month==DEC .and. A1_TurbT==1.
+                value 1.}
+        case A1_Dec_Jan{
+                condition month==JAN .and. A1_TurbTdv(-1)==1.
+                value 2.}
+    case A1_JAN{
+        condition month==JAN .and. A1_TurbT==2.
+                value 3.}
+    case A1_DJ_A3_F {
+        condition month==FEB .and. A1_TurbTdv(-1)==2. .and.  A3_trig_mo==5.
+                value 4.}
+    case A1_DJ_A3_F2 {
+                condition month==FEB .and. A1_TurbTdv(-2)==1. .and.  A3_trig_mo==5.
+                value 5.}
+        case A1_DJ {
+        condition month==FEB .and. A1_TurbTdv(-1)==2. .and.  A3_trig_mo>5.
+                value 6.}
+        case A1_DJ2 {
+        condition month==FEB .and. A1_TurbTdv(-2)==1. .and.  A3_trig_mo>5.
+                value 7.}
+
+    case A1_F_A3_F {
+        condition month==FEB .and. A1_TurbT==3. .and.  A3_trig_mo==5.
+                value 8.}
+    case A1_F {
+        condition month==FEB .and. A1_TurbT==3. .and.  A3_trig_mo>5.
+                value 9.}
+        case A1_F_M {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo>6.
+                value 10.}
+    case A1_M {
+        condition month==MAR .and. A1_TurbT==4. .and.  A3_trig_mo==6.
+                value 11.}
+    case A3_FEB_M {
+        condition month==MAR .and. A1_TurbTdv(-2)==2. .and.  A3_trig_mo==5.
+                value 12.}
+    case A3_FEB_M2 {
+        condition month==MAR .and. A1_TurbTdv(-3)==1. .and.  A3_trig_mo==5.
+                value 13.}
+    case A3_FEB_M3 {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo==5.
+                value 14.}
+    case A3_FEB_M4 {
+        condition month==MAR .and. A1_TurbT==4. .and.  A3_trig_mo==5.
+                value 15.}
+    case A3_M {
+        condition month==MAR .and. A1_TurbTdv(-1)==3. .and.  A3_trig_mo==6.
+                value 16.}
+    case A3_M2 {
+        condition month==MAR .and. A1_TurbTdv(-2)==2. .and.  A3_trig_mo==6.
+                value 17.}
+    case A3_M3 {
+        condition month==MAR .and. A1_TurbTdv(-3)==1. .and.  A3_trig_mo==6.
+                value 18.}
+        case A3_M4 {
+                condition month==MAR .and. A1_TurbTdv(-3)==1. .and.  A3_trig_mo==7.
+                value 18.5}
+        case A3_APR {
+                condition month==APR .and. A3_trig_mo<7.
+                value 19.}
+        case A3_APR2 {
+                condition month==APR .and. A3_trig_mo==7.
+                value 19.5}
+    case A3_MAY {
+                condition month==MAY .and. A3_offramp_mo==8.
+                value 20.}
+    case A3_MAY_J {
+                condition month==MAY .and. A3_offramp_mo==9.
+                value 21.}
+    case A3_JUN {
+                condition month==JUN .and. A3_offramp_mo==9.
+                value 22.}
+    case otherwise {
+        condition always
+                value 23.}
+}
+
+define OMR_RPA_1condv {alias OMR_RPA_1con kind 'TRIGGER' units 'NONE'}
+
+
+!define NoA1_OMR_Targ { value -5000.}
+/*define NoA1_con{
+       case initial {
+         condition month==OCT .and. wateryear==BgnWY
+         value 0.}
+       case JAN {
+        condition C_OMR014(-1)<=NoA1_OMR_Targ
+        value 1.}
+       case FEB {
+        condition C_OMR014(-1)<=NoA1_OMR_Targ .or. C_OMR014(-2)<=NoA1_OMR_Targ
+        value 1.}
+       case MAR {
+        condition C_OMR014(-1)<=NoA1_OMR_Targ .or. C_OMR014(-2)<=NoA1_OMR_Targ .or. C_OMR014(-3)<=NoA1_OMR_Targ
+        value 1.}
+       case otherwise {
+        condition always
+        value 0.}
+ }
+
+define NoA1_condv {alias NoA1_con kind 'TRIGGER' units 'NONE'}
+     */
+
+define OMR_RPA_NoA1{
+    case JAN {
+                condition month==JAN .and. A1_TurbT==99. !.and. NoA1_con==1.
+                value OMR_background}
+        case FEB {
+                condition month==FEB .and. A1_TurbT==99. .and. A3_trig_mo==5. /*.and. NoA1_con==1.*/
+                value (OMR_background*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case FEB_2 {
+                condition month==FEB .and. A1_TurbT==99. .and. A3_trig_mo>5. !.and. NoA1_con==1.
+                value OMR_background}
+        case MAR {
+                condition month==MAR .and. A1_TurbT==99. .and. A3_trig_mo<6. !.and. NoA1_con==1.
+                value A3_OMR_Targ}
+        case MAR_2 {
+                condition month==MAR .and. A1_TurbT==99. .and. A3_trig_mo==6.     !.and. NoA1_con==1.
+                value (OMR_background*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+        case MAR_3 {
+                condition month==MAR .and. A1_TurbT==99. .and. A3_trig_mo>6. !.and. NoA1_con==1.
+                value OMR_background}
+        case othnoA1 {
+                condition month>=JAN .and. month<=MAR
+                value OMR_background}
+        case APR {
+                condition month==APR .and. A1_TurbT==99. .and. A3_trig_mo<7.    !.and. NoA1_con==1.
+                value A3_OMR_Targ}
+        case APR_2 {
+                condition month==APR .and. A1_TurbT==99. .and. A3_trig_mo==7.     !.and. NoA1_con==1.
+                value (OMR_background*(A3_trig_da-1.)+A3_OMR_Targ*(daysin-A3_trig_da+1.))/daysin}
+    case otherwise{
+        condition always
+                value -99999.}
+}
+
+define OMR_RPA_NoA1dv {alias OMR_RPA_NoA1 kind 'FLOW' units 'CFS'}
+
+/*define OMR_RPA_NoA1con{
+    case JAN {
+                condition month==JAN .and. A1_TurbT==99. .and. NoA1_con==1.
+                value 1.}
+    case FEB {
+                condition month==FEB .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo==5.
+                value 2.}
+    case FEB_2 {
+                condition month==FEB .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo>5.
+                value 3.}
+    case MAR {
+                condition month==MAR .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo<6.
+                value 4.}
+    case MAR_2 {
+                condition month==MAR .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo==6.
+                value 5.}
+    case MAR_3 {
+                condition month==MAR .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo>6.
+                value 6.}
+    case APR {
+                condition month==APR .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo<7.
+                value 7.}
+    case APR_2 {
+                condition month==APR .and. A1_TurbT==99. .and. NoA1_con==1.  .and. A3_trig_mo==7.
+                value 8.}
+    case otherwise{
+        condition always
+                value 9.}
+}
+define OMRRPANoA1condv {alias OMR_RPA_NoA1con kind 'TRIGGER' units 'NONE'}
+ */
+
+define OMR_RPA_14day{value max(OMR_RPA_1,OMR_RPA_NoA1)}
+
+!Put an additional constraint so that 5 day OMR is not negative more than 25% of the 14 day OMR
+define OMR_RPA_5day {
+      case Action {
+            condition OMR_RPA_14day >= -12000.
+            value 1.25*OMR_RPA_14day}
+      case None {
+            condition always
+            value -99999.}
+}
+
+! Use Paul Hutton's regression equation to determine an aggregate based on a determination of whether
+! the 5 day or the 14 day will control
+define OMR_RPA_FWS {value max(OMR_RPA_14day,(OMR_RPA_5day+389.)/1.02)}
+
+!QA/QC
+define OMR_RPA14d {alias OMR_RPA_14day  kind 'FLOW-REG' units 'CFS'} ! for output
+define OMR_RPA5d {alias OMR_RPA_5day  kind 'FLOW-REG' units 'CFS'}
+define OMR_RPA_FWSdv {alias OMR_RPA_FWS  kind 'FLOW-REG' units 'CFS'}
+!

@@ -1,0 +1,150 @@
+!Disaggregate the Transfer Pipeline and the Los Vaqueros Pipline (between
+!the Transfer Facility and the Mokelumne Aqueduct) into forward and reverse
+!flows.  Reverse flows are to Los Vaqueros Reservoir and forward flows are to
+!the Contra Costa Canal.
+
+!Transfer Pipeline
+define C422_REL {std kind 'flow-channel' units 'cfs'}
+define C422_FILL {std kind 'flow-channel' units 'cfs'}
+goal split_C422 {C422 = C422_REL - C422_FILL}
+
+!Allow only reverse or forward flow in the TP, not both.
+
+define int_TP_FILL {integer std kind 'fill-switch' units 'none'}
+
+goal switch_TP_FILL {C422_FILL < int_TP_FILL*9999.}
+goal switch_TP_REL {C422_REL < 9999. - int_TP_FILL*9999.}
+
+
+!LV Pipeline
+define C423_DEL {std kind 'flow-channel' units 'cfs'}
+define C423_FILL {std kind 'flow-channel' units 'cfs'}
+goal split_C423 {C423 = C423_DEL - C423_FILL}
+
+!Allow only reverse or forward flow in LVP, not both.
+
+define int_LVP_FILL {integer std kind 'fill-switch' units 'none'}
+
+goal switch_LVP_FILL {C423_FILL < int_LVP_FILL*9999.}
+goal switch_LVP_DEL {C423_DEL < 9999. - int_LVP_FILL*9999.}
+
+!Disaggregate Mokelumne Aq. diversions into high and low priority.
+/*define I424_LP {std kind 'flow-delivery' units 'cfs'}
+define I424_HP {std kind 'flow-delivery' units 'cfs'}
+goal split_I424 {I424 = I424_LP + I424_HP}
+*/
+
+!Total Delta diversion
+define D408 {std kind 'FLOW-DELIVERY' units 'CFS'} !CCWD DELTA DIVERSION
+define D408_CC {std kind 'flow-delivery' units 'cfs'}
+define D408_P  {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D408_CC_P {D408 = D408_CC + D408_P}
+
+!Old River
+define D408_OR_CC {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_P {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D408_OR {D408_OR = D408_OR_CC + D408_OR_P}
+
+!Victoria Canal
+define D408_VC_CC {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_P {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D408_VC {D408_VC = D408_VC_CC + D408_VC_P}
+
+!Aggregate OR and VC Partner diversions.  This will also aggregate D408_CC = D408_RS + D408_OR_CC + D408_VC_CC with D408 aggregation in CalSimConnection.wresl.
+goal agg_P_diversions {D408_P = D408_OR_P + D408_VC_P}
+
+!Disaggregate CC diversions by CVP delivery (CVP), Delta surplus (DS), or Transfer.
+
+!Rock Slough
+define D408_RS_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_RS_3f {std kind 'flow-delivery' units 'cfs'}
+define D408_RS_TX {std kind 'flow-delivery' units 'cfs'}
+define D408_RS_ECC {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_RS {D408_RS = D408_RS_CVP + D408_RS_3f + D408_RS_TX + D408_RS_ECC}
+
+!Old River
+define D408_OR_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_3f {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_DS {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_TX {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_ECC {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_OR_CC {D408_OR_CC = D408_OR_CVP + D408_OR_3f + D408_OR_DS + D408_OR_TX + D408_OR_ECC}
+
+!Victoria Canal
+define D408_VC_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_3f {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_DS {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_TX {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_VC_CC {D408_VC_CC = D408_VC_CVP + D408_VC_3f + D408_VC_DS + D408_VC_TX}
+
+!Aggregate intake diversions by water right.
+define D408_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_3f {std kind 'flow-delivery' units 'cfs'} ! diversion beyond CVP allocation; can only go to delivery
+define D408_DS {std kind 'flow-delivery' units 'cfs'}
+define D408_TX {std kind 'flow-delivery' units 'cfs'}
+define D408_ECC {std kind 'flow-delivery' units 'cfs'}
+
+goal agg_CVP_intakes {D408_CVP = D408_RS_CVP + D408_OR_CVP + D408_VC_CVP}
+goal agg_DS_intakes {D408_DS = D408_OR_DS + D408_VC_DS}
+goal agg_3f_intakes {D408_3f = D408_OR_3f + D408_VC_3f + D408_RS_3f}
+goal agg_TX_intakes {D408_TX = D408_RS_TX + D408_OR_TX + D408_VC_TX}
+!goal zero_TX_intakes {D408_TX = 0.0} !@jmg 2017.12.11 - CurrentOps update
+goal agg_ECC_intakes {D408_ECC = D408_RS_ECC +  D408_OR_ECC}
+
+!Disaggregate in-Delta transfers into low priority and high priority (L and H)
+define D408_TX_H {std kind 'flow-delivery' units 'cfs'}
+define D408_TX_L {std kind 'flow-delivery' units 'cfs'}
+goal split_TX_div {D408_TX = D408_TX_H + D408_TX_L}
+
+!Disaggregate C424 for operations under OMR.
+define C424_MW {std kind 'flow-channel' units 'cfs'}     !minimum channel flow set according the monthlyweighted result
+define C424_DT {std kind 'flow-channel' units 'cfs'}
+goal split_C424 {C424 = C424_MW + C424_DT}
+
+!When delivery standard can be met, following disag will allow favoring better WQ
+!between OR, VC, and RS.
+define D408_VC_LCL {std kind 'flow-delivery' units 'cfs'}  !Best WQ (low CL)
+define D408_VC_MCL {std kind 'flow-delivery' units 'cfs'}  !Second best WQ (mid CL)
+define D408_VC_HCL {std kind 'flow-delivery' units 'cfs'}  !Worst WQ (high CL)
+goal split_D408_VC_3 {D408_VC_CC = D408_VC_LCL + D408_VC_MCL + D408_VC_HCL}
+
+define D408_OR_LCL {std kind 'flow-delivery' units 'cfs'}  !Best WQ (low CL)
+define D408_OR_MCL {std kind 'flow-delivery' units 'cfs'}  !Second best WQ (mid CL)
+define D408_OR_HCL {std kind 'flow-delivery' units 'cfs'}  !Worst WQ (high CL)
+goal split_D408_OR_3 {D408_OR_CC = D408_OR_LCL + D408_OR_MCL + D408_OR_HCL}
+
+define D408_RS_LCL {std kind 'flow-delivery' units 'cfs'}  !Best WQ (low CL)
+define D408_RS_MCL {std kind 'flow-delivery' units 'cfs'}  !Second best WQ (mid CL)
+define D408_RS_HCL {std kind 'flow-delivery' units 'cfs'}  !Worst WQ (high CL)
+goal split_D408_RS_3 {D408_RS = D408_RS_LCL + D408_RS_MCL + D408_RS_HCL}
+
+!Split Partner diversions into wheeling, delivery, and storage.
+define D408_P_WHL {std kind 'flow-delivery' units 'cfs'}
+define D408_P_DEL {std kind 'flow-delivery' units 'cfs'}
+define D408_P_STR {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P {D408_P = D408_P_WHL + D408_P_DEL + D408_P_STR}
+
+!Split Partner wheeling into South Bay and San Felipe.
+define D408_P_WHL_SB {std kind 'flow-delivery' units 'cfs'}
+define D408_P_WHL_SF {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P_WHL {D408_P_WHL = D408_P_WHL_SB + D408_P_WHL_SF}
+
+!Disaggregate C421 (Old River Pipeline
+define C421_BTH {std kind 'flow-channel' units 'cfs'}
+define C421_TFR {std kind 'flow-channel' units 'cfs'}
+
+goal split_C421 {C421 = C421_BTH + C421_TFR}
+goal set_C421_BTH {C421_BTH = D408_P_WHL + D408_P_DEL}
+goal set_C421_TFR {C421_TFR = D408_OR_CC + D408_VC_CC + D408_P_STR}
+
+!Disaggregate Partner arcs for WQ based weighting.
+define D408_OR_P_LCL {std kind 'flow-delivery' units 'cfs'}
+define D408_OR_P_HCL {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_P_LCL {std kind 'flow-delivery' units 'cfs'}
+define D408_VC_P_HCL {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D408_OR_P {D408_OR_P = D408_OR_P_LCL + D408_OR_P_HCL}
+goal split_D408_VC_P {D408_VC_P = D408_VC_P_LCL + D408_VC_P_HCL}

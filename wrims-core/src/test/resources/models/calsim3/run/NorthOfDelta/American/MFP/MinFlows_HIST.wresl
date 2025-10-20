@@ -1,0 +1,147 @@
+! Middle Fork Project Minimum Instream Flow Requirements
+! N. Riegels 08/30/05     modified by Derya Sumer 03/2006
+!*********************************************************************************
+
+! Flow requirements herein from superseded FERC Middle Fork Project No.2079 License
+! Superseded requirements are included for model validation and posterity purposes
+! Minimum flows are based on annual unimpaired flow at Fair Oaks.
+
+! Include 2 cfs buffer on all minimum flow requirements to ensure compliance
+define MIF_MFP_buffer {value 2.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Flow Requirements !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Duncan Creek Diversion Dam minimum instream release 
+define MIF_MFP_DCC008 {
+	case above_1000 {
+		condition amer_annual > 1000
+		value min(8.,I_DCC010)
+		}
+	case below_1000 {
+		condition always
+		value min(4.,I_DCC010)
+		}
+	}
+goal Duncan_min_release {C_DCC008_mif < (min(MIF_MFP_DCC008+ MIF_MFP_buffer,I_DCC010))}
+
+!For MFP discretionary (hydropower) supply forecasting
+define sumMIF_MFP_DCC008 {
+	case MaySep {
+		condition range(month,MAY,SEP)
+		sum (i=0,15-month,1) MIF_MFP_DCC008*cfs_taf(i)
+	}
+	case OctDec {
+		condition range(month,OCT,DEC)
+		sum (i=0,3-month,1) MIF_MFP_DCC008*cfs_taf(i)
+	}
+	case otherwise {
+		condition always
+		value 0.
+	}
+}
+define sumMIF_MFP_DCC008dv 		{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setsumMIF_MFP_DCC008dv		{sumMIF_MFP_DCC008dv = sumMIF_MFP_DCC008}
+
+! French Meadows minimum instream release 
+define MIF_MFP_MFA047 {
+	case above_1000 {
+		condition amer_annual > 1000
+		value 8.
+		}
+	case below_1000 {
+		condition always
+		value 4.
+		}
+	}
+goal FM_min_release {C_MFA047_mif < (MIF_MFP_MFA047 + MIF_MFP_buffer)}
+
+
+! Hell Hole minimum instream release 
+define MIF_MFP_RUB031 {
+	case above_1000_summer {
+		!condition amer_annual > 1000 .and. range(month,May,Dec) !use for monthly
+		condition amer_annual >= 1000 .and. ((day >= 15 .and. month == May) .or. (month > May .and. month <= Sep) .or. month < Dec .or. (day <= 14 .and. month == Dec))
+		value 20.
+		}
+	case above_1000_winter {
+		condition amer_annual >= 1000 .and. ((day >= 15 .and. month == Dec) .or. (month >= Jan .and. month < May) .or. (day <= 14 .and. month == May))
+		value 10.
+		}
+	case below_1000_summer {
+		condition amer_annual < 1000 .and. ((month >= Jun .and. month < Sep) .or. (day <= 14 .and. month == Oct))
+		value 10.
+		}
+	case below_1000_winter {
+		condition always
+		value 6.
+		}
+	}
+goal HH_min_release {C_RUB031_mif < (MIF_MFP_RUB031 + MIF_MFP_buffer)}
+
+
+! South Long Canyon Diversion Dam minimum instream release 
+define MIF_MFP_SLC002 {
+	case above_1000 {
+		condition amer_annual > 1000
+		value 5.
+		}
+	case below_1000 {
+		condition always
+		value 2.5
+		}
+	}
+goal SLCanyon_min_release {C_SLC002_mif < (min(MIF_MFP_SLC002,I_SLC003) + MIF_MFP_buffer)}
+
+
+! North Long Canyon Diversion Dam minimum instream release 
+define MIF_MFP_NLC002 {value 2.}
+goal NLCanyon_min_release {C_NLC002_mif < (min(MIF_MFP_NLC002,I_NLC003) + MIF_MFP_buffer)}		
+
+
+! Ralston or Middle Fork Interbay Minimum Instream Release 
+!MB: CH enforced this at Interbay Dam (MFA035); left like that for lack of reason to change otherwise
+define MIF_MFP_MFA035 {
+	case above_1000 {
+		condition amer_annual > 1000
+		value 23.
+		}
+	case below_1000 {
+		condition always
+		value 12.
+		}
+	}
+goal Interbay_min_release {C_MFA035_mif < (MIF_MFP_MFA035 + MIF_MFP_buffer)}
+
+
+! Middle Fork American below Ralston Afterbay Dam
+! There is no flow requirement specified at this location in the original license,
+! this is included in order to match the weights of the MIF defined at Ralston in min_flows_current.wresl
+define MIF_MFP_MFA025 {value 0.}
+goal RalstonRelease {C_MFA025_mif < MIF_MFP_MFA025}
+
+
+! Oxbow Minimum Instream Release 
+! MB: changed from 'Afterbay release' in CH's version, seemed like a mis-classification
+! As specified in the original license, flow requirement is enforced downstream of confluence with NF Middle Fork
+define MIF_MFP_MFA023 {value 75.}
+goal Oxbow_min_release {C_MFA023_mif < (MIF_MFP_MFA023 + MIF_MFP_buffer)}
+
+
+! American River Pump Station Minimum Instream Release 
+! Compliance point is downstream of Auburn Dam Site to Folsom Reservoir
+! From Stipulation and Agreement between PCWA and CDFG in 1962, cited by Decision 1104
+define MIF_MFP_NFA016 {value 75.}
+goal SetMIF_MFP_NFA016 {C_NFA016_mif < (MIF_MFP_NFA016 + MIF_MFP_buffer)}
+
+
+define MIF_MFP_DCC008dv {alias MIF_MFP_DCC008 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA047dv {alias MIF_MFP_MFA047 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA035dv {alias MIF_MFP_MFA035 kind 'MIF' units 'CFS'}
+define MIF_MFP_HHOLEdv  {alias MIF_MFP_RUB031 kind 'MIF' units 'CFS'}
+define MIF_MFP_NLC002dv {alias MIF_MFP_NLC002 kind 'MIF' units 'CFS'}
+define MIF_MFP_SLC002dv {alias MIF_MFP_SLC002 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA025dv {alias MIF_MFP_MFA025 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA023dv {alias MIF_MFP_MFA023 kind 'MIF' units 'CFS'}

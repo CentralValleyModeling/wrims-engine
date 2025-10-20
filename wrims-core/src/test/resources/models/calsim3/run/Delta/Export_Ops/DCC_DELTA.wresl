@@ -1,0 +1,42 @@
+! NMFS_SALMON_BO_DCC_DELTA.wresl
+!
+! Fix NMFS DCC and related operation parameters to the results of the DELTA cycle
+
+! final number of days in each month that the DXC gate is open under NMFS action
+define NMFSdaysopendv  {std kind 'DCC-DAYS-OPEN' UNITS 'NONE'}  !for output only
+define NMFS_days_open  {value NMFSdaysopendv[DELTA]}  ! grab from DELTA cycle
+goal   setNMFSdaysopen {NMFSdaysopendv = NMFS_days_open}
+
+! If not going to meet target number of days, drop exports to 2000 cfs max
+define NMFS_MaxExpDCCdv {std kind 'Export-Limit' units 'cfs'} !for output only
+define NMFS_MaxExp_DCC  {value NMFS_MaxExpDCCdv[DELTA]}  ! grab from DELTA cycle
+goal   setNMFSMaxExpDCC {NMFS_MaxExpDCCdv = NMFS_MaxExp_DCC}
+
+! If Rio Vista control is creating undesired storage release through DXC, limit days open
+define RVdaysopendv  {std kind 'DCC-DAYS-OPEN' UNITS 'NONE'}  !for output only
+define RV_days_open  {value RVdaysopendv[DELTA]}  ! grab from DELTA cycle
+goal   setRVdaysopen {RVdaysopendv = RV_days_open}
+
+! The idea of closing the gates is to relieve Shasta releases.  In some cases, penalties on
+! the NO_EI_SPLIT goals in COA, CVPrulecv, res balancing, etc... can make the model want to
+! keep releasing that water.  The penalty in the limitRVexc goal has been developed accordingly.
+! This goal only has an effect in the specific cases when RV was controlling and we close
+! the gates to save water.
+goal limitRVexc {
+    lhs C_SAC017_ADD
+    case DryCtrl{
+        condition C_SAC017_ADD[UPSTREAM]<0.1 .and. RV_days_open<daysin
+        rhs 0.
+        lhs>rhs penalty 3000}
+}
+
+define RV_DXC_cutDV {std kind 'output-cfs' units 'cfs'}
+goal setRV_DXC_cutDV {
+    lhs RV_DXC_cutDV
+    case RV_DXC_cut {
+        condition RV_days_open < daysin
+        rhs D_SAC030_MOK014[UPSTREAM] - D_SAC030_MOK014 }
+    case otherwise {
+        condition always
+        rhs 0.}
+}

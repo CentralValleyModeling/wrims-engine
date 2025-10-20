@@ -1,0 +1,28 @@
+!Sets up Requested Diversions from Freeport for Sacramento County
+
+define ReqSacANN { value max(0.0,RSReqSacDV[DELTA],
+                                 JPReqSacDV[DELTA],
+                                 EMReqSacDV[DELTA],
+                                 COReqSacDV[DELTA])  }
+                                 
+!Water right water taken as last priority (i.e. below wheeling, and interruptibles)
+
+goal setD_FPT013_WTPVNY_WR {D_FPT013_WTPVNY_WR < UD_26S_PU4 + UD_26S_PU5 + UD_26S_PU6 - D_WTPSAC_26S_PU4[DELTA] - D_FPT013_WTPVNY[DELTA]}
+
+goal setD_FPT_exc {D_FPT_exc < dem_SCWA_total - D_WTPSAC_26S_PU4[DELTA] - D_FPT013_WTPVNY[DELTA]}
+
+define NDOI_ADD_divertable {
+    case yes{
+    condition NDOI_ADD[DELTA] >= 500.
+    value NDOI_ADD[DELTA]}
+    case no{
+    condition always
+    value 0.0001}
+}
+define NDOI_ADD_divertable_dv {alias NDOI_ADD_divertable kind 'FLOW' units 'TAF'}
+
+!Excess amount taken limited by max Sac flow requirement from the four ANN stations
+define Hood_Excess {value max(0,C_SAC041[DELTA] - ReqSacANN)}
+
+goal limitD_FPT013_WTPVNY_WR {D_FPT013_WTPVNY_WR < min(NDOI_ADD_divertable,Hood_Excess)}
+

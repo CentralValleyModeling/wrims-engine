@@ -1,0 +1,197 @@
+ 
+Objective obj_SYS_SJRWEST = {
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!CALSIM-III WEIGHTS for East Side San Joaquin Valley
+!Original Formulation: C. Olson (MWH) April 2007
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Weighting structure:
+! -- all project ag and project urban weights ~ 30000
+! -- all project refuge weights ~ 45000
+! -- all exchange contractor weights ~ 49000
+! -- all non-project delivery weights ~ 50000
+! -- San Felipe Unit delivery weights ~75000 (ensure delivery is made, since not doing WB and can't pump here)
+! -- all pumping to *project units* is penalized (-999999); small penalty on non-project pumping (-100)
+
+
+!====================================================
+!Diversion Weights
+!====================================================
+/*[DCL_50_PA1, -1000],
+[DCL_71_PA1, -1000],
+[DCL_71_PA2, -1000],
+[DCL_71_PA3, -1000],
+[DCL_71_PA4, -1000],
+[DCL_71_PA5, -1000],
+[DCL_71_PA6, -1000],
+[DCL_71_PA8, -1000],
+[DCL_72_PA,  -1000],
+[DCL_72_XA1, -1000],
+[DCL_72_XA2, -1000],
+[DCL_72_XA3, -1000],
+[DCL_72_PR1, -1000],
+[DCL_72_PR2, -1000],
+[DCL_72_PR3, -1000],
+[DCL_72_PR4, -1000],
+[DCL_72_PR5, -1000],
+[DCL_72_PR6, -1000],
+[DCL_73_PA1, -1000],
+[DCL_73_PA2, -1000],
+[DCL_73_PA3, -1000],
+[DCL_73_XA,  -1000],
+[DCL_90_PA1, -1000],
+[DCL_90_PA2, -1000],
+[DCL_91_PA,  -1000],
+[DCL_91_PR,  -1000],
+!==========
+*/
+!***********WBA 64***************
+! [D_MDOTA_64_XA,         49000], ! this is in the East system directory
+
+!***********WBA 50***************
+[D_DMC021_50_PA1,       30001], !
+[D_RFS71A_50_PA1,       30000], !
+! [D_SJR062_50_PA1,       29990], !
+! [D_DMC016_WTPJJO,       30000], ! diversion goes to Tracy
+[D_WTPJJO_50_PU,        30001], ! put weight on actual delivery to 50_PU, not initial diversion to WTP
+[D_WTPDGT_50_PU,        30000], ! unsure how this should be weighted...
+
+!***********WBA 71***************
+
+[D_SJR090_71_NA2,       50000],
+[D_DMC030_71_PA1,       30000],
+[D_DMC034_71_PA2,       30000],
+[D_SJR082_71_PA2,       25000], ! West Stanislaus ID. Reduce weight below deliveries from DMC for planning purposes. Was 50,0000.
+[D_DMC034_71_PA3,       30000],
+[D_DMC044_71_PA4,       30000],
+[D_SJR096_71_PA4,       25000], ! Patterson ID. Reduce weight below deliveries from DMC for planning purposes. Was 50,0000.
+[D_DMC044_71_PA5,       30000],
+[D_DMC064_71_PA6,       30000],
+![D_CAA046_71_PA7,       30000],
+[D_DMC011_71_PA8,       30000],
+[D_CAA012_71_PU1,       30000],
+[D_CAA066_71_PU2,       30000],
+
+!***********WBA 72***************
+[D_SJR116_72_NA1,       50000],
+[D_XCC025_72_PA,        30000],
+[D_ARY010_72_XA1,       49001],
+[D_XCC010_72_XA2,       49002],
+[D_XCC054_72_XA3,       49000],
+[D_VLW008_72_PR1,       45000],
+[D_XCC033_72_PR2,       45000],
+[D_ARY010_72_PR3,       45000],
+[D_XCC033_72_PR4,       45000],
+[D_ARY010_72_PR4,       45001],
+[D_VLW008_72_PR5,       45000],
+[D_XCC054_72_PR5,       45001],
+[D_ARY010_72_PR6,       45001],
+[D_XCC025_72_PR6,       45000],
+
+!***********WBA 73***************
+[D_MDOTA_73_XA,         49000],
+[D_DMC111_73_XA,        49001],
+[D_CAA087_73_PA1,       30001],
+[D_DMC070_73_PA1,       30000],
+[D_DMC105_73_PA2,       30000],
+[D_CAA109_73_PA3,       30001],
+[D_DMC091_73_PA3,       30000],
+
+!***********WBA 90***************
+[D_MDOTA_90_PA1,        30000],  
+[D_CAA109_90_PA1,       30004],
+[D_CAA143_90_PA1,       30003],
+[D_CAA155_90_PA1,       30002],
+[D_CAA172_90_PA1,       30001],
+[D_CAA143_90_PA2,       30000.1],
+[D_CAA143_90_PU,        30002],
+[D_CAA156_90_PU,        30001],
+[D_CAA165_90_PU,        30000.2],
+
+!***********WBA 91***************
+[D_MDOTA_91_PR,         45000], 
+[D_MDOTA_91_PA,         30000], 
+
+!***********San Felipe Unit*******
+[D_SLUIS_PCH000,         75000],         
+
+![D_CAA239_CVPRF,1265], !in systemtablesall\weight-table
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! SLUIS + INTERTIE  !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+[D_DMC007_CAA009,        -100],       ! small penalty on intertie -- discourages intertie if flow < capacity
+
+[S_SLUIS_CVP_1, 600000*taf_cfs],
+[S_SLUIS_CVP_2, 1235*taf_cfs],
+[S_SLUIS_CVP_3, 1225*taf_cfs],
+[S_SLUIS_CVP_4, 65*taf_cfs],
+[S_SLUIS_CVP_5,-15000*taf_cfs],
+
+[S_SLUIS_SWP_1, 200000*taf_cfs],
+[S_SLUIS_SWP_2, 1235*taf_cfs],
+[S_SLUIS_SWP_3, 1225*taf_cfs],
+[S_SLUIS_SWP_4, 60*taf_cfs],
+[S_SLUIS_SWP_5,-15000*taf_cfs],
+
+!Set of weights to discourage simultaneous flow through ONFB (CAA->DMC and DMC->CAA)
+[D_CAA069_SLUIS_S,      -10],
+[D_CAA069_SLUIS_F,      -10], 
+[D_CAA069_DMC070,       -10],         
+
+!====================================================
+!Misc. Weights
+!====================================================
+
+!Penalty on spills to wasteways/sloughs (VLW, LBN, FBW, NMW, WWW) to ensure flows go through canals, not through wasteways.
+![D_DMC076_XCC043, -1000],
+[C_VLW008,        -10000],
+![D_XCC054_LBN008, -10000],
+[D_DMC034_WWW001, -10000],
+[D_DMC111_FBW001, -10000], 
+[D_DMC054_NMW004, -10000], 
+[C_CAA087_CVP_BORROWEDCAP,-10],!DOS AMIGOS PP. CVP USE OF SWP CAPACITY
+[C_CAA087_SWP_BORROWEDCAP,-10], !DOS AMIGOS PP. SWP USE OF CVP CAPACITY
+
+!Penalties for pumping from project units with small penalty for pumping from non-project units.
+[GP_50_PA1,  -9999], 
+[GP_50_PU,   -9999], 
+[GP_71_NA1,     -100],             
+[GP_71_NA2,     -100], 
+[GP_71_PA1,  -9999], 
+[GP_71_PA2,  -9999], 
+[GP_71_PA3,  -9999], 
+[GP_71_PA4,  -9999], 
+[GP_71_PA5,  -9999], 
+[GP_71_PA6,  -9999], 
+[GP_71_PA8,  -9999], 
+[GP_71_NU,      -100], 
+[GP_71_PU1,  -9999], 
+[GP_71_PU2,  -9999], 
+[GP_72_NA1,     -100], 
+[GP_72_NA2,     -100], 
+[GP_72_PA,   -9999], 
+[GP_72_XA1,  -9999], 
+[GP_72_XA2,  -9999], 
+[GP_72_XA3,  -9999], 
+[GP_72_PR1,  -9999], 
+[GP_72_PR2,  -9999], 
+[GP_72_PR3,  -9999], 
+[GP_72_PR4,  -9999], 
+[GP_72_PR5,  -9999], 
+[GP_72_PR6,  -9999], 
+[GP_72_NU,      -100], 
+[GP_72_PU,   -9999], 
+[GP_73_PA1,  -9999], 
+[GP_73_PA2,  -9999], 
+[GP_73_PA3,  -9999], 
+[GP_73_XA,   -9999], 
+[GP_73_NU,      -100], 
+[GP_90_PA1,  -9999], 
+[GP_90_PA2,  -9999], 
+[GP_90_PU,   -9999], 
+[GP_91_PA,   -9999], 
+[GP_91_PR,   -9999]
+}

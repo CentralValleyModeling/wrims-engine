@@ -1,0 +1,33 @@
+/*
+LakeAmadorOps.wresl
+*/
+
+/*
+Jackson Valley ID (JVID) has rights to store up to 36,000 af of Jackson Creek flows.373 It may divert
+flows to Lake Amador between November and May at a maximum rate of 110 cfs. Due to reservoir
+capacity constraints, the District typically uses about 10,000 af of this right. The safe yield
+is 8,500 af.
+
+JVID has rights to divert up to 3,850 af of Mokelumne River at a diversion rate of 50 cfs;
+the diversion is authorized year-round for domestic and stock watering uses, and between
+March and October for irrigation uses. However, JVID does not hold rights to store this
+water.
+
+Mokelumne River water flows by gravity from Pardee Reservoir to Lake Amador. The
+District requests and usually receives 3,850 af annually from EBMUD, although it is subject
+to availability.
+*/
+
+define AMADR_WR {
+	case Oct {
+		condition month == OCT
+		value 0.}
+	case NovMay {
+		condition month <= JUN 
+		value 1.}
+	case otherwise {
+		condition always 
+		value 0.}}
+
+goal setS_AMADR1 {S_AMADR*taf_cfs  < 110*AMADR_WR + S_AMADR(-1)*taf_cfs}
+goal setS_AMADR2 {S_AMADR*taf_cfs  < I_AMADR + S_AMADR(-1)*taf_cfs}

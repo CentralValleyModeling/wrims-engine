@@ -1,0 +1,111 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*This file generates the values that will be used in the WSI-DI curve generation
+  Dustin Jones 01/07/99
+*/
+
+!Sanjay Pahuja/Rob Leaf  HILL 1/9/02
+!di modified to include trinity
+! Define variables to be used in WSI-DI curve generation
+define DI_act_CVP_s    {upper unbounded lower unbounded kind 'DEMAND-INDEX' units 'TAF'}
+define DI_act_CVP_sys  {upper unbounded lower unbounded kind 'DEMAND-INDEX' units 'TAF'}
+define WSI_act_CVP_s   {upper unbounded lower unbounded kind 'WATER-SUPPLY-INDEX' units 'TAF'}
+define WSI_act_CVP_sys {upper unbounded lower unbounded kind 'WATER-SUPPLY-INDEX' units 'TAF'}
+
+!  =============================== Set DI values ===================================
+!  The demand index for the southern portion of the system is comprised of all southern
+!  deliveries and carryover storage for Trinity, Shasta, Folsom, and CVP San Luis.
+
+goal set_DI_CVP_s {
+     lhs  DI_act_CVP_s
+     case MAR {
+          condition      month == MAR
+
+          rhs            tot_del_cvp_s + S_TRNTY(prevSEP) + S_SHSTA(prevSEP) + S_FOLSM(prevSEP) + S_SLUIS_CVP(prevSEP) }    !RLEAF-
+
+     case other {
+          condition      always
+          rhs            -1.0 }
+}
+
+! The demand index for the entire system is comprised of all northern + southern
+! deliveries and carryover storage for Trinity, Shasta, Folsom, and CVP San Luis.
+goal set_DI_CVP_sys {
+     lhs  DI_act_CVP_sys
+     case MAR {
+          condition      month == MAR
+
+          rhs            tot_del_cvp_n + tot_del_cvp_s + S_TRNTY(prevSEP) + S_SHSTA(prevSEP) + S_FOLSM(prevSEP) + S_SLUIS_CVP(prevSEP) }   !RLEAF-
+
+     case other {
+          condition      always
+          rhs            -1.0 }
+}
+
+! =============================== Set WSI values ===================================
+! The WSI values for the south and entire system are defined in the CVP_dellogic files.
+! We use March and April because of the conservative forecasts, 90% and 75% respectively.
+! May has a 50% exceedence level forecast so we don't use it for the curve generation.
+
+/* goal set_WSI_CVP_s {
+     lhs  WSI_act_CVP_s
+     case APR_MAY {
+          condition      month == APR .or. month == MAY
+          rhs            WSI_CVP_s }
+     case other {
+          condition      always
+          rhs            0.0 }
+}  */ !RLEAF-
+! Water Supply Index for Central Valley Project
+!Sum of CVP storages
+define WSI_CVP_Storage { std kind 'storage' units 'TAF' }
+
+!CVP San Luis storage to be set in cycle 6
+define CVP_SL { std kind 'storage' units 'TAF' }
+
+goal setWSI_CVP_Storage { WSI_CVP_Storage = S_TRNTY +
+                        S_SHSTA +
+                        S_FOLSM +
+                        S_SLUIS_CVP }  
+
+!CVP San Luis storage
+goal setCVP_SL { CVP_SL = S_SLUIS_CVP }
+
+define WSI_CVP_sys  {
+    case MarToMay {
+           condition  month >= MAR .and. month <= MAY
+           value      WSI_CVP_Storage(-1) + frcst_sac + frcst_amr + jbypass_del  !@jmg 2017.11.20 - CO update ! Previous month storage plus forecast inflow
+               }
+    case JunToFeb {
+           condition  always
+           value      0 }
+               }
+
+define WSI_CVP_sysdv {alias WSI_CVP_sys kind 'water-supply-index' units 'taf'}
+goal set_WSI_CVP_sys {
+     lhs  WSI_act_CVP_sys
+     case APR_MAY {
+          condition      month == APR .or. month == MAY
+          rhs            WSI_CVP_sys }
+     case other {
+          condition      always
+          rhs            -1.0 }
+}
+
+define erik_n {alias tot_del_cvp_n kind 'test' units 'taf'}
+define erik_s {alias tot_del_cvp_s kind 'test' units 'taf'}
+define erik_sdem {alias tot_dem_cvp_s kind 'test' units 'taf'}

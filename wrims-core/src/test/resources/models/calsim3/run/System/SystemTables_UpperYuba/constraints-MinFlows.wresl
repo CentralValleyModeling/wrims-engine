@@ -1,0 +1,91 @@
+/*
+File Name: constraints-minflows.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Middle Yuba River below Jackson Meadows Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Below Jackson Meadows Dam
+goal   C_JKSMDtotal     {C_JKSMD  = C_JKSMD_MIF + C_JKSMD_ADD}
+goal   set_C_JKSMD_MIF  {C_JKSMD_MIF < MF_JKSMD_BUFF}
+
+! Middle Fork Yuba River below 	Milton Diversion Dam
+goal   C_MFY044total {C_MFY044 = C_MFY044_MIF + C_MFY044_ADD}
+goal   set_C_MFY044_MIF {C_MFY044_MIF < MF_MFY044_BUFF}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Creek and Canyon Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! French Creek below French Dam 
+goal   C_FRNCHtotal  {C_FRNCH  = C_FRNCH_MIF + C_FRNCH_ADD}
+goal   set_C_FRNCH_MIF  {C_FRNCH_MIF  < MF_FRNCH_BUFF}
+
+! Canyon Creek below Bowman-Spaulding diversion dam 
+goal   C_CCS009total  {C_CCS009  = C_CCS009_MIF + C_CCS009_ADD}
+goal   set_C_CCS009_MIF  {C_CCS009_MIF  < MF_CCS009_BUFF}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Texas, Fall, Rucker Creeks !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Downstream lakes on Texas, Fall, Rucker Creeks (combined)
+goal   C_LCBRFtotal  {C_LCBRF  = C_LCBRF_MIF + C_LCBRF_ADD}
+goal   set_C_LCBRF_MIF  {C_LCBRF_MIF  < MF_LCBRF_BUFF}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Fordyce Creek and South Yuba River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Fordyce Creek below Fordyce Lake
+define C_FRDYC_LEAKAGE { !Doubled seepage rate to get better match with historical data. Need to check source if the seepage data
+	case LowStor {
+		condition S_FRDYC(-1) <= 0.386
+		!value min(I_FRDYC, S_FRDYC(-1) * 10.0)}
+		value min(I_FRDYC, S_FRDYC(-1) * 20.0)}
+	case HighStor {
+		condition always
+		!value 10.0 + (S_FRDYC(-1) - 0.386)/(50.3 - 0.386) * 14.0}
+		value 20.0 + (S_FRDYC(-1) - 0.386)/(50.3 - 0.386) * 14.0 * 2.}
+}
+define C_FRDYC_LEAKAGE_DV {alias C_FRDYC_LEAKAGE kind 'FLOW-LEAKAGE' units 'CFS'}
+
+goal   C_FRDYCtotal    {C_FRDYC  = C_FRDYC_LEAKAGE + C_FRDYC_MIF + C_FRDYC_ADD}
+goal   set_C_FRDYC_MIF {C_FRDYC_MIF  < MF_FRDYC_BUFF}
+
+! South Fork Yuba River below Lake Spaulding
+goal   C_SPLDGtotal  {C_SPLDG  = C_SPLDG_MIF + C_SPLDG_ADD}
+goal   set_C_SPLDG   {C_SPLDG_MIF  < MF_SPLDG_BUFF}
+
+! South Fork Yuba River below Langs Crossing 
+goal   C_SFY040total     {C_SFY040  = C_SFY040_MIF + C_SFY040_ADD}
+goal   set_C_SFY040_MIF  {C_SFY040_MIF  < MF_SFY040_BUFF}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deer Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Deer Creek Powerhouse Reach
+goal   C_SFD003total {C_SFD003 = C_SFD003_MIF + C_SFD003_ADD}
+goal   set_C_SFD003_MIF {C_SFD003_MIF < MF_SFD003}
+
+! Deer Creek below Deer Creek Dam - 5 cfs 
+goal   C_DER022total {C_DER022 = C_DER022_MIF + C_DER022_ADD}
+goal   set_C_DER022_MIF {C_DER022_MIF < MF_DER022}
+
+goal   C_DER011total {C_DER011 = C_DER011_MIF + C_DER011_ADD}
+goal   set_C_DER011_MIF {C_DER011_MIF < MF_DER011}
+
+! Deer Creek below Lake Wildwood - 5 cfs or natural flow, whichever is less
+goal   C_DER004total {C_DER004 = C_DER004_MIF + C_DER004_ADD}
+goal   set_C_DER004_MIF {C_DER004_MIF < MF_DER004}

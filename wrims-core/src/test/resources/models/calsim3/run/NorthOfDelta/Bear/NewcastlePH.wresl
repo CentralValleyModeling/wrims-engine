@@ -1,0 +1,29 @@
+/*
+NewcastlePH.wresl; 
+
+Purpose: Limit flows through the pwoerhosue based on historical data/operations.
+*/
+
+! average of 1996-2015 USGS 11425416 NEWCASTLE PP NR NEWCASTLE CA
+define MinSTH007 {
+        case Oct        {condition month == OCT value  58.}
+        case Nov        {condition month == NOV value  88.}
+!       case Dec        {condition month == DEC value 186 }
+!       case Jan        {condition month == JAN value 209.}
+!	case Feb        {condition month == FEB value 236.}
+!       case Mar        {condition month == MAR value 225.}
+!       case Apr        {condition month == APR value 192.}
+!	case May        {condition month == MAY value 116.}
+!	case Jun        {condition month == JUN value  57.}
+!	case Jul        {condition month == JUL value   6.}
+!	case Aug        {condition month == AUG value  14.}
+        case Sep        {condition month == Sep value  85.}
+        case Otherwise  {condition always value 0.}
+        }
+
+define C_STH007_MIF	{std kind'CHANNEL' units 'CFS'}
+define C_STH007_ADD	{std kind'CHANNEL' units 'CFS'}
+
+goal setC_STH007        {C_STH007 = C_STH007_MIF + C_STH007_ADD} !Flow through Newcastle Powerhouse)
+goal setC_STH007_MIF    {C_STH007_MIF < MinSTH007}
+goal setC_LBC049        {C_LBC049 =0.} !Lower Boardman Canal spill to Secret Ravine

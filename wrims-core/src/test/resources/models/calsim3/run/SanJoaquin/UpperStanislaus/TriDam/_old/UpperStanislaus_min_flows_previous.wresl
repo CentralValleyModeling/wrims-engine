@@ -1,0 +1,102 @@
+! TriDam and Sand Bar Projects minimum flow requirement
+! Chakri 02/26/08
+! *********************************************************************************
+
+! Middle Fork Stanislaus River below Donnells Lake (C_DONLL)
+! Minimum bypass flow requirement based on apr to july forecasted inflow to New melones reservoir
+define Donnell_bypass_flow {
+		case le350      {
+		     condition frcst_nmi <= 350
+		     value 25.  }
+		case gt350le676 {
+		     condition frcst_nmi > 350 .and. frcst_nmi <= 676
+		     value 25.  }
+		case gt676lt1585_1 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= oct .and. month <= jan
+		     value 40.  }
+		case gt676lt1585_2 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= feb .and. month <= jun
+		     value 40.  }
+		case gt676lt1585_3 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= jul .and. month <= aug
+		     value 45.  }
+		case gt676lt1585_4 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month == sep
+		     value 40.  }
+		case ge1585_1 {
+		     condition frcst_nmi >= 1585 .and. month == oct
+		     value 45.  }
+		case ge1585_2 {
+		     condition frcst_nmi >= 1585 .and. month >= nov .and. month <= jan
+		     value 40.  }
+		case ge1585_3 {
+		     condition frcst_nmi >= 1585 .and. month >= feb
+		     value 46.8  }
+		case ge1585_4 {
+		     condition frcst_nmi >= 1585 .and. month >= mar .and. month <= jun
+		     value 50.  }
+		case ge1585_5 {
+		     condition frcst_nmi >= 1585 .and. month >= jul .and. month <= sep
+		     value 60.  }
+		case other {
+		     condition always
+		     value 0.}
+			   }
+
+! Middle Fork Stanislaus River below Donnells Lake (C_DONLL)
+! Minimum supplementary flow requirement based on apr to july forecasted inflow to New melones reservoir
+
+define donnell_suppl_yt {select yeartype from Stanislaus_donnell_supplflow
+	                 where wateryear = wateryear}
+
+define Donnell_suppl_flow {
+  case critical_dry {
+	condition donnell_suppl_yt == 0
+	value 0.}
+  case yt3mar {
+	condition donnell_suppl_yt == 3 .and. month == MAR
+	value 23.1}
+  case yt3apr {
+	condition donnell_suppl_yt == 3 .and. month == APR
+	value 188.5}
+  case yt3may {
+	condition donnell_suppl_yt == 3 .and. month == MAY
+	value 56.2}
+  case yt4apr {
+	condition donnell_suppl_yt == 4 .and. month == APR
+	value 23.1}
+  case yt4may {
+	condition donnell_suppl_yt == 4 .and. month == MAY
+	value 188.5}
+  case yt4jun {
+	condition donnell_suppl_yt == 4 .and. month == JUN
+	value 56.2}
+  case yt5may {
+	condition donnell_suppl_yt == 5 .and. month == MAY
+	value 23.1}
+  case yt5jun   {
+	condition donnell_suppl_yt == 5 .and. month == JUN
+	value 188.5 }
+  case yt5jul   {
+	condition donnell_suppl_yt == 5 .and. month == JUL
+	value 56.2  }
+  case others  {
+	condition always
+	value 0.     }
+       }
+define Donnell_min_flow {std kind 'FLOW' units 'CFS'}
+
+goal setDonnell_min_flow {Donnell_min_flow = Donnell_bypass_flow + Donnell_suppl_flow}
+goal Donnel_min_release {C_DONLL_MIF < Donnell_min_flow}
+
+! Middle Fork Stanislaus River below Beardsley After Bay (C_MFS016)
+! Minimum flow requirement is based on new melones forcast for apr to july
+define MF_BAF_min_flow   {
+		case Drywateryear {
+		     condition frcst_nmi < 676 ! Dry WaterYear
+		     value 50.    }
+		case others       {
+		     condition always
+		     value 135.}
+			 }
+goal MF_BAF_min_release {C_MFS016_MIF < MF_BAF_min_flow}

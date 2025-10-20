@@ -1,0 +1,65 @@
+!NIDAllocation_Logic2.wresl
+
+!NID imposes dry-year deficiencies on customers based on the ditsrict's drought contingency plan
+!These deficincies are coded in NID_Allocation_Logic1.wresl
+
+
+! Bear System, limit NID deliveries based on drought contingency plan
+goal limit_24_NU3_deliveries {D_WSE004_24_NU3 < UD_24_NU3/(1.0-DLF_24_NU3) * Usage_Reduction_NID}
+goal limit_24_NA1_deliveries {D_ABN024_24_NA1 + D_WSE004_24_NA1 + D_CBC001_24_NA1 < Usage_Reduction_NID*(AWO_24_NA1*(1.0-RUFO_24_NA1+RPF_24_NA1) + AWR_24_NA1*(1.0-RUFR_24_NA1+RPF_24_NA1))*(1.0-GPmin_24_NA1)/(1.0-DLF_24_NA1) }
+
+define AW_24_NA1_wloss {alias ((AWO_24_NA1*(1.0-RUFO_24_NA1+RPF_24_NA1) + AWR_24_NA1*(1.0-RUFR_24_NA1+RPF_24_NA1)*(1.0-GPmin_24_NA1))/(1.0-DLF_24_NA1))  kind 'demand' units 'cfs'}
+
+
+! Limit NID purchased water deliveries at Wise PH to maximum contract amount, per NID-PG&E Consolidation Contract (pg. 26, Section B-12)
+goal monthly_PGE_purchases_Wise {
+	lhs D_WSE004_24_NU3_PGE + D_WSE004_24_NA1_PGE + D_STH000_ABN027_PGE
+		case Jan {
+			condition month==JAN
+			rhs 0.415 * taf_cfs * WaterYearConditions_NID_PGE * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Feb {
+			condition month==FEB
+			rhs 0.295 * taf_cfs * WaterYearConditions_NID_PGE * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Mar {
+			condition month==MAR
+			rhs 0.420 * taf_cfs * WaterYearConditions_NID_PGE * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Apr {
+			condition month==APR
+			rhs 1.010 * taf_cfs * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case May {
+			condition month==MAY
+			rhs 1.420 * taf_cfs * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Jun {
+			condition month==JUN
+			rhs 1.810 * taf_cfs * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Jul {
+			condition month==JUL
+			rhs (2.125 * taf_cfs * WaterYearConditions_NID_PGE + 2.125 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Aug {
+			condition month==AUG
+			rhs (2.010 * taf_cfs * WaterYearConditions_NID_PGE + 2.010 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Sep {
+			condition month==SEP
+			rhs (1.685 * taf_cfs * WaterYearConditions_NID_PGE + 1.685 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Oct {
+			condition month==OCT
+			rhs (0.870 * taf_cfs * WaterYearConditions_NID_PGE + 0.870 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Nov {
+			condition month==NOV
+			rhs (0.505 * taf_cfs * WaterYearConditions_NID_PGE + 0.505 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+		case Dec {
+			condition month==DEC
+			rhs (0.455 * taf_cfs * WaterYearConditions_NID_PGE + 0.455 * taf_cfs*(1-WaterYearConditions_NID_PGE)*min(1,Spaulding_Accumulated_Inflow/216.0)) * PGE_WY_Allocation
+			lhs<rhs penalty 0}
+	}

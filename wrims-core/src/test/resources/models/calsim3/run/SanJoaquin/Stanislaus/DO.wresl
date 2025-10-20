@@ -1,0 +1,56 @@
+/*
+Summary
+-------
+The purpose of this module is to calculate the required New Melones release to
+satisfy the Stanislaus Dissolved Oxygen requirement between June and September
+[1]_ calculated in SJR_WQ1 (CYCLE7).
+
+Acronyms
+--------
+DO          Dissolved Oxygen
+
+References
+----------
+The references below are formatted according to Chicago Manual of Style, 16th
+Edition.
+
+.. [1] 'Drought Stressor Monitoring Case Study: Dissolved Oxygen Monitoring in
+   the San Joaquin and Stanislaus Rivers.' CDFW Prod. Accessed September 11,
+   2019. https://www.wildlife.ca.gov/Drought/Projects/San-Joaquin.
+
+*/
+! Select DO requirement from lookup table.
+define DO_req {
+   /*case ConfCrit {
+        condition wyt_SJR_stan > 4.5 !NMforecast1 < 940.
+        select ReqCrit from DO where month = month } */
+   case otherwise {
+        condition  always
+        select Req from DO where month = month }
+}
+define DO_req_dv {alias DO_req kind 'DO-flow-req' units 'taf'}
+! Define DO flow release requirement from New Melones.
+define DO_req_rel {
+   case JunthruSep {
+        condition month >= JUN .and. month <= SEP
+        value max( (  DO_req * TAF_cfs
+             /*       - WQ_reduced_min_def */ ! Needs to be commented out since WQ releases are not being made -TF 081920
+                    - C_STS059[SJRBASE_GW4] ),
+                  0. ) }
+   case otherwise {
+        condition   always
+        value       0.
+   }
+}
+! Calculate actual DO release from New Melones.
+goal releaseforDO {
+   lhs  C_MELONDO
+   case JunthruSep {
+        condition month >= JUN .and. month <= SEP
+        rhs DO_req_rel
+        lhs < rhs penalty 18999999. }
+   case otherwise {
+        condition always
+        rhs 0.
+        lhs < rhs penalty 0 }
+}

@@ -1,0 +1,115 @@
+/*
+JKSMD.wresl; 
+
+Purpose: Implement restrictions on Jackson Meadows operations
+
+•	In the recent past, NID and PG&E have not operated to the 1963 consolidated contract.
+
+•	Pending NID-PG&E agreement is still confidential, but annual bridging agreements are not.  The agreements will be similar to the pending agreement,
+        and will give insights into how NID operates currently that is different from the consolidated contract.
+        New agreement is expected to be submitted to the PUC in 1-3 months, and approximately 1 additional year to get approval.
+        It may or may not be considered “public” after submission to the PUC.
+
+•	Regulated flow below Jackson Meadows R. is allowed two regs up and two regs down per year (excluding spill). 
+        Reg up #1 occurs at the tail end of the spring runoff in April or May.  Reg up #2 as needed (kept on reserve).
+        Reg down #2 occurs mid-September, down to 80-110 cfs.  Reg down #2 occurs in mid-December, down to 10 cfs.
+        
+•	Milton-Bowman tunnel is occasionally closed during high flow events.  Often depends on access.
+
+•	French/Faucherie/Sawmill are drawn down after labor day to ½ storage, each.
+
+•	Drought management plan carryover storage is lower that what NID prefers to operate to.
+	          Jackson Meadows end of December storage target is 35 TAF.
+	          Bowman target is 35 TAF.
+	          French/Faucherie/Sawmill combined target is 10 TAF.
+	          
+•	When Spaulding spills, NID has priority to Drum Canal capacity equivalent to Bowman-Spaulding Canal capacity.
+
+•	Bowman-Spaulding Canal capacity limited to 250 cfs in winter, based on winter ops plan.
+
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! JACKSON MEADOWS    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define JKSMDTargetReleaseSV {std kind 'FLOW' units 'CFS'} 
+
+define JKSMDTargetRelease {
+     case May {   
+     	          condition month == MAY .and. S_JKSMD(-1) > S_JKSMDlevel3
+                   value max(min(125.0*(S_JKSMD(-1) + I_JKSMD*cfs_taf - S_JKSMDlevel3)/(S_JKSMDlevel5 - S_JKSMDlevel3),
+                   (S_JKSMD(-1) + I_JKSMD*cfs_taf - 35.0)*taf_cfs/5),0.0)}
+                   
+     case JunSep {
+     	          condition month >= JUN .and. month <= SEP
+                  value JKSMDTargetReleaseSV(-1)}    
+     case FallFirstYear {
+                  condition month==OCT .and. wateryear == BgnWY .and. S_JKSMD(-1) > S_JKSMDlevel3
+                  value max ((S_JKSMD(-1)- 35.0)*taf_cfs/2,0.0) }
+                  ! value (S_JKSMD(-1)- 35.0)*taf_cfs/2  } ! Jay
+     case LateFallFirstYear {
+                  condition month==NOV .and. wateryear == BgnWY .and. S_JKSMD(-1) > S_JKSMDlevel3
+                  ! value (S_JKSMD(-1)- 35.0)*taf_cfs  } !Jay
+                  value max((S_JKSMD(-1)- 35.0)*taf_cfs ,0.0) }
+     case Fall {
+                  condition month==OCT .and. S_JKSMD(-1) > S_JKSMDlevel3
+                  value max(max(MF_JKSMD_BUFF, MF_MFY044_BUFF),min((S_JKSMD(-1)- 35.0)*taf_cfs/2,JKSMDTargetReleaseSV(-1)))  }
+     case LateFall {
+                  condition month==NOV .and. S_JKSMD(-1) > S_JKSMDlevel3
+                  value JKSMDTargetReleaseSV(-1)  }                        
+     case Winter {
+                  condition always
+                  value max(MF_JKSMD_BUFF, MF_MFY044_BUFF)}
+          }  
+          
+goal setJKSMDTargetRelease {JKSMDTargetReleaseSV=JKSMDTargetRelease}
+
+goal setC_JKSMD {
+     lhs C_JKSMD
+     case Spill {
+                  condition S_JKSMD(-1) + I_JKSMD*cfs_taf - JKSMDTargetRelease*cfs_taf > S_JKSMDlevel5
+                  rhs S_JKSMD(-1)*taf_cfs + I_JKSMD - E_JKSMD - S_JKSMDlevel5*taf_cfs
+          lhs>rhs penalty 99999
+          lhs<rhs penalty 99999}
+     case otherwise {
+                  condition always
+                  rhs JKSMDTargetRelease
+          lhs>rhs penalty 99999
+          lhs<rhs penalty 99999}
+          }
+
+                    
+define C_JKSMD_SPILL      {lower 0 upper 99999 kind 'CHANNEL' units 'CFS'}
+define C_JKSMD_REGULATED  {lower 0 upper 99999 kind 'CHANNEL' units 'CFS'}
+goal setJKSMDRelease      {C_JKSMD = C_JKSMD_REGULATED + C_JKSMD_SPILL}
+
+goal setC_MFY045 {C_MFY045 > 0.45*C_JKSMD_SPILL} !0.45 is a calibration factor so that average annual flow below Milton Dam matches historical data (1986-2015)
+
+goal setSpill3 {C_JKSMD_Spill*cfs_taf > I_JKSMD*cfs_taf + S_JKSMD(-1) - S_JKSMDlevel5 - E_JKSMD*cfs_taf - JKSMDTargetRelease*cfs_taf}
+
+goal temp {S_JKSMD < S_JKSMDlevel5}
+
+
+
+
+          
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! BOWMAN-SPAULDING TUNNEL    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*goal BSCMax {												
+     lhs C_BSC000
+     case Winter {
+                  condition month>=NOV .and. month<=MAR
+                  rhs 250.
+                  lhs<rhs penalty 0}
+     case other {
+                  condition always
+                  rhs 325.
+                 lhs<rhs penalty 0}
+          }     */
+          
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! MILTON-BOWMAN TUNNEL    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal MBTMax {C_MBT005 < 300} ! Based on observed data

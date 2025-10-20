@@ -1,0 +1,18 @@
+!!!  CHO to GCID minimum flows
+
+define cho_gcid_min {select flow
+                  from   cho_gcid_min
+                  where  month=month}
+
+define cho_gcid_adj_min {
+	case tcca_alloc {
+		condition alloc_tcca <= 0.0
+		value 0.0 }
+	case otherwise {
+		condition always
+		value cho_gcid_min }
+		}
+
+define MF_STN014 {alias cho_gcid_adj_min kind 'flow-min-required' units 'cfs'}
+
+goal meet_chomin {C_STN014_mif < MF_STN014}

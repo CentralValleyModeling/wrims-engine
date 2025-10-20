@@ -1,0 +1,257 @@
+/**************************************************************************************/
+!  ERP Cottonwood/Willow establishment action
+!
+!  Modify spring flows into a “snowmelt pattern” in years with peak storm events in late-winter and early-spring - Red Bluff to Colusa
+!  The snowmelt pattern would be designed to increase the success of cottonwood cohorts specifically
+!
+/***************************************************************************************/
+!
+! This first section is for implementation of a Static Cottonwood Establishment Flow criteria
+!
+define Cottonwood_trig1 {
+    case ShastaColdOffRamp {
+        condition  S1(-1) + S4(-1) < ColdStorTarg
+        value 0.}
+    case CritCondOffRamp {
+        condition wyt_NODOS + prev_wyt_SAC >= 8
+        value 0.}
+    case other {
+        condition always
+        value 1.}
+        }
+define Cottonwood_flow1 {
+    case Apr {
+        condition month == APR .and. Cottonwood_trig1 == 1
+        select AprCotton from NODOS_FlowSelect where Year=wateryear }
+    case May {
+        condition month == MAY .and. Cottonwood_trig1 == 1
+        select MayCotton from NODOS_FlowSelect where Year=wateryear }
+    case rest {
+        condition always
+        value  0.}
+        }
+!
+! This second section is for implementation of a Dynamic Cottonwood Establishment Flow trigger mechanism
+!
+define CottonTrigValDV {std kind 'TRIGGER-FLOW' units 'CFS'}
+define CottonTrigVal{
+    case calcAprTrigger {
+        condition month == APR
+!        value max(C109[MONTHLYWEIGHTED],C109(-1)/2.+C109[MONTHLYWEIGHTED]/2.)}
+        value max(C109__Z4,C109(-1)/2.+C109__Z4/2.)}
+    case calcMayTrigger {
+        condition month == MAY
+        value CottonTrigValDV(-1)}
+    case rest {
+        condition always
+        value 0.}
+}
+goal saveCottonTrigVal {CottonTrigValDV=CottonTrigVal}
+!
+define Cottonwood_trig2 {
+    case checkTwoMonth {
+    condition CottonTrigVal > 20000.
+    value 2.}
+    case checkOneMonth {
+    condition CottonTrigVal > 14000.
+    value 1.}
+    case other {
+        condition always
+        value 0.}
+}
+!
+define Cottonwood_Week2 {select Week2 from NODOS_CottonwoodDynamic given trigger=CottonTrigVal use linear}
+define Cottonwood_Week4 {select Week4 from NODOS_CottonwoodDynamic given trigger=CottonTrigVal use linear}
+define Cottonwood_Week6 {select Week6 from NODOS_CottonwoodDynamic given trigger=CottonTrigVal use linear}
+define Cottonwood_Week8 {select Week8 from NODOS_CottonwoodDynamic given trigger=CottonTrigVal use linear}
+!
+define Cottonwood_flow2 {
+    case Apr {
+        condition month == APR .and. Cottonwood_trig2 > 0
+!        value max(Cottonwood_Week2/2. + Cottonwood_Week4/2. - C114[MONTHLYWEIGHTED],1.) }
+        value max(Cottonwood_Week4/2. + Cottonwood_Week6/2. - C114__Z4,1.) }
+    case May {
+        condition month == MAY .and. Cottonwood_trig2 > 1
+!        value max(Cottonwood_Week6/2. + Cottonwood_Week8/2. - C114[MONTHLYWEIGHTED],1.) }
+        value max(Cottonwood_Week6/2. + Cottonwood_Week8/2. - C114__Z4,1.) }
+    case rest {
+        condition always
+        value  0.}
+        }
+!
+! Implement Cottonwood/Willow establishment action
+!
+define ERP_C5_Cotton {
+       case Static {
+            condition FlowSelect == 1 .and. Cottonwood_trig1 > 0 .and.
+                      Cottonwood_flow1 > 100.  .and. month >= APR .and. month <= MAY
+            value Cottonwood_flow1 }
+       case Dynamic {
+            condition FlowSelect == 2 .and. Cottonwood_trig2 > 0 .and.
+                      Cottonwood_flow2 > 100.  .and. month >= APR .and. month <= MAY
+!            value C5[MONTHLYWEIGHTED] + Cottonwood_flow2 -
+!                  D112[MONTHLYWEIGHTED]/2. - D114[MONTHLYWEIGHTED]/2. }
+            value C5__Z4 + Cottonwood_flow2 -
+                  D112__Z4/2. - D114__Z4/2. }
+       case Zero {
+            condition always
+            value  0. }
+           }
+define ERP_C114_Cotton {
+       case Static {
+            condition FlowSelect == 1 .and. Cottonwood_trig1 > 0 .and.
+                      Cottonwood_flow1 > 100. .and. month >= APR .and. month <= MAY
+            value Cottonwood_flow1 }
+       case Dynamic {
+            condition FlowSelect == 2 .and. Cottonwood_trig2 > 0 .and.
+                      Cottonwood_flow2 > 100. .and. month >= APR .and. month <= MAY
+!            value C114[MONTHLYWEIGHTED] + Cottonwood_flow2 }
+            value C114__Z4 + Cottonwood_flow2 }
+       case Zero {
+            condition always
+            value  0. }
+           }
+!
+/***************************************************************************************/
+!  Keswick supplemental flow event
+!
+!  Supplement flows from Shasta and Keswick Dams in March during years when no flow event has occurred (provided only when
+!  sufficient inflow to Lake Shasta is available; add 8,000 – 10,000 cfs in dry years and add 15,000 – 20,000 cfs in below normal years)
+!
+/***************************************************************************************/
+!
+define KesSupplmnt_flow {select MarKesSup from NODOS_FlowSelect where Year=wateryear}
+define KesSupp_thresh {value 2500. + KesSupplmnt_flow}                                    !Assuming input on the high side of range desired
+
+define DecKesCheck {case Mar {condition month==MAR value min(C109(-3),KesSupp_thresh)}    !Using bend bridge as the checkpoint for this
+            case Not {condition always value 0.}}
+define JanKesCheck {case Mar {condition month==MAR value min(C109(-2),KesSupp_thresh)}    !Assuming input on the high side of range desired
+            case Not {condition always value 0.}}
+define FebKesCheck {case Mar {condition month==MAR value min(C109(-1),KesSupp_thresh)}
+            case Not {condition always value 0.}}
+
+define ERP_C5_Supplmnt {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S4(-1) < ColdStorTarg
+            value 0.}
+       case CritCondOffRamp {
+            condition wyt_NODOS + prev_wyt_SAC >= 8
+            value 0.}
+       case NoSupply {
+            condition  min(S32(-1),ERPStorReserve)*taf_cfs*0.75 < KesSupplmnt_flow
+            value 0.}
+       case Action {
+            condition FlowSelect >= 1 .and. KesSupplmnt_flow > 100. .and.
+                      month == MAR .and. max(DecKesCheck,JanKesCheck,FebKesCheck) < KesSupp_thresh
+            value C5__Z4 + KesSupplmnt_flow}
+       case Zero {
+            condition always
+            value  0. }
+           }
+!
+/***************************************************************************************/
+!  March Delta outflow event
+!
+!  Provide a March Delta outflow that occurs from the natural late-winter and early-spring peak inflow from the Sacramento River
+!  (10 days at 20,000 CFS in dry, 30,000 cfs in below-normal, and 40,000 cfs in above-normal water years)
+!  (code applies target flow = selected flow x 10/days in month + base flow x (days in month - 10)/days in month)
+!
+/***************************************************************************************/
+!
+define MarDelta_peak10d {select MarDelta from NODOS_FlowSelect where Year=wateryear}
+
+define MarDelta_flow {value max(C406__Z4,MarDelta_peak10d)*10./daysin + C406__Z4*(daysin-10.)/daysin}
+define SacDelta_addflow {value max(MarDelta_flow - C406__Z4,0.)}
+
+define ERP_C129_Delta {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S4(-1) < ColdStorTarg
+            value 0.}
+       case CritCondOffRamp {
+            condition wyt_NODOS + prev_wyt_SAC >= 8
+            value 0.}
+       case NoSupply {
+            condition  min(S32(-1),ERPStorReserve)*taf_cfs*0.75 < SacDelta_addflow
+            value 0.}
+       case Action {
+            condition FlowSelect >= 1 .and. SacDelta_addflow > 100. .and. month == MAR
+            value C129__Z4 + SacDelta_addflow}
+       case Zero {
+            condition always
+            value  0. }
+           }
+define ERP_NDOI_MIN_Delta {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S4(-1) < ColdStorTarg
+            value 0.}
+       case CritCondOffRamp {
+            condition wyt_NODOS + prev_wyt_SAC >= 8
+            value 0.}
+       case NoSupply {
+            condition  min(S32(-1),ERPStorReserve)*taf_cfs*0.75 < SacDelta_addflow
+            value 0.}
+       case Action {
+            condition FlowSelect >= 1 .and. SacDelta_addflow > 100. .and. month == MAR
+            value MarDelta_flow}
+       case Zero {
+            condition always
+            value  0. }
+           }
+!
+/***************************************************************************************/
+!   May Freeport flow event
+!
+!  Provide a minimum flow of 13,000 cfs on the Sacramento River below Sacramento in May of all but critical years
+!
+/***************************************************************************************/
+!
+define MayFreeport_flow {select MayFreeport from NODOS_FlowSelect where Year=wateryear}
+define SacFree_addflow  {value max(MayFreeport_flow - C169__Z4,0.)}
+
+define ERP_C129_SacFree {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S4(-1) < ColdStorTarg
+            value 0.}
+       case CritCondOffRamp {
+            condition wyt_NODOS + prev_wyt_SAC >= 8
+            value 0.}
+       case NoSupply {
+            condition  min(S32(-1),ERPStorReserve)*taf_cfs*0.85 < SacFree_addflow
+            value 0.}
+       case Action {
+            condition FlowSelect >= 1 .and. SacFree_addflow > 100. .and. month == MAY
+            value C129__Z4 + SacFree_addflow}
+       case Zero {
+            condition always
+            value  0. }
+           }
+define ERP_C169_SacFree {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S4(-1) < ColdStorTarg
+            value 0.}
+       case CritCondOffRamp {
+            condition wyt_NODOS + prev_wyt_SAC >= 8
+            value 0.}
+       case NoSupply {
+            condition  min(S32(-1),ERPStorReserve)*taf_cfs*0.85 < SacFree_addflow
+            value 0.}
+       case Action {
+            condition FlowSelect >= 1 .and. SacFree_addflow > 100. .and. month == MAY
+            value MayFreeport_flow}
+       case Zero {
+            condition always
+            value  0. }
+           }
+!
+/***************************************************************************************/
+define ERP_C5MIF_Habt {value max(ERP_C5_Cotton,ERP_C5_Supplmnt)}
+define ERP_C129MIF    {value max(ERP_C129_Delta,ERP_C129_SacFree)}
+define ERP_C114MIF    {value ERP_C114_Cotton}
+define ERP_C169MIF    {value ERP_C169_SacFree}
+define ERP_NDOI_MIN       {value ERP_NDOI_MIN_Delta}
+!
+define ERP_C5MIF_Habtdv {alias ERP_C5MIF_Habt kind 'FLOW-TARGET' units 'CFS'}
+define ERP_C129MIFdv    {alias ERP_C129MIF kind 'FLOW-TARGET' units 'CFS'}
+define ERP_C114MIFdv    {alias ERP_C114MIF kind 'FLOW-TARGET' units 'CFS'}
+define ERP_C169MIFdv    {alias ERP_C169MIF kind 'FLOW-TARGET' units 'CFS'}
+define ERP_NDOI_MINdv       {alias ERP_NDOI_MIN kind 'FLOW-TARGET' units 'CFS'}

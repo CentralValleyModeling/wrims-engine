@@ -1,0 +1,128 @@
+/*
+CalSim 3.0
+PCWAZone3.wresl
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Boardman Canal    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Canal water is derived from two sources:
+   - Alta Powerhouse Tailrace (measued at YB184)
+   - Pulp Mill Canal (measured at YB95) conveys water from Canyon Creek to the lower Boardman Canal
+Diverted water flow via the Pulp Mill Canal into Lake Alta, where it is stored or released for use in Zone 1 or Zone 3.
+
+   
+PG&E WATER   
+The Towle Canal conveys PG&E water to PCWA
+
+PG&E also uses Canyon Creek to transport water to their Towle Canal diversion upstream of this point.  There is a minimum instream flow requirement 
+upstream of YB 95 of 1 cfs. The instream flow water is provided by PG&E at no cost to PCWA.
+
+YB184 at the head of the lower Boarman Canal/Alta Tailrace Canal is the only PG&E buy point for all of Zone 3.
+The Towle Canal also directly delivers water to PCWA Alta WTP. This water is not included in YB184.
+
+During the annual Towle Canal outage, PG&E will deliver water into Zone 3 from Canyon Creek.  PCWA is charged for this water, less natural flows, 
+during the outage (normally in May). PCWA will also take delivery of water at YB 95 during the annual Zone 1 PG&E outage (Usually in October). PCWA is charged for this water.
+All other natural flows and PG&E abandoned water in Canyon Creek, up to 40 cfs, less instream flow maintenance, are available for PCWA diversion.
+   
+PCWA WATER RIGHT WATER
+PCWA has water rights transferred to them from PG&E as part of the purchase of the Zone 3 water system.  This right is for the diversion, up to
+40 cfs from Canyon Creek, near Alta, for use in western Placer County. Water is diverted into the Pulp Mill Canal and recorded at PG&E YB95
+the monthly flow records are available from PG&E to determine the amounts of diverted water for annual reporting to DWR.
+
+The Pulp Mill Canal conveys PCWA water right water (up to 40 cfs) 
+The Pulp Mill Canal is also used during PG&E outage of the Towle Canal in May/June
+
+
+ZONE 3 TO ZONE 1
+The lower Boardman Canal conveys water from Zone 3 to Zone 1 only during PG&E outage on the Bear River Canal.
+This outage typically occurs Mid-October to mid-November.
+
+
+ZONE 3 WATER USE
+Total raw water use is approximately 10 TAF/year
+Treated water use is less than 1 TAF/year.
+
+PCWA assume a 25% water loss due to infiltration, theft and evaporation as the water is conveyed to Lake Theodore
+
+
+1982 PG&E - PCWA CONTRACT
+1) PG&E will supply water for system consumption use only up to a limit of 25 TAF/year at a maximum delivery rate of 38 cfs.
+
+2) All deliveries of water by PG&E shall be made at Alta tailrace (yb 184) and at Alta forebay, with deliveries at the Alta forebay
+   limited to those amounts necessary to meet the consumptive uses of the Alta town system.
+   
+3) No charge shall ever be made by PG&E for water deliveries until such deliveries exceed 13,000 af in any water year. Buyer shall pay price
+   subject to power value as established by CPUC as paid to small power producers for water delivered by PG&E in excess of 13 TAF annually.
+   
+4) In the event that PCWA operates the system to decrease delivery requirements below 11 TAF/year, PG&E will credit PCWA per price set by CPUC
+   for each acre foot of water less than 11 TAF which is not delivered by PG&E.
+   
+5) PCWA acquired all water rights solely for consumptive use associated with the system including (i) Lake Arthur, (ii) Lake Theodore and
+  (iii) Canyon Creek at Pulp Mill Canal Diversion (these were clarified to be pre 1914 appropriative rights (letter dated dec. 9, 1982).
+
+*/
+
+! Towle Canal Outage
+goal TowleCanalOutage {
+	lhs C_TWL005
+		case May {
+			condition month==MAY
+			rhs 0.5*42.
+			lhs<rhs penalty 0}
+		case Other {
+			condition always
+			rhs 42.
+			lhs<rhs penalty 0}
+			}
+			
+! Towle Canal conveyance of PG&E water
+goal TowleCanal {
+	lhs C_TWL005
+		case May {
+			condition month==MAY
+			rhs 0.5*D_DRM009_CYN010
+			lhs>rhs constrain
+			lhs<rhs constrain}
+		case Other {
+			condition always
+			rhs D_DRM009_CYN010
+			lhs>rhs constrain
+			lhs<rhs constrain}
+			}			
+
+! Limit Zone 3 to Zone 1 lower Boardman Canal flows to 50% of capacity (40 cfs) in October to November to simulate annual 2-week outage on Bear River Canal.
+! If the water is transported into Zone 1, it is either stored in Lake Theodore (LBC031) and released to Zone 1 as a constant flow, or allowed to spill into Zone 1.
+! Water inflows are recorded at YB 66, upstream of Lake Theodore.
+! Any flows above 1 cfs (PG&E carry water) are considered canon creek inflows during the times that water is being diverted at Canyon Creek
+
+goal BearRiverCanal_Outage {
+	lhs C_LBC010
+		case OctNov {
+			condition month==OCT .or. month==NOV
+			rhs 0.5*40
+			lhs<rhs penalty 0}
+		case Other {
+			condition always
+			rhs 0.0
+			lhs<rhs penalty 0}
+			}
+			
+! Conveyance loss
+! Power Contract assumes 8.2% loss
+! PCWA (Randy Cox) assumes 25% loss
+goal setD_LBC001_LBCLOS {D_LBC001_LBCLOS = 0.25*D_LBR002_LBC001 + 0.25*D_CYN009_LBC001}
+
+
+
+
+
+
+  
+
+
+
+ 
+

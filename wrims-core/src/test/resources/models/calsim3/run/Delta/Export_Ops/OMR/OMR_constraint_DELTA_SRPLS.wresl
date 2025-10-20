@@ -1,0 +1,144 @@
+! OMR_constraint.wresl
+!
+! **********************************************************************************************
+define OMR_RPA {value max(OMR_RPA_FWS,OMR_RPA_LF)}
+!
+
+! How much of CCWD estimated demand will impact OMR flows?
+define CCWDFraction {value (D408_OR_max + D408_VC_max)/(D408_RS_max + D408_OR_max + D408_VC_max)}
+define Qsod_noExp { value 0. + D408D416_est*CCWDFraction + netDICU_SOD}
+
+! Action triggers
+define C_OMR014_limit_init {
+     case DEC_MAR{
+          condition month>=DEC .and. month<=MAR .and. OMR_RPA >= -12000.
+          value OMR_RPA}
+     case Apr{
+          condition month==APR .and. OMR_RPA >= -12000.
+!  doing full 60 day NMFS Action at the pumps so this calc does not matter
+!          value OMR_RPA*14./daysin + max(Qomr_VAMPperiod,OMR_RPA)*(daysin-14.)/daysin}
+          value OMR_RPA}
+     case May{
+          condition month==MAY .and. OMR_RPA >= -12000.
+!  doing full 60 day NMFS Action at the pumps so this calc does not matter
+!          value max(Qomr_VAMPperiod,OMR_RPA)*15./daysin + OMR_RPA*(daysin-15.)/daysin}
+          value OMR_RPA}
+     case Jun{
+          condition month==JUN .and. OMR_RPA >= -12000.
+          value OMR_RPA}
+     case otherwise{
+          condition always
+          value -99999.}
+}
+!
+! **********************************************************************************************
+!
+define Qsod_HandS { value max(tracyminpump + banksminpump,HandS_minpump) + D408D416_est*CCWDFraction + netDICU_SOD}
+define Qomr_HandS { value coefA*C_SJR070est+coefb*Qsod_HandS+coefc} 
+define Qomr_HandSdv {alias Qomr_HandS kind 'FLOW-CHANNEL' units 'CFS'}
+define Qomr_noExp { value coefA*C_SJR070est+coefb*Qsod_noExp+coefc} 
+define Qomr_noExpdv {alias Qomr_noExp kind 'FLOW-CHANNEL' units 'CFS'} 
+define C_OMR014_limit {value min(C_OMR014_limit_init,Qomr_HandS)}
+!define C_OMR014_limit {value min(C_OMR014_limit_init,Qomr_noExp)}
+define C_OMR014_LBound  {alias C_OMR014_limit kind 'FLOW-LBOUND' units 'CFS'}
+!
+goal bound_Qomr { C_OMR014 > C_OMR014_limit }
+!
+! Split arcs and Goals to force impacts of actions at pumps
+!*********************************************************************************************
+! C_OMR014_Base represents the OMR flow not including COA related pumping at Banks or Tracy
+define C_OMR014_NoEXP1  {lower -99999*taf_cfs upper 99999*taf_cfs kind 'FLOW-CHANNEL' units 'CFS'}
+goal set_C_OMR014NoEXP1 {C_OMR014_NoEXP1 - C_OMR014 = C_CAA003_EXP1_TD + C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SB_E1 + D408_P_WHL_SF_E1}
+
+!Calculate how much OMR flow needs to be increased from
+!the UPSTREAM cycle in order to meet the OMR flow criteria.
+define OMR_increase {value max(0., C_OMR014_limit - C_OMR014[UPSTREAM])}
+
+!Calculate the amount exports must be decreased from 
+!the UPSTREAM cycle in order to achieve the OMR flow increase calculated above.
+define Export_dec {value max(0.,-OMR_increase/coefB)}
+
+!5/9/19 Revised code to assign available export capacity, instead of assigning portion of export reduction met by each project.
+!5/9/19 This formulation allows for experimenting with other than 50/50 sharing of available export capacity.
+
+!If SWP exports in the UPSTREAM cycle were greater than CVP exports, 
+!the first decrease will be applied to SWP exports until OMR is met
+!or SWP exports equal CVP exports.
+!define SWP_exp_dec {value max(0.,min(Export_dec, C_CAA003_swp_TD[UPSTREAM] - C_DMC000_TD[UPSTREAM]
+!                          - C_CAA003_CVPDEDEX1TD[UPSTREAM] /*- D408_P_WHL_SB_E1[UPSTREAM] - D408_P_WHL_SF_E1[UPSTREAM]*/))}
+
+!If CVP exports in the UPSTREAM cycle were greater than SWP exports, 
+!the first decrease will be applied to CVP exports until OMR is met
+!or CVP exports equal SWP exports.
+!define CVP_exp_dec {value max(0.,min(Export_dec, C_DMC000_TD[UPSTREAM] + C_CAA003_CVPDEDEX1TD[UPSTREAM] 
+!                              /*+ D408_P_WHL_SB_E1[UPSTREAM] + D408_P_WHL_SF_E1[UPSTREAM] */- C_CAA003_swp_TD[UPSTREAM]))}
+
+!Once exports are equal and if further cuts to exports must be made, 
+!cuts will be made equally by this combined amount.
+!define Comb_exp_dec {value max(0., Export_dec - SWP_exp_dec - CVP_exp_dec)}
+
+define MAXEXP_OMR {value max(EXP_TD[UPSTREAM] - Export_dec, (1-max(JonesIFSwitch,BanksIFSwitch)) * Qomr_HandS)}
+
+define MAXEXP_OMR_CVP_Init {value CVPExpCapShare_Srpls*MAXEXP_OMR}
+define MAXEXP_OMR_SWP_Init {value SWPExpCapShare_Srpls*MAXEXP_OMR}
+
+define Unused_MAXEXP_OMR_CVP {value max(0., MAXEXP_OMR_CVP_Init - C_DMC000_TD[UPSTREAM])}
+define Unused_MAXEXP_OMR_SWP {value max(0., MAXEXP_OMR_SWP_Init - C_CAA003_swp_TD[UPSTREAM])}
+
+define MAXEXP_OMR_CVP {value max(tracyminpump,min(C_DMC000_TD[UPSTREAM], MAXEXP_OMR_CVP_Init) + Unused_MAXEXP_OMR_SWP)}
+define MAXEXP_OMR_SWP {value max(banksminpump,min(C_CAA003_swp_TD[UPSTREAM], MAXEXP_OMR_SWP_Init) + Unused_MAXEXP_OMR_CVP)}
+
+define OMR_increase_ {alias OMR_increase kind 'temp' units 'cfs'}
+define Export_dec_   {alias Export_dec kind 'temp' units 'cfs'}
+define MAXEXP_OMR_   {alias MAXEXP_OMR kind 'temp' units 'cfs'}
+
+define MAXEXP_OMR_SWP_Initdv {alias MAXEXP_OMR_SWP_Init kind 'TEMP' units 'CFS'}
+define Unused_MAXEXP_OMR_SWPdv {alias Unused_MAXEXP_OMR_SWP kind 'TEMP' units 'CFS'}
+define MAXEXP_OMR_SWPdv {alias MAXEXP_OMR_SWP kind 'EXPORT-LIMIT' units 'CFS'}
+
+define MAXEXP_OMR_CVP_Initdv {alias MAXEXP_OMR_CVP_Init kind 'TEMP' units 'CFS'}
+define Unused_MAXEXP_OMR_CVPdv {alias Unused_MAXEXP_OMR_CVP kind 'TEMP' units 'CFS'}
+define MAXEXP_OMR_CVPdv {alias MAXEXP_OMR_CVP kind 'EXPORT-LIMIT' units 'CFS'}
+
+!define SWP_exp_dec_  {alias SWP_exp_dec kind 'temp' units 'cfs'}
+!define CVP_exp_dec_  {alias CVP_exp_dec kind 'temp' units 'cfs'}
+!define Comb_exp_dec_ {alias Comb_exp_dec kind 'temp' units 'cfs'}
+
+/*
+goal bound_C_CAA003 {
+  lhs     C_CAA003_EXP1_TD + D408_P_WHL_SB_E1
+  case FWSBOActions{
+  condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}
+!
+goal bound_C_DMC000 {
+  lhs     C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SF_E1
+  case FWSBOActions{
+    condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}*/
+
+!Implement shared export capacity under the OMR constraint for SWP exports.
+goal bound_C_CAA003 {
+  lhs     C_CAA003_swp_TD
+  case FWSBOActions {
+  condition   month>=dec .and.  month<=jun 
+    rhs     MAXEXP_OMR_SWP
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}
+
+!Implement shared export capacity under the OMR constraint for CVP exports.
+goal bound_C_DMC000 {
+  lhs     C_DMC000_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SF_E1
+  case FWSBOActions {
+    condition   month>=dec .and.  month<=jun    
+    rhs     MAXEXP_OMR_CVP
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}

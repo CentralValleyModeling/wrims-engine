@@ -1,0 +1,277 @@
+/*
+Program:    Flow Management Plan Input Calculations
+Description:    The purpose of this module is to calculate inputs for the following files:
+            FMStandard.wresl
+            FolRuleCurv.wresl
+*/
+
+
+
+!=================================================================================================
+!FOLSM  - Folsom Inflow Forecasts
+!=================================================================================================
+!Define target storage for upstream reservoirs (from prevuious mode run)
+define MFPForecastRelease  {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+define UARPForecastRelease {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+define P184ForecastRelease {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+/*
+define AmerFrcstInflowOctMar {              
+        case OCT_MAR {condition month >= OCT .or. month <= MAR
+                  value  UNIMP_FOLS + MFPForecastRelease + UARPForecastRelease + P184ForecastRelease}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarApr {
+        case MAR_APR {condition month >= MAR .and. month <= APR
+                  sum(i=-(month-MAR),APR-month,1) UNIMP_FOLS(i) + MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarMay {
+        case MAR_May {condition month >= MAR .and. month <= MAY
+                  sum(i=-(month-MAR),MAY-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarJun {
+        case MAR_JUN {condition month >= MAR .and. month <= JUN
+                  sum(i=-(month-MAR),JUN-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarJul {
+        case MAR_JUL {condition month >= MAR .and. month <= JUL
+                  sum(i=-(month-MAR),JUL-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarAug {
+        case MAR_AUG {condition month >= MAR .and. month <= AUG
+                  sum(i=-(month-MAR),AUG-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowMarSep {
+        case MAR_SEP {condition month >= MAR .and. month <= SEP
+                  sum(i=-(month-MAR),SEP-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+define AmerFrcstInflowJunSep {
+        case MAR_SEP {condition month >= JUN .and. month <= SEP
+                  sum(i=-(month-JUN),SEP-month,1) UNIMP_FOLS(i)+ MFPForecastRelease(i) + UARPForecastRelease(i) + P184ForecastRelease(i)}
+    case other   {condition always
+              value 0.0}
+                          }
+
+! Store forecast variables
+define AmerFrcstInflowOctMar_a {alias AmerFrcstInflowOctMar kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarApr_a {alias AmerFrcstInflowMarApr kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarMay_a {alias AmerFrcstInflowMarMay kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarJun_a {alias AmerFrcstInflowMarJun kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarJul_a {alias AmerFrcstInflowMarJul kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarAug_a {alias AmerFrcstInflowMarAug kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowMarSep_a {alias AmerFrcstInflowMarSep kind 'INFLOW-FRCST' units 'TAF'}
+define AmerFrcstInflowJunSep_a {alias AmerFrcstInflowJunSep kind 'INFLOW-FRCST' units 'TAF'}
+*/
+
+!=================================================================================================
+!Divs       - Folsom Diversion Forecasts
+!=================================================================================================
+
+! Calculate water limits with CVPMI reductions
+define waterlimit_UD_26N_PU1   {value ((MFPann_FOLSM_WTPRSV)                        +  (CLann_FOLSM_WTPRSV * perdel_cvpmi_sys))}  ! City of Roseville: 30 TAF MFP + 32 TAF CVP
+define waterlimit_UD_26N_PU2a3 {value ((WRann_FOLSM_WTPSJP + MFPSJann_FOLSM_WTPSJP) +  (CLann_FOLSM_WTPSJP * perdel_cvpmi_sys))}  ! San Juan WD: 33 TAF Pre-1914 WR + 21 TAF MFP + 24.2 TAF CVP 
+define waterlimit_UD_26S_PU1   {value ((WRann_FOLSM_WTPFOL)                         +  (CLann_FOLSM_WTPFOL * perdel_cvpmi_sys))}  ! City of Folsom: Appropriateive WR (22 + 5 + 4) TAF + CVP contract: 7 TAF 
+define waterlimit_UD_26S_PU2   {value ((WRann_WTPCOL_26S_PU2)                                                                 )}  ! Golden State WC: Warren Act contract: 5 TAF through Folsom South Canal
+define waterlimit_UD_26S_PU3   {value ((WRann_FOLSM_26S_PU3)                                                                  )}  ! CA Parks and Rec: 1 TAF
+define waterlimit_UD_60N_PU    {value ((WRann_FSC025_60N_PU)                        + (CLann_FSC025_60N_PU * perdel_cvpmi_sys))}  ! SMUD: 14.48 TAF WR + 30 TAF CVP
+define waterlimit_UD_ELDID_NU3 {value ((WRann_FOLSM_WTPEDH)                         + (CLann_FOLSM_WTPEDH * perdel_cvpmi_sys ))}  ! El Dorado Irrigation District: (4.560 + 8.5) TAF WR/LTWAC + (7.550 + 7 Fazio) TAF CVP 
+define waterlimit_UD_26N_NU1   {value ((MFPSSann_FOLSM_WTPSJP)                                                                )}  ! SSWD: 14 TAF MFP water in wet years
+define waterlimit_PCWA         {value (                                             + (CLann_FOLSM_PCWA  * perdel_cvpmi_sys  ))}  ! PCWA: Under existing conditions, no POD from Folsom Reservoir
+
+define waterlimit_tot {alias waterlimit_UD_26N_PU1 + waterlimit_UD_26N_PU2a3 + waterlimit_UD_26S_PU1 + waterlimit_UD_26S_PU2 + waterlimit_UD_26S_PU3 + waterlimit_UD_60N_PU
+                            + waterlimit_UD_ELDID_NU3 + waterlimit_UD_26N_NU1 + waterlimit_PCWA kind'debug' units 'cfs'}
+/*       
+! Calculate the Forecast Diversions
+define AmerFrcstDivs_OctMar {
+    case OCT_MAR {condition month >= OCT .or. month <= MAR
+            value min(  UD_26N_PU1 * cfs_taf                    , perdem_UD_26N_PU1          * waterlimit_UD_26N_PU1  )
+                + min( (UD_26N_PU2 + UD_26N_PU3) * cfs_taf          , perdem_UD_26N_PU2a3        * waterlimit_UD_26N_PU2a3)
+                + min(  UD_26S_PU1 * cfs_taf                    , perdem_UD_26S_PU1          * waterlimit_UD_26S_PU1  )
+                + min(  UD_26S_PU2 * cfs_taf                    , perdem_UD_26S_PU2          * waterlimit_UD_26S_PU2  )
+                + min(  UD_26S_PU3 * cfs_taf                    , perdem_UD_26S_PU3          * waterlimit_UD_26S_PU3  )
+                + min(  UD_60N_PU  * cfs_taf                    , perdem_UD_60N_PU           * waterlimit_UD_60N_PU   )
+                + min(  UD_ELDID_NU3   * cfs_taf                , perdem_UD_ELDID_NU3            * waterlimit_UD_ELDID_NU3    )
+                + min(  UD_26N_NU1 * cfs_taf                    , perdem_UD_26N_NU1          * waterlimit_UD_26N_NU1  )
+                +       UD_26S_NU4 * cfs_taf
+                + min( (AWO_24_NA2*DFo_24_NA2
+                      + AWR_24_NA2*DFr_24_NA2
+                      + 2.5*AWO_24_NA3*DFo_24_NA3
+                      + 2.5*AWR_24_NA3*DFr_24_NA3
+                      + UD_24_NU2) * cfs_taf                , perdem_PCWA                * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_MarApr {
+    case MAR_APR {condition month >= MAR .and. month <= APR
+            value min(UD_26N_PU1_MarApr                 , perdem_UD_26N_PU1_MarApr   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarApr + UD_26N_PU3_MarApr , perdem_UD_26N_PU2a3_MarApr * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarApr             , perdem_UD_26S_PU1_MarApr   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarApr                 , perdem_UD_26S_PU2_MarApr   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarApr                 , perdem_UD_26S_PU3_MarApr   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarApr                  , perdem_UD_60N_PU_MarApr    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarApr                   , perdem_UD_ELDID_NU3_MarApr     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarApr                 , perdem_UD_26N_NU1_MarApr   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarApr
+                
+                + min(PCWATotals_MarApr                     , perdem_PCWA_MarApr         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_MarMay {
+    case MAR_May {condition month >= MAR .and. month <= May
+            value min(UD_26N_PU1_MarMay                 , perdem_UD_26N_PU1_MarMay   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarMay + UD_26N_PU3_MarMay , perdem_UD_26N_PU2a3_MarMay * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarMay             , perdem_UD_26S_PU1_MarMay   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarMay                 , perdem_UD_26S_PU2_MarMay   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarMay                 , perdem_UD_26S_PU3_MarMay   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarMay                  , perdem_UD_60N_PU_MarMay    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarMay                   , perdem_UD_ELDID_NU3_MarMay     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarMay                 , perdem_UD_26N_NU1_MarMay   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarMay
+                
+                + min(PCWATotals_MarMay                     , perdem_PCWA_MarMay         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+
+define AmerFrcstDivs_MarJun {
+    case MAR_JUN {condition month >= MAR .and. month <= JUN
+            value min(UD_26N_PU1_MarJun                 , perdem_UD_26N_PU1_MarJun   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarJun + UD_26N_PU3_MarJun , perdem_UD_26N_PU2a3_MarJun * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarJun             , perdem_UD_26S_PU1_MarJun   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarJun                 , perdem_UD_26S_PU2_MarJun   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarJun                 , perdem_UD_26S_PU3_MarJun   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarJun                  , perdem_UD_60N_PU_MarJun    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarJun                   , perdem_UD_ELDID_NU3_MarJun     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarJun                 , perdem_UD_26N_NU1_MarJun   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarJun
+                
+                + min(PCWATotals_MarJun                     , perdem_PCWA_MarJun         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_MarJul {
+    case MAR_JUL {condition month >= MAR .and. month <= JUL
+            value min(UD_26N_PU1_MarJul                 , perdem_UD_26N_PU1_MarJul   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarJul + UD_26N_PU3_MarJul , perdem_UD_26N_PU2a3_MarJul * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarJul             , perdem_UD_26S_PU1_MarJul   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarJul                 , perdem_UD_26S_PU2_MarJul   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarJul                 , perdem_UD_26S_PU3_MarJul   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarJul                  , perdem_UD_60N_PU_MarJul    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarJul                   , perdem_UD_ELDID_NU3_MarJul     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarJul                 , perdem_UD_26N_NU1_MarJul   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarJul
+                
+                + min(PCWATotals_MarJul                     , perdem_PCWA_MarJul         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_MarAug {
+    case MAR_AUG {condition month >= MAR .and. month <= AUG
+            value min(UD_26N_PU1_MarAug                 , perdem_UD_26N_PU1_MarAug   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarAug + UD_26N_PU3_MarAug , perdem_UD_26N_PU2a3_MarAug * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarAug             , perdem_UD_26S_PU1_MarAug   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarAug                 , perdem_UD_26S_PU2_MarAug   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarAug                 , perdem_UD_26S_PU3_MarAug   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarAug                  , perdem_UD_60N_PU_MarAug    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarAug                   , perdem_UD_ELDID_NU3_MarAug     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarAug                 , perdem_UD_26N_NU1_MarAug   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarAug
+                
+                + min(PCWATotals_MarAug                     , perdem_PCWA_MarAug         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_MarSep {
+    case MAR_SEP {condition month >= MAR .and. month <= SEP
+            value min(UD_26N_PU1_MarSep                 , perdem_UD_26N_PU1_MarSep   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_MarSep + UD_26N_PU3_MarSep , perdem_UD_26N_PU2a3_MarSep * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_MarSep             , perdem_UD_26S_PU1_MarSep   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_MarSep                 , perdem_UD_26S_PU2_MarSep   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_MarSep                 , perdem_UD_26S_PU3_MarSep   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_MarSep                  , perdem_UD_60N_PU_MarSep    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_MarSep                   , perdem_UD_ELDID_NU3_MarSep     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_MarSep                 , perdem_UD_26N_NU1_MarSep   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_MarSep
+                
+                + min(PCWATotals_MarSep                     , perdem_PCWA_MarSep         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                          
+define AmerFrcstDivs_JunSep {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP
+            value min(UD_26N_PU1_JunSep                 , perdem_UD_26N_PU1_JunSep   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_JunSep + UD_26N_PU3_JunSep , perdem_UD_26N_PU2a3_JunSep * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_JunSep             , perdem_UD_26S_PU1_JunSep   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_JunSep                 , perdem_UD_26S_PU2_JunSep   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_JunSep                 , perdem_UD_26S_PU3_JunSep   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_JunSep                  , perdem_UD_60N_PU_JunSep    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_JunSep                   , perdem_UD_ELDID_NU3_JunSep     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_JunSep                 , perdem_UD_26N_NU1_JunSep   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_JunSep
+                
+                + min(PCWATotals_JunSep                     , perdem_PCWA_JunSep         * waterlimit_PCWA        )
+                      }
+        case other {condition always value 0.0}
+                             }
+                             
+define AmerFrcstDivs_NowSep {
+            value min(UD_26N_PU1_NowSep                 , perdem_UD_26N_PU1_NowSep   * waterlimit_UD_26N_PU1  )
+                + min(UD_26N_PU2_NowSep + UD_26N_PU3_NowSep , perdem_UD_26N_PU2a3_NowSep * waterlimit_UD_26N_PU2a3)
+                + min(UD_26S_PU1_NowSep             , perdem_UD_26S_PU1_NowSep   * waterlimit_UD_26S_PU1  )
+                + min(UD_26S_PU2_NowSep                 , perdem_UD_26S_PU2_NowSep   * waterlimit_UD_26S_PU2  )
+                + min(UD_26S_PU3_NowSep                 , perdem_UD_26S_PU3_NowSep   * waterlimit_UD_26S_PU3  )
+                + min(UD_60N_PU_NowSep                  , perdem_UD_60N_PU_NowSep    * waterlimit_UD_60N_PU   )
+                
+                + min(UD_ELDID_NU3_NowSep                   , perdem_UD_ELDID_NU3_NowSep     * waterlimit_UD_ELDID_NU3    )
+                
+                + min(UD_26N_NU1_NowSep                 , perdem_UD_26N_NU1_NowSep   * waterlimit_UD_26N_NU1  )
+                +     UD_26S_NU4_NowSep
+                
+                + min(PCWATotals_NowSep                     , perdem_PCWA_NowSep         * waterlimit_PCWA        )
+                             }
+
+! Store diversion forecast variables
+define AmerFrcstDivs_OctMar_a  {alias AmerFrcstDivs_OctMar kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarApr_a  {alias AmerFrcstDivs_MarApr kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarMay_a  {alias AmerFrcstDivs_MarMay kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarJun_a  {alias AmerFrcstDivs_MarJun kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarJul_a  {alias AmerFrcstDivs_MarJul kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarAug_a  {alias AmerFrcstDivs_MarAug kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_MarSep_a  {alias AmerFrcstDivs_MarSep kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_JunSep_a  {alias AmerFrcstDivs_JunSep kind 'FRCST-DIV' units 'TAF'}
+define AmerFrcstDivs_NowSep_a  {alias AmerFrcstDivs_NowSep kind 'FRCST-DIV' units 'TAF'}*/
+
+

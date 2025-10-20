@@ -1,0 +1,126 @@
+! THIS Code CONTAINS THE X2 STANDARD MODELING IN CALSIM
+! X2 DAYS WITH FLOW-WEIGHTING PROCEDURE IS USED AS IN DWRSIM
+
+! X2 is the 2ppt bottom isohaline line used to describe the entrapment zone.  ANN is used to compute the
+! position as a function of last month's position and current month's Net Delta outflow
+
+INCLUDE[local] '..\..\Ann\AnnCommon3.wresl'
+
+! ******************************************************************************************
+! Set the begin and end day for the standard -- Roe always met first
+define begday_roe {value begday_roe[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_roe_mod > 0.5
+          value    1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define endday_roe {value endday_roe[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_roe_mod > 0.5
+          value    begday_roe + daysX2_roe_mod - 1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define begday_roedv {alias begday_roe kind 'debug' units 'none'}
+define endday_roedv {alias endday_roe kind 'debug' units 'none'}
+
+! Now compute the Delta outflow required to meet the Roe standard
+define DO_req_X2roe_nocap {value DO_req_X2roe_nocap[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_roe_mod > 0.5
+          value getNDO_X2(km_roe,
+                    X2_PRV(-4),X2_PRV(-3),X2_PRV(-2),X2_PRV(-1),X2_last,
+                    NDO(-4),NDO(-3),NDO(-2),NDO(-1),
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+                    10,month,wateryear,int(begday_roe),int(endday_roe)) }
+     case StandardOff {
+          condition      always
+          value          0.0  }
+}*/
+define DO_req_X2roe {value DO_req_X2roe[WHEELJPOD]}!min(flowcap_roe, DO_req_X2roe_nocap) }
+
+! ******************************************************************************************
+! Set the begin and end day for the standard -- Chipps always met second
+define begday_chs {value begday_chs[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_chs_mod > 0.5
+          value    endday_roe + 1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define endday_chs {value endday_chs[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_chs_mod > 0.5
+          value    begday_chs + daysX2_chs_mod - 1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define begday_chsdv {alias begday_chs kind 'debug' units 'none'}
+define endday_chsdv {alias endday_chs kind 'debug' units 'none'}
+
+! Now compute the Delta outflow required to meet the Chipps standard
+define DO_req_X2chs_nocap {value DO_req_X2chs_nocap[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_chs_mod > 0.5
+          value getNDO_x2_curMonNDOSplit(km_chs,
+                    X2_PRV(-4),X2_PRV(-3),X2_PRV(-2),X2_PRV(-1),X2_last,
+                    NDO(-4),NDO(-3),NDO(-2),NDO(-1),DO_req_X2roe,NDO(-1),
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+                    int(endday_roe),0,10,month,wateryear,int(begday_chs),int(endday_chs))}
+     case StandardOff {
+          condition      always
+          value          0.0  }
+}*/
+define DO_req_X2chs {value DO_req_X2chs[WHEELJPOD]}!min(flowcap_chs, DO_req_X2chs_nocap)}
+
+! ******************************************************************************************
+! Set the begin and end day for the standard -- Confluence always met last
+define begday_cnf {value begday_cnf[WHEELJPOD]}
+/*     case StandardNone {
+          condition      daysX2_cnf < 0.5
+          value    0. }
+     case StandardOn {
+          condition      daysX2_cnf_mod > 0.5
+          value    endday_chs + 1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define endday_cnf {value endday_cnf[WHEELJPOD]}
+/*     case StandardNone {
+          condition      daysX2_cnf < 0.5
+          value    0. }
+     case StandardOn {
+          condition      daysX2_cnf_mod > 0.5
+          value   begday_cnf + daysX2_cnf_mod - 1. }
+     case StandardOff {
+          condition      always
+          value    0. }
+}*/
+define begday_cnfdv {alias begday_cnf kind 'debug' units 'none'}
+define endday_cnfdv {alias endday_cnf kind 'debug' units 'none'}
+
+! Now compute the Delta outflow required to meet the Confluence standard
+
+define DO_req_X2cnf_nocap {value DO_req_X2cnf_nocap[WHEELJPOD]}
+/*     case StandardOn {
+          condition      daysX2_cnf_mod > 0.5
+          value getNDO_x2_curMonNDOSplit(km_cnf,
+                    X2_PRV(-4),X2_PRV(-3),X2_PRV(-2),X2_PRV(-1),X2_last,
+                    NDO(-4),NDO(-3),NDO(-2),NDO(-1),DO_req_X2roe,DO_req_X2chs,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),int(daysin),
+                    int(endday_roe),int(daysX2_chs_mod),10,month,wateryear,int(begday_cnf),int(endday_cnf))}
+     case SpecFlowStd {
+         condition       daysX2_cnf < 0.5 .and. daysX2_roe < 0.5
+         value           flowmin_specX2 }
+     case StandardOff {
+         condition       always
+         value           0.0  }   }*/
+define DO_req_X2cnf {value DO_req_X2cnf[WHEELJPOD]}!min(flowcap_cnf, DO_req_X2cnf_nocap) }
+
+

@@ -1,0 +1,91 @@
+!! update: Update Trinity forecast in April and May  
+!! Update: make all times when forecast is not needed = 0
+
+! Define Trinity inflows ( sum of March through September inflows)
+! forecast updated in April and May with actual inflows from passed months
+define sumI_TRNTY_part {
+    case Mar2May {
+        condition   month >= Mar .and. month <= May
+        value (sum(i=Mar-month,-1,1) I_TRNTY(i) * cfs_TAF(i)) + (sum(i=0,sep-month,1) I_Trnty_fm_Med[Forecast2](i))
+    } !! ??? I_TRNTY(i) * cfs_TAF(i) or UNIMP_TRIN(i) see define I_TRIN_annual
+    case otherwise {
+        condition always
+        value 0 
+    }
+}   
+define SumI_TRNTY_partdv {alias sumI_TRNTY_part kind 'Water-Supply' units 'TAF'}
+
+!! target carryover for use in setting water supply for import
+define Trin_CO {
+    Case Crit {condition wyt_Trin_frcst == 5 value 650.}
+    Case Dry  {condition wyt_Trin_frcst == 4 value 1000. }
+    Case Wet  {condition wyt_Trin_frcst == 1 value 1600. }
+    Case ANBN {condition always              value 1200. }
+}
+        
+! Trinity River minimum flow forecast, Sum of March through September
+define TrinMinFlow_Forecast {select MinFlow from TrinMinFlow_Forecast where TrinWYT=wyt_Trin_frcst}
+define TrinMinFlow_Forecastdv { alias TrinMinFlow_Forecast kind 'Water-Supply' units 'TAF'}         
+define TrinFallAugment {
+    case notWet    {condition wyt_TRIN>1 value 50.}
+    case otherwise {condition always value 0.}
+}
+!Calculate water availability in Trinity Basin 
+! EOFeb storage + forecasted inflow - carryover target - req'd release to Trinity River
+define TrinWaterSupplydv { std kind 'Water-Supply' units 'TAF'}
+define TrinWaterSupply { !this is initialized to 800 - placeholder value
+    case March {
+        condition   month == Mar
+        value   max(S_TRNTY(prevFeb) + sumI_TRNTY_part - Trin_CO - TrinMinFlow_Forecast - TrinFallAugment, 0) 
+    }
+    case otherwise {
+        condition  always
+        value   TrinWaterSupplydv(-1)
+    }
+}
+goal setTrinWaterSupply {TrinWaterSupplydv = TrinWaterSupply}
+
+!Calculate Trinity Import
+define TrinImportDist {select Percent from TrinImportMonthly where month=month}
+define TrinOffSeason {select TrinImport from TrinOffSeason given Storage = S_TRNTY(-1) use linear where month=month}
+define TrinFactor {select Trinity from TrinFactor given Storage = S_TRNTY(-1) use linear}
+define ShasFactor {select Shasta from TrinFactor given Storage = S_SHSTA(-1) use linear}
+
+define trin_import {
+    Case OffSeaon {
+        condition month <= Feb
+        value TrinOffSeason }
+    Case ImportSeason {
+        condition always
+        value TrinWaterSupply * TrinImportDist * TrinFactor * ShasFactor * taf_cfs}
+}
+define Trin_Importdv { alias trin_import kind 'Water-Supply' units 'CFS'}
+
+        
+!Split the Clear Creek tunnel into an import arc and an excess arc
+! "Excess" can be imported if it would otherwise spill or if there is a beneficial use for it
+define D_LWSTN_import {std kind 'FLOW-DELIVERY' units 'CFS'}
+define D_LWSTN_add    {std kind 'FLOW-DELIVERY' units 'CFS'}
+goal D_LWSTN_CCT011split {D_LWSTN_CCT011 = D_LWSTN_import + D_LWSTN_add}
+
+! Results indicate that "excess" import is also occasionally brought over in extreme system conditions
+! even when there is no import target given a very low water supply basis. The following goal does not
+! allow for "excess" import when Trinity storage is below the end-of-Sept threshold used to calculate 
+! import water supply
+goal limit_D_LWSTN_add {
+    lhs D_LWSTN_add 
+    case LowTrinity {
+        condition S_TRNTY(-1)< Trin_CO
+        rhs 0. }
+}
+
+
+
+!Now set goal for import
+goal set_import {D_LWSTN_Import < trin_import}                           
+
+goal limit_clear_tun {D_LWSTN_CCT011 < 3300.0}  !3300 cfs is the Clear Creek Tunnel capacity.
+
+
+
+

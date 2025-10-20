@@ -1,0 +1,55 @@
+! Friant_delivery_adjustments.wresl
+! Adjust Madera and Friant-Kern Canal deliveries for wetness and 215
+
+!#############################################################################
+/*
+Friant-Kern and Madera Canal delivery adjustment
+*/
+/*
+Tule River wetness index - Allows for Friant-Kern Canal delivery reduction due to available
+supplementary Tule River water supply
+*/
+! Define tule wetness index, units = TAF
+define tule_wet_indx {timeseries kind 'FRIANT-INDX' units 'taf'}
+! Friant-Kern Canal delivery adjustment (Tule River wetness index values in excess of 40 TAF)
+define FK_adj {value  (max(0.0,(min(tule_wet_indx - 41.0, FK_C2_del)))) }
+
+
+/*
+Ratio of Madera Canal additional capacity to receive flood water to that of total
+(Friant-Kern Canal + Madera Canal) capacity
+*/
+! Define Madera Canal flood capacity ratio
+define fl_cap_ratio { value Madera_fl_cap / (FK_fl_cap + Madera_fl_cap) }
+! Amount of flood water available to Friant-Kern Canal
+define FK_flood_av {value max(0.0, min(FK_fl_cap*cfs_taf, (1.0-fl_cap_ratio) * Fr_fc_rel )) }
+
+! Amount of flood water available to Madera Canal
+define Madera_flood_av {
+    case nov_thru_jan {
+        condition month >= nov .and. month <= jan
+        value 0.0 }
+    case otherwise {
+        condition always
+        value max(0.0, min(Madera_fl_cap*cfs_taf, fl_cap_ratio * Fr_fc_rel)) } }
+
+! Available additional Friant-Kern Canal physical capacity
+define FK_av_cap { value max (FK_cap_head*cfs_taf - D_MLRTN_FRK_ini, 0.0) }
+! Available additional Madera Canal physical capacity
+define Madera_av_cap { value max (Madera_cap_head*cfs_taf - D_MLRTN_MDC_ini, 0.0) }
+! Additional Madera Canal delivery
+define Madera_add {value min(Madera_av_cap, Madera_flood_av) }
+! Additional Friant-Kern Canal delivery
+define FK_add {
+    case no_adjustment {
+        condition tule_wet_indx - 41.0 < 0.00001
+        value min((FK_flood_av + (Madera_flood_av - Madera_add)), min(FK_av_cap,FK_fl_cap * cfs_taf)) }
+    case adjustment {
+        condition always
+        value 0.0 } }
+
+!used for debugging
+!define FK_add_chk {alias FK_add kind 'temp' units 'none'}
+!define FK_av_cap_chk {alias FK_av_cap kind 'temp' units 'none'}
+!define M_add_chk {alias Madera_add kind 'temp' units 'none'}
+

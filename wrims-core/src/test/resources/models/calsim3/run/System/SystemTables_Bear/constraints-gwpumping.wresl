@@ -1,0 +1,47 @@
+/*
+File Name: constraints-GWpumping.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Naming takes the following form:
+
+
+*/
+
+!Note: Constraints for demand units with no access to surface water are not meaningful.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 24_NA1
+goal setGPmin_24_NA1   {GP_24_NA1  > GPmin_24_NA1 * AWo_24_NA1 * (1.0+ RPF_24_NA1 - RUFo_24_NA1) + GPmin_24_NA1 * AWr_24_NA1 * (1.0+ RPF_24_NA1 - RUFr_24_NA1)}
+goal setGPmax_24_NA1   {GP_24_NA1  < GPmax_24_NA1 * AWo_24_NA1 * (1.0+ RPF_24_NA1 - RUFo_24_NA1) + GPmax_24_NA1 * AWr_24_NA1 * (1.0+ RPF_24_NA1 - RUFr_24_NA1)}
+define GPmin_24_NA1_dv	{alias GPmin_24_NA1 * AWo_24_NA1 * (1.0+ RPF_24_NA1 - RUFo_24_NA1) + GPmin_24_NA1 * AWr_24_NA1 * (1.0+ RPF_24_NA1 - RUFr_24_NA1) kind 'GW-PUMPING-LIMIT' units 'CFS'}
+
+! 24_NA2
+goal setGPmin_24_NA2   {GP_24_NA2  > GPmin_24_NA2 * AWo_24_NA2 * (1.0+ RPF_24_NA2 - RUFo_24_NA2) + GPmin_24_NA2 * AWr_24_NA2 * (1.0+ RPF_24_NA2 - RUFr_24_NA2)}
+!goal setGPmax_24_NA2   {GP_24_NA2  < GPmax_24_NA2 * AWo_24_NA2 * (1.0+ RPF_24_NA2 - RUFo_24_NA2) + GPmax_24_NA2 * AWr_24_NA2 * (1.0+ RPF_24_NA2 - RUFr_24_NA2)}
+define GPmin_24_NA2_dv {alias GPmin_24_NA2 * AWo_24_NA2 * (1.0+ RPF_24_NA2 - RUFo_24_NA2) + GPmin_24_NA2 * AWr_24_NA2 * (1.0+ RPF_24_NA2 - RUFr_24_NA2) kind 'GW-PUMPING-LIMIT' units 'CFS'}
+
+! 24_NA3
+goal setGPmin_24_NA3   {GP_24_NA3  > 2.5*(GPmin_24_NA3 * AWo_24_NA3 * (1.0+ RPF_24_NA3 - RUFo_24_NA3) + GPmin_24_NA3 * AWr_24_NA3 * (1.0+ RPF_24_NA3 - RUFr_24_NA3))} ! Scale ag demand by 2.5 because of errors in land use
+!goal setGPmax_24_NA3   {GP_24_NA3  < 2.5*(GPmax_24_NA3 * AWo_24_NA3 * (1.0+ RPF_24_NA3 - RUFo_24_NA3) + GPmax_24_NA3 * AWr_24_NA3 * (1.0+ RPF_24_NA3 - RUFr_24_NA3))} ! Scale ag demand by 2.5 because of errors in land use
+define GPmin_24_NA3_dv {alias 2.5*(GPmin_24_NA3 * AWo_24_NA3 * (1.0+ RPF_24_NA3 - RUFo_24_NA3) + GPmin_24_NA3 * AWr_24_NA3 * (1.0+ RPF_24_NA3 - RUFr_24_NA3)) kind 'GW-PUMPING-LIMIT' units 'CFS'} ! Scale ag demand by 2.5 because of errors in land use
+
+! 24_NU1
+goal setGPmin_24_NU1   {GP_24_NU1  > GPmin_24_NU1 * UD_24_NU1}
+goal setGPmax_24_NU1   {GP_24_NU1  < GPmax_24_NU1 * UD_24_NU1}
+
+! 24_NU2
+goal setGPmin_24_NU2   {GP_24_NU2  > GPmin_24_NU2 * UD_24_NU2}
+!goal setGPmax_24_NU2   {GP_24_NU2  < GPmax_24_NU2 * UD_24_NU2}
+
+! 24_NU3
+goal setGPmin_24_NU3   {GP_24_NU3  > GPmin_24_NU3 * UD_24_NU3}
+goal setGPmax_24_NU3   {GP_24_NU3  < GPmax_24_NU3 * UD_24_NU3}
+
+goal set_GP_WBATotal_24  {GP_WBATotal_24 - GP_24_NA1 - GP_24_NA3 - GP_24_NU2 - GP_24_NU1 - GP_24_NU3 - GP_24_NU4 = 0.}
+
+! PCWA_3
+goal set_GP_PCWA3      {GP_PCWA3 = 0.0 * UD_PCWA3}

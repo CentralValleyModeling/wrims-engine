@@ -1,0 +1,445 @@
+/*
+SEEPAGE ARCS
+
+The sign of GetSeep is with respect to groundwater; i.e.
+
+  positive seepage (GetSeep) = loosing stream
+  negative seepage (GetSeep) = gaining stream
+
+When multiplied by -1, it reflects stream's perspective.  
+
+Original formulation _ AJD, jtpayne July 2006
+updated _ Can Dogrul June 2007
+*/
+
+
+!*********************************************************************
+!*********************************************************************
+!***  Define goals
+!*********************************************************************
+!********************************************************************* 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! California Aqueduct !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define svSG_CAA005_589       {value - SG_R1R2_SWP * ( 4.65/66.74) * 0.50} 
+define svSG_CAA005_602       {value - SG_R1R2_SWP * ( 4.65/66.74) * 0.50} 
+define svSG_CAA051_608       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_609       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_611       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_613       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_631       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_647       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_658       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_669       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_680       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA051_681       {value - SG_R1R2_SWP * (46.66/66.74) * 0.10}
+define svSG_CAA067_711       {value - SG_R1R2_SWP * (15.43/66.74) * 0.25} 
+define svSG_CAA067_723       {value - SG_R1R2_SWP * (15.43/66.74) * 0.25} 
+define svSG_CAA067_758       {value - SG_R1R2_SWP * (15.43/66.74) * 0.25} 
+define svSG_CAA067_763       {value - SG_R1R2_SWP * (15.43/66.74) * 0.25} 
+define svSG_CAA087_764       {value 0.34 * (- SG_R3_SWP - SG_R3_CVP)}
+define svSG_CAA087_780       {value 0.33 * (- SG_R3_SWP - SG_R3_CVP)}
+define svSG_CAA087_793       {value 0.33 * (- SG_R3_SWP - SG_R3_CVP)}
+define svSG_CAA109_814       {value 0.25 * (- SG_R4_SWP - SG_R4_CVP)}
+define svSG_CAA109_839       {value 0.25 * (- SG_R4_SWP - SG_R4_CVP)}
+define svSG_CAA109_854       {value 0.25 * (- SG_R4_SWP - SG_R4_CVP)}
+define svSG_CAA109_862       {value 0.25 * (- SG_R4_SWP - SG_R4_CVP)}
+define svSG_CAA143_866       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_869       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_883       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_888       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_903       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_920       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_968       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_846       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_954       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA143_961       {value 0.10 * (- SG_R5_SWP - SG_R5_CVP)}
+define svSG_CAA155_977       {value 0.34 * (- SG_R6_SWP - SG_R6_CVP)}
+define svSG_CAA155_990       {value 0.33 * (- SG_R6_SWP - SG_R6_CVP)}
+define svSG_CAA155_1009      {value 0.33 * (- SG_R6_SWP - SG_R6_CVP)}
+define svSG_CAA172_1020      {value 0.25 * (- SG_R7_SWP - SG_R7_CVP)}
+define svSG_CAA172_1038      {value 0.25 * (- SG_R7_SWP - SG_R7_CVP)}
+define svSG_CAA172_1053      {value 0.25 * (- SG_R7_SWP - SG_R7_CVP)}
+define svSG_CAA172_1062      {value 0.25 * (- SG_R7_SWP - SG_R7_CVP)}
+
+goal setNegSG_CAA005_589 {lhs SG_CAA005_589 case negative {condition svSG_CAA005_589 < 0 rhs svSG_CAA005_589 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA005_602 {lhs SG_CAA005_602 case negative {condition svSG_CAA005_602 < 0 rhs svSG_CAA005_602 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_608 {lhs SG_CAA051_608 case negative {condition svSG_CAA051_608 < 0 rhs svSG_CAA051_608 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_609 {lhs SG_CAA051_609 case negative {condition svSG_CAA051_609 < 0 rhs svSG_CAA051_609 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_611 {lhs SG_CAA051_611 case negative {condition svSG_CAA051_611 < 0 rhs svSG_CAA051_611 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_613 {lhs SG_CAA051_613 case negative {condition svSG_CAA051_613 < 0 rhs svSG_CAA051_613 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_631 {lhs SG_CAA051_631 case negative {condition svSG_CAA051_631 < 0 rhs svSG_CAA051_631 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_647 {lhs SG_CAA051_647 case negative {condition svSG_CAA051_647 < 0 rhs svSG_CAA051_647 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_658 {lhs SG_CAA051_658 case negative {condition svSG_CAA051_658 < 0 rhs svSG_CAA051_658 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_669 {lhs SG_CAA051_669 case negative {condition svSG_CAA051_669 < 0 rhs svSG_CAA051_669 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_680 {lhs SG_CAA051_680 case negative {condition svSG_CAA051_680 < 0 rhs svSG_CAA051_680 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA051_681 {lhs SG_CAA051_681 case negative {condition svSG_CAA051_681 < 0 rhs svSG_CAA051_681 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA067_711 {lhs SG_CAA067_711 case negative {condition svSG_CAA067_711 < 0 rhs svSG_CAA067_711 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA067_723 {lhs SG_CAA067_723 case negative {condition svSG_CAA067_723 < 0 rhs svSG_CAA067_723 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA067_758 {lhs SG_CAA067_758 case negative {condition svSG_CAA067_758 < 0 rhs svSG_CAA067_758 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA067_763 {lhs SG_CAA067_763 case negative {condition svSG_CAA067_763 < 0 rhs svSG_CAA067_763 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA087_764 {lhs SG_CAA087_764 case negative {condition svSG_CAA087_764 < 0 rhs svSG_CAA087_764 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA087_780 {lhs SG_CAA087_780 case negative {condition svSG_CAA087_780 < 0 rhs svSG_CAA087_780 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA087_793 {lhs SG_CAA087_793 case negative {condition svSG_CAA087_793 < 0 rhs svSG_CAA087_793 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA109_814 {lhs SG_CAA109_814 case negative {condition svSG_CAA109_814 < 0 rhs svSG_CAA109_814 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA109_839 {lhs SG_CAA109_839 case negative {condition svSG_CAA109_839 < 0 rhs svSG_CAA109_839 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA109_854 {lhs SG_CAA109_854 case negative {condition svSG_CAA109_854 < 0 rhs svSG_CAA109_854 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA109_862 {lhs SG_CAA109_862 case negative {condition svSG_CAA109_862 < 0 rhs svSG_CAA109_862 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_866 {lhs SG_CAA143_866 case negative {condition svSG_CAA143_866 < 0 rhs svSG_CAA143_866 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_869 {lhs SG_CAA143_869 case negative {condition svSG_CAA143_869 < 0 rhs svSG_CAA143_869 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_883 {lhs SG_CAA143_883 case negative {condition svSG_CAA143_883 < 0 rhs svSG_CAA143_883 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_888 {lhs SG_CAA143_888 case negative {condition svSG_CAA143_888 < 0 rhs svSG_CAA143_888 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_903 {lhs SG_CAA143_903 case negative {condition svSG_CAA143_903 < 0 rhs svSG_CAA143_903 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_920 {lhs SG_CAA143_920 case negative {condition svSG_CAA143_920 < 0 rhs svSG_CAA143_920 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_968 {lhs SG_CAA143_968 case negative {condition svSG_CAA143_968 < 0 rhs svSG_CAA143_968 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_846 {lhs SG_CAA143_846 case negative {condition svSG_CAA143_846 < 0 rhs svSG_CAA143_846 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_954 {lhs SG_CAA143_954 case negative {condition svSG_CAA143_954 < 0 rhs svSG_CAA143_954 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA143_961 {lhs SG_CAA143_961 case negative {condition svSG_CAA143_961 < 0 rhs svSG_CAA143_961 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA155_977 {lhs SG_CAA155_977 case negative {condition svSG_CAA155_977 < 0 rhs svSG_CAA155_977 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA155_990 {lhs SG_CAA155_990 case negative {condition svSG_CAA155_990 < 0 rhs svSG_CAA155_990 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA155_1009 {lhs SG_CAA155_1009 case negative {condition svSG_CAA155_1009 < 0 rhs svSG_CAA155_1009 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA172_1020 {lhs SG_CAA172_1020 case negative {condition svSG_CAA172_1020 < 0 rhs svSG_CAA172_1020 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA172_1038 {lhs SG_CAA172_1038 case negative {condition svSG_CAA172_1038 < 0 rhs svSG_CAA172_1038 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA172_1053 {lhs SG_CAA172_1053 case negative {condition svSG_CAA172_1053 < 0 rhs svSG_CAA172_1053 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_CAA172_1062 {lhs SG_CAA172_1062 case negative {condition svSG_CAA172_1062 < 0 rhs svSG_CAA172_1062 lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG_CAA005_589 {lhs SG_CAA005_589 case negative {condition svSG_CAA005_589 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA005_589 }}
+goal setPosSG_CAA005_602 {lhs SG_CAA005_602 case negative {condition svSG_CAA005_602 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA005_602 }}
+goal setPosSG_CAA051_608 {lhs SG_CAA051_608 case negative {condition svSG_CAA051_608 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_608 }}
+goal setPosSG_CAA051_609 {lhs SG_CAA051_609 case negative {condition svSG_CAA051_609 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_609 }}
+goal setPosSG_CAA051_611 {lhs SG_CAA051_611 case negative {condition svSG_CAA051_611 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_611 }}
+goal setPosSG_CAA051_613 {lhs SG_CAA051_613 case negative {condition svSG_CAA051_613 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_613 }}
+goal setPosSG_CAA051_631 {lhs SG_CAA051_631 case negative {condition svSG_CAA051_631 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_631 }}
+goal setPosSG_CAA051_647 {lhs SG_CAA051_647 case negative {condition svSG_CAA051_647 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_647 }}
+goal setPosSG_CAA051_658 {lhs SG_CAA051_658 case negative {condition svSG_CAA051_658 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_658 }}
+goal setPosSG_CAA051_669 {lhs SG_CAA051_669 case negative {condition svSG_CAA051_669 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_669 }}
+goal setPosSG_CAA051_680 {lhs SG_CAA051_680 case negative {condition svSG_CAA051_680 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_680 }}
+goal setPosSG_CAA051_681 {lhs SG_CAA051_681 case negative {condition svSG_CAA051_681 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA051_681 }}
+goal setPosSG_CAA067_711 {lhs SG_CAA067_711 case negative {condition svSG_CAA067_711 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA067_711 }}
+goal setPosSG_CAA067_723 {lhs SG_CAA067_723 case negative {condition svSG_CAA067_723 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA067_723 }}
+goal setPosSG_CAA067_758 {lhs SG_CAA067_758 case negative {condition svSG_CAA067_758 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA067_758 }}
+goal setPosSG_CAA067_763 {lhs SG_CAA067_763 case negative {condition svSG_CAA067_763 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA067_763 }}
+goal setPosSG_CAA087_764 {lhs SG_CAA087_764 case negative {condition svSG_CAA087_764 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA087_764 }}
+goal setPosSG_CAA087_780 {lhs SG_CAA087_780 case negative {condition svSG_CAA087_780 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA087_780 }}
+goal setPosSG_CAA087_793 {lhs SG_CAA087_793 case negative {condition svSG_CAA087_793 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA087_793 }}
+goal setPosSG_CAA109_814 {lhs SG_CAA109_814 case negative {condition svSG_CAA109_814 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA109_814 }}
+goal setPosSG_CAA109_839 {lhs SG_CAA109_839 case negative {condition svSG_CAA109_839 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA109_839 }}
+goal setPosSG_CAA109_854 {lhs SG_CAA109_854 case negative {condition svSG_CAA109_854 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA109_854 }}
+goal setPosSG_CAA109_862 {lhs SG_CAA109_862 case negative {condition svSG_CAA109_862 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA109_862 }}
+goal setPosSG_CAA143_866 {lhs SG_CAA143_866 case negative {condition svSG_CAA143_866 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_866 }}
+goal setPosSG_CAA143_869 {lhs SG_CAA143_869 case negative {condition svSG_CAA143_869 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_869 }}
+goal setPosSG_CAA143_883 {lhs SG_CAA143_883 case negative {condition svSG_CAA143_883 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_883 }}
+goal setPosSG_CAA143_888 {lhs SG_CAA143_888 case negative {condition svSG_CAA143_888 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_888 }}
+goal setPosSG_CAA143_903 {lhs SG_CAA143_903 case negative {condition svSG_CAA143_903 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_903 }}
+goal setPosSG_CAA143_920 {lhs SG_CAA143_920 case negative {condition svSG_CAA143_920 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_920 }}
+goal setPosSG_CAA143_968 {lhs SG_CAA143_968 case negative {condition svSG_CAA143_968 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_968 }}
+goal setPosSG_CAA143_846 {lhs SG_CAA143_846 case negative {condition svSG_CAA143_846 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_846 }}
+goal setPosSG_CAA143_954 {lhs SG_CAA143_954 case negative {condition svSG_CAA143_954 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_954 }}
+goal setPosSG_CAA143_961 {lhs SG_CAA143_961 case negative {condition svSG_CAA143_961 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA143_961 }}
+goal setPosSG_CAA155_977 {lhs SG_CAA155_977 case negative {condition svSG_CAA155_977 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA155_977 }}
+goal setPosSG_CAA155_990 {lhs SG_CAA155_990 case negative {condition svSG_CAA155_990 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA155_990 }}
+goal setPosSG_CAA155_1009 {lhs SG_CAA155_1009 case negative {condition svSG_CAA155_1009 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA155_1009 }}
+goal setPosSG_CAA172_1020 {lhs SG_CAA172_1020 case negative {condition svSG_CAA172_1020 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA172_1020 }}
+goal setPosSG_CAA172_1038 {lhs SG_CAA172_1038 case negative {condition svSG_CAA172_1038 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA172_1038 }}
+goal setPosSG_CAA172_1053 {lhs SG_CAA172_1053 case negative {condition svSG_CAA172_1053 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA172_1053 }}
+goal setPosSG_CAA172_1062 {lhs SG_CAA172_1062 case negative {condition svSG_CAA172_1062 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_CAA172_1062 }}
+
+! [FOLLOWING TERMS ARE BELOW JUB...IGNORE FOR NOW]
+!goal setSG_CAA173_1113     {SG_CAA173_1113     = - D_CAA220_CAALOS *  (0.22/77.02)}! Reach 08C is  0.22 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA185_multi    {SG_CAA185_multi    = - D_CAA220_CAALOS * (12.18/77.02)}! Reach 08D is 12.18 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA197_multi    {SG_CAA197_multi    = - D_CAA220_CAALOS * (12.23/77.02)}! Reach 09  is 12.23 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA210_multi    {SG_CAA210_multi    = - D_CAA220_CAALOS * (13.24/77.02)}! Reach 10A is 13.24 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA218_multi    {SG_CAA218_multi    = - D_CAA220_CAALOS *  (7.50/77.02)}! Reach 11B is  7.50 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA230_multi    {SG_CAA230_multi    = - D_CAA220_CAALOS * (11.90/77.02)}! Reach 12D is 11.90 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA238_multi    {SG_CAA238_multi    = - D_CAA220_CAALOS *  (5.42/77.02)}! Reach 12E is  8.42 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA249_multi    {SG_CAA249_multi    = - D_CAA220_CAALOS * (11.33/77.02)}! Reach 13B is 11.33 miles long, D_CAA220_CAALOS_PLS represents losses from 8C thru 13B
+!goal setSG_CAA262_multi    {SG_CAA262_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA271_multi    {SG_CAA271_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA277_multi    {SG_CAA277_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA280_multi    {SG_CAA280_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA293_multi    {SG_CAA293_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA299_multi    {SG_CAA299_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA304_multi    {SG_CAA304_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA306_multi    {SG_CAA306_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA324_multi    {SG_CAA324_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA337_multi    {SG_CAA337_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA348_multi    {SG_CAA348_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA355_multi    {SG_CAA355_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA360_multi    {SG_CAA360_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA403_multi    {SG_CAA403_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA406_multi    {SG_CAA406_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA408_multi    {SG_CAA408_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA411_multi    {SG_CAA411_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA413_multi    {SG_CAA413_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA425_multi    {SG_CAA425_multi    = - GetSeep(228)   / cfs_cfm }
+!goal setSG_CAA440_multi    {SG_CAA440_multi    = - GetSeep(228)   / cfs_cfm }
+
+! CUMULATIVE TERMS FOR OUTPUT...
+!goal setCAALOSS_SWP_Upper   {CAALOSS_SWP_Upper  = -SG_R1R2_SWP}
+goal setCAALOSS_SWP_Upper   {CAALOSS_SWP_Upper  =+SG_CAA005_589 +SG_CAA005_602 +SG_CAA051_608 
+                                                 +SG_CAA051_609 +SG_CAA051_611 +SG_CAA051_613 
+                                                 +SG_CAA051_631 +SG_CAA051_647 +SG_CAA051_658 
+                                                 +SG_CAA051_669 +SG_CAA051_680 +SG_CAA051_681 
+                                                 +SG_CAA067_711 +SG_CAA067_723 +SG_CAA067_758 
+                                                 +SG_CAA067_763} !-SG_R1R2_SWP}
+goal setCAALOSS_CVP_Upper   {CAALOSS_CVP_Upper  =  0.0}
+!goal setCAALOSS_SWP_Lower   {CAALOSS_SWP_Lower  = -SG_R3_SWP - SG_R4_SWP - SG_R5_SWP - SG_R6_SWP - SG_R7_SWP}
+!goal setCAALOSS_CVP_Lower   {CAALOSS_CVP_Lower  = -SG_R3_CVP - SG_R4_CVP - SG_R5_CVP - SG_R6_CVP - SG_R7_CVP}
+goal setCAALOSS_SWP_Lower {CAALOSS_SWP_Lower =  
+	+SG_R3_SWP/(SG_R3_SWP+SG_R3_CVP)*(SG_CAA087_764 +SG_CAA087_780 +SG_CAA087_793) 
+	+SG_R4_SWP/(SG_R4_SWP+SG_R4_CVP)*(SG_CAA109_814 +SG_CAA109_839 +SG_CAA109_854 +SG_CAA109_862)
+	+SG_R5_SWP/(SG_R5_SWP+SG_R5_CVP)*(SG_CAA143_866 +SG_CAA143_869 +SG_CAA143_883 +SG_CAA143_888 +SG_CAA143_903 
+	                                 +SG_CAA143_920 +SG_CAA143_968 +SG_CAA143_846 +SG_CAA143_954 +SG_CAA143_961) 
+	+SG_R6_SWP/(SG_R6_SWP+SG_R6_CVP)*(SG_CAA155_977 +SG_CAA155_990 +SG_CAA155_1009) 
+	+SG_R7_SWP/(SG_R7_SWP+SG_R7_CVP)*(SG_CAA172_1020 +SG_CAA172_1038 +SG_CAA172_1053 +SG_CAA172_1062) }
+goal setCAALOSS_CVP_Lower {CAALOSS_CVP_Lower =  
+	+SG_R3_CVP/(SG_R3_SWP+SG_R3_CVP)*(SG_CAA087_764 +SG_CAA087_780 +SG_CAA087_793) 
+	+SG_R4_CVP/(SG_R4_SWP+SG_R4_CVP)*(SG_CAA109_814 +SG_CAA109_839 +SG_CAA109_854 +SG_CAA109_862)
+	+SG_R5_CVP/(SG_R5_SWP+SG_R5_CVP)*(SG_CAA143_866 +SG_CAA143_869 +SG_CAA143_883 +SG_CAA143_888 +SG_CAA143_903 
+	                                 +SG_CAA143_920 +SG_CAA143_968 +SG_CAA143_846 +SG_CAA143_954 +SG_CAA143_961) 
+	+SG_R6_CVP/(SG_R6_SWP+SG_R6_CVP)*(SG_CAA155_977 +SG_CAA155_990 +SG_CAA155_1009) 
+	+SG_R7_CVP/(SG_R7_SWP+SG_R7_CVP)*(SG_CAA172_1020 +SG_CAA172_1038 +SG_CAA172_1053 +SG_CAA172_1062) }
+! MAP LOSSES TO SG...
+goal setCAA005_CAALOS       {D_CAA005_CAALOS    = SG_CAA005_589  + SG_CAA005_602}
+goal setCAA006_CAALOS       {D_CAA006_CAALOS    = 0.0}
+goal setCAA009_CAALOS       {D_CAA009_CAALOS    = 0.0}
+goal setCAA012_CAALOS       {D_CAA012_CAALOS    = 0.0}
+goal setCAA024_CAALOS       {D_CAA024_CAALOS    = 0.0}
+goal setCAA046_CAALOS       {D_CAA046_CAALOS    = 0.0}
+goal setCAA051_CAALOS       {D_CAA051_CAALOS    = SG_CAA051_608  
+                                                + SG_CAA051_609  
+                                                + SG_CAA051_611  
+                                                + SG_CAA051_613  
+                                                + SG_CAA051_631
+                                                + SG_CAA051_647  
+                                                + SG_CAA051_658  
+                                                + SG_CAA051_669  
+                                                + SG_CAA051_680  
+                                                + SG_CAA051_681}
+goal setCAA066_CAALOS       {D_CAA066_CAALOS    = 0.0}
+goal setCAA067_CAALOS       {D_CAA067_CAALOS    = SG_CAA067_711  
+                                                + SG_CAA067_723  
+                                                + SG_CAA067_758  
+                                                + SG_CAA067_763}
+goal setCAA069_CAALOS       {D_CAA069_CAALOS    = 0.0}
+goal setCAA071_CAALOS       {D_CAA071_CAALOS    = 0.0}
+goal setCAA087_CAALOS       {D_CAA087_CAALOS    = SG_CAA087_764  
+                                                + SG_CAA087_780  
+                                                + SG_CAA087_793}
+goal setCAA095_CAALOS       {D_CAA095_CAALOS    = 0.0}
+goal setCAA109_CAALOS       {D_CAA109_CAALOS    = SG_CAA109_814  
+                                                + SG_CAA109_839  
+                                                + SG_CAA109_854  
+                                                + SG_CAA109_862}
+goal setCAA143_CAALOS       {D_CAA143_CAALOS    = SG_CAA143_846  
+                                                + SG_CAA143_866  
+                                                + SG_CAA143_869  
+                                                + SG_CAA143_883  
+                                                + SG_CAA143_888
+                                                + SG_CAA143_903  
+                                                + SG_CAA143_920  
+                                                + SG_CAA143_954  
+                                                + SG_CAA143_961  
+                                                + SG_CAA143_968}
+goal setCAA155_CAALOS       {D_CAA155_CAALOS    = SG_CAA155_977  
+                                                + SG_CAA155_990  
+                                                + SG_CAA155_1009}
+goal setCAA156_CAALOS       {D_CAA156_CAALOS    = 0.0}
+goal setCAA165_CAALOS       {D_CAA165_CAALOS    = 0.0}
+goal setCAA172_CAALOS       {D_CAA172_CAALOS    = SG_CAA172_1020 
+                                                + SG_CAA172_1038 
+                                                + SG_CAA172_1053 
+                                                + SG_CAA172_1062}
+!====
+!
+!===
+goal setCAA071_CAALOS_CVP   {D_CAA071_CAALOS_CVP= 0.0}
+goal setCAA071_CAALOS_SWP   {D_CAA071_CAALOS_SWP= 0.0}
+
+goal setCAA087_CAALOS_CVP   {D_CAA087_CAALOS_CVP= D_CAA087_CAALOS * (SG_R3_CVP/(SG_R3_CVP+SG_R3_SWP))}
+goal setCAA087_CAALOS_SWP   {D_CAA087_CAALOS_SWP= D_CAA087_CAALOS - D_CAA087_CAALOS_CVP}
+
+goal setCAA095_CAALOS_CVP   {D_CAA095_CAALOS_CVP= 0.0}
+goal setCAA095_CAALOS_SWP   {D_CAA095_CAALOS_SWP= 0.0}
+
+goal setCAA109_CAALOS_CVP   {D_CAA109_CAALOS_CVP= D_CAA109_CAALOS * (SG_R4_CVP/(SG_R4_CVP+SG_R4_SWP))}
+goal setCAA109_CAALOS_SWP   {D_CAA109_CAALOS_SWP= D_CAA109_CAALOS - D_CAA109_CAALOS_CVP}
+
+goal setCAA143_CAALOS_CVP   {D_CAA143_CAALOS_CVP= D_CAA143_CAALOS * (SG_R5_CVP/(SG_R5_CVP+SG_R5_SWP))}
+goal setCAA143_CAALOS_SWP   {D_CAA143_CAALOS_SWP= D_CAA143_CAALOS - D_CAA143_CAALOS_CVP}
+
+goal setCAA155_CAALOS_CVP   {D_CAA155_CAALOS_CVP= D_CAA155_CAALOS * (SG_R6_CVP/(SG_R6_CVP+SG_R6_SWP))}
+goal setCAA155_CAALOS_SWP   {D_CAA155_CAALOS_SWP= D_CAA155_CAALOS - D_CAA155_CAALOS_CVP}
+
+goal setCAA156_CAALOS_CVP   {D_CAA156_CAALOS_CVP= 0.0}
+goal setCAA156_CAALOS_SWP   {D_CAA156_CAALOS_SWP= 0.0}
+
+goal setCAA165_CAALOS_CVP   {D_CAA165_CAALOS_CVP= 0.0}
+goal setCAA165_CAALOS_SWP   {D_CAA165_CAALOS_SWP= 0.0}
+
+goal setCAA172_CAALOS_CVP   {D_CAA172_CAALOS_CVP= D_CAA172_CAALOS * (SG_R7_CVP/(SG_R7_CVP+SG_R7_SWP))}
+goal setCAA172_CAALOS_SWP   {D_CAA172_CAALOS_SWP= D_CAA172_CAALOS - D_CAA172_CAALOS_CVP}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Delta Mendota Canal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define svSG_DMC003_590       {value - SG_DMC_UPPER * (11.35/70.01)}        ! Reach 1  is 11.35 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC007_590       {value 0.0} !- SG_DMC_UPPER * (11.35/70.01)}        ! Reach 1  is 11.35 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC011_602       {value - SG_DMC_UPPER * (2.42/70.01)}         ! SG_DMC011_multi * 0.5}
+define svSG_DMC011_608       {value - SG_DMC_UPPER * (2.42/70.01)}         ! SG_DMC011_multi * 0.5}
+define svSG_DMC016_609       {value - SG_DMC_UPPER * (4.44/70.01)}         ! Reach 3  is 4.44 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC021_611       {value - SG_DMC_UPPER * (3.80/70.01)}         ! Reach 4  is 3.80 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC024_614       {value - SG_DMC_UPPER * (5.39/70.01)}         ! Reach 5  is 5.39 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC030_631       {value - SG_DMC_UPPER * (4.60/70.01)}         ! Reach 6  is 4.60 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC034_647       {value - SG_DMC_UPPER * (4.26/70.01)}         ! Reach 7  is 4.26 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC039_658       {value - SG_DMC_UPPER * (5.58/70.01)}         ! Reach 8  is 5.58 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC044_669       {value - SG_DMC_UPPER * (4.36/70.01)}         ! Reach 9  is 4.36 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC049_680       {value - SG_DMC_UPPER * (5.79/70.01)}         ! Reach 10 is 5.79 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC054_692       {value - SG_DMC_UPPER * (3.87/70.01)}         ! Reach 11 is 3.87 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC058_711       {value - SG_DMC_UPPER * (5.71/70.01)}         ! Reach 12 is 5.71 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC064_723       {value - SG_DMC_UPPER * (6.02/70.01)}         ! Reach 13 is 6.02 miles long, D703 represents losses from 1 thru 13
+define svSG_DMC070_758       {value - SG_DMC_LOWER * (4.39/46.59) * 0.5 }  ! SG_DMC070_multi * 0.5}
+define svSG_DMC070_763       {value - SG_DMC_LOWER * (4.39/46.59) * 0.5 }  ! SG_DMC070_multi * 0.5}
+define svSG_DMC074_764       {value - SG_DMC_LOWER * (5.24/46.59)}         ! Reach 15 is 5.24 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC080_780       {value - SG_DMC_LOWER * (5.45/46.59)}         ! Reach 16 is 5.45 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC085_793       {value - SG_DMC_LOWER * (5.45/46.59)}         ! Reach 17 is 5.45 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC091_815       {value - SG_DMC_LOWER * (6.27/46.59)}         ! Reach 18 is 6.27 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC097_840       {value - SG_DMC_LOWER * (8.25/46.59)}         ! Reach 19 is 8.25 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC105_841       {value - SG_DMC_LOWER * (6.20/46.59) * 0.5}   ! SG_DMC105_multi * 0.5}
+define svSG_DMC105_842       {value - SG_DMC_LOWER * (6.20/46.59) * 0.5}   ! SG_DMC105_multi * 0.5}
+define svSG_DMC111_858       {value - SG_DMC_LOWER * (5.22/46.59)}         ! Reach 21 is 5.22 miles long, D607D represents losses from 14 thru 22
+define svSG_DMC116_872       {value - SG_DMC_LOWER * (0.13/46.59)}         ! Reach 22 is 0.13 miles long, D607D represents losses from 14 thru 22
+
+goal setNegSG_DMC003_590 {lhs SG_DMC003_590 case negative {condition svSG_DMC003_590 < 0 rhs svSG_DMC003_590 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC007_590 {lhs SG_DMC007_590 case negative {condition svSG_DMC007_590 < 0 rhs svSG_DMC007_590 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC011_602 {lhs SG_DMC011_602 case negative {condition svSG_DMC011_602 < 0 rhs svSG_DMC011_602 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC011_608 {lhs SG_DMC011_608 case negative {condition svSG_DMC011_608 < 0 rhs svSG_DMC011_608 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC016_609 {lhs SG_DMC016_609 case negative {condition svSG_DMC016_609 < 0 rhs svSG_DMC016_609 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC021_611 {lhs SG_DMC021_611 case negative {condition svSG_DMC021_611 < 0 rhs svSG_DMC021_611 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC024_614 {lhs SG_DMC024_614 case negative {condition svSG_DMC024_614 < 0 rhs svSG_DMC024_614 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC030_631 {lhs SG_DMC030_631 case negative {condition svSG_DMC030_631 < 0 rhs svSG_DMC030_631 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC034_647 {lhs SG_DMC034_647 case negative {condition svSG_DMC034_647 < 0 rhs svSG_DMC034_647 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC039_658 {lhs SG_DMC039_658 case negative {condition svSG_DMC039_658 < 0 rhs svSG_DMC039_658 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC044_669 {lhs SG_DMC044_669 case negative {condition svSG_DMC044_669 < 0 rhs svSG_DMC044_669 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC049_680 {lhs SG_DMC049_680 case negative {condition svSG_DMC049_680 < 0 rhs svSG_DMC049_680 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC054_692 {lhs SG_DMC054_692 case negative {condition svSG_DMC054_692 < 0 rhs svSG_DMC054_692 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC058_711 {lhs SG_DMC058_711 case negative {condition svSG_DMC058_711 < 0 rhs svSG_DMC058_711 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC064_723 {lhs SG_DMC064_723 case negative {condition svSG_DMC064_723 < 0 rhs svSG_DMC064_723 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC070_758 {lhs SG_DMC070_758 case negative {condition svSG_DMC070_758 < 0 rhs svSG_DMC070_758 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC070_763 {lhs SG_DMC070_763 case negative {condition svSG_DMC070_763 < 0 rhs svSG_DMC070_763 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC074_764 {lhs SG_DMC074_764 case negative {condition svSG_DMC074_764 < 0 rhs svSG_DMC074_764 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC080_780 {lhs SG_DMC080_780 case negative {condition svSG_DMC080_780 < 0 rhs svSG_DMC080_780 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC085_793 {lhs SG_DMC085_793 case negative {condition svSG_DMC085_793 < 0 rhs svSG_DMC085_793 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC091_815 {lhs SG_DMC091_815 case negative {condition svSG_DMC091_815 < 0 rhs svSG_DMC091_815 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC097_840 {lhs SG_DMC097_840 case negative {condition svSG_DMC097_840 < 0 rhs svSG_DMC097_840 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC105_841 {lhs SG_DMC105_841 case negative {condition svSG_DMC105_841 < 0 rhs svSG_DMC105_841 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC105_842 {lhs SG_DMC105_842 case negative {condition svSG_DMC105_842 < 0 rhs svSG_DMC105_842 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC111_858 {lhs SG_DMC111_858 case negative {condition svSG_DMC111_858 < 0 rhs svSG_DMC111_858 lhs>rhs penalty SGPHIGH}}
+goal setNegSG_DMC116_872 {lhs SG_DMC116_872 case negative {condition svSG_DMC116_872 < 0 rhs svSG_DMC116_872 lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG_DMC003_590 {lhs SG_DMC003_590 case negative {condition svSG_DMC003_590 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC003_590 }}
+goal setPosSG_DMC007_590 {lhs SG_DMC007_590 case negative {condition svSG_DMC007_590 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC007_590 }}
+goal setPosSG_DMC011_602 {lhs SG_DMC011_602 case negative {condition svSG_DMC011_602 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC011_602 }}
+goal setPosSG_DMC011_608 {lhs SG_DMC011_608 case negative {condition svSG_DMC011_608 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC011_608 }}
+goal setPosSG_DMC016_609 {lhs SG_DMC016_609 case negative {condition svSG_DMC016_609 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC016_609 }}
+goal setPosSG_DMC021_611 {lhs SG_DMC021_611 case negative {condition svSG_DMC021_611 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC021_611 }}
+goal setPosSG_DMC024_614 {lhs SG_DMC024_614 case negative {condition svSG_DMC024_614 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC024_614 }}
+goal setPosSG_DMC030_631 {lhs SG_DMC030_631 case negative {condition svSG_DMC030_631 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC030_631 }}
+goal setPosSG_DMC034_647 {lhs SG_DMC034_647 case negative {condition svSG_DMC034_647 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC034_647 }}
+goal setPosSG_DMC039_658 {lhs SG_DMC039_658 case negative {condition svSG_DMC039_658 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC039_658 }}
+goal setPosSG_DMC044_669 {lhs SG_DMC044_669 case negative {condition svSG_DMC044_669 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC044_669 }}
+goal setPosSG_DMC049_680 {lhs SG_DMC049_680 case negative {condition svSG_DMC049_680 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC049_680 }}
+goal setPosSG_DMC054_692 {lhs SG_DMC054_692 case negative {condition svSG_DMC054_692 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC054_692 }}
+goal setPosSG_DMC058_711 {lhs SG_DMC058_711 case negative {condition svSG_DMC058_711 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC058_711 }}
+goal setPosSG_DMC064_723 {lhs SG_DMC064_723 case negative {condition svSG_DMC064_723 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC064_723 }}
+goal setPosSG_DMC070_758 {lhs SG_DMC070_758 case negative {condition svSG_DMC070_758 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC070_758 }}
+goal setPosSG_DMC070_763 {lhs SG_DMC070_763 case negative {condition svSG_DMC070_763 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC070_763 }}
+goal setPosSG_DMC074_764 {lhs SG_DMC074_764 case negative {condition svSG_DMC074_764 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC074_764 }}
+goal setPosSG_DMC080_780 {lhs SG_DMC080_780 case negative {condition svSG_DMC080_780 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC080_780 }}
+goal setPosSG_DMC085_793 {lhs SG_DMC085_793 case negative {condition svSG_DMC085_793 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC085_793 }}
+goal setPosSG_DMC091_815 {lhs SG_DMC091_815 case negative {condition svSG_DMC091_815 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC091_815 }}
+goal setPosSG_DMC097_840 {lhs SG_DMC097_840 case negative {condition svSG_DMC097_840 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC097_840 }}
+goal setPosSG_DMC105_841 {lhs SG_DMC105_841 case negative {condition svSG_DMC105_841 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC105_841 }}
+goal setPosSG_DMC105_842 {lhs SG_DMC105_842 case negative {condition svSG_DMC105_842 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC105_842 }}
+goal setPosSG_DMC111_858 {lhs SG_DMC111_858 case negative {condition svSG_DMC111_858 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC111_858 }}
+goal setPosSG_DMC116_872 {lhs SG_DMC116_872 case negative {condition svSG_DMC116_872 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_DMC116_872 }}
+
+!=====
+define SG_SJR_MDOTA         {timeseries kind 'RIVER-LOSS' units 'CFS'} !>=zero 
+define svSG_MDOTA_872   {value -SG_SJR_MDOTA } !<=zero 
+goal setNegSG_MDOTA_872 {lhs SG_MDOTA_872 case negative {condition svSG_MDOTA_872 < 0 rhs svSG_MDOTA_872 lhs>rhs penalty SGPHIGH}}
+goal setPosSG_MDOTA_872 {lhs SG_MDOTA_872 case negative {condition svSG_MDOTA_872 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG_MDOTA_872 }}
+ 
+! MAP LOSSES TO SG...
+goal setDMC003_DMCLOS       {D_DMC003_DMCLOS    = SG_DMC003_590}
+goal setDMC007_DMCLOS       {D_DMC007_DMCLOS    = SG_DMC007_590}
+goal setDMC011_DMCLOS       {D_DMC011_DMCLOS    = SG_DMC011_602 
+                                                + SG_DMC011_608}
+goal setDMC016_DMCLOS       {D_DMC016_DMCLOS    = SG_DMC016_609}
+goal setDMC021_DMCLOS       {D_DMC021_DMCLOS    = SG_DMC021_611}
+goal setDMC024_DMCLOS       {D_DMC024_DMCLOS    = SG_DMC024_614}
+goal setDMC030_DMCLOS       {D_DMC030_DMCLOS    = SG_DMC030_631}
+goal setDMC034_DMCLOS       {D_DMC034_DMCLOS    = SG_DMC034_647}
+goal setDMC039_DMCLOS       {D_DMC039_DMCLOS    = SG_DMC039_658}
+goal setDMC044_DMCLOS       {D_DMC044_DMCLOS    = SG_DMC044_669}
+goal setDMC049_DMCLOS       {D_DMC049_DMCLOS    = SG_DMC049_680}
+goal setDMC054_DMCLOS       {D_DMC054_DMCLOS    = SG_DMC054_692}
+goal setDMC058_DMCLOS       {D_DMC058_DMCLOS    = SG_DMC058_711}
+goal setDMC064_DMCLOS       {D_DMC064_DMCLOS    = SG_DMC064_723}
+goal setDMC070_DMCLOS       {D_DMC070_DMCLOS    = SG_DMC070_758 
+                                                + SG_DMC070_763}
+goal setDMC074_DMCLOS       {D_DMC074_DMCLOS    = SG_DMC074_764}
+goal setDMC076_DMCLOS       {D_DMC076_DMCLOS    = 0.0}          
+goal setDMC080_DMCLOS       {D_DMC080_DMCLOS    = SG_DMC080_780}
+goal setDMC085_DMCLOS       {D_DMC085_DMCLOS    = SG_DMC085_793}
+goal setDMC091_DMCLOS       {D_DMC091_DMCLOS    = SG_DMC091_815}
+goal setDMC097_DMCLOS       {D_DMC097_DMCLOS    = SG_DMC097_840}
+goal setDMC105_DMCLOS       {D_DMC105_DMCLOS    = SG_DMC105_841 
+                                                + SG_DMC105_842}
+goal setDMC111_DMCLOS       {D_DMC111_DMCLOS    = SG_DMC111_858}
+goal setDMC116_DMCLOS       {D_DMC116_DMCLOS    = SG_DMC116_872}
+goal setMDOTA_LOSS          {D_MDOTA_LOSS       = SG_MDOTA_872}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Fresno Slough    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define svSG51_FSL012_4 {value - GetSeep(51) /cfs_cfm }
+define svSG52_FSL005_4 {value - GetSeep(52) /cfs_cfm }
+define svSG53_FSL005_4 {value - GetSeep(53) /cfs_cfm }
+
+define SG51_FSL012_4_DLL {alias svSG51_FSL012_4 kind 'RIVER-SEEPAGE' units 'CFS'}
+define SG52_FSL005_4_DLL {alias svSG52_FSL005_4 kind 'RIVER-SEEPAGE' units 'CFS'}
+define SG53_FSL005_4_DLL {alias svSG53_FSL005_4 kind 'RIVER-SEEPAGE' units 'CFS'}
+
+goal setNegSG51_FSL012_4 {lhs SG51_FSL012_4 case negative {condition svSG51_FSL012_4 < 0 rhs svSG51_FSL012_4 lhs>rhs penalty SGPHIGH}}
+goal setNegSG52_FSL005_4 {lhs SG52_FSL005_4 case negative {condition svSG52_FSL005_4 < 0 rhs svSG52_FSL005_4 lhs>rhs penalty SGPHIGH}}
+goal setNegSG53_FSL005_4 {lhs SG53_FSL005_4 case negative {condition svSG53_FSL005_4 < 0 rhs svSG53_FSL005_4 lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG51_FSL012_4 {lhs SG51_FSL012_4 case negative {condition svSG51_FSL012_4 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG51_FSL012_4 }}
+goal setPosSG52_FSL005_4 {lhs SG52_FSL005_4 case negative {condition svSG52_FSL005_4 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG52_FSL005_4 }}
+goal setPosSG53_FSL005_4 {lhs SG53_FSL005_4 case negative {condition svSG53_FSL005_4 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG53_FSL005_4 }}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Orestimba Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+define svSG128_ORT014_19 {value - GetSeep(128) /cfs_cfm}
+define svSG129_ORT009_19 {value - GetSeep(129) /cfs_cfm}
+define svSG130_ORT001_19 {value - GetSeep(130) /cfs_cfm}
+
+define SG128_ORT014_19_DLL {alias svSG128_ORT014_19 kind 'RIVER-SEEPAGE' units 'CFS'}
+define SG129_ORT009_19_DLL {alias svSG129_ORT009_19 kind 'RIVER-SEEPAGE' units 'CFS'}
+define SG130_ORT001_19_DLL {alias svSG130_ORT001_19 kind 'RIVER-SEEPAGE' units 'CFS'}
+
+goal setNegSG128_ORT014_19 {lhs SG128_ORT014_19 case negative {condition svSG128_ORT014_19 < 0 rhs svSG128_ORT014_19 lhs>rhs penalty SGPHIGH}}
+goal setNegSG129_ORT009_19 {lhs SG129_ORT009_19 case negative {condition svSG129_ORT009_19 < 0 rhs svSG129_ORT009_19 lhs>rhs penalty SGPHIGH}}
+goal setNegSG130_ORT001_19 {lhs SG130_ORT001_19 case negative {condition svSG130_ORT001_19 < 0 rhs svSG130_ORT001_19 lhs>rhs penalty SGPHIGH}}
+
+goal setPosSG128_ORT014_19 {lhs SG128_ORT014_19 case negative {condition svSG128_ORT014_19 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG128_ORT014_19 }}
+goal setPosSG129_ORT009_19 {lhs SG129_ORT009_19 case negative {condition svSG129_ORT009_19 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG129_ORT009_19 }}
+goal setPosSG130_ORT001_19 {lhs SG130_ORT001_19 case negative {condition svSG130_ORT001_19 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG130_ORT001_19 }}
+
+

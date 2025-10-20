@@ -1,0 +1,272 @@
+/*
+File Name: Yuba_Operations.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Operational Logic for New Bullards Bar Dam
+
+*/
+
+!modified code for releases from New Bullards Bar
+!minimum instream flow is 6 cfs.  After that, releases limited to 3700 cfs until
+!flood control pool is reached and then add'l releases can be made.  
+
+
+!NBB is operated to meet minimum instream flow d/s of Daguerre Point Diversion Dam
+!It is assumed that NBB releases do not take into account inflow from Dry Creek
+!The minimum instream flow has therefore been defined as being in excess of the Dry Creek flow
+
+define ColgateMax  {value 3430.0}
+define NarrowsMax  {value 4190.0}
+define NBBFishFlow {value    6.0}
+
+
+goal set_C_NFY002_MIF  {C_NFY002_MIF = MF_C_NFY002}
+
+
+
+goal limitD_NBLDB_CGT005_POW {D_NBLDB_CGT005_POW < ColgateMax}
+goal C_NFY002_Total    {C_NFY002 = C_NFY002_MIF  + C_NFY002_ADD}
+goal D_NBLDB_CGT005Total {D_NBLDB_CGT005 = D_NBLDB_CGT005_POW}
+
+
+!Define
+
+/*
+!Minimum flow requirements u/s of Narrows penstock st to zero
+define MF_ENGLB {
+	case Wet {
+        	condition wytype_Yuba == 1
+        	select Wet   from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        case AN {
+	        condition wytype_Yuba == 2
+        	select AN    from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        case BN {
+	        condition wytype_Yuba == 3
+        	select BN    from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        case Dry {
+	        condition wytype_Yuba == 4
+        	select Dry   from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        case Crit {
+	        condition wytype_Yuba == 5
+        	select Crit  from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        case otherwise {
+		condition always
+        	select Ecrit from Yuba_LowerYubaMinflow where C_arc=37,standard = 0,month=month}
+        }
+*/
+
+!goal C_ENGLBminflow {C_ENGLB_MIF < MF_ENGLB} 
+goal C_ENGLBpower   {C_ENGLB_POW < NarrowsMax} !capacity of Narrows
+goal C_ENGLBtotal   {C_ENGLB = /*C_ENGLB_MIF*/ + C_ENGLB_POW + C_ENGLB_ADD}
+
+/*
+!Control 8: Maintain water releases after October
+!The purpose of the first case statement is to avoid specifying an
+!initial value for C_NBLDB_ADD
+goal MaintainWinterFlows {
+	lhs  C_YUB024
+	case firstmonth {
+	        condition month==OCT .and. wateryear == bgnWY
+        	rhs 0.
+        	lhs<rhs penalty 0.
+        	lhs>rhs penalty 0.
+        	}
+	case Nov  {
+		condition month==NOV .and. C_ENGLB_ADD(-1) < 0.01 
+		rhs C_YUB024(-1)
+		lhs<rhs penalty 20000
+		lhs>rhs penalty 0} 
+	case Dec  {
+		condition month==DEC .and. C_ENGLB_ADD(-1) < 0.01  
+		rhs C_YUB024(-1)
+		lhs<rhs penalty 20000
+		lhs>rhs penalty 0}  
+	case Jan  {
+		condition month==JAN .and. C_ENGLB_ADD(-1) < 0.01  
+		rhs C_YUB024(-1)
+		lhs<rhs penalty 20000
+		lhs>rhs penalty 0} 
+}
+
+!Control 3: Release to flood envelope, release to target storage limited
+!by capacity of Narrows
+
+!Penalize excess flows C37_ADD
+
+
+!Calculate previous month control for Colgate release
+!For output only
+
+!ReleaseControl = 1: Dead storage reached
+!ReleaseControl = 21: Release for demand - at or d/s of Daguerre Point Dam
+!ReleaseControl = 22: Release for demand - Smartville minimum flow
+!ReleaseControl = 3: Release to NBB flood envelope
+!ReleaseControl = 4: Release to NBB target storage
+!ReleaseControl = 5: Maximum Colgate release
+!ReleaseControl = 6: Release to Narrows maximum
+!ReleaseControl = 7: Minimum PG&E release
+!ReleaseControl = 8: Release to maintain winter flows after October
+
+
+define S_NBLDBlevel5_prev {
+	case      OCT {
+        condition month == OCT
+        select target from res_level where res_num=93,level=5,month=12}
+        
+        case      otherwise {
+	condition always
+        select target from res_level where res_num=93,level=5,month=month-1}
+        }
+        
+        
+define S_NBLDBlevel4_prev {
+	case      OCT {
+        condition month == OCT
+        select target from res_level where res_num=93,level=4,month=12}
+        
+        case      otherwise {
+	condition always
+        select target from res_level where res_num=93,level=4,month=month-1}
+        }
+
+define RelFloodEnvelope {
+	case      InitialMonth {
+        condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+        
+        case	  Otherwise {
+        condition always
+        value	  S_NBLDB(-2)*taf_cfs(-1) + C_NFY017(-1) + C_CMT000(-1) + I_NBLDB(-1) - E_NBLDB(-1) - S_NBLDBLevel5_prev*taf_cfs(-1) - C_NFY002_MIF(-1)}
+        }
+        
+define RelTargetStorage {
+	case      InitialMonth {
+        condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+        
+        case	  Otherwise {
+        condition always
+	value     S_NBLDB(-2)*taf_cfs(-1) + C_NFY017(-1) + C_CMT000(-1) + I_NBLDB(-1) - E_NBLDB(-1) - S_NBLDBLevel4_prev*taf_cfs(-1) - C_NFY002_MIF(-1)}
+	}
+	
+define RelNarrowsMax {
+	case      InitialMonth {
+        condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+        
+        case	  Otherwise {
+        condition always
+	value     NarrowsMax - S_ENGLB(-2)*taf_cfs(-1) + S_ENGLB(-1)*taf_cfs(-1) - I_ENGLB(-1) + E_ENGLB(-1) - C_NFY002_MIF(-1) }
+	}
+	
+define RelColgateMax {value ColgateMax}
+	
+define RelPGEMin {value (18.500/1.13)*taf_cfs(-1) }
+        
+        
+define RelWinterFlows {
+	case      InitialMonth {
+	condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+        
+        case      SecondMonth {
+	condition month == NOV .and. wateryear == bgnWY
+        value     0 }
+        
+	case      WinterMonth {
+	condition month >= DEC .and. month <= FEB .and. C_ENGLB_ADD(-2) == 0
+        value     C_ENGLB_POW(-2) - S_ENGLB(-2)*taf_cfs(-1) + S_ENGLB(-1)*taf_cfs(-1) - I_ENGLB(-1) + E_ENGLB(-1) - C_NFY002_MIF(-1) }
+        
+        case	  Otherwise {
+	condition always
+	value     0}
+	}
+        
+define RelEGBMinFlow {
+	case      InitialMonth {
+	condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+	        
+	case	  Otherwise {
+	condition always
+	value     MF_YUB024dv(-1) - S_ENGLB(-2)*taf_cfs(-1) + S_ENGLB(-1)*taf_cfs(-1) - I_ENGLB(-1) -  I_ENGLB(-1)+ E_ENGLB(-1) - C_NFY002_MIF(-1)}
+	}
+	
+define RelDGPDemand {
+	case      InitialMonth {
+	condition month == OCT .and. wateryear == bgnWY
+        value     0 }
+	        
+	case	  Otherwise {
+	condition always
+	value     MF_YUB006dv(-1) - S_ENGLB(-2)*taf_cfs(-1) + S_ENGLB(-1)*taf_cfs(-1) - I_ENGLB(-1) + E_ENGLB(-1)
+			 - I_DER001(-1) + WR_DGR(-1) + CL_DGR(-1) - C_NFY002_MIF(-1)} 
+	}
+        
+define tolerance {value 0.1}
+
+define PreMonthRelCntrl {
+
+    	case      InitialMonth {
+        condition month == OCT .and. wateryear == bgnWY
+        value     0 } 
+        
+        case      Control21 {
+	condition abs(D_NBLDB_CGT005_POW(-1)- RelDGPDemand) <= tolerance
+        value     21 }
+        
+        case      Control22 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelEGBMinFlow) <= tolerance
+	value     22 }
+                                            
+        case      Control34 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelFloodEnvelope) <= tolerance .and.
+		  abs(D_NBLDB_CGT005_POW(-1) - RelTargetStorage)<= tolerance
+	value     34 }
+        
+        case      Control3 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelFloodEnvelope) <= tolerance
+        value     3 }
+        
+        case      Control4 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelTargetStorage) <= tolerance
+        value     4 }
+       
+        !Meet winter flow requirements without exceeding Colgate max capacity
+        case      Control81 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelWinterFlows) <= tolerance 
+	value     81 }
+	
+	!Meet winter flow requirements exceeding Colgate max capacity
+	case      Control82 {
+	condition abs(D_NBLDB_CGT005_POW(-1) + C_NFY002_ADD(-1) - RelWinterFlows) <= tolerance
+	value     82 }
+        
+        case      Control5 {
+        condition abs(D_NBLDB_CGT005_POW(-1) - RelColgateMax) <= tolerance
+        value     5 }
+        
+        case      Control6 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelNarrowsMax) <= tolerance 
+        value     6 }
+        
+        case      Control7 {
+	condition abs(D_NBLDB_CGT005_POW(-1) - RelPGEMin) <= tolerance
+	value     7 }
+
+        case      otherwise {
+        condition always
+        value     0 }   
+        
+}
+
+define P_RelFloodEnvdv     {alias RelFloodEnvelope kind 'control' units 'none'}
+define P_RelTargStordv     {alias RelTargetStorage kind 'control' units 'none'}
+define P_RelNarrowMaxdv    {alias RelNarrowsMax kind 'control' units 'none'}
+define P_RelPGEMindv       {alias RelPGEMin kind 'control' units 'none'}
+define P_RelWintFlowdv     {alias RelWinterFlows kind 'control' units 'none'}
+define P_RelColgMaxdv      {alias RelColgateMax kind 'control' units 'none'}
+define P_RelDGPDemanddv    {alias RelDGPDemand kind 'control' units 'none'}
+define P_RelEGMinFlowdv    {alias RelEGBMinFlow kind 'control' units 'none'}
+define P_RelCntrldv        {alias PreMonthRelCntrl kind 'control' units 'none'}
+*/

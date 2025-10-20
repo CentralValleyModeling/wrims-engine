@@ -1,0 +1,308 @@
+!ITP Proposed Project Alt 2B export limit
+!only applied on SWP exports
+!Apr - May: SWP exports limited to maximum of 600 cfs or 40% of max allowable export under SJR I/E; applied with Delta is in excess conditions
+!Aug: reduce SWP exports by 100 TAF in all the Wet and AN years
+
+!AK 11/27/2019
+!KS 12/13/2019 - updated references in the condition statements to the DELTA cycle; 
+
+!Calculate the maximum allowable export with SJR I/E
+define NMFS_MaxExp_ON {
+    case AprMay {		
+        condition month>=APR .AND. month<=MAY
+        value SJRatio_MaxExp}
+    case otherwise{
+        condition always
+        value 999999.}
+}
+define NMFS_MaxExp_ONdv {alias NMFS_MaxExp_ON kind 'NMFS' units 'cfs'}
+
+!Limit wet year SJRIE cuts to 150 TAF after allowing 30 TAF buffer above allowed SJRIE.
+
+!Determine how much of the 30 TAF buffer remains
+define initial_30TAF_cut_reduction_ {std kind 'SJRIE' units 'TAF'}
+define initial_30TAF_cut_reduction {
+	case NoCutReduction {
+		condition	range(month,jun,mar) .or. wyt_SAC> 1.5
+					.OR. NDOI_MIN[WHEELJPOD] + NDOI_ADD[WHEELJPOD] >= 44500
+					.OR. NMFS_MaxExp_ON >= EXP_TD[WHEELJPOD]			!total SJR I/E export does not constrain
+					.OR. SWPExpCapShare_OMR*NMFS_MaxExp_ON >= C_CAA003_SWP[WHEELJPOD]	!40% of the SJR I/E does not constrain constrain
+					.OR. C_CAA003[WHEELJPOD] <= 600.					!at or below Health and Safety Exports
+		
+		value		0.	
+	}
+	case otherwise {
+		condition	always
+		value		max(0., min(30. - initial_30TAF_cut_reduction_(-1), 
+								(C_CAA003_SWP[WHEELJPOD]-max(600,SWPExpCapShare_OMR*NMFS_MaxExp_ON))*cfs_taf))
+	}
+}
+goal set_initial_30TAF_cut_reduction_ {initial_30TAF_cut_reduction_ = initial_30TAF_cut_reduction}
+        
+!SWP export cut to meet ITP SJRIE criteria - DV
+
+!Determine how much of the 150 TAF export reduction cap remains.
+define export_reduction_cap {
+	case NoReductionCap {
+		condition	range(month,jun,mar) .or. wyt_SJR> 1.5
+		value		99999.*cfs_taf	
+	}
+	case otherwise {
+		condition	always
+		value		max(0., 150. - Alt2BSWPExpCut_SJRIEdv(-1)*cfs_taf(-1))
+	}	
+}
+define export_reduction_cap_ {alias export_reduction_cap kind 'SJRIE' UNITS 'TAF'}
+define export_reduction_cap_cfs {value export_reduction_cap*taf_cfs}
+define export_reduction_cap_cfs_ {alias export_reduction_cap_cfs kind 'SJRIE' UNITS 'CFS'}
+
+!SWP export cut to meet ITP SJRIE criteria - SV
+!Note that SWP export are first buffered by 30 TAF and export reductions are limited to 150 TAF in Wet years.
+define Alt2BSWPExpCut_SJRIE {     
+    case AprMay {		
+        condition month>=APR .AND. month<=MAY
+					.AND. NDOI_MIN[WHEELJPOD] + NDOI_ADD[WHEELJPOD] < 44500 
+					.AND. NMFS_MaxExp_ON < EXP_TD[WHEELJPOD]			!total SJR I/E export must be less than the baseline total export
+					.AND. SWPExpCapShare_OMR*NMFS_MaxExp_ON < C_CAA003_SWP[WHEELJPOD]	!40% of the SJR I/E must be less than the baseline SWP exports
+					.AND. C_CAA003[WHEELJPOD] > 600.					!Health and Safety Exports
+        value min(export_reduction_cap_cfs, max(0,C_CAA003_SWP[WHEELJPOD]-initial_30TAF_cut_reduction*taf_cfs
+        		-max(600,SWPExpCapShare_OMR*NMFS_MaxExp_ON))
+        )}
+    case otherwise{
+        condition always
+        value 0}
+}
+define Alt2BSWPExpCut_SJRIEdv  {alias Alt2BSWPExpCut_SJRIE kind 'flow-delivery' units 'CFS'}
+
+
+!In Wet, Above Normal, and Below Normal years, ITP 100 TAF export cut carryover should be released to 
+!support 80 km X2 in the summer months. 
+define release_ITP_Carryover_ {std kind 'carryover-release' units 'cfs'}
+
+!Track remaining ITP carryover in W, AN, and BN years
+!Calculate spill of remaining ITP carryover that would be used in W, AN, and BN years.
+define remain_ITP_Carryover_ {std kind 'carryover-remain' units 'taf'}
+define ITP_Oro_Spill_of_Rem {
+	case Spill1 {
+		condition	S_OROVL[WHEELJPOD] + 0.1 > S_OROVLLEVEL5 .and. month == may
+		value		min(ITP_Carryover_(-1),C_FTR059_ADD[WHEELJPOD]*cfs_taf,C_FTR003_ADD[WHEELJPOD]*cfs_taf)
+	}
+	case Spill2 {
+		condition	S_OROVL[WHEELJPOD] + 0.1 > S_OROVLLEVEL5
+		value		min(remain_ITP_Carryover_(-1),C_FTR059_ADD[WHEELJPOD]*cfs_taf,C_FTR003_ADD[WHEELJPOD]*cfs_taf)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}	
+}
+define ITP_Oro_Spill_of_Rem_ {alias ITP_Oro_Spill_of_Rem kind 'carryover-spill' units 'taf'}
+
+define remain_ITP_Carryover {
+	case OFF {
+		condition	range(month,oct,apr)
+		value		0.
+	}
+	case May {
+		condition	month == may .and. wyt_sac < 3.5
+		value		max(0.,ITP_Carryover_(-1)-ITP_Oro_Spill_of_Rem)
+	}
+	case otherwise {
+		condition	always
+		value		max(0., remain_ITP_Carryover_(-1) - ITP_Oro_Spill_of_Rem - release_ITP_Carryover_(-1)*CFS_TAF(-1))
+	}
+}
+goal set_remain_ITP_Carryover_ {remain_ITP_Carryover_ = remain_ITP_Carryover}
+
+!Limit release of ITP carryover to Delta outflow necessary to target X2 of 80 km in W and AN years.
+!Do this starting in May when WYT is finalized
+
+!Release all carryover in May in BN years.
+define release_ITP_Carryover {
+	case WandAN {
+		condition wyt_sac < 2.5	
+		value max(0.,min(DO_req_X2_ITP - NDOI_MIN[WHEELJPOD] - NDOI_ADD[WHEELJPOD],remain_ITP_Carryover*TAF_cfs))
+	}
+	case may {
+		condition	month == may
+		value		remain_ITP_Carryover*TAF_cfs
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+goal set_release_ITP_Carryover_ {release_ITP_Carryover_ = release_ITP_Carryover}
+
+!In Wet and above normal years, designate a minimum of 80 TAF of 100 TAF ITP export cut for carryover.
+!Carryover can only occur is there is enough available capacity in Oroville.
+define min_carryover {value 80.}  !TAF
+
+!Calculate how much is remaining of the 100 TAF export cut to support freshening the Delta
+!to 80 km in Wet and Above normal years.  Assume 80 TAF will be preserved for carryover unless
+!there is insufficient room in Oroville.
+define Alt2BSWPExpCutX2dv {std kind 'flow-delivery' units 'CFS'}
+define likely_spill_threshold {
+	case NotAugust {
+		condition	range(month,sep,jul)
+		value		99999.
+	}
+	case August {
+		condition	always
+		value		S_OROVLLEVEL5(1)
+	}
+}
+define likely_spill_threshold_ {alias likely_spill_threshold kind 'Oroville' UNITS 'TAF'}
+
+define remain_Aug_Alt2BSWPExpCut_ {std kind 'flex-account-remain' units 'taf'}  
+define remain_Aug_Alt2BSWPExpCut {
+	case OFF {
+		condition	range(month,oct,may)
+		value		0.
+	}
+	case June {
+		condition	month == jun
+		value		max(0., Aug_Alt2BSWPExpCut - min_carryover)
+	}
+	case AugustCancelMinCarryover {
+		condition	S_OROVL[WHEELJPOD] + min_carryover > likely_spill_threshold !likely_spill_threshold = End of Sep flood curve in August
+		value		max(0., remain_Aug_Alt2BSWPExpCut_(-1) + min_carryover - Alt2BSWPExpCutX2dv(-1)*CFS_TAF(-1))
+	}
+	case otherwise {
+		condition	always
+		value		max(0., remain_Aug_Alt2BSWPExpCut_(-1) - Alt2BSWPExpCutX2dv(-1)*CFS_TAF(-1))
+	}
+}
+goal set_remain_Aug_Alt2BSWPExpCut_ {remain_Aug_Alt2BSWPExpCut_ = remain_Aug_Alt2BSWPExpCut}
+
+!Determine cut in exports to meet 80 km X2 target. This is use of this years 100 TAF export cut.
+!Carryover from previous year is used first.
+define Alt2BSWPExpCut_X2 {value max(0.,min(DO_req_X2_ITP - release_ITP_Carryover - NDOI_MIN[WHEELJPOD] - NDOI_ADD[WHEELJPOD],remain_Aug_Alt2BSWPExpCut*TAF_cfs, C_CAA003_SWP[WHEELJPOD] - 300.)) }
+goal set_Alt2BSWPExpCutX2dv {Alt2BSWPExpCutX2dv = Alt2BSWPExpCut_X2}
+
+!Track how much of ITP 100 TAF export cut used for 80 km target.
+define Alt2BSWPExpCut_X2_used_ {std kind 'Flex-Account-Used' units 'TAF'}
+define Alt2BSWPExpCut_X2_used {
+	case OFF {
+		condition	range(month,jan,may) .or. (wateryear == 1922 .and. range(month,oct,dec))
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		Alt2BSWPExpCut_X2_used_(-1) + Alt2BSWPExpCut_X2*CFS_TAF
+	}
+}
+goal set_Alt2BSWPExpCut_X2_used_ {Alt2BSWPExpCut_X2_used_ = Alt2BSWPExpCut_X2_used}
+
+!Calculate how much of ITP export cut unused for meeting 80 km target and therefore
+!available for carryover if exports can be cut in a way to back the water in Oroville.
+define ITP_Unused {value max(0.,Aug_Alt2BSWPExpCut - Alt2BSWPExpCut_X2_used)}
+define ITP_Unused_ {alias ITP_Unused kind 'carryover' units 'taf'}
+
+!Unused ITP 100 TAF export cut will be cut in September.  The first priority is carryover
+!in Oroville if storage capacity is available.  It goes to Delta outflow if not.
+!Alt2BSWPExpCut_Final is the Final September export cut whether it goes to carryover or outflow.
+define Alt2BSWPExpCut_Final {
+	case NoCut {
+		condition	range(month,oct,aug) .or. wyt_sac > 2.5
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		max(0., min(ITP_Unused*taf_cfs, C_CAA003_SWP[WHEELJPOD] - 300.))
+	}
+}
+
+!Alt2BSWPExpCut_Carryover is the portion of Alt2BSWPExpCut_Final backed into Oroville. 
+define Alt2BSWPExpCut_Carryover {value max(0., min(Alt2BSWPExpCut_Final,(S_OROVLLEVEL5 - S_OROVL[WHEELJPOD])*TAF_CFS, C_FTR059[WHEELJPOD] - C_FTR059_MIF[WHEELJPOD], C_FTR003[WHEELJPOD] - C_FTR003_MIF[WHEELJPOD]))}
+
+
+!AltAlt2BSWPExpCut_Outflow is the portion of Alt2BSWPExpCut_Final that flows out the Delta because there is no room in Oroville.
+define Alt2BSWPExpCut_Outflow {value max(0., Alt2BSWPExpCut_Final - Alt2BSWPExpCut_Carryover)}
+
+!AltAlt2BSWPExpCut_Credit is the portion of ITP_Unused credited to Oroville carryover because exports have already been cut 
+!to meet Fall X2.
+define Alt2BSWpExpCut_Credit {
+	case NotSeptember {
+		condition	range(month,oct,aug)
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		max(0., ITP_Unused*taf_cfs - (C_CAA003_SWP[WHEELJPOD] - 300.))
+	}
+}
+
+define Alt2BSWPExpCut_Final_ {alias Alt2BSWPExpCut_Final kind 'flow-delivery' units 'cfs'}
+define Alt2BSWPExpCut_Carryover_ {alias Alt2BSWPExpCut_Carryover kind 'flow-delivery' units 'cfs'}
+define Alt2BSWPExpCut_Outflow_ {alias Alt2BSWPExpCut_Outflow kind 'flow-delivery' units 'cfs'}
+define Alt2BSWPExpCut_Credit_ {alias Alt2BSWPExpCut_Credit kind 'flow-delivery' units 'cfs'}
+
+!Calculate spill of ITP carryover including outflow that occurs in September due to  
+!insufficient storage capacity in Oroville.  
+define ITP_Oro_Spill {
+	case September {
+		condition	month == sep
+		value		Alt2BSWPExpCut_Outflow*cfs_taf
+	}
+	case Spill {
+		condition	S_OROVL[WHEELJPOD] + 0.1 > S_OROVLLEVEL5
+		value		min(ITP_Carryover_(-1),C_FTR059_ADD[WHEELJPOD]*cfs_taf,C_FTR003_ADD[WHEELJPOD]*cfs_taf)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}	
+}
+define ITP_Oro_Spill_ {alias ITP_Oro_Spill kind 'carryover-spill' units 'taf'}
+
+!Track ITP carryover.
+define remain_ITP_Carryover_Oro_rel_ {std kind 'carryover-release' units 'TAF'}
+define ITP_Carryover {
+	case Init {
+		condition	range(month,oct,aug) .and. wateryear == 1922
+		value		0.
+	}
+	case September {
+		condition	month == sep
+		value		Alt2BSWPExpCut_Carryover*cfs_taf + Alt2BSWpExpCut_Credit*cfs_taf
+	}
+	case Critical {
+		condition	month == may .and. wyt_sac > 4.5
+		value		0. 			
+	}
+	case Augsetzero {
+		condition	ABS(SMSCG_Op3_Count-2) < 0.001 .and. SMSCG_OP3SV > 0.5
+		value		ITP_Carryover_(-1) - remain_ITP_Carryover_Oro_rel_(-1) 
+	}
+	case otherwise {
+		condition	always
+		value		max(0.,ITP_Carryover_(-1) - ITP_Oro_Spill - SMSCG_Carryover_Rel*cfs_taf - release_ITP_Carryover*cfs_taf)
+	}
+}
+goal set_ITP_Carryover_ {ITP_Carryover_ = ITP_Carryover}
+
+
+define remain_ITP_Carryover_Oro_rel{
+	case Init {
+		condition	range(month,oct,aug) .and. wateryear == 1922
+		value		0.
+	}
+	case day60ops_end {
+	condition ITP_Carryover > 0 .and. ABS(SMSCG_Op3_Count-2) < 0.001 .and. SMSCG_OP3SV < 0.5
+	value ITP_Carryover
+	}
+	case otherwise {
+	condition	always
+	value		0.
+	}
+}
+
+goal set_remain_ITP_Carryover_Oro_rel_ {remain_ITP_Carryover_Oro_rel_ = remain_ITP_Carryover_Oro_rel}
+
+
+!Total ITP export cuts
+define Alt2BSWPExpCut {value Alt2BSWPExpCut_SJRIE +  Alt2BSWPExpCut_X2 + Alt2BSWPExpCut_Final}
+define Alt2BSWPExpCutdv {alias Alt2BSWPExpCut_SJRIE +  Alt2BSWPExpCut_X2 + Alt2BSWPExpCut_Final kind 'flow-delivery' units 'CFS'}
+
+goal Adj_C_CAA003_SWP {C_CAA003_SWP = C_CAA003_SWP[WHEELJPOD] - Alt2BSWPExpCut_SJRIE - Alt2BSWPExpCut_X2 - Alt2BSWPExpCut_Final }

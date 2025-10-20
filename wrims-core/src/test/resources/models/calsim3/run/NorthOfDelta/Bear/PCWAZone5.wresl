@@ -1,0 +1,75 @@
+/*
+CalSim 3.0
+PCWAZone5.wresl
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Auburn Ravine    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Water for PCWA consists of a mix of:
+   PG&W water delivered from the South Canal. Measued at YB136 (D_STH002_ABN026).
+   American River PumpStation water discharged directly into the ravine.
+   NID surplus water.
+
+Zone 5 allocation decided by PCWA. From 2013-2016 varied from 5 TAF - 16.5 TAF.
+
+Delivery of NID surplus water is typically zero, but did occur in 2005 and 2006.
+
+Assume all deliveries from April-October are for ZOne 5
+
+*/
+
+!Deliveries are based on accounting of Auburn Ravine supplies with NID. It is assumed there is a 6.25% seepage loss.
+!goal setD_ABN010_24_NA2 {D_ABN010_24_NA2 < 0.9375*D_STH002_ABN026 + 0.9375*C_ABT002}
+
+!Based on observed data, there are no deliveries outside of the April-October irrigation season
+define Zone5Season {
+		case NovMar {condition month>=NOV .AND. month<=MAR value 0.}
+		case Other  {condition  always		           value 1.}}
+
+goal Zone5Deliveries1 {D_ABN010_24_NA2 < 999*Zone5Season + 999*LODFlag}
+!goal Zone5Deliveries2 {D_ABT002_STH001 < 999 - 999*Zone5Season}
+
+
+!Limit diversion to PCWA Zone 5 based on historical data
+!From 2006 – 2015, PG&E surface water delivered to Zone 5 ranged from 0.1 to 6.3 TAF/year, averaging 3.5 TAF/year
+
+define Sum_AW_24_NA2 {std kind 'AG-DEMAND' UNITS 'TAF'}
+define Sum_AW_24_NA2_SV {
+	case FirstYear {
+	    condition wateryear == bgnWY .and. month == Oct
+	    sum(i=6,12,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2) }
+	case LastYear {
+	    condition wateryear == endWY .and. month == apr
+	    sum(i=0,5,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2) }
+        case apr{
+            condition month == apr
+            sum(i=0,6,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2) }
+        case otherwise {
+    	    condition always
+            value Sum_AW_24_NA2(-1) }}
+        
+goal setSum_AW_24_NA2 {Sum_AW_24_NA2 = Sum_AW_24_NA2_SV}        
+
+!goal limitPCWAZone5 {D_STH002_ABN026 = 3.5*taf_cfs *Zone5Season* (AWR_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFO_24_NA2))/Sum_AW_24_NA2_SV}
+
+! PCWA Delivery Splits, Auburn Ravine
+define D_ABN010_24_NA2_PGE {std kind 'DIVERSION' units 'CFS'}  ! Purchased from PGE Drum Spaulding - Prioritize use of this water before MFP
+define D_ABN010_24_NA2_PCWA {std kind 'DIVERSION' units 'CFS'} ! MFP from American River Pump Station
+
+goal D_ABN010_24_NA2_Split {D_ABN010_24_NA2 = D_ABN010_24_NA2_PGE + D_ABN010_24_NA2_PCWA} ! Deliveries to PCWA Zone 5 consist of PGE and MFP water
+goal setD_ABN010_24_NA2_PGE {D_ABN010_24_NA2_PGE = D_STH002_ABN026}     ! PGE water comes from the South Canal
+goal RouteARPS_PCWAZ5 {D_ABN010_24_NA2_PCWA = C_ABT002}                                   ! MFP water to PCWA Zone 5 Ag comes through the American River Pump Station
+
+goal RouteARPS_PCWAZ1 {D_STH005_24_NA3_PCWA + D_STH003_WTPFSS_PCWA + D_STH003_24_NA3_PCWA = D_ABT002_STH001} ! All of the MFP water conveyed to PCWA Lower Zone 1 must come from the ARPS
+
+!goal RouteARPS_Total {D_ABN010_24_NA2_PCWA +  D_STH003_24_NA3_PCWA + D_STH005_24_NA3_PCWA + D_STH003_WTPFSS_PCWA  = C_ABT002 + D_ABT002_STH001} !Color ARPS water
+
+  
+
+
+
+ 
+

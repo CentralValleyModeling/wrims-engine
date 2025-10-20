@@ -1,0 +1,86 @@
+/*
+SouthForkFeather.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+Operation of Sly Creek and Little Grass Reservoirs
+
+Created A Draper M Bachman, MWH/Stantec, 06.08.17 
+ */
+
+!*********************************************************
+! Water Rights for Sly Creek Reservoir
+!*********************************************************
+
+
+!SLATE CREEK DIVERSION
+
+!License 10940 (Application 13956):	Direct diversion right of 300 cfs, year-round;
+!                                       Storage right of 34,200 af/yr, with a 300 cfs
+!                                       maximum diversion rate to offstream storage, 
+!				        between January 1 and July 1;
+!					Priority Date: 9/20/50
+!
+!Permit 11516 (Application 13957):	Direct diversion right of 300 cfs, year-round;
+!					Storage right of 35,000 af/yr, with a 300 cfs 
+!                                       maximum diversion rate to offstream storage,
+!					between January 1 and July 1;
+!					Priority Date: 9/20/50
+!
+!Note: The total direct-diversion rate under License 10940 and Permit 11516 is 300 cfs, the total diversion-to-storage rate is 300 cfs, and the total direct diversion and diversion-to-storage rate is 600 cfs.)
+
+
+!LOST CREEK DIVERSION
+
+!Permit 2942 (Application 02778):	Direct diversion right of 50 cfs between April 1 and June 1;
+!                                       Diversion to storage between October 1 and June 1;
+! 
+!Permit 11518 (Application 014113):	Direct diversion right of 350 cfs year round;
+!                                       Diversion to storage between November 1 and July 1;
+!                                       Storage right of 40,000 af/yr
+
+
+!SOUTH FORK FEATHER DIVERSION*
+
+!Permit 11518 (Application 014113):	Direct diversion right of 350 cfs year round from SF Feather;
+!                                       Diversion to storage between November 1 and July 1;
+!                                       Storage right of 77,300 af/yr
+
+
+
+
+define SlyCreekStorageTrigger {
+	case OctJun {
+		condition range(month,Oct,Jun)
+		value 1.}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+
+define LittleGrassValleyStorageTrigger {
+	case OctJun {
+		condition range(month,Oct,Jun)
+		value 1.}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+
+define SlyCreekReleaseTrigger {
+	case JulDec {
+		condition range(month,Jul,Dec)
+		value 1.}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+
+goal setS_SLYCK {S_SLYCK + S_LGRSV < S_SLYCK(-1) + S_LGRSV(-1) + 99999.*SlyCreekStorageTrigger + D_SLT009_SCT000_DD*cfs_taf} !+ C_SFT000*cfs_taf}
+goal setS_LGRSV {S_LGRSV < S_LGRSV(-1) + 99999.*LittleGrassValleyStorageTrigger}
+
+goal setC_SLYCK1 {C_SLYCK > D_SLT009_SCT000_DD}
+goal setS_SLYCK1 {S_SLYCK > D_SLT009_SCT000_DS*cfs_taf}
+
+!set consumptive use constraints
+!goal setD_OWC000_13_NA		{D_OWC000_13_NA < UD_13_NU1*taf_cfs}

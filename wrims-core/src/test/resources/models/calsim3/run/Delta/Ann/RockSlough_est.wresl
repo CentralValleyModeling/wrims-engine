@@ -1,0 +1,71 @@
+
+!Get the required Sac flow for ESTIMATED exports
+define RSReqSac1 {
+  case LowCL{
+    condition C_SAC041_ANN(-1) >= 40000.
+    value 0.}
+  case NoSalinityControlPossible{
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition RS_m_1_sv <= 0.0
+    value 0.}
+  /*case highcost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    value 0.}*/
+  case LargeNegInt{
+    condition RS_b_1_sv < -10000.0
+    value 0.}  
+  case other{
+    condition always
+    value max(0.,(EstTotExpTD-RS_b_1_sv)/RS_m_1_sv)}
+}
+define RSReqSac2 {
+  case LowCL{
+    condition C_SAC041_ANN(-1) >= 40000.
+    value 0.}
+  case NoSalinityControlPossible{
+    condition abs(RS_m_2_sv) <= 0.001 .and. int(RS_b_2_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition RS_m_2_sv <= 0.0
+    value 0.}
+  /*case highcost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    value 0.}*/
+  case LargeNegInt{
+    condition RS_b_2_sv < -10000.0
+    value 0.}    
+  case NegCarriage{
+    condition RS_m_2_sv >= 1.0
+    value 0.}    
+  case other{
+    condition always
+    value max(0.,(EstTotExpTD-RS_b_2_sv)/RS_m_2_sv)}
+}
+define RSReqSac3 {
+  case LowCL{
+    condition C_SAC041_ANN(-1) >= 40000.
+    value 0.}
+  case NoSalinityControlPossible{
+    condition abs(RS_m_3_sv) <= 0.001 .and. int(RS_b_3_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition RS_m_3_sv <= 0.0
+    value 0.}
+  /*case highcost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    value 0.}*/
+  case LargeNegInt{
+    condition RS_b_3_sv < -10000.0
+    value 0.}    
+  case NegCarriage{
+    condition RS_m_3_sv >= 1.0
+    value 0.}    
+  case other{
+    condition always
+    value max(0.,(EstTotExpTD-RS_b_3_sv)/RS_m_3_sv)}
+}
+define RSReqSac {value max(0.,RSReqSac1,RSReqSac2,RSReqSac3)}
+define RSReqSacDV {alias RSReqSac kind 'FLOW' units 'CFS'}
+

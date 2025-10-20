@@ -1,0 +1,142 @@
+! NFS Operating Rules
+! Chakri 03/03/08
+
+! Level 2 storage based on FERC minimum operating pool requirements,
+! which are based on April-July unimpaired inflow into New Melones Reservoir
+
+! New Spicer Meadows Reservoir level 2
+
+define nmi_frcst_prev_1_dv {std kind 'FLOW' units 'TAF'}
+define nmi_frcst_prev_2_dv {std kind 'FLOW' units 'TAF'}
+
+define nmi_frcst_prev_1 {
+	case firstYear {
+		condition wateryear==1922 .and. (month>=OCT .or. month <=FEB)
+		value 692.2
+		}
+	case FEB {
+		condition  month == FEB
+		value frcst_nmidv(-12)
+		}
+    case other {
+		condition always
+		value nmi_frcst_prev_1_dv(-1)
+		}
+	}
+define nmi_frcst_prev_2 {
+	case firstYear {
+		condition wateryear <= 1923 .and. (month>=OCT .or. month <=FEB)
+		value 692.2
+		}
+	case FEB {
+		condition  month == FEB
+		value frcst_nmidv(-24)
+		}
+    case other {
+		condition always
+		value nmi_frcst_prev_2_dv(-1)
+		}
+	}
+	
+! During the 2 years following a dry year, the minimum storage requirement will be 5 taf if forecasted April-July
+! inflow is less than 750 taf. Upper Stanislaus Hydrology and Operations Study Model Documentation pg. 6-4
+
+define S_SPICElevel2 {
+             case nmi_frcst_prev_Feb_1 {
+	          condition nmi_frcst_prev_1 < 500 .and. frcst_nmi < 750
+	          value 5.}
+             case nmi_frcst_prev_Feb_2 {
+	          condition nmi_frcst_prev_2 < 500 .and. frcst_nmi < 750
+	          value 5.}
+	     case above500 {
+	          condition frcst_nmi >= 500
+	          value 36.}
+	     case below500 {
+	          condition always
+	          value 5.}
+		}
+
+goal setS_SPICElevel2 {S_SPICE_2 < max(S_SPICElevel2 - S_SPICElevel1,0.)}
+goal setnmi_frcst_prev_1_dv {nmi_frcst_prev_1_dv = nmi_frcst_prev_1}
+goal setnmi_frcst_prev_2_dv {nmi_frcst_prev_2_dv = nmi_frcst_prev_2}
+
+! New Spicer Meadows Reservoir Level 3
+define trigger_mon {select    TrigMon
+                    from      Stanislaus_newspicer_trigmon
+                    where     Mon=month}
+define index_mon0 {value trigger_mon-month}
+define index_mon {
+	case shift {
+		condition index_mon0>0.
+		value int(index_mon0 - 12) }
+	case other {
+		condition always
+		value int(index_mon0) }
+}
+
+
+define curve_number {
+	case firstmon {
+		condition month==oct .and. wateryear==1922
+		value 2.5}
+ 	case other {
+		condition always
+                select   Curve
+                from     newspicer_target
+                given    TrigVal=S_SPICE(index_mon)
+                !given    TrigVal=S_SPICE(-5)
+                use      linear
+                where    Mon=month}
+			}
+
+define trigger_value {
+	case firstmon {
+		condition month==oct .and. wateryear==1922
+		value 120.}
+	case feb_may {
+		condition month>=feb .and. month<=may
+		value S_SPICE(index_mon) + 1.0*max(curve_number-2.5,0.)
+		!value S_SPICE(-5) + 1.0*max(curve_number-2.5,0.)
+		}
+	case other {
+		condition always
+		value S_SPICE(index_mon)}
+		!value S_SPICE(-5)}
+		}
+
+
+define S_SPICElevel3inp {
+	case firstmon {
+		condition month==oct .and. wateryear==1922
+		value 120.}
+        case other {
+		condition always
+                select   Target
+                from     newspicer_target
+                given    TrigVal=trigger_value
+                use      linear
+                where    Mon=month}
+		 }
+
+!define S_SPICElevel3af {select S_SPICE_level3 from newspicer_reslevel where Mo=month}
+!define S_SPICElevel3 {value S_SPICElevel3af/1000} !converts value to TAF
+
+define S_SPICElevel3 {value max(S_SPICElevel2,S_SPICElevel3inp)}
+
+goal setS_SPICElevel3 {S_SPICE_3 < max(S_SPICElevel3 - S_SPICElevel2,0.)}
+
+!define S_SPICEindexdv {std kind 'INDEX' units 'NONE'}
+!goal checkS_SPICEindex {S_SPICEindexdv=index_mon0}
+
+define S_SPICElevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_SPICElevel3 {S_SPICElevel3dv=S_SPICElevel3}
+
+! New Spicer Meadows Reservoir Level 4
+define S_SPICElevel4 {value S_SPICElevel5}
+goal setS_SPICElevel4 {S_SPICE_4 < max(S_SPICElevel4 - S_SPICElevel3,0.)}
+
+define S_SPICElevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal setS_SPICElevel4dv {S_SPICElevel4dv=S_SPICElevel4}
+
+! New Spicer Meadows Reservoir Level 5
+goal setS_SPICElevel5 {S_SPICE_5 < max(S_SPICElevel5 - S_SPICElevel4,0.)}

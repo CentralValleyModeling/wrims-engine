@@ -1,0 +1,114 @@
+! SacRiverIndexMay90.wresl 
+! D1641: X2 days standard does not apply in May and June if the best available May estimate of the Sacramento River Index
+! (described in footnote 5) for the water year is less than 8.1 MAF at the 90% exceedence level.
+! Under this circumstance, a minimum 14-day running average flow of 4,000 cfs is required in May and June.
+! The Sacramento River Index refers to the sum of the unimpaired runoff in the water year as published in the DWR
+! Bulletin 120 for the following locations: Sacramento River above Bend Bridge, near Red Bluff;
+! Feather River, total unimpaired inflow to Oroville Reservoir; Yuba River at Smartville; and American
+! River, total unimpaired inflow to Folsom Reservoir
+
+define C_BB_OctApr_May90{
+	case MonthMay{
+		condition month==may
+		value (sum(i=Oct-month, Apr-month, 1) UNIMP_SRBB(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define C_BB_MaySep_May90{
+	case MonthMay{
+		condition month==May
+		value (sum(i=0, Sep-month, 1) BB_fm[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+ 
+
+define i_Orovl_OctApr_May90{
+	case MonthMay{
+		condition month==may
+		value (sum(i=Oct-month, Apr-month, 1) UNIMP_OROV(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define i_Orovl_MaySep_May90{
+	case MonthMay{
+		condition month==May 
+		value (sum(i=0, Sep-month, 1) I4_fm[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+
+define i_Folsm_OctApr_May90{
+	case MonthMay{
+		condition month==may
+		value (sum(i=Oct-month, Apr-month, 1) UNIMP_FOLS(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define i_Folsm_MaySep_May90{
+	case MonthMay{
+		condition month==May
+		value (sum(i=0, Sep-month, 1) I_Folsm_fm[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+
+define yuba_OctApr_May90{
+	case MonthMay{
+		condition month==may
+		value (sum(i=Oct-month, Apr-month, 1) UNIMP_YUBA(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define yuba_MaySep_May90{
+	case MonthMay{
+		condition month==May
+		value (sum(i=0, Sep-month, 1) yuba_fm[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+
+
+define SacRiverIndex_May90_Prev{value SacRiverIndex_May90_dv(prevMay)}
+
+define SacRiverIndex_May90{
+	case MonthMay{
+		condition month==May
+	value (C_BB_MaySep_May90+i_Orovl_MaySep_May90+i_Folsm_MaySep_May90+yuba_MaySep_May90)+(C_BB_OctApr_May90+i_Orovl_OctApr_May90+i_Folsm_OctApr_May90+yuba_OctApr_May90)
+	}
+	case other{
+			condition always
+			value SacRiverIndex_May90_dv(prevMay)
+	}
+	
+	}
+define SacRiverIndex_May90_dv{alias SacRiverIndex_May90 kind 'index' units 'taf'}
+

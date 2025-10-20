@@ -1,0 +1,318 @@
+! Code by E. Reyes as of 12/16/99
+! Modified by DJE 12/7/00
+! Modified by AD 10/7/03
+! Modified by MZE 10/9/03
+
+! This file checks to see if the SWP Project Diversion Requirement is less than the amount allocated
+! by the Contract Cut Procedure.  If the SWP PDR is less than the allocation, then limit the
+! stream diversions further to match the SWP PDR.
+
+
+
+
+!*** For the South of Delta *************************************************************
+
+!mwd demands
+goal maxD_PRRIS_MWDSCPMIdeliv   {D_PRRIS_MWDSC_PMI   < dem_D_PRRIS_MWDSC_pmi *taf_cfs*perdel_21}
+goal maxD_CAA194_KERNBPMIdeliv {D_CAA194_KERNB_PMI < dem_D_CAA194_KERNB_PMI*taf_cfs*perdel_22}
+goal maxD_ESB413_MWDSCPMIdeliv  {D_ESB413_MWDSC_PMI  < dem_D_ESB413_MWDSC_PMI*taf_cfs*perdel_23}
+goal maxD_WSB031_MWDSCPMIdeliv  {D_WSB031_MWDSC_PMI  < dem_D_WSB031_MWDSC_PMI*taf_cfs*perdel_24}
+goal maxD_ESB433_MWDSCPMIdeliv  {D_ESB433_MWDSC_PMI  < dem_D_ESB433_MWDSC_PMI*taf_cfs*perdel_25}
+
+!ag contractor demands
+goal maxD802APAGdeliv {D_CAA046_71_PA7_PAG < dem_D802A_PAG*taf_cfs*perdel_28}
+goal maxD_CAA173_EMPIREPAGdeliv  {D_CAA173_EMPIRE_PAG  < dem_D_CAA173_EMPIRE_PAG *taf_cfs*perdel_14}
+goal maxD_CAA181_KINGSPAGdeliv  {D_CAA181_KINGS_PAG  < dem_D_CAA181_KINGS_PAG *taf_cfs*perdel_10}
+goal maxD_CAA183_TULAREPAGdeliv  {D_CAA183_TULARE_PAG  < dem_D_CAA183_TULARE_PAG *taf_cfs*perdel_37}
+goal maxD_CAA184_DUDLEYPAGdeliv  {D_CAA184_DUDLEY_PAG  < dem_D_CAA184_DUDLEY_PAG *taf_cfs*perdel_13}
+goal maxD_CAA194_KERNPAGdeliv  {D_CAA194_KERN_PAG  < dem_D_CAA194_KERN_PAG *taf_cfs*perdel_16}
+goal maxD_CAA242_KernPAGdeliv  {D_CAA242_Kern_PAG  < dem_D_CAA242_Kern_PAG *taf_cfs*perdel_17}
+goal maxD_CAA279_KernPAGdeliv  {D_CAA279_Kern_PAG  < dem_D_CAA279_Kern_PAG *taf_cfs*perdel_18}
+goal maxD_CSB015_KERN_BMWDPAGdeliv  {D_CSB015_KERN_BMWD_PAG  < dem_D_CSB015_KERN_BMWD_PAG *taf_cfs*perdel_19}
+goal maxD_CSB009_CLRTA1_DDWDPAGdeliv  {D_CSB009_CLRTA1_DDWD_PAG  < dem_D_CSB009_CLRTA1_DDWD_PAG *taf_cfs*perdel_5 }
+goal maxD_CSB004_GVWDPAGdeliv  {D_CSB004_GVWD  = 0.} ! Placeholder for Green Valley WD diversions (County of Kings wholesaler) as suggested by Andy (Stantec)
+
+!non-mwd mi contractor demands
+goal maxD_SVRWD_CSTLNPMIdeliv   {D_SVRWD_CSTLN_PMI   < dem_D_SVRWD_CSTLN_pmi  *taf_cfs*perdel_11}
+goal maxD_PYRMD_VNTRAPMIdeliv   {D_PYRMD_VNTRA_PMI   < dem_D_PYRMD_VNTRA_PMI  *taf_cfs*perdel_38}
+goal maxD_CSTIC_VNTRAPMIdeliv   {D_CSTIC_VNTRA_PMI   < dem_D_CSTIC_VNTRA_PMI  *taf_cfs*perdel_39}
+!goal maxD204PMIdeliv  {D_WTPCYC_16_PU_SWP_PMI   < CL1mon_WTPCYC_16_PU  *taf_cfs*perdel_7} 
+goal maxYUBAPMIdeliv {D_WTPCYC_16_PU_SWP_PMI < dem_D_WTPCYC_16_PU_SWP_PMI*taf_cfs*perdel_7}
+goal maxNAPAPMIdeliv {D_BKR004_NBA009_NAPA_PMI < dem_D_BKR004_NBA009_NAPA*taf_cfs*perdel_27}
+goal maxSCWAPMIdeliv {D_BKR004_NBA009_SCWA_PMI < dem_D_BKR004_NBA009_SCWA*taf_cfs*perdel_36}
+goal maxD_SBA009_ACFCPMIdeliv  {D_SBA009_ACFC_PMI  < dem_D_SBA009_ACFC_PMI *taf_cfs*perdel_1 }
+goal maxD_SBA020_ACFCPMIdeliv  {D_SBA020_ACFC_PMI  < dem_D_SBA020_ACFC_PMI *taf_cfs*perdel_2 }
+goal maxD_SBA029_ACWDPMIdeliv  {D_SBA029_ACWD_PMI  < dem_D_SBA029_ACWD_PMI *taf_cfs*perdel_3 }
+goal maxD_SBA036_SCVWDPMIdeliv  {D_SBA036_SCVWD_PMI  < dem_D_SBA036_SCVWD_PMI *taf_cfs*perdel_35}
+goal maxD_CAA194_KERNAPMIdeliv {D_CAA194_KERNA_PMI < dem_D_CAA194_KERNA_PMI*taf_cfs*perdel_15}
+goal maxD_CSB038_OBISPOPMIdeliv  {D_CSB038_OBISPO_PMI  < dem_D_CSB038_OBISPO_PMI *taf_cfs*perdel_33}
+goal maxD_CSB103_BRBRAPMIdeliv  {D_CSB103_BRBRA_PMI  < dem_D_CSB103_BRBRA_PMI *taf_cfs*perdel_34}
+goal maxD_ESB324_AVEKPMIdeliv  {D_ESB324_AVEK_PMI  < dem_D_ESB324_AVEK_PMI *taf_cfs*perdel_4 }
+goal maxD_ESB347_PLMDLPMIdeliv  {D_ESB347_PLMDL_PMI  < dem_D_ESB347_PLMDL_PMI *taf_cfs*perdel_29}
+goal maxD_ESB355_LROCKPMIdeliv  {D_ESB355_LROCK_PMI  < dem_D_ESB355_LROCK_PMI *taf_cfs*perdel_20}
+goal maxD_ESB403_MOJVEPMIdeliv  {D_ESB403_MOJVE_PMI  < dem_D_ESB403_MOJVE_PMI *taf_cfs*perdel_26}
+goal maxD_ESB407_CCHLAPMIdeliv  {D_ESB407_CCHLA_PMI  < dem_D_ESB407_CCHLA_PMI *taf_cfs*perdel_8 }
+goal maxD_ESB408_DESRTPMIdeliv  {D_ESB408_DESRT_PMI  < dem_D_ESB408_DESRT_PMI *taf_cfs*perdel_12}
+goal maxD_ESB414_BRDNOPMIdeliv  {D_ESB414_BRDNO_PMI  < dem_D_ESB414_BRDNO_PMI *taf_cfs*perdel_30}
+goal maxD_ESB415_GABRLPMIdeliv  {D_ESB415_GABRL_PMI  < dem_D_ESB415_GABRL_PMI *taf_cfs*perdel_31}
+goal maxD_ESB420_GRGNOPMIdeliv  {D_ESB420_GRGNO_PMI  < dem_D_ESB420_GRGNO_PMI *taf_cfs*perdel_32}
+goal maxD_WSB032_CLRTA2PMIdeliv  {D_WSB032_CLRTA2_PMI  < dem_D_WSB032_CLRTA2_PMI *taf_cfs*perdel_6 }
+
+!interruptible demands
+goal maxD204PINdeliv  {D_WTPCYC_16_PU_SWP_PIN  < min(dem_D_WTPCYC_16_PU_SWP_PIN, limit_D_WTPCYC_16_PU_SWP_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_PRRIS_MWDSCPINdeliv  {D_PRRIS_MWDSC_PIN  < min(dem_D_PRRIS_MWDSC_PIN, limit_D_PRRIS_MWDSC_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CSTIC_VNTRAPINdeliv  {D_CSTIC_VNTRA_PIN  < min(dem_D_CSTIC_VNTRA_PIN, limit_D_CSTIC_VNTRA_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 1/2/2020
+goal maxNAPAPINdeliv {D_BKR004_NBA009_NAPA_PIN < min(dem_NAPA_PIN,limit_D_BKR004_NBA009_NAPA_PIN_ANNUAL)*perdel_swp_int}
+goal maxSCWAPINdeliv {D_BKR004_NBA009_SCWA_PIN < min(dem_SCWA_PIN, limit_D_BKR004_NBA009_SCWA_PIN_ANNUAL)*perdel_swp_int} ! New Article 21 demands. 1/2/2020
+goal maxD802APINdeliv  {D_CAA046_71_PA7_PIN  < min(dem_D_CAA046_71_PA7_PIN, limit_D_CAA046_71_PA7_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_CAA173_EMPIREPINdeliv {D_CAA173_EMPIRE_PIN < min(dem_D_CAA173_EMPIRE_PIN, limit_D_CAA173_EMPIRE_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CAA181_KINGSPINdeliv {D_CAA181_KINGS_PIN < min(dem_D_CAA181_KINGS_PIN, limit_D_CAA181_KINGS_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 1/2/2020
+goal maxD_CAA184_DUDLEYPINdeliv {D_CAA184_DUDLEY_PIN < min(dem_D_CAA184_DUDLEY_PIN, limit_D_CAA184_DUDLEY_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CSB009_CLRTA1_DDWDPINdeliv {D_CSB009_CLRTA1_DDWD_PIN < min(dem_D_CSB009_CLRTA1_DDWD_PIN, limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CSB103_BRBRAPINdeliv {D_CSB103_BRBRA_PIN < min(dem_D_CSB103_BRBRA_PIN, limit_D_CSB103_BRBRA_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 1/2/2020
+goal maxD_ESB347_PLMDLPINdeliv  {D_ESB347_PLMDL_PIN  < min(dem_D_ESB347_PLMDL_PIN, limit_D_ESB347_PLMDL_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_CAA183_TULAREPINdeliv {D_CAA183_TULARE_PIN < min(dem_D_CAA183_TULARE_PIN, limit_D_CAA183_TULARE_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CAA242_KernPINdeliv {D_CAA242_Kern_PIN < min(dem_D_CAA242_Kern_PIN, limit_D_CAA242_Kern_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_CSB038_OBISPOPINdeliv  {D_CSB038_OBISPO_PIN  < min(dem_D_CSB038_OBISPO_PIN, limit_D_CSB038_OBISPO_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_ESB324_AVEKPINdeliv {D_ESB324_AVEK_PIN < min(dem_D_ESB324_AVEK_PIN, limit_D_ESB324_AVEK_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_ESB407_CCHLAPINdeliv {D_ESB407_CCHLA_PIN < min(dem_D_ESB407_CCHLA_PIN, limit_D_ESB407_CCHLA_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_ESB408_DESRTPINdeliv {D_ESB408_DESRT_PIN < min(dem_D_ESB408_DESRT_PIN, limit_D_ESB408_DESRT_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_ESB413_MWDSCPINdeliv {D_ESB413_MWDSC_PIN < min(dem_D_ESB413_MWDSC_PIN, limit_D_ESB413_MWDSC_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_ESB414_BRDNOPINdeliv  {D_ESB414_BRDNO_PIN  < min(dem_D_ESB414_BRDNO_PIN, limit_D_ESB414_BRDNO_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_ESB415_GABRLPINdeliv {D_ESB415_GABRL_PIN < min(dem_D_ESB415_GABRL_PIN, limit_D_ESB415_GABRL_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 1/2/2020
+goal maxD_ESB420_GRGNOPINdeliv  {D_ESB420_GRGNO_PIN  < min(dem_D_ESB420_GRGNO_PIN, limit_D_ESB420_GRGNO_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. 07/2020
+goal maxD_ESB433_MWDSCPINdeliv {D_ESB433_MWDSC_PIN < min(dem_D_ESB433_MWDSC_PIN, limit_D_ESB433_MWDSC_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_WSB031_MWDSCPINdeliv {D_WSB031_MWDSC_PIN < min(dem_D_WSB031_MWDSC_PIN, limit_D_WSB031_MWDSC_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_SBA009_ACFCPINdeliv {D_SBA009_ACFC_PIN < min(dem_D_SBA009_ACFC_PIN, limit_D_SBA009_ACFC_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_SBA029_ACWDPINdeliv {D_SBA029_ACWD_PIN < min(dem_D_SBA029_ACWD_PIN, limit_D_SBA029_ACWD_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_SBA036_SCVWDPINdeliv {D_SBA036_SCVWD_PIN < min(dem_D_SBA036_SCVWD_PIN, limit_D_SBA036_SCVWD_PIN_ANNUAL) *perdel_swp_int}
+goal maxD_ESB355_LROCK_PINdeliv {D_ESB355_LROCK_PIN < min(dem_D_ESB355_LROCK_PIN, limit_D_ESB355_LROCK_PIN_ANNUAL) *perdel_swp_int} ! New Article 21 demands. JByers, 05/30/2024
+goal maxD_ESB403_MOJVEPINdeliv  {D_ESB403_MOJVE_PIN  < min(dem_D_ESB403_MOJVE_PIN, limit_D_ESB403_MOJVE_PIN_ANNUAL) *perdel_swp_int} !New Article 21 demands. JByers, 05/30/2024
+
+!Ensure North Bay Article 21 is limited to surplus conditions.
+goal constrain_North_Bay_A21 {D_BKR004_NBA009_NAPA_PIN + D_BKR004_NBA009_SCWA_PIN < NDOI_ADD_swp + NDOI_ADD_cvp}
+
+!balance KCWA and MWD Art 21 deliveries
+goal balanceKCWAMWDPIN {
+    lhs D_CAA242_Kern_PIN
+    rhs D_ESB413_MWDSC_PIN + D_WSB031_MWDSC_PIN + D_ESB433_MWDSC_PIN + D_PRRIS_MWDSC_PIN
+    lhs>rhs penalty 3.
+    lhs<rhs penalty 3.
+}
+
+!Total SOD PIN demand
+define SWP_SOD_PIN_demand {std kind 'demand' units 'cfs'} ! Lower bound
+define SWP_SOD_PIN_upper_demand {std kind 'demand' units 'cfs'} ! Upper bound
+goal setSWP_SOD_PIN_demand {SWP_SOD_PIN_demand =
+min(dem_D_CAA046_71_PA7_PIN, limit_D_CAA046_71_PA7_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ min(dem_D_CAA173_EMPIRE_PIN, limit_D_CAA173_EMPIRE_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_CAA181_KINGS_PIN, limit_D_CAA181_KINGS_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ min(dem_D_CAA184_DUDLEY_PIN, limit_D_CAA184_DUDLEY_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_CSB009_CLRTA1_DDWD_PIN, limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_CSB103_BRBRA_PIN, limit_D_CSB103_BRBRA_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ min(dem_D_ESB347_PLMDL_PIN, limit_D_ESB347_PLMDL_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ min(dem_D_CAA183_TULARE_PIN, limit_D_CAA183_TULARE_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_CAA242_Kern_PIN, limit_D_CAA242_Kern_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_CSB038_OBISPO_PIN, limit_D_CSB038_OBISPO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ min(dem_D_ESB324_AVEK_PIN, limit_D_ESB324_AVEK_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_ESB407_CCHLA_PIN, limit_D_ESB407_CCHLA_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_ESB408_DESRT_PIN, limit_D_ESB408_DESRT_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_ESB413_MWDSC_PIN, limit_D_ESB413_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_ESB414_BRDNO_PIN, limit_D_ESB414_BRDNO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ min(dem_D_ESB415_GABRL_PIN, limit_D_ESB415_GABRL_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ min(dem_D_ESB420_GRGNO_PIN, limit_D_ESB420_GRGNO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ min(dem_D_ESB433_MWDSC_PIN, limit_D_ESB433_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_WSB031_MWDSC_PIN, limit_D_WSB031_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_SBA009_ACFC_PIN, limit_D_SBA009_ACFC_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_SBA029_ACWD_PIN, limit_D_SBA029_ACWD_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_SBA036_SCVWD_PIN, limit_D_SBA036_SCVWD_PIN_ANNUAL) *perdel_swp_int
++ min(dem_D_ESB355_LROCK_PIN, limit_D_ESB355_LROCK_PIN_ANNUAL)*perdel_swp_int  ! New Article 21 demands. JByers, 05/30/2024
++ min(dem_D_ESB403_MOJVE_PIN, limit_D_ESB403_MOJVE_PIN_ANNUAL)*perdel_swp_int} ! New Article 21 demands. JByers, 05/30/2024
+
+goal setSWP_SOD_PIN_upper_demand {SWP_SOD_PIN_upper_demand =
+max(dem_D_CAA046_71_PA7_PIN, limit_D_CAA046_71_PA7_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ max(dem_D_CAA173_EMPIRE_PIN, limit_D_CAA173_EMPIRE_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_CAA181_KINGS_PIN, limit_D_CAA181_KINGS_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ max(dem_D_CAA184_DUDLEY_PIN, limit_D_CAA184_DUDLEY_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_CSB009_CLRTA1_DDWD_PIN, limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_CSB103_BRBRA_PIN, limit_D_CSB103_BRBRA_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ max(dem_D_ESB347_PLMDL_PIN, limit_D_ESB347_PLMDL_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ max(dem_D_CAA183_TULARE_PIN, limit_D_CAA183_TULARE_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_CAA242_Kern_PIN, limit_D_CAA242_Kern_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_CSB038_OBISPO_PIN, limit_D_CSB038_OBISPO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ max(dem_D_ESB324_AVEK_PIN, limit_D_ESB324_AVEK_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_ESB407_CCHLA_PIN, limit_D_ESB407_CCHLA_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_ESB408_DESRT_PIN, limit_D_ESB408_DESRT_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_ESB413_MWDSC_PIN, limit_D_ESB413_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_ESB414_BRDNO_PIN, limit_D_ESB414_BRDNO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ max(dem_D_ESB415_GABRL_PIN, limit_D_ESB415_GABRL_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 1/2/2020
++ max(dem_D_ESB420_GRGNO_PIN, limit_D_ESB420_GRGNO_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. 07/2020
++ max(dem_D_ESB433_MWDSC_PIN, limit_D_ESB433_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_WSB031_MWDSC_PIN, limit_D_WSB031_MWDSC_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_SBA009_ACFC_PIN, limit_D_SBA009_ACFC_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_SBA029_ACWD_PIN, limit_D_SBA029_ACWD_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_SBA036_SCVWD_PIN, limit_D_SBA036_SCVWD_PIN_ANNUAL) *perdel_swp_int
++ max(dem_D_ESB355_LROCK_PIN, limit_D_ESB355_LROCK_PIN_ANNUAL) *perdel_swp_int ! New Article 21 demands. JByers, 05/30/2024
++ max(dem_D_ESB403_MOJVE_PIN, limit_D_ESB403_MOJVE_PIN_ANNUAL)*perdel_swp_int} ! New Article 21 demands. JByers, 05/30/2024
+
+!losses
+goal maxD_CAA220_CAALOS_PLSPLSdeliv {D_CAA220_CAALOS_PLS < dem_D_CAA220_CAALOS_PLS}
+goal maxD_CAA278_CAALOSPLSdeliv {D_CAA278_CAALOS_PLS < dem_D_CAA278_CAALOS_PLS}
+goal maxD_CAA280_CAALOSPLSdeliv {D_CAA280_CAALOS_PLS < dem_D_CAA280_CAALOS_PLS}
+goal maxD_ESB361_ESBLOSPLSdeliv {D_ESB361_ESBLOS_PLS < dem_D_ESB361_ESBLOS_PLS}
+goal maxD_ESB406_ESBLOSPLSdeliv {D_ESB406_ESBLOS_PLS < dem_D_ESB406_ESBLOS_PLS}
+goal maxD_ESB425_ESBLOSPLSdeliv {D_ESB425_ESBLOS_PLS < dem_D_ESB425_ESBLOS_PLS}
+goal maxD_WSB006_WSBLOSPLSdeliv {D_WSB006_WSBLOS_PLS < dem_D_WSB006_WSBLOS_PLS}
+goal maxD_WSB026_WSBLOSPLSdeliv {D_WSB026_WSBLOS_PLS < dem_D_WSB026_WSBLOS_PLS}
+goal maxD_WSB027_WSBLOSPLSdeliv {D_WSB027_WSBLOS_PLS < dem_D_WSB027_WSBLOS_PLS}
+goal maxD_SBA042_SBALOSPLSdeliv {D_SBA042_SBALOS_PLS < dem_D_SBA042_SBALOS_PLS}
+goal maxNAPAPLSdeliv {D_BKR004_NBA009_NAPA_PLS < NBA_Losses}
+
+
+!carryover deliveries (from previous year allocation)
+goal maxdelD_SBA009_ACFC_PCO  { D_SBA009_ACFC_PCO  < co_dem_1 }
+goal maxdelD_SBA020_ACFC_PCO  { D_SBA020_ACFC_PCO  < co_dem_2 }
+goal maxdelD_SBA029_ACWD_PCO  { D_SBA029_ACWD_PCO  < co_dem_3 }
+goal maxdelD_ESB324_AVEK_PCO  { D_ESB324_AVEK_PCO  < co_dem_4 }
+goal maxdelD_CSB009_CLRTA1_DDWD_PCO  { D_CSB009_CLRTA1_DDWD_PCO  < co_dem_5 }
+goal maxdelD_WSB032_CLRTA2_PCO  { D_WSB032_CLRTA2_PCO  < co_dem_6 }
+goal maxdelYUBA_PCO  { D_WTPCYC_16_PU_SWP_PCO  < co_dem_7 } 
+goal maxdelD_ESB407_CCHLA_PCO  { D_ESB407_CCHLA_PCO  < co_dem_8 }
+!goal maxdelD201_PCO  { D201_PCO  < co_dem_9 }
+goal maxdelD_CAA181_KINGS_PCO  { D_CAA181_KINGS_PCO  < co_dem_10}
+goal maxdelD_SVRWD_CSTLN_PCO   { D_SVRWD_CSTLN_PCO   < co_dem_11}
+goal maxdelD_ESB408_DESRT_PCO  { D_ESB408_DESRT_PCO  < co_dem_12}
+goal maxdelD_CAA184_DUDLEY_PCO  { D_CAA184_DUDLEY_PCO  < co_dem_13}
+goal maxdelD_CAA173_EMPIRE_PCO  { D_CAA173_EMPIRE_PCO  < co_dem_14}
+goal maxdelD_CAA194_KERN_PCO  { D_CAA194_KERN_PCO  < co_dem_16}
+goal maxdelD_CAA242_Kern_PCO  { D_CAA242_Kern_PCO  < co_dem_17}
+goal maxdelD_CAA279_Kern_PCO  { D_CAA279_Kern_PCO  < co_dem_18}
+goal maxdelD_CSB015_KERN_BMWD_PCO  { D_CSB015_KERN_BMWD_PCO  < co_dem_19}
+goal maxdelD_ESB355_LROCK_PCO  { D_ESB355_LROCK_PCO  < co_dem_20}
+goal maxdelD_PRRIS_MWDSC_PCO   { D_PRRIS_MWDSC_PCO   < co_dem_21}
+!goal maxdelD_CAA194_KERN_PCO  { D_CAA194_KERN_PCO  < co_dem_22}
+goal maxdelD_ESB413_MWDSC_PCO  { D_ESB413_MWDSC_PCO  < co_dem_23}
+goal maxdelD_WSB031_MWDSC_PCO  { D_WSB031_MWDSC_PCO  < co_dem_24}
+goal maxdelD_ESB433_MWDSC_PCO  { D_ESB433_MWDSC_PCO  < co_dem_25}
+goal maxdelD_ESB403_MOJVE_PCO  { D_ESB403_MOJVE_PCO  < co_dem_26}
+goal maxdelNAPA_PCO { D_BKR004_NBA009_NAPA_PCO < co_dem_27}
+goal maxdelD802A_PCO { D_CAA046_71_PA7_PCO < co_dem_28}
+goal maxdelD_ESB347_PLMDL_PCO  { D_ESB347_PLMDL_PCO  < co_dem_29}
+goal maxdelD_ESB414_BRDNO_PCO  { D_ESB414_BRDNO_PCO  < co_dem_30}
+goal maxdelD_ESB415_GABRL_PCO  { D_ESB415_GABRL_PCO  < co_dem_31}
+goal maxdelD_ESB420_GRGNO_PCO  { D_ESB420_GRGNO_PCO  < co_dem_32}
+goal maxdelD_CSB038_OBISPO_PCO  { D_CSB038_OBISPO_PCO  < co_dem_33}
+goal maxdelD_CSB103_BRBRA_PCO  { D_CSB103_BRBRA_PCO  < co_dem_34}
+goal maxdelD_SBA036_SCVWD_PCO  { D_SBA036_SCVWD_PCO  < co_dem_35}
+goal maxdelSCWA_PCO { D_BKR004_NBA009_SCWA_PCO < co_dem_36}
+goal maxdelD_CAA183_TULARE_PCO  { D_CAA183_TULARE_PCO  < co_dem_37}
+goal maxdelD_PYRMD_VNTRA_PCO   { D_PYRMD_VNTRA_PCO   < co_dem_38}
+goal maxdelD_CSTIC_VNTRA_PCO   { D_CSTIC_VNTRA_PCO   < co_dem_39}
+
+
+define swp_demand_mwd {value            ! Ryan 8/9/2005
+      dem_D_PRRIS_MWDSC_pmi *taf_cfs*perdel_21        +
+      dem_D_CAA194_KERNB_PMI*taf_cfs*perdel_22        +
+      dem_D_ESB413_MWDSC_PMI*taf_cfs*perdel_23        +
+      dem_D_WSB031_MWDSC_PMI*taf_cfs*perdel_24        +
+      dem_D_ESB433_MWDSC_PMI*taf_cfs*perdel_25}
+
+
+define swp_demand_ag {value
+      dem_D802A_PAG*taf_cfs*perdel_28       +
+      dem_D_CAA173_EMPIRE_PAG *taf_cfs*perdel_14       +
+      dem_D_CAA181_KINGS_PAG *taf_cfs*perdel_10       +
+      dem_D_CAA183_TULARE_PAG *taf_cfs*perdel_37       +
+      dem_D_CAA184_DUDLEY_PAG *taf_cfs*perdel_13       +
+      dem_D_CAA194_KERN_PAG *taf_cfs*perdel_16       +
+      dem_D_CAA242_Kern_PAG *taf_cfs*perdel_17       +
+      dem_D_CAA279_Kern_PAG *taf_cfs*perdel_18       +
+      dem_D_CSB015_KERN_BMWD_PAG *taf_cfs*perdel_19       +
+      dem_D_CSB009_CLRTA1_DDWD_PAG *taf_cfs*perdel_5        }
+
+define swp_demand_mi {value
+      dem_D_SVRWD_CSTLN_pmi  *taf_cfs*perdel_11       +
+      dem_D_PYRMD_VNTRA_PMI  *taf_cfs*perdel_38       +
+      dem_D_CSTIC_VNTRA_PMI  *taf_cfs*perdel_39       +
+      dem_D_WTPCYC_16_PU_SWP_PMI*taf_cfs*perdel_7 +
+      dem_D_BKR004_NBA009_NAPA*taf_cfs*perdel_27  +
+      dem_D_BKR004_NBA009_SCWA*taf_cfs*perdel_36  +
+      dem_D_SBA009_ACFC_PMI *taf_cfs*perdel_1        +
+      dem_D_SBA020_ACFC_PMI *taf_cfs*perdel_2        +
+      dem_D_SBA029_ACWD_PMI *taf_cfs*perdel_3        +
+      dem_D_SBA036_SCVWD_PMI *taf_cfs*perdel_35       +
+      dem_D_CAA194_KERNA_PMI*taf_cfs*perdel_15       +
+      dem_D_CSB038_OBISPO_PMI *taf_cfs*perdel_33       +
+      dem_D_CSB103_BRBRA_PMI *taf_cfs*perdel_34       +
+      dem_D_ESB324_AVEK_PMI *taf_cfs*perdel_4        +
+      dem_D_ESB347_PLMDL_PMI *taf_cfs*perdel_29       +
+      dem_D_ESB355_LROCK_PMI *taf_cfs*perdel_20       +
+      dem_D_ESB403_MOJVE_PMI *taf_cfs*perdel_26       +
+      dem_D_ESB407_CCHLA_PMI *taf_cfs*perdel_8        +
+      dem_D_ESB408_DESRT_PMI *taf_cfs*perdel_12       +
+      dem_D_ESB414_BRDNO_PMI *taf_cfs*perdel_30       +
+      dem_D_ESB415_GABRL_PMI *taf_cfs*perdel_31       +
+      dem_D_ESB420_GRGNO_PMI *taf_cfs*perdel_32       +
+      dem_D_WSB032_CLRTA2_PMI *taf_cfs*perdel_6        }
+
+define swp_demand_pls {value
+      SG_R1R2_SWP +   ! 000 -> 067
+      SG_R3_SWP   +   ! 069 -> 087
+      SG_R4_SWP   +   ! 095 -> 109
+      SG_R5_SWP   +   ! 143
+      SG_R6_SWP   +   ! 155
+      SG_R7_SWP   +   ! 156 -> 172
+      dem_D_CAA220_CAALOS_PLS              +
+      dem_D_CAA278_CAALOS_PLS              +
+      dem_D_CAA280_CAALOS_PLS              +
+      dem_D_ESB361_ESBLOS_PLS              +
+      dem_D_ESB406_ESBLOS_PLS              +
+      dem_D_ESB425_ESBLOS_PLS              +
+      dem_D_WSB006_WSBLOS_PLS              +
+      dem_D_WSB026_WSBLOS_PLS              +
+      dem_D_WSB027_WSBLOS_PLS              +
+      dem_D_SBA042_SBALOS_PLS              +
+      NBA_Losses             }
+
+define swp_demand_co {value
+      co_dem_1                  +
+      co_dem_2                  +
+      co_dem_3                  +
+      co_dem_4                  +
+      co_dem_5                  +
+      co_dem_6                  +
+
+      co_dem_8                  +
+
+      co_dem_10                 +
+      co_dem_11                 +
+      co_dem_12                 +
+      co_dem_13                 +
+      co_dem_14                 +
+      co_dem_15                 +
+      co_dem_16                 +
+      co_dem_17                 +
+      co_dem_18                 +
+      co_dem_19                 +
+      co_dem_20                 +
+      co_dem_21                 +
+
+      co_dem_23                 +
+      co_dem_24                 +
+      co_dem_25                 +
+      co_dem_26                 +
+      co_dem_27                 +
+      co_dem_28                 +
+      co_dem_29                 +
+      co_dem_30                 +
+      co_dem_31                 +
+      co_dem_32                 +
+      co_dem_33                 +
+      co_dem_34                 +
+      co_dem_35                 +
+      co_dem_36                 +
+      co_dem_37                 +
+      co_dem_38                 +
+      co_dem_39     }
+
+define swp_total_demand {value swp_demand_mwd+swp_demand_ag+swp_demand_mi+swp_demand_pls +swp_demand_co}

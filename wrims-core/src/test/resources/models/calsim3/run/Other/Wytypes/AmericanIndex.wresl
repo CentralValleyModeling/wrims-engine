@@ -1,0 +1,33 @@
+!AmericanIndex.wresl
+
+define I_FOLS_AprSep{
+	case OctFeb{
+		condition month>=Oct .and. month<=Feb
+		sum(i=Apr-month, Sep-month, 1) UNIMP_FOLS(i)
+	}
+	case March{
+		condition month==Mar
+		sum(i=1, Sep-month, 1) I_Folsm_fm_med[Forecast2](i)	
+	}
+	case AprMay{
+		condition month==Apr .or. month==May
+		value (sum(i=Apr-month, -1, 1) UNIMP_FOLS(i)) + (sum(i=0, Sep-month, 1) I_Folsm_fm_med[Forecast2](i))	
+	}
+	case JunSep{
+		condition always
+		sum(i=Apr-month, Sep-month, 1) UNIMP_FOLS(i)
+	}
+}
+define I_FOLS_AprSep_dv{alias I_FOLS_AprSep kind 'index' units 'taf'}
+
+define wyt_AMERd893_frcst{
+	case a{
+		condition I_FOLS_AprSep > 600
+		value 1
+	}
+	case b{
+		condition always
+		value 2
+	}
+}
+define WYT_AMERd893_Frcst_dv{alias wyt_AMERd893_frcst kind 'wateryeartype' units 'none'}

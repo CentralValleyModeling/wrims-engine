@@ -1,0 +1,12 @@
+define SJRR_min_taf {select release from SJRR_base where month=month}
+define SJRR_min {value SJRR_min_taf*taf_cfs}
+
+define MLRTN_rel {value SJRR_min}
+define MLRTN_rel_jun {select thruJun from SJRR_base where month=month}
+define MLRTN_rel_sep {select thruSep from SJRR_base where month=month}
+define MLRTN_rel_jun_ {alias MLRTN_rel_jun kind 'restoration-sum' units 'taf'}
+define MLRTN_rel_sep_ {alias MLRTN_rel_sep kind 'restoration-sum' units 'taf'}
+
+define SJRR_rel {value  MLRTN_rel}
+define SJRR_relDV {alias SJRR_rel kind 'flow-min-requirement' units 'cfs'}
+

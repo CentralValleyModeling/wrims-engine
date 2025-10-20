@@ -1,0 +1,73 @@
+! A. Munevar 11/20/99
+
+! Defines Standard allowable & Max allowable pumping at Tracy.  Tracy can increase pumping
+! up to 1/3 of San Joaquin River flow at Vernalis if flow at Vernalis is greater than 1000 cfs.
+
+!   If SJR flow @ Vernalis > 1000 cfs then,
+!   Tracy_max_allow = Tracy_standard_allow + 1/3*(SJR @ Vernalis)
+!   But only upto physical capacity.
+
+! Number of days in which the Tracy limit *IS* increased by 1/3 of SJR flow
+define TracyDaysIncr {
+       select   DaysIncr
+       from     TracyLimits
+       where    month=month
+}
+
+! Number of days in which the Tracy limit *IS NOT* increased by 1/3 of SJR flow
+define TracyDaysNoIncr { value daysin - TracyDaysIncr}
+
+! Finds the Max Pump Capacity with the allowable increase
+define TracyMax1 {
+/*      case Increase {
+        condition   C_SJR070[-1] > 1000.0   ! Change back to cycle stuff
+        value   min(TracyCapPermit + C_SJR070[-1]/3.0, TracyCapPhys) }   ! Change back to cycle stuff
+*/
+       case NoIncrease {
+            condition always
+            value     TracyCapPermit }
+}
+
+! Limit Pumping to allowable, weight for days in which increase is allowed
+define TracyMaxAllow {value TracyMax1*TracyDaysIncr/daysin + TracyCapPermit*TracyDaysNoIncr/daysin }
+
+! Limit Pumping to Allowable and Physical Capacity, whichever is less
+goal tracyLessThanAllow { C_DMC000_TD < TracyMaxAllow}
+goal tracyLessThanPhys  { C_DMC000 < TracyCapPhys}
+
+! Output Allowable Pumping Cap for Checking Only
+define TracyAllowOut {alias TracyMaxAllow kind 'FLOW-ALLOW-TRACY' UNITS 'CFS' }
+
+! Tracy PP Minimum Cap
+define tracyminpump {
+    case tracylowshasta {
+        condition S_SHSTA(-1) - S_SHSTA_WTS(-1)  < 1500.
+        value 600. }
+    case tracylowshastafolsom {
+        condition S_FOLSM(-1) < 400 .and. S_SHSTA(-1) - S_SHSTA_WTS(-1) < 2000. !Better reflection of actual operations by trying to keep
+        value 800. }                                                           !water from being released for SL storage during low storage
+    case tracyhighshasta   {                                                   !conditions in the NOD.
+        condition always
+        value 800. }
+}
+
+define tracyminpumpdv {alias tracyminpump kind 'health-safety' units 'cfs'}
+
+goal settracyminpump {
+    lhs C_DMC000_cvp
+    case tracylowshasta {
+        condition S_SHSTA(-1) - S_SHSTA_WTS(-1) < 1500.
+    rhs tracyminpump
+        lhs>rhs penalty 0 !65*taf_cfs + 1
+        lhs<rhs penalty 2700 }
+    case tracylowshastafolsom {
+        condition S_FOLSM(-1) < 400 .and. S_SHSTA(-1) - S_SHSTA_WTS(-1) < 2000. !Better reflection of actual operations by trying to keep
+        rhs tracyminpump                                                       !water from being released for SL storage during low storage
+        lhs>rhs penalty 0 !65*taf_cfs + 1                                         !conditions in the NOD.
+        lhs<rhs penalty 2700 }
+    case tracyhighshasta   {
+        condition always
+        rhs tracyminpump
+        lhs>rhs penalty 0
+        lhs<rhs penalty 2700 }
+}

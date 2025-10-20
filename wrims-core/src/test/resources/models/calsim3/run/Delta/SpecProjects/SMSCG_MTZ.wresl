@@ -1,0 +1,306 @@
+! Idy Lui 9/21/2020
+/*
+Suisun Marsh Salinity Control Gate Operation using ANN 
+
+For Sep-May, use last 7-day average Martinez EC from previous month and 
+compare to the value specified in the table below to trigger gate operation for the entire month.  
+Martinez EC threshold for triggering SMSCG operation for D-1641 and SMPA (for all wyt)
+month       MTZ EC trigger (mS/cm)
+1 (Oct)          25.2
+2 (Nov)          23.9
+3 (Dec)          23.9
+4 (Jan)          21.1
+5 (Feb)          16.9
+6 (Mar)          16.9
+7 (Apr)          19.4
+8 (May)          19.4
+12(Sep)          24.6
+
+For summer, (for ITP/BiOp)
+  BN, AN, and D following W or AN (operate two months): 
+  	use last 7 day average MTZ EC in May as trigger, 
+	if exceed 17.5 ms/cm operate gate June and July, 
+	otherwise operate July and August.
+  D following BN (operate one month):
+   	for June and July, use last 7 day average MTZ EC of previous month
+   	if exceed 22.2 mS/cm, gate operate for entire month
+   	if operation is not triggered in neither June nor July, gate operate entire August
+  W (operate zero to two months)
+  	use last 7 day average MTZ EC of previous month
+  	if exceed 22.2 mS/cm, gate operate for entire month
+  	summer gate operations are not to exceed 60-days (two months)
+  	if gates are tidally operated in June AND July then no gate operations in Aug 
+  C, D following D or C: No Action   	
+*/
+
+!*************************************************************************************************************
+! calculate last 7-day average MTZ EC from previous month
+define MTZ {value 21} ! ANN input location Martinez
+
+define MTZ_EC_7day_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(MTZ),int(ave_last_7days),12,(wateryear-1))}
+  case others {
+    condition always
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(MTZ),int(ave_last_7days),(month-1),wateryear)}
+}
+define MTZ_EC_7day {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setMTZ_EC_7day {MTZ_EC_7day = MTZ_EC_7day_sv}
+
+! calculate previous month's value of Beldon salinity
+! For checking
+define BD {value 20} ! ANN input location Beldon
+
+define BD_EC_Month_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(BD),int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(BD),int(monthly_ave),(month-1),wateryear)}
+}
+
+define BD_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setBD_EC_MON {BD_EC_Month = BD_EC_Month_sv}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! For Sep-May
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SMSCG_EC_Trigger_lookup {
+  case off {
+    condition  month>=Jun .and. month<=Aug
+    value  999.0}
+  case  on{
+    condition  always
+    select  ECtrigger
+    from  SMSCG_TriggerMTZ
+    where  month=month}
+} 
+    
+define SMSCG_EC_Trigger1 {value SMSCG_EC_Trigger_lookup*1000.0}    
+define SMSCG_EC_Trigger1_dv {alias SMSCG_EC_Trigger1 kind 'Trigger' units 'UMHOS/CM'}
+
+define SMSCG_OP1SV {  ! operation flag for Sep-May; 0 means tidally operating,  1 means all gates open 
+  case offMonth {
+    condition  month>=Jun .and. month<=Aug 
+    value  99. }                                    !exculde summer month, for summer month use SMSCG_OP2SV    
+  case  ECTrigger{
+    condition  MTZ_EC_7day_sv > SMSCG_EC_Trigger1
+    value 0.}
+  case  notTrigger{
+    condition  always
+    value 1.}
+}
+
+define SMSCG_OP1 {alias SMSCG_OP1SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op1_Count {                                               
+	case init {
+		condition wateryear == 1922 .and. month==Oct
+		value 0. }
+	case reset {
+		condition month>=Jun .and. month<=Aug
+		value 0. }
+	case otherwise {
+		condition always
+		value SMSCG_Op1_Count_dv(-1) + (1-round(SMSCG_OP1SV)) }
+}
+define SMSCG_Op1_Count_dv {alias SMSCG_Op1_Count kind 'flag' units 'NONE'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! For summer, Jun-Aug
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SMSCG_EC_Trigger2_ {
+  case offMonth {
+    condition  month<Jun .or. month>Aug				!exculde Sep-May
+    value  999.0}
+  case offC {
+    condition  abs(wyt_SAC-5)<0.001 					 !No Action for C
+    value  999.0}
+  case offD_flw_D_C {
+    condition  abs(wyt_SAC-4)<0.001 .and. wyt_SAC_(-12)>=4.  		!No Action for D following D or C
+    value  999.0}    
+  case onWet {
+    condition  abs(wyt_SAC-1)<0.001
+    value  22.2} 
+  case onD_flw_BN {
+    condition  abs(wyt_SAC-4)<0.001 .and. abs(wyt_SAC_(-12)-3)<0.001
+    value  22.2}     
+  case  onOtherWyt{ ! AN, BN, D following W, D following AN
+    condition  always 
+    value  17.5} 
+} 
+    
+define SMSCG_EC_Trigger2 {value SMSCG_EC_Trigger2_*1000.0}    
+define SMSCG_EC_Trigger2_dv {alias SMSCG_EC_Trigger2 kind 'Trigger' units 'UMHOS/CM'}
+! SMSCG_wytflag2 and SMSCG_OP2SV are for W (0-2 months) and BN/AN (2 months)
+!******************************************************************************
+! ROC on LTO Proposed Action and ITP Summer/Fall Delta Smelt Habitat Operation criteria:
+!   - beginning June or later through Aug
+!   - BN, AN and W years
+!   - up to 60 days for W years, 60 days consecutive for BN, AN years
+!   - Depends on summer Jun-Aug EC trigger
+
+define SMSCG_wytflag2{                                      
+  case offMonth {
+    condition  month<Jun .or. month>Aug						!exculde Sep-May
+    value  99.}
+  case dayzeroto60{
+    condition  abs(wyt_SAC-1)<0.001 							!W (operate zero to two months)
+    value  3.}
+  case day60BNAN{
+    condition  wyt_SAC>=2. .and. wyt_SAC<=3.	!BN, AN(operate two months)
+    value  2.}
+  case off{
+    condition always
+    value 0.	
+    }  
+}
+define SMSCG_wytflag2_dv {alias SMSCG_wytflag2 kind 'flag' units 'NONE'}
+
+define SMSCG_OP2SV {  ! operation flag for Summer; 0 means tidally operating,  1 means all gates open 
+  case  offMonth{
+    condition  month<Jun .or. month>Aug
+    value 99.}                                      !exculde Sep-May, for Sep-May use SMSCG_OP1SV
+  case offwyt{
+    condition  SMSCG_wytflag2<0.5
+    value  1.}
+  case day60_done{
+    condition  SMSCG_Op2_Count_dv(-1)>=2 
+    value  1.}  
+  case ECtrigger{
+    condition  month>=Jun .and. month<=Aug .and. MTZ_EC_7day_sv > SMSCG_EC_Trigger2 
+    value  0.} 
+  case Jul_Aug_60day{
+    condition  (month==Jul .and. abs(SMSCG_wytflag2-2)<0.001) .or. (month==Aug .and. abs(SMSCG_wytflag2-2)<0.001 .and. abs(SMSCG_OP2(-2)-1)<0.001)
+    value  0.}       
+  case off{
+    condition  always
+    value  1.}    
+}
+
+define SMSCG_OP2 {alias SMSCG_OP2SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op2_Count {                                               
+	case reset {
+		condition month<Jun .or. month>Aug
+		value 0. }
+	case otherwise {
+		condition always
+		value SMSCG_Op2_Count_dv(-1) + (1-round(SMSCG_OP2SV)) }
+}
+define SMSCG_Op2_Count_dv {alias SMSCG_Op2_Count kind 'flag' units 'NONE'}
+
+!******************************************************************************
+! ITP SMSCG re-operation implements D year SMSCG re-operations following W, AN, or BN years
+! Re-operation is to occur for 60 days (2 months) following W and AN years and 30 days following a BN year
+! Re-operation is to occur between June and August if EC threshold is met
+! Re-operation following Wet and AN years are dependent on carryover of ITP 100 TAF export cut (ITP_Carryover) > 20. TAF
+
+define SMSCG_wytflag3{  
+  case offMonth {
+    condition  month<Jun .or. month>Aug						!exculde Sep-May
+    value  99.}    
+  case day30{
+    condition  abs(wyt_SAC-4)<0.001 .and. abs(wyt_SAC_(-12)-3)<0.001					!D following BN (operate one month)
+    value  1.}    
+  case day60D{
+    condition  (abs(wyt_SAC-4)<0.001 .and. wyt_SAC_(-12)<=2.) .and. ITP_Carryover_(-1) > 20.	!D following W or AN (operate two months), TAF
+    value  2.}    
+   case noAction{
+    condition always
+    value  0.} 
+}
+
+
+define SMSCG_wytflag3_dv {alias SMSCG_wytflag3 kind 'flag' units 'NONE'}
+
+define SMSCG_OP3SV { 
+  case  offMonth{
+    condition  month<Jun .or. month>Aug
+    value 99.}                                      !exculde Sep-May, for Sep-May use SMSCG_OP1SV
+  case offwyt{
+    condition  SMSCG_wytflag3<0.5
+    value  1.}   
+  case day30_60_done{
+    condition  (abs(SMSCG_wytflag3-1)<0.001 .and. SMSCG_Op3_Count_dv(-1)>=1) .or. SMSCG_Op3_Count_dv(-1)>=2
+    value  1.}  
+  case ECtrigger{
+    condition  month>=Jun .and. month<=Aug .and. MTZ_EC_7day_sv > SMSCG_EC_Trigger2 
+    value  0.} 
+  case Jul_Aug_60day{
+    condition  (month==Jul .and. abs(SMSCG_wytflag3-2)<0.001) .or. (month==Aug .and. abs(SMSCG_wytflag3-2)<0.001 .and. abs(SMSCG_OP3(-2)-1)<0.001)
+    value  0.}   
+  case Aug30day{
+    condition  month==Aug .and. abs(SMSCG_wytflag3-1)<0.001 .and. SMSCG_Op3_Count_dv(-1)<0.5
+    value  0.}    
+  case off{
+    condition  always
+    value  1.} 	
+}
+	
+define SMSCG_OP3 {alias SMSCG_OP3SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op3_Count {                                               
+	case reset {
+		condition month<Jun .or. month>Aug
+		value 0. }
+	case otherwise {
+		condition always
+		value SMSCG_Op3_Count_dv(-1) + (1-round(SMSCG_OP3SV)) }
+}
+define SMSCG_Op3_Count_dv {alias SMSCG_Op3_Count kind 'flag' units 'NONE'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Combined Sep-May and Summer Op flag
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SMSCG_OPSV {  ! 0 means tidally operating,  1 means all gates open 
+  case SepMay{
+    condition  month<Jun .or. month>Aug 
+    value  SMSCG_OP1SV }                                        
+  case  JunAug{
+    condition  always
+    value min(SMSCG_OP2SV, SMSCG_OP3SV)}
+}
+
+define SMSCG_OP {alias SMSCG_OPSV kind 'GATE-OP-RATIO' units 'NONE'} 

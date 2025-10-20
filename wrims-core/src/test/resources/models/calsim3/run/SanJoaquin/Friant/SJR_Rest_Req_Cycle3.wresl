@@ -1,0 +1,81 @@
+! SJR_Rest_Cycle3.wresl
+
+! Retrieve SJR Restoration Settlement flow requirements.
+! This file is included in the pulse period cycle and uses the restoration flow
+! requirements for April 16-30 in April.  The flow requirement is the same for the 
+! whole month of May, so it is just defined as such.
+
+! ensure that total Millerton release is at least the restoration release target
+goal setMLRTN_rel {C_MLRTN > MLRTN_rel}  
+
+define SJRR_rel {
+        case April {
+                condition   month==APR
+                value       rest_req_p*taf_cfs*30./16.}
+        case MayOtherwise {
+                condition   always
+                value       MLRTN_rel}
+}
+define SJRR_relDV {alias SJRR_rel kind 'flow-min-requirement' units 'cfs'}
+
+define SJRR_rel_np {
+    case April {
+        condition   month==APR
+        value       rest_req_np*taf_cfs*30./14.
+    }
+    case Otherwise {
+        condition   always
+        value       MLRTN_rel
+    }
+}
+define SJRR_rel_pDV {alias SJRR_rel_np kind 'flow-min-requirement' units 'cfs'}
+
+define rel_def_np {value max(0., SJRR_rel - SJRR_rel_np)}
+define rel_def_p {value max(0., SJRR_rel_np - SJRR_rel)}
+
+define rel_add_np {value min(rel_def_np, Fr_snow_rel*taf_cfs*30./14.)}
+define rel_add_p {value min(rel_def_p, Fr_snow_rel*taf_cfs*30./16.)}
+define rel_add_mon {value max(0.,Fr_snow_rel*taf_cfs - rel_add_np*14./30. - rel_add_p*16./30.)}
+
+define rel_add_np_dv {alias rel_add_np kind 'alias' units 'cfs'}
+define rel_add_p_dv {alias rel_add_p kind 'alias' units 'cfs'}
+define rel_add_mon_dv {alias rel_add_mon kind 'alias' units 'cfs'}
+
+!Set snowmelt release
+goal set_C_MLRTNa { C_MLRTNa < rel_add_p + rel_add_mon}
+
+! target restoration reach flow
+goal meetSJRR {
+    lhs D_SJR205_SJR201 
+    case April {
+        condition month==APR
+        rhs REST_RCH_P}
+ !       lhs<rhs penalty 0}
+    case MayOtherwise {
+        condition always
+        rhs REST_RCH_NP}
+!        lhs<rhs penalty 0}
+}
+
+
+!******************************************************************************
+! SJRR Recapture Logic
+define recap_D_SJR096_SJR_max {select D_SJR096 from SRRP_Recapture_Pot where mon=month}
+define recap_D_SJR082_SJR_max {select D_SJR082 from SRRP_Recapture_Pot where mon=month}
+define recap_D_SJR070_SJR_max {select D_SJR070 from SRRP_Recapture_Pot where mon=month}
+define recap_max {value recap_D_SJR096_SJR_max + recap_D_SJR082_SJR_max + recap_D_SJR070_SJR_max }
+
+goal set_SRRP_lmt1  { D_SJR096_SJRRrecap + D_SJR082_SJRRrecap + D_SJR070_SJRRrecap < D_SJR205_SJR201 } !limited to SJRR flows
+
+goal set_D_SJR096_SJRRrecap_lmt1 { D_SJR096_SJRRrecap < recap_D_SJR096_SJR_max} ! SRRP flow recapture - Patterson ID
+goal set_D_SJR096_SJRRrecap_lmt2 { D_SJR096_SJRRrecap < D_SJR205_SJR201 * recap_D_SJR096_SJR_max/recap_max}
+
+goal set_D_SJR082_SJRRrecap_lmt1 { D_SJR082_SJRRrecap < recap_D_SJR082_SJR_max}   ! SRRP flow recapture - West Stanislaus ID
+goal set_D_SJR082_SJRRrecap_lmt2 { D_SJR082_SJRRrecap < D_SJR205_SJR201 * recap_D_SJR082_SJR_max/recap_max}
+
+goal set_C_SJR070_SJRRrecap_lmt1 { D_SJR070_SJRRrecap < recap_D_SJR070_SJR_max}   ! SRRP flow recapture - Banta Carbona ID
+goal set_C_SJR070_SJRRrecap_lmt2 { D_SJR070_SJRRrecap < D_SJR205_SJR201 * recap_D_SJR070_SJR_max/recap_max}
+
+! Remaining SRRP flow - remove from SJR until the final cycle
+goal D_SJR070_SJRRremove_lmt1 {D_SJR070_SJRRremove < D_SJR205_SJR201 - D_SJR096_SJRRrecap - D_SJR082_SJRRrecap - D_SJR070_SJRRrecap } 
+

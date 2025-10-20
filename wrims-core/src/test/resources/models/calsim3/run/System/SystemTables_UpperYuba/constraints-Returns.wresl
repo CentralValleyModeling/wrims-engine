@@ -1,0 +1,36 @@
+/*
+Constraints-returns.wresl
+CalSim 3.0 System File
+
+Purpose:
+Calculate return flow from demand units
+
+Naming takes the following form:
+R_{DEMAND UNIT}			- return flow from specific demand unit
+R_{WBA}_{DESTINATION}	- aggregated return from WBA to specific location
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Urban Return Flows	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define WW_GRSVL        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_GRSVL_WLF021 {R_GRSVL_WLF021 = WW_GRSVL}
+
+define WW_WLDWD        {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+goal setR_WLDWD_DER004 {R_WLDWD_DER004 = WW_WLDWD}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Agricultural Return Flows	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define TW_NIDDC_NA1   		{timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+! Revisit what the 0.0 factor ought to be for R_NIDDC_NA1_DER011
+goal setR_NIDDC_NA1_DER011 	{R_NIDDC_NA1_DER011 = 0.0 * D_DES006_NIDDC_NA1 + 0.0 * D_CSD014_NIDDC_NA1}
+! Revisit what the 0.0 factor ought to be for R_NIDDC_NA1_WLF017
+goal setR_NIDD1_WLF017 		{R_NIDDC_NA1_WLF017 = 0.0 * D_DES006_NIDDC_NA1 + 0.0 * D_CSD014_NIDDC_NA1}
+
+!define TW_NIDDC_NA2        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+! Revisit what the 0.0 factor ought to be for R_NIDDC_NA2_DER002
+goal setR_NIDDC_NA2_DER002 {R_NIDDC_NA2_DER002 = 0.0 * D_DER004_NIDDC_NA2 + 0.0 * D_DER011_NIDDC_NA2 + 0.0 * D_NWT013_NIDDC_NA2}
+

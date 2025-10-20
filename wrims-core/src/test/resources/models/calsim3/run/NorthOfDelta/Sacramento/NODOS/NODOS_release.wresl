@@ -1,0 +1,221 @@
+! NODOS_release.wresl
+! This file contains the release logic for the operation of NODOS
+!
+! *******************************************************************
+! Misc defines/goals
+define D31_S32_EXCH  {std kind 'FLOW-DELIVERY' units 'CFS'} !SWP transfer to CVP account in exchange for release from Shasta Lake
+define D33_S32_EXCH  {std kind 'FLOW-DELIVERY' units 'CFS'} !EWA transfer to CVP account in exchange for release from Shasta Lake
+define D33_S31_SPILL {std kind 'FLOW-DELIVERY' units 'CFS'} !EWA spill to SWP account (usually a spring spill if forecasts are low)
+define D33_S32_SPILL {std kind 'FLOW-DELIVERY' units 'CFS'} !EWA spill to CVP account (usually a spring spill if forecasts are low)
+define D34_S32_EXCH  {std kind 'FLOW-DELIVERY' units 'CFS'} !WQ transfer to CVP account in exchange for release from Shasta Lake
+define D34_S31_SPILL {std kind 'FLOW-DELIVERY' units 'CFS'} !WQ spill to SWP account (usually a spring spill if forecasts are low)
+define D34_S32_SPILL {std kind 'FLOW-DELIVERY' units 'CFS'} !WQ spill to CVP account (usually a spring spill if forecasts are low)
+! split arc goals
+goal splitD31_S32 {D31_S32 = D31_S32_EXCH}
+goal splitD33_S31 {D33_S31 = D33_S31_SPILL}
+goal splitD33_S32 {D33_S32 = D33_S32_EXCH + D33_S32_SPILL}
+goal splitD34_S31 {D34_S31 = D34_S31_SPILL}
+goal splitD34_S32 {D34_S32 = D34_S32_EXCH + D34_S32_SPILL}
+! tie exchange portions to Shasta Lake releases for this purpose
+goal splitC5_S32SWP {C5_S32SWP = D31_S32_EXCH}
+goal splitC5_S32OTH {C5_S32OTH = D33_S32_EXCH + D34_S32_EXCH}
+!
+define C32B_TCC {std kind 'FLOW-CHANNEL' units 'CFS'} !NODOS releases to offset TCC diversion from the Sac R
+define C32B_GCC {std kind 'FLOW-CHANNEL' units 'CFS'} !NODOS releases to offset GCC diversion from the Sac R
+goal splitC32B {C32B = C32B_TCC + C32B_GCC}
+!
+define D17601_TCC {std kind 'FLOW-DELIVERY' units 'CFS'} !NODOS releases to offset TCC diversion from the Sac R
+define D17601_GCC {std kind 'FLOW-DELIVERY' units 'CFS'} !NODOS releases to offset GCC diversion from the Sac R
+goal splitD17601 {D17601 = D17601_TCC + D17601_GCC}
+!
+define D33_1 {std kind 'FLOW-DELIVERY' units 'CFS'} !EWA Release Fake from NODOS
+define D33_2 {std kind 'FLOW-DELIVERY' units 'CFS'} !EWA Release Fake from NODOS
+define D34_1 {std kind 'FLOW-DELIVERY' units 'CFS'} !WQ Release Fake from NODOS
+define D34_2 {std kind 'FLOW-DELIVERY' units 'CFS'} !WQ Release Fake from NODOS
+goal splitD33 {D33 = D33_1 + D33_2}
+goal splitD34 {D34 = D34_1 + D34_2}
+!
+! *******************************************************************
+!
+! Added Continuity Equations to make sure flows are related properly
+goal AddContinuity17502 {C17602 - C17502 > C32B_TCC + D17601_TCC -1.}  !make sure release to TCC and GCC is routed/split appropriately from NODOS
+goal AddContinuity14402 {C17502 - C14402A > C32B_GCC + C32C + D17601_GCC -1.}  !make sure release to GCC and Colusa Basin Drain is routed/split appropriately from NODOS
+!
+! Added Conveyance Capacity Constraints (combinations of arcs) related to NODOS
+goal RelCapNODOS {C17602 + C17603 + D30 + D32 + D33_1 + D34_1 < CapAllRel} !D30, D32, D33_1 and D34_1 are temporary arcs to test potential demands
+goal limit_OTH1 {C30 + C31 + C32 + C33 + C34 + D33_1 + D34_1 < upperC17603} !D33_1 and D34_1 are temporary arcs to test potential demands
+!
+! *******************************************************************
+!
+! This prevents cycling water off the river
+define int_AllConvey {INTEGER std kind 'INTEGER' units 'NONE'}
+goal zeroC17601_2 {C17601 < int_AllConvey*999999.0}
+! Set River release from NODOS to Zero if filling
+goal zeroC17602_3 {C17602 - D17601 + C17603 + D30 + D32 + D33_1 + D34_1 < 999999.0 - 999999.0*int_AllConvey}
+!
+! This prevents conflicting flows in New Pipe
+define int_NewPipe {INTEGER std kind 'INTEGER' units 'NONE'}
+goal zeroD124A_2  {D124A < int_NewPipe*999999.0}
+! Set River release from NODOS to Zero if filling
+goal zeroC17603_2 {C17603 + D30 + D32 + D33_1 + D34_1  < 999999.0 - 999999.0*int_NewPipe}
+!
+! This prevents conflicting flows between local channels
+define int_Local {INTEGER std kind 'INTEGER' units 'NONE'}
+goal zeroD17501_2 {D17501 < int_Local*999999.0}
+! Set River release from NODOS to Zero if filling
+goal zeroC17602_2 {C17602 < 999999.0 - 999999.0*int_Local}
+!
+! *******************************************************************
+!
+! Limit releases to the previous month ending storage
+! Fills are not constrained concurrent to releases except for the New Pipeline as above
+goal limit_release_loc {C30 + C30A + C30C + D30 < max(S30(-1)-DeadPoolLocal,0.)*taf_cfs} !Rleaf
+goal limit_release_swp {C31 + C31A + D31_S32_EXCH < S31(-1)*taf_cfs} !Rleaf
+goal limit_release_cvp {C32 + C32A + C32B + C32C + D32 - D31_S32_EXCH - D33_S32_EXCH - D34_S32_EXCH < S32(-1)*taf_cfs} !Rleaf
+goal limit_release_ewa {C33 + D33_S32_EXCH + D33 < S33(-1)*taf_cfs} !Rleaf
+goal limit_release_wq  {C34 + D34_S32_EXCH + D34 < S34(-1)*taf_cfs} !Rleaf
+!
+! *******************************************************************
+!
+goal zerolocaltest { d30 = 0.0 }
+goal zeroCVPtest { d32 = 0.0 }
+goal zeroD33_S32E {D33_S32_EXCH < 0.}  ! water should be diverted through D33
+!
+! restrict spills to CVP share
+goal zeroD33_S32S {D33_S32_SPILL < 0.}
+goal zeroD34_S32S {D34_S32_SPILL < 0.}
+!
+! *******************************************************************
+! configure SWP relaeses from NODOS - assumes that C31 has a weight of positive 500
+goal pushC31andD31_32 {
+    lhs C31 + D31_S32_EXCH
+! Hold Storage when Oroville high - let Oroville meet demands on its own
+!    case OrovilleOK {
+!        condition S6(-1) >= 2750. .and. wyt_SAC <= 3.
+!        rhs 0.
+!        lhs>rhs penalty 250.}
+! Support allocations from NODOS otherwise
+!    case NODOSAlloc1 {
+!        condition month >= Jun .and. nds_swpdel_adj > 0.
+!        rhs 0.0
+!        lhs>rhs penalty -250.}
+!    case NODOSAlloc2 {
+!        condition month <= Oct .and. nds_swpdel_adj > 0.
+!        rhs 0.0
+!        lhs>rhs penalty -250.}
+! If in drought let it out
+    case DryCritical {
+        condition wyt_NODOS + prev_wyt_SAC >= 8
+        rhs 0.0
+!        lhs>rhs penalty -250.}
+        lhs>rhs penalty -500.}
+! otherwise no
+    case otherwise {
+        condition always
+        rhs 0.
+!        lhs>rhs penalty 250.}
+        lhs>rhs penalty 500.}
+}
+! *******************************************************************
+! configure SWP relaeses from NODOS - assumes that C31 has a weight of positive 500
+goal pushC32 {
+    lhs C32
+! Support allocations from NODOS otherwise
+    case CVPExcessStor1 {
+        condition month >= Jun .and. S32(-1) > S32_StorTarg
+        rhs 0.0
+!        lhs>rhs penalty -250.}
+        lhs>rhs penalty -1000.}
+    case CVPExcessStor2 {
+        condition month <= Oct .and. S32(-1) > S32_StorTarg
+        rhs 0.0
+!        lhs>rhs penalty -250.}
+        lhs>rhs penalty -1000.}
+! If in drought let it out
+    case DryCritical {
+        condition wyt_NODOS + prev_wyt_SAC >= 8
+        rhs 0.0
+        lhs>rhs penalty -500.}
+}
+! *******************************************************************
+!set ewa release (into space) - EWA step not implemented at this time
+define ewa_rel_limit {
+  case Jul_to_Sep {
+    condition month >= Jul .and. month <= Sep
+!    Assume only 500cfs dedicated Banks PP capacity for now - assume 23% salinity cost (based on WTS testing)
+    value min(EwaNODPurchTgtEst/3.*taf_cfs,500.*1.23) }
+  case OtherMonths {
+    condition always
+    value 0. }
+  }
+goal set_ewa_limit2 { c33 < 0.0 }
+goal set_ewa_limit { d33 < ewa_rel_limit}
+!
+! *******************************************************************
+!
+! Through storage exchange operations CVP storage in NODOS has been built to support
+! the reduction river diversions.  The CVP share of NODOS release for reduction of
+! diversions when TCCA and/or GCID diversions exceed certain thresholds
+!
+! TCCA threshold
+define TCC_input {select TCC from NODOS_DivRedTargs where Month=month}
+define TCC_threshold {
+    case AprMay {
+        condition month >= APR .and. month <= MAY
+        value TCC_input*max(1.0-AprMaySacRDivRedSwitch,0.0) }
+    case other {
+        condition always
+        value TCC_input }
+    }
+! TCCA modified operation
+define DivrtAbove_D112 {std kind 'FLOW' units 'CFS'}
+define DivrtBelow_D112 {std kind 'FLOW' units 'CFS'}
+define IntDivrt_D112   {INTEGER std kind 'INTEGER' units 'NONE'}
+goal ApplyThresh_D112  {D112 - TCC_threshold*perdel_cvpag_sys = DivrtAbove_D112 - DivrtBelow_D112}
+goal ForceAbove_D112   {DivrtAbove_D112 < 999999.0 - IntDivrt_D112*999999.0}
+goal ForceBelow_D112   {DivrtBelow_D112 < IntDivrt_D112*999999.0}
+goal SwitchC32B_TCC    {C32B_TCC + D17601_TCC < 999999.0 - IntDivrt_D112*999999.0}
+!
+! GCID threshold
+define GCC_input {select GCC from NODOS_DivRedTargs where Month=month}
+define GCC_threshold {
+    case AprMay {
+        condition month >= APR .and. month <= MAY
+        value GCC_input*max(1.0-AprMaySacRDivRedSwitch,0.0) }
+    case other {
+        condition always
+        value GCC_input }
+    }
+! GCID modified operation
+define DivrtAbove_D114 {std kind 'FLOW' units 'CFS'}
+define DivrtBelow_D114 {std kind 'FLOW' units 'CFS'}
+define IntDivrt_D114   {INTEGER std kind 'INTEGER' units 'NONE'}
+goal ApplyThresh_D114  {D114 - GCC_threshold*perdel_cvpsc_sys = DivrtAbove_D114 - DivrtBelow_D114}
+goal ForceAbove_D114   {DivrtAbove_D114 < 999999.0 - IntDivrt_D114*999999.0}
+goal ForceBelow_D114   {DivrtBelow_D114 < IntDivrt_D114*999999.0}
+goal SwitchC32B_GCC    {C32B_GCC + D17601_GCC < 999999.0 - IntDivrt_D114*999999.0}
+!
+!************************************************************
+!
+! Manage indirect release
+goal limit_C5_S32 {
+    lhs C5_S32SWP + C5_S32OTH + D33_2 + D34_2
+    case ShastaColdOffRamp {
+         condition  S1(-1) + S4(-1) < ColdStorTarg
+         rhs 0.0 }
+    case CritCondOffRamp {
+         condition wyt_NODOS + prev_wyt_SAC >= 8
+         rhs 0.}
+    case otherwise {
+         condition always
+         rhs 99999.0
+         lhs<rhs penalty 0}
+}
+! Avoid power loss
+! This prevents indirect releases when it would cause Keswick to exceed 15000 cfs
+define int_PowerOk {INTEGER std kind 'INTEGER' units 'NONE'}
+goal checkPowerFlow {C5 - 15000. < 999999.0 - int_PowerOk*999999.0}
+! Let indirect happen if Power OK...
+goal limit_C5_S32_2 {C5_S32SWP + C5_S32OTH + D33_2 + D34_2 < 999999.0*int_PowerOk}
+
+!

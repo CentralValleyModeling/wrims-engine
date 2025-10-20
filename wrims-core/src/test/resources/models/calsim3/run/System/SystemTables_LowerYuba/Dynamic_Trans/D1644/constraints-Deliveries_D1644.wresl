@@ -1,0 +1,65 @@
+/*
+File Name: constraints-deliveries_D1644.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+! For managed wetlands constrain groundwater pumping to minimum specified amount
+! Demand may not be met in full due to contract limits
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 14_NA - BVID irrigators
+!======================================================================
+! gross surface water diversions
+goal setDG_14_NA_D1644    {DG_14_NA_D1644 = D_FDC006_14_NA + D_YUB013_14_NA_D1644}
+! Limit diversion from Dry Creek to be less than 70% of total  (based on historical diversions)
+! Weight diversion from Dry Creek above diversion from Yuba River
+goal setD_YUB013_14_NA_D1644 {D_FDC006_14_NA < 0.40*DG_14_NA_D1644}! Revised from 0.70 as Merle Collins was being drawn down dry
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_14_NA_D1644    {DN_14_NA_D1644 = DG_14_NA_D1644 - DL_14_NA_D1644}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_14_NA_D1644   {AW_14_NA + RP_14_NA = DN_14_NA_D1644 + GP_14_NA_D1644 + RU_14_NA } ! + SHRTG_14_NA }
+
+!goal setD_CGT005_14_NA {D_CGT005_14_NA = 0.} ! discontinued in 1990
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!======================================================================
+! 15N_NA2
+!======================================================================
+
+! gross surface water diversions
+goal setDG_15N_NA2_D1644  {DG_15N_NA2_D1644 = D_YUB011_15N_NA2_D1644}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15N_NA2_D1644  {DN_15N_NA2_D1644 = DG_15N_NA2_D1644 - DL_15N_NA2_D1644}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15N_NA2_D1644     {AW_15N_NA2 + RP_15N_NA2 = DN_15N_NA2_D1644 + GP_15N_NA2_D1644 + RU_15N_NA2 } ! + SHRTG_15N_NA2 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!======================================================================
+! 15S_NA2
+!======================================================================
+
+! gross surface water diversions
+goal setDG_15S_NA2_D1644  {DG_15S_NA2_D1644 = D_YUB011_15S_NA2_D1644}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15S_NA2_D1644  {DN_15S_NA2_D1644 = DG_15S_NA2_D1644 - DL_15S_NA2_D1644}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15S_NA2_D1644     {AW_15S_NA2 + RP_15S_NA2 = DN_15S_NA2_D1644 + GP_15S_NA2_D1644 + RU_15S_NA2 } ! + SHRTG_15S_NA2 }
+

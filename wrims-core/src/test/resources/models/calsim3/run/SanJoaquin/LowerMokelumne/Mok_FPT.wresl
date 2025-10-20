@@ -1,0 +1,140 @@
+! Mok_FPT.wresl
+
+!******************************************************************************
+! Operation of Freeport for Drought Water Supply
+!******************************************************************************
+/*
+EBMUD Board adopted a policy to take CVP water when our projected EOS-TSS falls below 475 TAF.
+Even though EBMUD's CVP contract year is from March through the February, CVP water delivery begins April 1st
+in the first year of rationing at a rate of 90 MGD.  This model assumptions is consistent with the consideration
+that it takes time to determine the severity of a drought and provides time for customers to respond.  
+
+The volumes of water listed in the 2015 Urban Water Management Plan, under Table 3-2, Supplemental Supply Needed are not used.
+For purposes of modeling ignore the 35 TAF and 65 TAF references in this table.  
+
+EBMUD begins pumping CVP water at FWRP on July 1st at 90MGD and continues at this rate until a limitation is reached.
+This includes no more than 133TAF in a single year and 165 TAF in a continuous three year drought period (coupled with the CVP North of Delta M&I allocations).  
+
+The volume in each CVP eligible year can be different depending on the M&I cutbacks for that year.
+
+*/
+
+!Defined in Mok_WS.wresl
+! If the total system storage is forecast to be below 475 TAF, then the current year is assumed to be a water-deficit year, and use of Freeport is triggered.
+! EBMUD_DefFlag = 1
+
+!Subdivide D_FPT013_FSC013 into EBMUD and CCWD components to also implement CCWD diversion of its CVP contract supply through Freeport
+define D_FPT013_FSC013_EBMUD {std kind 'flow-delivery' units 'cfs'}
+define D_FPT013_FSC013_CCWD {std kind 'flow-delivery' units 'cfs'}
+goal split_D_FPT013_FSC013 {D_FPT013_FSC013 = D_FPT013_FSC013_EBMUD + D_FPT013_FSC013_CCWD}
+
+define CLann_FPT013_EBMUD {value 133.} !TAF; CVP contract amount. Additional 3-year limitation.
+
+define FPT_Triggerdv {std kind 'FLAG' units 'NONE'}
+
+define FPT_Trigger  {
+    case FirstYear { 
+     	 condition month == OCT .and. wateryear == BgnWY
+     	 value 0 }
+    case mMay {
+	 condition month == MAY .and. FPT_Triggerdv(-1) <= 0.5 .and. EBMUD_FptFlag >= 0.25
+	 value 1}
+    case April {
+    	 condition month == APR .and. FPT_Triggerdv(-1) >= 0.5 .and. EBMUD_FptFlag <=0.25
+	 value 0}
+    case Otherwise {
+     	 	condition always
+     	 	value FPT_Triggerdv(-1) }}
+
+goal set_FPT_Triggerdv {FPT_Triggerdv = FPT_Trigger }
+
+
+! Define flow rate at Freeport when use of the facility is triggered
+define FPT_Flow  {
+    case UseFreeport {
+	 condition FPT_Trigger >=0.5
+         value 90.*1.547}
+    case Otherwise {
+     	 condition always
+     	 value 0. }}
+
+
+! Calculate the remaining supply of CVP water
+define FPT_SupplyRemaining1dv {std kind 'SUPPLY' units 'TAF'}
+
+define FPT_SupplyRemaining1 {
+    case FirstYear { 
+     	 condition month == OCT .and. wateryear == BgnWY
+     	 value CLann_FPT013_EBMUD*0.5 }
+    case March {
+	 condition month == MAR
+         value CLann_FPT013_EBMUD*perdel_cvpmi_EBMUD}
+    case April {
+	 condition month == APR
+         value CLann_FPT013_EBMUD*perdel_cvpmi_EBMUD - D_FPT013_FSC013_EBMUD(-1)*cfs_taf(-1)} 
+    case May {
+	 condition month == MAY
+         value CLann_FPT013_EBMUD*perdel_cvpmi_EBMUD - D_FPT013_FSC013_EBMUD(-1)*cfs_taf(-1) - D_FPT013_FSC013_EBMUD(-2)*cfs_taf(-2)}        
+    case Otherwise {
+     	 condition always
+     	 value max(0,FPT_SupplyRemaining1dv(-1) - D_FPT013_FSC013_EBMUD(-1)*cfs_taf(-1)) }}
+     	 	
+goal set_FPT_SupplyRemainingdv {FPT_SupplyRemaining1dv = FPT_SupplyRemaining1 }
+
+
+
+! Calculate the remaining supply based on a 3-year limitation
+!Need to have separate variable because of local variable conflict
+define FreeportDiversion {std kind 'DIVERSION' units 'CFS'}
+goal setFreeportDiversion {FreeportDiversion = D_FPT013_FSC013_EBMUD}
+
+define FPT_Last35dv {std kind 'DIVERSION' units 'TAF'}
+define FPT_Last35  {
+     case FirstMonth {
+    	 condition month == OCT .AND. wateryear == BgnWY
+	 value 0.}
+     case FirstMonths {
+	 condition wateryear <= BgnWY+2
+	 value FPT_Last35dv(-1) + FreeportDiversion(-1)*cfs_taf(-1)}
+    case Otherwise {
+     	 condition always
+     	 value FPT_Last35dv(-1) + FreeportDiversion(-1)*cfs_taf(-1) - FreeportDiversion(-36)*cfs_taf(-36) }}
+
+goal setFPT_Last35dv {FPT_Last35dv = FPT_Last35}     	     	 
+
+
+define FPT_SupplyRemaining2dv {std kind 'COUNTER' units 'NONE'}
+
+define FPT_SupplyRemaining2  {value MAX(0,165. - FPT_Last35) }
+
+goal set_FPT_SupplyRemaining2dv {FPT_SupplyRemaining2dv = FPT_SupplyRemaining2 }
+
+!After a first year on pumping at Freeport, cease pumping in March if WYT is AN or wet
+define FPT_MarchFlag  {
+     case SecondDryYear {
+    	 condition month == MAR .AND. ANNMOK079FNF >= 500. !Arbitrary threshold of 500 TAF chosen to match EBMUDSIM results
+	 value 0.}
+     case Otherwise {
+         condition always
+     	 value 1.}
+     	 }
+
+!goal set_D_FPT013_FSC013a {D_FPT013_FSC013_EBMUD < FPT_Flow}
+!goal set_D_FPT013_FSC013b {D_FPT013_FSC013_EBMUD < FPT_SupplyRemaining1*taf_cfs}
+!goal set_D_FPT013_FSC013c {D_FPT013_FSC013_EBMUD < FPT_SupplyRemaining2*taf_cfs}
+goal set_D_FPT013_FSC013f {D_FPT013_FSC013 = D_FSC027_MAQ012}
+
+goal set_D_FPT013_FSC013g {D_FPT013_FSC013_EBMUD = min(FPT_Flow,FPT_SupplyRemaining1*taf_cfs,FPT_SupplyRemaining2*taf_cfs)*FPT_MarchFlag}
+
+!CCWD can only use remaining Freeport Capacity
+goal limit_D_FPT013_FSC013_CCWD {D_FPT013_FSC013_CCWD < 90.*1.547 - D_FPT013_FSC013_EBMUD}
+!Route CCWD diversions through Mokelumne Intertie into LV Pipeline.
+goal route_D_FPT013_FSC013_CCWD {D_FPT013_FSC013_CCWD = D_MAQ057_LVP007}
+
+define FPT_Capacity_Available {value max(0.,90.*1.547 - min(FPT_Flow,FPT_SupplyRemaining1*taf_cfs,FPT_SupplyRemaining2*taf_cfs)*FPT_MarchFlag)}
+define FPT_Capacity_Available_ {alias FPT_Capacity_Available kind 'Capacity' units 'cfs'}
+
+
+!goal set_D_FPT013_FSC013h {D_FPT013_FSC013 < 90.*1.547*FPT_MarchFlag}
+
+

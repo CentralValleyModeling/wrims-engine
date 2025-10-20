@@ -1,0 +1,281 @@
+! Friant_allocation.wresl
+! Created for the Upper San Joaquin River Basin Storage Investigation Project
+! Implements Friant water allocation scheme
+!##############################################################################
+/*
+Define total delivery variables for Friant Class I & II water also the water releases due to rainfall or snowmelt runoff
+*/
+! Total Delivery (Friant-Kern Canal + Madera Canal) of Class 1 Water from Friant
+define tot_C1_del {upper unbounded lower unbounded kind 'FRIANT-DEL' units 'TAF' }
+! Total Delivery (Friant-Kern Canal + Madera Canal) of Class 2 Water from Friant
+define tot_C2_del {upper unbounded lower unbounded kind 'FRIANT-DEL' units 'TAF' }
+! Estimated Friant release due to rainfall runoff into Friant
+define Fr_rain_rel {upper unbounded lower unbounded kind 'FRIANT-FC' units 'TAF' }
+! Estimated volume of water to be released due to snowmelt runoff into Friant
+define Fr_snow_rel_vol {upper unbounded lower unbounded kind 'FRIANT-FC' units 'TAF' }
+! Define snowmelt release forecast
+define snow_rel_for {upper unbounded lower unbounded kind 'FRIANT-FC' units 'TAF' }
+define snow_rel_for_cor {upper unbounded lower unbounded kind 'FRIANT-FC' units 'TAF' }
+
+define und_D_MLRTN_MDC_C1 {std kind 'under-delivery' units 'taf'}
+define und_D_MLRTN_MDC_C2 {std kind 'under-delivery' units 'taf'}
+define tot_und_D_MLRTN_MDC_C1 {std kind 'under-delivery' units 'taf'}
+define tot_und_D_MLRTN_MDC_C2 {std kind 'under-delivery' units 'taf'}
+define re_und_D_MLRTN_MDC_C1 {std kind 'reallocated' units 'taf'}
+define re_und_D_MLRTN_MDC_C2 {std kind 'reallocated' units 'taf'}
+
+define tot_und_D_MLRTN_MDC_C1_ {
+        case March {
+                condition       month == mar
+                value           0.
+        }
+        case otherwise {
+                condition       always
+                value           max(0.,tot_und_D_MLRTN_MDC_C1(-1) + und_D_MLRTN_MDC_C1(-1) - re_und_D_MLRTN_MDC_C1(-1))
+        }
+}
+goal set_tot_und_D_MLRTN_MDC_C1 {tot_und_D_MLRTN_MDC_C1 = tot_und_D_MLRTN_MDC_C1_}
+
+define unf_spill {value (C_MLRTNF(-1) + D_MLRTN_MDC_F(-1))*cfs_taf(-1)
+        + max(0.,((D_MLRTN_FRK_16B(-1) + D_MLRTN_MDC_16B(-1) + D_MLRTN_FRK_215(-1) + D_MLRTN_MDC_215(-1))*cfs_taf(-1) - Fr_snow_rel_vol(-1)))} ! Spill above snowmelt forecast release.
+
+define tot_und_D_MLRTN_MDC_C2_ {
+        case March {
+                condition       month == mar
+                value           0.
+        }
+        case otherwise {
+                condition       always
+                value           max(0.,tot_und_D_MLRTN_MDC_C2(-1) + und_D_MLRTN_MDC_C2(-1) - re_und_D_MLRTN_MDC_C2(-1) - unf_spill)
+        }
+}
+goal set_tot_und_D_MLRTN_MDC_C2 {tot_und_D_MLRTN_MDC_C2 = tot_und_D_MLRTN_MDC_C2_}
+
+define forecast_correction {
+   value max(0., 
+             tot_und_D_MLRTN_MDC_C1_ 
+           - max(0.,unf_spill -(tot_und_D_MLRTN_MDC_C2(-1) + und_D_MLRTN_MDC_C2(-1) - re_und_D_MLRTN_MDC_C2(-1))) 
+           + tot_und_D_MLRTN_MDC_C2_) }
+
+!Correct water supply forecast.
+define FR_WS_for_cor {
+        case March {
+                condition       month == mar
+                value           FR_WS_for
+        }
+        case otherwise {
+                condition       always
+                value           Fr_WS_for - forecast_correction
+        }
+}
+
+/*
+Class 1 allocation - March through June
+*/
+! Sum of the Class 1 water delivered prior to current month
+define Class1_delivered {
+        case march {
+            condition month == mar
+            value 0.0 }
+        case initial_case {
+            condition month < mar .and. wateryear == BgnWY
+            value 0.0 }
+        case otherwise {
+            condition always
+            sum(i=prevmar,-1,1) tot_C1_del(i) } }
+
+/*
+Maximum amount of Class 1 and Class 2 Friant allocations
+*/
+! Maximum Class 1 allocation is 800 TAF
+define Class1_max { value 800. }
+! Maximum Class 2 allocation is 1400 TAF
+define Class2_max { value 1400. }
+! Define temporary variable for class1_alloc
+define C1_alloc_tmp {upper unbounded lower unbounded kind 'TEMPORARY' units 'TAF' }
+
+/*
+Determination of Friant Class 1 allocation.  Allocation made March through June is determined
+by Friant water supply forecast and the difference between Class 1 allocation and delivery.
+*/
+define class1_alloc {
+        case MarthruJun {
+           condition   month >= mar .and. month <= jun
+           value max(0.0, min(Fr_WS_for_cor, Class1_max - Class1_delivered)) }
+        case firstmonth {
+            condition wateryear == BgnWY .and. month == oct
+            value 0.0 }
+        case otherwise {
+            condition   always
+            value C1_alloc_tmp(-1) - tot_C1_del(-1) } }
+! Allows past values of Class 1 allocation can be accessed via C1_alloc_tmp
+goal set_C1_alloc_tmp {C1_alloc_tmp = class1_alloc }
+
+
+/*
+Class 2 plus surplus allocation - March through June
+NOTE: must first calculate spills, then subtract spills from water supply available to
+get Class 2 allocation
+*/
+! Sum of Friant inflow from current month through June
+define I_MLRTN_thrujun {
+    case FebthruJun {
+        condition   month >= feb .and. month <= jun
+        sum(i=0,9-month,1) I_MLRTN_IMP(i) * cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value 0.0 } }
+
+! Sum of the average evaporation losses from current month through June
+define Fr_Evap_jun {
+    case FebthruJun {
+        condition   month >= feb .and. month <= jun
+        select thru_jun
+        from Friant_Evap
+        where month = month }
+    case otherwise {
+        condition   always
+        value 0.0  } }
+
+! Sum of the combined Madera and Friant-Kern canal losses from current month through June
+define FR_losses_jun {
+    case FebthruJun {
+        condition   month >= feb .and. month <= jun
+        select thru_jun
+        from Friant_canal_Losses
+        where month = month }
+    case otherwise {
+        condition   always
+        value 0.0  } }
+
+/*
+Sum of the estimated deliveries from Friant from current month through June
+Assume maximum delivery for spill calculation. Max delivery assumed to avoid unnecessary spills
+*/
+define Fr_del_est_prct {
+        select thru_jun
+        from Friant_max_del
+        where month = month }
+! Define the amount of the estimated deliveries from Friant
+define Fr_del_est_jun { value Fr_del_est_prct / 100. * 2200.}
+
+/*
+Snowmelt release logic - release due to snowmelt runoff
+Forecast of the amount of water that will be spilled from Friant between current month and June
+*/
+define Fr_for_spill {
+    case Febthrujun {
+         condition   month >= Feb .and. month <= jun
+         value max(0.0, I_MLRTN_thrujun - Fr_del_est_jun - MLRTN_rel_jun - FR_losses_jun
+                        - Fr_Evap_jun + SIO_FWUA(-1) - S_MLRTNlevel5 - S17level3) }
+    case otherwise {
+        condition always
+        value 0.0 } }
+! Set snowmelt release forecast equals to Friant spill forecast
+goal set_snow_rel_for {snow_rel_for = fr_for_spill}
+
+define Fr_for_spill_cor {
+    case March {
+         condition month == Mar
+         value Fr_for_spill}
+    case Febthrujun {
+         condition   month >= Feb .and. month <= jun
+         value max(0.0, Fr_for_spill - forecast_correction) }
+    case otherwise {
+        condition always
+        value 0.0 } }
+
+! Set snowmelt release forecast equals to Friant spill forecast
+goal set_snow_rel_for_cor {snow_rel_for_cor = fr_for_spill_cor}
+
+
+! Friant flood control release pattern required to release forecast seasonal snowmelt
+define Fr_srp {
+    case feb {
+        condition month == feb
+        select percent
+        from Feb_snowmelt_release_pattern
+        given forecast_spill = fr_for_spill_cor
+        use minimum
+        where month = month }
+    case mar {
+        condition month == mar
+        select percent
+        from Mar_snowmelt_release_pattern
+        given forecast_spill = fr_for_spill_cor
+        use minimum
+        where month = month }
+    case apr {
+        condition month == apr
+        select percent
+        from Apr_snowmelt_release_pattern
+        given forecast_spill = fr_for_spill_cor
+        use minimum
+        where month = month }
+    case may {
+        condition month == may
+        select percent
+        from May_snowmelt_release_pattern
+        given forecast_spill = fr_for_spill_cor
+        use minimum
+        where month = month }
+    case jun {
+        condition month == jun
+        select percent
+        from May_snowmelt_release_pattern
+        given forecast_spill = fr_for_spill
+        use minimum
+        where month = month }
+    case otherwise {
+        condition always
+        value 0.0 } }
+
+/*
+Snowmelt release is the forecasted amount of water that will be spilled from Friant
+times the Friant flood control release pattern
+*/
+goal set_snow_rel_volume { Fr_snow_rel_vol = fr_for_spill_cor * Fr_srp / 100. }
+
+! Define temporary variable for class2_alloc
+define C2_alloc_tmp {upper unbounded lower unbounded kind 'TEMPORARY' units 'taf'}
+
+! Class 2 Allocation for March, April-May and Jun-Aug
+! Sum of the Class 2 water delivered prior to current month
+define Class2_delivered {
+        case march {
+            condition month == mar
+            value 0.0 }
+        case initial_case {
+            condition month < mar .and. wateryear == BgnWY
+            value 0.0 }
+        case otherwise {
+            condition always
+            sum(i=prevmar,-1,1) tot_C2_del(i) } }
+
+define class2_alloc {
+        case MarthruJun {
+           condition   month >= mar .and. month <= jun
+            value max(0.0, min(Fr_WS_for_cor - Class1_alloc - Fr_for_spill_cor, Class2_max - Class2_delivered)) }
+        case firstmonth {
+            condition wateryear == BgnWY .and. month == oct
+            value 0.0 }
+        case otherwise {
+            condition   always
+            value C2_alloc_tmp(-1) - tot_C2_del(-1) } }
+
+! Allows past values of Class 2 allocation can be accessed via C2_alloc_tmp
+goal set_C2_alloc_tmp {C2_alloc_tmp = class2_alloc }
+
+
+define class2_alloc_percent {
+	    case initial_case {
+            condition month < mar .and. wateryear == BgnWY
+            value 1.0 }
+        case march {
+            condition month == mar
+            value class2_alloc/Class2_max}
+        case otherwise {
+            condition always
+             value class2_alloc_percent_dv(-1)}}
+
+define class2_alloc_percent_dv {alias class2_alloc_percent kind 'ALLOCATION' units 'PERCENT'}

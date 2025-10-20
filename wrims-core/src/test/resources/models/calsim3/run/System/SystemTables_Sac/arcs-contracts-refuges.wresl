@@ -1,0 +1,409 @@
+/*
+File Name: arcs-refuges.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Naming takes the following form:
+CLann_{ORIGIN PREFIX}_{DESTINATION}     - annual limitation on specific contractors diversion from particular source (state variable)
+CLmon_{ORIGIN PREFIX}_{DESTINATION}     - monthly limitation on specific contractors diversion from particular source (state variable)
+CL_{ORIGIN PREFIX}_{DESTINATION}        - monthly limitation on specific contractors diversion from particular source (decision variable for output)
+
+All units is TAF
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! CVP NOD Refuge Contractors !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!**********************************************************************************
+!Define Annual Applied Water Rice Demand for CVP NOD Refuge
+!**********************************************************************************
+define AWRyear_08N_PR1dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			
+define AWRyear_08N_PR1{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWR_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFr5_TS(i))}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWR_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFr5_TS(i))}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWR_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFr5_TS(i))}
+       case Rest { 
+       		condition always
+       			value AWRyear_08N_PR1dv(-1) } }
+       			
+goal setAWRyear_08N_PR1dv {AWRyear_08N_PR1dv = AWRyear_08N_PR1}
+       			       			
+
+define AWRyear_08N_PR2dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			     			
+define AWRyear_08N_PR2{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWR_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFr5_TS(i))}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWR_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFr5_TS(i))}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWR_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFr5_TS(i))}
+       case Rest { 
+       		condition always
+       			value AWRyear_08N_PR2dv(-1) } }
+       			
+goal setAWRyear_08N_PR2dv {AWRyear_08N_PR2dv = AWRyear_08N_PR2}
+       			       			
+ 
+ define AWRyear_08S_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+ define AWRyear_08S_PR{   
+        case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        		condition month == OCT .and. wateryear == bgnWY
+        			sum(i=0,11,1)  AWR_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFr5_TS(i))}
+        case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+        		condition month == MAR .and. wateryear == EndWY
+        			sum(i=prevOCT,SEP-month,1) AWR_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFr5_TS(i))}
+        case March { ! March for wateryears BgnWY - year before EndWY
+        		condition month == MAR .and. wateryear < EndWY
+        			sum(i=0,11,1)  AWR_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFr5_TS(i))}
+        case Rest { 
+        		condition always
+       			value AWRyear_08S_PRdv(-1) } }
+       			
+goal setAWRyear_08S_PRdv {AWRyear_08S_PRdv = AWRyear_08S_PR}
+       			        			
+
+define AWRyear_17N_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}        			
+define AWRyear_17N_PR{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWR_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFr5_TS(i))}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWR_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFr5_TS(i))}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWR_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFr5_TS(i))}
+       case Rest { 
+       		condition always
+       			value AWRyear_17N_PRdv(-1) } }
+       			
+goal setAWRyear_17N_PRdv {AWRyear_17N_PRdv = AWRyear_17N_PR}
+
+!********************************************************************************
+!Define Annual Applied Water Demand for crops other than rice for CVP NOD Refuge
+!********************************************************************************
+define AWOyear_08N_PR1dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			
+define AWOyear_08N_PR1{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWO_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFo_08N_PR1)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWO_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFo_08N_PR1)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWO_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFo_08N_PR1)}
+       case Rest { 
+       		condition always
+       			value AWOyear_08N_PR1dv(-1) } }
+
+goal setAWOyear_08N_PR1dv {AWOyear_08N_PR1dv = AWOyear_08N_PR1}
+       			       			
+
+define AWOyear_08N_PR2dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			     			
+define AWOyear_08N_PR2{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWO_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFo_08N_PR2)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWO_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFo_08N_PR2)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWO_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFo_08N_PR2)}
+       case Rest { 
+       		condition always
+        			value AWOyear_08N_PR2dv(-1) } }
+
+goal setAWOyear_08N_PR2dv {AWOyear_08N_PR2dv = AWOyear_08N_PR2}
+       			      			
+ 
+ define AWOyear_08S_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+ define AWOyear_08S_PR{   
+        case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        		condition month == OCT .and. wateryear == bgnWY
+        			sum(i=0,11,1)  AWO_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFo_08S_PR)}
+        case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+        		condition month == MAR .and. wateryear == EndWY
+        			sum(i=prevOCT,SEP-month,1) AWO_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFo_08S_PR)}
+        case March { ! March for wateryears BgnWY - year before EndWY
+        		condition month == MAR .and. wateryear < EndWY
+        			sum(i=0,11,1)  AWO_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFo_08S_PR)}
+        case Rest { 
+        		condition always
+        			value AWOyear_08S_PRdv(-1) } }
+
+goal setAWOyear_08S_PRdv {AWOyear_08S_PRdv = AWOyear_08S_PR}
+
+define AWOyear_17N_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+ define AWOyear_17N_PR{   
+        case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        		condition month == OCT .and. wateryear == bgnWY
+        			sum(i=0,11,1)  AWO_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFo_17N_PR)}
+        case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+        		condition month == MAR .and. wateryear == EndWY
+        			sum(i=prevOCT,SEP-month,1) AWO_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFo_17N_PR)}
+        case March { ! March for wateryears BgnWY - year before EndWY
+        		condition month == MAR .and. wateryear < EndWY
+        			sum(i=0,11,1)  AWO_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFo_17N_PR)}
+        case Rest { 
+        		condition always
+        			value AWOyear_17N_PRdv(-1) } }
+
+goal setAWOyear_17N_PRdv {AWOyear_17N_PRdv = AWOyear_17N_PR}
+
+!**********************************************************************************
+!Define Annual Applied Water Wetlands Demand for CVP NOD Refuge
+!**********************************************************************************
+define AWWyear_08N_PR1dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			
+define AWWyear_08N_PR1{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWW_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFw_08N_PR1)}  !RUFw_08N_PR1)}  !Z.Q. Richard 04/05/2012
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWW_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 -  RUFw_08N_PR1)}  !RUFw_08N_PR1)} 
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWW_08N_PR1(i)*cfs_taf(i)*(1+ RPF_08N_PR1 - RUFw_08N_PR1)} ! RUFw_08N_PR1)}  
+       case Rest { 
+       		condition always
+       			value AWWyear_08N_PR1dv(-1) } }
+
+goal setAWWyear_08N_PR1dv {AWWyear_08N_PR1dv = AWWyear_08N_PR1}
+       			       			
+
+define AWWyear_08N_PR2dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}       			     			
+define AWWyear_08N_PR2{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       		condition month == OCT .and. wateryear == bgnWY
+       			sum(i=0,11,1)  AWW_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFw_08N_PR2)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       		condition month == MAR .and. wateryear == EndWY
+       			sum(i=prevOCT,SEP-month,1) AWW_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFw_08N_PR2)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+       		condition month == MAR .and. wateryear < EndWY
+       			sum(i=0,11,1)  AWW_08N_PR2(i)*cfs_taf(i)*(1+ RPF_08N_PR2 - RUFw_08N_PR2)}
+       case Rest { 
+       		condition always
+        			value AWWyear_08N_PR2dv(-1) } }
+
+goal setAWWyear_08N_PR2dv {AWWyear_08N_PR2dv = AWWyear_08N_PR2}
+       			      			
+ 
+ define AWWyear_08S_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+ define AWWyear_08S_PR{   
+        case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        		condition month == OCT .and. wateryear == bgnWY
+        			sum(i=0,11,1)  AWW_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFw_08S_PR)}
+        case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+        		condition month == MAR .and. wateryear == EndWY
+        			sum(i=prevOCT,SEP-month,1) AWW_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFw_08S_PR)}
+        case March { ! March for wateryears BgnWY - year before EndWY
+        		condition month == MAR .and. wateryear < EndWY
+        			sum(i=0,11,1)  AWW_08S_PR(i)*cfs_taf(i)*(1+ RPF_08S_PR - RUFw_08S_PR)}
+        case Rest { 
+        		condition always
+        			value AWWyear_08S_PRdv(-1) } }
+
+goal setAWWyear_08S_PRdv {AWWyear_08S_PRdv = AWWyear_08S_PR}
+
+define AWWyear_17N_PRdv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'} 
+define AWWyear_17N_PR{   
+        case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        		condition month == OCT .and. wateryear == bgnWY
+        			sum(i=0,11,1)  AWW_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFw_17N_PR)}
+        case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+        		condition month == MAR .and. wateryear == EndWY
+        			sum(i=prevOCT,SEP-month,1) AWW_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFw_17N_PR)}
+        case March { ! March for wateryears BgnWY - year before EndWY
+        		condition month == MAR .and. wateryear < EndWY
+        			sum(i=0,11,1)  AWW_17N_PR(i)*cfs_taf(i)*(1+ RPF_17N_PR - RUFw_17N_PR)}
+        case Rest { 
+        		condition always
+        			value AWWyear_17N_PRdv(-1) } }
+        			
+ goal setAWWyear_17N_PRdv {AWWyear_17N_PRdv = AWWyear_17N_PR}
+ 
+
+!define CLann_GCC027_08N_PR1  	{select contract from Contracts_CVPService where diversion=16}
+define CLmon_GCC027_08N_PR1   {value max(0.0, CLann_GCC027_08N_PR1 * (AWo_08N_PR1*(1+ RPF_08N_PR1 - RUFo_08N_PR1) + AWr_08N_PR1*(1+ RPF_08N_PR1 - RUFr5_TS) + AWw_08N_PR1*(1+ RPF_08N_PR1 - RUFw_08N_PR1))*cfs_taf / (AWOyear_08N_PR1 + AWRyear_08N_PR1 + AWWyear_08N_PR1))}  ! Monthly contract amount (TAF) patterned on demand
+define CL_GCC027_08N_PR1          {alias CLmon_GCC027_08N_PR1 kind 'CONTRACT-LIMIT' units 'TAF'}
+
+!define CLann_GCC039_08N_PR2  	{select contract from Contracts_CVPService where diversion=18}
+define CLmon_GCC039_08N_PR2  	{value max(0.0, CLann_GCC039_08N_PR2 * (AWo_08N_PR2*(1+ RPF_08N_PR2 - RUFo_08N_PR2) + AWr_08N_PR2*(1+ RPF_08N_PR2 - RUFr5_TS) + AWw_08N_PR2*(1+ RPF_08N_PR2 - RUFw_08N_PR2))*cfs_taf / (AWOyear_08N_PR2 + AWRyear_08N_PR2 + AWWyear_08N_PR2))}  ! Monthly contract amount (TAF) patterned on demand
+define CL_GCC039_08N_PR2      	{alias CLmon_GCC039_08N_PR2 kind 'CONTRACT-LIMIT' units 'TAF'}
+
+!define CLann_GCC056_08S_PR  	{select contract from Contracts_CVPService where diversion=17}
+define CLmon_GCC056_08S_PR   	{value max(0.0, CLann_GCC056_08S_PR * (AWo_08S_PR*(1+ RPF_08S_PR - RUFo_08S_PR) + AWr_08S_PR*(1+ RPF_08S_PR - RUFr5_TS) + AWw_08S_PR*(1+ RPF_08S_PR - RUFw_08S_PR))*cfs_taf / (AWOyear_08S_PR + AWRyear_08S_PR + AWWyear_08S_PR))}  ! Monthly contract amount (TAF) patterned on demand
+define CL_GCC056_08S_PR           	{alias CLmon_GCC056_08S_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+!define CLann_CBD037_08S_PR  	{select contract from Contracts_CVPService where diversion=22}
+define CLmon_CBD037_08S_PR   	{value max(0.0, CLann_CBD037_08S_PR * (AWo_08S_PR*(1+ RPF_08S_PR - RUFo_08S_PR) + AWr_08S_PR*(1+ RPF_08S_PR - RUFr5_TS) + AWw_08S_PR*(1+ RPF_08S_PR - RUFw_08S_PR))*cfs_taf / (AWOyear_08S_PR + AWRyear_08S_PR + AWWyear_08S_PR))}  ! Monthly contract amount (TAF) patterned on demand
+define CL_CBD037_08S_PR           	{alias CLmon_CBD037_08S_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+!define CLann_JBC002_17N_PR  	{select contract from Contracts_CVPService where diversion=19}
+define CLmon_JBC002_17N_PR   	{value max(0.0, CLann_JBC002_17N_PR * (AWo_17N_PR*(1+ RPF_17N_PR - RUFo_17N_PR) + AWr_17N_PR*(1+ RPF_17N_PR - RUFr5_TS) + AWw_17N_PR*(1+ RPF_17N_PR - RUFw_17N_PR))*cfs_taf / (AWOyear_17N_PR + AWRyear_17N_PR + AWWyear_17N_PR))}  ! Monthly contract amount (TAF) patterned on demand
+define CL_JBC002_17N_PR           	{alias CLmon_JBC002_17N_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+
+! Currently no CVP water is delivered to Sutter NWR
+! The refuge receives water from Sutter Extension WD and exercises its water rights to divert from the Bypass
+!define CLann_SBP028_17S_PR  	{select contract from Contracts_CVPService where diversion=20}
+!define CLmon_SBP028_17S_PR  	{value max(0.0, CLann_SBP028_17S_PR * (AWo_17S_PR + AWR_17S_PR + AWW_17S_PR)*cfs_taf / (AWoann_17S_PR + AWRann_17S_PR + AWwann_17S_PR))}  ! Monthly contract amount (TAF) patterned on demand
+!define CL_SBP028_17S_PR          	{alias CLmon_SBP028_17S_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+! Colusa NWR has an 8 cfs water right to the Colusa Basin Drain Apr 15 - Nov 1
+define WRmon_CBD037_08S_PR   {
+	case Apr{
+		condition month == APR
+          	value (8./2.) * cfs_taf}
+	case MayOct{
+		condition month >= MAY .or. month <= OCT
+          	value 8. * cfs_taf}
+         case other{
+		condition always
+          	value 0. *cfs_taf}
+          }
+          
+
+/*          
+!Sutter National Wildlife Refuge diversion from Sutter Extension Water District (11_SA4)
+
+The Sutter Extension Water District supplies refuge lands located outside of the Sutter Bypass levees,
+approximately 450 acres at the southeast corner of the refuge, through the Sutter Extension Canal.
+USFWS and Sutter Extension Water District have (?) an annual agreement that allowed the Service to
+purchase water at the discretion of the district.
+
+Source: Refuge Water Suply, Long-Term Water Supply Agreements (Reclamation, 2001)
+*/
+
+define WRann_SEC009_17S_PR    {select right from WaterRightAmounts where diversion=2}
+
+define SumAW_17S_PR      {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_17S_PR_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) AWR_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFr5_TS(i)) + AWO_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFo_17S_PR) + AWW_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFw_17S_PR) }
+    case JanEndWY {
+     condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWR_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFr5_TS(i)) + AWO_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFo_17S_PR) + AWW_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFw_17S_PR) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWR_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFr5_TS(i)) + AWO_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFo_17S_PR) + AWW_17S_PR(i)*cfs_taf(i)*(1+ RPF_17S_PR - RUFw_17S_PR) }
+    case otherwise {
+        condition   always
+        value SumAW_17S_PR(-1) }
+        }
+       
+goal setSumAW_17S_PR     {SumAW_17S_PR=SumAW_17S_PR_sv}
+
+! Monthly contract amount (TAF) patterned on demand   
+define WRmon_SEC009_17S_PR    {value max (0.0,WRann_SEC009_17S_PR * (AWR_17S_PR*cfs_taf*(1+ RPF_17S_PR - RUFr5_TS) + AWO_17S_PR*cfs_taf*(1+ RPF_17S_PR - RUFo_17S_PR) + AWW_17S_PR*cfs_taf*(1+ RPF_17S_PR - RUFw_17S_PR)) / SumAW_17S_PR_sv)} 
+define WR_SEC009_17S_PR       {alias WRmon_SEC009_17S_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+/*
+Sutter National Wildlife Refuge diversion from Sutter Bypass
+
+More than 85 percent of the water supply for the refuge has come from irrigation and return
+flows in the East and West Borrow Ditches of Sutter Bypass if, and when, they were
+available. Agricultural return flows provide the majority of the summer flows. Rainfall,
+runoff, and flood flows provide the majority of winter flows. Sutter NWR also has three
+appropriative water rights in the Sutter Bypass. License 4590 (A011632) allocates 25 cfs from June 1 to
+October 30 to be diverted from the East Borrow Ditch for irrigation of 1,000 acres inside of
+the Bypass. License 3149 (A011349) appropriates 5 cfs from April 15 to October 1 to be diverted from
+East Borrow Ditch for irrigation of 270 acres inside of the Bypass. License 6996 appropriates
+10 cfs of water from the main drainage canal on the east side of the East Sutter Bypass levee
+between October 1 and January 1 for irrigation of 450 acres. These water rights do not have
+high priority numbers, so reliable water supplies were not available to the refuge. Given the
+lack of available water during most of the year, these sources cannot be considered to be
+dependable water sources. The water right under License 6996 has not been used because of
+poor water quality and limited availability.
+
+Source: Refuge Water Suply, Long-Term Water Supply Agreements (Reclamation, 2001)
+*/
+
+define WRmon_SBP028_17S_PR   {
+	case Apr{
+		condition month == APR
+          	value (5./2.) * cfs_taf}
+	case May{
+		condition month == MAY
+          	value 5. * cfs_taf}
+         case JunSep{
+	 	condition month >= JUN .and. month <= SEP
+          	value (5. + 25.) * cfs_taf}
+         case Oct{
+	 	condition month == OCT
+          	value 25. * cfs_taf}
+         case other{
+		condition always
+          	value 0. *cfs_taf}
+          }
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Other Managed Wetlands        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! The Little Dry Creek Unit and Howard Slough Unit of the Upper Butte Basin Wildlife Area have been annexed
+! into Richvale ID and Western Canal WD, respectively. The agreements do not specify a fixed quantity of water
+! It is assumed that this water is subject to diversion limits for these two settlement contractors
+define WRmon_WEC005_11_PR     {value 99999.}
+define WRmon_RVC005_11_PR     {value 99999.}
+
+define CLmon_MTC000_09_PR     {value 99999.}
+
+define WRmon_CRK005_17N_NR    {value 99999.}
+
+define CL_MTC000_09_PR        {alias CLmon_MTC000_09_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+define WR_WEC005_11_PR        {alias WRmon_WEC005_11_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+define WR_RVC005_11_PR        {alias WRmon_RVC005_11_PR kind 'CONTRACT-LIMIT' units 'TAF'}
+
+define WR_CRK005_17N_NR  {alias WRmon_CRK005_17N_NR kind 'WATER-RIGHT' units 'TAF'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!! Miscellaneous Water Rights !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+! The beginWaterYear Agreement specifies November to March
+! Western Canal WD GM says water is delivered from after rice harvest through December
+! Model using October to December period
+! Western Canal is typically closed mid-January
+
+define WRmon_WEC005_BTC032    {
+     case OctMar{
+          condition month >= OCT .and. month <= MAR
+          value 250.*cfs_taf}
+     case Sep{
+          condition month == SEP
+          value 250.*cfs_taf}
+     case AprAug{
+          condition always
+          value 0.0} 
+          }
+          
+define WR_WEC005_BTC032       {alias WRmon_WEC005_BTC032 kind 'WATER-RIGHT' units 'TAF'}!For output only
+
+
+
+
+define WRmon_BGD000_17N_PR    {value 23.5/12.}
+

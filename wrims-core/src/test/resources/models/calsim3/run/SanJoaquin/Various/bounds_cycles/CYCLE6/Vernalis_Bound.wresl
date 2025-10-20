@@ -1,0 +1,31 @@
+! Edward Chang
+! 5/01/2000
+! Joint Model
+! Revised by C. Hsu, 4/10/03, USBR, for review and documentation project
+! This code bounds decision variables using monthly weighted constraints for cycle 6 only (within San Joaquin Basin)
+!###################################################################################################
+ 
+/*
+Flow at Vernalis, without Vernalis minimum flows from February to June plus October
+*/
+define Vern_nomincycle6 { 
+    case NonPulseNonDO {
+        condition   month <= mar
+        value       C_SJR070[SJR_WQ1] }
+    case April {
+        condition   month == apr
+        value       14.*C_SJR070[SJR_WQ1]/30. + 16.*C_SJR070[SJR_WQ2]/30. }  
+    case Mayonly {
+        condition   month == may
+        value       15.*C_SJR070[SJR_WQ2]/31. + 16.*C_SJR070[SJR_WQ1]/31. } 
+    case NonPulsePlusDO {
+        condition   always
+        value       C_SJR070[SJR_WQ1] } 
+        }
+define VernNoMinC6dv {alias Vern_nomincycle6 kind 'output-cfs' units 'cfs'}
+! Total flows at Vernalis including instream and minimum flows
+!@zrc goal set1Vernalis_cycle6 { C_SJR070 = Vern_nomincycle6 + C_MELONmin + C_MCLREMIN }
+!In ITP cycle need to make sure the water that was removed in D_SJR070_SJRRremove is now put back in system
+goal set1Vernalis_cycle6 { lhs C_SJR070 rhs Vern_nomincycle6 + C_MELONmin + C_MCLREMIN + D_OMR027_SJRRrecap + FriantVA_Flow + FriantVA_EXC lhs<rhs penalty 9999999 lhs>rhs penalty 9999999}!Soft penalty to avoid infeasibility
+!goal set1Vernalis_cycle6 { C_SJR070 = Vern_nomincycle6 + C_MELONmin + C_MCLREMIN + D_OMR027_SJRRrecap + FriantVA_Flow + FriantVA_EXC }
+

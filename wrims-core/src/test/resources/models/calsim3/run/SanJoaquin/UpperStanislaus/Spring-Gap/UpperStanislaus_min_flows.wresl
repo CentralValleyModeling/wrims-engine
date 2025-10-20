@@ -1,0 +1,344 @@
+! Spring Gap-Stanislaus minimum flow requirement
+! Chakri 02/26/08
+! Sarah Hamilton 05/04/2020
+! Bridget Childs 01/12/2023
+! *********************************************************************************
+! FERC Project No. 2130-033: Spring-Gap (April 24, 2009)
+! Based on DWR Forecast Annual Unimpaired Inflow to New Melones Reservoir (AF) 
+! 		Critically Dry: Flow <= 350 TAF
+! 		Dry: 350 TAF < Flow <= 676 TAF
+! 		Normal: 676 TAF < Flow <= 1,585 TAF
+!			Normal-Dry: 676k < Flow <= 1,050k 
+!			Normal-Wet: 1,050k Flow <= 1,585k 
+! 		Wet: Flow >= 1,585 TAF
+
+! Min/Max Streamflows for the Relief Reach (cfs) - MFS047 Node in CS3 
+!				Normal		Dry/Critical		Wet
+! Oct			(30,50)		(20,40)			(40,125)
+! Nov			(30,60)		(20,50)			(40,125)
+! Dec			(30,60)		(20,50)			(40,125)
+! Jan1-Feb9		(30,60)		(20,50)			(40,125)
+! Feb10-Mar9	(30,60)		(20,50)			(40,125)
+! Mar10-Apr9	(30,60)		(25,50)			(40,125)
+! Apr10-May9	(60,NA)		(45,NA)			(70,NA)
+! May10-May31	(100,NA)	(80,NA)			(150,NA)
+! Jun			(150,NA)	(100,NA)		(250,NA)
+! Jul			(90,NA)		(40,NA)			(200,NA)
+! Aug			(40,200)	(20,40)			(100,300)
+! Sep			(30,120)	(20,40)			(60,200)
+
+define MFS047_MIF {
+		case crit_dry_1 {
+		     condition frcst_nmi <= 676 .and. month >= jan .and. month <= feb
+		     value 20.  }
+		case crit_dry_2 {
+		     condition frcst_nmi <= 676 .and. month == mar
+		     value 24.  } ! weighted average
+		case crit_dry_3 {
+		     condition frcst_nmi <= 676 .and. month == apr
+		     value 39.  } ! weighted average
+		case crit_dry_4 {
+		     condition frcst_nmi <= 676 .and. month == may
+		     value 70.  } ! weighted average
+		case crit_dry_5 {
+		     condition frcst_nmi <= 676 .and. month == jun
+		     value 100.  } 
+		case crit_dry_6 {
+		     condition frcst_nmi <= 676 .and. month == jul
+		     value 40.  } 
+		case crit_dry_7 {
+		     condition frcst_nmi <= 676 .and. month >= aug .and. month <= dec
+		     value 20.  }  
+		case normal_1   {
+		     condition frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month >= jan .and. month <= mar
+		     value 30.  } 
+		case normal_2 {
+		     condition frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month == apr
+		     value 51.  } ! weighted average
+		case normal_3 {
+		     condition frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month == may
+		     value 88.  } ! weighted average
+		case normal_4 {
+		     condition  frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month == jun
+		     value 150.  } 
+		case normal_5 {
+		     condition  frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month == jul
+		     value 90.  } 
+		case normal_6 {
+		     condition  frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month == aug 
+		     value 40.  } 
+  		case normal_7   {
+		     condition frcst_nmi <= 1585 .and. frcst_nmi > 676 .and. month >= sep .and. month <= dec
+		     value 30.  }   
+		case wet_1   {
+		     condition frcst_nmi >= 1585  .and. month >= jan .and. month <= mar
+		     value 40.  } 
+		case wet_2 {
+		     condition frcst_nmi >= 1585  .and. month == apr
+		     value 61.  } ! weighted average
+		case wet_3 {
+		     condition frcst_nmi >= 1585  .and. month == may
+		     value 127.  } ! weighted average
+		case wet_4 {
+		     condition  frcst_nmi >= 1585 .and. month == jun
+		     value 250.  } 
+		case wet_5 {
+		     condition  frcst_nmi >= 1585 .and. month == jul
+		     value 200.  } 
+		case wet_6 {
+		     condition  frcst_nmi >= 1585 .and. month == aug 
+		     value 100.  } 
+  		case wet_7   {
+		     condition frcst_nmi >= 1585  .and. month == sep
+		     value 60.  }   
+  		case wet_8   {
+		     condition frcst_nmi >= 1585  .and. month >= oct .and. month <= dec
+		     value 40.  }   		        			
+		case other {
+		     condition always
+		     value 0.}
+			   }
+goal setC_MFS047_MIF {C_MFS047_MIF + C_MFS047_SHTG = MFS047_MIF}
+
+!Minimum Daily Flow schedule for the Sand Bar Dam Reach (cfs) - MFS012 in CS3
+!			Normal			Dry/Critical		Wet
+! Oct			80			50					80
+! Nov			70			50					70
+! Dec			70			50					70
+! Jan1-Feb9		70			50					70
+! Feb10-Mar9	70			50					70
+! Mar10-Apr9	80			50					80
+! Apr10-May9	80			50					80
+! May10-May31	80			50					80
+! Jun			80			50					80
+! Jul			80			60					100
+! Aug			80			60					100
+! Sep			80			50					100
+
+
+define MFS012_MIF {
+		case crit_dry_1 {
+		     condition frcst_nmi <= 676 .and. month >= jan .and. month <= jun
+		     value 50.  }	
+		case crit_dry_2 {
+		     condition frcst_nmi <= 676 .and. month >= jul .and. month <= aug
+		     value 60.  }		
+		case crit_dry_3 {
+		     condition frcst_nmi <= 676 .and. month >= sep .and. month <= dec
+		     value 50.  }	         
+		case norm_wet_1 {
+		     condition frcst_nmi > 676 .and. month >= jan .and. month <= feb
+		     value 70.  }	
+		case norm_wet_2 {
+		     condition frcst_nmi > 676 .and. month == mar
+		     value 77.  } !weighted average
+		case norm_1 {
+		     condition frcst_nmi > 676 .and. frcst_nmi <= 1585 .and. month >= apr .and. month <= oct
+		     value 80.  } 
+	    case wet_1 {
+		     condition frcst_nmi > 1585 .and. month >= apr .and. month <= jun
+		     value 80.  } 
+	    case wet_2 {
+		     condition frcst_nmi > 1585 .and. month >= jul .and. month <= sep
+		     value 100.  } 
+		case wet_3 {
+		     condition frcst_nmi > 1585 .and. month == oct
+		     value 80.  } 
+		case norm_wet_3 {
+		     condition frcst_nmi > 676 .and. month >= nov .and. month <= dec
+		     value 70.  }      			
+		case other {
+		     condition always
+		     value 0.}
+			   }
+
+! Minimum Supplemental Flow schedule for the Sand Bar Dam Reach (cfs) - MFS012 in CS3
+! 		This amount must be initiated in addition to the MIF. 
+! 		Can be initiated March 1 - May 1st at discretion of licensee.
+!		Based on analysis of the natural hydrograph (Goodwin FNF), it was determined that supplemental releases for 
+!		release in the below schedule. 
+
+!			Normal, Dry, Wet	Month Released			Critical	Month Released
+! Week1	 		5					3						15			4
+! Week2			10					3						75			4
+! Week3			25					3						250			4
+! Week4			35					4						150			5
+! Week5			75					4						100			5
+! Week6			140					4						40			5
+! Week7			220					4						20			5
+! Week8			400					5						0			6
+! Week9			180					5						0			6
+! Week10		110					5						0			6
+! Week11		65					5						0			6
+! Week12		25					6						0			7
+! Week13 		10					6						0			7
+
+! Based on the analysis of natural hydrograph described above, the following supplemental releases were assumed
+! 			Normal 	Dry		Wet		Critical
+! Mar		10		10		10		0
+! Apr		118		118		118		85
+! May		189		189		189		75
+! Jun		9		9		9		0
+! Jul		0		0		0		0
+
+define MFS012_MIF_SUPPL {
+		case critical_1      {
+		     condition frcst_nmi <= 350. .and. month == apr
+		     value 85.  }
+		case critical_2      {
+		     condition frcst_nmi <= 350. .and. month == may
+		     value 75.  }
+		case march {
+		     condition month == mar .and. frcst_nmi > 350.
+		     value 10.  }
+		case april {
+		     condition month == apr .and. frcst_nmi > 350.
+		     value 118.  }
+		case mmay {
+		     condition month == may .and. frcst_nmi > 350.
+		     value 189.  }
+		case june {
+		     condition month == jun .and. frcst_nmi > 350.
+		     value 9.  }
+		case other {
+		     condition always
+		     value 0.  }
+		     }		   
+
+goal setC_MFS012_MIF {C_MFS012_MIF + C_MFS012_SHTG = MFS012_MIF  + MFS012_MIF_SUPPL}
+
+
+! Minimum Daily Flow schedule for the Pinecrest Reach (cfs) -  SFS033 in CS3
+!				Dry Normal-Dry	Normal-Wet	Wet
+! Oct			10		10		15			15		
+! Nov			10		10		15			15	
+! Dec			10		10		10			15	
+! Jan1-Feb9		10		10		10			15	
+! Feb10-Mar9	10		10		10			15	
+! Mar10-Apr9	10		10		10			15	
+! Apr10-May9	10		10		15			15	
+! May10-May31	10		10		15			15	
+! Jun			10		10		15			15	
+! Jul			10		10		15			15	
+! Aug			10		10		15			15	
+! Sep			10		10		15			15	
+
+define SFS033_MIF {
+		case normal_dry    { 
+		     condition frcst_nmi <= 1050
+		     value 10.  }
+		case wet    {
+		     condition frcst_nmi > 1585
+		     value 15.  }
+		case normal_wet_1  {
+		     condition frcst_nmi > 1050 .and. frcst_nmi <= 1585 .and. month >= jan .and. month <= mar 
+		     value 10.  }		 
+		case normal_wet_2  {
+		     condition frcst_nmi > 1050 .and. frcst_nmi <= 1585 .and. month >= apr .and. month <= dec 
+		     value 15.  }			    		 
+		case other {
+		     condition always
+		     value 0.  }
+		     }	
+goal setC_SFS033_MIF {C_SFS033_MIF + C_SFS033_SHTG = SFS033_MIF}
+
+
+! Minimum Daily Flow schedule for the Philadelphia Reach (cfs) -  SFS026 in CS3
+!				Dry Normal-Dry	Normal-Wet	Wet
+! Oct			10		10		15			15		
+! Nov			10		10		15			15	
+! Dec			10		10		10			15	
+! Jan1-Feb9		10		10		10			15	
+! Feb10-Mar9	10		10		10			15	
+! Mar10-Apr9	10		10		10			15	
+! Apr10-May9	10		10		15			15	
+! May10-May31	10		10		15			15	
+! Jun			10		10		15			15	
+! Jul			10		10		15			15	
+! Aug			10		10		15			15	
+! Sep			10		10		15			15
+
+
+define SFS026_MIF {
+		case normal_dry    { 
+		     condition frcst_nmi <= 1050
+		     value 10.  }
+		case wet    {
+		     condition frcst_nmi > 1585
+		     value 15.  }
+		case normal_wet_1  {
+		     condition frcst_nmi > 1050 .and. frcst_nmi <= 1585 .and. month >= jan .and. month <= mar 
+		     value 10.  }		 
+		case normal_wet_2  {
+		     condition frcst_nmi > 1050 .and. frcst_nmi <= 1585 .and. month >= apr .and. month <= dec 
+		     value 15.  }			    		 
+		case other {
+		     condition always
+		     value 0.  }
+		     }	
+
+goal setC_SFS026_MIF {C_SFS026_MIF + C_SFS026_SHTG = SFS026_MIF}
+
+! *********************************************************************************
+! Defining Donnell's Reservoir Operations: Target Storage (Level 3) 
+!
+! Monthly storage targets for Beardsley and Donnells have been developed based on the 
+! operating rules contained in the CHEOPS model of the Middle Fork of Stanislaus River. The 
+! storage targets are defined as functions of water available, which is calculated as the 
+! previous month’s storage in Beardsley and Donnells plus the Relief Reservoir release 
+!(measured at Kennedy Meadows on arc C15) plus the inflows into the Middle Fork between 
+! Beardsley Lake and Kennedy Meadows (I4 + I17 + I16). The monthly storage target curves 
+! for each reservoir in each month are shown in Tables 6-17 and 6-18. 
+! (Source: 2008 Upper Stanislaus Study Model Documentation; CH2MHill)
+
+
+define C_MFS047_ADD_1 {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define C_MFS047_ADD_2 {std kind 'FLOW-EXCESS-POWER' units 'CFS'}
+goal C_MFS047_ADD_total {C_MFS047_ADD = C_MFS047_ADD_1 + C_MFS047_ADD_2}
+
+define C_MFS047_POW {std kind 'FLOW-POWER' units 'CFS'}
+goal C_MFS047_POW_total {C_MFS047_POW = C_MFS047_MIF + C_MFS047_ADD_1}
+
+define water_avb_relief {value I_RLIEF + I_MFS047 + S_RLIEF(-1)*taf_cfs}
+define C_MFS047_target {
+	case sep_dry {
+		condition     month == sep .and. frcst_nmi <= 900
+		select        Sep
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case oct_dry {
+		condition     month == oct .and. frcst_nmi <= 900
+		select        Oct
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case nov_dry {
+		condition     month == nov .and. frcst_nmi <= 900
+		select        Nov
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case dec_dry {
+		condition     month == dec .and. frcst_nmi <= 900
+		select        Dec
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case jan_dry {
+		condition     month == jan .and. frcst_nmi <= 900
+		select        Jan
+		from          Stanislaus_relief_rel1
+		given         forecast = frcst_nmi
+		use           maximum }
+	case other {
+		condition     always
+		select        Release
+		from          Stanislaus_relief_rel2
+		given         WaterAvb = water_avb_relief
+		use           linear
+		where         Mon = month }
+	}
+
+goal setC_MFS047_target {C_MFS047_POW < max(C_MFS047_target, MFS047_MIF)}
+goal setC_MFS047_total {C_MFS047 = C_MFS047_POW + C_MFS047_ADD_2}

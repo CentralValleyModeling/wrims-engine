@@ -1,0 +1,129 @@
+
+/*
+File Name: CCSFWaterBank.wresl
+
+Purpose:
+Define CSF/New Don Pedro Water Bank Accounting
+
+*/
+
+!Consistent with agreements between Turlock and Modesto irrigation districts and CCSF, the New Don Pedro Project provides a water bank of 570,000 AF of storage
+!when Don Pedro Reservoir is below elevation 801.9 feet, and up to 740,000 AF when Don Pedro is at 830 feet) that CCSF uses to help manage the water
+!supply of its Lloyd and Hetch Hetchy Reservoir water system while meeting the senior water rights of the Districts. 
+
+!Using the water bank, CCSF can pre-release flows from its upstream facilities into the Don Pedro water bank where the flows are credited against CCSF’s
+!obligation to meet future District entitlements (minimum of unimpared flow at LaGrange station and Fourth agreemnet check) so that later in dry periods,
+!CCSF can divert and use Tuolumne River water which it otherwise would have to bypass to meet the Districts’ senior water rights. CCSF’s water bank credits
+!substantially improve the reliability of its water system by crediting the water bank in wet years so that it can debit the account in dry years.
+
+!Additional water from the CCSF System can be released as supplemental inflow to Don Pedro Reservoir to maintain the Water Bank Account Balance greater than zero. 
+!The first call for supplemental water release will be from Cherry Reservoir. If the storage in Cherry Reservoir is less than 45,000 AF, the supplemental
+!release is made by Hetch Hetchy Reservoir.
+
+
+
+!The capacity of CCSF Water Bank can be increased if there is any water in the rain flood zone of New Don Pedro reservoir  (S_Pedro > 1690 TAF).
+!Half of any stored water in New Don Pedro more than 1690 TAF could be added to the CCSF Water bank storage. The CCSF Water Bank should not exceed 740 TAF.
+!This is not simulated in CalSim 3 as it is typically not used (personal communication, Matt Moses, SFPUC, 2020). Water stored in this zone would be lost in later months
+!when the additional reserve is not available
+
+!Define unimpaired flow at New Don Pedro Dam
+define PEDRO_UF   {value I_ELENR+I_LLOYD+I_HTCHY+I_PEDRO+I_CHY006+I_TUO105+I_JWB001+I_MFT000+I_SFT003+I_CVY009+I_NFT008+I_MOC003+CT_PEDRO_SV}
+define PEDRO_UFdv {alias PEDRO_UF kind 'FLOW' units 'CFS'}
+
+   
+!The Water Bank Account is to be maintained on a daily basis based upon the computed daily natural flow at La Grange Diversion Dam. “Daily natural flow” is defined as that flow which
+!would have occurred at La Grange Diversion Dam had no facilities been constructed by any party in the Tuolumne River watershed. San Francisco receives a credit of advance releases
+!whenever the inflow to the reservoir from all sources exceeds 2,416 cfs or natural flow, whichever is smaller, year-round, and 4,066 cfs or natural flow, whichever is smaller, for 60
+!days following and inclusive of April 15. The additional 66 cfs was for an 1871 mining ditch right acquired during the construction of the original Don Pedro Dam. A major portion of
+!the mining ditch right served the Waterford Irrigation District which was later annexed by MID. ? Except with the prior consent of the Districts, San Francisco is not entitled to have a debit
+!balance in the Water Bank Account.
+
+define FourthAgrmntLimit { !in cfs
+       case April {
+                 condition month == APR
+                 value 3296.}
+       case May {
+                 condition month == MAY
+                 value 4066.}
+       case June {
+                 condition month == JUN
+                 value 3131.}          
+       case Otherwise {
+                 condition always
+                 value 2416.}}
+                 
+               
+define MIDTIDEntitlement   {value min(PEDRO_UF,FourthAgrmntLimit)} !entitlement is unimpaired inflow to New Don Pedro, up to a threshold (Fourth Agreement Limit). 
+define MIDTIDEntitlementDV {alias MIDTIDEntitlement kind 'FLOW' units 'CFS'}  
+             
+define I_WTBNK_C1   {value C_TUO073[UPPERTUOLUMNE1] + I_PEDRO + CT_PEDRO_SV - MIDTIDEntitlement} !credit/debit from the water bank 
+define I_WTBNK_C1dv {alias I_WTBNK_C1 kind 'FLOW' units 'CFS'}
+
+define I_WTBNK      {lower unbounded upper unbounded kind 'FLOW' units 'CFS'} 
+define I_WTBNK_ADD  {std kind 'FLOW' units 'CFS'} !additional release upstream in cycle 2 to keep Water Bank from debit balance
+goal setI_WTBNK     {I_WTBNK = I_WTBNK_C1 + I_WTBNK_ADD}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Water Bank      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_PEDRO_WTBNK      {lower 0. upper 570. kind 'STORAGE' units 'TAF'} ! Do not allow bank to go negative
+
+/* An evaporation loss is considered for CCSF Water Bank (E_WTBNK).*/
+define E_PEDRO_WTBNK {   !in cfs
+    case FirstMonth {
+        condition month==bgnmo .and. wateryear==bgnwy
+        value max(0, E_PEDRO_SV*(S_PEDRO_WTBNK(-1)/1643.))} !note: 1643 is initial condition for S_PEDRO
+    case otherwise {
+        condition always
+        value max(0, E_PEDRO_SV*(S_PEDRO_WTBNK(-1)/S_PEDRO_SV(-1)))} 
+}
+
+! Calculate Water Bank Storage in Cycle 1
+define S_PEDRO_WTBNK_C1   {value max(0, min(S_PEDRO_WTBNK(-1) + I_WTBNK_C1*cfs_taf - E_PEDRO_WTBNK*cfs_taf, 570.))} ! Need to set to min to 0 because this can go negative in extreme scenarios like 95% LOC. Also, total water bank is not allowed to go negative. NOsorio 10/27/2023
+define S_PEDRO_WTBNK_C1dv {alias S_PEDRO_WTBNK_C1 kind 'STORAGE' units 'TAF'} !for debugging purposes
+
+! Calculate Water Bank Storage in Cycle 2
+goal setS_PEDRO_WTBNK     {S_PEDRO_WTBNK = S_PEDRO_WTBNK_C1 + I_WTBNK_ADD*cfs_taf}
+
+
+! Minimum Lloyd storage to draw for water bank/supplemental release is 45000 AF. When Lloyd storage is below 45000 AF the water bank/supplemental release requirement is directed to Hetch Hetchy reservoir.
+! Water Bank Flaf (WBflag) has defined for this purpose.              
+define WBflag {
+         case HTCHYoperation{
+               condition S_LLOYD[UPPERTUOLUMNE1] < 45.
+               value 0.}
+         case other {
+             condition always
+             value 1.}}
+   
+             
+goal deficit {LHS I_WTBNK_ADD*cfs_taf RHS max(0,-S_PEDRO_WTBNK_C1) 
+    LHS > RHS penalty 99999
+    LHS < RHS penalty 99999.}   
+
+goal setI_WTBNK_ADD      {I_WTBNK_ADD = C_LLOYD + D_CHRRY_CHY000 + C_HTCHY + D_HTCHY_CPT012 - C_LLOYD[UPPERTUOLUMNE1] - D_CHRRY_CHY000[UPPERTUOLUMNE1] - C_HTCHY[UPPERTUOLUMNE1] - D_HTCHY_CPT012[UPPERTUOLUMNE1]}
+goal setLloydRelease     {C_LLOYD + D_CHRRY_CHY000 - C_LLOYD[UPPERTUOLUMNE1] - D_CHRRY_CHY000[UPPERTUOLUMNE1] <  WBFlag*max(0,S_LLOYD[UPPERTUOLUMNE1] -45.)*taf_cfs}  
+goal setHHetchyRelease   {C_HTCHY + D_HTCHY_CPT012 - C_HTCHY[UPPERTUOLUMNE1] - D_HTCHY_CPT012[UPPERTUOLUMNE1] <  9999. - 9999. * WBFlag + max(0., max(0,-S_PEDRO_WTBNK_C1) - max(0,S_LLOYD[UPPERTUOLUMNE1] -45.))*taf_cfs}
+goal setElenrRelease     {C_ELENR = C_ELENR[UPPERTUOLUMNE1]}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! For debugging     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_TUO073_C1       {alias C_TUO073[UPPERTUOLUMNE1]       kind 'FLOW' units 'CFS'}
+define C_LLOYD_C1        {alias C_LLOYD[UPPERTUOLUMNE1]        kind 'FLOW' units 'CFS'}
+define D_CHRRY_CHY000_C1 {alias D_CHRRY_CHY000[UPPERTUOLUMNE1] kind 'FLOW' units 'CFS'}
+define C_HTCHY_C1        {alias C_HTCHY[UPPERTUOLUMNE1]        kind 'FLOW' units 'CFS'}
+define D_HTCHY_CPT012_C1 {alias D_HTCHY_CPT012[UPPERTUOLUMNE1] kind 'FLOW' units 'CFS'}
+define D_ELENR_ECT001_C1 {alias D_HTCHY_CPT012[UPPERTUOLUMNE1] kind 'FLOW' units 'CFS'}
+define S_HTCHY_C1    {alias S_HTCHY[UPPERTUOLUMNE1] kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD_C1    {alias S_LLOYD[UPPERTUOLUMNE1] kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR_C1    {alias S_ELENR[UPPERTUOLUMNE1] kind 'STORAGE-ZONE' units 'TAF'}
+define DonPedroInflow_C1 {alias C_TUO073[UPPERTUOLUMNE1] + I_PEDRO + CT_PEDRO_SV kind 'CHANNEL' units 'CFS'}
+define DonPedroInflow    {alias C_TUO073 + I_PEDRO + CT_PEDRO_SV kind 'CHANNEL' units 'CFS'}
+
+
+
+
+
+

@@ -1,0 +1,442 @@
+! El Dorado Project Minimum Instream Flow Requirements
+! M.Bachman 11/2017
+!*********************************************************************************
+
+! Minimum flows are based on FERC License No. 184-065 (Condition No.31)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Project Water Year !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! El Dorado Project minimum flows are based on April-July unimpaired flow at Fair Oaks.
+! Minimum flows are based on water year types as defined below:
+!	Water Year type		Definition
+!	Wet					April-July umimpaired flow >125% of average historical
+!	Above Normal		April-July umimpaired flow 100-125% of average historical
+!	Below Normal		April-July umimpaired flow 75-100% of average historical
+!	Dry					April-July umimpaired flow 50-75% of average historical
+!	Critical 			April-July umimpaired flow <50% of average historical
+
+define WY_EID{
+	case wet{
+		condition amr_aprjul_pct > 125.
+		value 1
+		}
+	case above_normal{
+		condition amr_aprjul_pct >= 100.
+		value 2
+		}
+	case below_normal{
+		condition amr_aprjul_pct >= 75.
+		value 3
+		}
+	case dry{
+		condition amr_aprjul_pct >= 50.
+		value 4
+		}
+	case critical{
+		condition always
+		value 5
+		}
+	}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! El Dorado Canal Maintenance !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*FERC License No. 184-065 specifies an annual maintenance period for the El Dorado Canal
+ and Akin Powerhouse to begin no later than October 3rd each year (Condition No.52). 
+ During this maintenance period, El Dorado Canal is non-operational.
+ 
+ ECorp specifies the maintenance period to be October 1 through December 15.
+ That same time period is specified here for consistency, and for lack of a more specific
+ time frame provided in the FERC license.
+*/
+ 
+define CanalMaintenance{
+	case Maintenance1 {condition month==Oct .or. month==Nov value 0.}
+	case Maintenance2 {condition month==Dec value (16./31.)}
+	case NoMaintenance {condition always value 1.}
+}
+goal CanalLimit {D_SFA066_EDC000<156.*CanalMaintenance} !Canal capacity = 163 cfs (ECorp presentation says 156 cfs?)
+goal AlderLimit {D_ALD002_EDC004<15.*CanalMaintenance} !capacity = 15 cfs
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Flow Requirements !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Echo Creek below Echo Lakes Dam 
+define MIF_EID_ECHOL_1{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 1
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 1
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 1
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 1
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 1
+		}
+	}
+define MIF_EID_ECHOL    {value min(MIF_EID_ECHOL_1,I_ECHOL)}
+define MIF_EID_ECHOL_DV {alias MIF_EID_ECHOL kind 'FLOW-REQUIRED' UNITS 'CFS'}
+
+goal MIF_EID_ECHOLRelease {C_ECHOL_MIF<MIF_EID_ECHOL}
+
+
+! Pyramid Creek below Lake Aloha Dam 
+define MIF_EID_PYR001_1{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 2
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 2
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 2
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 2
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 2
+		}
+	}
+define MIF_EID_PYR001 {value min(MIF_EID_PYR001_1,I_ALOHA)}
+
+goal MIF_EID_PYR001Release {C_PYR001_MIF<MIF_EID_PYR001}
+
+
+! Caples Creek below Caples Lake Dam 
+define MIF_EID_CPC008_1 {
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 3
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 3
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 3
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 3
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 3
+		}
+	}
+	
+define MIF_EID_CPC008_2 { !Pulse flow
+	case Wet{condition WY_EID == 1 value 345.}
+	case AN {condition WY_EID == 2 value 300.}
+	case BN {condition WY_EID == 3 value 210.}
+	case Dry{condition WY_EID == 4 value 150.}
+	case CriticallyDry{condition always value 0.}}
+	
+define CaplesPulseFlowTrigger {
+       case AprilPeak {condition month == APR .and. I_CAPLS >= I_CAPLS(7-month+1) .and. I_CAPLS >= I_CAPLS(7-month+2)  value 1.}
+       case MayPeak   {condition month == MAY .and. I_CAPLS >= I_CAPLS(8-month+1) .and. I_CAPLS >= I_CAPLS(8-month-1) value 1.}
+       case JunePeak  {condition month == JUN .and. I_CAPLS >= I_CAPLS(9-month-1) .and.I_CAPLS >= I_CAPLS(9-month-2) value 1.}
+       case otherwise {condition always value 0.}}
+       
+define CaplesPulseFlow {value MIF_EID_CPC008_2 * (5./daysin) * CaplesPulseFlowTrigger}     
+define CaplesPulseFlowDV{alias CaplesPulseFlow kind 'debug' units 'cfs'}
+define MIF_EID_CPC008{
+	case AugNoDryCrit{condition WY_EID>4.5 value MIF_EID_CPC008_1}
+		
+	case Otherwise{
+		condition always
+		value max(5.0, min(MIF_EID_CPC008_1,I_CAPLS)) + CaplesPulseFlow}}
+				
+goal MIF_EID_CPC008Release {C_CPC008_MIF<MIF_EID_CPC008}
+
+
+
+
+! Silver Fork American River below Silver Lake Dam 
+define MIF_EID_SLF015 {value min(4,I_SILVR)}
+
+goal MIF_EID_SLF015Release {C_SLF015_MIF<MIF_EID_SLF015}
+
+
+! Silver Fork American below Oyster Creek 
+define MIF_EID_SLF014_1{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 4
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 4
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 4
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 4
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 4
+		}
+	}
+
+/*Leakage to Oyster Creek
+
+Silver Lake is partly situated in a basin consisting of lahar rock. The lahar has one or
+ more subterranean channels through which water flows out at certain lake levels. 
+ The term “leakage” is used to describe the total outflow through the subterranean
+ channels of lahar rock which converge in Oyster Creek, downstream of Oyster Pond.
+
+Relationship between Silver Lake storage and leakage to Oyster Creek is taken from table
+ 'FERC Table' in spreadsheet SilverLakeLeakage_Analysis_ECorp*/
+
+define SILVR_el {
+	case FirstMonth {
+		condition WaterYear==BgnWY .and. month==Oct
+		value 7184.
+		}
+	case Otherwise {
+		condition always
+		select elevation from American_ResInfo given storage=(S_SILVR(-1)*1000) use linear where ResNum=11 !how to not use last month?
+	}
+}
+
+! Silver Fork American below Sherman Diversion Dam (Proposed Alder Creek Reservoir Project)
+define MIF_EID_SLF009{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 8
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 8
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 8
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 8
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 8
+		}
+	}
+ 
+define SILVR_leakage {select Leakage from American_SilverLakeLeakage given elevation=SILVR_el use linear}
+
+define L_SILVR  {lower 0 upper 99999 kind 'CHANNEL' units 'CFS'}
+goal setL_SILVR {L_SILVR<SILVR_leakage}
+
+!define MIF_EID_SLF014 {value min(MIF_EID_SLF014_1,I_SILVR+SILVR_leakage)} 
+define MIF_EID_SLF014 {value MIF_EID_SLF014_1} ! Changed to better match historical data and OASIS model results
+
+goal MIF_EID_SLF014Release {C_SLF014_MIF<MIF_EID_SLF014}
+
+goal MIF_EID_SLF009Release {C_SLF009_MIF<MIF_EID_SLF009}
+
+
+! South Fork American River below Kyburz Diversion Dam 
+define MIF_EID_SFA065_1{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 5
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 5
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 5
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 5
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 5
+		}
+	}
+
+! Condition 38 specifies certain months that the licensee is not permitted to divert certain minimum flows specified in Condition 31
+
+define MIF_EID_SFA065_2{value 0.}
+/* 
+	case Wet{
+		condition WY_EID == 1 .and. (month==1 .or. month==12)
+		value MIF_EID_PYR001 + MIF_EID_CPC008 + MIF_EID_SLF015 + MIF_EID_SLF014
+		}
+	case AboveNormal{
+		condition WY_EID == 2 .and. (month==1 .or. month==12)
+		value MIF_EID_PYR001 + MIF_EID_CPC008 + MIF_EID_SLF015 + MIF_EID_SLF014
+		}
+	case BelowNormal{
+		condition WY_EID == 3 .and. (month==1 .or. month>=11)
+		value MIF_EID_PYR001 + MIF_EID_CPC008 + MIF_EID_SLF015 + MIF_EID_SLF014
+		}
+	case Dry{
+		condition WY_EID == 4 .and. (month==1 .or. month>=10)
+		value MIF_EID_PYR001 + MIF_EID_CPC008 + MIF_EID_SLF015 + MIF_EID_SLF014
+		}
+	case CriticalDry{
+		condition WY_EID == 5 .and. (month<=2 .or. month>=11)
+		value MIF_EID_PYR001 + MIF_EID_CPC008 + MIF_EID_SLF015 + MIF_EID_SLF014
+		}
+	case Otherwise{
+		condition always
+		value 0.
+		}
+	}
+*/ 								!This flow requirement has not been triggered after 5 years of license	
+	
+define MIF_EID_SFA076{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 7
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 7
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 7
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 7
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 7
+		}
+	}
+
+define MIF_EID_SFA065 {value MIF_EID_SFA065_1+MIF_EID_SFA065_2}
+
+goal MIF_EID_SFA065Release {C_SFA065_MIF<MIF_EID_SFA065}
+
+goal MIF_EID_SFA076Release {C_SFA076_MIF<MIF_EID_SFA076}
+
+
+! Alder Creek 
+define MIF_EID_ALD0011{
+	case Wet{
+		condition WY_EID == 1
+		select Wet from MIF_EID
+		where month = month, identifier = 6
+		}
+	case AboveNormal{
+		condition WY_EID == 2
+		select AboveNormal from MIF_EID
+		where month = month, identifier = 6
+		}
+	case BelowNormal{
+		condition WY_EID == 3
+		select BelowNormal from MIF_EID
+		where month = month, identifier = 6
+		}
+	case Dry{
+		condition WY_EID == 4
+		select Dry from MIF_EID
+		where month = month, identifier = 6
+		}
+	case CriticallyDry{
+		condition WY_EID == 5
+		select CriticalDry from MIF_EID
+		where month = month, identifier = 6
+		}
+	}
+define MIF_EID_ALD001 {value min(MIF_EID_ALD0011,I_ALD002)}
+
+goal MIF_EID_ALD001Release {C_ALD001_MIF<MIF_EID_ALD001}
+
+
+! Sly Creek below Jenkinson Dam 
+define MIF_EID_JNKSN {value 1.} !cfs
+goal C_JNKSNRelease {C_JNKSN_MIF<MIF_EID_JNKSN}
+
+
+! Camp Creek below diversion dam 
+define MIF_EID_CMP014 {value 2.} !cfs
+goal C_CMP014Release {C_CMP014_MIF<MIF_EID_CMP014}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WY_EIDdv {alias WY_EID kind 'INDEX' units 'NONE'}
+
+define MIF_EID_ECHOLdv  {alias MIF_EID_ECHOL kind 'MIF' units 'CFS'}
+define MIF_EID_PYR001dv {alias MIF_EID_PYR001 kind 'MIF' units 'CFS'}
+define MIF_EID_CPC008dv {alias MIF_EID_CPC008 kind 'MIF' units 'CFS'}
+define MIF_EID_SLF015dv {alias MIF_EID_SLF015 kind 'MIF' units 'CFS'}
+define MIF_EID_SLF014dv {alias MIF_EID_SLF014 kind 'MIF' units 'CFS'}
+define MIF_EID_SFA065dv {alias MIF_EID_SFA065 kind 'MIF' units 'CFS'}
+define MIF_EID_ALD001dv {alias MIF_EID_ALD001 kind 'MIF' units 'CFS'}

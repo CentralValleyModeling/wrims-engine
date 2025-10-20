@@ -1,0 +1,50 @@
+! Net demands south of navigation control point (ncp) are comprised of the following:
+! diversions: 1. Non-project demands (DSA 69,70)
+!             2. CVP settlement
+!	      3. Refuge
+!	      4. SWP contractors
+!	      5. Feather river service area (FRSA) subject to cuts
+!	      6. Feather river service area (FRSA) not subject to cuts
+!             7. American river urban demand
+! accretions: 1. Return flows (DSA 12,69,70)
+!	      2. Indoor urban return flows
+
+! Ryan Wilbur 8-6-03
+ 
+! non-project demands (DSA 69,70)
+define(fm) NPD_SNCP_fm {select NPD from CAM_Demands_SNCP where month=mv($m)}
+
+! cvp settlement demands (DSA 65,69,70)	- cut to 75% of contract if shasta critical year
+define(fm) CVPS_SNCP_temp_fm {select CVPS from CAM_Demands_SNCP where month=mv($m)}
+define(fm) CVPS_SNCP_fm {value CVPS_SNCP_temp_fm($m)*(1.-0.25*ShastaCriteriaMet)}
+
+define(fm) CVPS_SNCP_dv_fm {alias CVPS_SNCP_fm($m) kind 'DEMANDS' units 'TAF'}           !output SC demands, MYT 20210722
+
+! wildlife refuge
+define(fm) WR_SNCP_fm {select WR from CAM_Demands_SNCP where month=mv($m)}
+
+! swp water rights on feather river (FRSA below Thermalito release) - not subject to cuts
+define(fm) SWPWR1_STHRM_fm {select SWPWR1_STHRM from CAM_Demands_SNCP where month=mv($m)}
+
+! swp water rights on feather river (FRSA below Thermalito release) - subject to cuts (cuts not applied)
+define(fm) SWPWR2_STHRM_fm {select SWPWR2_STHRM from CAM_Demands_SNCP where month=mv($m)}
+
+! swp contractors on feather river (below Thermalito release) - subject to cuts	(cuts not applied)
+define(fm) SWPC_STHRM_fm {select Yuba_TA from CAM_SWPDem_NOD where month= mv($m)}
+
+! return flow (DSA 12,69,70)
+define(fm) RF_SNCP_fm {select RF from CAM_Demands_SNCP where month=mv($m)}
+
+! american river diversion downstream of lake natoma
+define Amer1 {timeseries 'AMER_DEM_S' kind 'FLOW-DEMAND' units 'TAF'}
+define(fm) AMER1_fm {value Amer1($m)}
+
+! american river indoor urban water use return flow
+define IUWU {timeseries 'AMER_UWU' kind 'FLOW-DEMAND' units 'TAF'}
+define(fm) IUWU_fm {value IUWU($m)}
+
+! set demands
+!zeroing out the Settlement contractors demand since it is in the ,I30 DLL calc already. Miller/Wilde 6.22.2022
+goal(fm) set_D31_fm {D31_fm($m) = 0.0 }  
+!goal(fm) set_D31_fm {D31_fm($m) = NPD_SNCP_fm($m) + CVPS_SNCP_fm($m) + WR_SNCP_fm($m) + SWPWR1_STHRM_fm($m) + SWPWR2_STHRM_fm($m) + SWPC_STHRM_fm($m) - RF_SNCP_fm($m) + AMER1_fm($m) - IUWU_fm($m)}
+!goal(fm) set_D31_fm {D31_fm($m) = CVPS_SNCP_fm($m) }  ! Settlement contractors only, MYT 20210721

@@ -1,0 +1,141 @@
+/*
+CALSIM 3.0
+NBA.WRESL
+
+Edited ajdraper, MWH, November 15, 2006
+*/
+
+! Logic for distribution of water from the North Bay Aqueduct to different entities
+!Three types of water are delivered through the NBA:
+!	- SWP water (suffix _prj)
+!	- Settlement water (suffix _smt)
+!	- Vallejo water rights/permit water (siffix _vpw)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Create Sub-Arcs
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define D_BKR004_NBA009_PRJ {std kind 'DIVERSION' units 'CFS'} defined in arcs-diversions.wresl
+define D_BKR004_NBA009_SMT {std kind 'DIVERSION' units 'CFS'}
+define D_BKR004_NBA009_VPW {std kind 'DIVERSION' units 'CFS'}
+
+goal set_D_BKR004_NBA009 {D_BKR004_NBA009 = D_BKR004_NBA009_PRJ + D_BKR004_NBA009_SMT + D_BKR004_NBA009_VPW}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Fairfield, Vacaville and Benecia Agreement for Settlement Water
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Settlement Water is a major source of water for the cities of Benicia, Fairfield and Vacaville. In
+1990 the three cities filed for State Water Resources Control Board water rights permits for an
+appropriation of water under the State’s Watershed of Origin statues. The permit application was
+withdrawn after a settlement was reached with DWR that provided an essentially equivalent water
+supply from the SWP. A Settlement Agreement and a Conveyance Agreement with DWR specify
+the details of the Settlement Water supply.
+Settlement Water is available up to the following amounts: Benicia 10,500 AF/year;
+Fairfield 11,800 AF/year; and Vacaville 9,320 AF/year. The main restriction to Settlement water is
+that is in not available when Standard Water Right Term 91 is in effect.
+*/
+
+!define FVB_demand 	{ value 2.635 }  ! TAF/mon - assumes constant demand   
+
+!Limit Diversions for FVB Settlement Water to times when the system is in UWFE Condition
+!Also weighted such that excess flow conditions in the Delta need to occur
+!goal set_D_BKR004_NBA009_SMT 		{ D_BKR004_NBA009_SMT < FVB_demand * int_IBU_UWFE * taf_cfs}
+
+! FVB_demand constraint is in SpecProjects.wresl
+
+define BNCIA_SMT		{std kind 'FLOW' units 'CFS'}
+define FRFLD_SMT 		{std kind 'FLOW' units 'CFS'}
+define VCVLL_SMT		{std kind 'FLOW' units 'CFS'}	
+
+goal set_BNCIA_SMT 	{BNCIA_SMT = (10.500/31.620)*D_BKR004_NBA009_SMT}
+goal set_FRFLD_SMT 	{FRFLD_SMT =(11.800/31.620)*D_BKR004_NBA009_SMT}
+goal set_VCVLL_SMT 	{VCVLL_SMT = (9.320/31.620)*D_BKR004_NBA009_SMT}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Vallejo Permit Water
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+VPW is derived from a water rights license held by Vallejo. The license allows for 31.52
+cfs to be pumped from the Delta. The service area allowed to use VPW includes Vallejo, Benicia,
+parts of Fairfield and the American Canyon area of Napa County. Prior to the construction of the
+NBA, VPW was transported in the Cache Slough pipeline owned by Vallejo. A pumping plant
+located on Cache Slough in the Delta pumped water to Vallejo through an underground pipeline.
+The Cache Slough Pipeline is interconnected with the NBA and portions of the Cache
+Slough Pipeline are still being used to transport water from the NBA.
+When the NBA was constructed, Vallejo paid for the right to use the NBA to deliver VPW
+through the NBA. The NBA was increased in size to transport 31.52 cfs of VPW. Annual amounts
+of VPW are contractually limited to 17,287 AF per year by DWR. This amount is 5,493 AF less
+than the amount if the 31.52 cfs were taken all year round. An amendment to the agreement with
+DWR would be necessary to increase the amount of VPW to the maximum amount.
+VPW has a higher water rights priority date than the SWP and CVP, so it is more reliable
+than SWP supplies. Term 91 is not included in the VPW license. 
+
+Particularly in dry years, VPW is an important part of the water supply in Solano County.
+Vallejo exchanges and sells VPW to other cities to augment their supplies.
+*/
+
+define VLLJO_VPW {std kind 'FLOW' units 'CFS'}
+define demand_VLLJO_VPW {select demand from demand where D_arc=403.1,month=month}
+
+goal set_D_BKR004_NBA009_VPW1 {D_BKR004_NBA009_VPW = VLLJO_VPW}
+goal set_D_BKR004_NBA009_VPW2 {D_BKR004_NBA009_VPW < demand_VLLJO_VPW*taf_cfs}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! State Water Project water
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!defined in arcs-diversions.wresl
+!define D_BKR004_NBA009_NAPA 		{std kind 'DIVERSION' units 'CFS'}
+!define D_BKR004_NBA009_NAPA_PRJ 	{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_NAPA_PMI 	{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_NAPA_PCO 	{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_NAPA_PIN 	{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_NAPA_PLS 	{std kind 'DIVERSION' units 'CFS'}
+
+!define D_BKR004_NBA009_SCWA 		{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_SCWA_PRJ {std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_SCWA_PMI 	{std kind 'DIVERSION' units 'CFS'} 
+!define D_BKR004_NBA009_SCWA_PCO {std kind 'DIVERSION' units 'CFS'}
+
+goal set_NBA_PRJ		{D_BKR004_NBA009_PRJ = D_BKR004_NBA009_NAPA + D_BKR004_NBA009_SCWA_A}
+
+goal set_NAPA_PRJ1	{D_BKR004_NBA009_NAPA = D_BKR004_NBA009_NAPA_PRJ}
+goal set_NAPA_PRJ2 	{D_BKR004_NBA009_NAPA_PRJ =  D_BKR004_NBA009_NAPA_PMI + D_BKR004_NBA009_NAPA_PCO + D_BKR004_NBA009_NAPA_PIN + D_BKR004_NBA009_NAPA_PLS}
+
+!Solano County Water Agency SWP Water
+! Distribute SWP water based on Table A amounts. City of Suisun has a Table A amount of 1.3 TAF/year in 2015, but has no facilities to use this water
+
+define BNCIA_PRJ 		{std kind 'FLOW' units 'CFS'}
+define FRFLD_PRJ 		{std kind 'FLOW' units 'CFS'}
+define VCVLL_PRJ 		{std kind 'FLOW' units 'CFS'}	
+define VLLJO_PRJ 		{std kind 'FLOW' units 'CFS'}	
+
+goal set_BNCIA_PRJ 	{BNCIA_PRJ = (17.200/46.456)*D_BKR004_NBA009_SCWA_A}
+goal set_FRFLD_PRJ 	{FRFLD_PRJ =(14.678/46.456)*D_BKR004_NBA009_SCWA_A}
+goal set_VCVLL_PRJ  	{VCVLL_PRJ = (8.978/46.456)*D_BKR004_NBA009_SCWA_A}
+goal set_VLLJO_PRJ  	{VLLJO_PRJ= (5.600/46.456)*D_BKR004_NBA009_SCWA_A}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Assign 3 types of water to different entities
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Conveyance losses
+goal set_D_NBA027_NBALOS {D_NBA027_NBALOS = D_BKR004_NBA009_NAPA_PLS}
+
+! Supply to Travis Air Force Base
+goal set_D_NBA009_WTPTAB {D_NBA009_WTPTAB < VLLJO_VPW + 0.333 * VLLJO_PRJ}
+
+!Supply to and from North Bay Regional WTP
+!goal set_D_NBA011_WTPNBR {D_NBA011_WTPNBR < FRFLD_PRJ + VCVLL_PRJ + FRFLD_SMT + VCVLL_SMT}
+goal set_D_WTPNBR_FRFLD {D_WTPNBR_FRFLD < FRFLD_PRJ + FRFLD_SMT}
+goal set_D_WTPNBR_25_PU {D_WTPNBR_25_PU < VCVLL_PRJ + VCVLL_SMT}
+
+!Supply to Vallejo and Benicia
+goal set_D_NBA021_VJB000    {D_NBA021_VJB000 < BNCIA_PRJ + VLLJO_PRJ + VLLJO_VPW + BNCIA_SMT}
+
+! Napa County Water Agency
+goal set_D_BKR004_NBA009_NAPA {D_BKR004_NBA009_NAPA = D_NBA027_WTPJAC + D_NBA027_WTPAMC + D_NBA027_NBALOS}
+
+goal setD_WTPJAC_NAPA 		{D_WTPJAC_NAPA < .821*D_BKR004_NBA009_NAPA - .821*D_BKR004_NBA009_NAPA_PLS} !CFCWCD Table A fractions: Napa .755, Calistoga .066, Subtotal .821
+goal setD_WTPAMC_AMCYN 		{D_WTPAMC_AMCYN + D_WTPJAC_AMCYN < .179*D_BKR004_NBA009_NAPA - .179*D_BKR004_NBA009_NAPA_PLS}   !American Canyon .179, Total 1.000

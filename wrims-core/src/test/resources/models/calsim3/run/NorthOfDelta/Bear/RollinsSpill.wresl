@@ -1,0 +1,30 @@
+/*
+RollinsSpills.wresl; 
+
+Purpose: The monthly timestep compared to a daily timestep results in too little water spilled over the diversion dam for the Bear River Canal.
+*/
+
+goal setRLLNSRelease {C_RLLNS = C_RLLNS_REGULATED + C_RLLNS_SPILL}
+goal setMaxSpill     {C_RLLNS_SPILL*cfs_taf > I_RLLNS*cfs_taf + S_RLLNS(-1) - S_RLLNSlevel4 - E_RLLNS*cfs_taf} ! Do not spill regulated inflow from Drum Canal
+
+!goal setC_BRR050     {C_BRR050 > 0.30*C_RLLNS_SPILL + 0.0*c_drm011} !0.45 is a calibration factor so that average annual flow below Milton Dam matches historical data (1986-2015)
+
+/*
+define MinCMBIE {
+        case Oct        {condition month == OCT value 0. }
+        case Nov        {condition month == NOV value 0. }
+        case Dec        {condition month == DEC value 0. }
+        case Jan        {condition month == JAN value 0. }
+	case Feb        {condition month == FEB value 0. }
+        case Mar        {condition month == MAR value 810. }
+        case Apr        {condition month == APR value 730. }
+	case May        {condition month == MAY value 530. }
+	case Jun        {condition month == JUN value 135. }
+	case Jul        {condition month == JUL value 95. }
+	case Aug        {condition month == AUG value 65. }
+        case Sep        {condition always        value 50.}
+        }
+
+ goal setC_CMBIE     {C_CMBIE > 0.80*C_RLLNS_SPILL + MinCMBIE}*/
+ 
+

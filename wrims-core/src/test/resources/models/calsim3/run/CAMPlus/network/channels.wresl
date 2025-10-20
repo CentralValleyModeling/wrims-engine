@@ -1,0 +1,58 @@
+! Channel definitions are included below:
+! Ryan Wilbur 8-1-03
+! Hongbing Yin 1-20-04
+
+! trinity river flow:
+define(fm) C1_fm {std kind 'Flow' units 'TAF'}
+
+! whiskeytown release (clear creek):
+define(fm) C2_fm {std kind 'Flow' units 'TAF'}
+
+! shasta release:
+define(fm) C3_fm {std kind 'Flow' units 'TAF'}
+goal(fm) limitC3_fm{
+	lhs C3_fm($m)
+	case JulSep{
+		condition mv($m)>=Jul .and. mv($m)<=Sep
+		rhs 15000*cfs_taf
+		lhs<rhs penalty 0.0
+	}
+}
+
+! oroville release:
+define(fm) C4_fm {std kind 'Flow' units 'TAF'}
+
+! Set Oroville 2500 cfs release cap in November and December unless required for flood control, (November because of the DFG criteria, and December for flow stability) suggested by John Leahigh
+! THE CAP HAS BEEN SET IN "MinimumFlow_PerfectForesight.wresl". NO NEED TO REDO IT HERE
+/*define C4_Nov_Cap_lo {std kind 'Penalty' units 'TAF'}
+define C4_Nov_Cap_hi {std kind 'Penalty' units 'TAF'}
+define C4_Dec_Cap_lo {std kind 'Penalty' units 'TAF'}
+define C4_Dec_Cap_hi {std kind 'Penalty' units 'TAF'} 
+goal Set_Cap_C4_Nov {C4_Nov = 2500.0*cfs_taf( 2-month) + C4_Nov_Cap_hi - C4_Nov_Cap_lo} 
+goal Set_Cap_C4_Dec {C4_Dec = 2500.0*cfs_taf( 3-month) + C4_Dec_Cap_hi - C4_Dec_Cap_lo} */
+
+! folsom release:
+define(fm) C5_fm {std kind 'Flow' units 'TAF'}
+goal(fm) limitC5_fm{
+	lhs C5_fm($m)
+	case JulSep{
+		condition mv($m)>=Jul .and. mv($m)<=Sep
+		rhs 5000*cfs_taf
+		lhs<rhs penalty 0.0
+	}
+}
+
+
+! sacramento river flow at ncp:
+define(fm) C30_fm {std kind 'Flow' units 'TAF'}
+
+! sacramento river flow into the delta:
+define(fm) C31_fm {std kind 'Flow' units 'TAF'}
+
+! required delta outflow:
+define(fm) C33_fm {std kind 'Flow' units 'TAF'}
+
+! surplus delta outflow:
+define(fm) C33B_fm {std kind 'Flow' units 'TAF'}
+
+

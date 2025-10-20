@@ -1,0 +1,84 @@
+! MokWYT.wresl
+
+/*
+Define two water year types:
+  1) For Joint Settlement Agreement that governs flow requirements on the lower Mokelumne River below Camanche Reservoir (code moved to lower Mokelumne folder)
+  2) FERC requirements for PG&E Project 137 on the North Fork Mokelumne River
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! Mokelumne River near Mokelumne Hill !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define unimpaired mokelumne river inflow time series
+define annMOK079FNFdv {std kind 'Unimpaired-Flow' units 'TAF'}
+
+! Calculate annual inflow based on runoff to date plus forecasted (perfect foresight)
+define annMOK079FNF {
+    case FirstYear {
+        condition wateryear == BgnWY .and. month <= JAN
+        value 731 }! Based on average of 1922-2009 period
+    case Feb {
+        condition   month == FEB
+        sum(i=1-month,Sep-month,1) (I_BCM003(i)+I_COL003(i)+I_MFM008(i)+I_MOK079(i)+I_NFM010(i)+I_SFM005(i)+I_SLTSP(i)+I_TGC003(i)+I_UBEAR(i))*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value annMOK079FNFdv(-1)}
+}
+
+goal setannMOK079FNF {annMOK079FNFdv = annMOK079FNF}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!! PG&E Project 137 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+Water Year Types.
+The minimum streamflow schedules have been separated into five water year types:
+Wet, Above Normal (AN), Below Normal (BN), Dry, and Critically Dry (CD).
+The Licensee shall determine water year type based on the predicted unimpaired inflow to
+Pardee Reservoir (Pardee) and spring forecasting information provided by the Licensee and
+the California Department of Water Resources snowpack forecasts each month from February
+through May. The water year types are defined as ollows:
+
+Wet: 	Pardee Inflow >= 958,700 AF
+AN: 	Pardee Inflow < 958,700 AF but >= 724,400 AF
+BN: 	Pardee Inflow < 724,400 AF but >= 518,100 AF
+Dry: 	Pardee Inflow < 518,100 AF but >= 376,100 AF
+CD:	Pardee Inflow < 376,100 AF
+
+Each February through May the Licensee shall make a monthly forecast of the water year
+type and operate for that month based on that forecast. The May forecast shall be used to
+establish the final water year tyPe for the remaining months of the year until the next
+February, when forecasting shall begin again. Salt Springs Reservoir is expected to spill
+in Wet, AN, and BN years.
+*/
+
+
+define wyt_NForkMokdv {std kind 'WATER-YEAR-TYPE' units 'NONE'}
+define wyt_NForkMok {
+    case FirstYear{
+    	condition wateryear == BgnWY .and. month <= JAN
+    	value 2} ! Average for 1922-2009, not important as water year type only affects flows Feb-Sep
+    case Feb_Crit{
+        condition month == FEB .and. annMOK079FNF < 376.1
+        value 5} 
+    case Feb_Dry {
+        condition month == FEB .and. annMOK079FNF < 518.1
+        value 4}
+    case Feb_blwnor {
+        condition month == FEB .and. annMOK079FNF < 724.4
+        value 3}
+    case Feb_abvnor {
+        condition month == FEB .and. annMOK079FNF < 958.7
+        value 2}
+    case Feb_wet {
+        condition month == FEB
+        value 1}
+    case otherwise {
+        condition always
+        value int(wyt_NForkMokdv(-1)+0.1)} ! rounding errors causing problems in lookup table
+}
+goal setwyt_NForkMokdv {wyt_NForkMokdv = wyt_NForkMok} 
+

@@ -1,0 +1,84 @@
+! Reservoir and node connectivity constraints are included below:
+! Ryan Wilbur 8-1-03
+! Hongbing Yin 1/16/04
+
+! trinity balance storage:
+goal(fm) set_S_Trnty_fm {S_Trnty($m) = S_Trnty($m-1) + I1_fm($m) - D1_fm($m) - C1_fm($m) - E1_fm($m)}
+					    
+! whiskeytown balance storage:
+goal(fm) set_S_WKYTN_fm {S_WKYTN($m) = S_WKYTN($m-1) + I2_fm($m) + D1_fm($m) - D2_fm($m) - C2_fm($m) - E2_fm($m)}
+
+! shasta balance storage:
+goal(fm) set_S_Shsta_fm {
+	lhs S_Shsta($m) 
+	case JanJun{
+		condition mv($m)>=Jan .and. mv($m)<=Jun
+		rhs S_Shsta($m-1) + I3_fm($m) + D2_fm($m) - C3_fm($m) - E3_fm($m)
+		lhs<rhs penalty 1000000 
+		lhs>rhs penalty 1000000
+	}
+	case JulDec{
+		condition always
+		rhs S_Shsta($m-1) + I3_fm($m) + D2_fm($m) - C3_fm($m) - E3_fm($m)
+	}
+}
+
+! oroville balance storage:
+goal(fm) set_S_Orovl_fm {
+	lhs S_Orovl($m) 
+	case JanJun{
+		condition mv($m)>=Jan .and. mv($m)<=Jun
+		rhs S_Orovl($m-1) + I4_fm($m) - D4_fm($m) - C4_fm($m) - E4_fm($m)-SMSCG_ITP_NDO_adj_taf($m)-release_ITP_Carryover_taf($m)
+		lhs<rhs penalty 1000000 
+		lhs>rhs penalty 1000000
+	}
+	case JulDec{
+		condition always
+		rhs S_Orovl($m-1) + I4_fm($m) - D4_fm($m) - C4_fm($m) - E4_fm($m)-SMSCG_ITP_NDO_adj_taf($m)-release_ITP_Carryover_taf($m)
+	}
+}
+
+! folsom balance storage:
+goal(fm) set_S_Folsm_fm {
+	lhs S_Folsm($m) 
+	case JanJun{
+		condition mv($m)>=Jan .and. mv($m)<=Jun
+		rhs S_Folsm($m-1) + I5_fm($m) - D5_fm($m) - C5_fm($m) - E5_fm($m)
+		lhs<rhs penalty 1000000 
+		lhs>rhs penalty 1000000	
+	}
+	case JulDec{
+		condition always
+		rhs S_Folsm($m-1) + I5_fm($m) - D5_fm($m) - C5_fm($m) - E5_fm($m)
+	}
+}
+										     
+! system losses
+define(fm) SWP_LS_fm {select loss from CAM_SWP_Loss where month = mv($m)}
+define(fm) SWP_LS_dv_fm {alias SWP_LS_fm($m) kind 'Delivery' units 'TAF'}
+
+! Source switch
+define(fm) SourceSwitch_fm {value 0}
+
+! Outflow Sacramento Treatment plant
+define(fm) SacTreat_fm {value 0}
+define(fm) SacTreat_dv_fm {alias SacTreat_fm($m) kind 'Flow' units 'TAF'}
+
+! input Banks wheeling (see cells K28:K39 in DCO Spreadsheet):
+define(fm) D33D_WHL_fm {value 0}
+define(fm) D33D_WHL_dv_fm {alias D33D_WHL_fm($m) kind 'Flow' units 'TAF'}
+
+! swp san luis balance storage:
+goal(fm) set_S_SLUIS_SWP_fm {S_SLUIS_SWP($m) = S_SLUIS_SWP($m-1) + D33D_fm($m) - D6_fm($m) - E6_fm($m) - SourceSwitch_fm($m)}
+
+! cvp san luis balance storage:
+goal(fm) set_S_SLUIS_CVP_fm {S_SLUIS_CVP($m) = S_SLUIS_CVP($m-1) + D33E_fm($m) + D33D_WHL_fm($m) - D7_fm($m) - E7_fm($m)}
+
+! mass balance on node30:
+goal(fm) set_C30_fm {C30_fm($m) + D30_fm($m) = C3_fm($m) + C2_fm($m) + I30_fm($m)}
+
+! mass balance on node31:
+goal(fm) set_C31_fm {C31_fm($m) + D31_fm($m) = C30_fm($m) + C4_fm($m) + C5_fm($m) + I31_fm($m)}
+
+! delta balance (node33):
+goal(fm) set_Delta_fm {C31_fm($m) + I33A_fm($m) + I33B_fm($m) + SacTreat_fm($m) + I406_fm($m) = D33D_fm($m) + D33D_WHL_fm($m) + D33E_fm($m) + D33A_fm($m) + D33B_fm($m) + D33C_fm($m) + C33_fm($m) + C33B_fm($m)}

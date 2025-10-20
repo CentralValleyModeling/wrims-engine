@@ -1,0 +1,306 @@
+! Cosumnes_EID.wresl
+
+!******************************************************************************
+! Jenkinson Lake Operations
+!******************************************************************************
+/*
+Jenkinson Lake as constructed as a portion of the USBR Central Valley Project in 1955.
+It has a maximum capacity of 41,033 ac-ft. Ownership was transferred to El Dorado ID (EID)
+in 2003, including the water rights.
+
+The average annual yield from this facility is approximately 23,000 ac-ft, though EID's
+annual water right is for 33,400 ac-ft of total beneficial use. Under normal conditions,
+Jenkinson Lake is operated to maintain 14,000 to 18,000 ac-ft of carryover storage each year.
+*/
+
+!******************************************************************************
+! Diversion through Hazel Creek Tunnel
+!******************************************************************************
+
+goal setD_EDC014_JNKSN {D_EDC014_JNKSN = 0.} !Operation of Hazel Creek not defined for existing conditions
+
+!******************************************************************************
+! Diversion through Camino Conduit
+!******************************************************************************
+
+! Calculate EID Mar-Sep demand
+
+! Urban Demand
+define UD_ELDID_NU1_MarSep {   
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  UD_ELDID_NU1(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }
+
+define UD_ELDID_NU2_MarSep {   
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  UD_ELDID_NU2(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+define UD_ELDID_NU3_MarSep_ { !Underscore to differentaite from calculation for FMS
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  UD_ELDID_NU3(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }
+
+! Ag Demand
+define AW_ELDID_NA1_MarSep {   
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  AW_ELDID_NA1(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }
+
+define AW_ELDID_NA2_MarSep {   
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  AW_ELDID_NA2(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }                
+  
+/*define AW_ELDID_NA3_MarSep {   
+       case March {  
+            condition month == MAR
+                sum(i=0,6,1)  AW_ELDID_NA3(i)*cfs_taf(i)}
+       case Otherwise {
+            condition always 
+                value 0. } }     */  
+                                
+! Calculate EID Annual Demand
+
+! Urban EID                 
+define UD_ELDID_NU1_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  UD_ELDID_NU1(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  UD_ELDID_NU1(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  UD_ELDID_NU1(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+define UD_ELDID_NU2_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  UD_ELDID_NU2(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  UD_ELDID_NU2(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  UD_ELDID_NU2(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+define UD_ELDID_NU3_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  UD_ELDID_NU3(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  UD_ELDID_NU3(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  UD_ELDID_NU3(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }
+ 
+ ! Ag EID  
+ define AW_ELDID_NA1_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  AW_ELDID_NA1(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  AW_ELDID_NA1(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  AW_ELDID_NA1(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+ define AW_ELDID_NA2_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  AW_ELDID_NA2(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  AW_ELDID_NA2(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  AW_ELDID_NA2(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+/*define AW_ELDID_NA3_Annual {
+	   case Oct {  
+            condition month == Oct .and. wateryear==BgnWY
+                sum(i=0,4,1)  AW_ELDID_NA3(i)*cfs_taf(i)}
+	   case MarchEndWY {  
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=0,-11,-1)  AW_ELDID_NA3(i)*cfs_taf(i)}
+       case March {  
+            condition month == MAR
+                sum(i=0,11,1)  AW_ELDID_NA3(i)*cfs_taf(i)}	
+       case Otherwise {
+            condition always 
+                value 0. } }*/
+            
+define UrDemandEIDMarSep {value UD_ELDID_NU1_MarSep+UD_ELDID_NU2_MarSep+UD_ELDID_NU3_MarSep_}
+define AgDemandEIDMarSep {value AW_ELDID_NA1_MarSep+AW_ELDID_NA2_MarSep}!+AW_ELDID_NA3_MarSep}
+ 
+define UrDemandEIDAnnual {value UD_ELDID_NU1_Annual+UD_ELDID_NU2_Annual+UD_ELDID_NU3_Annual}
+define AgDemandEIDAnnual {value AW_ELDID_NA1_Annual+AW_ELDID_NA2_Annual}!+AW_ELDID_NA3_Annual}
+     
+define TotDemandEIDMarSep {value UrDemandEIDMarSep+AgDemandEIDMarSep}
+define TotDemandEIDAnnual {value UrDemandEIDAnnual+AgDemandEIDAnnual}    
+                   
+!Aliases
+define UrDemandEIDMarSep_dv {alias UrDemandEIDMarSep kind 'DEBUG'}
+define UrDemandEIDAnnual_dv {alias UrDemandEIDAnnual kind 'DEBUG'}
+define AgDemandEIDMarSep_dv {alias AgDemandEIDMarSep kind 'DEBUG'}
+define AgDemandEIDAnnual_dv {alias AgDemandEIDAnnual kind 'DEBUG'}
+define TotDemandEIDMarSep_dv {alias TotDemandEIDMarSep kind 'DEBUG'}
+define TotDemandEIDAnnual_dv {alias TotDemandEIDAnnual kind 'DEBUG'}
+
+define EIDFraction_MarSep {
+	case March {condition month==Mar value TotDemandEIDMarSep/TotDemandEIDAnnual}
+	case Otherwise {condition always value 0.}
+}
+
+define JNKSNForcastedInflow {   
+       case octBgnWY {  
+            condition month == MAR
+                sum(i=0,6,1)  (I_JNKSN(i) + I_CMP014(i))*cfs_taf(i)}!ignores restrictions on Camp Creek diversions after Jun 30
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+define JNKSNForcastedInflow_dv {alias JNKSNForcastedInflow kind 'DEBUG' units 'TAF'}
+
+define JNKSNForcastedOtherSupply {   
+       case octBgnWY {  
+            condition month == MAR
+                value (annFolsom_EID_contract*perdel_cvpmi_sys + annFolsom_EID_WR + annFolsom_Ditch_EID + UD_EIDForebay)*EIDFraction_MarSep}
+       case Otherwise {
+            condition always 
+                value 0. } }
+                
+define JNKSNForcastedOtherSupply_dv {alias JNKSNForcastedOtherSupply kind 'DEBUG' units 'TAF'}
+
+define EIDallocationdv {std kind 'ALLOCATION' units 'TAF'}
+define EIDallocation {
+    case octBgnWY {  ! special case for first wateryear
+        condition month == OCT .and. wateryear == BgnWY
+        value 1.0}
+    case Mar {
+        condition month == MAR
+        value max(0,min(1,max((S_JNKSN(-1)-4.6)/TotDemandEIDMarSep, (JNKSNForcastedInflow + JNKSNForcastedOtherSupply + S_JNKSN(-1)- 16.0)/TotDemandEIDMarSep)))} 
+        !EID allocation is: minimum of (1, Historical low storage and Carryover storage target)
+        !Assume 16 TAF carryover storage target. 4.6 TAF is historical storage September 1977
+    case otherwise {
+        condition always
+        value EIDallocationdv(-1)}}
+goal setEIDallocationdv {EIDallocationdv = EIDallocation}
+
+define D_JNKSN_WTPRSA_firm  {upper 125 kind 'FLOW-DELIVERY' units 'CFS'} !Jenkinson delivery to EID based on OASIS outputs (firm delivery - likely incalculable in CalSim due to lack of spatial granularity in demand)
+define EIDallocation_firm   {value 12.} !smallest annual EID delivery volume from Jenkinson (1985-2015)
+define EIDdist_firm         {select EID from Cosumnes_demands_OASISVal where month=month} !demand pattern from OASIS outputs (1922-2015)
+define EIDdemand_firm		{value EIDallocation_firm * EIDdist_firm}
+goal setD_JNKSN_WTPRSA_firm {D_JNKSN_WTPRSA_firm < EIDdemand_firm * taf_cfs}
+
+goal setD_JNKSN_WTPRSA      {D_JNKSN_WTPRSA = D_JNKSN_WTPRSA_alloc + D_JNKSN_WTPRSA_firm}
+
+define EIDdemand_firmdv	    {alias EIDdemand_firm kind 'DEMAND' units 'TAF'}
+
+define EIDallocation_remainingdv {std kind 'ALLOCATION' units 'TAF'}
+define EIDallocation_remaining {
+	case FirstMonth {
+		condition month==Oct .and. wateryear==BgnWY
+		value TotDemandEIDAnnual
+	}
+	case March {
+		condition month==Mar
+		value EIDallocation * (TotDemandEIDAnnual-EIDallocation_firm)
+	}
+	case Otherwise {
+		condition always
+		value EIDallocation_remainingdv(-1) - D_JNKSN_WTPRSA(-1)*cfs_taf - D_JNKSN_ELDID_NA1(-1)*cfs_taf - D_JNKSN_ELDID_NA2(-1)*cfs_taf - D_JNKSN_EDCOCA_NA3(-1)*cfs_taf - D_JNKSN_EDCOCA_NA2(-1)*cfs_taf - D_JNKSN_EDCOCA_NU3(-1)*cfs_taf
+	}
+} 
+goal setEIDallocation_remainingdv {EIDallocation_remainingdv = EIDallocation_remaining}  
+
+
+define D_JNKSN_WTPRSA_alloc    {upper 125 kind 'FLOW-DELIVERY' units 'CFS'} !Jenkinson delivery to EID based on allocation
+define EIDist_alloc {select EID from Cosumnes_demands_OASISVal where month=month} !demand pattern from OASIS outputs (1922-2015)
+define EIDallocation_rem_dist  {value EIDallocation_remaining * EIDist_alloc}
+goal set_D_JNKSN_WTPRSA_alloc  {D_JNKSN_WTPRSA_alloc + D_JNKSN_ELDID_NA1 + D_JNKSN_ELDID_NA2 + D_JNKSN_EDCOCA_NA3 + D_JNKSN_EDCOCA_NU3 + D_JNKSN_EDCOCA_NA2< EIDallocation_rem_dist * taf_cfs}
+
+!******************************************************************************
+! Diversion through Camp Creek Tunnel
+!******************************************************************************
+/*
+EID diverts water from Camp Creek via the Camp Creek Tunnel to Jenkinson Lake. This direct diversion
+was originally associated with EID's Crawford Ditch and dates to 1851. The maximum diversion rate is 12.5 cfs
+and the season of diversion is May through October (see S022682). EID reports these diversions to the
+State Water Board as part of its License Reports for licenses 11835(Application 2270) and 11836(Application 5645A).
+
+Application 2270 allows:
+ -  7 TAF/year diversion to storage from Nov 15 to June 1 from Sly Park Creek
+ - 15 TAF/year diversion to storage from Nov 15 to June 15 from Camp Creek
+ - 27.1 cfs direct diversion from Sly Park Creek from Apr 15 - Jun 15
+ - 48.3 cfs direct diversion from Camp Creek from Apr 15 - Jun 15
+ - Maximum combined direct diversion of 63.8 cfs
+  
+Application 5645A allows:
+ - 5.4 TAF/year diversion to storage from Nov 1 to June 30 from Sly Park Creek
+ - 9.4 TAF/year diversion to storage from Nov 1 to June 30 from Camp Creek
+ - 30.7 cfs direct diversion from Sly Park Creek from Nov 1 - Apr 14 and Jun 16 - Jun 30
+ - 24.2 cfs direct diversion from Camp Creek from Nov 1 - Apr 14 and Jun 16 - Jun 30
+ - Maximum combined direct diversion of 32.5 cfs
+ 
+Both Applications
+ - Maximum combined diversion to storage 36.7 TAF
+ - Maximum amount put to beneficial use shall not exceed 33.4 TAF/year
+ 
+Licensee shall at all times bypass at Sly Park Dam a minimum of 1 cubic foot per second (cfs), or the
+natural flow of Sly Park Creek, whichever is less, and at all times bypass at Camp Creek Diversion Dam a
+minimum of 2 cfs or the natural flow, whichever is less, to maintain fish life.
+ 
+Licensee, considering hydrologic conditions and water use requirements, shall estimate in April of each
+year the storage that will exist in Jenkinson Lake on the following September 30 and revise such estimate
+as often as hydrologic conditions and water use requirements warrant such revision. If such estimate or
+re-estimate exceeds 23,800 acre-feet, licensee shall so advise Department of Fish and Game.
+
+If the estimated September 30 storage exceeds 23,800 acre-feet, licensee shall release to Sly Park Creek
+up to 5 cfs, including the 1 cfs provided for above, of such excess on a constant-flow pattern during the
+period May through October or during such portion of said period as remains after revisions of the
+licensee’s estimate.
+*/
+
+define CmpCkTunnelMax {
+	Case NovJun {condition range(month,Oct,Mar)
+		value 24.2}
+	Case otherwise {condition always
+		value 12.5}}
+		
+goal set_D_CMP014_JNKSN {D_CMP014_JNKSN < CmpCkTunnelMax}
+
+! Weight of -1 applied to diversion to prevent diversions to Jenkinson Lake when storage is at rule curve.

@@ -1,0 +1,50 @@
+!-------------------------------------------------
+!ANN flow adjustments (at Hood)
+! whlcv
+goal setC_SAC041_whlcv {C_WKYTN_whlcv + C_KSWCK_whlcv + C_NTOMA_whlcv + C32_whlcv                !LHS for CVC
+                  = C_SAC041_whlcv /*+ D400_whlcv*/ - C_CAA003_cvcsurp_IF + C_SAC041_WHLCV_Bal_Err}
+! whljp
+goal setC_SAC041_whljp {C_WKYTN_whljp + C_KSWCK_whljp + C_NTOMA_whljp + C32_whljp                !LHS for JPOD
+                  = C_SAC041_whljp /*+ D400_whljp*/ - C_CAA003_cvcsurp_IF + C_SAC041_WHLJP_Bal_Err}
+                  /*+ C177C_EXOP*/!}                                               !RHS for NODOS/Shasta Stored Water movement
+! WTS
+/*goal setC_SAC041_WTS   {WTS_Yuba + WTS_DSA12 + WTS_DSA15 + WTS_DSA69 + WTS_DSA70  !LHS for WTS
+                  + WTS_DEC12_Stg2 + WTS_DEC15_Stg2 + WTS_DEC69_Stg2 + WTS_DEC70_Stg2
+                  + C_KSWCK_WTS   + C6_WTS   + SP4_WTS*taf_cfs + SP6_WTS*taf_cfs
+                  = C_SAC041_WTS + D400_WTS                                       !RHS for WTS
+                  + WTS_INC12_Stg2 + WTS_INC15_Stg2 + WTS_INC69_Stg2 + WTS_INC70_Stg2
+                  + I4_WTS + I6_WTS 
+				  + C_SAC041_WTS_Bal_Err}*/
+
+				  
+goal zeroC_SAC041Bal {lhs C_SAC041_WHLCV_Bal_Err
+					+ C_SAC041_WHLJP_Bal_Err
+					/*+ C400_WTS_Bal_Err*/
+				  rhs 0.
+                  lhs>rhs penalty 999999
+                  lhs<rhs penalty 999999}
+! Reop source continuities
+goal setReleaseCont {C_SAC041_whlcv + C_SAC041_whljp /*+ C_SAC041_WTS*/
+           /*+ D400_whlcv + D400_whljp + D400_WTS*/- C_CAA003_cvcsurp_IF - C_CAA003_whlsurp_IF
+                   = NDOI_ADD_whlcv + C_CAA003_cvcrels                                !RHS for CVC
+                   + NDOI_ADD_whljp + C_CAA003_whlrels                                !RHS for JP
+                   /*+ NDOI_ADD_WTS   + C_CAA003_WTS   + C_DMC000_WTS + WTS_SPILL*/           !RHS for WTS
+           + Reop_Rel_Bal_Err}
+
+		   goal zeroReop_Rel_Bal {lhs Reop_Rel_Bal_Err
+               rhs 0.
+                       lhs>rhs penalty 999999
+                       lhs<rhs penalty 999999}
+
+goal setSurplusCont {NDOI_ADD_cvp + NDOI_ADD_swp                                      !LHS for New Base Ops
+                   + Surp1Terms + Surp2Terms                                  !LHS for surplus reduction from CVC, CVP, JPOD use of surplus at pumps
+                   /*+ D168c_exc_ntDep*/                                          !LHS for surplus reduction from FRWP
+                   = NDOI_ADD_cvp_Base + NDOI_ADD_swp_Base                            !RHS for Old Base Ops
+           + ReopSurp_Bal_Err}
+
+		   
+goal zeroReopSurp_Bal {lhs ReopSurp_Bal_Err
+               rhs 0.
+                       lhs>rhs penalty 99999
+                       lhs<rhs penalty 99999}
+

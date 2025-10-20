@@ -1,0 +1,489 @@
+/*
+File Name: Yuba_NID_PGE_Split.wresl
+CalSim 3.0  File for Middle Yuba, South Yuba, and Bear River Operations
+
+Purpose: Separates Nevada ID water (blue) from PG&E water (red)
+
+*/
+
+!*******************************
+!** Bowman-Spaulding Conduit
+!*******************************
+
+! Based on historical data, define a minimum flow
+
+define BSCMin {
+	case HiStorage {condition S_BOWMN(-1) > S_BOWMNlevel3 value 50.}
+	case LoStorage {condition always value 0.}}
+	
+goal setBSCMin { LHS D_CCS010_BSC000 
+	             RHS BSCMin
+	             LHS<RHS penalty 99999
+	             LHS>RHS penalty 0}
+
+
+define C_BSC011_PGE {std kind 'CHANNEL' units 'CFS'}	  
+define C_BSC011_NID {std kind 'CHANNEL' units 'CFS'}
+goal C_BSC011_split {C_BSC011 = C_BSC011_PGE + C_BSC011_NID}
+
+define D_BSC010_SFY043_PGE {std kind 'CHANNEL' units 'CFS'}	  
+define D_BSC010_SFY043_NID {std kind 'CHANNEL' units 'CFS'}
+goal D_BSC010_SFY043_split {D_BSC010_SFY043 = D_BSC010_SFY043_PGE + D_BSC010_SFY043_NID}
+
+
+! Prorated delivery of 3,500 ac-ft of Bowman-Spaulding Canal side flow to PG&E (11.5 cfs/day) July through November
+define D_TFR000_BSC005_PGE  {std kind 'CHANNEL' units 'CFS'}
+goal D_TFR000_BSC005_PGE_split  {
+		lhs	D_TFR000_BSC005_PGE
+			case Jul_Nov {
+				condition month >= JUL .or. month <=NOV
+				RHS	11.5 
+				lhs>rhs constrain
+                lhs<rhs penalty 99999}
+
+			case otherwise {
+				condition always 
+				RHS 0.}
+		}
+define D_TFR000_BSC005_NID  {std kind 'CHANNEL' units 'CFS'}
+goal D_TFR000_BSC005_split {D_TFR000_BSC005 = D_TFR000_BSC005_NID + D_TFR000_BSC005_PGE}
+
+goal set_C_BSC011_PGE {C_BSC011_PGE + D_BSC010_SFY043_PGE = D_TFR000_BSC005_PGE}
+
+
+! As defined in the 1963 Consolidated Contract, total mountain storage is the summation of useable reservoir storage 
+! in Jackson Meadows Reservoir, Jackson Lake, French Lake, Faucherie Lake, Sawmill Lake and Bowman Lake.
+! Jackson Lake and Milton Diversion are not explicitly modeled in CalSim.  Assume a storage of 1.33 TAF for Jackson and 0.3 TAF for Milton
+define S_JKSN_NID  {value 1.330} 
+define S_MILTON	 {value 0.3}
+define S_TOTAL_MOUNTAIN_STORAGE_NID  {value S_JKSMD(-1) + S_MILTON + S_JKSN_NID + S_FRNCH(-1) + S_BOWMN(-1)}
+define TOTAL_MOUNTAIN_STORAGE_NID_DV {alias S_TOTAL_MOUNTAIN_STORAGE_NID kind 'STORAGE' units 'TAF'}
+
+! Non-power period is April - June, power period is July - March
+! Nevada shall deliver all available water to Lake Spaulding up to 290 cfs during power periods and up to 300 cfs during non-power periods, subject to:
+!	a) during the power period, when the total mountain storage exceeds (typo?? is less than?) the critical mountain storage for the month, deliveries to Lake Spaulding will be limited to 216.3 cfs
+!	b) during the non-power period, all water available to Lake Spaulding provided it won't reduce the total mountain storage below the critical mountain storage
+!	c) Storage in Jackson Meadows Reservoir shall not go below 3,000 at any time
+!      Storage in Bowman Reservoir shall not go below 6,000 ac-ft prior to October 31
+!      Storage in Bowman Reservoir shall not go below 4.500 ac-ft prior to November 30
+!      Storage in Bowman Reservoir shall not go below 3,000 ac-ft prior to December 31
+!      Storage in Bowman Reservoir shall not go below 1,000 ac-ft prior to January 31
+! (Assume static Jackon Lake (1.33 TAF) and Milton (0.3 TAF) Storage at all times)
+goal CRITICAL_MOUNTAIN_STORAGE_CHECK	{
+		lhs C_BSC011 + D_BSC010_SFY043
+			case Above_OCT	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 113.0 .and. month == OCT
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_NOV	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 98.0 .and. month == NOV
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_DEC	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 88.0 .and. month == DEC
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_JAN	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 78.0 .and. month == JAN
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_FEB	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 70.0 .and. month == FEB
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_MAR	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 68.0 .and. month == MAR
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_APR	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 71.0 .and. month == APR	!non-power period
+!				RHS min((S_TOTAL_MOUNTAIN_STORAGE_NID-71.0)*taf_cfs,300.0)
+				RHS 300.0
+				lhs<rhs penalty 0}
+			case Above_MAY	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 104.0 .and. month == MAY	!non-power period
+!				RHS min((S_TOTAL_MOUNTAIN_STORAGE_NID-104.0)*taf_cfs,300.0)
+				RHS 300.0
+				lhs<rhs penalty 0}
+			case Above_JUN	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID > 137.0 .and. month == JUN	!non-power period
+!				RHS min((S_TOTAL_MOUNTAIN_STORAGE_NID-137.0)*taf_cfs,0.5*300.0)		!reduced by 50% to represent annual 2 week outage
+				RHS 150.0  															!reduced by 50% to represent annual 2 week outage
+				lhs<rhs penalty 0}
+			case Above_JUL	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID >= 156.0 .and. month == JUL
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_AUG	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID >= 142.0 .and. month == AUG
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Above_SEP	{
+				condition S_TOTAL_MOUNTAIN_STORAGE_NID >= 130.0 .and. month == SEP
+				RHS 290.0
+				lhs<rhs penalty 0}
+			case Below_OCT	{
+				condition month == OCT
+				RHS max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-10.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_NOV	{
+				condition month == NOV
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-9.130)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_DEC	{
+				condition month == DEC
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-7.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_JAN	{
+				condition month == JAN
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-5.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_FEB	{
+				condition month == FEB
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_MAR	{
+				condition month == MAR
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_APR	{
+				condition month == APR	!non-power period
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_MAY	{
+				condition month == MAY	!non-power period
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_JUN	{
+				condition month == JUN	!non-power period
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,0.5*216.3)) 	!reduced by 50% to represent annual 2 week outage
+				lhs<rhs penalty 0}
+			case Below_JUL	{
+				condition month == JUL
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_AUG	{
+				condition month == AUG
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+			case Below_SEP	{
+				condition month == SEP
+				RHS  max(0.0,min(0.5*(S_TOTAL_MOUNTAIN_STORAGE_NID-4.630)*taf_cfs,216.3))
+				lhs<rhs penalty 0}
+		}
+
+
+!****************************************************************************************
+!** Lake Spaulding Inflow
+!****************************************************************************************
+define C_SFY043_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_SFY043_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_SFY043_split {C_SFY043 = C_SFY043_NID + C_SFY043_PGE}
+    
+goal   continuitySFY043_PGE {C_SFY043_PGE = C_BSC011_PGE + D_BSC010_SFY043_PGE + C_SFY044}
+
+
+!****************************************************************************************
+!** Lake Spaulding Outflow
+!****************************************************************************************
+! Assume Spaulding cannot store NID water
+! Continuity of NID water upstream and downstream of Lake Spaulding
+! Assumes spills to South Yuba River consist of PG&E water except when Bowman is spilling
+
+!
+!Priorities:
+!1. NID delivery to South Yuba Canal
+!2. NID delivery to Drum Canal
+!3. PG&E delivery to Drum Canal to meet PCWA demands and PG&E discretionary hydropower
+!4. PG&E additional delivery to South Yuba Canal for power generation at Deer Creek Powerhouse if otherwise spilled to South Yuba
+!5. ??? If Rollins and Combie full and Jackson Meadows and Bowman spilling, and water supply demands met, then spill down Middle Yuba or Canyon Creek ???
+
+!Note: PG&E water to the South Yuba Canal becomes NID water available for NID demands in Deer Creek.
+
+
+define C_SPLDG_NID          {std kind 'CHANNEL' units 'CFS'}
+define C_SPLDG_PGE          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SPLDG_split        {C_SPLDG = C_SPLDG_NID + C_SPLDG_PGE}
+
+define D_SPLDG_SYC000_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_SPLDG_SYC000_NID   {std kind 'DIVERSION' units 'CFS'}
+goal   D_SPLDG_SYC000_split {D_SPLDG_SYC000 = D_SPLDG_SYC000_NID + D_SPLDG_SYC000_PGE}
+
+define D_SPLDG_DRM000_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_SPLDG_DRM000_NID   {std kind 'DIVERSION' units 'CFS'}
+goal   D_SPLDG_DRM000_split {D_SPLDG_DRM000 = D_SPLDG_DRM000_NID + D_SPLDG_DRM000_PGE}
+
+goal   continuitySPLDG_NID  {C_SPLDG_NID + D_SPLDG_SYC000_NID + D_SPLDG_DRM000_NID = C_SFY043_NID}
+
+
+!****************************************************************************************
+!** South Yuba Canal
+!****************************************************************************************
+
+! Sue Sindt, NID, personal communication, 12/05/17
+! Historically, NID purchase of PG&E water for the Deer Creek system has been very limited.
+! and probably less likely in the future based on updated pricing that will be in the next COA.
+
+! Assume all PG&E water diverted in to South Yuba Canal either:
+!	- returns to South Yuba River via arc D_SYC000_SFY041
+!       - spills to Bear River via arc D_SYC002_BRR074
+
+
+define D_SYC000_SFY041_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_SYC000_SFY041_NID   {std kind 'DIVERSION' units 'CFS'}
+goal   D_SYC000_SFY041_split {D_SYC000_SFY041 = D_SYC000_SFY041_NID + D_SYC000_SFY041_PGE}
+goal   setD_SYC000_SFY041_NID   {D_SYC000_SFY041_NID = 0.}
+
+! Ignore D_DRM002_SYC001 as set to zero
+
+define D_SYC002_BRR074_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_SYC002_BRR074_NID   {std kind 'DIVERSION' units 'CFS'}
+goal   D_SYC002_BRR074_split {D_SYC002_BRR074 = D_SYC002_BRR074_NID + D_SYC002_BRR074_PGE}
+goal   setD_SYC002_BRR074_NID   {D_SYC002_BRR074_NID = 0.}
+
+define C_SYC000_PGE          {std kind 'CHANNEL' units 'CFS'}
+define C_SYC000_NID          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SYC000_split        {C_SYC000 = C_SYC000_NID + C_SYC000_PGE}
+
+define C_SYC001_PGE          {std kind 'CHANNEL' units 'CFS'}
+define C_SYC001_NID          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SYC001_split        {C_SYC001 = C_SYC001_NID + C_SYC001_PGE}
+
+define C_SYC002_PGE          {std kind 'CHANNEL' units 'CFS'}
+define C_SYC002_NID          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SYC002_split        {C_SYC002 = C_SYC002_NID + C_SYC002_PGE}
+
+define C_SYC003_PGE          {std kind 'CHANNEL' units 'CFS'}
+define C_SYC003_NID          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SYC003_split        {C_SYC003 = C_SYC003_NID + C_SYC003_PGE}
+
+! Assume South Yuba Canal loss is both NID and PG&E water
+define D_SYC003_SYCLOS_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_SYC003_SYCLOS_NID   {std kind 'DIVERSION' units 'CFS'}
+goal   D_SYC003_SYCLOS_split {D_SYC003_SYCLOS = D_SYC003_SYCLOS_NID + D_SYC003_SYCLOS_PGE}
+
+goal   setD_SYC003_SYCLOS     {D_SYC003_SYCLOS = 0.125*C_SYC002} ! Loss from Chalk Bluff Canal
+goal   setD_SYC003_SYCLOS_NID {D_SYC003_SYCLOS_NID = 0.125*C_SYC002_NID} ! NID loss from Chalk Bluff Canal
+
+define C_SYC020_PGE          {std kind 'CHANNEL' units 'CFS'}
+define C_SYC020_NID          {std kind 'CHANNEL' units 'CFS'}
+goal   C_SYC020_split        {C_SYC020 = C_SYC020_NID + C_SYC020_PGE}
+goal   Deer_Cr_PH_PGE	     {C_SYC020_PGE = 0.0} !Assume NID does not purchase water at Deer Creek Powerhouse
+
+goal limitC_SYC020_NID {LHS C_SYC020_NID 		
+			case MOct	{
+				condition month == Oct
+				RHS  (WaterYearConditions_NID_PGE*6.20*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*4.80*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}	
+			case MNov	{
+				condition month == Nov
+				RHS  (WaterYearConditions_NID_PGE*4.70*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*3.30*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MDec	{
+				condition month == Dec
+				RHS  (WaterYearConditions_NID_PGE*4.60*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*3.40*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MJan	{
+				condition month == JAN
+				RHS  (WaterYearConditions_NID_PGE*4.40*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*3.20*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MFeb	{
+				condition month == FEB
+				RHS  (WaterYearConditions_NID_PGE*4.10*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*2.80*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MMar	{
+				condition month == MAR
+				RHS  (WaterYearConditions_NID_PGE*4.40*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*3.20*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MApr	{
+				condition month == APR	
+				RHS  (WaterYearConditions_NID_PGE*5.40*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*2.30*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MMay	{
+				condition month == MAY	
+				RHS  (WaterYearConditions_NID_PGE*5.60*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*4.20*taf_cfs/(1-0.125))
+				lhs<rhs penalty 0}
+			case MJun	{
+				condition month == JUN	
+				RHS  (WaterYearConditions_NID_PGE*6.30*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*4.40*taf_cfs/(1-0.125)) 	
+				lhs<rhs penalty 0}
+			case MJul	{
+				condition month == JUL
+				RHS  (WaterYearConditions_NID_PGE*6.50*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*5.60*taf_cfs/(1-0.125)) 
+				lhs<rhs penalty 0}
+			case MAug	{
+				condition month == AUG
+				RHS  (WaterYearConditions_NID_PGE*6.50*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*5.60*taf_cfs/(1-0.125)) 
+				lhs<rhs penalty 0}
+			case MSep	{
+				condition month == SEP
+				RHS  (WaterYearConditions_NID_PGE*6.30*taf_cfs/(1-0.125)+(1-WaterYearConditions_NID_PGE)*5.20*taf_cfs/(1-0.125)) 
+				lhs<rhs penalty 0}} !Condition based on month and flag for dry or normal conditions WaterYearConditions_NID_PGE 
+
+goal ContinuitySYC000_NID    {C_SYC000_NID = D_SPLDG_SYC000_NID - D_SYC000_SFY041_NID}
+goal ContinuitySYC001_NID    {C_SYC001_NID = C_SYC000_NID}
+goal ContinuitySYC002_NID    {C_SYC002_NID = C_SYC001_NID - D_SYC002_BRR074_NID}
+goal ContinuitySYC003_NID    {C_SYC003_NID = C_SYC002_NID - D_SYC003_SYCLOS_NID}
+goal ContinuitySYC020_NID    {C_SYC020_NID = C_SYC003_NID}
+
+! Limit NID S. Yuba Canal flows to 50% of Chalk Bluff capacity (62.5 cfs) in April to simulate annual 2-week outage.
+goal Spaulding_PH2_Outage {
+	lhs D_SPLDG_SYC000
+		case Apr {
+			condition month==APR
+			rhs 100.0 !Includes full monthly capacity of the South Yuba River return flow
+			lhs<rhs penalty 0}
+		case Other {
+			condition always
+			rhs 200.0
+			lhs<rhs penalty 0}
+			}
+
+
+!****************************************************************************************
+!** Drum Canal
+!****************************************************************************************
+
+! Limit Drum Canal flows to 50% of capacity (420 cfs) in September to simulate annual 2-week outage.
+goal Spaulding_PH1_Outage {
+	lhs D_SPLDG_DRM000
+		case Sep {
+			condition month==SEP
+			rhs 420.0
+			lhs<rhs penalty 0}
+		case Other {
+			condition always
+			rhs 840.0
+			lhs<rhs penalty 0}
+			}
+
+goal setD_DRM002_SYC001 {D_DRM002_SYC001 = 0.} ! Canal is no longer used. (M. Lionberger)
+
+define C_DRM001_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_DRM001_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_DRM001_split {C_DRM001 = C_DRM001_NID + C_DRM001_PGE}
+
+define C_DRM002_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_DRM002_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_DRM002_split {C_DRM002 = C_DRM002_NID + C_DRM002_PGE}
+
+define C_DRM003_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_DRM003_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_DRM003_split {C_DRM003 = C_DRM003_NID + C_DRM003_PGE}
+
+define D_DRM003_BRR074_NID    {std kind 'DIVERSION' units 'CFS'}
+define D_DRM003_BRR074_PGE    {std kind 'DIVERSION' units 'CFS'}
+goal   D_DRM003_BRR074_split  {D_DRM003_BRR074 = D_DRM003_BRR074_NID + D_DRM003_BRR074_PGE}
+goal   setD_DRM003_BRR074_NID {D_DRM003_BRR074_NID = 0.}
+
+define C_DRM008_NID           {std kind 'CHANNEL' units 'CFS'}
+define C_DRM008_PGE           {std kind 'CHANNEL' units 'CFS'}
+goal   C_DRM008_split         {C_DRM008 = C_DRM008_NID + C_DRM008_PGE}
+
+!Assume Drum Canal loss is split between PG&E/NID
+define D_DRM003_DRMLOS_NID   {std kind 'DIVERSION' units 'CFS'}
+define D_DRM003_DRMLOS_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_DRM003_DRMLOS_split {D_DRM003_DRMLOS = D_DRM003_DRMLOS_NID + D_DRM003_DRMLOS_PGE}
+
+goal setD_DRM003_DRMLOS     {D_DRM003_DRMLOS = 0.078*C_DRM002} ! Loss from Drum Canal
+goal setD_DRM003_DRMLOS_NID {D_DRM003_DRMLOS_NID = 0.078*C_DRM003_NID} ! NID loss from Drum Canal
+
+define C_DRM009_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_DRM009_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_DRM009_split {C_DRM009 = C_DRM009_NID + C_DRM009_PGE}
+
+! Drum Canal release to Canyon Creek is PG&E water
+! Inflow from Lake Valley Canal is PG&E water
+! Release from Drum Canal to Bear River is a mix of PG&E water and NID water
+
+goal ContinuityDRM001_NID  {C_DRM001_NID = D_SPLDG_DRM000_NID}
+goal ContinuityDRM002_NID  {C_DRM002_NID = C_DRM001_NID}
+goal ContinuityDRM003_NID  {C_DRM003_NID = C_DRM002_NID - D_DRM003_BRR074_NID}
+goal ContinuityDRM008_NID  {C_DRM008_NID = C_DRM003_NID - D_DRM003_DRMLOS_NID}
+goal ContinuityDRM009_NID  {C_DRM009_NID = C_DRM008_NID}
+
+
+!****************************************************************************************
+!** Bear River upstream from Rollins
+!****************************************************************************************
+define C_BRR060_NID   {std kind 'FLOW' units 'CFS'}
+define C_BRR060_PGE   {std kind 'FLOW' units 'CFS'}
+goal   C_BRR060_split {C_BRR060 = C_BRR060_NID + C_BRR060_PGE}
+
+goal continuityBRR060_NID {C_BRR060_NID = C_DRM009_NID + D_SYC002_BRR074_NID + D_DRM003_BRR074_NID}
+!****************************************************************************************
+!** Rollins Reservoir
+!****************************************************************************************
+define S_RLLNS_NID   {std kind 'STORAGE' units 'TAF'}
+define S_RLLNS_PGE   {std kind 'STORAGE' units 'TAF'}
+goal   S_RLLNS_split {S_RLLNS = S_RLLNS_NID + S_RLLNS_PGE}
+
+define C_RLLNS_NID   {std kind 'CHANNEL' units 'TAF'}
+define C_RLLNS_PGE   {std kind 'CHANNEL' units 'TAF'}
+goal   C_RLLNS_split {C_RLLNS = C_RLLNS_NID + C_RLLNS_PGE}
+
+! PG&E can store up to the first 30 TAF of imported water to Rollins Reservoir, but cannot store natural inflow
+! For ease of accounting assume evaporation is all NID water
+! PG&E has priority to first 350 cfs natural inflow to Rollins, but cannot store it in Rollins.
+goal S_RLLNS_PGE_max     {S_RLLNS_PGE < 10.000}
+goal continuityRLLNS_PGE {S_RLLNS_PGE*taf_cfs - S_RLLNS_PGE(-1)*taf_cfs < C_BRR060_PGE}
+goal continuityRLLNS_NID {S_RLLNS_NID*taf_cfs - S_RLLNS_NID(-1)*taf_cfs = C_BRR060_NID - C_RLLNS_NID - E_RLLNS + (I_RLLNS - min(350,I_RLLNS)) + C_CSD014}
+define C_BRR050_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_BRR050_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_BRR050_split {C_BRR050 = C_BRR050_NID + C_BRR050_PGE}
+
+define D_BRR050_BEC000_NID   {std kind 'DIVERSION' units 'CFS'}
+define D_BRR050_BEC000_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_BRR050_BEC000_NID_MIF   {std kind 'DIVERSION' units 'CFS'}
+define D_BRR050_BEC000_NID_ADD   {std kind 'DIVERSION' units 'CFS'}
+
+define MF_BRR050_BEC000_NID {case mOct{condition month == Oct value 7.35*taf_cfs} case mNov{condition month == Nov value 6.0*taf_cfs} 
+							 case mDec{condition month == Dec value 4.9*taf_cfs} case mJan{condition month == Jan value 3.1*taf_cfs}
+							 case mFeb{condition month == Feb value 2.0*taf_cfs} case mMar{condition month == Mar value 3.1*taf_cfs}
+							 case mApr{condition month == Apr value 2.0*taf_cfs} case mMay{condition month == May value 4.5*taf_cfs}
+							 case mJun{condition month == Jun value 5.5*taf_cfs} case mJul{condition month == Jul value 7.35*taf_cfs}
+							 case mAug{condition month == Aug value 7.35*taf_cfs} case mSep{condition month == Sep value 7.11*taf_cfs}}
+
+
+goal   splitD_BRR050_BEC000_NID{D_BRR050_BEC000_NID = D_BRR050_BEC000_NID_MIF +  D_BRR050_BEC000_NID_ADD}
+goal   D_BRR050_BEC000_split {D_BRR050_BEC000 = D_BRR050_BEC000_NID + D_BRR050_BEC000_PGE}
+
+goal continuityBRR050_PGE {C_BRR050_PGE = C_RLLNS_PGE - D_BRR050_BEC000_PGE}
+! Total NID diversion into the Bear River Canal cannot exceed 120 cfs
+goal D_BRR050_BEC000_NIDwheel {D_BRR050_BEC000_NID < 120.0}
+
+
+
+!****************************************************************************************
+!** Bear River upstream at diversion dam
+!****************************************************************************************
+
+
+! Assume NID meeting min flow in the Bear River below Bear River Canal diversion dam
+define C_BRR050_MIF_NID   {std kind 'FLOW' units 'CFS'}
+define C_BRR050_MIF_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BRR050_MIF_split {C_BRR050_MIF = C_BRR050_MIF_NID + C_BRR050_MIF_PGE}
+
+define C_BRR050_ADD_NID   {std kind 'FLOW' units 'CFS'}
+define C_BRR050_ADD_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BRR050_ADD_split {C_BRR050_ADD = C_BRR050_ADD_NID + C_BRR050_ADD_PGE}
+goal   continuityC_BRR050_MIF_NID {C_BRR050_NID = C_BRR050_ADD_NID + C_BRR050_MIF_NID}
+
+
+define MaxSTH007 {
+!        case Oct        {condition month == OCT value  58.}		
+!        case Nov        {condition month == NOV value  88.}
+        case Dec        {condition month == DEC value 186. }
+        case Jan        {condition month == JAN value 209.}
+	case Feb        {condition month == FEB value 236.}
+        case Mar        {condition month == MAR value 225.}
+        case Apr        {condition month == APR value 192.}
+!	case May        {condition month == MAY value 116.}
+	case Jun        {condition month == JUN value  57.}				!Average of 2001 - 2015
+	case Jul        {condition month == JUL value   6.}				!Average of 2001 - 2015
+	case Aug        {condition month == AUG value  14.}				!Average of 2001 - 2015
+!        case Sep        {condition month == Sep value  85.}
+        case Otherwise {condition always value 99999.}
+        }
+goal setC_STH007Max    {C_STH007 < MaxSTH007}
+

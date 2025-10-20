@@ -1,0 +1,105 @@
+! Tridam Operating Rules
+! Chakri 03/03/08
+
+! donnell Reservoir Level 2 storage is made equal to dead storage as
+! there is no FERC minimum pool requirement
+define S_DONLLlevel2 {value S_DONLLlevel1}
+goal Set3level2 {S_DONLL_2 < max (S_DONLLlevel2-S_DONLLlevel1,0.)}
+
+! donnell Reservoir Level 3 storage
+define wat_avb_BSLY { value S_DONLL(-1) + S_BEARD(-1) + (I_BEARD + I_MFS022 + I_DONLL + I_CFS001 + C_MFS047_target)*cfs_taf }
+
+define wat_avb_BSLYDV {std kind 'INFLOW' units 'TAF'}
+goal checkwat_BSLY {wat_avb_BSLYDV = wat_avb_BSLY}
+
+define S_DONLLlevel3 {
+	select     S_DONLL_level3
+	from       Stanislaus_donnell_reslevel
+	given      WaterAvb = wat_avb_BSLY
+	use	   linear
+	where      Mon = month }
+
+goal Set3level3 {S_DONLL_3 < max (S_DONLLlevel3-S_DONLLlevel2,0.)}
+
+define S_DONLLlevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_DONLLlevel3 {S_DONLLlevel3dv=S_DONLLlevel3}
+
+! donnell Reservoir Level 4 storage based on FERC maximum storage level requirements
+define S_DONLLelev4 {
+        case oct {
+	     condition month == oct
+	     value 4917.
+		     }
+	case nov_mar {
+	     condition month >= nov .and. month <= mar
+	     value 4898.
+		     }
+	case apr_sep {
+	     condition month >= apr .and. month <= sep
+	     value 4917.
+		     }
+	case other {
+	     condition always
+	     value 0.}
+		}
+define S_DONLLlevel4af {select storage from Stanislaus_res_info given elevation = S_DONLLelev4 use linear where res_num=3}!gets S_DONLLlevel4 from table in af
+define S_DONLLlevel4 {value min(S_DONLLlevel5,S_DONLLlevel4af/1000)} !converts value to TAF
+goal Set3level4 {S_DONLL_4 < max (S_DONLLlevel4-S_DONLLlevel3,0.)}
+
+define S_DONLLlevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_DONLLlevel4 {S_DONLLlevel4dv=S_DONLLlevel4}
+
+! donnell Reservoir Level 5
+goal Set3level5 {S_DONLL_5 < max (S_DONLLlevel5 - S_DONLLlevel4,0.)}
+
+! Beardsley Reservoir Level 2 storage is made equal to dead storage as
+! there is no FERC minimum pool requirement
+define S_BEARDlevel2 {value S_BEARDlevel1}
+goal Set4level2 {S_BEARD_2 < max (S_BEARDlevel2-S_BEARDlevel1,0.)}
+
+! Beardsley Reservoir Level 3
+define S_BEARDlevel3 {
+	select     S_BEARD_level3
+	from       Stanislaus_beardsley_reslevel
+	given	   WaterAvb = wat_avb_BSLY
+	use        linear
+	where      Mon = month }
+
+goal Set4level3 {S_BEARD_3 < max (S_BEARDlevel3-S_BEARDlevel2,0.)}
+
+define S_BEARDlevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_BEARDlevel3 {S_BEARDlevel3dv=S_BEARDlevel3}
+
+! Beardsley Reservoir Level 4 storage based on FERC maximum storage level requirements
+define S_BEARDelev4 {
+        case oct {
+	     condition month == oct
+	     value 3397.}
+      	case nov_mar {
+	     condition month >= nov .and. month <= mar
+	     value 3368.}
+	case apr_sep {
+	     condition month >= apr .and. month <= sep
+	     value 3397.}
+		case other {
+	     condition always
+	     value 0.}
+		}
+
+define S_BEARDlevel4af {
+	select     storage
+	from       res_info
+	given      elevation = S_BEARDelev4
+	use        linear
+	where      res_num=4 }!gets S_BEARDlevel4 from table in af
+define S_BEARDlevel4inp {value S_BEARDlevel4af/1000} !converts value to TAF
+
+define S_BEARDlevel4 {value max(S_BEARDlevel3,S_BEARDlevel4inp)}
+
+goal Set4level4 {S_BEARD_4 < max (S_BEARDlevel4-S_BEARDlevel3,0.)}
+
+define S_BEARDlevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_BEARDlevel4 {S_BEARDlevel4dv=S_BEARDlevel4}
+
+! Beardsley Reservoir Level 5
+goal Set4level5 {S_BEARD_5 < max (S_BEARDlevel5 - S_BEARDlevel4,0.)}

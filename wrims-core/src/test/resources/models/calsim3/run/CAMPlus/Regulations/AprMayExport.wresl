@@ -1,0 +1,137 @@
+! April 15 - May 15 export limits on Banks+Tracy
+
+define Pulse_Apr {std kind 'EXPORT-LIMIT' UNITS 'TAF'}
+define Pulse_May {std kind 'EXPORT-LIMIT' UNITS 'TAF'}
+
+define NonPulse_Apr {std KIND 'EXPORT-LIMIT' UNITS 'TAF'}
+define NonPulse_May {std KIND 'EXPORT-LIMIT' UNITS 'TAF'}
+
+! limit the pulse period to physical capacity, ei ratio, and max(sjr,1500cfs)
+goal cap_Pulse_SJR_Apr {Pulse_Apr < max(1500.0*cfs_taf( 7-month),I33B_Apr)}
+goal cap_Pulse_SJR_May {Pulse_May < max(1500.0*cfs_taf( 8-month),I33B_May)}
+goal(fm) cap_Pulse_EI_Apr  {lhs Pulse_Apr case Apr{condition mv($m)==Apr rhs 0.35*inflow_fm($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_Pulse_EI_May  {lhs Pulse_May case May{condition mv($m)==May rhs 0.35*inflow_fm($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_Pulse_CAP_Apr {lhs Pulse_Apr case Apr{condition mv($m)==Apr rhs 4200.0*cfs_taf($m) + 6680.0*cfs_taf($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_Pulse_CAP_May {lhs Pulse_May case May{condition mv($m)==May rhs 4200.0*cfs_taf($m) + 6680.0*cfs_taf($m) lhs<rhs penalty 0.0}}
+
+! limit the non-pulse period to physical capacity and ei ratio
+goal(fm) cap_NonPulse_EI_Apr  {lhs NonPulse_Apr case Apr{condition mv($m)==Apr rhs 0.35*inflow_fm($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_NonPulse_EI_May  {lhs NonPulse_May case May{condition mv($m)==May rhs 0.35*inflow_fm($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_NonPulse_CAP_Apr {lhs NonPulse_Apr case Apr{condition mv($m)==Apr rhs 4200.0*cfs_taf($m) + 6680.0*cfs_taf($m) lhs<rhs penalty 0.0}}
+goal(fm) cap_NonPulse_CAP_May {lhs NonPulse_May case May{condition mv($m)==May rhs 4200.0*cfs_taf($m) + 6680.0*cfs_taf($m) lhs<rhs penalty 0.0}}
+
+! apply limits to combined total
+goal(fm) limit_TandB_Apr {
+	lhs D33E_fm($m) + D33D_fm($m)
+	case Apr{
+		condition mv($m)==Apr
+		rhs NonPulse_Apr*14.0/30 + Pulse_Apr*16.0/30
+		lhs<rhs penalty 0.0
+	}	 
+}
+goal(fm) limit_TandB_May {
+	lhs D33E_fm($m)  + D33D_fm($m) 
+	case May{
+		condition mv($m)==May
+		rhs NonPulse_May*16.0/31 + Pulse_May*15.0/31
+		lhs<rhs penalty 0.0	
+	}
+}
+define D33D_E_Max_Apr {alias NonPulse_Apr*14.0/30 + Pulse_Apr*16.0/30 kind 'FLOW' units 'TAF'}
+define D33D_E_Max_May {alias NonPulse_May*16.0/31 + Pulse_May*15.0/31 kind 'FLOW' units 'TAF'}
+
+! apply limits to tracy
+goal(fm) limit_Tracy_Apr {
+	lhs D33E_fm($m) 
+	case Apr{
+		condition mv($m)==Apr
+		rhs 4200.0*cfs_taf($m)*14.0/30 + CVPExpCapShare_Blncd_CAM*Pulse_Apr*16.0/30
+		lhs<rhs penalty 0.0	
+	}
+}
+goal(fm) limit_Tracy_May {
+	lhs D33E_fm($m) 
+	case May{
+		condition mv($m)==May
+		rhs 4200.0*cfs_taf($m)*16.0/31 + CVPExpCapShare_Blncd_CAM*Pulse_May*15.0/31
+		lhs<rhs penalty 0.0	
+	}
+}
+
+! apply limits to banks
+goal(fm) limit_Banks_Apr {
+	lhs D33D_fm($m) 
+	case Apr{
+		condition mv($m)==Apr
+		rhs	6680.0*cfs_taf($m)*14.0/30 + SWPExpCapShare_Blncd_CAM*Pulse_Apr*16.0/30
+		lhs<rhs penalty 0.0	
+	}
+}
+goal(fm) limit_Banks_May {
+	lhs D33D_fm($m) 
+	case May{
+		condition mv($m)==May
+		rhs	6680.0*cfs_taf($m)*16.0/31 + SWPExpCapShare_Blncd_CAM*Pulse_May*15.0/31
+		lhs<rhs penalty 0.0	
+	}
+}
+
+define D33D_Max_Apr {alias 6680.0*cfs_taf( 7-month)*14.0/30 + SWPExpCapShare_Blncd_CAM*Pulse_Apr*16.0/30 kind 'FLOW' units 'TAF'}
+define D33D_Max_May {alias 6680.0*cfs_taf( 8-month)*16.0/31 + SWPExpCapShare_Blncd_CAM*Pulse_May*15.0/31 kind 'FLOW' units 'TAF'}
+define D33E_Max_Apr {alias 4200.0*cfs_taf( 7-month)*14.0/30 + CVPExpCapShare_Blncd_CAM*Pulse_Apr*16.0/30 kind 'FLOW' units 'TAF'}
+define D33E_Max_May {alias 4200.0*cfs_taf( 8-month)*16.0/31 + CVPExpCapShare_Blncd_CAM*Pulse_May*15.0/31 kind 'FLOW' units 'TAF'}
+
+! if total export (Banks+Tracy) is in control, equally split water between Banks and Tracy up to Tracy's capacity. integers are used
+define Pulseabmax_Apr {std kind 'FLOW' units 'TAF'}
+define Pulseblmax_Apr {std kind 'FLOW' units 'TAF'}
+define Pulse_int_Apr {INTEGER std kind 'INTEGER' units 'NONE'}
+goal(fm) force_Pulse_int_Apr {
+	lhs NonPulse_Apr*14.0/30 + Pulse_Apr*16.0/30 - D33E_fm($m) - D33D_fm($m) - 0.51 
+	case Apr{
+		condition mv($m)==Apr
+		rhs Pulseabmax_Apr - Pulseblmax_Apr	
+	}
+}
+goal force_Pulse_at_Apr {Pulseabmax_Apr < Pulse_int_Apr * 9999999.0}
+goal force_Pulse_below_Apr {Pulseblmax_Apr < 9999999.0 - Pulse_int_Apr * 9999999.0}
+goal(fm) Equal_Pulse_split1_Apr {
+	lhs D33D_fm($m) - D33E_fm($m) 
+	case Apr{
+		condition mv($m)==Apr
+		rhs 999999. * Pulse_int_Apr lhs<rhs penalty 0. lhs>rhs penalty 700.	
+	}
+}
+goal(fm) Equal_Pulse_split2_Apr {
+	lhs D33E_fm($m) - D33D_fm($m) 
+	case Apr{
+		condition mv($m)==Apr
+		rhs 999999. * Pulse_int_Apr lhs<rhs penalty 0. lhs>rhs penalty 700.
+	}
+}
+
+define Pulseabmax_May {std kind 'FLOW' units 'TAF'}
+define Pulseblmax_May {std kind 'FLOW' units 'TAF'}
+define Pulse_int_May {INTEGER std kind 'INTEGER' units 'NONE'}
+goal(fm) force_Pulse_int_May {
+	lhs NonPulse_May*16.0/31 + Pulse_May*15.0/31 - D33E_fm($m) - D33D_fm($m) - 0.51 
+	case May{
+		condition mv($m)==May
+		rhs Pulseabmax_May - Pulseblmax_May	
+	}
+}
+goal force_Pulse_at_May {Pulseabmax_May < Pulse_int_May * 9999999.0}
+goal force_Pulse_below_May {Pulseblmax_May < 9999999.0 - Pulse_int_May * 9999999.0}
+goal(fm) Equal_Pulse_split1_May {
+	lhs D33D_fm($m) - D33E_fm($m) 
+	case May{
+		condition mv($m)==May
+		rhs 999999. * Pulse_int_May lhs<rhs penalty 0. lhs>rhs penalty 700.	
+	}
+}
+goal(fm) Equal_Pulse_split2_May {
+	lhs D33E_fm($m) - D33D_fm($m) 
+	case May{
+		condition mv($m)==May
+		rhs 999999. * Pulse_int_May lhs<rhs penalty 0. lhs>rhs penalty 700.	
+	}
+}

@@ -1,0 +1,353 @@
+/*
+File Name: arcs-reservoirs.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Compiled by M. Lionberger, HDR
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Jackson Meadows Reservoir, Middle Fork Yuba River	!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_JKSMDlevel1 {value  2.795} ! Equivalent to 5933 feet (LLO invert elevation). Drum-Spaulding Project FERC Final Application
+define S_JKSMD_1     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Inactive pool
+define S_JKSMDlevel2 {value  2.795}
+define S_JKSMD_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_JKSMDlevel3 {value 12.952} ! Equivalent to 5964 feet. Remaining volume is needed to meet min req. flow, no releases for delivery demand
+define S_JKSMD_3     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Discretionary Minimum Pool
+define S_JKSMDlevel4 {  
+			case Oct {condition month == OCT value 37.361} ! Equivalent to 6003 feet
+			case Nov {condition month == NOV value 32.621} ! Equivalent to 5997 feet
+			case Dec {condition month == DEC value 32.621} ! Equivalent to  40.6596007 feet
+			case Jan {condition month == JAN value 32.621} ! Equivalent to 6007 feet
+			case Feb {condition month == FEB value 40.659} ! Equivalent to 6007 feet
+			case Mar {condition month == MAR value 47.556} ! Equivalent to 6015 feet
+			case Apr {condition month == APR value 52.065} ! Equivalent to 6020 feet
+			case May {condition month == MAY value 67.435} ! Equivalent to 6036 feet
+			case Jun {condition month == JUN value 66.431} ! Equivalent to 6035 feet
+			case Jul {condition month == JUL value 60.541} ! Equivalent to 6029 feet
+			case Aug {condition month == AUG value 52.065} ! Equivalent to 6020 feet
+			case otherwise {condition always value 44.058}}! Equivalent to 6011 feet
+define S_JKSMD_4     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS operations model rule curve
+define S_JKSMDlevel5 {  
+			case Oct {condition month == OCT value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Nov {condition month == NOV value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Dec {condition month == DEC value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Jan {condition month == JAN value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Feb {condition month == FEB value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Mar {condition month == MAR value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case Apr {condition month == APR value 53.00} ! Equivalent to spillway crest elevation, 6021 feet, gates open
+			case otherwise {condition always value 67.435}} ! Equivalent to 6036 feet, normal-maximum WSE.
+define S_JKSMD_5     {std kind 'STORAGE-ZONE' units 'TAF'} !  Yuba-Bear Project FERC Final License Application
+define S_JKSMDlevel6 {value 76.000} !Equivalent to 6044.5 feet, top of dam. Drum-Spaulding Project FERC Final Application
+define S_JKSMD_6     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Flood control Pool
+define S_JKSMD       {std kind 'STORAGE' units 'TAF'}
+define E_JKSMD       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_JKSMD       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_JKSMD      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_JKSMDlast   {select area from YubaBear_res_info given storage=1000*S_JKSMD(-1) use linear where res_num=1}
+define A_JKSMDforward {select area from YubaBear_res_info given storage=1050*S_JKSMD(-1) use linear where res_num=1}
+define A_JKSMDback   {select area from YubaBear_res_info given storage=950*S_JKSMD(-1) use linear where res_num=1}
+define Coefev_JKSMD  {value (A_JKSMDforward - A_JKSMDback)/(100*max(0.01,S_JKSMD(-1)))}
+define RelCap_JKSMD  {select discharge from YubaBear_res_info given storage=1000*S_JKSMD(-1) use linear where res_num=1}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Lake (includes Faucherie and Sawmill), Canyon Creek 	    !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_FRNCHlevel1 {value 0.000} ! Inactive zone. Equivalent to 6,598.5 feet. YB/DS Operation Model inactive pool
+define S_FRNCH_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRNCHlevel2 {value 1.513} ! Equivalent to 6,608.40 ft, Normal Minimum Water Surface Elevation, YB/DS operations Model min pool
+define S_FRNCH_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRNCHlevel3 {value 1.513} 
+define S_FRNCH_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRNCHlevel4 {  case Oct {condition month == OCT value 12.687} ! Equivalent to 6630.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Nov {condition month == NOV value 12.687} ! Equivalent to 6630.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Dec {condition month == DEC value 12.687} ! Equivalent to 6630.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Jan {condition month == JAN value 15.016} ! Equivalent to 6640.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Feb {condition month == FEB value 15.016} ! Equivalent to 6640.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Mar {condition month == MAR value 15.016} ! Equivalent to 6640.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Apr {condition month == APR value 19.540} ! Equivalent to 5565.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case May {condition month == MAY value 20.948} ! Equivalent to 6660.28 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Jun {condition month == JUN value 20.948} ! Equivalent to 6660.28 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Jul {condition month == JUL value 20.359} ! Equivalent to 6658.50 feet (+7.01 TAF for Sawmill and Faucherie)
+			case Aug {condition month == AUG value 19.540} ! Equivalent to 6656.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			case otherwise {condition always value 15.016} ! Equivalent to 6640.00 feet (+7.01 TAF for Sawmill and Faucherie)
+			}
+define S_FRNCH_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRNCHlevel5 {value 20.948} ! Equivalent to 6,660.28 ft, Normal Maximum Water Surface Elevation, Yuba-Bear Project FERC Final License Application
+define S_FRNCH_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRNCHlevel6 {value 20.948} ! Equivalent to 6,660.28 ft, Normal Maximum Water Surface Elevation
+define S_FRNCH_6     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Flood pool
+define S_FRNCH       {std kind 'STORAGE' units 'TAF'}
+define E_FRNCH       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_FRNCH       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_FRNCH      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_FRNCHlast   {select area from YubaBear_res_info given storage=1000*S_FRNCH(-1) use linear where res_num=7}
+define A_FRNCHforward {select area from YubaBear_res_info given storage=1050*S_FRNCH(-1) use linear where res_num=7}
+define A_FRNCHback   {select area from YubaBear_res_info given storage=950*S_FRNCH(-1) use linear where res_num=7}
+define Coefev_FRNCH  {value (A_FRNCHforward - A_FRNCHback)/(100*max(0.01,S_FRNCH(-1)))}
+!define RelCap_FRNCH  {select discharge from YubaBear_res_info given storage=1000*S_FRNCH(-1) use linear where res_num=7}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bowman Lake, Canyon Creek 	    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_BOWMNlevel1 {value 0.000} ! Inactive zone. Equivalent to 5401 feet. Drum-Spaulding Project FERC Final Application
+define S_BOWMN_1     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Minimum pool
+define S_BOWMNlevel2 {value 0.000} ! Inactive zone. Equivalent to 5401 feet. Drum-Spaulding Project FERC Final Application
+define S_BOWMN_2     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Minimum pool
+define S_BOWMNlevel3 {value 20.0}
+/*			case Oct {condition month == OCT value 4.500}
+			case Nov {condition month == NOV value 4.500}
+			case Dec {condition month == DEC value 3.000}
+			case Jan {condition month == JAN value 1.000}
+			case Feb {condition month == FEB value 1.000}
+			case Mar {condition month == MAR value 1.000}
+			case Apr {condition month == APR value 1.000}
+			case May {condition month == MAY value 1.000}
+			case Jun {condition month == JUN value 1.000}
+			case Jul {condition month == JUL value 6.000}
+			case Aug {condition month == AUG value 6.000}
+			case otherwise {condition always value 6.000}} */
+define S_BOWMN_3     {std kind 'STORAGE-ZONE' units 'TAF'} ! Minimum pool, per the NID-PG&E consolidated contract
+define S_BOWMNlevel4 {  
+			case Oct {condition month == OCT value 38.551} ! Equivalent to 5522 feet
+			case Nov {condition month == NOV value 33.413} ! Equivalent to 5514 feet
+			case Dec {condition month == DEC value 29.191} ! Equivalent to 5507 feet
+			case Jan {condition month == JAN value 26.894} ! Equivalent to 5503 feet
+			case Feb {condition month == FEB value 25.773} ! Equivalent to 5501 feet
+			case Mar {condition month == MAR value 31.570} ! Equivalent to 5511 feet
+			case Apr {condition month == APR value 41.227} ! Equivalent to 5526 feet
+			case May {condition month == MAY value 64.302} ! Equivalent to 5557 feet
+			case Jun {condition month == JUN value 64.302} ! Equivalent to 5557 feet
+			case Jul {condition month == JUL value 62.688} ! Equivalent to 5555 feet
+			case Aug {condition month == AUG value 51.168} ! Equivalent to 5540 feet
+			case otherwise {condition always value 45.392}}! Equivalent to 5532 feet
+define S_BOWMN_4     {std kind 'STORAGE-ZONE' units 'TAF'}	! YB/DS Operations Model Conservation pool
+define S_BOWMNlevel5 {value 68.363} ! Equivalent to 5,562 ft, normal-maximum WSE
+define S_BOWMN_5     {std kind 'STORAGE-ZONE' units 'TAF'}	!  Yuba-Bear Project FERC Final License Application
+define S_BOWMNlevel6 {value 69.673} ! Equivalent to 5,563.6 ft, top of Bowman South Dam
+define S_BOWMN_6     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model Flood pool
+define S_BOWMN       {std kind 'STORAGE' units 'TAF'}
+define E_BOWMN       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_BOWMN       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_BOWMN      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_BOWMNlast   {select area from YubaBear_res_info given storage=1000*S_BOWMN(-1) use linear where res_num=2}
+define A_BOWMNforward {select area from YubaBear_res_info given storage=1050*S_BOWMN(-1) use linear where res_num=2}
+define A_BOWMNback   {select area from YubaBear_res_info given storage=950*S_BOWMN(-1) use linear where res_num=2}
+define Coefev_BOWMN  {value (A_BOWMNforward - A_BOWMNback)/(100*max(0.01,S_BOWMN(-1)))}
+define RelCap_BOWMN  {select discharge from YubaBear_res_info given storage=1000*S_BOWMN(-1) use linear where res_num=2}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!! Fordyce Lake, Fordyce Creek 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_FRDYClevel1 {value 0.027} ! Equivalent to 6290.5 feet (LLO Invert elevation). Drum-Spaulding Project FERC Final Application
+define S_FRDYC_1     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model inactive pool
+define S_FRDYClevel2 {value 0.386} ! Equivalent to 6294.5 feet, remaining volume is needed to meet min req. flow, no releases for delivery demand
+define S_FRDYC_2     {std kind 'STORAGE-ZONE' units 'TAF'}  ! YB/DS Operations Model min pool
+define A_FRDYClast   {select area from YubaBear_res_info given storage=1000*S_FRDYC(-1) use linear where res_num=3}
+define FRDYCDLevel3Set{
+	case JunSep{condition month>=JUN .and. month<=SEP .and. wateryear<EndWY
+		value max(8.75,S_FRDYC(-1) + I_FRDYC*cfs_taf - max(0,(S_FRDYC(-1) + (sum(i=0,13-month,1)I_FRDYC(i)*cfs_taf(i)) - 8.75)/(13-month+1)
+			))
+	}
+/* 		case Octo{condition month==Oct .and. wateryear > BgnWY
+		value 16.995!S_FRDYC(-1) - E_FRDYC(-1) - MF_FRDYC_BUFF
+	}*/
+
+		case Octo{condition month==Oct .and. wateryear > Bgnwy
+		value max(8.75, S_FRDYC(-1) - A_FRDYClast*ER_FRDYC/12000 - MF_FRDYC_BUFF)
+	}
+			case Nov {condition month == NOV value 15.785} ! Equivalent to 6348.2 feet
+			case Dec {condition month == DEC value 10.862} ! Equivalent to 6336.5 feet
+			case Jan {condition month == JAN value 15.986} ! Equivalent to 6348.6 feet
+			case Feb {condition month == FEB value 21.522} ! Equivalent to 6360 feet
+			case Mar {condition month == MAR value 26.912} ! Equivalent to 6370 feet
+			case Apr {condition month == APR value 43.068} ! Equivalent to 6396 feet
+			case May {condition month == MAY value 49.426} ! Equivalent to 6409.1 feet
+			case Otherwise{condition always value S_FRDYC(-1)
+	}
+}
+define S_FRDYClevel5 {case Oct   {condition month == OCT value 43.068} ! Equivalent to 6396 feet, boards out flashboard spillway Oct-Apr 15 per DSOD.
+			case Nov {condition month == NOV value 43.068} ! Equivalent to 6396 feet
+			case Dec {condition month == DEC value 43.068} ! Equivalent to 6396 feet
+			case Jan {condition month == JAN value 43.068} ! Equivalent to 6396 feet
+			case Feb {condition month == FEB value 43.068} ! Equivalent to 6396 feet
+			case Mar {condition month == MAR value 43.068} ! Equivalent to 6396 feet
+			case Apr {condition month == APR value 43.068} ! Equivalent to 6396 feet
+			case otherwise {condition always value 49.426}}  ! Equivalent to 6405.1 ft, normal-maximum WSE
+define S_FRDYClevel3 {value min(S_FRDYClevel5, FRDYCDLevel3Set)} 
+define S_FRDYClevel3_dv{alias S_FRDYClevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+	/*case Oct {condition month == OCT value 16.995} ! Equivalent to 6350.8 feet
+			case Nov {condition month == NOV value 15.785} ! Equivalent to 6348.2 feet
+			case Dec {condition month == DEC value 10.862} ! Equivalent to 6336.5 feet
+			case Jan {condition month == JAN value 15.986} ! Equivalent to 6348.6 feet
+			case Feb {condition month == FEB value 21.522} ! Equivalent to 6360 feet
+			case Mar {condition month == MAR value 26.912} ! Equivalent to 6370 feet
+			case Apr {condition month == APR value 43.068} ! Equivalent to 6396 feet
+			case May {condition month == MAY value 49.426} ! Equivalent to 6409.1 feet
+			case Jun {condition month == JUN value 45.823} ! Equivalent to 6405.5 feet
+			case Jul {condition month == JUL value 32.751} ! Equivalent to 6400 feet
+			case Aug {condition month == AUG value 22.781} ! Equivalent to 6380 feet
+			case otherwise {condition always value 18.293}}*/ ! Equivalent to 6353.5 feet
+define S_FRDYC_3     {std kind 'STORAGE-ZONE' units 'TAF'} !Rule curve from YB/DS operation model
+define S_FRDYClevel4_l {  
+	case Oct {condition month == OCT value 43.068} ! Equivalent to 6396 feet
+			case Nov {condition month == NOV value 43.068} ! Equivalent to 6396 feet
+			case Dec {condition month == DEC value 32.751} ! Equivalent to 6380 feet
+			case Jan {condition month == JAN value 35.840} ! Equivalent to 6385.3 feet
+			case Feb {condition month == FEB value 39.049} ! Equivalent to 6390 feet
+			case Mar {condition month == MAR value 43.068} ! Equivalent to 6396 feet
+			case Apr {condition month == APR value 43.068} ! Equivalent to 6396 feet
+			case May {condition month == MAY value 49.426} ! Equivalent to 6409.1 feet
+			case Jun {condition month == JUN value 45.823} ! Equivalent to 6405.5 feet
+			case Jul {condition month == JUL value 32.751} ! Equivalent to 6400 feet
+			case Aug {condition month == AUG value 43.068} ! Equivalent to 6396 feet
+			case otherwise {condition always value 43.068}}! Equivalent to 6396 feet
+define S_FRDYClevel4{value max(S_FRDYClevel3,S_FRDYClevel4_l)}
+define S_FRDYC_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FRDYCLevel5_dv{alias S_FRDYClevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_FRDYC_5     {std kind 'STORAGE-ZONE' units 'TAF'}  !  Drum-Spaulding Project FERC Final License Application
+define S_FRDYClevel6 {value 50.300} !  Equivalent to 6406.6 feet, top of dam
+define S_FRDYC_6     {std kind 'STORAGE-ZONE' units 'TAF'} !  Drum-Spaulding Project FERC Final License Application
+define S_FRDYC       {std kind 'STORAGE' units 'TAF'}
+define E_FRDYC       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_FRDYC       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_FRDYC      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+
+define A_FRDYCforward {select area from YubaBear_res_info given storage=1050*S_FRDYC(-1) use linear where res_num=3}
+define A_FRDYCback   {select area from YubaBear_res_info given storage=950*S_FRDYC(-1) use linear where res_num=3}
+define Coefev_FRDYC  {value (A_FRDYCforward - A_FRDYCback)/(100*max(0.01,S_FRDYC(-1)))}
+define RelCap_FRDYC  {select discharge from YubaBear_res_info given storage=1000*S_FRDYC(-1) use linear where res_num=3}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Spaulding, South Fork Yuba River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_SPLDGlevel1 {value 0.000} ! Equivalent to 4775.6 feet, LLO invert elevation
+define S_SPLDG_1     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model inactive pool
+define S_SPLDGlevel2 {value 2.000} ! Historical minimum
+define S_SPLDG_2     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model min pool
+define S_SPLDGlevel3 {value 10.00} ! Typical minimum
+define S_SPLDG_3     {std kind 'STORAGE-ZONE' units 'TAF'} ! 
+define S_SPLDGlevel4 {  
+			case Oct {condition month == OCT value 32.892} ! Equivalent to 4940 feet
+			case Nov {condition month == NOV value 26.332} ! Equivalent to 4925 feet
+			case Dec {condition month == DEC value 23.514} ! Equivalent to 4918 feet
+			case Jan {condition month == JAN value 21.217} ! Equivalent to 4912 feet
+!			case Feb {condition month == FEB value 18.666} ! Equivalent to 4905 feet
+!			case Mar {condition month == MAR value 24.303} ! Equivalent to 4920 feet
+!			case Apr {condition month == APR value 48.086} ! Equivalent to 4970 feet
+			case Feb {condition month == FEB value SPLDGLevel4Storage} ! From PGEPowerOps.wresl
+			case Mar {condition month == MAR value SPLDGLevel4Storage} ! From PGEPowerOps.wresl
+			case Apr {condition month == APR value SPLDGLevel4Storage} ! From PGEPowerOps.wresl
+			case May {condition month == MAY value 75.912} ! Equivalent to 5014.6 feet
+			case Jun {condition month == JUN value 74.823} ! Equivalent to 5013 feet
+			case Jul {condition month == JUL value 60.559} ! Equivalent to 4991.21 feet
+			case Aug {condition month == AUG value 50.561} ! Equivalent to 4974.57 feet
+			case otherwise {condition always value 45.897}}! Equivalent to 4966 feet
+define S_SPLDGlevel4dv {alias S_SPLDGlevel4 kind 'Storage-level' units 'TAF'}
+define S_SPLDG_4     {std kind 'STORAGE-ZONE' units 'TAF'} ! YB/DS Operations Model rule curve
+define S_SPLDGlevel5 {
+			case Oct {condition month == OCT value 75.912} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+			case Nov {condition month == NOV value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case Dec {condition month == DEC value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case Jan {condition month == JAN value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case Feb {condition month == FEB value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case Mar {condition month == MAR value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case Apr {condition month == APR value 62.690} ! Equivalent to 4994.6 feet, spillway crest, gates open
+			case May {condition month == MAY value 75.912} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+			case Jun {condition month == JUN value 75.912} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+			case Jul {condition month == JUL value 75.912} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+			case Aug {condition month == AUG value 75.912} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+			case otherwise {condition always value 75.912}} ! Equivalent to 5014.6 feet, normal-maximum water surface elevation
+define S_SPLDGLevel5_dv{alias S_SPLDGlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SPLDG_5     {std kind 'STORAGE-ZONE' units 'TAF'} ! Drum-Spaulding Project FERC Final License Application
+define S_SPLDGlevel6 {value 76.937} ! Equivalent to 5016.1 feet, top of dam
+define S_SPLDG_6     {std kind 'STORAGE-ZONE' units 'TAF'} ! Drum-Spaulding Project FERC Final License Application
+define S_SPLDG       {std kind 'STORAGE' units 'TAF'}
+define E_SPLDG       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SPLDG       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SPLDG      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SPLDGlast   {select area from YubaBear_res_info given storage=1000*S_SPLDG(-1) use linear where res_num=4}
+define A_SPLDGforward {select area from YubaBear_res_info given storage=1050*S_SPLDG(-1) use linear where res_num=4}
+define A_SPLDGback   {select area from YubaBear_res_info given storage=950*S_SPLDG(-1) use linear where res_num=4}
+define Coefev_SPLDG  {value (A_SPLDGforward - A_SPLDGback)/(100*max(0.01,S_SPLDG(-1)))}
+define RelCap_SPLDG  {select discharge from YubaBear_res_info given storage=1000*S_SPLDG(-1) use linear where res_num=4}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Scotts Flat Reservoir, Deer Creek      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_SCOTFlevel1 {value 5.00} ! Nevada ID Raw Water Master Plan, dead pool
+define S_SCOTF_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SCOTFlevel2 {value 14.520} ! Oct-1966 storage
+define S_SCOTF_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SCOTFlevel3 {value 14.520} ! Oct-1966 storage
+define S_SCOTF_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+
+! Define level 4 using average monthly historical storagege for the 15-year period 1995-2009
+! Using the 1996-2015 average results in too low carryover storage beacuse of the drought years
+define S_SCOTFlevel4 {  case Oct {condition month == OCT value 30.703}
+			case Nov {condition month == NOV value S_SCOTFlevel2}!31.862} 
+			case Dec {condition month == DEC value S_SCOTFlevel2}!36.210} 
+			case Jan {condition month == JAN value S_SCOTFlevel2}!41.464} 
+			case Feb {condition month == FEB value 44.617} 
+			case Mar {condition month == MAR value 47.758} 
+			case Apr {condition month == APR value 47.994} 
+			case May {condition month == MAY value 47.278} 
+			case Jun {condition month == JUN value 45.198} 
+			case Jul {condition month == JUL value 41.152} 
+			case Aug {condition month == AUG value 36.411} 
+			case otherwise {condition always value 32.341}}
+define S_SCOTF_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SCOTFlevel5 {value 48.547} ! Equivalent to 3074.8 feet. Nevada ID Raw Water Master Plan.
+define S_SCOTF_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SCOTFlevel6 {value 49.000} ! Equivalent to 3085 feet, dam crest elevation. CDEC dam info.
+define S_SCOTF_6     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SCOTF       {std kind 'STORAGE' units 'TAF'}
+define E_SCOTF       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SCOTF       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SCOTF      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SCOTFlast   {select area from YubaBear_res_info given storage=1000*S_SCOTF(-1) use linear where res_num=5}
+define A_SCOTFforward {select area from YubaBear_res_info given storage=1050*S_SCOTF(-1) use linear where res_num=5}
+define A_SCOTFback   {select area from YubaBear_res_info given storage=950*S_SCOTF(-1) use linear where res_num=5}
+define Coefev_SCOTF  {value (A_SCOTFforward - A_SCOTFback)/(100*max(0.01,S_SCOTF(-1)))}
+define RelCap_SCOTF  {select discharge from YubaBear_res_info given storage=1000*S_SCOTF(-1) use linear where res_num=5}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Minor Reservoirs in Texas, Lake, Fall, and Rucker Creeks !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_LCBRF_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LCBRF_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LCBRF_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LCBRFlevel1 {value 3.201}	!Dead storage, from YB/DS Operations Model
+define S_LCBRFlevel2 {  case Oct {condition month == OCT value 4.697} !Average monthly simulated storage 1975-2008, FERC relicensing
+			case Nov {condition month == NOV value 3.201} 
+			case Dec {condition month == DEC value 7.689} 
+			case Jan {condition month == JAN value 7.689} 
+			case Feb {condition month == FEB value 7.689} 
+			case Mar {condition month == MAR value 7.689} 
+			case Apr {condition month == APR value 7.689} 
+			case May {condition month == MAY value 7.689} 
+			case Jun {condition month == JUN value 7.689} 
+			case Jul {condition month == JUL value 7.689} 
+			case Aug {condition month == AUG value 7.689} 
+			case otherwise {condition always value 6.193}}
+define S_LCBRFlevel3 {value 7.689}
+define S_LCBRF       {std kind 'STORAGE' units 'TAF'}
+!define E_LCBRF       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+!define A_LCBRF       {std kind 'SURFACE-AREA' units 'ACRES'}
+!define ER_LCBRF      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+!define A_LCBRFlast   {select area from YubaBear_res_info given storage=1000*S_LCBRF(-1) use linear where res_num=}
+!define A_LCBRFforward {select area from YubaBear_res_info given storage=1050*S_LCBRF(-1) use linear where res_num=}
+!define A_LCBRFback   {select area from YubaBear_res_info given storage=950*S_LCBRF(-1) use linear where res_num=}
+!define Coefev_LCBRF  {value (A_LCBRFforward - A_LCBRFback)/(100*max(0.01,S_LCBRF(-1)))}
+!define RelCap_LCBRF  {select discharge from YubaBear_res_info given storage=1000*S_LCBRF(-1) use linear where res_num=}
+
+

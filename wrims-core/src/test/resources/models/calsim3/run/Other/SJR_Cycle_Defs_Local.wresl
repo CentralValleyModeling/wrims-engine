@@ -1,0 +1,173 @@
+! SJW_SystemDefsLocal.wresl
+!
+! This file contains definitions and constraints for use in the initial cycles of the 
+! model when the Sac Basin is not dynamically simulated.  Banks operations are limited
+! to satisfying only losses in the California aqueduct above the joint use branch.
+! Jones is constrained only by capacity - options for introducing estimates of operational
+! limits can be investigated later.  
+
+
+
+define S_TRNTY {std kind 'STORAGE' units 'TAF'}
+define S_TRNTYlevel4 {select target from res_level where res_num=1,level=4,month=month}
+define S_SHSTA {std kind 'STORAGE' units 'TAF'}
+define S_SHSTA4 {std kind 'STORAGE' units 'TAF'}
+define S_OROVL {std kind 'STORAGE' units 'TAF'}
+define S_OROVLlevel5 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSM {std kind 'STORAGE' units 'TAF'}
+define S_FOLSMLevel5 {timeseries kind 'storage-level' units 'taf'}
+
+define D_CAA238_CVPCV {std kind 'FLOW-DELIVERY' units 'CFS'} !CVP CROSS VALLEY CANAL/ AG DIV
+define D_CAA239_CVPRF {std kind 'FLOW-DELIVERY' units 'CFS'} !CVP CROSS VALLEY/ REFUGE DIV
+define D_CAA239_CVPRF_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA239_CVPRF_PRF    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA239_CVPRF     { D_CAA239_CVPRF = D_CAA239_CVPRF_PRJ }
+goal totalD_CAA239_CVPRF_prj { D_CAA239_CVPRF_prj = D_CAA239_CVPRF_PRF }
+
+! fix or limit variables to allow the SOD system to function for CVP deliveries
+! in San Joaquin / Westside cycles. Allow Jones and Banks to pump up to capacity, 
+goal flexJones      {C_DMC000 < 4600.}
+!@zrc changed sign (+) to (-1) for all CAALOS
+goal limitBanks {C_CAA003 < 10300.}
+! set Banks and SWP operations to function only for losses until the full system cycles.
+! Commented out because it is limiting Banks exports even in wettest years, NOsorio 11/2023
+/*goal limitBanks     {C_CAA003 =  -D_CAA005_CAALOS  !"<" was "=" todo dbo 8.4.15 !2017-07-31 (JAS): Changed this back to "=." Need to test.
+                               - D_CAA006_CAALOS  
+                               - D_CAA009_CAALOS  
+                               - D_CAA012_CAALOS  
+                               - D_CAA024_CAALOS  
+                               - D_CAA046_CAALOS  
+                               - D_CAA051_CAALOS  
+                               - D_CAA066_CAALOS  
+                               - D_CAA067_CAALOS  
+                               - D_CAA069_CAALOS_SWP  
+                               - D_CAA071_CAALOS_SWP  
+                               - D_CAA087_CAALOS_SWP  
+                               - D_CAA095_CAALOS_SWP  
+                               - D_CAA109_CAALOS_SWP  
+                               - D_CAA143_CAALOS_SWP  
+                               - D_CAA155_CAALOS_SWP  
+                               - D_CAA156_CAALOS_SWP  
+                               - D_CAA165_CAALOS_SWP  
+                               - D_CAA172_CAALOS_SWP
+                               + DG_71_PU1       !dbo8.4.15todo added dg terms for infeasibility !2017-07-31 (JAS): Leave in for now. Need to resolve.
+                               + DG_71_PU2}      !dbo8.4.15todo added dg terms for infeasibility !2017-07-31 (JAS): Leave in for now. Need to resolve.
+*/                               
+
+!====
+! CCWD flows
+!====
+!goal initD_RSL004_CCC004 {D_RSL004_CCC004 < 350.0 } !D408_RS = D_RSL004_CCC004 < D408_RS_max=350.0
+!goal initC_RSL001B       {C_RSL001B < 0.089*(C_CAA003  + C_DMC000 + D_RSL004_CCC004 + D_OMR021_ORP000  + DND_OMR) } !+ D_VCT002_ORP000
+!goal initC_RSL001B { C_RSL001B = (coefb+1) * (C_CAA003  + C_DMC00 + D_RSL004_CCC004 + D_OMR021_ORP000 + D_VCT002_ORP000 + netDICU_SOD)  } ! Indian Slough component of OMR flow equation 0.06 <coefb+1 <0.089  -0.94 <coefb <-0.911
+!goal initD_OMR021_orp000 {D_OMR021_orp000 < 250.0 } !D408_OR_max = 250.0
+!goal initD_ISF001_OMR024 {D_ISF001_OMR024 < 350.0+250.0+0.0 } !D408_max=D408_RS_max+D408_OR_max+D408_VC_max = 350+250+0
+!goal initC_ISF001_OMR027 {lhs C_ISF001_OMR027 rhs 0.0} ! lhs<rhs penalty 999999 lhs>rhs penalty 999999 }
+define I422 {timeseries kind 'FLOW-INFLOW' units 'TAF' convert 'CFS'} !LOS VAQUEROS INFLOW
+!goal set_C_LOSVQ            {C_LOSVQ   < min(5., I422)}
+ 
+goal zeroIntRev     {D_CAA009_DMC007 = 0.}  ! reverse intertie
+!goal zero50_PA2     {D_CAA002_50_PA2 = 0.}  ! zero delta depletion at Clifton Court Forebay
+!Byron-Bethany ID; Depletion and Accretion of BBID is from DCD model   
+!Diversion to BBID from Clifton Court Forebay, D_CAA002_50_PA2 is set to meet DD_50_PA2
+goal setD_CAA002_50_PA2  {lhs D_CAA002_50_PA2 rhs DD_50_PA2} ! lhs<rhs penalty 999999 } !goal setD_CAA002_50_PA2  {D_CAA002_50_PA2 = DD_50_PA2} 
+!goal setR_50_PA2_OMR027 {R_50_PA2_OMR027 = DA_50_PA2}  !Drainage flow from BBID
+
+goal zeroSBA        {D_CAA005_SBA000 = 0.}  ! zero diversion to SBA
+goal zeroBlwJUB     {C_CAA172 = D_CAA239_CVPRF}         ! zero delivery to southern CA
+goal nullSLUIS_SWP  {D_CAA069_SLUIS_S = 0.} ! no diversions to SWP San Luis
+goal nullSLUIS_SWPout {C_SLUIS_SWP = 0.}    ! no releases from SWP San Luis
+
+
+! Placeholder logic until rule curve logic is engaged in full system cycles
+define S_SLUIS_CVPlevel3 {value 972.}  
+goal S_SLUIS_CVPZone3 {S_SLUIS_CVP_3 < max(0.0,S_SLUIS_CVPlevel3 - S_SLUIS_CVPlevel2)} 
+goal S_SLUIS_CVPZone4 {S_SLUIS_CVP_4 < S_SLUIS_CVPlevel4 - S_SLUIS_CVPlevel3}          
+goal S_SLUIS_CVPZone5 {S_SLUIS_CVP_5 < S_SLUIS_CVPlevel5 - S_SLUIS_CVPlevel4}          
+
+
+!**********************************************************************************
+! construct a water balance for the SJR between Mendota Pool and Sack Dam, and use 
+! this information to impose limits on flows into Mendota Pool from the DMC.  
+! We don't want DMC water going down the San Joaquin River past Sack Dam.
+
+define mp_deliveries {alias D_MDOTA_64_XA 
+                          + D_MDOTA_73_XA 
+                          + D_MDOTA_90_PA1 
+                          + D_MDOTA_91_PA 
+                          + D_MDOTA_91_PR 
+                          + D_MDOTA_XCC010 kind 'water-balance' units 'cfs'}
+
+define mp_inflow {alias C_FSL005 + C_SJR205 kind 'water-balance' units 'cfs'}
+
+define mp_to_sack_accr {alias r_64_xa_sjr185 
+                            + sr_64_sjr180 + TD_SJR180_067
+                            + SG64_SJR198_8 
+                            + SG65_SJR192_8 
+                            + SG66_SJR185_8 
+                            + SG67_SJR180_8 kind 'water-balance' units 'cfs'}
+
+! If accretions between mdota and sjr180 are sufficient to meet the delivery at Sack Dam,
+! INT_SackAccr_abv = 1, Sack_Above > 0, and Sack_below = 0
+! If accretions are not enough to meet the delivery, 
+! INT_SackAccr_blw = 1, Sack_Above = 0, and Sack_below > 0
+! The variable we want out of this is Sack_below, which is how much water it needs from the DMC
+define INT_SackAccr_abv  {INTEGER std kind 'INTEGER' units 'NONE'}
+define INT_SackAccr_blw  {alias 1. - INT_SackAccr_abv kind 'INTEGER' units 'NONE'}
+define Sack_above    {std kind 'water-balance' units 'cfs'}
+define Sack_below    {std kind 'water-balance' units 'cfs'}
+define Sack_max      {value 1500} !zrc@ Sac_blow < 808
+
+
+goal SackDamBalance  {Sack_above - Sack_below = mp_to_sack_accr - d_sjr180_ary010}
+goal Accr_abv_force  {Sack_above < INT_SackAccr_abv * Sack_max}
+goal Accr_blw_force  {Sack_below < Sack_max - INT_SackAccr_abv * Sack_max}
+
+define Sack_short {std kind 'water-balance' units 'cfs'}
+goal setSack_short1 {Sack_short < Sack_below}
+
+define Sack_demand {value CLM_72_PR3*taf_cfs*perdel_cvprf_s
+                        + CLM_72_PR4*taf_cfs*perdel_cvprf_s
+                        + CLM_72_PR6*taf_cfs*perdel_cvprf_s
+                        + CLM_72_XA1 * taf_cfs * perdel_cvpex_s}
+
+goal setSack_short {
+    lhs sack_short
+    case zero_demand {
+        condition Sack_demand <.01
+        rhs 0.
+        lhs < rhs penalty 0}
+}
+
+
+! Now carry any need for DMC water up river to mendota pool.
+! If inflows to mendota pool are sufficient to meet the deficiency at Sack Dam and deliveries at Mendota
+! INT_MPInflow_abv = 1, mdota_above > 0, and mdota_below = 0
+! If inflows to mendota pool are not enough to meet the deficiency at Sack Dam and deliveries at Mendota
+! INT_MPInflow_blw = 1, mdota_above = 0, and mdota_below > 0
+! The variable we want out of this is mdota_below, which will be the total need for water from the DMC
+define mdota_max {value 10000.0} !zrc@
+define INT_MPInflow_abv  {INTEGER std kind 'INTEGER' units 'NONE'}
+define INT_MPInflow_blw  {alias 1. - INT_MPInflow_abv kind 'INTEGER' units 'NONE'}
+define mdota_above    {std kind 'water-balance' units 'cfs'}
+define mdota_below    {std kind 'water-balance' units 'cfs'}
+
+goal MendotaBalance   {mdota_above - mdota_below = mp_inflow - mp_deliveries - Sack_short}
+goal MPInf_abv_force  {mdota_above < INT_MPInflow_abv * mdota_max}
+goal MPInf_blw_force  {mdota_below < mdota_max - INT_MPInflow_abv * mdota_max}
+
+goal limitDMC116 {C_DMC116 < mdota_below}
+
+!The constraint below is designed to prevent delivery shortages due to seepage terms below Sack Dam pulling water away from deliveries
+!This calculates the maximum value of Sack Dam releases, which is SJRR flows + other MP inflows + accretions between MP and Sack Dam -
+!(MP and Sack Dam deliveries + shortages - DMC inflows). Including the shortage calculation forces the model to make the proper deliveries
+!without shortages -TF 091120
+!goal constrainC_SJR180 {C_SJR180 < D_SJR205_SJR201 + mp_inflow + mp_to_sack_accr - (mp_deliveries + D_SJR180_ARY010 + short_cvp_tot_mpsd - C_DMC116)}
+
+
+
+
+
+
+
+

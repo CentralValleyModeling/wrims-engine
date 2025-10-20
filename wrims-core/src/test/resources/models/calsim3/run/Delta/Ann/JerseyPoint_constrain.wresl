@@ -1,0 +1,26 @@
+! R.Wilbur & S. Wu 5/10/05
+
+goal meetJP {
+  lhs EXP_TD + D408_P
+  case NoSalinityControlPossible{
+    condition abs(JP_m_sv) <= 0.001 .and. int(JP_b_sv) == 0
+    rhs ExportCap
+    lhs<rhs penalty 0}
+  case NegSlope{
+    condition JP_m_sv <= 0.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case HighCost{
+    condition JP_Sac_ZeroExp_sv2 >= ANNcap
+    rhs ExportCap
+    lhs<rhs penalty 0}*/
+  case NegCarriage{
+    condition JP_m_sv >= 1.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  case Normal {
+    condition always
+    rhs JP_m_sv*C_SACtot_ANN + JP_b_sv
+    lhs<rhs penalty 0}
+}
+

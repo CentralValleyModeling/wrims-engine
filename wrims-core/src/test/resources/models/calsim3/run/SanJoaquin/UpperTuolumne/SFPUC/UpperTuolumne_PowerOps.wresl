@@ -1,0 +1,30 @@
+
+/*
+File Name: UpperTuolumne_PowerOps.wresl
+
+Purpose:
+Define minimum release to Holm & Canyon Powerhouse
+
+*/
+
+
+! Holm target release (minimum Holm requirement=minHolm) is 158.3 cfs from May (Memorial day) to August (Labor day)
+! which is equal to 4 hours of full power generation per day during this period (Holm capacity is 950 cfs). 
+! Reference: Tuolumne Daily Model
+! Similar TDM, this minimum requirement is considered for entire May through end of Agust. 
+
+define minHolmrel {
+    case MaythruAugust {
+	 condition month >= may .and. month <= aug
+	 value 158.3 }
+    case otherwise {
+	  condition always
+	  value     0. }}
+
+goal setD_CHRRY_CHY000_MIN {D_CHRRY_CHY000_MIN < minHolmrel}
+
+
+
+! Canyon Powerhouse minimum release 
+
+goal SetCanyonPowerhouseMF {D_HTCHY_CPT012_MIN = 0.} !placeholder for minimum power generation for Canyon Powerhouse 

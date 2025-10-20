@@ -1,0 +1,59 @@
+! bounds_cycle4.wresl
+! Edward Chang
+! 5/1/2000
+! Joint Model
+! This file bounds decision variables within the San Joaquin basin for cycle 4 only
+! Revised by C. Hsu, 3/5/03, USBR, for review and documentation project
+!####################################################################################
+/*
+This code bounds decision variables for cycle 4
+*/
+
+! The only increase to Vernalis should be from the release for WQ
+goal VernalisIncrease { C_SJR070 < C_SJR070[SJR_PULSE] + C_MELONWQ +
+(D_SJR096_SJRRrecap[SJR_PULSE] + D_SJR082_SJRRrecap[SJR_PULSE] + D_SJR070_SJRRrecap[SJR_PULSE]  + D_SJR070_SJRRremove[SJR_PULSE]
+- D_SJR096_SJRRrecap - D_SJR082_SJRRrecap - D_SJR070_SJRRrecap - D_SJR070_SJRRremove) 	!since recapture can go down between SJRBASE_GW4 and SJR_WQ1 due to a better estimate of SJRR flows reaching the Merced, need to allow Vernalis flows to adjust
++ (D_MLRTN_MDC_215 + D_MLRTN_MDC_F + D_MLRTN_MDC_16B - D_MLRTN_MDC_215[SJR_PULSE] - D_MLRTN_MDC_F[SJR_PULSE] - D_MLRTN_MDC_16B[SJR_PULSE])
+}
+! New Melones DO release
+goal setC_MELONdocycle4 { C_MELONdo = 0. }      
+! February Thru June 1995 WQCP Vernalis Minflow release
+goal setC_MELONmincycle4 { C_MELONmin = 0. }         
+! October Merced Releases
+goal setC_MCLREMINcycle4 { C_MCLREMIN = 0. }         
+! payback of VAMP debt - should always be zero
+goal setD_OAK020_61_NA2 {D_OAK020_61_NA2 = 0.}          
+
+!Tuolumne River FERC minimum flows
+goal boundC_TUO054cycle4 { 
+    lhs C_TUO054_mif 
+    case AprMay {
+        condition   month >= apr .and. month <= may
+        rhs         C_TUO054_mif[SJR_PULSE]
+        lhs<rhs     penalty 0 }
+    case otherwise {
+        condition   always
+        rhs         C_TUO054_mif[SJR_WQ1]
+        lhs<rhs     penalty 0 }
+        }
+
+! Stanislaus River below Goodwin (Reach C520) F & W minimum flows 
+goal boundC_STS059cycle4 { 
+    lhs C_STS059_mif 
+    case AprMay {
+        condition   month >= apr .and. month <= may
+        rhs         C_STS059_mif[SJR_PULSE]
+        lhs<rhs     penalty 0 }
+    case otherwise {
+        condition   always
+        rhs         C_STS059_mif[SJR_WQ1]
+        lhs<rhs     penalty 0 }
+        }
+
+! Stanislaus River below Goodwin excess flows 
+goal bound1C_STS059_exc_acycle4 { 
+    lhs       C_STS059_exc_a
+    case AprMay {
+        condition   month >= apr .and. month <= may
+        rhs       C_STS059_exc_a[SJR_PULSE] }
+}

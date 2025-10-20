@@ -1,0 +1,125 @@
+!MFP Water Rights
+!A. Draper 08/2019
+
+/*
+PCWA’s surface water supplies consist of water from the North Fork American River and its
+tributaries (including water stored in its Middle Fork Project (MFP)) under water right
+Permits 13856 and 13858, Central Valley Project water under Interim CVP Contract 14-06-
+200-5082A-IR3 from the American River, and water purchased from Pacific Gas & Electric
+Company (PG&E) from the Yuba and Bear Rivers under the 1982 Zone 3 Contract Purchase
+Agreement and the February 27, 2015 Water Supply Agreement.
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Period of Direct Diversion !!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+PCWA period of diversion to storage is Nov 1-Jul 1 (for modeling purposes Jun 30)
+PCWA period of direct diversion is Nov 1-Jul 1 (for modeling purposes Jun 30)
+
+
+
+Direct diversion of water under permits 13856, 13858 from a point of diversion at Folsom Dam shall
+be limited to the supply available to the permittee at point of diversion #7, Auburn.
+*/
+
+!November 1 to July 1
+define PCWA_DD_Flag {
+	Case NovJuly {condition month>=NOV .and. month <= JUN value 1}
+	Case Otherwise {condition always value 0.}}
+
+goal WR_PCWA_DD1 {D_NFA016_ABT002 + D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFP < C_NFA019 + I_NFA016}
+goal WR_PCWA_DD2 {D_NFA016_ABT002 + D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFP < S_FRMDW(-1)*taf_cfs + S_HHOLE(-1)*taf_cfs - S_FRMDW*taf_cfs - S_HHOLE*taf_cfs + PCWA_DD_Flag*9999}
+
+define WSFlowConstraint  {std kind 'FLOW' units 'CFS'}
+goal setWSFlowConstraint {WSFlowConstraint = C_NFA019 + I_NFA016}
+
+define WSReleaseConstraint  {std kind 'FLOW' units 'CFS'}
+goal setWSReleaseConstraint {WSReleaseConstraint = S_FRMDW(-1)*taf_cfs + S_HHOLE(-1)*taf_cfs - S_FRMDW*taf_cfs - S_HHOLE*taf_cfs + PCWA_DD_Flag*9999}
+
+define MFPDelivery  {std kind 'FLOW' units 'CFS'}
+goal setMFPDElivery {MFPDelivery = D_NFA016_ABT002 + D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFP}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Outside Period of Diversion to Storage!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setMFPStorageConstraint {S_FRMDW + S_HHOLE < S_FRMDW(-1) + S_HHOLE(-1) + PCWA_DD_Flag*9999} ! To simlify, ignore evaporative losses
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Reclamation Agreement !!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+PCWA has entered into an agreement with Reclamation regarding storage and release of American River
+water by the Middle Fork Project (Reclamation, 1963). The agreement states that the end-of-September
+total Middle Fork Project storage cannot exceed the previous year’s storage if the April 1 through
+September 30 estimated unimpaired inflow to Folsom Reservoir is less than 600,000 acre-feet. In addition,
+Reclamation may require storage at the end of July, August, September, October, November, and December
+to be no greater than the storage at the beginning of the month if the unimpaired flow to Folsom reservoir
+is less than 600,000 acre-feet, with the following exception:
+
+If the total inflow to French Meadows Reservoir, including Duncan Creek diversions, exceeds 19,000 acre-feet
+in November or December, and the inflow to Hell Hole Reservoir exceeds 45,000 acre-feet in November or December,
+then the storage may be increased during each month this occurs.
+*/
+
+define DryYearFlag {case Dry   {condition amer_apr_sept < 600. value 1.}
+                    case other {condition always value 0.}}
+                    
+
+!Limitation on end-of September storage in dry years
+goal LimitMFPSepStorage {
+       lhs S_FRMDW + S_HHOLE
+       case Sep {
+           condition month==SEP
+           rhs S_FRMDW(prevSep) + S_HHOLE(prevSep) + 9999-DryYearFlag*9999
+           lhs<rhs penalty 0}}
+
+!Limitation on end-of-November and December storage
+
+!define inflow to French Meadows and Hell Hole
+define FRMDWNovDecInflowEst {
+	case NovDec {
+		condition range(month,NOV,DEC)
+		value I_FRMDW + min(400.,max(0,I_DCC010-MIF_MFP_DCC008-MIF_MFP_buffer))}
+	case Otherwise {
+		condition always
+		value 0.}}
+		
+define HHOLENovDecInflowEst {
+	case NovDec {
+		condition range(month,NOV,DEC)
+		value I_HHOLE + min(I_RUB047+I_LRB004,max(Rubicon_min_flow+LittleRubicon_min_flow,I_RUB047+I_LRB004-1160.))}
+	case Otherwise {
+		condition always
+		value 0.}}		
+ 
+define DryNovDecFlag {
+	case NovDec {
+		condition range(month,NOV,DEC) .AND. FRMDWNovDecInflowEst < 19.*taf_cfs .AND. HHOLENovDecInflowEst < 45.*taf_cfs .AND. DryYearFlag == 1
+		value 1.}
+	case Otherwise {
+		condition always
+		value 0.}}
+
+goal LimitMFPNovDecStorage {
+                LHS S_FRMDW + S_HHOLE
+	        case NovDec {
+	            condition range(month,NOV,DEC)
+	            RHS S_FRMDW(prevSep) + S_HHOLE(prevSep) + 9999-DryNovDecFlag*9999
+                    LHS<RHS penalty 0.}}
+
+!Limitation on end-ofJulytoDecember storage
+
+goal LimitMFPJultoDecStorage {
+                LHS S_FRMDW + S_HHOLE
+	        case JulAugOct {
+	            condition range(month,JUL,DEC)
+	            RHS S_FRMDW(-1) + S_HHOLE(-1) + 9999-DryYearFlag*9999
+                    LHS<RHS penalty 0.}}
+
+
+

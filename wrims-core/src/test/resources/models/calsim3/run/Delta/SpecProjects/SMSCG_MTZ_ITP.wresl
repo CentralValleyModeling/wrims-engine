@@ -1,0 +1,74 @@
+!SMSCG_Operation_ITP.wresl
+
+!*************************************************************************************************************
+! calculate last 7-day average MTZ EC from previous month
+define MTZ_EC_7day {std kind 'SALINITY' units 'UMHOS/CM'}
+define MTZ_EC_7day_sv {value MTZ_EC_7day[DELTA]}
+goal setMTZ_EC_7day {MTZ_EC_7day = MTZ_EC_7day_sv}
+
+define BD_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define BD_EC_Month_sv {value BD_EC_Month[DELTA]}
+goal setBD_EC_MON {BD_EC_Month = BD_EC_Month_sv}
+
+define SMSCG_EC_Trigger1 {value SMSCG_EC_Trigger1_dv[DELTA]}    
+define SMSCG_EC_Trigger1_dv {alias SMSCG_EC_Trigger1 kind 'Trigger' units 'UMHOS/CM'}
+
+define SMSCG_OP1SV {value SMSCG_OP1[DELTA]}
+define SMSCG_OP1 {alias SMSCG_OP1SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_EC_Trigger2 {value SMSCG_EC_Trigger2_dv[DELTA]}    
+define SMSCG_EC_Trigger2_dv {alias SMSCG_EC_Trigger2 kind 'Trigger' units 'UMHOS/CM'}
+
+define SMSCG_wytflag2{value SMSCG_wytflag2_dv[DELTA]}
+define SMSCG_wytflag2_dv {alias SMSCG_wytflag2 kind 'flag' units 'NONE'}
+
+define SMSCG_OP2SV {value SMSCG_OP2[DELTA]}
+define SMSCG_OP2 {alias SMSCG_OP2SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op2_Count {value SMSCG_Op2_Count_dv[DELTA]} 
+define SMSCG_Op2_Count_dv {alias SMSCG_Op2_Count kind 'flag' units 'NONE'}
+
+define SMSCG_wytflag3{value SMSCG_wytflag3_dv[DELTA]}
+define SMSCG_wytflag3_dv {alias SMSCG_wytflag3 kind 'flag' units 'NONE'}
+
+define SMSCG_OP3SV {value SMSCG_OP3[DELTA]}
+define SMSCG_OP3 {alias SMSCG_OP3SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op3_Count {value SMSCG_Op3_Count_dv[DELTA]} 
+define SMSCG_Op3_Count_dv {alias SMSCG_Op3_Count kind 'flag' units 'NONE'}
+
+define SMSCG_OPSV {value SMSCG_OP[DELTA]}
+define SMSCG_OP {alias SMSCG_OPSV kind 'GATE-OP-RATIO' units 'NONE'}
+!******************************************************************************
+
+define SMSCG_Oro_Rel_for_DO {
+	case Init {
+		condition	month == oct .and. wateryear == 1922
+		value		0.
+	}
+	case D_Following_WorAN {	
+		condition	 ABS(SMSCG_wytflag3-2) < 0.001 .and. SMSCG_OP3SV < 0.5 
+		value (1-SMSCG_OP3SV)*min(ITP_Carryover_(-1)*taf_cfs,SMSCG_Dyr_watercost[DELTA])
+	}
+
+	case otherwise {	
+		condition	always
+		value 0.
+	}
+	
+}
+define SMSCG_Carryover_Rel {
+	case Following_WorAN {
+		condition	ABS(SMSCG_wytflag3-2) < 0.001 .and. SMSCG_OP3SV < 0.5
+		value		SMSCG_Oro_Rel_for_DO
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+define SMSCG_Oro_Rel_for_DO_ {alias SMSCG_Oro_Rel_for_DO kind 'ITP-Action' units 'cfs'}
+define SMSCG_Carryover_Rel_ {alias SMSCG_Carryover_Rel kind 'ITP-Action' units 'cfs'}
+!******************************************************************************
+
+

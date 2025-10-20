@@ -1,0 +1,1436 @@
+/*
+ File Name: arcs-WUfactors.wresl
+ CalSim 3.0 System File
+ 
+ Purpose:
+ Define water use factors
+
+ NAMING TAKES THE FOLLOWING FORMS:
+ EVF_{Upstream CalSim 3.0 node}_{demand unit} - evaporative conveyance loss
+ DPF_{Upstream CalSim 3.0 node}_{demand unit} - deep percolation conveyance loss
+ LFF_{Upstream CalSim 3.0 node}_{demand unit} - lateral flow conveyance loss (from canal to toe drain)
+ OSF_{Upstream CalSim 3.0 node}_{demand unit} - spill conveyance loss (from canal to drain outfall - not available for reuse)
+ 
+ RUFR_{demand unit} - reuse fraction for irrigated rice
+ RUFO_{demand unit}     - reuse fraction for all other crops
+ RUFW_{demand unit}     - reuse fraction for wetlands
+ RPF_{demand unit}  - riparian and miscellaneous field/on-farm evaporative losses 
+ EV_{demand unit}       - total evaporative loss associated with surface water conveyance 
+ DP_{demand unit}       - total deep percolation loss associated with surface water conveyance  
+ LF_{demand unit}       - total lateral flow loss associated with surface water conveyance  
+ OS_{demand unit}       - total spill associated with surface water conveyance 
+ DL_{demand unit}       - total loss associated with surface water conveyance (evaporation loss+deep percolation+lateral flow+spill) 
+ 
+
+ Edited ADraper, MWH, 08/01/11
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Reuse factor for rice !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define TWAWRatio    {select TWAW from AgReuse where DU=1,month=month} !maximum reuse fraction for irrigated rice - all demand units
+define RUFR1        {select fraction from AgReuse where DU=1,month=month} !maximum reuse fraction for irrigated rice - Joint Board
+define RUFR2        {select fraction from AgReuse where DU=2,month=month} !maximum reuse fraction for irrigated rice - Western canal WD
+define RUFR3        {select fraction from AgReuse where DU=3,month=month} !maximum reuse fraction for irrigated rice - YCWA Service Area
+define RUFR4        {select fraction from AgReuse where DU=4,month=month} !maximum reuse fraction for irrigated rice - GCID
+define RUFR5        {select fraction from AgReuse where DU=5,month=month} !maximum reuse fraction for irrigated rice - Others
+define RUFR6        {select fraction from AgReuse where DU=6,month=month} !maximum reuse fraction for irrigated rice - Others    added 3/24/2016 Idy
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Reuse factor for refuge !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define RUFW1_TS {timeseries kind 'REUSE-FACTOR' units 'NONE' } ! GCID SacNWR 08N_PR1
+
+
+include 'FlowLossFactors.wresl'
+include 'Rpf_RufO_RufW.wresl'
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 1      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Not used
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 2      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 2_NA -
+!=============================================
+define EV_02_NA             {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_02_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_02_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_02_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_02_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 2_SA -
+!=============================================
+
+
+define EV_02_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_02_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_02_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_02_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_02_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 2_PA -
+!=============================================
+define EV_02_PA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_02_PA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_02_PA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_02_PA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_02_PA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 2_PU -
+!=============================================
+
+define DL_WTPCSD_02_PU   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPCSD_02_PU   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPCSD_02_PU   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_02_PU          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 2_SU -
+!=============================================
+
+define DL_WTPFTH_02_SU   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPFTH_02_SU   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPFTH_02_SU   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_02_SU          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 3      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 3_NA -
+!=============================================
+define EV_03_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_03_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_03_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_03_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_03_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_PA -
+!=============================================
+
+define EV_03_PA             {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_03_PA             {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_03_PA             {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_03_PA             {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_03_PA             {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_SA -
+!=============================================
+
+define EV_03_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_03_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_03_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_03_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_03_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_SU -
+!=============================================
+define DL_WTPFTH_03_SU   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPFTH_03_SU   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPFTH_03_SU   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+define DL_WTPBUK_03_SU  {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_WTPBUK_03_SU  {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPBUK_03_SU  {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_03_SU          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_PU1 -
+!=============================================
+
+
+define DL_WTPJMS_03_PU1  {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPJMS_03_PU1  {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPJMS_03_PU1  {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_03_PU1    {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_PU2 -
+!=============================================
+
+
+define DL_WTPBLV_03_PU2     {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPBLV_03_PU2     {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPBLV_03_PU2     {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_03_PU2    {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 3_PU3 -
+!=============================================
+
+
+!define DL_WTPBUK_03_PU3  {std kind 'DELIVERY-LOSS'  units 'CFS'}
+!define EL_WTPBUK_03_PU3  {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+!define SL_WTPBUK_03_PU3  {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+!define DL_03_PU3    {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 4      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 4_NA -
+!=============================================
+
+define EV_04_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_04_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_04_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_04_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_04_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 4_PA1 -
+!=============================================
+
+define EV_04_PA1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_04_PA1    {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_04_PA1    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_04_PA1    {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_04_PA1    {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 4_PA2 -
+!=============================================
+
+define EV_04_PA2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_04_PA2    {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_04_PA2    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_04_PA2    {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_04_PA2    {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!======================================================================================
+! 4_TCCL - Tehama-Colusa Canal loss
+!======================================================================================
+!As loss small attribute all to WBA4. In future refine to include losses for WBA 7N and 7S.
+!Values based on mass balance of T-C Canal
+!define EVF_04_TCCL  {value 0.01} !evaporative loss fraction
+!define DPF_04_TCCL  {value 0.04} !deep percolation loss fraction. 
+
+define EV_04_TCCL   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_04_TCCL   {std kind 'DEEP-PERCOLATION' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 5      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 5_NA -
+!=============================================
+
+define EV_05_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_05_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_05_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_05_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_05_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 6      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 6_PA -
+!=============================================
+
+define EV_06_PA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_06_PA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_06_PA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_06_PA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_06_PA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 06_NA -
+!=============================================
+
+!==================================================================================
+! 6_STNL - Stony Creek to Tehama-Colusa Canal diversion loss
+!==================================================================================
+
+define EV_06_STNL   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_06_STNL   {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define SG_TCC031    {std kind 'STREAM-GAIN' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7 North          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 7N_PA -
+!=============================================
+
+define EV_07N_PA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_07N_PA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_07N_PA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_07N_PA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_07N_PA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 07N_NA -
+!=============================================
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7 South          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 7S_PA -
+!=============================================
+
+define EV_07S_PA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_07S_PA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_07S_PA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_07S_PA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_07S_PA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 07S_NA -
+!=============================================
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8 North          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 8N_PA -
+!=============================================
+
+define EV_08N_PA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_PA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_PA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_PA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_PA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8N_PR1 -
+!=============================================
+
+define EV_08N_PR1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_PR1        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_PR1        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_PR1        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_PR1        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8N_PR2 -
+!=============================================
+
+define EV_08N_PR2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_PR2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_PR2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_PR2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_PR2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8N_SA1 -
+!=============================================
+
+define EV_08N_SA1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_SA1        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_SA1        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_SA1        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_SA1        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8N_SA2 - 
+!=============================================
+
+define EV_08N_SA2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_SA2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_SA2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_SA2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_SA2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 08N_NA -
+!=============================================
+
+define EV_08N_NA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08N_NA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08N_NA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08N_NA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08N_NA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8 South          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 8S_SA1 -
+!=============================================
+
+define EV_08S_SA1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_SA1        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_SA1        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_SA1        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_SA1        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8S_SA2 -
+!=============================================
+
+define EV_08S_SA2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_SA2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_SA2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_SA2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_SA2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8S_SA3 -
+!=============================================
+
+define EV_08S_SA3        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_SA3        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_SA3        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_SA3        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_SA3        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8S_PR -
+!=============================================
+
+define EV_08S_PR         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_PR         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_PR         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_PR         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_PR         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 8S_PA -
+!=============================================
+
+define EV_08S_PA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_PA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_PA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_PA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_PA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 08S_NA1 -
+!=============================================
+
+define EV_08S_NA1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_NA1        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_NA1        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_NA1        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_NA1        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 08S_NA2 -
+!=============================================
+
+define EV_08S_NA2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_08S_NA2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_08S_NA2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_08S_NA2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_08S_NA2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 9      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 9_NA
+!=============================================
+
+define EV_09_NA               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_09_NA               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_09_NA               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_09_NA               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_09_NA               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 9_SA1
+!=============================================
+
+define EV_09_SA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_09_SA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_09_SA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_09_SA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_09_SA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 9_SA2
+!=============================================
+
+define EV_09_SA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_09_SA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_09_SA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_09_SA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_09_SA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 9_PR 
+!=============================================
+
+define EV_09_PR               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_09_PR               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_09_PR               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_09_PR               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_09_PR               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 10_NA -
+!=============================================
+
+define EV_10_NA               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_10_NA               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_10_NA               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_10_NA               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_10_NA               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 11          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 11_NU2
+!=============================================
+/*define EF_SNK_11_NU2   {value 0.05001} !non recoverable loss fraction
+define SF_SNK_11_NU2     {value 0.04999} !non recoverable loss fraction
+
+define DL_SNK_11_NU2     {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_SNK_11_NU2     {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_SNK_11_NU2     {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_11_NU2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+*/
+!=============================================
+! 11_NA
+!=============================================
+
+define EV_11_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_SA1
+!=============================================
+
+define EV_11_SA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_SA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_SA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_SA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_SA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_SA2
+!=============================================
+
+define EV_11_SA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_SA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_SA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_SA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_SA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_SA3
+!=============================================
+
+define EV_11_SA3         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_SA3         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_SA3         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_SA3         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_SA3         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_SA4
+!=============================================
+
+define EV_11_SA4         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_SA4         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_SA4         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_SA4         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_SA4         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_NU1 -
+!=============================================
+
+define DL_THRMF_11_NU1       {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_THRMF_11_NU1       {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_THRMF_11_NU1       {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_11_NU1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 11_PR
+!=============================================
+
+define EV_11_PR          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_11_PR          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_11_PR          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_11_PR          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_11_PR          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 12_NU1 -
+!=============================================
+
+define EL_12_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_12_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+define DL_12_NU1    {std kind 'DELIVERY-LOSS'  units 'CFS'}
+
+!=============================================
+! 12_NA -
+!=============================================
+
+define EV_12_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_12_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_12_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_12_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_12_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 12_SA -
+!=============================================
+
+define EV_12_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_12_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_12_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_12_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_12_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 13_NA -
+!=============================================
+
+define EV_13_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_13_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_13_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_13_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_13_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 13_NU1 -
+!=============================================
+define DL_WTPMNR_13_NU1       {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_WTPMNR_13_NU1       {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPMNR_13_NU1       {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+define DL_OROVL_13_NU1       {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_OROVL_13_NU1       {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_OROVL_13_NU1       {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_13_NU1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 13_NU2 -
+!=============================================
+define DL_MNRRH_13_NU2        {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_MNRRH_13_NU2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_MNRRH_13_NU2        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_13_NU2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 14_NA - BVID irrigators   
+!=============================================
+
+define EV_14_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_14_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_14_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_14_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_14_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 14_NU 
+!=============================================
+!No surface diversions for 14_NU
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 15N_NA1 -
+!=============================================
+
+!=============================================
+! 15N_NA2 -                    
+!============================================= 
+
+define EV_15N_NA2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_15N_NA2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_15N_NA2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_15N_NA2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_15N_NA2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 15N_SA -                     
+!============================================= 
+
+define EV_15N_SA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_15N_SA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_15N_SA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_15N_SA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_15N_SA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 15N_NU - 
+!============================================= 
+
+define DL_YUB_15N_NU          {std kind 'DELIVERY-LOSS'  units 'CFS'}
+define EL_YUB_15N_NU          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_YUB_15N_NU          {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_15N_NU         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!=============================================
+! 15S_NA1 -
+!=============================================
+
+!=============================================
+! 15S_NU - 
+!============================================= 
+!  no conveyance loss, groundwater pumping only
+
+!=============================================
+! 15S_NA2 -         
+!=============================================
+
+define EV_15S_NA2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_15S_NA2        {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_15S_NA2        {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_15S_NA2        {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_15S_NA2        {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 15S_SA -               
+!=============================================
+
+define EV_15S_SA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_15S_SA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_15S_SA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_15S_SA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_15S_SA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 16          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 16_PA - Feather Water District
+!=============================================
+! Piped distribution system. Losses are very low
+! Historically district has not taken all of its CVP water
+! Reuse estimated to be 1.5-2.0 TAF/year (Final EA for Renewal of the Long-term Contract)
+! Minimum groundwater pumping increased to 65% to reflect low diversions
+
+
+define EV_16_PA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_16_PA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_16_PA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_16_PA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_16_PA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 16_SA -
+!=============================================
+! Historical diversions relatively high
+! Reduce minimum groundwater pumping by assuming all uncategorized lands on surface water
+! Increase miscellaneous ET from 6% to 10%
+! Assume large spill fraction for miscellaeous diverters
+
+
+define EV_16_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_16_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_16_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_16_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_16_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 16_PU -
+!=============================================
+define DL_FTR_16_PU  {std kind 'DELIVERY-LOSS' units 'CFS'}
+define EL_FTR_16_PU  {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_FTR_16_PU  {std kind 'SEEPAGE-LOSS' units 'CFS'}
+
+define DL_16_PU              {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 16_NA1 -
+!=============================================
+
+!=============================================
+! 16_NA2
+!=============================================
+
+define EV_16_NA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_16_NA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_16_NA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_16_NA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_16_NA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 17N_PR -
+!=============================================
+
+define EV_17N_PR         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_17N_PR         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_17N_PR         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_17N_PR         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_17N_PR         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 17N_NR -
+!=============================================
+
+define EV_17N_NR         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_17N_NR         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_17N_NR         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_17N_NR         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_17N_NR         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 17N_NA -
+!=============================================
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 17S_PR -
+!=============================================
+
+define EV_17S_PR         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_17S_PR         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_17S_PR         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_17S_PR         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_17S_PR         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 17S_NA -
+!=============================================
+
+define EV_17S_NA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_17S_NA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_17S_NA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_17S_NA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_17S_NA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 17S_SA -
+!=============================================
+
+define EV_17S_SA         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_17S_SA         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_17S_SA         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_17S_SA         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_17S_SA         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 18          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 18_NA -
+!=============================================
+
+define EV_18_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_18_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_18_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_18_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_18_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 18_SA -
+!=============================================
+
+define EV_18_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_18_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_18_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_18_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_18_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 19          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 19_NA - Placeholder
+!=============================================
+/*define EVF_SAC109_19_NA     {value 0.01} !evaporative loss fraction
+define DPF_SAC109_19_NA  {value 0.075} !deep percolation loss fraction
+define LFF_SAC109_19_NA  {value 0.06} !lateral flow loss fraction lateral flow
+define OSF_SAC109_19_NA  {value 0.03} !canal operating spill fraction
+
+define RUFR_19_NA   {value RUFR5*TWAWRatio}!reuse fraction for irrigated rice
+define RUFO_19_NA   {value 0.10} !reuse fraction for all other crops
+define RPF_19_NA    {value 0.00} !riparian and miscellaneous ET fraction
+
+define EV_19_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_19_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_19_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_19_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_19_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+*/
+!=============================================
+! 19_SA
+!=============================================
+
+define EV_19_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_19_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_19_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_19_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_19_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 20          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 20_NA1 -
+!=============================================
+
+define EV_20_NA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_20_NA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_20_NA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_20_NA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_20_NA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 20_NA2 -
+!=============================================
+
+!=============================================
+! 20_PA -
+!=============================================
+
+define EV_20_PA               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_20_PA               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_20_PA               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_20_PA               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_20_PA               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 20_NU1 -
+!=============================================
+
+define DL_WTPDWP_20_NU1        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPDWP_20_NU1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPDWP_20_NU1        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_20_NU1               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 21          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 21_NA -
+!=============================================
+
+define EV_21_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_21_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_21_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_21_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_21_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 21_PU -
+!=============================================
+define DL_WTPBTB_21_PU        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPBTB_21_PU        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPBTB_21_PU        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_21_PU               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 21_SA -
+!=============================================
+
+define EV_21_SA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_21_SA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_21_SA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_21_SA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_21_SA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 21_PA -
+!=============================================
+
+define EV_21_PA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_21_PA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_21_PA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_21_PA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_21_PA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 22          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 22_SA1
+!=============================================
+
+define EV_22_SA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_22_SA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_22_SA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_22_SA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_22_SA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 22_SA2
+!=============================================
+
+define EV_22_SA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_22_SA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_22_SA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_22_SA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_22_SA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 22_NA -
+!=============================================
+
+define EV_22_NA          {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_22_NA          {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_22_NA          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_22_NA          {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_22_NA          {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 23_NA
+!=============================================
+
+define EV_23_NA               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_23_NA               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_23_NA               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_23_NA               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_23_NA               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!=============================================
+! 24_NA1: Nevada Irrigation District
+!=============================================
+
+define EV_24_NA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_24_NA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_24_NA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_24_NA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_24_NA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NA2: Placer County Water Agency - Zone 5
+!=============================================
+define EV_24_NA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_24_NA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_24_NA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_24_NA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_24_NA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NA3: Placer County Water Agency - Zone 1
+!=============================================
+define EV_24_NA3         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_24_NA3         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_24_NA3         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_24_NA3         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_24_NA3         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NU2
+!=============================================
+define DL_WTPFSS_24_NU2   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPFSS_24_NU2   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPFSS_24_NU2   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_24_NU2     {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NU1
+!=============================================
+define DL_WTPBWM_24_NU1   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPBWM_24_NU1   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPBWM_24_NU1   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_WTPAUB_24_NU1   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WTPAUB_24_NU1   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WTPAUB_24_NU1   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_24_NU1     {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 24_NU3
+!=============================================
+define DL_WSE004_24_NU3   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_WSE004_24_NU3   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_WSE004_24_NU3   {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_24_NU3     {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 25          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 25_PA1 -
+!=============================================
+
+define EV_25_PA1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_25_PA1         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_25_PA1         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_25_PA1         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_25_PA1         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 25_PA2 -
+!=============================================
+
+define EV_25_PA2         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_25_PA2         {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_25_PA2         {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_25_PA2         {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_25_PA2         {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 25_NA -
+!=============================================
+
+define EV_25_NA               {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define DP_25_NA               {std kind 'DEEP-PERCOLATION' units 'CFS'}
+define LF_25_NA               {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_25_NA               {std kind 'SPILL-LOSS' units 'CFS'}
+define DL_25_NA               {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+!=============================================
+! 25_PU
+!=============================================
+define DL_25_PU      {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26N         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 26N_NA -
+!=============================================
+
+define DL_26N_PU1        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_PU1        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_PU1        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_26N_PU2        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_PU2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_PU2        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_26N_PU3        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_PU3        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_PU3        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26N_NU2        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_NU2        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_NU2        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+
+define DL_26N_NU1        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_NU1         {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_NU1         {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+define DL_26N_NU3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_NU3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_NU3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26N_NU4    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26N_NU4    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26N_NU4    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26S         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================
+! 26S_NA -
+!=============================================
+define DL_26S_PU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+
+define DL_26S_PU2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+define DL_26S_NU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+
+define DL_26S_PU4    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU4    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU4    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26S_NU2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_NU2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_NU2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_26S_NU3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_NU3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_NU3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define DL_26S_PU5    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU5    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU5    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26S_PU6    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU6    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU6    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26S_PU3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_PU3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_PU3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+
+define DL_26S_NU4    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_26S_NU4    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_26S_NU4    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+!define EF_WTPEDH_26S_EX  {value 0.0}
+!define SF_WTPEDH_26S_EX  {value 0.0}
+
+!define DL_26S_EX    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+!define EL_26S_EX    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+!define SL_26S_EX    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WTPCSD_02_PU   {value 0.0} !non recoverable loss fraction
+define SF_WTPCSD_02_PU   {value 0.0} !non recoverable loss fraction
+
+define EF_WTPFTH_02_SU   {value 0.00} !non recoverable loss fraction
+define SF_WTPFTH_02_SU   {value 0.00} !non recoverable loss fraction
+
+
+define EF_WTPFTH_03_SU   {value 0.0} !non recoverable loss fraction
+define SF_WTPFTH_03_SU   {value 0.0} !non recoverable loss fraction
+
+define EF_WTPJMS_03_PU1  {value 0.0} !non recoverable loss fraction
+define SF_WTPJMS_03_PU1  {value 0.0} !non recoverable loss fraction
+
+define EF_WTPBLV_03_PU2     {value 0.0} !non recoverable loss fraction
+define SF_WTPBLV_03_PU2     {value 0.0} !non recoverable loss fraction
+define EF_WTPBUK_03_SU  {value 0.0} !non recoverable loss fraction
+define SF_WTPBUK_03_SU  {value 0.0} !non recoverable loss fraction
+
+define EF_THRMF_11_NU1       {value 0.0}
+define SF_THRMF_11_NU1       {value 0.0}
+
+define EF_THRMF_12_NU1   {value 0.0}
+define SF_THRMF_12_NU1   {value 0.0}
+define EF_MIO023_12_NU1  {value 0.0}
+define SF_MIO023_12_NU1  {value 0.0}
+
+define EF_WTPMNR_13_NU1       {value 0.0}
+define SF_WTPMNR_13_NU1       {value 0.0}
+
+define EF_OROVL_13_NU1       {value 0.0}
+define SF_OROVL_13_NU1       {value 0.8}
+
+define EF_MNRRH_13_NU2        {value 0.0}
+define SF_MNRRH_13_NU2        {value 0.0}
+
+define EF_YUB_15N_NU          {value 0.0}
+define SF_YUB_15N_NU          {value 0.0}
+
+define EF_FTR_16_PU  {value 0.0}
+define SF_FTR_16_PU  {value 0.0}
+
+define EF_WTPDWP_20_NU1        {value 0.0}
+define SF_WTPDWP_20_NU1        {value 0.0}
+
+define EF_WTPBTB_21_PU        {value 0.0}
+define SF_WTPBTB_21_PU        {value 0.0}
+
+define EF_WTPFSS_24_NU2   {value 0.0}
+define SF_WTPFSS_24_NU2   {value 0.0}
+
+define EF_WTPBWM_24_NU1   {value 0.0}
+define SF_WTPBWM_24_NU1   {value 0.0}
+
+define EF_WTPAUB_24_NU1   {value 0.0}
+define SF_WTPAUB_24_NU1   {value 0.0}
+
+define EF_WSE004_24_NU3   {value 0.0}
+define SF_WSE004_24_NU3   {value 0.0}
+
+define EF_WTPRSV_26N_PU1 {value 0.0}
+define SF_WTPRSV_26N_PU1 {value 0.0}
+
+define EF_WTPSJP_26N_PU2 {value 0.0}
+define SF_WTPSJP_26N_PU2 {value 0.0}
+
+define EF_WTPSJP_26N_PU3  {value 0.0}
+define SF_WTPSJP_26N_PU3  {value 0.0}
+
+define EF_WTPBJM_26N_NU2  {value 0.0}
+define SF_WTPBJM_26N_NU2  {value 0.0}
+
+define EF_WTPFBN_26N_NU1  {value 0.0}
+define SF_WTPFBN_26N_NU1  {value 0.0}
+
+define EF_WTPSJP_26N_NU1  {value 0.0}
+define SF_WTPSJP_26N_NU1  {value 0.0}
+
+
+define EF_WTPFBN_26N_NU3  {value 0.0}
+define SF_WTPFBN_26N_NU3  {value 0.0}
+
+define EF_WTPSAC_26N_NU3  {value 0.0}
+define SF_WTPSAC_26N_NU3  {value 0.0}
+
+
+define EF_WTPFBN_26N_NU4  {value 0.0}
+define SF_WTPFBN_26N_NU4  {value 0.0}
+
+define EF_WTPFOL_26S_PU1  {value 0.0}
+define SF_WTPFOL_26S_PU1  {value 0.0}
+
+define EF_WTPVNY_26S_PU1  {value 0.0}
+define SF_WTPVNY_26S_PU1  {value 0.0}
+
+define EF_WTPCOL_26S_PU2  {value 0.0}
+define SF_WTPCOL_26S_PU2  {value 0.0}
+define EF_WTPSAC_26S_NU1  {value 0.0}
+define SF_WTPSAC_26S_NU1  {value 0.0}
+
+define EF_WTPFBN_26S_NU1  {value 0.0}
+define SF_WTPFBN_26S_NU1  {value 0.0}
+define EF_WTPSAC_26S_PU4  {value 0.0}
+define SF_WTPSAC_26S_PU4  {value 0.0}
+
+define EF_WTPVNY_26S_PU4  {value 0.0}
+define SF_WTPVNY_26S_PU4  {value 0.0}
+
+define EF_WTPFBN_26S_NU2  {value 0.0}
+define SF_WTPFBN_26S_NU2  {value 0.0}
+
+define EF_WTPFBN_26S_NU3  {value 0.0}
+define SF_WTPFBN_26S_NU3  {value 0.0}
+
+define EF_WTPVNY_26S_PU5  {value 0.0}
+define SF_WTPVNY_26S_PU5  {value 0.0}
+
+define EF_WTPVNY_26S_PU6  {value 0.0}
+define SF_WTPVNY_26S_PU6  {value 0.0}
+
+define EF_FSC003_26S_PU3  {value 0.01}
+define SF_FSC003_26S_PU3  {value 0.02}
+
+define EF_FOLSM_26S_NU4  {value 0.0}
+define SF_FOLSM_26S_NU4  {value 0.0}
+
+define EVF_STN_06_PA     {value EVF_STN021_06_PA*.35 + EVF_STN026_06_PA*.65} ! Used in Stony Creek allocation logic
+define DPF_STN_06_PA     {value DPF_STN021_06_PA*.35 + DPF_STN026_06_PA*.65} ! Used in Stony Creek allocation logic
+define LFF_STN_06_PA     {value LFF_STN021_06_PA*.35 + LFF_STN026_06_PA*.65} ! Used in Stony Creek allocation logic
+define OSF_STN_06_PA     {value OSF_STN021_06_PA*.35 + OSF_STN026_06_PA*.65} ! Used in Stony Creek allocation logic
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District to El Dorado Hills    !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define DL_ELDID_NU3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NU3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NU3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_WTPEDH_ELDID_NU3  {value 0.0}
+define SF_WTPEDH_ELDID_NU3  {value 0.0}
+
+/*define DL_ELDID_NA3    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_ELDID_NA3    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_ELDID_NA3    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_ELDID_NA3  {value 0.0}
+define SF_FOLSM_ELDID_NA3  {value 0.0}*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado County Other County Areas (OCA)  - Deliveries from Folsom    !!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!EDCOCA_NU1 - OCA Urban potentially supply by Folsom (N. SFA)
+define DL_EDCOCA_NU1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NU1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NU1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NU1  {value 0.0}
+define SF_FOLSM_EDCOCA_NU1  {value 0.0}
+
+define EF_WRT000_EDCOCA_NU1  {value 0.0}
+define SF_WRT000_EDCOCA_NU1  {value 0.0}
+
+!EDCOCA_NA1 - OCA Ag potentially supply by Folsom (N. SFA)
+define DL_EDCOCA_NA1    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NA1    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NA1    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NA1  {value 0.0}
+define SF_FOLSM_EDCOCA_NA1  {value 0.0}
+
+define EF_WRT000_EDCOCA_NA1  {value 0.0}
+define SF_WRT000_EDCOCA_NA1  {value 0.0}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado County Other County Areas (OCA)  - Deliveries from Folsom    !!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!EDCOCA_NU2 - OCA Urban potentially supply by Folsom (S. SFA)
+define DL_EDCOCA_NU2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NU2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NU2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NU2  {value 0.0}
+define SF_FOLSM_EDCOCA_NU2  {value 0.0}
+
+!EDCOCA_NA2 - OCA Ag potentially supply by Folsom (S. SFA)
+define DL_EDCOCA_NA2    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define EL_EDCOCA_NA2    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_EDCOCA_NA2    {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+
+define EF_FOLSM_EDCOCA_NA2  {value 0.0}
+define SF_FOLSM_EDCOCA_NA2  {value 0.0}

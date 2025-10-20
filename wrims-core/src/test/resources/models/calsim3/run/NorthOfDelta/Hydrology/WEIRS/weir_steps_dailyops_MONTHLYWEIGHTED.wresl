@@ -1,0 +1,15 @@
+!Definition of daily fraction to map daily pattern
+include 'read_dailypattern_SacRFreeport.wresl'
+
+! flows from previous cycle
+define QsacFth_prv {value QsacFth[monthlyweighted]}
+define Qsac166_prv {value Qsac166[monthlyweighted]}
+
+!Daily upstream flow estimation from a previous cycle corrected monthly flow and using the daily fractions.
+!Previous cycle monthly upstream flow is corrected with the difference of previous and current estimated Fremont weir spills
+
+define Qsac166nospill{value Qsac166[monthlyweighted]+ SP_SAC083_YBP037[monthlyweighted]}
+
+define Qsac166nospilldv {alias Qsac166nospill kind 'debug' units 'cfs'}
+
+include 'weir_steps_dailyops.wresl'

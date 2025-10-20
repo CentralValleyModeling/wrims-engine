@@ -1,0 +1,157 @@
+! Instream_bound.wresl
+! Edward Chang
+! 5/01/2000
+! Joint Model
+! This code bounds decision variables using monthly weighted constraints for cycle 6 only (San Joaquin Basin)
+! Revised by C. Hsu, 3/10/03, USBR, for review and documentation project
+
+!####################################################################################################
+/*
+Instream flows on the Tuolumne, Merced, and Stanislaus Rivers (including dissolved oxygen)
+*/
+
+/*
+Tuolumne River FERC minimum flow on reach C_TUO050 for April - May period
+*/
+define C_TUO054FERC {
+    case April {
+        condition   month == apr
+        value       C_TUO054_mif[SJR_WQ1] * 14./30. + C_TUO054_mif[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       C_TUO054_mif[SJR_WQ2] * 15./31. + C_TUO054_mif[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       C_TUO054_mif[SJR_WQ1] }
+        }
+
+/*
+define TUOL_C_TUO001FERC {
+    case April {
+        condition   month == apr
+        value       C_TUO001[SJR_WQ1] * 14./30. + C_TUO001_mif[SJR_WQ2] * 16./30. }
+    case MayOnly {
+        condition   month == may
+        value       C_TUO001_mif[SJR_WQ2] * 15./31. + C_TUO001[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       C_TUO001_mif[SJR_WQ1] }
+        }
+*/
+! Set limits on Tuolumne River minimum flow for reach C_TUO050
+goal setC_TUO054cycle6 { C_TUO054_mif < C_TUO054FERC }
+!goal setC_TUO001cycle6 { C_TUO001_mif < TUOL_C_TUO001FERC }
+
+
+/*
+Stanislaus River F & W minimum flows.  In April and May, a pulse flow requirement is calculated
+but the pulse flow only applies during the last 16 days in April and the first 15 days in May.
+The goal of the resulting monthly requirement is to maintain a minimum fish and wildlife flow.
+Release from Goodwin to the Stanislaus River can't exceed 1500 CFS
+*/
+define Stan_C_STS059FW {
+    case AprilHigh {
+         condition   month == apr .and. C_STS059[SJRBASE_GW4] >= maxGoodwin
+         value          maxGoodwin * 14./30. + C_STS059_mif[SJR_PULSE] * 16./30. }
+    case April {
+         condition   month == apr
+         value       C_STS059_mif[SJRBASE_GW4] * 14./30. + C_STS059_mif[SJR_PULSE] * 16./30. }
+    case MayHigh {
+         condition   month == may .and. C_STS059[SJR_WQ1] >= maxGoodwin
+         value       C_STS059_mif[SJR_PULSE] * 15./31. + maxGoodwin * 16./31. }
+    case MayOnly {
+         condition   month == may
+         value       C_STS059_mif[SJR_PULSE] * 15./31. + C_STS059_mif[SJRBASE_GW4] * 16./31. }
+    case otherwise {
+         condition   always
+         value       C_STS059_mif[SJRBASE_GW4] }
+        }
+
+! Set limits on F & W minimum flow requirement for reach C_STS059
+goal set1C_STS059cycle6 { C_STS059_mif < Stan_C_STS059FW  }
+
+goal setC_STS059_exc_acycle6 {
+     lhs  C_STS059_exc_a
+     case OctthruMar {
+          condition month <= mar
+          rhs       C_STS059_exc_a[SJRBASE_GW4]  lhs<rhs penalty 99999 lhs>rhs penalty 99999} !zrc 8/7/2019
+     case JunthruSep {
+          condition month >= jun
+          rhs       C_STS059_exc_a[SJR_WQ1]      lhs<rhs penalty 99999 lhs>rhs penalty 99999} 
+          }
+
+/*
+In-stream flow Stanislaus requirement.  Three conditions are included in code.  Non-Pulse and non Do,
+Pulse flow for April-May period and non-pulse with DO requirement
+*/
+!***************************************************************
+define C_MELONmeqcycle6 {
+     case NonPulseNonDO {
+          condition month <= mar
+          value     max (0., min(C_MELONm[SJR_WQ1],
+                                 maxGoodwin - I_TULOC - I_STS059
+                                 + D_STS059_SSJ001[SJR_WQ1] + D_STS059_OAK001[SJR_WQ1] + D_STS059_UFC000[SJR_WQ1] )) }
+    case April {
+        condition month  == apr
+        value     max (0.,
+                         min( 14.*C_MELONm[SJR_WQ1]/30. + 16.*C_MELONm[SJR_WQ2]/30.,    
+                              maxGoodwin - I_TULOC - I_STS059
+                              + 14.*D_STS059_UFC000[SJR_WQ1]/30. + 16.*D_STS059_UFC000[SJR_WQ2]/30.  
+                              + 14.*D_STS059_SSJ001[SJR_WQ1]/30. + 16.*D_STS059_SSJ001[SJR_WQ2]/30.  
+                              + 14.*D_STS059_OAK001[SJR_WQ1]/30. + 16.*D_STS059_OAK001[SJR_WQ2]/30.)   ) }   
+     case MayOnly {
+        condition month  == may
+        value     max (0.,
+                         min( 15.*C_MELONm[SJR_WQ2]/31. + 16.*C_MELONm[SJR_WQ1]/31.,   
+                              maxGoodwin - I_TULOC - I_STS059
+                              + 15.*D_STS059_UFC000[SJR_WQ1]/31. + 16.*D_STS059_UFC000[SJR_WQ2]/31.  
+                              + 15.*D_STS059_SSJ001[SJR_WQ1]/31. + 16.*D_STS059_SSJ001[SJR_WQ2]/31.  
+                              + 15.*D_STS059_OAK001[SJR_WQ1]/31. + 16.*D_STS059_OAK001[SJR_WQ2]/31.)   ) }  
+    case NonPulsePlusDO {
+        condition always
+         value     max (0., min(C_MELONm[SJR_WQ1],  
+                               maxGoodwin - I_TULOC - I_STS059
+                                 + D_STS059_SSJ001[SJR_WQ1] + D_STS059_OAK001[SJR_WQ1] +D_STS059_UFC000[SJR_WQ1])) }
+        }
+
+!goal maintainC_MELONm1cycle6 { C_MELONm > max(0.,C_MELONmeqcycle6 ) }
+! Maintain Stanislaus instream flow for cycle 6
+goal maintainC_MELONm2cycle6 { lhs C_MELONm rhs C_MELONmeqcycle6    lhs<rhs penalty 99999 lhs>rhs penalty 99999} !zrc 8/7/2019
+
+
+/*
+DON PEDRO AND MCCLURE IN BASIN RELEASES
+*/
+
+! New Don Pedro minimum flow at pulse period for cycle 6
+define C_PEDROmequivcycle6 {
+     case NonPulseNonDO {
+          condition month <= mar
+          value     max (0., C_PEDROm[SJR_WQ1]) }
+    case April {
+        condition month  == apr
+        value     max(0., 14.*C_PEDROm[SJR_WQ1]/30. + 16.*C_PEDROm[SJR_WQ2]/30.) }  
+    case MayOnly {
+        condition month  == may
+        value     max(0., 15.*C_PEDROm[SJR_WQ2]/31. + 16.*C_PEDROm[SJR_WQ1]/31.) }  
+    case NonPulsePlusDO {
+        condition always
+        value     max (0., C_PEDROm[SJR_WQ1])}   
+}
+! New Don Pedro main flow release
+goal setC_PEDROm1cycle6 { lhs C_PEDROm rhs max(0., C_PEDROmequivcycle6) lhs<rhs penalty 99999 lhs>rhs penalty 99999} !zrc 8/7/2019 }
+
+! McClure main flow release
+goal setC_MCLREm1cycle6 { C_MCLREm = max(0., C_MCLREm[SJR_WQ1]) }  
+
+! New Melones dissolved Oxygen release for cycle 6
+goal setC_MELONdocycle6 {
+    lhs  C_MELONdo
+    case JuneSep {
+        condition month > MAY  
+        rhs max(0., C_MELONdo[SJR_WQ1]) }   
+    case OctMay {
+        condition month<JUN
+        rhs 0.0 }
+}
+

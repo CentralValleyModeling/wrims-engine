@@ -1,0 +1,107 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-FloodSpill.wresl
+Dir Name: .\System\SystemTables_SJREast\
+Calling File Name:
+CalSim 3.0 System File
+
+Purpose:
+To allow flow tops the channel capacity or the reservoir release capacity (RelCap_xxxxx) for flood spill.
+
+Naming takes the following form where {xxxxx} represent the flow node:
+C_{xxxxx}_NCF      -- Normal channel flow (NCF) under channel capacity constraint or normal release under MaxRel constaint
+C_{xxxxx}_Flood    -- Flood release above MaxRel constraint or normal channel capacity
+
+Z.Q. Richard Chen, BDO 8/14/2019 
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Hogan Reservoir, Calavera River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_NHGAN {C_NHGAN<relcap_NHGAN}
+define C_NHGAN_NCF	{lower 0 upper RelCap_NHGAN kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_NHGAN  {C_NHGAN < RelCap_NHGAN}
+define C_NHGAN_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_NHGAN  	{C_NHGAN_NCF + C_NHGAN_Flood = C_NHGAN }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Melones Reservoir, Stanislaus River
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_MELON {C_MELON<relcap_MELON}
+define C_MELON_NCF	{lower 0 upper RelCap_MELON kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_MELON  {C_MELON < RelCap_MELON}
+define C_MELON_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_MELON  	{C_MELON_NCF + C_MELON_Flood = C_MELON }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Millerton Lake, San Joaquin River !!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_MLRTN {C_MLRTN<relcap_MLRTN}
+define C_MLRTN_NCF	{lower 0 upper RelCap_MLRTN kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_MLRTN  {C_MLRTN < RelCap_MLRTN}
+define C_MLRTN_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_MLRTN  	{C_MLRTN_NCF + C_MLRTN_Flood = C_MLRTN }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake McClure (Exchequer Dam), Merced River      !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_MCLRE {C_MCLRE<relcap_MCLRE}
+define C_MCLRE_NCF	{lower 0 upper RelCap_MCLRE kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_MCLRE  {C_MCLRE < RelCap_MCLRE}
+define C_MCLRE_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_MCLRE  	{C_MCLRE_NCF + C_MCLRE_Flood = C_MCLRE }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Hensley Lake, Fresno River !!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_HNSLY {C_HNSLY<relcap_HNSLY}
+define C_HNSLY_NCF	{lower 0 upper RelCap_HNSLY kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_HNSLY  {C_HNSLY < RelCap_HNSLY}
+define C_HNSLY_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_HNSLY  	{C_HNSLY_NCF + C_HNSLY_Flood = C_HNSLY }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Eastman Lake, Chowchilla River !!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_ESTMN {C_ESTMN<relcap_ESTMN}
+define C_ESTMN_NCF	{lower 0 upper RelCap_ESTMN kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_ESTMN  {C_ESTMN < RelCap_ESTMN}
+define C_ESTMN_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_ESTMN  	{C_ESTMN_NCF + C_ESTMN_Flood = C_ESTMN }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Tulloch Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}
+!zrc! goal maxrelease_TULOC {C_TULOC<relcap_TULOC}
+define C_TULOC_NCF	{lower 0 upper RelCap_TULOC kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_TULOC  {C_TULOC < RelCap_TULOC}
+define C_TULOC_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_TULOC  	{C_TULOC_NCF + C_TULOC_Flood = C_TULOC }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Don Pedro Reservoir, Tuolumne River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!zrc! goal maxrelease_PEDRO {C_PEDRO<relcap_PEDRO}
+define C_PEDRO_NCF	{lower 0 upper RelCap_PEDRO kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_PEDRO  {C_PEDRO < RelCap_PEDRO}
+define C_PEDRO_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_PEDRO  	{C_PEDRO_NCF + C_PEDRO_Flood = C_PEDRO }
+
+Objective obj_FloodSRJEast = {
+
+[C_NHGAN_Flood, -900000],
+[C_MELON_Flood, -900000],
+[C_MCLRE_Flood, -900000],
+[C_HNSLY_Flood, -900000],
+[C_ESTMN_Flood, -900000],
+[C_TULOC_Flood, -900000],
+[C_PEDRO_Flood, -900000]
+}

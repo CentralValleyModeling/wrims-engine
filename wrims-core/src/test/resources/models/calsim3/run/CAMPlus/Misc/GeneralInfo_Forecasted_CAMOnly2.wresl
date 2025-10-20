@@ -1,0 +1,102 @@
+! General information for CAM.
+! Ryan Wilbur 10-6-03
+
+!goal fix_error_1 {I607_WTS = 0}
+!goal fix_error_2 {I607_EWA = 0}
+!goal fix_error_3 {D700 = 0}
+!goal fix_error_4 {D706 = 0}
+!goal fix_error_5 {D707 = 0}
+!goal fix_error_6 {D708 = 0}
+!goal fix_error_7 {D833 = 0}
+!goal fix_error_8 {D835 = 0}
+
+!define C5 {std kind 'flow-channel' units 'cfs'}
+!define C203 {std kind 'flow-channel' units 'cfs'}
+!define C169 {std kind 'flow-channel' units 'cfs'}
+!define C9 {std kind 'flow-channel' units 'cfs'}
+!define D160 {std kind 'flow-diversion' units 'cfs'}
+!define D166A {std kind 'flow-diversion' units 'cfs'}
+
+
+! exceedence value for each jan-jun monthly forecast (options are 99,90,75,50)
+define exc {select exc from CAM_Exc_Level where month=month}
+
+! exceedence level for oct-dec fall period
+define exc_fall {value 90}
+
+!************************************************************************
+!the following dvars from the main CALSIM II simulaion are available for use in the allocation model:
+
+!exports:
+!define D418 {STD KIND 'FLOW-DELIVERY' UNITS 'CFS'}
+define C_CAA003 {STD KIND 'CHANNEL' UNITS 'CFS'}
+
+!delivery:
+!define del_swp_total   {STD KIND 'DELIVERY-SWP' UNITS 'CFS'}
+define swp_TA_total    {STD kind 'swp_delivery' units 'cfs'}
+define swp_CO_total    {STD kind 'swp_delivery' units 'cfs'}
+define swp_TA_Feath  {std kind 'swp_delivery' units 'cfs'} !sub-total
+define swp_TA_NBay   {std kind 'swp_delivery' units 'cfs'} !sub-total
+!define del_cvp_total_s {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+!define del_cvp_pag_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+!define del_cvp_pmi_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+!define del_cvp_pex_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+!define del_cvp_prf_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+!define del_cvp_pls_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+
+!water year type:
+!define wyt_trinity    {select Trinityindex from wytypes where wateryear=wateryear}
+!define wyt_sacramento {select SACindex     from wytypes where wateryear=wateryear}
+!define wyt_shasta     {select SHASTAindex  from wytypes where wateryear=wateryear}
+!define wyt_sjr        {select SJRindex  from wytypes where wateryear=wateryear}
+
+!define wyt {value wyt_sacramento}
+
+!define wyt_sac_dv  {alias wyt_sacramento KIND 'INDEX' UNITS 'NONE'}
+!define wyt_trin_dv {alias wyt_trinity    KIND 'INDEX' UNITS 'NONE'}
+!define wyt_shas_dv {alias wyt_shasta     KIND 'INDEX' UNITS 'NONE'}
+
+!miscellaneous
+define NDOI {std kind 'FLOW' units 'CFS'}
+define X2_prv {STD KIND 'X2-POSITION-PREV' UNITS 'KM'}
+
+!************************************************************************
+!previous months delivery:
+define del_swp_Jan{case a{condition month>=Feb value swp_TA_total(4-month)*cfs_taf( 4-month) + swp_CO_total(4-month)*cfs_taf( 4-month)} case b{condition always value 0}}
+define del_swp_Feb{case a{condition month>=Mar value swp_TA_total(5-month)*cfs_taf( 5-month) + swp_CO_total(5-month)*cfs_taf( 5-month)} case b{condition always value 0}}
+define del_swp_Mar{case a{condition month>=Apr value swp_TA_total(6-month)*cfs_taf( 6-month) + swp_CO_total(6-month)*cfs_taf( 6-month)} case b{condition always value 0}}
+define del_swp_Apr{case a{condition month>=May value swp_TA_total(7-month)*cfs_taf( 7-month) + swp_CO_total(7-month)*cfs_taf( 7-month)} case b{condition always value 0}}
+define del_swp_May{case a{condition month>=Jun value swp_TA_total(8-month)*cfs_taf( 8-month) + swp_CO_total(8-month)*cfs_taf( 8-month)} case b{condition always value 0}}
+define del_swp_Jun{case a{condition month>=Jul value swp_TA_total(9-month)*cfs_taf( 9-month) + swp_CO_total(9-month)*cfs_taf( 9-month)} case b{condition always value 0}}
+
+define del_swp_SOD_Jan{case a{condition month>=Feb value (swp_TA_total(4-month) + swp_CO_total(4-month) - swp_TA_Feath(4-month) - swp_TA_NBay(4-month))*cfs_taf( 4-month)} case b{condition always value 0}}
+define del_swp_SOD_Feb{case a{condition month>=Mar value (swp_TA_total(5-month) + swp_CO_total(5-month) - swp_TA_Feath(5-month) - swp_TA_NBay(5-month))*cfs_taf( 5-month)} case b{condition always value 0}}
+define del_swp_SOD_Mar{case a{condition month>=Apr value (swp_TA_total(6-month) + swp_CO_total(6-month) - swp_TA_Feath(6-month) - swp_TA_NBay(6-month))*cfs_taf( 6-month)} case b{condition always value 0}}
+define del_swp_SOD_Apr{case a{condition month>=May value (swp_TA_total(7-month) + swp_CO_total(7-month) - swp_TA_Feath(7-month) - swp_TA_NBay(7-month))*cfs_taf( 7-month)} case b{condition always value 0}}
+define del_swp_SOD_May{case a{condition month>=Jun value (swp_TA_total(8-month) + swp_CO_total(8-month) - swp_TA_Feath(8-month) - swp_TA_NBay(8-month))*cfs_taf( 8-month)} case b{condition always value 0}}
+define del_swp_SOD_Jun{case a{condition month>=Jul value (swp_TA_total(9-month) + swp_CO_total(9-month) - swp_TA_Feath(9-month) - swp_TA_NBay(9-month))*cfs_taf( 9-month)} case b{condition always value 0}}
+
+!************************************************************************
+!delta consumptive use: perfect foresight from timeseries
+! Now calculating DND dynamically based on CS3 input data
+!define DND_SAC_North_ {timeseries 'DND_SAC_North' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_SAC_West_ {timeseries 'DND_SAC_West' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_SAC_South_ {timeseries 'DND_SAC_South' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_SJR_East_ {timeseries 'DND_SJR_East' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_SJR_West_ {timeseries 'DND_SJR_West' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_OMR_ {timeseries 'DND_OMR' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+!define DND_MOK_ {timeseries 'DND_MOK' kind 'DELTA-NET-DEPLETION' units 'TAF'}
+
+!define(fm) DCU_fm{value DND_SAC_North_($m) + DND_SAC_West_($m)  + DND_SAC_South_($m)  + DND_SJR_East_($m)  + DND_SJR_West_($m)  + DND_OMR_($m)  + DND_MOK_($m)}
+define(fm) DCU_fm{value DND_SAC_North_FAM($m) + DND_SAC_West_FAM($m)  + DND_SAC_South_FAM($m)  + DND_SJR_East_FAM($m)  + DND_SJR_West_FAM($m)  + DND_OMR_FAM($m)  + DND_MOK_FAM($m)}
+
+! contra costa demand:
+define(fm) CC_Demand_fm {select demand from CAM_cc_demand where month=mv($m)}
+
+! north bay/vallejo demand:
+define(fm) NBV_Demand_fm {select NB_TA from CAM_SWPDem_NOD where month= mv($m)}
+
+!************************************************************************
+! Read in DCO COA indictor - on=1 and off=0
+define(fm) COA_ind_fm{value 1}
+define(fm) COA_ind_dv_fm {alias COA_ind_fm($m) kind 'COA' units 'NONE'}

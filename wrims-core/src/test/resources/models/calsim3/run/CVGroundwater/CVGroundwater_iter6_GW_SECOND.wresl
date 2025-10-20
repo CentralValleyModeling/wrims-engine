@@ -1,0 +1,42 @@
+!*********************************************************************
+!
+!    Z.Q. Richard Chen 10/24/2018
+!
+!*********************************************************************
+
+include 'SetPumping_using_GW_INITIAL.wresl'
+include 'SetDeepPerc_using_GW_INITIAL.wresl'
+include 'SetStrmFlow_using_GW_INITIAL.wresl'
+
+include 'setExteriorDPGP_SJRBASE.wresl'
+include 'setBUGWRecharge_SJRBASE.wresl'
+
+include 'SetGWreservoirFlows.wresl'
+!*********************************************************************
+!***  Set the forcings on the groundwater system (using previous cycle's values)
+!*********************************************************************
+!*********************************************************************
+include 'SetPumping_Second.wresl'
+include 'SetDeepPerc_Second.wresl'
+include 'SetStrmFlow_Second.wresl'
+
+include 'setExteriorDPGP_SAC.wresl'
+include 'setBUGWRecharge_SAC.wresl'
+
+!*********************************************************************
+!*********************************************************************
+!***  Simulate groundwater system
+!*********************************************************************
+!*********************************************************************
+define rSimGW {value    SimGW(wateryear,month) }       !Returns value of 0 if successfully executed
+
+include '..\System\SystemTables_Sac\constraints-Seepage_Sac.wresl'
+include '..\System\SystemTables_Delta\constraints-Seepage_Delta.wresl'
+include '..\System\SystemTables_LowerMokelumne\constraints-Seepage_DeltaES_using_SJRBASE_GW4.wresl'   
+include '..\System\SystemTables_SJREast\constraints-Seepage_SJREast_using_SJRBASE_GW4.wresl' 
+include '..\System\SystemTables_SJRWest\constraints-Seepage_SJRWest_using_SJRBASE_GW4.wresl' 
+
+include '..\System\SystemTables_LowerMokelumne\constraints-TileDrain_DeltaES_using_SJRBASE_GW4.wresl'        
+include '..\System\SystemTables_SJREast\constraints-TileDrain_DeltaES_using_SJRBASE_GW4.wresl'        
+include '..\System\SystemTables_SJRWest\constraints-TileDrain_DeltaES_using_SJRBASE_GW4.wresl'        
+include '..\System\systemtables_Sac\constraints-TileDrain_SAC.wresl'

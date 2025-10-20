@@ -1,0 +1,98 @@
+! This code Bounds the Non-Wheeling interconnections between SWP and CVP.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! (Constrain CVP and SWP water in CAA/JUB)
+
+! CVP water balance @ CAA067 (inflow to ONFB)
+! CVP water equals inflows minus diversions (no losses!)
+goal setC_CAA067_CVP    { C_CAA067_CVP = C_CAA003_CVP + D_DMC007_CAA009 - D_CAA012_71_PU1 - D_CAA066_71_PU2}
+goal setC_CAA067_SWP    { C_CAA067_SWP = C_CAA003     - C_CAA003_CVP    - D_CAA005_SBA000 - D_CAA046_71_PA7 + CAALOSS_SWP_Upper} !- SG_R1R2_SWP}
+goal setC_CAA067_TOT    { C_CAA067     = C_CAA067_CVP + C_CAA067_SWP}
+
+! CVP water balance @ CAA069 (outflow from ONFB to JUB)
+! CVP water equals inflows minus diversions since CAA067 (no losses up to this point!)
+! CVP water limited to diversions+losses+CVC on JUB
+goal setC_CAA069_CVPsup { C_CAA069_CVP = C_CAA067_CVP + C_SLUIS_CVP     + D_DMC070_CAA069 - D_CAA069_SLUIS_F - D_CAA069_DMC070}
+goal setC_CAA069_CVPdem { C_CAA069_CVP < D_CAA087_73_PA1  + D_CAA109_73_PA3 + D_CAA109_90_PA1                   ! (CVP deliveries + CVC)
+                                       + D_CAA143_90_PA1 + D_CAA143_90_PA2 + D_CAA143_90_PU  + D_CAA155_90_PA1 
+                                       + D_CAA156_90_PU  + D_CAA165_90_PU  + D_CAA172_90_PA1 + C_CAA172_CVP 
+                                       - D_CAA071_CAALOS_CVP - D_CAA087_CAALOS_CVP - D_CAA095_CAALOS_CVP - D_CAA109_CAALOS_CVP   ! (CVP losses)
+                                       - D_CAA143_CAALOS_CVP - D_CAA155_CAALOS_CVP - D_CAA156_CAALOS_CVP - D_CAA165_CAALOS_CVP 
+                                       - D_CAA172_CAALOS_CVP}
+goal setC_CAA069_SWPsup { C_CAA069_SWP = C_CAA067_SWP + C_SLUIS_SWP     - D_CAA069_SLUIS_S}
+goal setC_CAA069_SWPdem { C_CAA069_SWP < C_CAA172 - C_CAA172_CVP                                                                 ! (SWP outflow from JUB)
+                                       - D_CAA071_CAALOS_SWP - D_CAA087_CAALOS_SWP - D_CAA095_CAALOS_SWP - D_CAA109_CAALOS_SWP   ! (SWP losses)
+                                       - D_CAA143_CAALOS_SWP - D_CAA155_CAALOS_SWP - D_CAA156_CAALOS_SWP - D_CAA165_CAALOS_SWP 
+                                       - D_CAA172_CAALOS_SWP }
+goal setC_CAA069_TOT    { C_CAA069     = C_CAA069_CVP + C_CAA069_SWP}
+ 
+
+! CVP water balance @ CAA069 (flow at Dos Amigos)
+! CVP water equals inflows minus diversions minus losses since CAA069
+! CVP water limited to diversions+losses+CVC on remainder of JUB
+goal setC_CAA087_CVPsup { C_CAA087_CVP = C_CAA069_CVP + D_CAA071_CAALOS_CVP + D_CAA087_CAALOS_CVP - D_CAA087_73_PA1}
+goal setC_CAA087_CVPdem { C_CAA087_CVP < D_CAA109_73_PA3 + D_CAA109_90_PA1 + D_CAA143_90_PA1                    ! (CVP deliveries + CVC)
+                                       + D_CAA143_90_PA1 + D_CAA143_90_PA2 + D_CAA143_90_PU  + D_CAA155_90_PA1  
+                                       + D_CAA156_90_PU  + D_CAA165_90_PU  + D_CAA172_90_PA1 + C_CAA172_CVP
+                                       - D_CAA095_CAALOS_CVP - D_CAA109_CAALOS_CVP - D_CAA143_CAALOS_CVP                         ! (CVP losses)
+                                       - D_CAA155_CAALOS_CVP - D_CAA156_CAALOS_CVP - D_CAA165_CAALOS_CVP 
+                                       - D_CAA172_CAALOS_CVP }
+goal setC_CAA087_SWPsup { C_CAA087_SWP = C_CAA069_SWP + D_CAA071_CAALOS_SWP + D_CAA087_CAALOS_SWP}
+goal setC_CAA087_SWPdem { C_CAA087_SWP < C_CAA172 - C_CAA172_CVP                                                                 ! (SWP outflow from JUB)
+                                       - D_CAA095_CAALOS_SWP - D_CAA109_CAALOS_SWP - D_CAA143_CAALOS_SWP                         ! (SWP losses)
+                                       - D_CAA155_CAALOS_SWP - D_CAA156_CAALOS_SWP - D_CAA165_CAALOS_SWP 
+                                       - D_CAA172_CAALOS_SWP }
+goal setCAA087_TOT      { C_CAA087     = C_CAA087_CVP + C_CAA087_SWP}
+
+
+! CVP water balance @ CAA172 (end of JUB)
+! CVP water equals inflows minus diversions minus losses since CAA087
+! CVP water also equals CVC flow
+! goal setC_CAA172_CVPdem { C_CAA172_CVP = C_CAA087_CVP        + D_CAA095_CAALOS_CVP + D_CAA109_CAALOS_CVP + D_CAA143_CAALOS_CVP
+!                                        + D_CAA155_CAALOS_CVP + D_CAA156_CAALOS_CVP + D_CAA165_CAALOS_CVP + D_CAA172_CAALOS_CVP
+!                                              - D_CAA109_73_PA3     - D_CAA109_90_PA1  
+!                                        - D_CAA143_90_PA1     - D_CAA143_90_PA2     - D_CAA143_90_PU
+!                                        - D_CAA155_90_PA1     - D_CAA156_90_PU      - D_CAA165_90_PU
+!                                        - D_CAA172_90_PA1}
+goal setC_CAA172_SWP    { C_CAA172_SWP = C_CAA087_SWP        + D_CAA095_CAALOS_SWP + D_CAA109_CAALOS_SWP + D_CAA143_CAALOS_SWP
+                                       + D_CAA155_CAALOS_SWP + D_CAA156_CAALOS_SWP + D_CAA165_CAALOS_SWP + D_CAA172_CAALOS_SWP}                     
+goal setC_CAA172_CVP    { C_CAA172_CVP = D_CAA238_CVPCV + D_CAA239_CVPRF}
+!goal s_reduce_D_CAA239_CVPRF_prf {D_CAA239_CVPRF_prf < perdel_cvprf_s*dem_D_CAA239_CVPRF_prf*taf_cfs}
+goal setCAA172_TOT      { C_CAA172     = C_CAA172_CVP + C_CAA172_SWP}
+
+
+
+! sum of cvp joint use branch deliveries (INCLUDE CVP LOSSES!)
+define CVP_JUB_delivs   { std kind 'delivery' units 'cfs' }
+goal setCVP_JUB_delivs  { CVP_JUB_delivs = D_CAA087_73_PA1  + D_CAA109_73_PA3 + D_CAA109_90_PA1                   ! (CVP deliveries + CVC)
+                                         + D_CAA143_90_PA1 + D_CAA143_90_PA2 + D_CAA143_90_PU  + D_CAA155_90_PA1 
+                                         + D_CAA156_90_PU  + D_CAA165_90_PU  + D_CAA172_90_PA1 
+                                         - D_CAA071_CAALOS_CVP - D_CAA087_CAALOS_CVP - D_CAA095_CAALOS_CVP - D_CAA109_CAALOS_CVP   ! (CVP losses)
+                                         - D_CAA143_CAALOS_CVP - D_CAA155_CAALOS_CVP - D_CAA156_CAALOS_CVP - D_CAA165_CAALOS_CVP 
+                                         - D_CAA172_CAALOS_CVP}
+
+! aliases...
+! sum of all cvp inflows/outflows to CAA
+define caa_cvp_INFLOWS  { alias C_CAA003_CVP+D_DMC007_CAA009+D_DMC070_CAA069+C_SLUIS_CVP                                                     kind 'TESTING' units 'CFS' }
+define caa_cvp_OUTFLOWS { alias D_CAA012_71_PU1+D_CAA066_71_PU2+D_CAA069_SLUIS_F+D_CAA069_DMC070+CVP_JUB_delivs+C_CAA172_CVP kind 'TESTING' units 'CFS' }
+
+
+
+/*goal set_MSN004_cap     { C_MSN004 < C_BANOS
+                                   + R_73_PA1_LBN025
+                                   + R_72_PR1_LBN012
+                                   + D_XCC054_LBN008
+                                   + R_72_PR5_MSN009
+                                   + R_73_PA3_SLD027
+                                   + R_73_XA_SLD027
+                                   + R_73_PA2_SLD027
+                                   + SR_73_SLD027 
+                                   + SR_73_MSN004
+                                   + SR_72_MSN004
+                                   + SR_71_MSN004
+                                   + TD_MSN004_114 + TD_MSN004_115 + TD_MSN004_104
+                                   + R_72_PR2_MSN004
+                                   + R_RFS72B_MSN004 }*/
+
+
+                       

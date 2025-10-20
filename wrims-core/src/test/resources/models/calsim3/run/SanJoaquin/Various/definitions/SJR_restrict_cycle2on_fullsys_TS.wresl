@@ -1,0 +1,57 @@
+! SJR_restrict.wresl
+! This code restricts regulated flows in various arcs within the SJR system
+
+! ###############################################################################
+
+
+!Millerton
+
+/*define UpperSJRSeep    {value SG54_SJR263_7[SJRBASE_GW4] + SG55_SJR256_7[SJRBASE_GW4]
+                            + SG56_SJR249_7[SJRBASE_GW4] + SG57_SJR242_7[SJRBASE_GW4] 
+                            + SG58_SJR235_7[SJRBASE_GW4] + SG59_SJR227_7[SJRBASE_GW4]}*/
+
+
+! Make sure Settlement flow goes past Sack Dam
+goal SJRR_PassThru {C_SJR180 > D_SJR205_SJR201}
+
+
+! Restrict Hensley regulated release to Fresno River losses, Fresno River delivery and Fresno River minimum instream flow 
+
+/*define UpperFresnoSeep {value SG69_FRS045_9[SJRBASE_GW4] + SG70_FRS039_9[SJRBASE_GW4]
+                            + SG71_FRS036_9[SJRBASE_GW4]}*/
+
+! goal boundC_HNSLYmain  { C_HNSLYm < max(0.,-UpperFresnoSeep + C_FRS036_min - I_FRS046) - SP_MDC019_FRS045 + D_FRS036_64_PA1 }
+goal boundC_HNSLYmain  {lhs C_HNSLYm
+                        rhs max(0.,-UpperFresnoSeep+C_FRS036_min-I_FRS046) - SP_MDC019_FRS045 + D_FRS036_64_PA1
+                        lhs>rhs penalty 999999
+                        lhs<rhs penalty 0}
+
+! Restrict Eastman regulated release to Chowchilla River delivery & Chowchilla River losses  
+
+goal boundC_ESTMNmain  {lhs C_ESTMNm
+                        rhs D_CHW017_64_PA2 + D_CHW028_ASL013 + D_CHW028_BRS018
+                            - SG80_CHW031_11 - SG81_CHW028_11 - SG82_CHW024_11
+                            - SG83_CHW021_11 - SG84_CHW017_11 - C_MDC032
+                        lhs>rhs penalty 999999
+                        lhs<rhs penalty 0}
+
+
+! Regulated releases from Goodwin Dam (Tulloch Reservoir) < 1500 cfs
+! NOTE -- limits in table MaxPermissible upped to 7500 to match latest CSII
+define maxGoodwin { select MaxLimit from MaxPermissible where nodeid=16 }
+goal RestrGoodwin{ C_STS059 - C_STS059F < maxGoodwin }
+
+
+
+/*
+Water released from New Melones for WQ, VAMP, and DO must flow past Goodwin (if below channel capacity)
+*/
+
+! Water released from New Melones for water quality route past Goodwin
+goal routeC_STS059WQ   {C_STS059WQ = C_MELONWQ}
+! Water released from New Melones for DO route past Goodwin
+goal routeC_STS059DO   {C_STS059DO = C_MELONDO}
+! Water released from New Melones for minimum flow (?) route past Goodwin
+goal routeC_STS059MIN  {C_STS059MIN = C_MELONMIN}
+
+

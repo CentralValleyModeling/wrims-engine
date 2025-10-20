@@ -1,0 +1,76 @@
+/*
+RETURN FLOWS FROM DEMAND UNITS
+
+NAMING TAKES THE FOLLOWING FORMS:
+R_{DEMAND UNIT}     - return flow from specific demand unit
+R_{WBA}_{DESTINATION}   - aggregated return from WBA to specific location
+
+*/
+
+
+define TW_26S_NA            {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'}
+goal setR_26S_NA_MOK019 {R_26S_NA_MOK019 = TW_26S_NA /* +LF_26S_NA + OS_26S_NA */ - RU_26S_NA}  !add by Richard 5/22/2013
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60N     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 60N_NA1 - Jackson Valley ID - Ag
+!============================================================= 
+define R_60N_NA1        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60N_NA1       {R_60N_NA1        = TW_60N_NA1 + LF_60N_NA1 + OS_60N_NA1 - RU_60N_NA1}
+goal setR_60N_DSC026    {R_60N_NA1_DSC026 = R_60N_NA1}
+
+
+!=============================================================
+! 60N_NA2 - Omochumne-Hartnell WD, Galt ID, Clay WD - Ag
+!============================================================= 
+define R_60N_NA2        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60N_NA2       {R_60N_NA2        = TW_60N_NA2 + LF_60N_NA2 + OS_60N_NA2 - RU_60N_NA2}
+goal setR_60N_CSM005    {R_60N_NA2_CSM005 = R_60N_NA2}
+
+
+!=============================================================
+! 60N_NA3 - North San Joaquin WCD - Ag
+!============================================================= 
+define R_60N_NA3        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60N_NA3       {R_60N_NA3        = TW_60N_NA3 + LF_60N_NA3 + OS_60N_NA3 - RU_60N_NA3}
+goal setR_60N_SJR028    {R_60N_NA3_SJR028 = R_60N_NA3}
+
+
+!=============================================================
+! 60N_NA4 - Woodbridge ID - Ag
+!============================================================= 
+define R_60N_NA4        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60N_NA4       {R_60N_NA4        = TW_60N_NA4 + LF_60N_NA4 + OS_60N_NA4 - RU_60N_NA4}
+goal setR_60N_SJR022    {R_60N_NA4_SJR022 = R_60N_NA4}
+
+!=============================================================
+! 60N_NA5 - Riparian, Non-District - Ag
+!============================================================= 
+define R_60N_NA5        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60N_NA5       {R_60N_NA5        = TW_60N_NA5 + LF_60N_NA5 + OS_60N_NA5 - RU_60N_NA5}
+goal setR_60N_MOK028    {R_60N_NA5_MOK028 = R_60N_NA5}
+
+! No return flows from 60N_NA5 (Non-district)
+! No return flows from 60N_NU2 (Rancho Murieta)
+! No return flows from 60N_PU  (Rancho Seco PowerPlant)
+! No return flows from EBMUD
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Hills    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define WW_ELDID_NU3 {value min(UD_ELDID_NU3(3-month),UD_ELDID_NU3(4-month),UD_ELDID_NU3(5-month),UD_ELDID_NU3(6-month))}
+
+goal setR_ELDID_NU3_EDWWTP {R_ELDID_NU3_EDWWTP = WW_ELDID_NU3}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Wastewater (returns) from urban demand units which have no specified return pathway goes to deep percolation         !!!!!!!!!!
+!!! see constraints-DeepPercolation.wresl                                                                                !!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define WW_60N_NU2    {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+define WW_60N_PU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+!define WW_60S_NU2    {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}

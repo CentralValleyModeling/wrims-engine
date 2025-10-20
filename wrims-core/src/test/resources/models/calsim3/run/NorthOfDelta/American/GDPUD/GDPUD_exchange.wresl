@@ -1,0 +1,49 @@
+! GDPUD Exchange Logic
+! R. Hoang 5/2019
+!*********************************************************************************
+define annFolsom_Fazio_GDPUD {value 7.5} !Annual contract amount (TAF) 
+define D_NFA016_WTPWAL_CVP {std kind 'DIVERSION-CVP' units 'CFS'}
+define D_NFA016_WTPWAL_WR {std kind 'DIVERSION' units 'CFS'}
+
+!Identify the remaining Fazio supplies for GDPUD
+define monGDPUD_Fazio_RemainingSupplydv {std kind 'SUPPLY' units 'TAF'}
+define monGDPUD_Fazio_RemainingSupply {
+	case FirstWY {
+		condition wateryear==BgnWY .and. month==Oct
+		value annFolsom_Fazio_GDPUD*perdel_cvpmi_sys
+	}
+	case March {
+		condition month == Mar
+		value annFolsom_Fazio_GDPUD*perdel_cvpmi_sys
+		}
+	case April {
+		condition month == Apr
+		value annFolsom_Fazio_GDPUD*perdel_cvpmi_sys - D_NFA016_WTPWAL_CVP(-1)*cfs_taf(-1)
+		}
+	case monthMay {
+		condition month == May
+		value annFolsom_Fazio_GDPUD*perdel_cvpmi_sys - D_NFA016_WTPWAL_CVP(-1)*cfs_taf(-1) - D_NFA016_WTPWAL_CVP(-2)*cfs_taf(-2)
+		}
+	case JunSep {
+		condition range(month,Jun,Sep)
+		value monGDPUD_Fazio_RemainingSupplydv(-1) - D_NFA016_WTPWAL_CVP(-1)*cfs_taf(-1)
+		}
+	case OctFeb {
+		condition always
+		value monGDPUD_Fazio_RemainingSupplydv(-1) - D_NFA016_WTPWAL_CVP(-1)*cfs_taf(-1)
+		}
+	}
+	
+goal setmonGDPUD_Fazio_RemainingSupplydv {monGDPUD_Fazio_RemainingSupplydv = monGDPUD_Fazio_RemainingSupply}
+goal setD_NFA016_WTPWAL_CVP {D_NFA016_WTPWAL = D_NFA016_WTPWAL_CVP + D_NFA016_WTPWAL_WR}
+goal limD_NFA016_WTPWAL_CVP_FazioSupply  {D_NFA016_WTPWAL_CVP < monGDPUD_Fazio_RemainingSupply/**perdel_cvpmi_sys*/*taf_cfs} !Fazio water delivered to GDPUD < contract amount
+
+goal GDPUD_Exchg_Priority { !Prioritize other supply sources over CVP water for GDPUD
+  lhs D_NFA016_WTPWAL_CVP
+  case OctMar {
+    condition   range(month,Oct,Mar)
+    rhs         0.
+    lhs>rhs     penalty 10. }
+}
+
+goal setD_WTPWAL_GDPUD_PU {D_WTPWAL_GDPUD_PU = D_NFA016_WTPWAL_CVP}

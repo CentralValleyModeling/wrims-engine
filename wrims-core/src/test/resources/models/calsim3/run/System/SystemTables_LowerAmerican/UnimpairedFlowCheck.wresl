@@ -1,0 +1,65 @@
+! UnimpairedFlowCheck.wresl
+
+define UnimpairedFlowFairOaks {std kind 'FNF' units 'TAF'}
+
+define S_LKVLY_SV          {timeseries kind 'STORAGE'   units 'TAF'}
+define D_NNA013_LVC001_SV  {timeseries kind 'DIVERSION'   units 'TAF' convert 'CFS'}
+
+define S_LKVLY             {std kind 'STORAGE'   units 'TAF'}
+define D_NNA013_LVC001     {std kind 'DIVERSION'   units 'CFS'}
+
+goal set_S_LKVLY {lhs S_LKVLY case WatershedsOn {condition simulateUpperYubaBear == 1 rhs S_LKVLY[YUBABEAR]}
+                                              case Otherwise    {condition always                rhs S_LKVLY_SV}}
+                            
+goal set_D_NNA013_LVC001 {lhs D_NNA013_LVC001 case WatershedsOn {condition simulateUpperYubaBear == 1 rhs D_NNA013_LVC001[YUBABEAR]}
+                                              case Otherwise    {condition always                rhs D_NNA013_LVC001_SV}}
+
+goal setFNF {UnimpairedFlowFairOaks =  C_AMR022*cfs_taf
+                                      +E_ALOHA*cfs_taf
+                                      +E_CAPLS*cfs_taf
+                                      +E_FOLSM*cfs_taf
+                                      +E_FRMDW*cfs_taf
+                                      +E_GERLE*cfs_taf
+                                      +E_HHOLE*cfs_taf
+                                      +E_ICEHS*cfs_taf
+                                      +E_LOONL*cfs_taf
+                                      +E_NTOMA*cfs_taf
+                                      +E_SILVR*cfs_taf
+                                      +E_STMPY*cfs_taf
+                                      +E_UNVLY*cfs_taf
+                                      +S_LKVLY-S_LKVLY(-1)
+                                      +S_ALOHA-S_ALOHA(-1)
+                                      +S_CAPLS-S_CAPLS(-1)
+                                      +S_FOLSM-S_FOLSM(-1)
+                                      +S_FRMDW-S_FRMDW(-1)
+                                      +S_GERLE-S_GERLE(-1)
+                                      +S_HHOLE-S_HHOLE(-1)
+                                      +S_ICEHS-S_ICEHS(-1)
+                                      +S_LOONL-S_LOONL(-1)
+                                      +S_NTOMA-S_NTOMA(-1)
+                                      +S_SILVR-S_SILVR(-1)
+                                      +S_STMPY-S_STMPY(-1)
+                                      +S_UNVLY-S_UNVLY(-1)
+                                      +D_NNA013_LVC001*cfs_taf
+                                      +D_NFA016_ABT002*cfs_taf
+                                      +C_EDC014*cfs_taf-D_EDC021_EDP003*cfs_taf
+                                      +D_EDC014_JNKSN*cfs_taf
+                                      +D_PLC007_GDD010*cfs_taf
+                                      +D_NTOMA_FSC003*cfs_taf
+                                      +D_FOLSM_26S_PU3*cfs_taf
+                                      +D_FOLSM_26S_NU4*cfs_taf
+                                      +D_FOLSM_WTPFOL*cfs_taf
+                                      +D_FOLSM_WTPEDH*cfs_taf
+                                      +D_FOLSM_WTPRSV*cfs_taf
+                                      +D_FOLSM_WTPSJP*cfs_taf
+                                      +D_FOLSM_ELDID_NA3*cfs_taf
+                                      +D_FOLSM_EDCOCA_NU1*cfs_taf
+                                      +D_FOLSM_EDCOCA_NU2*cfs_taf
+                                      +D_FOLSM_EDCOCA_NA1*cfs_taf
+                                      +D_FOLSM_EDCOCA_NA2*cfs_taf
+                                      -D_ECHOL_ELC001*cfs_taf
+                                      -C_STH007*cfs_taf
+                                      -C_MRM001*cfs_taf
+                                      +D_SFA040_WRT000*cfs_taf-C_WRT000*cfs_taf}
+                                      
+                

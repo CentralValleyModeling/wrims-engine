@@ -1,0 +1,49 @@
+	!Disaggregate flow arcs for operational controls and to color water.
+	include 'CCWD_Ops\CCWD_flow_disaggregation.wresl'
+
+	!Implement accounting for LVE integrated operations.
+	include 'LVE\IO_Accounting.wresl'
+	
+	!Limit intake and pipe capacities according to user input.
+	include 'CCWD_Ops\CCWD_Size_Pipes_Intakes.wresl'
+
+
+	!Set CCWD delivery demands
+	include 'CCWD_Ops\CCWD_Demands.wresl'
+
+        !Define Water Quality Conditions
+        !include '..\Delta\ANN\Intake_WQ_estimates.wresl'
+        include 'CCWD_Ops\CCWD_WQ_SV_readWQ.wresl'
+
+	!Define Mallard Slough operation
+	include 'CCWD_Ops\CCWD_MallardSlough.wresl'
+
+	!Define LV operations bounds
+	include 'CCWD_Ops\CCWD_LosVaqueros.wresl'
+	
+	!Bound diversion sources
+	include 'CCWD_Ops\CCWD_Delta_Diversions.wresl'
+	
+!Retrieve intake preference info from lookup tables.
+define RS_pref {
+	case RS_preference {
+		condition	intake_pref > 0.5 .and. intake_pref < 1.5
+		select 		RS_pref from CCWD_INTAKE_PREF where month=month
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+define ORVC_pref {
+	case ORVC_preference {
+		condition	intake_pref > 1.5
+		select 		ORVC_pref from CCWD_INTAKE_PREF where month=month
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+	
+

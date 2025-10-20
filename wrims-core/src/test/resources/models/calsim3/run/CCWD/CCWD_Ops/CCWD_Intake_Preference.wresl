@@ -1,0 +1,253 @@
+!*****************************************************************************************************************************
+
+!Favor RS intake in months specified by user in UserInput.wresl.  Intake preference is given only when LV storage is not negatively affected and 
+!service area water quality targets can be met.  Otherwise, intake choice is base on water quality.
+
+define switch_RS_LCL1 {
+	case LowCL_or_Pref {
+		condition	WQ408_RS <= WQ408_ORVC_min .or. RS_pref > 0.5 .and. WQ420_pRS <= WQ420_target .and. fill_switch > 0.5 .or. RS_pref > 0.5 .and. fill_switch < 0.5
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define switch_OR_LCL1 {
+	case LowCL {
+		condition	WQ408_OR <= WQ408_VC
+		value		max(0.,1.-switch_RS_LCL1)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+define switch_VC_LCL1 {value	max(0.,1. - max(switch_RS_LCL1,switch_OR_LCL1))}
+
+define switch_RS_HCL1 {
+	case HighCL {
+		condition	WQ408_RS > WQ408_ORVC_max
+		value		max(0.,1. - switch_RS_LCL1)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+define switch_OR_HCL1 {
+	case HighCL {
+		condition	WQ408_OR > WQ408_VC
+		value		max(0.,1. - switch_RS_HCL1)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+define switch_VC_HCL1 {value	max(0.,1. - max(switch_RS_HCL1,switch_OR_HCL1))}
+
+define switch_RS_MCL1 {value	max(0.,1. - max(switch_RS_LCL1,switch_RS_HCL1))}
+define switch_OR_MCL1 {value	max(0.,1. - max(switch_OR_LCL1,switch_OR_HCL1))}
+define switch_VC_MCL1 {value	max(0.,1. - max(switch_VC_LCL1,switch_VC_HCL1))}
+
+!From January to July, diversions from OR or VC take priority over RS because of
+!fish screens as long as water quality goals met and storage not sacrificed.
+!If it is determined there is a fill opportunity, and RS has the middle water quality,
+!favor the lower ORVC water quality to ensure maximum filling while meeting Service Area demands
+!and water quality targets.
+
+define switch_RS_HCL2 {
+	case FillOpp {
+		condition	fill_switch > 0.5 .and. WQ408_RS >= WQ408_ORVC_min .and. WQ408_RS > WQ420_target
+		value		1.
+	}
+	case WQ_Constrains {
+		condition	WQ408_RS < WQ408_ORVC_min .and. WQ408_RS >= WQ420_target
+		value		0.
+	}
+	case JantoJul {		!Fish protection supercedes best available water quality as long as delivery standard met.
+		condition	ORVC_pref > 0.5
+		value		1.
+	}
+	case HighCL {
+		condition	WQ408_RS >= WQ408_OR .and. WQ408_RS >= WQ408_VC
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define switch_OR_HCL2 {
+	case HighCL {
+		condition	WQ408_OR > WQ408_VC
+		value		1.*max(0., 1. - switch_RS_HCL2)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define switch_VC_HCL2 {value 1.*max(0., 1. - switch_RS_HCL2)*max(0., 1. - switch_OR_HCL2)}
+
+define switch_RS_MCL2 {
+	case MidCL {
+		condition	WQ408_RS >= WQ408_OR .or. WQ408_RS >= WQ408_VC
+		value		1.*max(0., 1. - switch_RS_HCL2)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define switch_OR_MCL2 {
+	case MidCL {
+		condition	WQ408_OR > WQ408_VC .and. switch_RS_HCL2 > 0.5
+		value		1.
+	}
+	case MidCL2 {
+		condition	WQ408_OR > WQ408_RS .and. switch_VC_HCL2 > 0.5
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define switch_VC_MCL2 {value 1.*max(0., 1. - switch_RS_MCL2)*max(0., 1. - switch_OR_MCL2)}
+
+define switch_RS_LCL2 {value 1.*max(0., 1. - switch_RS_HCL2)*max(0., 1. - switch_RS_MCL2)}
+define switch_OR_LCL2 {value 1.*max(0., 1. - switch_OR_HCL2)*max(0., 1. - switch_OR_MCL2)}
+define switch_VC_LCL2 {value 1.*max(0., 1. - switch_RS_LCL2)*max(0., 1. - switch_OR_LCL2)}
+
+!Set intake preference switches based on user choice in UserInput.wresl
+define switch_RS_LCL {
+	case Pref_0_or_1 {
+		condition	intake_pref < 1.5
+		value	switch_RS_LCL1
+	}
+	case otherwise {
+		condition	always
+		value	switch_RS_LCL2
+	}
+}
+define switch_OR_LCL {
+	case Pref_0_or_1 {
+		condition	intake_pref < 1.5
+		value	switch_OR_LCL1
+	}
+	case otherwise {
+		condition	always
+		value	switch_OR_LCL2
+	}
+}
+define switch_VC_LCL {value	max(0.,1. - max(switch_RS_LCL,switch_OR_LCL))}
+
+define switch_RS_HCL {
+	case Pref_0_or_1 {
+		condition	intake_pref < 1.5
+		value	switch_RS_HCL1
+	}
+	case otherwise {
+		condition	always
+		value	switch_RS_HCL2
+	}
+}
+define switch_OR_HCL {
+	case Pref_0_or_1 {
+		condition	intake_pref < 1.5
+		value	switch_OR_HCL1
+	}
+	case otherwise {
+		condition	always
+		value	switch_OR_HCL2
+	}
+}
+define switch_VC_HCL {value	max(0.,1. - max(switch_RS_HCL,switch_OR_HCL))}
+
+define switch_RS_MCL {value	max(0.,1. - max(switch_RS_LCL,switch_RS_HCL))}
+define switch_OR_MCL {value	max(0.,1. - max(switch_OR_LCL,switch_OR_HCL))}
+define switch_VC_MCL {value	max(0.,1. - max(switch_VC_LCL,switch_VC_HCL))}
+
+
+!Cap intake wq subarcs to operate to wq and fish screen criteria.
+goal cap_D408_RS_HCL {D408_RS_HCL < switch_RS_HCL * 9999.}
+goal cap_D408_OR_HCL {D408_OR_HCL < switch_OR_HCL * 9999.}
+goal cap_D408_VC_HCL {D408_VC_HCL < switch_VC_HCL * 9999.}
+
+goal cap_D408_RS_MCL {D408_RS_MCL < switch_RS_MCL * 9999.}
+goal cap_D408_OR_MCL {D408_OR_MCL < switch_OR_MCL * 9999.}
+goal cap_D408_VC_MCL {D408_VC_MCL < switch_VC_MCL * 9999.}
+
+goal cap_D408_RS_LCL {D408_RS_LCL < switch_RS_LCL * 9999.}
+goal cap_D408_OR_LCL {D408_OR_LCL < switch_OR_LCL * 9999.}
+goal cap_D408_VC_LCL {D408_VC_LCL < switch_VC_LCL * 9999.}
+
+!Save subarc switch parameters.
+define switch_RS_HCL_ {alias switch_RS_HCL kind 'wq-trigger' units 'none'}
+define switch_OR_HCL_ {alias switch_OR_HCL kind 'wq-trigger' units 'none'}
+define switch_VC_HCL_ {alias switch_VC_HCL kind 'wq-trigger' units 'none'}
+
+define switch_RS_MCL_ {alias switch_RS_MCL kind 'wq-trigger' units 'none'}
+define switch_OR_MCL_ {alias switch_OR_MCL kind 'wq-trigger' units 'none'}
+define switch_VC_MCL_ {alias switch_VC_MCL kind 'wq-trigger' units 'none'}
+
+define switch_RS_LCL_ {alias switch_RS_LCL kind 'wq-trigger' units 'none'}
+define switch_OR_LCL_ {alias switch_OR_LCL kind 'wq-trigger' units 'none'}
+define switch_VC_LCL_ {alias switch_VC_LCL kind 'wq-trigger' units 'none'}
+
+!Save subarc switch 1 parameters.  (Covers no preference and RS preference options.)
+define switch_RS_HCL1_ {alias switch_RS_HCL1 kind 'wq-trigger' units 'none'}
+define switch_OR_HCL1_ {alias switch_OR_HCL1 kind 'wq-trigger' units 'none'}
+define switch_VC_HCL1_ {alias switch_VC_HCL1 kind 'wq-trigger' units 'none'}
+
+define switch_RS_MCL1_ {alias switch_RS_MCL1 kind 'wq-trigger' units 'none'}
+define switch_OR_MCL1_ {alias switch_OR_MCL1 kind 'wq-trigger' units 'none'}
+define switch_VC_MCL1_ {alias switch_VC_MCL1 kind 'wq-trigger' units 'none'}
+
+define switch_RS_LCL1_ {alias switch_RS_LCL1 kind 'wq-trigger' units 'none'}
+define switch_OR_LCL1_ {alias switch_OR_LCL1 kind 'wq-trigger' units 'none'}
+define switch_VC_LCL1_ {alias switch_VC_LCL1 kind 'wq-trigger' units 'none'}
+
+!Save subarc switch 2 parameters.  (Covers ORVC preference option.)
+define switch_RS_HCL2_ {alias switch_RS_HCL2 kind 'wq-trigger' units 'none'}
+define switch_OR_HCL2_ {alias switch_OR_HCL2 kind 'wq-trigger' units 'none'}
+define switch_VC_HCL2_ {alias switch_VC_HCL2 kind 'wq-trigger' units 'none'}
+
+define switch_RS_MCL2_ {alias switch_RS_MCL2 kind 'wq-trigger' units 'none'}
+define switch_OR_MCL2_ {alias switch_OR_MCL2 kind 'wq-trigger' units 'none'}
+define switch_VC_MCL2_ {alias switch_VC_MCL2 kind 'wq-trigger' units 'none'}
+
+define switch_RS_LCL2_ {alias switch_RS_LCL2 kind 'wq-trigger' units 'none'}
+define switch_OR_LCL2_ {alias switch_OR_LCL2 kind 'wq-trigger' units 'none'}
+define switch_VC_LCL2_ {alias switch_VC_LCL2 kind 'wq-trigger' units 'none'}
+
+
+!Now establish intake priority for partner filling and wheeling.
+define swt_OR_P_LCL {
+	case LCL {
+		condition	switch_OR_LCL > 0.5 .or. switch_VC_HCL > 0.5
+		value		1.
+	}
+	case HCL {
+		condition	always
+		value		0.
+	}
+}
+
+define swt_OR_P_HCL {value max(0., 1. - swt_OR_P_LCL)}
+define swt_VC_P_LCL {value	swt_OR_P_HCL}
+define swt_VC_P_HCL {value	swt_OR_P_LCL}
+
+goal cap_D408_OR_P_LCL {D408_OR_P_LCL < swt_OR_P_LCL * 9999.}
+goal cap_D408_VC_P_LCL {D408_VC_P_LCL < swt_VC_P_LCL * 9999.}
+
+goal cap_D408_OR_P_HCL {D408_OR_P_HCL < swt_OR_P_HCL * 9999.}
+goal cap_D408_VC_P_HCL {D408_VC_P_HCL < swt_VC_P_HCL * 9999.}
+

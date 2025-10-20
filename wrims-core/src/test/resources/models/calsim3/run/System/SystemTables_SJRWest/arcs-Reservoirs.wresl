@@ -1,0 +1,75 @@
+/*
+ STORAGE CONTINUITY
+ 
+ 
+ 
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Luis Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!The SWP and CVP portions of San Luis are represented separately in Calsim
+
+!CVP Portion of San Luis Reseroir
+define S_SLUIS_CVPlevel1 {value 38.} ! Updated CVP SL deadpool from 45 to 38 TAF per Devinder Dhillon, 04/11/2022
+define S_SLUIS_CVP_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_CVPlevel2 {value 38.} ! Updated CVP SL deadpool from 45 to 38 TAF per Devinder Dhillon, 04/11/2022
+define S_SLUIS_CVP_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_CVP_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_CVPlevel4 {value 972}
+define S_SLUIS_CVP_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_CVPlevel5 {value 972}
+define S_SLUIS_CVP_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_CVP {std kind 'STORAGE' units 'TAF'} !CVP SAN LUIS RESERVOIR
+define E_SLUIS_CVP {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SLUIS_CVP {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SLUIS {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SLUIS_CVPlast {select area from res_info given storage=1000*S_SLUIS_CVP(-1) use linear where res_num=11}
+define A_SLUIS_CVPforward {select area from res_info given storage=1050*S_SLUIS_CVP(-1) use linear where res_num=11}
+define A_SLUIS_CVPback {select area from res_info given storage=950*S_SLUIS_CVP(-1) use linear where res_num=11}
+!define coefev_SLUIS_CVP {value (A_SLUIS_CVPforward - A_SLUIS_CVPback)/(100*max(0.01,S_SLUIS_CVP(-1)))}
+define coefev_SLUIS_CVP  {                                          
+	case NEARZERO { condition S_SLUIS_CVP(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=11}	 
+	case Otherwise { condition always 
+                value (A_SLUIS_CVPforward - A_SLUIS_CVPback)/(100*max(0.01,S_SLUIS_CVP(-1)))}
+        }
+define relcap_SLUIS_CVP {select discharge from res_info given storage=1000*S_SLUIS_CVP(-1) use linear where res_num=11}
+define S_SLUIS_CVP_DP {value S_SLUIS_CVPlevel1} ! Created alias to ensure consistent reference to CVP SL deadpool value
+
+!SWP Portion of San Luis Reservoir
+define S_SLUIS_SWPlevel1 {value 42.} ! Updated SWP SL deadpool from 55 to 42 TAF per Devinder Dhillon, 04/11/2022
+define S_SLUIS_SWP_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_SWPlevel2 {value 42.} ! Updated SWP SL deadpool from 55 to 42 TAF per Devinder Dhillon, 04/11/2022
+define S_SLUIS_SWP_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_SWP_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_SWPlevel4 {value 1067}
+define S_SLUIS_SWP_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_SWPlevel5 {value 1067}
+define S_SLUIS_SWP_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SLUIS_SWP {std kind 'STORAGE' units 'TAF'} !SWP SAN LUIS RESERVOIR
+define E_SLUIS_SWP {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SLUIS_SWP {std kind 'SURFACE-AREA' units 'ACRES'}
+define A_SLUIS_SWPlast {select area from res_info given storage=1000*S_SLUIS_SWP(-1) use linear where res_num=12}
+define A_SLUIS_SWPforward {select area from res_info given storage=1050*S_SLUIS_SWP(-1) use linear where res_num=12}
+define A_SLUIS_SWPback {select area from res_info given storage=950*S_SLUIS_SWP(-1) use linear where res_num=12}
+!define coefev_SLUIS_SWP {value (A_SLUIS_SWPforward - A_SLUIS_SWPback)/(100*max(0.01,S_SLUIS_SWP(-1)))}
+define coefev_SLUIS_SWP  {                                          
+	case NEARZERO { condition S_SLUIS_SWP(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=12}	 
+	case Otherwise { condition always 
+                value (A_SLUIS_SWPforward - A_SLUIS_SWPback)/(100*max(0.01,S_SLUIS_SWP(-1)))}
+        }
+
+define relcap_SLUIS_SWP {select discharge from res_info given storage=1000*S_SLUIS_SWP(-1) use linear where res_num=12}
+define S_SLUIS_SWP_DP {value S_SLUIS_SWPlevel1} ! Created alias to ensure consistent reference to SWP SL deadpool value
+
+! define E_SLUIS {std kind 'EVAPORATION' units 'TAF'}
+! goal tot_E_SLUIS {E_SLUIS = E_SLUIS_SWP + E_SLUIS_CVP}
+
+define S_SLUIS {std kind 'STORAGE' units 'TAF'} !SWP SAN LUIS RESERVOIR
+goal tot_S_SLUIS {S_SLUIS = S_SLUIS_SWP + S_SLUIS_CVP}
+
+

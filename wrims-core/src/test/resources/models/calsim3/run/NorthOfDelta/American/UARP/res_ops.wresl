@@ -1,0 +1,1247 @@
+!UARP Operating Rules
+!M.Bachman 12/2017
+
+!Level 4 storage is based on DSOD maximum operating pool requirements.
+!Level 3 storage is based on 
+!Level 2 storage is based on FERC minimum operating pool requirements in Condition 5 of Appendix A of FERC Project No. 2101-084.
+
+/*! Daily Operation Constraints:
+! UARP operations are borrowed from the SMUD UARP Water Balance Model Technical Report.  Loon lake, Ice house,
+! and Union Valley Reservoirs are operated by setting a target operating level according to April-July unimpaired runoff
+! at American River at Fair Oaks gage.  A five-level  "wetness index" is defined in October and target reservoir elevations
+! are identified at a 15-day interval. The target elevations are determined using a lookup table and values are interpolated for each day.
+
+! amer_apr_july    Wetness Index:
+!    <500		A
+!    <1000		B
+!    <1500		C
+!    <2000		D
+!    >2000      E*/ !from CH Daily Model
+
+
+!! Problem with high releases in dry years. Temp fix.
+!goal limitstoragerelease {C_SLV014_ADD + c_jbt004 < MAX(0,(S_UNVLY(-1) - 120.)*taf_cfs) + I_SLV015 + I_UNVLY + I_ICEHS} 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Spill Forecasting !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------------------------------------------------------------
+!Unimpaired inflows
+!-------------------------------------------------------------------------------------
+define UARPForecast_LOONLInflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_LOONL(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UARPForecast_LRB004Inflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_LRB004(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UARPForecast_RUB047Inflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_RUB047(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UARPForecast_SFR006Inflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_SFR006(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UARPForecast_UNVLYInflow {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_UNVLY(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UARPForecast_ICEHSInflow {
+	case JanMay  {condition range(month,Jan,May) sum(i=0,8-month,1)  I_ICEHS(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}	
+define UARPForecast_GRL001Inflow {
+	case JanMay  {condition range(month,Jan,May) sum(i=0,8-month,1)  I_GERLE(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}	
+define UARPForecast_SLV015Inflow {
+	case JanMay  {condition range(month,Jan,May) sum(i=0,8-month,1)  I_SLV015(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}	
+	
+define UARPForecast_PYR001Inflow {
+	case JanMay  {condition range(month,Jan,May) sum(i=0,8-month,1)  I_PYR001(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}	
+
+
+! Balance for SFA030	
+
+define UARPForecast_CaplesMIF_jancfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Jan, Identifier = 3}
+					case abvNormal {condition  UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Jan, Identifier = 3}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Jan, Identifier = 3}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Jan, Identifier = 3}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Jan, Identifier = 3}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_CaplesMIF_Jan{value UARPForecast_CaplesMIF_jancfs*cfs_taf}
+
+define UARPForecast_CaplesMIF_febcfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Feb, Identifier = 3}
+					case abvNormal {condition  UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Feb, Identifier = 3}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Feb, Identifier = 3}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Feb, Identifier = 3}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Feb, Identifier = 3}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_CaplesMIF_Feb{value UARPForecast_CaplesMIF_febcfs*cfs_taf}
+
+define UARPForecast_CaplesMIF_marcfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Mar, Identifier = 3}
+					case abvNormal {condition  UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Mar, Identifier = 3}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Mar, Identifier = 3}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Mar, Identifier = 3}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Mar, Identifier = 3}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_CaplesMIF_Mar{value UARPForecast_CaplesMIF_marcfs*cfs_taf}
+
+define UARPForecast_CaplesMIF_aprcfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Apr, Identifier = 3}
+					case abvNormal {condition  UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Apr, Identifier = 3}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Apr, Identifier = 3}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Apr, Identifier = 3}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Apr, Identifier = 3}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_CaplesMIF_Apr{value UARPForecast_CaplesMIF_aprcfs*cfs_taf}
+
+define UARPForecast_CaplesMIF_maycfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=May, Identifier = 3}
+					case abvNormal {condition  UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=May, Identifier = 3}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=May, Identifier = 3}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=May, Identifier = 3}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=May, Identifier = 3}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_CaplesMIF_May{value UARPForecast_CaplesMIF_maycfs*cfs_taf}
+
+define UARPForecast_PyrMIF_jancfs { !Caples (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Jan, Identifier = 2}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Jan, Identifier = 2}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Jan, Identifier = 2}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Jan, Identifier = 2}
+					case Crit {condition UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Jan, Identifier = 2}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_PyrMIF_Jan{value UARPForecast_PyrMIF_jancfs*cfs_taf}
+define UARPForecast_PyrMIF_febcfs { !Pyramid February (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Feb, Identifier = 2}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Feb, Identifier = 2}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Feb, Identifier = 2}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Feb, Identifier = 2}
+					case Crit {condition UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Feb, Identifier = 2}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_PyrMIF_Feb{value UARPForecast_PyrMIF_febcfs*cfs_taf}
+define UARPForecast_PyrMIF_marcfs { !Pyramid Mar (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Mar, Identifier = 2}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Mar, Identifier = 2}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Mar, Identifier = 2}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Mar, Identifier = 2}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Mar, Identifier = 2}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_PyrMIF_Mar{value UARPForecast_PyrMIF_marcfs*cfs_taf}
+define UARPForecast_PyrMIF_aprcfs { !Pyramid Apr (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=apr, Identifier = 2}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=apr, Identifier = 2}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=apr, Identifier = 2}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=apr, Identifier = 2}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=apr, Identifier = 2}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_PyrMIF_Apr{value UARPForecast_PyrMIF_aprcfs*cfs_taf}
+define UARPForecast_PyrMIF_maycfs { !Pyramid May (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=May, Identifier = 2}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=May, Identifier = 2}
+					case blwNormal {condition  UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=May, Identifier = 2}
+					case Dry {condition  UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=May, Identifier = 2}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=May, Identifier = 2}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_PyrMIF_May{value UARPForecast_PyrMIF_maycfs*cfs_taf}
+
+
+
+define UARPForecast_SILVRMIF_jancfs { !Silver Jan (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Jan, Identifier = 4}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Jan, Identifier = 4}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Jan, Identifier = 4}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Jan, Identifier = 4}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Jan, Identifier = 4}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SILVRMIF_Jan{value UARPForecast_SILVRMIF_jancfs*cfs_taf}
+
+define UARPForecast_SILVRMIF_febcfs { !Silver Feb (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Feb, Identifier = 4}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Feb, Identifier = 4}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Feb, Identifier = 4}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Feb, Identifier = 4}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Feb, Identifier = 4}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SILVRMIF_Feb{value UARPForecast_SILVRMIF_febcfs*cfs_taf}
+define UARPForecast_SILVRMIF_marcfs { !Silver Feb (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Mar, Identifier = 4}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Mar, Identifier = 4}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Mar, Identifier = 4}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Mar, Identifier = 4}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Mar, Identifier = 4}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SILVRMIF_Mar{value UARPForecast_SILVRMIF_marcfs*cfs_taf}
+define UARPForecast_SILVRMIF_aprcfs { !Silver Apr (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=Apr, Identifier = 4}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=Apr, Identifier = 4}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=Apr, Identifier = 4}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=Apr, Identifier = 4}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=Apr, Identifier = 4}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SILVRMIF_Apr{value UARPForecast_SILVRMIF_aprcfs*cfs_taf}
+
+define UARPForecast_SILVRMIF_maycfs { !Silver May (TAF)
+					case Wet {condition UARPYrType>0.5 .and.  UARPYrType<1.5 		select Wet from MIF_EID  
+							  where month=May, Identifier = 4}
+					case abvNormal {condition UARPYrType>1.5 .and.  UARPYrType<2.5		select AboveNormal from MIF_EID
+							  where month=May, Identifier = 4}
+					case blwNormal {condition UARPYrType>2.5 .and.  UARPYrType<3.5 		select BelowNormal from MIF_EID 
+							  where month=May, Identifier = 4}
+					case Dry {condition UARPYrType>3.5 .and.  UARPYrType<4.5  		select Dry from MIF_EID 
+							  where month=May, Identifier = 4}
+					case Crit {condition  UARPYrType>4.5 .and.  UARPYrType<5.5  		select CriticalDry from MIF_EID 
+							  where month=May, Identifier = 4}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SILVRMIF_May{value UARPForecast_SILVRMIF_maycfs*cfs_taf}
+
+define UARPForecast_SFA030MIF_jancfs { !Chili Bar MIF Jan(TAF)
+					case Wet {condition WY_PGECh>0.5 .and.  WY_PGECh<1.5 		select Wet from MIF_PGECh_req
+							  where month=Jan}
+					case abvNormal {condition WY_PGECh>1.5 .and.  WY_PGECh<2.5			select AboveNormal from MIF_PGECh_req 
+							  where month=Jan}
+					case blwNormal {condition  WY_PGECh>2.5 .and.  WY_PGECh<3.5 	 		select BelowNormal from MIF_PGECh_req 
+							  where month=Jan}
+					case Dry {condition  WY_PGECh>3.5 .and.  WY_PGECh<4.5  		select Dry from MIF_PGECh_req 
+							  where month=Jan}
+					case Crit {condition  WY_PGECh>4.5 .and.  WY_PGECh<5.5 	select CriticalDry from MIF_PGECh_req 
+							  where month=Jan}
+				   	case SuperDry {condition  WY_PGECh>5.5 .and.  WY_PGECh<6.5 	select SuperDry from MIF_PGECh_req 
+							  where month=Jan}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFA030MIF_Jan{value UARPForecast_SFA030MIF_jancfs*cfs_taf}	
+
+define UARPForecast_SFA030MIF_febcfs { !Chili Bar MIF Feb(TAF)
+					case Wet {condition WY_PGECh>0.5 .and.  WY_PGECh<1.5 		select Wet from MIF_PGECh_req
+							  where month=Feb}
+					case abvNormal {condition WY_PGECh>1.5 .and.  WY_PGECh<2.5			select AboveNormal from MIF_PGECh_req 
+							  where month=Feb}
+					case blwNormal {condition  WY_PGECh>2.5 .and.  WY_PGECh<3.5 	 		select BelowNormal from MIF_PGECh_req 
+							  where month=Feb}
+					case Dry {condition  WY_PGECh>3.5 .and.  WY_PGECh<4.5  		select Dry from MIF_PGECh_req 
+							  where month=Feb}
+					case Crit {condition  WY_PGECh>4.5 .and.  WY_PGECh<5.5 	select CriticalDry from MIF_PGECh_req 
+							  where month=Feb}
+				   	case SuperDry {condition  WY_PGECh>5.5 .and.  WY_PGECh<6.5 	select SuperDry from MIF_PGECh_req 
+							  where month=Feb}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFA030MIF_Feb{value UARPForecast_SFA030MIF_febcfs*cfs_taf}	
+
+
+define UARPForecast_SFA030MIF_marcfs { !Chili Bar MIF Feb(TAF)
+					case Wet {condition WY_PGECh>0.5 .and.  WY_PGECh<1.5 		select Wet from MIF_PGECh_req
+							  where month=Mar}
+					case abvNormal {condition WY_PGECh>1.5 .and.  WY_PGECh<2.5			select AboveNormal from MIF_PGECh_req 
+							  where month=Mar}
+					case blwNormal {condition  WY_PGECh>2.5 .and.  WY_PGECh<3.5 	 		select BelowNormal from MIF_PGECh_req 
+							  where month=Mar}
+					case Dry {condition  WY_PGECh>3.5 .and.  WY_PGECh<4.5  		select Dry from MIF_PGECh_req 
+							  where month=Mar}
+					case Crit {condition  WY_PGECh>4.5 .and.  WY_PGECh<5.5 	select CriticalDry from MIF_PGECh_req 
+							  where month=Mar}
+				   	case SuperDry {condition  WY_PGECh>5.5 .and.  WY_PGECh<6.5 	select SuperDry from MIF_PGECh_req 
+							  where month=Mar}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFA030MIF_Mar{value UARPForecast_SFA030MIF_marcfs*cfs_taf}	
+
+define UARPForecast_SFA030MIF_aprcfs { !Chili Bar MIF Feb(TAF)
+					case Wet {condition WY_PGECh>0.5 .and.  WY_PGECh<1.5 		select Wet from MIF_PGECh_req
+							  where month=Apr}
+					case abvNormal {condition WY_PGECh>1.5 .and.  WY_PGECh<2.5			select AboveNormal from MIF_PGECh_req 
+							  where month=Apr}
+					case blwNormal {condition  WY_PGECh>2.5 .and.  WY_PGECh<3.5 	 		select BelowNormal from MIF_PGECh_req 
+							  where month=Apr}
+					case Dry {condition  WY_PGECh>3.5 .and.  WY_PGECh<4.5  		select Dry from MIF_PGECh_req 
+							  where month=Apr}
+					case Crit {condition  WY_PGECh>4.5 .and.  WY_PGECh<5.5 	select CriticalDry from MIF_PGECh_req 
+							  where month=Apr}
+				   	case SuperDry {condition  WY_PGECh>5.5 .and.  WY_PGECh<6.5 	select SuperDry from MIF_PGECh_req 
+							  where month=Apr}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFA030MIF_Apr{value UARPForecast_SFA030MIF_aprcfs*cfs_taf}	
+define UARPForecast_SFA030MIF_maycfs { !Chili Bar MIF Feb(TAF)
+					case Wet {condition WY_PGECh>0.5 .and.  WY_PGECh<1.5 		select Wet from MIF_PGECh_req
+							  where month=May}
+					case abvNormal {condition WY_PGECh>1.5 .and.  WY_PGECh<2.5			select AboveNormal from MIF_PGECh_req 
+							  where month=May}
+					case blwNormal {condition  WY_PGECh>2.5 .and.  WY_PGECh<3.5 	 		select BelowNormal from MIF_PGECh_req 
+							  where month=May}
+					case Dry {condition  WY_PGECh>3.5 .and.  WY_PGECh<4.5  		select Dry from MIF_PGECh_req 
+							  where month=May}
+					case Crit {condition  WY_PGECh>4.5 .and.  WY_PGECh<5.5 	select CriticalDry from MIF_PGECh_req 
+							  where month=May}
+				   	case SuperDry {condition  WY_PGECh>5.5 .and.  WY_PGECh<6.5 	select SuperDry from MIF_PGECh_req 
+							  where month=May}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFA030MIF_May{value UARPForecast_SFA030MIF_maycfs*cfs_taf}	
+
+define Forebay_monthlypattern_Jan {select fraction from ElDoradoForebay_monthlypattern where month=Jan}
+define Forebay_monthlypattern_Feb {select fraction from ElDoradoForebay_monthlypattern where month=Feb}
+define Forebay_monthlypattern_Mar {select fraction from ElDoradoForebay_monthlypattern where month=Mar}
+define Forebay_monthlypattern_Apr {select fraction from ElDoradoForebay_monthlypattern where month=Apr}
+define Forebay_monthlypattern_May {select fraction from ElDoradoForebay_monthlypattern where month=May}
+
+
+define UARPForecast_NetSFAInflows{
+	case JanMay  {condition month == Jan  value 
+		max(0, UARPForecast_SFA030MIF_Jan+UD_EIDForebay*Forebay_monthlypattern_Jan - (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+max(UARPForecast_PyrMIF_Jancfs, I_PYR001)+UARPForecast_CAPLESMIF_jancfs+UARPForecast_SILVRMIF_jancfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_Feb+UD_EIDForebay*Forebay_monthlypattern_Feb - (I_SFA030(1)+I_RCK001(1)+I_SFA040(1)+I_BSH003(1)+I_SLV006(1)+I_PLM001(1)+I_ALD004(1)+I_ALD002(1)+I_SFA066(1)+I_SFA076(1)+I_SLF009(1)+max(UARPForecast_PyrMIF_febcfs, I_PYR001(1))+UARPForecast_CAPLESMIF_febcfs+UARPForecast_SILVRMIF_febcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_Mar+UD_EIDForebay*Forebay_monthlypattern_Mar - (I_SFA030(2)+I_RCK001(2)+I_SFA040(2)+I_BSH003(2)+I_SLV006(2)+I_PLM001(2)+I_ALD004(2)+I_ALD002(2)+I_SFA066(2)+I_SFA076(2)+I_SLF009(2)+max(UARPForecast_PyrMIF_marcfs, I_PYR001(2))+UARPForecast_CAPLESMIF_marcfs+UARPForecast_SILVRMIF_marcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_apr+UD_EIDForebay*Forebay_monthlypattern_Apr - (I_SFA030(3)+I_RCK001(3)+I_SFA040(3)+I_BSH003(3)+I_SLV006(3)+I_PLM001(3)+I_ALD004(3)+I_ALD002(3)+I_SFA066(3)+I_SFA076(3)+I_SLF009(3)+max(UARPForecast_PyrMIF_aprcfs, I_PYR001(3))+UARPForecast_CAPLESMIF_aprcfs+UARPForecast_SILVRMIF_aprcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_May+UD_EIDForebay*Forebay_monthlypattern_May - (I_SFA030(4)+I_RCK001(4)+I_SFA040(4)+I_BSH003(4)+I_SLV006(4)+I_PLM001(4)+I_ALD004(4)+I_ALD002(4)+I_SFA066(4)+I_SFA076(4)+I_SLF009(4)+max(UARPForecast_PyrMIF_maycfs, I_PYR001(4))+UARPForecast_CAPLESMIF_maycfs+UARPForecast_SILVRMIF_maycfs)*cfs_taf) 
+        }
+    case FebMay  {condition month == Feb  value 
+		max(0, UARPForecast_SFA030MIF_Feb+UD_EIDForebay*Forebay_monthlypattern_Feb - (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+max(UARPForecast_PyrMIF_febcfs, I_PYR001)+UARPForecast_CAPLESMIF_febcfs+UARPForecast_SILVRMIF_febcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_Mar+UD_EIDForebay*Forebay_monthlypattern_Mar - (I_SFA030(1)+I_RCK001(1)+I_SFA040(1)+I_BSH003(1)+I_SLV006(1)+I_PLM001(1)+I_ALD004(1)+I_ALD002(1)+I_SFA066(1)+I_SFA076(1)+I_SLF009(1)+max(UARPForecast_PyrMIF_Marcfs, I_PYR001(1))+UARPForecast_CAPLESMIF_Marcfs+UARPForecast_SILVRMIF_Marcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_Apr+UD_EIDForebay*Forebay_monthlypattern_Apr - (I_SFA030(2)+I_RCK001(2)+I_SFA040(2)+I_BSH003(2)+I_SLV006(2)+I_PLM001(2)+I_ALD004(2)+I_ALD002(2)+I_SFA066(2)+I_SFA076(2)+I_SLF009(2)+max(UARPForecast_PyrMIF_Aprcfs, I_PYR001(2))+UARPForecast_CAPLESMIF_Aprcfs+UARPForecast_SILVRMIF_Aprcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_May+UD_EIDForebay*Forebay_monthlypattern_May - (I_SFA030(3)+I_RCK001(3)+I_SFA040(3)+I_BSH003(3)+I_SLV006(3)+I_PLM001(3)+I_ALD004(3)+I_ALD002(3)+I_SFA066(3)+I_SFA076(3)+I_SLF009(3)+max(UARPForecast_PyrMIF_Maycfs, I_PYR001(3))+UARPForecast_CAPLESMIF_Maycfs+UARPForecast_SILVRMIF_Maycfs)*cfs_taf)
+        }
+    case MarMay  {condition month == Mar  value 
+		max(0, UARPForecast_SFA030MIF_Mar+UD_EIDForebay*Forebay_monthlypattern_Mar - (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+max(UARPForecast_PyrMIF_Marcfs, I_PYR001)+UARPForecast_CAPLESMIF_Marcfs+UARPForecast_SILVRMIF_Marcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_Apr+UD_EIDForebay*Forebay_monthlypattern_Apr - (I_SFA030(1)+I_RCK001(1)+I_SFA040(1)+I_BSH003(1)+I_SLV006(1)+I_PLM001(1)+I_ALD004(1)+I_ALD002(1)+I_SFA066(1)+I_SFA076(1)+I_SLF009(1)+max(UARPForecast_PyrMIF_Aprcfs, I_PYR001(1))+UARPForecast_CAPLESMIF_Aprcfs+UARPForecast_SILVRMIF_Aprcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_May+UD_EIDForebay*Forebay_monthlypattern_May - (I_SFA030(2)+I_RCK001(2)+I_SFA040(2)+I_BSH003(2)+I_SLV006(2)+I_PLM001(2)+I_ALD004(2)+I_ALD002(2)+I_SFA066(2)+I_SFA076(2)+I_SLF009(2)+max(UARPForecast_PyrMIF_Maycfs, I_PYR001(2))+UARPForecast_CAPLESMIF_Maycfs+UARPForecast_SILVRMIF_Maycfs)*cfs_taf)
+        }
+    case AprMay  {condition month == Apr  value 
+		max(0, UARPForecast_SFA030MIF_Apr+UD_EIDForebay*Forebay_monthlypattern_Apr - (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+max(UARPForecast_PyrMIF_Aprcfs, I_PYR001)+UARPForecast_CAPLESMIF_Aprcfs+UARPForecast_SILVRMIF_Aprcfs)*cfs_taf)
+        +max(0, UARPForecast_SFA030MIF_May+UD_EIDForebay*Forebay_monthlypattern_May - (I_SFA030(1)+I_RCK001(1)+I_SFA040(1)+I_BSH003(1)+I_SLV006(1)+I_PLM001(1)+I_ALD004(1)+I_ALD002(1)+I_SFA066(1)+I_SFA076(1)+I_SLF009(1)+max(UARPForecast_PyrMIF_Maycfs, I_PYR001(1))+UARPForecast_CAPLESMIF_Maycfs+UARPForecast_SILVRMIF_Maycfs)*cfs_taf)
+		}
+    case MMay  {condition month == May  value 
+		max(0, UARPForecast_SFA030MIF_May+UD_EIDForebay*Forebay_monthlypattern_May - (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+max(UARPForecast_PyrMIF_Maycfs, I_PYR001)+UARPForecast_CAPLESMIF_Maycfs+UARPForecast_SILVRMIF_Maycfs)*cfs_taf)
+        }
+    case Otherwise {condition always value 0.}
+}
+!-------------------------------------------------------------------------------------
+!Reservoir Evaporation
+!-------------------------------------------------------------------------------------	
+
+!---------Loon Lake---------------
+define UARPForecast_LOONLEvapRate {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_LOONL(i)}
+	case Otherwise {condition always value 0.}
+	}
+	
+define S_LOONLelev4    {value 6410.0}
+define S_LOONLlevel4af {select storage from American_ResInfo given elevation = S_LOONLelev4 use linear where ResNum=4}!gets S_LOONLlevel4 from table in af
+define S_LOONLlevel4   {value S_LOONLlevel4af/1000} !converts value to TAF	
+
+define LOONL_AreaLast  {select area from American_ResInfo given storage=1000*S_LOONL(-1)   use linear where ResNum=4}
+define LOONL_AreaMay   {select area from American_ResInfo given storage=1000*S_LOONLlevel4 use linear where ResNum=4}
+
+define UARPForecast_LOONLEvap   {value UARPForecast_LOONLEvapRate*(LOONL_AreaLast+LOONL_AreaMay)/24000.}
+define UARPForecast_LOONLEvapdv {alias UARPForecast_LOONLEvap kind 'FORECAST' UNITS 'TAF'}
+
+!---------Ice House---------------
+define UARPForecast_ICEHSEvapRate {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1) ER_ICEHS(i)}
+	case Otherwise {condition always value 0.}
+	}
+	
+define ICEHS_AreaLast  {select area from American_ResInfo given storage=1000*S_LOONL(-1) use linear where ResNum=6}
+define ICEHS_AreaMay   {select area from American_ResInfo given storage=1000*43.496      use linear where ResNum=6}
+
+define UARPForecast_ICEHSEvap  {value UARPForecast_ICEHSEvapRate*(ICEHS_AreaLast+ICEHS_AreaMay)/24000.}
+define UARPForecast_ICEHSEvapdv {alias UARPForecast_ICEHSEvap kind 'FORECAST' UNITS 'TAF'}
+
+!----------------Union Valley Evaporation
+define UARPForecast_UNVLYEvapRate {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_UNVLY(i)}
+	case Otherwise {condition always value 0.}
+	}
+define S_UNVLYelev4_May    {value 4869.0}
+define S_UNVLYlevel4af_May {select storage from American_ResInfo given elevation = S_UNVLYelev4_May use linear where ResNum=5}!gets S_LOONLlevel4 from table in af
+define S_UNVLYlevel4_May   {value S_UNVLYlevel4af_May/1000} !converts value to TAF	
+
+define UNVLY_AreaLast  {select area from American_ResInfo given storage=1000*S_UNVLY(-1)   use linear where ResNum=5}
+define UNVLY_AreaMay   {select area from American_ResInfo given storage=1000*S_UNVLYlevel4_May use linear where ResNum=5}
+
+define UARPForecast_UNVLYEvap   {value UARPForecast_UNVLYEvapRate*(UNVLY_AreaLast+UNVLY_AreaMay)/24000.}
+define UARPForecast_UNVLYEvapdv {alias UARPForecast_UNVLYEvap kind 'FORECAST' UNITS 'TAF'}	
+
+!-------------------------------------------------------------------------------------
+!Minimum flows
+!-------------------------------------------------------------------------------------
+define UARPForecast_RubiconMIF_cfs { !Rubicon (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_RUB044
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May)  .and. UARPYrType>1.5 .and.  UARPYrType<2.5		select EOMAboveNormal from UARPmif_RUB044 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. UARPYrType>2.5 .and.  UARPYrType<3.5 		select EOMBelowNormal from UARPmif_RUB044 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5  		select EOMDry from UARPmif_RUB044 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5  		select EOMCritical from UARPmif_RUB044 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_RubiconMIF{value UARPForecast_RubiconMIF_cfs*cfs_taf}
+
+/*  	case January_Wet      {condition month==Jan .and. UARPYrType==1. value 4.97}
+	case January_AN       {condition month==Jan .and. UARPYrType==2. value 4.97}
+	case January_BN       {condition month==Jan .and. UARPYrType==3. value 4.97}
+	case January_Dry      {condition month==Jan .and. UARPYrType==4. value 2.83}
+	case January_Crit     {condition month==Jan .and. UARPYrType==5. value 2.16}
+	case February_Wet     {condition month==Feb .and. UARPYrType==1. value 4.60}
+	case February_AN      {condition month==Feb .and. UARPYrType==2. value 4.60}
+	case February_BN      {condition month==Feb .and. UARPYrType==3. value 4.60}
+	case February_Dry     {condition month==Feb .and. UARPYrType==4. value 2.46}
+	case February_Crit    {condition month==Feb .and. UARPYrType==5. value 1.79}
+	case March_Wet        {condition month==Mar .and. UARPYrType==1. value 4.26}
+	case March_AN         {condition month==Mar .and. UARPYrType==2. value 4.26}
+	case March_BN         {condition month==Mar .and. UARPYrType==3. value 4.26}
+	case March_Dry        {condition month==Mar .and. UARPYrType==4. value 2.13}
+	case March_Crit       {condition month==Mar .and. UARPYrType==5. value 1.46}
+	case April_Wet        {condition month==Apr .and. UARPYrType==1. value 3.34}
+	case April_AN         {condition month==Apr .and. UARPYrType==2. value 3.34}
+	case April_BN         {condition month==Apr .and. UARPYrType==3. value 3.34}
+	case April_Dry        {condition month==Apr .and. UARPYrType==4. value 1.64}
+	case April_Crit       {condition month==Apr .and. UARPYrType==5. value 1.09}
+	case May_Wet          {condition month==May .and. UARPYrType==1. value 2.15}
+	case May_AN           {condition month==May .and. UARPYrType==2. value 2.15}
+	case May_BN           {condition month==May .and. UARPYrType==3. value 2.15}
+	case May_Dry          {condition month==May .and. UARPYrType==4. value 0.92}
+	case May_Crit         {condition month==May .and. UARPYrType==5. value 0.61}
+	case Otherwise        {condition always value 0.}
+	}*/
+	
+define UARPForecast_RubiconMIFdv {alias UARPForecast_RubiconMIF kind 'FORECAST' UNITS 'TAF'}	
+
+define UARPForecast_LRubiconMIF_cfs { !Little Rubicon (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_LRB003
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5			select EOMAboveNormal from UARPmif_LRB003 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. UARPYrType>2.5 .and.  UARPYrType<3.5 		select EOMBelowNormal from UARPmif_LRB003 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5  	 		select EOMDry from UARPmif_LRB003 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5 		select EOMCritical from UARPmif_LRB003 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_LRubiconMIF{value UARPForecast_LRubiconMIF_cfs*cfs_taf}
+
+/* 
+	case January_Wet      {condition month==Jan .and. UARPYrType==1. value 1.09}
+	case January_AN       {condition month==Jan .and. UARPYrType==2. value 1.09}
+	case January_BN       {condition month==Jan .and. UARPYrType==3. value 1.09}
+	case January_Dry      {condition month==Jan .and. UARPYrType==4. value 0.60}
+	case January_Crit     {condition month==Jan .and. UARPYrType==5. value 0.42}
+	case February_Wet     {condition month==Feb .and. UARPYrType==1. value 1.03}
+	case February_AN      {condition month==Feb .and. UARPYrType==2. value 1.03}
+	case February_BN      {condition month==Feb .and. UARPYrType==3. value 1.03}
+	case February_Dry     {condition month==Feb .and. UARPYrType==4. value 0.54}
+	case February_Crit    {condition month==Feb .and. UARPYrType==5. value 0.36}
+	case March_Wet        {condition month==Mar .and. UARPYrType==1. value 0.97}
+	case March_AN         {condition month==Mar .and. UARPYrType==2. value 0.97}
+	case March_BN         {condition month==Mar .and. UARPYrType==3. value 0.97}
+	case March_Dry        {condition month==Mar .and. UARPYrType==4. value 0.49}
+	case March_Crit       {condition month==Mar .and. UARPYrType==5. value 0.30}
+	case April_Wet        {condition month==Apr .and. UARPYrType==1. value 0.79}
+	case April_AN         {condition month==Apr .and. UARPYrType==2. value 0.79}
+	case April_BN         {condition month==Apr .and. UARPYrType==3. value 0.79}
+	case April_Dry        {condition month==Apr .and. UARPYrType==4. value 0.36}
+	case April_Crit       {condition month==Apr .and. UARPYrType==5. value 0.24}
+	case May_Wet          {condition month==May .and. UARPYrType==1. value 0.49}
+	case May_AN           {condition month==May .and. UARPYrType==2. value 0.49}
+	case May_BN           {condition month==May .and. UARPYrType==3. value 0.49}
+	case May_Dry          {condition month==May .and. UARPYrType==4. value 0.18}
+	case May_Crit         {condition month==May .and. UARPYrType==5. value 0.12}
+	case Otherwise        {condition always value 0.}
+	}*/
+	
+define UARPForecast_LRubiconMIFdv {alias UARPForecast_LRubiconMIF kind 'FORECAST' UNITS 'TAF'}
+	
+define UARPForecast_LOONLMIF_cfs { !MIFs for Gerle Creek for Jan-May (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_GRL010
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	 		select EOMAboveNormal from UARPmif_GRL010 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May) .and. UARPYrType>2.5 .and.  UARPYrType<3.5  		select EOMBelowNormal from UARPmif_GRL010 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5  			select EOMDry from UARPmif_GRL010 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5 		select EOMCritical from UARPmif_GRL010 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_LOONLMIF{value UARPForecast_LOONLMIF_cfs*cfs_taf}
+/* 
+	case January_Wet      {condition month==Jan .and. UARPYrType==1. value 13.22}
+	case January_AN       {condition month==Jan .and. UARPYrType==2. value 11.12}
+	case January_BN       {condition month==Jan .and. UARPYrType==3. value  9.07}
+	case January_Dry      {condition month==Jan .and. UARPYrType==4. value  7.27}
+	case January_Crit     {condition month==Jan .and. UARPYrType==5. value  5.59}
+	case February_Wet     {condition month==Feb .and. UARPYrType==1. value 11.50}
+	case February_AN      {condition month==Feb .and. UARPYrType==2. value  9.70}
+	case February_BN      {condition month==Feb .and. UARPYrType==3. value  7.91}
+	case February_Dry     {condition month==Feb .and. UARPYrType==4. value  6.35}
+	case February_Crit    {condition month==Feb .and. UARPYrType==5. value  4.85}
+	case March_Wet        {condition month==Mar .and. UARPYrType==1. value  9.72}
+	case March_AN         {condition month==Mar .and. UARPYrType==2. value  8.20}
+	case March_BN         {condition month==Mar .and. UARPYrType==3. value  6.68}
+	case March_Dry        {condition month==Mar .and. UARPYrType==4. value  5.35}
+	case March_Crit       {condition month==Mar .and. UARPYrType==5. value  4.07}
+	case April_Wet        {condition month==Apr .and. UARPYrType==1. value  7.02}
+	case April_AN         {condition month==Apr .and. UARPYrType==2. value  5.93}
+	case April_BN         {condition month==Apr .and. UARPYrType==3. value  4.84}
+	case April_Dry        {condition month==Apr .and. UARPYrType==4. value  3.87}
+	case April_Crit       {condition month==Apr .and. UARPYrType==5. value  2.91}
+	case May_Wet          {condition month==May .and. UARPYrType==1. value  3.57}
+	case May_AN           {condition month==May .and. UARPYrType==2. value  3.01}
+	case May_BN           {condition month==May .and. UARPYrType==3. value  2.46}
+	case May_Dry          {condition month==May .and. UARPYrType==4. value  1.97}
+	case May_Crit         {condition month==May .and. UARPYrType==5. value  1.54}
+	case Otherwise        {condition always value 0.}
+	}	*/
+	
+define UARPForecast_LOONLMIFdv {alias UARPForecast_LOONLMIF kind 'FORECAST' UNITS 'TAF'}	
+
+define UARPForecast_GerlePulseFlow {
+       case AprilPeak {condition month <= 7 .and. I_LOONL(7-month) >= I_LOONL(7-month+1) value Gerle_pulse_flow * (5./30.)*(30.*86.4/43560)}
+       case MayPeak   {condition I_LOONL(7-month) <  I_LOONL(7-month+1) value Gerle_pulse_flow * (5./31.)*(31.*86.4/43560)}
+       case Otherwise {condition always value 0.}}
+       
+define UARPForecast_GerlePulseFlowdv {alias UARPForecast_GerlePulseFlow kind 'FORECAST' UNITS 'TAF'}
+
+define UARPForecast_IceHouseMIF_cfs { !Ice House MIF for Feb-May (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5		select EOMWet from UARPmif_SSV013
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	 		select EOMAboveNormal from UARPmif_SSV013 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. UARPYrType>2.5 .and.  UARPYrType<3.5 		select EOMBelowNormal from UARPmif_SSV013 
+							  where month=month}
+					case Dry {condition range(month,Jan,May) .and. UARPYrType>3.5 .and.  UARPYrType<4.5  		select EOMDry from UARPmif_SSV013 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5 	select EOMCritical from UARPmif_SSV013 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_IceHouseMIF{value UARPForecast_IceHouseMIF_cfs*cfs_taf}
+/* 
+	case February_WetANBN {condition month==Feb .and. UARPYrType<=3. value 9.10}
+	case February_Dry     {condition month==Feb .and. UARPYrType==4. value 6.14}
+	case February_Crit    {condition month==Feb .and. UARPYrType==5. value 3.56}
+	case March_WetANBN    {condition month==Mar .and. UARPYrType<=3. value 8.10}
+	case March_Dry        {condition month==Mar .and. UARPYrType==4. value 5.48}
+	case March_Crit       {condition month==Mar .and. UARPYrType==5. value 3.23}
+	case April_WetANBN    {condition month==Apr .and. UARPYrType<=3. value 6.62}
+	case April_Dry        {condition month==Apr .and. UARPYrType==4. value 4.49}
+	case April_Crit       {condition month==Apr .and. UARPYrType==5. value 2.74}
+	case May_WetANBN      {condition month==May .and. UARPYrType<=3. value 4.18}
+	case May_Dry          {condition month==May .and. UARPYrType==4. value 2.83}
+	case May_Crit         {condition month==May .and. UARPYrType==5. value 1.84}
+	case Otherwise        {condition always value 0.}
+	}*/
+	
+define UARPForecast_SFSilverPulseFlow {
+       case AprilPeak {condition month <= 7 .and. I_ICEHS(7-month) >= I_ICEHS(7-month+1) value SFSilver_pulse_flow * (5./30.)*(30.*86.4/43560)}
+       case MayPeak   {condition I_ICEHS(7-month) <  I_ICEHS(7-month+1) value SFSilver_pulse_flow * (5./31.)*(31.*86.4/43560)}
+       case Otherwise {condition always value 0.}}
+       
+define UARPForecast_SFSilverPulseFlowdv {alias UARPForecast_SFSilverPulseFlow kind 'FORECAST' UNITS 'TAF'}
+
+
+define UARPForecast_SLV014MIF_cfs { !Ice House MIF for Feb-May (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_SLV014
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	 		select EOMAboveNormal from UARPmif_SLV014 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. UARPYrType>2.5 .and.  UARPYrType<3.5 	select EOMBelowNormal from UARPmif_SLV014 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5  		select EOMDry from UARPmif_SLV014 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5 		select EOMCritical from UARPmif_SLV014 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SLV014MIF{value max(0, UARPForecast_SLV014MIF_cfs*cfs_taf-UARPForecast_IceHouseMIF-UARPForecast_SLV015Inflow)}
+
+define UARPForecast_GRL001MIF_cfs { !Ice House MIF for Feb-May (TAF)
+					case Wet {condition range(month,Jan,May) .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_GRL001
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5			select EOMAboveNormal from UARPmif_GRL001 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May)  .and. UARPYrType>2.5 .and.  UARPYrType<3.5 		select EOMBelowNormal from UARPmif_GRL001 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5  		select EOMDry from UARPmif_GRL001 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType== 5. 		select EOMCritical from UARPmif_GRL001 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_GRL001MIF{value UARPForecast_GRL001MIF_cfs*cfs_taf}	
+
+define UARPForecast_SFR006MIF_cfs { !Ice House MIF for Feb-May (TAF)
+					case Wet {condition range(month,Jan,May)  .and. UARPYrType>0.5 .and.  UARPYrType<1.5 		select EOMWet from UARPmif_SFR006
+							  where month=month}
+					case abvNormal {condition range(month,Jan,May) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	 		select EOMAboveNormal from UARPmif_SFR006 
+							  where month=month}
+					case blwNormal {condition range(month,Jan,May) .and. UARPYrType>2.5 .and.  UARPYrType<3.5 		select EOMBelowNormal from UARPmif_SFR006 
+							  where month=month}
+					case Dry {condition range(month,Jan,May)  .and. UARPYrType>3.5 .and.  UARPYrType<4.5 		select EOMDry from UARPmif_SFR006 
+							  where month=month}
+					case Crit {condition range(month,Jan,May)  .and. UARPYrType>4.5 .and.  UARPYrType<5.5 		select EOMCritical from UARPmif_SFR006 
+							  where month=month}
+					case Otherwise {condition always value 0}
+					}
+define UARPForecast_SFR006MIF{value UARPForecast_SFR006MIF_cfs*cfs_taf}	
+
+
+define UARPForecast_UARPMIFs { !MIFs for UARP for Feb-May (TAF) !			
+!		Calculate flow requirement at SLV014, add four together
+value (UARPForecast_LRubiconMIF+UARPForecast_RubiconMIF+UARPForecast_SLV014MIF+UARPForecast_GRL001MIF+UARPForecast_SFR006MIF)}
+/*
+	case February_Wet     {condition month==Feb .and. UARPYrType==1. value 99.47}
+	case February_AN      {condition month==Feb .and. UARPYrType==2. value 96.18}
+	case February_BN      {condition month==Feb .and. UARPYrType==3. value 91.72}
+	case February_Dry     {condition month==Feb .and. UARPYrType==4. value 58.55}
+	case February_Crit    {condition month==Feb .and. UARPYrType==5. value 40.29}
+	case March_Wet        {condition month==Mar .and. UARPYrType==1. value 88.30}
+	case March_AN         {condition month==Mar .and. UARPYrType==2. value 85.85}
+	case March_BN         {condition month==Mar .and. UARPYrType==3. value 82.22}
+	case March_Dry        {condition month==Mar .and. UARPYrType==4. value 51.05}
+	case March_Crit       {condition month==Mar .and. UARPYrType==5. value 34.24}
+	case April_Wet        {condition month==Apr .and. UARPYrType==1. value 70.07}
+	case April_AN         {condition month==Apr .and. UARPYrType==2. value 68.05}
+	case April_BN         {condition month==Apr .and. UARPYrType==3. value 64.54}
+	case April_Dry        {condition month==Apr .and. UARPYrType==4. value 38.75}
+	case April_Crit       {condition month==Apr .and. UARPYrType==5. value 26.68}
+	case May_Wet          {condition month==May .and. UARPYrType==1. value 42.17}
+	case May_AN           {condition month==May .and. UARPYrType==2. value 40.67}
+	case May_BN           {condition month==May .and. UARPYrType==3. value 37.17}
+	case May_Dry          {condition month==May .and. UARPYrType==4. value 21.18}
+	case May_Crit         {condition month==May .and. UARPYrType==5. value 15.31}
+	case Otherwise        {condition always value 0.}
+	} */
+define UARPForecast_UARPMIFsdv {alias UARPForecast_UARPMIFs kind 'FORECAST' UNITS 'TAF'}	
+
+
+
+!-------------------------------------------------------------------------------------
+!Net available water
+!-------------------------------------------------------------------------------------	
+define UARPForecast_LOONL {value UARPForecast_LOONLInflow + UARPForecast_LRB004Inflow + UARPForecast_RUB047Inflow - UARPForecast_RubiconMIF - UARPForecast_LRubiconMIF - UARPForecast_LOONLMIF - UARPForecast_GerlePulseFlow - UARPForecast_LOONLEvap}
+define UARPForecast_ICEHS {value UARPForecast_ICEHSInflow - UARPForecast_IceHouseMIF - UARPForecast_SFSilverPulseFlow - UARPForecast_ICEHSEvap}
+define UARPForecast_UNVLY {value UARPForecast_LOONLInflow + UARPForecast_LRB004Inflow + UARPForecast_RUB047Inflow + UARPForecast_SFR006Inflow + UARPForecast_UNVLYInflow + UARPForecast_ICEHSInflow + UARPForecast_GRL001Inflow - UARPForecast_UARPMIFs- UARPForecast_LOONLEvap- UARPForecast_ICEHSEvap-UARPForecast_UNVLYEvap-UARPForecast_NetSFAInflows}
+
+define UARPForecast_LOONLdv {alias UARPForecast_LOONL kind 'FORECAST' UNITS 'TAF'}
+define UARPForecast_UNVLYdv {alias UARPForecast_UNVLY kind 'FORECAST' UNITS 'TAF'}
+define UARPForecast_ICEHSdv {alias UARPForecast_ICEHS kind 'FORECAST' UNITS 'TAF'}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!! Loon Lake !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Pull water from Rubicon through Buck-Loon Tunnel
+! Apply high weight to diversion
+goal BuckLoon_volume {D_LRB004_BLT000 < I_LRB004 + I_RUB047 - Rubicon_min_flow - LittleRubicon_min_flow}
+
+
+!-------------------------------------------------------------------------------------
+!Level 1
+!-------------------------------------------------------------------------------------
+!defined in arcs-reservoirs.wresl
+
+
+!-------------------------------------------------------------------------------------
+!Level 2
+!-------------------------------------------------------------------------------------
+!Minimum FERC pool
+define S_LOONLlevel2_el {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value 0.
+	}
+	case JulSep_Wet {
+		condition range(month,Jul,Sep) .and. UARPYrType>0.5 .and.  UARPYrType<1.5
+		select target from American_ResLevel 
+		where month=month, ResNum=953.1
+		}
+	case JulSep_AboveNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=953.2
+		}
+	case JulSep_BelowNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>2.5 .and.  UARPYrType<3.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=953.3
+		}
+	case JulSep_Dry {
+		condition range(month,Jul,Sep) .and. UARPYrType>3.5 .and.  UARPYrType<4.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=953.4
+		}
+	case JulSep_Critical {
+		condition range(month,Jul,Sep) .and. UARPYrType>4.5 .and.  UARPYrType<5.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=953.5
+		}
+	}
+define S_LOONLlevel2_af {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value S_LOONLlevel1*1000.
+	}
+	case JulSep {
+		condition range(month,Jul,Sep)
+		select storage from American_ResInfo given elevation=S_LOONLlevel2_el use linear where ResNum=4
+		}
+	}
+define S_LOONLlevel2 {value S_LOONLlevel2_af/1000.}
+
+
+!-------------------------------------------------------------------------------------
+!Level 4
+!-------------------------------------------------------------------------------------
+!Defined by Department of Safety of Dams
+!define S_LOONLelev4    {value 6410.0}
+!define S_LOONLlevel4af {select storage from American_ResInfo given elevation = S_LOONLelev4 use linear where ResNum=4}!gets S_LOONLlevel4 from table in af
+!define S_LOONLlevel4   {value S_LOONLlevel4af/1000} !converts value to TAF
+
+
+!-------------------------------------------------------------------------------------
+!Level 3
+!-------------------------------------------------------------------------------------
+! Discretionary releases
+! Starting in January determine how far down to drawdown storage with an allowed range of 10,000 AF to 29,000 AF
+! remaining storage. The reservoir is operated with a fill target of 67,900 AF on June 30th.
+
+define LL_PowerReleaseTarget {
+	case JanMay {condition range(month,Jan,May)
+		         value max(0,(UARPForecast_LOONL + S_LOONL(-1) - S_LOONLlevel4)/(8-month+1))
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+	
+define LL_NetInflow {value I_RUB047*cfs_taf + I_LRB004*cfs_taf + I_LOONL*cfs_taf - Rubicon_min_flow*cfs_taf - LittleRubicon_min_flow*cfs_taf - A_LOONLlast*ER_LOONL/12000.}	
+
+define LL_PowerReleaseTargetdv {alias LL_PowerReleaseTarget kind 'FORECAST' UNITS 'TAF'}
+
+define LLDrawdown {value max(0,S_LOONL(-1)-40.00)/(12-month+1)}	
+
+define S_LOONLlevel3init {
+	case OctDec    {condition range(month,Oct,Dec)
+	                value 40.00!38.740
+	}
+	case JanApr   {condition range(month,Jan,Apr)
+	               value max(S_LOONLlevel2,S_LOONL(-1) + LL_NetInflow - LL_PowerReleaseTarget - LoonGerle_min_flow*cfs_taf - GerlePulseFlow*cfs_taf)
+	}
+	Case MonthMay {condition month == May
+		           value S_LOONLlevel4
+    }
+	Case JunSep   {condition range(month,Jun,Sep)
+		           value max(S_LOONLlevel2, S_LOONL(-1) - LLDrawdown)
+	}
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+
+define S_LOONLlevel3 {value min(S_LOONLlevel4,S_LOONLlevel3init)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!! Ice House !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!-------------------------------------------------------------------------------------
+!Level 1
+!-------------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------------
+!Level 2
+!-------------------------------------------------------------------------------------
+!Ice House has minimum reservoir elevations defined in its FERC license for July-September
+define S_ICEHSlevel2_el {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value 0.
+	}
+	case JulSep_Wet {
+		condition range(month,Jul,Sep) .and. UARPYrType>0.5 .and.  UARPYrType<1.5
+		select target from American_ResLevel 
+		where month=month, ResNum=955.1
+		}
+	case JulSep_AboveNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=955.2
+		}
+	case JulSep_BelowNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>2.5 .and.  UARPYrType<3.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=955.3
+		}
+	case JulSep_Dry {
+		condition range(month,Jul,Sep) .and. UARPYrType>3.5 .and.  UARPYrType<4.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=955.4
+		}
+	case JulSep_Critical {
+		condition range(month,Jul,Sep) .and. UARPYrType>4.5 .and.  UARPYrType<5.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=955.5
+		}
+	}
+define S_ICEHSlevel2_af {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value S_ICEHSlevel1*1000.
+	}
+	case JulSep {
+		condition range(month,Jul,Sep)
+		select storage from American_ResInfo given elevation=S_ICEHSlevel2_el use linear where ResNum=6
+		}
+	}
+define S_ICEHSlevel2 {value max(S_ICEHSlevel1, S_ICEHSlevel2_af/1000.)}
+
+!-------------------------------------------------------------------------------------
+!Level 4
+!-------------------------------------------------------------------------------------	
+!DSOD regulations specify !that the level of Ice House Reservoir shall be lowered gradually
+!from elevation 5447 feet to !elevation 5436.5 feet over the course of October.
+
+define S_ICEHSelev4 {
+        case October {
+                condition month == OCT
+                value 5436.5 !Gates must be open Nov 1, so storage must be drawdown gradually in October
+                }
+	case NovMar {
+		condition range(month,Nov,Mar)
+		value 5436.5 !Corresponds to 34,855 acre-feet
+		}
+	case AprSep {
+		condition always !Gates may be closed April 2 - Oct 31
+		value 5447. !Corresponds to 43,496 acre-feet
+		}
+	}
+
+define S_ICEHSlevel4af {select storage from American_ResInfo given elevation = S_ICEHSelev4 use linear where ResNum=6}!gets S_ICEHSlevel3 from table in af
+define S_ICEHSlevel4   {value min(S_ICEHSlevel5,S_ICEHSlevel4af/1000)} !converts value to TAF
+
+!-------------------------------------------------------------------------------------
+!Level 3
+!-------------------------------------------------------------------------------------	
+! Ice House Reservoir Preferred Storage Objective
+
+/*
+define IHTargetLevel{
+	case E{
+		condition amer_apr_july > 2000
+		select E from American_UARP_StorObj given mon=month use linear where reservoir=2
+		}
+	case D{
+		condition amer_apr_july > 1500
+		select D from American_UARP_StorObj given mon=month use linear where reservoir=2
+		}
+	case C{
+		condition amer_apr_july > 1000
+		select C from American_UARP_StorObj given mon=month use linear where reservoir=2
+		}
+	case B{
+		condition amer_apr_july > 500
+		select B from American_UARP_StorObj given mon=month use linear where reservoir=2
+		}
+	case A{
+		condition always
+		select A from American_UARP_StorObj given mon=month use linear where reservoir=2
+		}
+	}
+	
+! From ARIOps Model
+! Hold carryover target from December through March, fill April-June	
+define ICEHSCarryoverTarget {
+	case DecMar {
+		condition range(month,Dec,Mar)
+		value 25.5
+	}
+	case AprJun {
+		condition range(month,Apr,Jun)
+		value S_ICEHSlevel4
+	}
+	case Otherwise { !this case will never be used in S_ICEHSlevel3 (see below)
+		condition always
+		value 0.
+	}
+}
+
+define S_ICEHSelev3 {value min(IHTargetlevel, S_ICEHSelev4)}
+define S_ICEHSlevel3af {select storage from American_ResInfo given elevation = S_ICEHSelev3 use linear where ResNum=6}!gets S_ICEHSlevel3 from table in af
+define S_ICEHSlevel3 {value max(ICEHSCarryoverTarget,S_ICEHSlevel2,S_ICEHSlevel3af/1000)} !converts value to TAF
+*/
+
+define IH_PowerReleaseTarget {
+	case JanMay {condition range(month,Jan,May)
+		         value max(0,(UARPForecast_ICEHS + S_ICEHS(-1) - S_ICEHSlevel4)/(8-month+1))
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+	
+define IH_NetInflow {value I_ICEHS*cfs_taf - A_ICEHSlast*ER_ICEHS/12000.}	
+
+define IH_PowerReleaseTargetdv {alias IH_PowerReleaseTarget kind 'FORECAST' UNITS 'TAF'}	
+
+define IHDrawdown {value max(0.,S_ICEHS(-1)-30.00)/(12-month+1)}
+
+define S_ICEHSlevel3init {
+	case OctDec    {condition range(month,Oct,Dec)
+	                value 30.00!25.50
+	}
+	case JanApr   {condition range(month,Jan,Apr)
+	               value max(S_ICEHSlevel2,S_ICEHS(-1) + IH_NetInflow - IH_PowerReleaseTarget - SFSilver_min_flow*cfs_taf - SFSIlverPulseFlow*cfs_taf)
+	}
+	Case MonthMay {condition month == May
+		           value S_ICEHSlevel4
+    }
+	Case JunSep   {condition range(month,Jun,Sep)
+		           value max(S_ICEHSlevel2, S_ICEHS(-1) - IHDrawdown)
+	}
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+
+define S_ICEHSlevel3 {value min(S_ICEHSlevel4,S_ICEHSlevel3init)}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!! Union Valley !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!-------------------------------------------------------------------------------------
+!Level 1
+!-------------------------------------------------------------------------------------
+!defined in arcs-reservoirs.wresl
+
+!-------------------------------------------------------------------------------------
+!Level 2
+!-------------------------------------------------------------------------------------
+!There is no Level 2 requirement for Union Valley.  It is set to Level 1.
+define S_UNVLYlevel2_el {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value 0.
+	}
+	case JulSep_Wet {
+		condition range(month,Jul,Sep) .and. UARPYrType>0.5 .and.  UARPYrType<1.5
+		select target from American_ResLevel 
+		where month=month, ResNum=954.1
+		}
+	case JulSep_AboveNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>1.5 .and.  UARPYrType<2.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=954.2
+		}
+	case JulSep_BelowNormal {
+		condition range(month,Jul,Sep) .and. UARPYrType>2.5 .and.  UARPYrType<3.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=954.3
+		}
+	case JulSep_Dry {
+		condition range(month,Jul,Sep) .and. UARPYrType>3.5 .and.  UARPYrType<4.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=954.4
+		}
+	case JulSep_Critical {
+		condition range(month,Jul,Sep) .and. UARPYrType>4.5 .and.  UARPYrType<5.5	
+		select target from American_ResLevel 
+		where month=month, ResNum=954.5
+		}
+	}
+define S_UNVLYlevel2_af {
+	case OctJun{
+		condition range(month,Oct,Jun)
+		value S_UNVLYlevel1*1000.
+	}
+	case JulSep {
+		condition range(month,Jul,Sep)
+		select storage from American_ResInfo given elevation=S_UNVLYlevel2_el use linear where ResNum=5
+		}
+	}
+define S_UNVLYlevel2 {value S_UNVLYlevel2_af/1000.}
+!define S_UNVLYlevel2 {value S_UNVLYlevel1}
+goal Set954level2 {S_UNVLY_2 < max (S_UNVLYlevel2-S_UNVLYlevel1,0.)}
+
+!Union Valley Reservoir Preferred Storage Objective
+
+define UVTargetLevel{
+	case E{
+ 		condition amer_apr_july > 2000
+		select E from American_UARP_StorObj given mon=month use linear where reservoir=3
+		}
+	case D{
+		condition amer_apr_july > 1500
+		select D from American_UARP_StorObj given mon=month use linear where reservoir=3
+		}
+	case C{
+		condition amer_apr_july > 1000
+		select C from American_UARP_StorObj given mon=month use linear where reservoir=3
+		}
+	case B{
+		condition amer_apr_july > 500
+		select B from American_UARP_StorObj given mon=month use linear where reservoir=3
+		}
+	case A{
+		condition always
+		select A from American_UARP_StorObj given mon=month use linear where reservoir=3
+		}
+	}
+
+!-------------------------------------------------------------------------------------
+!Level 4
+!-------------------------------------------------------------------------------------
+!S_UNVLY (Union Valley) max. elevation for October must be computed because DSOD regulations specify
+!that the level of Union Valley Reservoir shall be lowered gradually from elevation 4867 feet to
+!elevation 4855 feet over the course of the month.
+!4867 is lower than the level 3 requirement for May-Jul.  Level 3 will be restricted to 4867 ft.
+
+define S_UNVLYelev4 {
+        case October {
+                condition month == OCT
+                value 4854. !Gates must be open Nov 1, so storage must be drawdown gradually in October
+                			!Provides 1 ft freeboard below spillway crest
+                }
+	case Nov_Mar {
+		condition range(month,Nov,Mar) !Nov 1 - Mar 31
+		value 4854. !Provides 1 ft freeboard below spillway crest
+		}
+	case AprilSep {!Apr 1 - Sep 30
+		condition always
+		value 4869. !Provides 1 ft of freeboard below top of gate
+		}
+	}
+
+define S_UNVLYlevel4af {select storage from American_ResInfo given elevation =S_UNVLYelev4  use linear where ResNum=5}!gets S_UNVLYlevel4 from table in af
+define S_UNVLYlevel4   {value min(S_UNVLYlevel4af/1000,S_UNVLYlevel5)} !converts value to TAF
+
+!-------------------------------------------------------------------------------------
+!Level 3
+!-------------------------------------------------------------------------------------
+/*
+! From ARIOps Model
+! Hold carryover target from December through March, fill April-June	
+define UNVLYCarryoverTarget {
+	case DecMar {
+		condition range(month,Dec,Mar)
+		value 140.
+	}
+	case AprJun {
+		condition range(month,Apr,Jun)
+		value S_UNVLYlevel4
+	}
+	case Otherwise { !this case will never be used in S_UNVLYlevel3 (see below)
+		condition always
+		value 0.
+	}
+}
+
+define S_UNVLYelev3 {value min(UVTargetlevel,S_UNVLYelev4)} 
+define S_UNVLYlevel3af {select storage from American_ResInfo given elevation =S_UNVLYelev3  use linear where ResNum=5}!gets S_UNVLYlevel4 from table in af
+define S_UNVLYlevel3 {value min(S_UNVLYlevel4,max(UNVLYCarryoverTarget,S_UNVLYlevel2,S_UNVLYlevel3af/1000 + 20.)) } !converts value to TAF !20. is short-term calibration factor
+*/
+
+define UV_PowerReleaseTarget {
+	case JanMay {condition range(month,Jan,May)
+		         value max(0,(UARPForecast_UNVLY + S_UNVLY(-1)+ S_LOONL(-1)+ S_ICEHS(-1)- S_LOONLlevel4- S_ICEHSlevel4- S_UNVLYlevel4)/(8-month+1))
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+	
+define UV_NetInflow {value I_UNVLY*cfs_taf + I_SFR006*cfs_taf + I_GERLE*cfs_taf + IH_PowerReleaseTarget + LL_PowerReleaseTarget + LoonGerle_min_flow + GerlePulseFlow- GerleCreek_min_flow*cfs_taf - SFRubicon_min_flow*cfs_taf - A_UNVLYlast*ER_UNVLY/12000.}	
+
+define I_UNVLYdv{alias I_UNVLY*cfs_taf kind 'debug' units 'TAF'}
+define I_SFR006dv{alias I_SFR006*cfs_taf kind 'debug' units 'TAF'}
+define I_GERLEdv{alias I_GERLE*cfs_taf kind 'debug' units 'TAF'}
+!define LoonGerle_min_flowdv{alias LoonGerle_min_flow kind 'debug' units 'TAF'}
+define GerlePulseFlowdv{alias GerlePulseFlow*cfs_taf kind 'debug' units 'TAF'}
+!define SFRubicon_min_flowdv{alias SFRubicon_min_flow*cfs_taf kind 'debug' units 'TAF'}
+
+
+define UV_PowerReleaseTargetdv {alias UV_PowerReleaseTarget kind 'FORECAST' UNITS 'TAF'}	
+
+define UV_OtherNetInflow{value min(0, (I_SFA030+I_RCK001+I_SFA040+I_BSH003+I_SLV006+I_PLM001+I_ALD004+I_ALD002+I_SFA066+I_SFA076+I_SLF009+ max(MIF_EID_PYR001,I_PYR001)-MIF_PGECh_req_SFA030+MIF_EID_CPC008+MIF_EID_SLF015)*cfs_taf-UD_EIDForebay*Forebay_monthlypattern)}
+
+define UVDrawdown {value max(0.,S_UNVLY(-1)-140.0)/(12-month+1)}		!Three new values for carryover storage
+
+define S_UNVLYlevel3init {
+	case OctDec    {condition range(month,Oct,Dec)
+	                value 140.0
+	}
+	case JanApr   {condition range(month,Jan,Apr)
+	               value max(S_UNVLYlevel2,S_UNVLY(-1) + UV_NetInflow - UV_PowerReleaseTarget - max(0, Junction_min_flow-I_SLV015-SFSilver_min_flow)*cfs_taf)
+	}
+	Case MonthMay {condition month == May
+		           value S_UNVLYlevel4
+    }
+	Case JunSep   {condition range(month,Jun,Sep)
+		           value max(S_UNVLYlevel2, S_UNVLY(-1) - UVDrawdown)
+	}
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+
+
+define Debug111 {value S_UNVLY(-1) + UV_NetInflow - UV_PowerReleaseTarget - max(0, Junction_min_flow-I_SLV015-SFSilver_min_flow)*cfs_taf}
+define Debug111dv{alias Debug111 kind'debug' units 'TAF'}
+
+define S_UNVLYlevel3 {value min(S_UNVLYlevel4,S_UNVLYlevel3init)}
+
+
+define UV_netinflowdv {alias UV_NetInflow kind 'FORECAST' UNITS 'TAF'}
+	
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!! Storage Zone Constraints !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal set_S_LOONLZone1 {S_LOONL_1 < S_LOONLlevel1}
+goal set_S_LOONLZone2 {S_LOONL_2 < max(0.,S_LOONLlevel2-S_LOONLlevel1)}
+goal set_S_LOONLZone3 {S_LOONL_3 < max(0.,S_LOONLlevel3-S_LOONLlevel2)}
+goal set_S_LOONLZone4 {S_LOONL_4 < max(0.,S_LOONLlevel4-S_LOONLlevel3)}
+goal set_S_LOONLZone5 {S_LOONL_5 < max(0.,S_LOONLlevel5-S_LOONLlevel4)}
+
+goal set_S_ICEHSzone1 {S_ICEHS_1 < S_ICEHSlevel1}
+goal set_S_ICEHSzone2 {S_ICEHS_2 < max (S_ICEHSlevel2-S_ICEHSlevel1,0.)}
+goal set_S_ICEHSzone3 {S_ICEHS_3 < max (S_ICEHSlevel3-S_ICEHSlevel2,0.)}
+goal set_S_ICEHSzone4 {S_ICEHS_4 < max (S_ICEHSlevel4-S_ICEHSlevel3,0.)}
+goal set_S_ICEHSzone5 {S_ICEHS_5 < max (S_ICEHSlevel5-S_ICEHSlevel4,0.)}
+
+
+goal set_S_UNVLYzone1 {S_UNVLY_1 < S_UNVLYlevel1}
+goal set_S_UNVLYzone2 {S_UNVLY_2 < max (S_UNVLYlevel2-S_UNVLYlevel1,0.)}
+goal set_S_UNVLYzone3 {S_UNVLY_3 < max (S_UNVLYlevel3-S_UNVLYlevel2,0.)}
+goal set_S_UNVLYzone4 {S_UNVLY_4 < max (S_UNVLYlevel4-S_UNVLYlevel3,0.)}
+goal set_S_UNVLYzone5 {S_UNVLY_5 < max (S_UNVLYlevel5-S_UNVLYlevel4,0.)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!! For Output !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_LOONLlevel2dv {alias S_LOONLlevel2 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_LOONLlevel3dv {alias S_LOONLlevel3 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_LOONLlevel4dv {alias S_LOONLlevel4 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_LOONLlevel5dv {alias S_LOONLlevel5 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+
+define S_ICEHSlevel2dv {alias S_ICEHSlevel2 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_ICEHSlevel3dv {alias S_ICEHSlevel3 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_ICEHSlevel4dv {alias S_ICEHSlevel4 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_ICEHSlevel5dv {alias S_ICEHSlevel5 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+
+define S_UNVLYlevel2dv {alias S_UNVLYlevel2 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_UNVLYlevel3dv {alias S_UNVLYlevel3 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_UNVLYlevel4dv {alias S_UNVLYlevel4 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+define S_UNVLYlevel5dv {alias S_UNVLYlevel5 kind 'STORAGE-LEVEL' UNITS 'TAF'}
+
+

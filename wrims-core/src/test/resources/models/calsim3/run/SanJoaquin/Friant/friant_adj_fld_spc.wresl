@@ -1,0 +1,48 @@
+! Friant_adj_fld_spc.wresl
+! Created for the Upper San Joaquin River Basin Storage Investigation Project
+! Adjust required flood space in Millerton based on Mammoth storage
+! Revised by C. Hsu, 02/25/03, USBR, for review and documentation project
+!##############################################################################
+
+! Read flood control storage level (S18level4) from table
+define Friant_fs_req {select flood_pool from USJRS_FP_REQ where month = month }
+
+! Storage in Mammoth Pool
+define mammoth_storage {timeseries kind 'Storage' units 'TAF'}
+
+! Maximum Storage in Mammoth Pool, value = 120 TAF
+define mam_max_stor { value 120.0 }
+
+/*
+Mammoth Pool Credit - if required Friant flood space exceeds 85 TAF, allow for up to 85 TAF of
+the remaining required Friant space to be made available in Mammoth Pool
+*/
+define mam_fc_credit {
+    case mammoth_storage_allowed {
+        condition Friant_fs_req > 85.
+       value max(0.0, min ((mam_max_stor - mammoth_storage), (Friant_fs_req - 85.0))) }
+    case mammoth_storage_not_allowed {
+        condition always
+        value 0. }}
+
+!Balance Millerton and TF storage and Flood pool
+define S_MLRTNlevel2_max {select target from res_level where res_num=18,level=2,month=month}
+define S_MLRTNlevel3_max {select target from res_level where res_num=18,level=3,month=month}
+
+define S_MLRTNlevel2     {std kind 'storage-level' units 'taf'}
+define S_MLRTNlevel3     {std kind 'storage-level' units 'taf'}
+define S_MLRTNlevel4     {std kind 'storage-level' units 'taf'}
+define S17level2         {std kind 'storage-level' units 'taf'}
+
+goal   ub_MLRTNlevel2      {S_MLRTNlevel2 < S_MLRTNlevel2_max}
+goal   ub_MLRTNlevel3      {S_MLRTNlevel3 < S_MLRTNlevel3_max}
+goal   ub_USJRS_fp       {S_MLRTNlevel4 + S17level2 < S_MLRTNlevel5 + S17level3 + mam_fc_credit  - Friant_fs_req}
+
+goal   S_MLRTNZone1      {S_MLRTN_1 < S_MLRTNlevel1}
+goal   S_MLRTNZone2      {S_MLRTN_2 < S_MLRTNlevel2-S_MLRTNlevel1}
+goal   S_MLRTNZone3      {S_MLRTN_3 < S_MLRTNlevel3-S_MLRTNlevel2}
+goal   S_MLRTNZone4      {S_MLRTN_4 < S_MLRTNlevel4-S_MLRTNlevel3}
+goal   S_MLRTNZone5      {S_MLRTN_5 < S_MLRTNlevel5-S_MLRTNlevel4}
+
+goal S17Zone2 {S17_2 < S17level2-S17level1}
+goal S17Zone3 {S17_3 < S17level3-S17level2}

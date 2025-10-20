@@ -1,0 +1,424 @@
+! R.Wilbur 7/27/04
+
+! This file defines all the SWP demands for the South of Delta and North Bay.
+
+! Annual demands, along with their monthly distributions, are provided to SWPAO
+! by the contractors for three allocation levels (100, 50 and 30%).
+
+/*
+Demand & contractor ID's:
+
+ IDD    DemArc       IDC Type Contractor
+  1     D_SBA009_ACFC             1    MI   ALAMEDA COUNTY FC&WCD-ZONE 7
+  2     D_SBA020_ACFC             1    MI   ALAMEDA COUNTY FC&WCD-ZONE 7
+  3     D_SBA029_ACWD             2    MI   ALAMEDA COUNTY WD
+  4     D_ESB324_AVEK             3    MI   ANTELOPE VALLEY-EAST KERN WA
+  5     D_CSB009_CLRTA1_DDWD             4    AG*  SANTA CLARITA WA
+  6     D_WSB032_CLRTA2             4    MI*  SANTA CLARITA WA
+  7     D204         5    MI   CITY OF YUBA CITY
+  8     D_ESB407_CCHLA         6    MI   COACHELLA VALLEY WD
+  9     D201         7    MI   COUNTY OF BUTTE
+  10    D_CAA181_KINGS         8    AG   COUNTY OF KINGS
+  11    D_SVRWD_CSTLN          9    MI   CRESTLINE-LAKE ARROWHEAD WA
+  12    D_ESB408_DESRT         10   MI   DESERT WA
+  13    D_CAA184_DUDLEY         11   AG   DUDLEY RIDGE WD
+  14    D_CAA173_EMPIRE         12   AG   EMPIRE WEST SIDE ID
+  15    D_CAA194_KERNA        13   MI   KERN COUNTY WA
+  16    D_CAA194_KERN         13   AG   KERN COUNTY WA
+  17    D_CAA242_Kern         13   AG   KERN COUNTY WA
+  18    D_CAA279_Kern         13   AG   KERN COUNTY WA
+  19    D_CSB015_KERN_BMWD         13   AG   KERN COUNTY WA
+  20    D_ESB355_LROCK         14   MI   LITTLEROCK CREEK ID
+  21    D_PRRIS_MWDSC          15   MWD  METROPOLITAN WDSC
+  22    D_CAA194_KERNB        15   MWD  METROPOLITAN WDSC
+  23    D_ESB413_MWDSC         15   MWD  METROPOLITAN WDSC
+  24    D_WSB031_MWDSC         15   MWD  METROPOLITAN WDSC
+  25    D_ESB433_MWDSC             15   MWD  METROPOLITAN WDSC
+  26    D_ESB403_MOJVE             16   MI   MOJAVE WA
+  27    D_BKR004_NBA009_NAPA   17   MI   NAPA COUNTY FC&WCD
+  28    D_CAA046_71_PA7_pag        18   AG   OAK FLAT WD
+  29    D_ESB347_PLMDL         19   MI   PALMDALE WD
+  30    D_ESB414_BRDNO         20   MI   SAN BERNARDINO VALLEY MWD
+  31    D_ESB415_GABRL         21   MI   SAN GABRIEL VALLEY MWD
+  32    D_ESB420_GRGNO         22   MI   SAN GORGONIO PASS WA
+  33    D_CSB038_OBISPO         23   MI   SAN LUIS OBISPO COUNTY FC&WCD
+  34    D_CSB103_BRBRA         24   MI   SANTA BARBARA COUNTY FC&WCD
+  35    D_SBA036_SCVWD         25   MI   SANTA CLARA VALLEY WD
+  36    D_BKR004_NBA009_SCWA   26   MI   SOLANO COUNTY WA
+  37    D_CAA183_TULARE         27   AG   TULARE LAKE BASIN WSD
+  38    D_PYRMD_VNTRA          28   MI   VENTURA COUNTY WPD
+  39    D_CSTIC_VNTRA          28   MI   VENTURA COUNTY WPD
+*/
+
+define percent_Yuba{value swp_perdel_yuba*100.0}
+define percent_butt{value swp_perdel_butt*100.0}
+define percent_napa{value swp_perdel_napa*100.0}
+define percent_solano{value swp_perdel_solano*100.0}
+
+/* define yuba_demprofile {
+    case low  {
+        condition percent_Yuba < 35.
+        value   30.}
+    case lowmed  {
+        condition percent_Yuba < 45.
+        value   30. + (50. - 30.)*(percent_Yuba - 35.)/(45. - 35.)}
+        case med  {
+        condition percent_Yuba < 60.
+        value   50.}
+        case medhigh  {
+        condition percent_Yuba < 70.
+        value   50. + (100. - 50.)*(percent_Yuba - 60.)/(70. - 60.)}
+        case high {
+        condition always
+        value  100}
+}*/
+
+define yuba_demprofile {
+    case lowest  {
+        condition percent_Yuba < 35.
+        value   30.}
+    case low  {
+        condition percent_Yuba < 40.
+        value   30. + (50. - 30.)*(percent_Yuba - 35.)/(40. - 35.)}
+    case lowmed  {
+        condition percent_Yuba < 55.
+        value   50.}
+	case medhigh	{
+		condition percent_Yuba < 65.
+        value   60.}
+    case high  {
+        condition percent_Yuba < 80.
+        value   60. + (100. - 60.)*(percent_Yuba - 65.)/(80. - 65.)}
+    case highest {
+        condition always
+        value  100}
+}
+
+/*define butt_demprofile {
+    case low  {
+        condition percent_butt < 35.
+        value   30.}
+    case lowmed  {
+        condition percent_butt < 45.
+        value   30. + (50. - 30.)*(percent_butt - 35.)/(45. - 35.)}
+        case med  {
+        condition percent_butt < 60.
+        value   50.}
+        case medhigh  {
+        condition percent_butt < 70.
+        value   50. + (100. - 50.)*(percent_butt - 60.)/(70. - 60.)}
+        case high {
+        condition always
+        value  100}
+}
+*/
+
+define butt_demprofile {
+    case lowest  {
+        condition percent_butt < 35.
+        value   30.}
+    case low  {
+        condition percent_butt < 40.
+        value   30. + (50. - 30.)*(percent_butt - 35.)/(40. - 35.)}
+    case lowmed  {
+        condition percent_butt < 55.
+        value   50.}
+	case medhigh	{
+		condition percent_butt < 65.
+        value   60.}
+    case high  {
+        condition percent_butt < 80.
+        value   60. + (100. - 60.)*(percent_butt - 65.)/(80. - 65.)}
+    case highest {
+        condition always
+        value  100}
+}
+
+/*define napa_demprofile{
+    case low  {
+        condition percent_napa < 35.
+        value   30.}
+    case lowmed  {
+        condition percent_napa < 45.
+        value   30. + (50. - 30.)*(percent_napa - 35.)/(45. - 35.)}
+        case med  {
+        condition percent_napa < 60.
+        value   50.}
+        case medhigh  {
+        condition percent_napa < 70.
+        value   50. + (100. - 50.)*(percent_napa - 60.)/(70. - 60.)}
+        case high {
+        condition always
+        value  100}
+}
+*/
+
+define napa_demprofile {
+    case lowest  {
+        condition percent_napa < 35.
+        value   30.}
+    case low  {
+        condition percent_napa < 40.
+        value   30. + (50. - 30.)*(percent_napa - 35.)/(40. - 35.)}
+    case lowmed  {
+        condition percent_napa < 55.
+        value   50.}
+	case medhigh	{
+		condition percent_napa < 65.
+        value   60.}
+    case high  {
+        condition percent_napa < 80.
+        value   60. + (100. - 60.)*(percent_napa - 65.)/(80. - 65.)}
+    case highest {
+        condition always
+        value  100}
+}
+ 
+/*define solano_demprofile {
+    case low  {
+        condition percent_solano < 35.
+        value   30.}
+    case lowmed  {
+        condition percent_solano < 45.
+        value   30. + (50. - 30.)*(percent_solano - 35.)/(45. - 35.)}
+        case med  {
+        condition percent_solano < 60.
+        value   50.}
+        case medhigh  {
+        condition percent_solano < 70.
+        value   50. + (100. - 50.)*(percent_solano - 60.)/(70. - 60.)}
+        case high {
+        condition always
+        value  100}
+}
+*/
+
+define solano_demprofile {
+    case lowest  {
+        condition percent_solano < 35.
+        value   30.}
+    case low  {
+        condition percent_solano < 40.
+        value   30. + (50. - 30.)*(percent_solano - 35.)/(40. - 35.)}
+    case lowmed  {
+        condition percent_solano < 55.
+        value   50.}
+	case medhigh	{
+		condition percent_solano < 65.
+        value   60.}
+    case high  {
+        condition percent_solano < 80.
+        value   60. + (100. - 60.)*(percent_solano - 65.)/(80. - 65.)}
+    case highest {
+        condition always
+        value  100}
+}
+
+define dem_D_SBA009_ACFC_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=1, month=month}
+define dem_D_SBA020_ACFC_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=2, month=month}
+define dem_D_SBA029_ACWD_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=3, month=month}
+define dem_D_ESB324_AVEK_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=4, month=month}
+define dem_D_CSB009_CLRTA1_DDWD_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=5, month=month}
+define dem_D_WSB032_CLRTA2_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=6, month=month}
+define dem_D_ESB407_CCHLA_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=8, month=month}
+define dem_D_CAA181_KINGS_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=10,month=month}
+define dem_D_SVRWD_CSTLN_PMI   {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=11,month=month}
+define dem_D_ESB408_DESRT_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=12,month=month}
+define dem_D_CAA184_DUDLEY_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=13,month=month}
+define dem_D_CAA173_EMPIRE_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=14,month=month}
+define dem_D_CAA194_KERNA_PMI {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=15,month=month}
+define dem_D_CAA194_KERN_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=16,month=month}
+define dem_D_CAA242_Kern_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=17,month=month}
+define dem_D_CAA279_Kern_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=18,month=month}
+define dem_D_CSB015_KERN_BMWD_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=19,month=month}
+define dem_D_ESB355_LROCK_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=20,month=month}
+define dem_D_PRRIS_MWDSC_PMI   {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=21,month=month}
+define dem_D_CAA194_KERNB_PMI {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=22,month=month}
+define dem_D_ESB413_MWDSC_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=23,month=month}
+define dem_D_WSB031_MWDSC_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=24,month=month}
+define dem_D_ESB433_MWDSC_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=25,month=month}
+define dem_D_ESB403_MOJVE_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=26,month=month}
+define dem_D_BKR004_NBA009_NAPA {select demand from swp_3pattern_demands given percent=napa_demprofile use linear where contractor=27,month=month}
+define dem_D802A_PAG {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=28,month=month}
+define dem_D_ESB347_PLMDL_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=29,month=month}
+define dem_D_ESB414_BRDNO_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=30,month=month}
+define dem_D_ESB415_GABRL_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=31,month=month}
+define dem_D_ESB420_GRGNO_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=32,month=month}
+define dem_D_CSB038_OBISPO_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=33,month=month}
+define dem_D_CSB103_BRBRA_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=34,month=month}
+define dem_D_SBA036_SCVWD_PMI  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=35,month=month}
+define dem_D_BKR004_NBA009_SCWA {select demand from swp_3pattern_demands given percent=solano_demprofile use linear where contractor=36,month=month}
+define dem_D_CAA183_TULARE_PAG  {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=37,month=month}
+define dem_D_PYRMD_VNTRA_PMI   {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=38,month=month}
+define dem_D_CSTIC_VNTRA_PMI   {select demand from swp_3pattern_demands given percent=swp_demprofile use linear where contractor=39,month=month}
+define dem_D_WTPCYC_16_PU_SWP_PMI {select demand from swp_3pattern_demands given percent=yuba_demprofile use linear where contractor=7,month=month}
+
+!define out_D_SVRWD_CSTLN_PMI   {alias dem_D_SVRWD_CSTLN_PMI    kind 'debug' units 'taf'}
+!define out_D_PRRIS_MWDSC_PMI   {alias dem_D_PRRIS_MWDSC_PMI    kind 'debug' units 'taf'}
+!define out_D_PYRMD_VNTRA_PMI   {alias dem_D_PYRMD_VNTRA_PMI    kind 'debug' units 'taf'}
+!define out_D_CSTIC_VNTRA_PMI   {alias dem_D_CSTIC_VNTRA_PMI    kind 'debug' units 'taf'}
+!define out_D802A_PAG {alias dem_D802A_PAG  kind 'debug' units 'taf'}
+!define out_D_SBA009_ACFC_PMI  {alias dem_D_SBA009_ACFC_PMI   kind 'debug' units 'taf'}
+!define out_D_SBA020_ACFC_PMI  {alias dem_D_SBA020_ACFC_PMI   kind 'debug' units 'taf'}
+!define out_D_SBA029_ACWD_PMI  {alias dem_D_SBA029_ACWD_PMI   kind 'debug' units 'taf'}
+!define out_D_SBA036_SCVWD_PMI  {alias dem_D_SBA036_SCVWD_PMI   kind 'debug' units 'taf'}
+!define out_D_CAA173_EMPIRE_PAG  {alias dem_D_CAA173_EMPIRE_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA181_KINGS_PAG  {alias dem_D_CAA181_KINGS_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA183_TULARE_PAG  {alias dem_D_CAA183_TULARE_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA184_DUDLEY_PAG  {alias dem_D_CAA184_DUDLEY_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA194_KERN_PAG  {alias dem_D_CAA194_KERN_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA194_KERN_PMI  {alias dem_D_CAA194_KERN_PMI   kind 'debug' units 'taf'}
+!define out_D_CAA242_Kern_PAG  {alias dem_D_CAA242_Kern_PAG   kind 'debug' units 'taf'}
+!define out_D_CAA279_Kern_PAG  {alias dem_D_CAA279_Kern_PAG   kind 'debug' units 'taf'}
+!define out_D_CSB015_KERN_BMWD_PAG  {alias dem_D_CSB015_KERN_BMWD_PAG   kind 'debug' units 'taf'}
+!define out_D_CSB009_CLRTA1_DDWD_PAG  {alias dem_D_CSB009_CLRTA1_DDWD_PAG   kind 'debug' units 'taf'}
+!define out_D_CSB038_OBISPO_PMI  {alias dem_D_CSB038_OBISPO_PMI   kind 'debug' units 'taf'}
+!define out_D_CSB103_BRBRA_PMI  {alias dem_D_CSB103_BRBRA_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB324_AVEK_PMI  {alias dem_D_ESB324_AVEK_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB347_PLMDL_PMI  {alias dem_D_ESB347_PLMDL_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB355_LROCK_PMI  {alias dem_D_ESB355_LROCK_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB403_MOJVE_PMI  {alias dem_D_ESB403_MOJVE_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB407_CCHLA_PMI  {alias dem_D_ESB407_CCHLA_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB408_DESRT_PMI  {alias dem_D_ESB408_DESRT_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB413_MWDSC_PMI  {alias dem_D_ESB413_MWDSC_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB414_BRDNO_PMI  {alias dem_D_ESB414_BRDNO_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB415_GABRL_PMI  {alias dem_D_ESB415_GABRL_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB420_GRGNO_PMI  {alias dem_D_ESB420_GRGNO_PMI   kind 'debug' units 'taf'}
+!define  out_D_WSB031_MWDSC_PMI  {alias dem_D_WSB031_MWDSC_PMI   kind 'debug' units 'taf'}
+!define out_D_WSB032_CLRTA2_PMI  {alias dem_D_WSB032_CLRTA2_PMI   kind 'debug' units 'taf'}
+!define out_D_ESB433_MWDSC_PMI  {alias dem_D_ESB433_MWDSC_PMI   kind 'debug' units 'taf'}
+
+!***********************************************************************************
+
+!losses - constant pattern, never reduced.
+define dem_D_CAA220_CAALOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_CAA278_CAALOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_CAA280_CAALOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_ESB361_ESBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_ESB406_ESBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_ESB425_ESBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_WSB006_WSBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_WSB026_WSBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_WSB027_WSBLOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+define dem_D_SBA042_SBALOS_PLS  {timeseries kind 'demand-swp-ls' units 'taf' convert 'cfs'}
+
+!interruptable - full request, weights determine if water is delivered.
+define dem_D_PRRIS_MWDSC_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CSTIC_VNTRA_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 11/19/2019
+define dem_D_WTPCYC_16_PU_SWP_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+
+define dem_NAPA_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_SCWA_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 11/19/2019
+define dem_D_CAA046_71_PA7_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+
+define dem_D_CAA173_EMPIRE_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CAA181_KINGS_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 11/19/2019
+define dem_D_CAA183_TULARE_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CAA184_DUDLEY_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CSB009_CLRTA1_DDWD_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CAA242_Kern_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_CSB103_BRBRA_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 11/19/2019
+define dem_D_ESB324_AVEK_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_ESB347_PLMDL_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+define dem_D_CSB038_OBISPO_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+
+define dem_D_ESB407_CCHLA_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_ESB408_DESRT_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_ESB413_MWDSC_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_ESB414_BRDNO_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+
+define dem_D_ESB415_GABRL_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 11/19/2019
+define dem_D_ESB420_GRGNO_PIN   {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} ! Added new Article 21 demands. NOsorio, 07/2020
+
+define dem_D_ESB433_MWDSC_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_WSB031_MWDSC_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_SBA009_ACFC_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_SBA029_ACWD_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_SBA036_SCVWD_PIN  {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'}
+define dem_D_ESB355_LROCK_PIN {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} !Added new Article 21 demands. JByers, 05/30/2024
+define dem_D_ESB403_MOJVE_PIN {timeseries kind 'demand-swp-in' units 'taf' convert 'cfs'} !Added new Article 21 demands. JByers, 05/30/2024
+
+! Maximum Article 21 deliveries received for each contractor 2005-2018 based on SWPAO Historical Deliveries data
+! Once contractor has received this amount, they will not be receiving any more Article 21 water despite monthly demand in SV DSS PIN timeseries
+
+define dem_D_SBA009_ACFC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 1 }
+define dem_D_SBA020_ACFC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 2 }
+define dem_D_SBA029_ACWD_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 3 }
+define dem_D_ESB324_AVEK_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 4 }
+define dem_D_CSB009_CLRTA1_DDWD_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 5 }
+define dem_D_WSB032_CLRTA2_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 6 }
+define dem_D_WTPCYC_16_PU_SWP_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 7 }
+define dem_D_ESB407_CCHLA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 8 }
+define dem_D201_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 9 }
+define dem_D_CAA181_KINGS_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 10 }
+define dem_D_SVRWD_CSTLN_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 11 }
+define dem_D_ESB408_DESRT_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 12 }
+define dem_D_CAA184_DUDLEY_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 13 }
+define dem_D_CAA173_EMPIRE_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 14 }
+define dem_D_CAA194_KERNA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 15 }
+define dem_D_CAA194_KERN_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 16 }
+define dem_D_CAA242_Kern_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 17 }
+define dem_D_CAA279_Kern_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 18 }
+define dem_D_CSB015_KERN_BMWD_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 19 }
+define dem_D_ESB355_LROCK_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 20 }
+define dem_D_PRRIS_MWDSC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 21 }
+define dem_D_CAA194_KERNB_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 22 }
+define dem_D_ESB413_MWDSC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 23 }
+define dem_D_WSB031_MWDSC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 24 }
+define dem_D_ESB433_MWDSC_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 25 }
+define dem_D_ESB403_MOJVE_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 26 }
+define dem_D_BKR004_NBA009_NAPA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 27 }
+define dem_D_CAA046_71_PA7_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 28 }
+define dem_D_ESB347_PLMDL_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 29 }
+define dem_D_ESB414_BRDNO_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 30 }
+define dem_D_ESB415_GABRL_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 31 }
+define dem_D_ESB420_GRGNO_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 32 }
+define dem_D_CSB038_OBISPO_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 33 }
+define dem_D_CSB103_BRBRA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 34 }
+define dem_D_SBA036_SCVWD_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 35 }
+define dem_D_BKR004_NBA009_SCWA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 36 }
+define dem_D_CAA183_TULARE_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 37 }
+define dem_D_PYRMD_VNTRA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 38 }
+define dem_D_CSTIC_VNTRA_PIN_ANN_MAX {select Art21AnnualMax from swp_art21_ann_max where contractor = 39 }
+
+!QAQC outputs
+define	dem_D_SBA009_ACFC_PIN_ANN_MAX_	{alias	dem_D_SBA009_ACFC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_SBA020_ACFC_PIN_ANN_MAX_	{alias	dem_D_SBA020_ACFC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_SBA029_ACWD_PIN_ANN_MAX_	{alias	dem_D_SBA029_ACWD_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB324_AVEK_PIN_ANN_MAX_	{alias	dem_D_ESB324_AVEK_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CSB009_CLRTA1_DDWD_PIN_ANN_MAX_	{alias	dem_D_CSB009_CLRTA1_DDWD_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_WSB032_CLRTA2_PIN_ANN_MAX_	{alias	dem_D_WSB032_CLRTA2_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_WTPCYC_16_PU_SWP_PIN_ANN_MAX_	{alias	dem_D_WTPCYC_16_PU_SWP_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB407_CCHLA_PIN_ANN_MAX_	{alias	dem_D_ESB407_CCHLA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D201_PIN_ANN_MAX_	{alias	dem_D201_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA181_KINGS_PIN_ANN_MAX_	{alias	dem_D_CAA181_KINGS_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_SVRWD_CSTLN_PIN_ANN_MAX_	{alias	dem_D_SVRWD_CSTLN_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB408_DESRT_PIN_ANN_MAX_	{alias	dem_D_ESB408_DESRT_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA184_DUDLEY_PIN_ANN_MAX_	{alias	dem_D_CAA184_DUDLEY_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA173_EMPIRE_PIN_ANN_MAX_	{alias	dem_D_CAA173_EMPIRE_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA194_KERNA_PIN_ANN_MAX_	{alias	dem_D_CAA194_KERNA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA194_KERN_PIN_ANN_MAX_	{alias	dem_D_CAA194_KERN_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA242_Kern_PIN_ANN_MAX_	{alias	dem_D_CAA242_Kern_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA279_Kern_PIN_ANN_MAX_	{alias	dem_D_CAA279_Kern_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CSB015_KERN_BMWD_PIN_ANN_MAX_	{alias	dem_D_CSB015_KERN_BMWD_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB355_LROCK_PIN_ANN_MAX_	{alias	dem_D_ESB355_LROCK_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_PRRIS_MWDSC_PIN_ANN_MAX_	{alias	dem_D_PRRIS_MWDSC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA194_KERNB_PIN_ANN_MAX_	{alias	dem_D_CAA194_KERNB_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB413_MWDSC_PIN_ANN_MAX_	{alias	dem_D_ESB413_MWDSC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_WSB031_MWDSC_PIN_ANN_MAX_	{alias	dem_D_WSB031_MWDSC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB433_MWDSC_PIN_ANN_MAX_	{alias	dem_D_ESB433_MWDSC_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB403_MOJVE_PIN_ANN_MAX_	{alias	dem_D_ESB403_MOJVE_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_BKR004_NBA009_NAPA_PIN_ANN_MAX_	{alias	dem_D_BKR004_NBA009_NAPA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA046_71_PA7_PIN_ANN_MAX_	{alias	dem_D_CAA046_71_PA7_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB347_PLMDL_PIN_ANN_MAX_	{alias	dem_D_ESB347_PLMDL_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB414_BRDNO_PIN_ANN_MAX_	{alias	dem_D_ESB414_BRDNO_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB415_GABRL_PIN_ANN_MAX_	{alias	dem_D_ESB415_GABRL_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_ESB420_GRGNO_PIN_ANN_MAX_	{alias	dem_D_ESB420_GRGNO_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CSB038_OBISPO_PIN_ANN_MAX_	{alias	dem_D_CSB038_OBISPO_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CSB103_BRBRA_PIN_ANN_MAX_	{alias	dem_D_CSB103_BRBRA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_SBA036_SCVWD_PIN_ANN_MAX_	{alias	dem_D_SBA036_SCVWD_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_BKR004_NBA009_SCWA_PIN_ANN_MAX_	{alias	dem_D_BKR004_NBA009_SCWA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CAA183_TULARE_PIN_ANN_MAX_	{alias	dem_D_CAA183_TULARE_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_PYRMD_VNTRA_PIN_ANN_MAX_	{alias	dem_D_PYRMD_VNTRA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+define	dem_D_CSTIC_VNTRA_PIN_ANN_MAX_	{alias	dem_D_CSTIC_VNTRA_PIN_ANN_MAX	kind	'debug'	units	'TAF'}
+

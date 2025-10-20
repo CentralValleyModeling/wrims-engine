@@ -1,0 +1,128 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: SeepageReachOutput_SJR.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Output StreamGain/Loss in tributaries and mainstem reaches in Delta and San Joquin Valley
+
+Z.Q. Richard Chen, DWR 10/19/2022
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SG_SJRWest_CAA {alias D_CAA005_CAALOS+D_CAA006_CAALOS+D_CAA009_CAALOS+D_CAA012_CAALOS
++D_CAA024_CAALOS+D_CAA046_CAALOS+D_CAA051_CAALOS+D_CAA066_CAALOS+D_CAA067_CAALOS
++D_CAA069_CAALOS_CVP +D_CAA069_CAALOS_SWP +D_CAA071_CAALOS +D_CAA087_CAALOS +D_CAA095_CAALOS+D_CAA109_CAALOS
++D_CAA143_CAALOS+D_CAA155_CAALOS+D_CAA156_CAALOS+D_CAA165_CAALOS+D_CAA172_CAALOS
+kind 'CANAL-LOSS' units 'CFS'}
+
+define SG_SJRWest_DMC {alias 
+ D_DMC003_DMCLOS - D_DMC007_DMCLOS - D_DMC011_DMCLOS - D_DMC016_DMCLOS - D_DMC021_DMCLOS - D_DMC024_DMCLOS -
+ D_DMC030_DMCLOS - D_DMC034_DMCLOS - D_DMC039_DMCLOS - D_DMC044_DMCLOS - D_DMC049_DMCLOS - D_DMC054_DMCLOS -
+ D_DMC058_DMCLOS - D_DMC064_DMCLOS - D_DMC070_DMCLOS - D_DMC074_DMCLOS - D_DMC076_DMCLOS - D_DMC080_DMCLOS -
+ D_DMC085_DMCLOS - D_DMC091_DMCLOS - D_DMC097_DMCLOS - D_DMC105_DMCLOS - D_DMC111_DMCLOS - D_DMC116_DMCLOS - 
+ D_MDOTA_LOSS        
+kind 'CANAL-LOSS' units 'CFS'}
+
+define SG_SJRWestTrib {alias SG_CHC000_609 + SG_CAP000_854 + SG_LPC000_840 + SG128_ORT014_19 + SG129_ORT009_19 + 
+ SG130_ORT001_19 + SG_ORG000_793 + SG_SLO000_659 + SG_MDOTA_872 + SG51_FSL012_4 + SG52_FSL005_4  + SG53_FSL005_4 
+kind 'RIVER-SEEPAGE' units 'CFS'}                        
+
+define SG_SJREastExtr {alias SG_SJR_MLRTN265_RM230_tot + SG_SJR_RM230_184_tot + SG_SJR_RM184_138_tot + 
+ SG_SJR_RM138_90_tot + SG_SJR_RM90_43_tot + SG_SJR_RM43_00_tot + SG_UFC000_599
+kind 'RIVER-SEEPAGE' units 'CFS'}
+
+define SG_SJREastTrib {alias SG_STS_tot + SG_TUO_tot + SG_MCD_tot + SG_BCK_tot + SG_DED_tot + SG_CHW_tot + SG_FRS_tot 
+kind 'RIVER-SEEPAGE' units 'CFS'}   !No ESstreams included
+
+define SG_SJREastResv {alias SG_WDWRD + SG_MDSTO_644 + SG_TRLCK_666 + SG_UFC000_599 kind 'RESEROIR-SEEPAGE' units 'CFS'}
+
+define TD_SJRBasin{alias
++TD_MSN004_115+TD_MSN004_114+TD_MSN004_104+TD_SAL006_113+TD_SLD027_102+TD_OMR039_202 
++TD_SJR075_145+TD_SJR091_133+TD_SJR106_130+TD_SJR091_132+TD_SJR106_127+TD_SJR117_125
++TD_MOK014_197+TD_MOK019_196+TD_MOK035_179+TD_SJR022_200+TD_SJR028_170+TD_FCS007_160
++TD_SJR038_167+TD_SJR043_168+TD_SJR053_157+TD_FCS007_169+TD_SJR070_156+TD_STS017_152
++TD_SJR075_154+TD_TUO017_141+TD_MCD050_116+TD_SJR081_143+TD_TUO017_140+TD_EBP030_087
++TD_EBP050_112+TD_MCD021_121+TD_MCD050_117+TD_SJR117_124+TD_SJR134_103+TD_EBP005_075
++TD_EBP019_088+TD_EBP030_086+TD_EBP050_100+TD_FRS022_074+TD_SJR180_067+TD_SJR227_059
+ kind 'DRAIN-GW' units 'CFS'}
+
+define SR_SJRBasin {alias SR_60N + SR_60S + SR_61 + SR_62 + SR_63 + SR_64 +  SR_71 
+ kind 'SURFACE-RUNOFF' units 'CFS'}
+ 
+define SG_SJRbasin {alias TD_SJRBasin
++SG_SJREastExtr+SG_SJREastTrib+SG_SJREastResv+SG_SJRWest_CAA+SG_SJRWest_DMC+SG_SJRWestTrib 
+ kind 'STREAM-GAIN' units 'CFS'}
+
+
+
+define I_ANG017 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_BEARD {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_BVC007 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_CFS001 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_DONLL {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_LYONS {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MFS013 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MFS022 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MFS047 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MIL003 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NFS005 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NFS009 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_NFS033 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_PCRST {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_RLIEF {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFS030 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SFS033 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_SPICE {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_STS072 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_ELENR {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_HTCHY {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_LLOYD {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define I_MLRTN {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+
+define I_SJRBasin {alias 
+ +I_ANG017 +I_BEARD +I_BVC007 +I_CFS001 +I_DONLL +I_LYONS +I_MFS013 +I_MFS022 +I_MFS047 +I_MIL003                          !Stanaluas R.
+ +I_NFS005 +I_NFS009 +I_NFS033 +I_PCRST +I_RLIEF +I_SFS030 +I_SFS033 +I_SPICE +I_STS072 +I_TULOC                           !Stanaluas R.
+ +I_TUO054 +I_PEDRO +I_ELENR +I_HTCHY +I_LLOYD /* +I_CHY006 +I_CVY009 +I_JWB001 +I_MFT000 +I_NFT008 +I_SFT003 +I_TUO105 */ !C_TUO073_SV_imp
+ +I_MCD055 +I_MCLRE /*+I_MCD080 +I_MCD096 +I_MCD119 +I_MCD128 +I_MSF001 +I_MSF023 */ +I_MLRTN                              !Merced R. & San Joaquin R. =I_MLRTN_imp
+ +I_AMADR +I_BANOS +I_BCK040 +I_BUR005 +I_CAP000 +I_CHC000 +I_CHW031 +I_CLV026 +I_CMCHE
+ +I_CMP001 +I_CMP014 +I_COL003 +I_COT033 +I_CSM035 +I_DBC024 +I_DCM027 +I_DCT050 +I_DED044 +I_DEE023
+ +I_DPC008 +I_DSC035 +I_ESTMN +I_FRS046 +I_GRZ012 +I_HNSLY +I_ING008 +I_JNKSN +I_LJC022 +I_LOSVQ
+ +I_LPC007 +I_MFM008 +I_MOK079 +I_MPS038 +I_MSH015 +I_NFM010 +I_NHGAN +I_ORG000 +I_ORT014 +I_OWN040
+ +I_PARDE +I_QNT005 +I_SFM005 +I_SJR258 +I_SJR265 +I_SLO007 +I_SLTSP +I_SLUIS +I_STS059 +I_TGC003
+ +I_UBEAR
+ kind 'INFLOW' units 'CFS'}
+ 
+/*
++I_AMADR	+I_ANG017	+I_BANOS	+I_BCK040	+I_BCM003	+I_BEARD	+I_BUR005	+I_BVC007	+I_CAA245	+I_CAP000
++I_CFS001	+I_CHC000	+I_CHW031	+I_CLV026	+I_CMCHE	+I_CMP001	+I_COL003	+I_COT033	+I_CSM035	+I_DBC024
++I_DCM027	+I_DCT050	+I_DED044	+I_DEE023	+I_DONLL	+I_DPC008	+I_DSC035	+I_EBTML	+I_ESTMN	+I_FRS046
++I_FSL012	+I_GRZ012	+I_HNSLY	+I_ING008	+I_JBP006	+I_LJC022	+I_LPC007	+I_LYONS	+I_MCD055	+I_MCLRE
++I_MFM008	+I_MFS013	+I_MFS022	+I_MFS047	+I_MIL003	+I_MLRTN	+I_MOK079	+I_MPS038	+I_NFM010	+I_NFS005
++I_NFS009	+I_NFS033	+I_NHGAN	+I_ORG000	+I_ORT014	+I_OWN040	+I_PARDE	+I_PCRST	+I_PEDRO	+I_QNT005
++I_RLIEF	+I_SFM005	+I_SFS030	+I_SFS033	+I_SJR258	+I_SJR265	+I_SLO007	+I_SLTSP	+I_SLUIS	+I_SPICE
++I_STS059	+I_STS072	+I_TGC003	+I_TULOC	+I_TUO054	+I_UBEAR				
+*/
+
+ define CT_SJRbasin {alias
+ +CT_Melon +CT_Pedro +CT_Vernalis +CT_Stevinson +CT_MODESTO +CT_MERCED+ CT_Ripon+ CT_GRAVELLYFORD
+ kind 'CLOSURE-TERM' units 'CFS'}

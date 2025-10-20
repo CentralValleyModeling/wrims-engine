@@ -1,0 +1,103 @@
+/*
+CalSim 3.0
+BearRiver.wresl
+
+*/
+! Calculate annual urban demands (self-supplied)and applied water for 23_NU
+
+define SumUD_23_NU  {std kind 'URBAN-DEMAND' units 'TAF'} ! Annual demand
+define SumUD_23_NU_sv {
+    case oct{
+     condition month == oct 
+        sum(i=0,11,1) UD_23_NU(i)*cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value SumUD_23_NU(-1) }
+        }
+goal setSumUD_23_NU {SumUD_23_NU=SumUD_23_NU_sv}
+
+define SumAW_23_NA {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_23_NA_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  AWR_23_NA(i)*cfs_taf(i)*(1+RPF_23_NA-RUFR_23_NA) + AWO_23_NA(i)*cfs_taf(i)*(1+RPF_23_NA-RUFO_23_NA)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_23_NA(-1)
+        }}
+goal setSumAW_23_NA {SumAW_23_NA=SumAW_23_NA_sv}
+
+define SumAW_24_NA1 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_24_NA1_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  AWR_24_NA1(i)*cfs_taf(i)*(1+RPF_24_NA1-RUFR_24_NA1) + AWO_24_NA1(i)*cfs_taf(i)*(1+RPF_24_NA1-RUFO_24_NA1)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_24_NA1(-1)
+        }}
+goal setSumAW_24_NA1 {SumAW_24_NA1=SumAW_24_NA1_sv}
+
+define SumUD_24_NU3  {std kind 'URBAN-DEMAND' units 'TAF'} ! Annual demand
+define SumUD_24_NU3_sv {
+    case oct{
+     condition month == oct 
+        sum(i=0,11,1) UD_24_NU3(i)*cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value SumUD_24_NU3(-1) }
+        }
+goal setSumUD_24_NU3 {SumUD_24_NU3=SumUD_24_NU3_sv}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Camp Far West Reservoir    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Limit releases from Camp Far West Reservoir and Dam to flood releases, and releases for 
+Camp Far West ID and South Sutter WD, not releases for demand downstream of Wheatland gage
+*/
+goal setC_BRR017 {lhs C_BRR017 rhs C_BRR017_MIF+C_BRR017_BDSA lhs>rhs penalty 9999 lhs<rhs penalty 0}
+
+goal setD_BRR017_23_NA {D_BRR017_23_NA * (1. - EVF_BRR017_23_NA - DPF_BRR017_23_NA - LFF_BRR017_23_NA - OSF_BRR017_23_NA) < 0.35 * AWo_23_NA * (1. + RPF_23_NA - RUFo_23_NA) + 0.35 * AWr_23_NA * (1. + RPF_23_NA - RUFr_23_NA) - 0.35 * GPmin_23_NA_dv}
+
+
+/*
+In February 2000, DWR, South Sutter WD, and Camp Far West ID signed the Bear River Settlement Agreement to settle responsibilities of the two districts and other Bear River water right holders to implement the objectives of the 1995 Bay-Delta Plan. 
+
+•	South Sutter WD is obligated to release 4,400 acre-feet of water in dry and critical water years (Sacramento Valley 40-30-30 index), provided adequate water is stored in Camp Far West Reservoir. 
+•	If the April 1 storage in Camp Far West is less than 33,255 acre-feet, the release volume is reduced to the difference between the April 1 storage and 33,255 acre-feet. 
+•	No water need be released if the April 1 storage is below 28,855 acre-feet. 
+•	Releases are met by increasing flows by 37 cfs for up to sixty days during July to September. Assume release of settlement water begins July 16 and continues until a total of 4,400 acre-feet (or a lesser amount depending on April 1 storage) has been released.
+•	Settlement water is in addition to South Sutter WD FERC flow requirements (MF_BRR017).
+*/
+
+define BDSAAnnualVolume{
+ case apr1 	{condition month == APR .and. wyt_SAC >= 4 .and. S_CMPFW(-1) >= 33.255
+ 			value 4.4 }
+ case apr2 	{condition month == APR .and. wyt_SAC >= 4 .and. S_CMPFW(-1) >= 28.855
+ 			value 4.4 - (33.255-S_CMPFW(-1))}
+ case other 	{condition always value 0. }
+}
+define BDSAAnnualVolume_dv{alias BDSAAnnualVolume kind 'Debug-TAF' units 'taf'}
+
+define BDSARemainVolume {
+ case off	{condition month <= Jun value 0.}
+ case onJuly	{condition month == Jul value BDSAAnnualVolume_dv(PrevApr)}
+ case on	{condition month >= Aug
+ 			value max(0,BDSARemainVolume_dv(-1)- BDSA_Req_dv(-1)*cfs_taf(-1))}
+ }
+
+define BDSARemainVolume_dv{alias BDSARemainVolume kind 'Debug-TAF' units 'taf'}
+
+define BDSA_Req {
+ case off	{condition month <= Jun value 0.}		
+ case onJuly	{condition month == Jul .and. wyt_Sac_(PrevApr) >= 4 value min(37/2,BDSARemainVolume*taf_cfs)}
+ case onAugSep	{condition month >= Aug .and. wyt_Sac_(PrevApr) >= 4 value min(37,BDSARemainVolume*taf_cfs)}
+ case other	{condition always value 0.}	
+ }
+ 
+define BDSA_Req_dv{alias BDSA_Req kind 'Debug-CFS' units 'CFS'} 
+ 

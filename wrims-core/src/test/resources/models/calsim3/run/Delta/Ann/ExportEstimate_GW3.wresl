@@ -1,0 +1,76 @@
+/*
+This file defines export levels for each project (SWP,CVP).
+Estimates are based on current month delivery and San Luis rule-curve.
+*/
+
+!*********************************************************************************************
+! SWP exports:
+! This calculation is considering both potential ND intake as well as SD intake - see ExportEstimate2.wresl
+
+! export for south-of-delta SWP: demand
+define EstSWPSodDem {value swp_total_demand - I_CAA245 } !Ryan 8/9/2005
+define exp_est_SWPDem {alias EstSWPSodDem kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+! export for south-of-delta SWP: rulecurve
+define EstSWPSodRC {value SWPRULEcalc1*taf_cfs - S_SLUIS_SWP(-1)*taf_cfs}
+define exp_est_SWPRC {alias EstSWPSodRC kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+! export for south-of-delta SWP: demand + rulecurve
+define est_oro_release{
+    case verylow {condition S_OROVL[GW_SECOND] <= 1250.0 
+    value 300.0}
+    case low {condition S_OROVL[GW_SECOND]>1250.0 .and. S_OROVL[GW_SECOND] <= 1800.0 
+    value  0.25*(S_OROVL(-1) - 1600. - DrainTar_buffer)*taf_cfs}
+    case high {condition S_OROVL[GW_SECOND]>1800.0 .and. S_OROVL[GW_SECOND] <= 2200.0 
+    value 0.50*(S_OROVL(-1) - 1600. - DrainTar_buffer)*taf_cfs}
+    case veryhigh { condition always 
+    value 0.75*(S_OROVL(-1) - 1600. - DrainTar_buffer)*taf_cfs}
+}
+
+define EstSWPSodExp {value min(BanksMaxAllow, max(300.0, EstSWPSodDem + EstSWPSodRC), max(300., est_oro_release))}
+define exp_est_SWP {alias EstSWPSodExp kind 'EXPORT-ESTIMATE' units 'CFS'}
+define exp_estSWPlim3  {alias max(300.,est_oro_release) kind 'debug' units 'cfs'}
+
+
+!*********************************************************************************************
+! CVP exports:
+! This calculation is considering both potential ND intake as well as SD intake - see ExportEstimate2.wresl
+
+! estimate south-of-delta CVP demand
+! DMC and JUB delivery allocations less the portion of Mendota Pool diversions which come from 
+! SJR flood flows or Fresno Slough/James Bypass inflows
+! This formulation assumes that diversions in the initial cycles are sufficient to meet the allocations.
+define EstCVPSodDem {value
+  dem_totcvps_pag*taf_cfs*perdel_cvpag_s 
++ dem_totcvps_pls*taf_cfs
++ dem_totcvps_pmi*taf_cfs*perdel_cvpmi_s  
++ dem_totcvps_pex*taf_cfs*perdel_cvpex_s 
++ dem_totcvps_prf*taf_cfs*perdel_cvprf_s 
+- min(C_SJR205[SJRBASE_GW4]+C_FSL005[SJRBASE_GW4], 
+        D_MDOTA_73_XA[SJRBASE_GW4] + D_MDOTA_90_PA1[SJRBASE_GW4] 
+      + D_MDOTA_91_PA[SJRBASE_GW4] + D_MDOTA_91_PR[SJRBASE_GW4] 
+      + D_MDOTA_64_XA[SJRBASE_GW4] + D_MDOTA_XCC010[SJRBASE_GW4] 
+      + (D_SJR180_ARY010[SJRBASE_GW4]-R_64_XA_SJR185[SJRBASE_GW4]))}
+
+define exp_est_CVPDem {alias EstCVPSodDem kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+! export for south-of-delta CVP: rulecurve
+define EstCVPSodRC {value CvpRuleCalc1*taf_cfs - S_SLUIS_CVP(-1)*taf_cfs}
+define exp_est_CVPRC {alias EstCVPSodRC kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+! minimum Tracy pumping (for potential ND intake as well as SD intake)
+define TracyMinPumpLevel {
+        case TracyShastaLow {
+                condition S_SHSTA(-1) - S_SHSTA_WTS(-1) < 1500.0
+                value 600.0 }
+        case tracylowshastafolsom {
+                condition S_FOLSM(-1) < 400. .and. S_SHSTA(-1) - S_SHSTA_WTS(-1) < 2000. !Better reflection of actual operations by trying to keep
+                value 800. }                                                            !water from being released for SL storage during low storage
+        case TracyShastaHigh {
+                condition always
+                value 800.0 }
+}
+! export for south-of-delta CVP: demand + rulecurve
+define CVPexportcap {value maxTracycalc+ CVPDedBanksSwitch*BanksMaxAllowCVP}
+define EstCVPSodExp {value min(CVPexportcap, max(TracyMinPumpLevel, EstCVPSodDem + EstCVPSodRC))}
+define exp_est_CVP {alias EstCVPSodExp kind 'EXPORT-ESTIMATE' units 'CFS'}

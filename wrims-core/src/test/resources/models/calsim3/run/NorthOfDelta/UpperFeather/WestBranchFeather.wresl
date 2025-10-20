@@ -1,0 +1,196 @@
+/*
+WestBranchFeather.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+	Operation of Round Valley and Philbrook Reservoirs
+	Operation of Hendricks and Miocene Diversion Dams
+
+Created A Draper, MWH, 07.10.11; revised A Draper M Bachman, MWH/Stantec, 06.06.17 and 07.02.19
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!! Hendricks/Toadtown Canals  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+The Hendrick and Toadtown canals are part of PG&E's DeSabla – Centerville Hydroelectric Project on Butte Creek and the West Branch
+Feather River (FERC P-8033). During the summer,the natural flow of the West Branch Feather is augmented by water releases from
+Round Valley and Philbrook reservoirs.
+
+Commissioned in 1900, the Centerville Powerhouse has been offline since 2011, and ran only partially for the five years previous to that.
+The DeSabla Powerhouse, nine miles upstream of Centerville, is relatively modern and in good condition. From 2004 to 2009, PG&E went
+through a formal relicensing process with the Federal Energy Regulatory Commission (FERC) to relicense the Project. In 2016, the
+State Water Board issued a Water Quality Certification needed for a new license. However, PG&E announced on February 2, 2017 that it was
+withdrawing its application to relicense the Project.
+
+*/
+
+
+! Restrict canal flows based on observed flows in relatively wet period, when no shut-down for apparent emergency maintenance
+! Average of wet and above normal years 1998-2015
+! Historical data shows lower diversions after 1997
+define D_WBF030_HKC002_TGT {
+	case Oct { 
+		condition month == OCT
+		value 35 }
+	case Nov { 
+		condition month == NOV
+		value 45 }
+	case Dec { 
+		condition month == DEC
+		value 65 }
+	case Jan { 
+		condition month == JAN
+		value 80 }
+	case Feb { 
+		condition month == FEB
+		value 80 }
+	case Mar { 
+		condition month == MAR
+		value 90 }
+	case Apr { 
+		condition month == APR
+		value 65 }
+	case May { 
+		condition month == MAY
+		value 45 }
+	case Jun { 
+		condition month == JUN
+		value 100 }
+	case Jul {
+		condition month == JUL
+		value 85 }
+	case Aug {
+		condition month == AUG
+		value 70 }
+	case other {
+		condition always
+	value 55 }}
+
+goal set_D_WBF030_HKC002 {D_WBF030_HKC002 < D_WBF030_HKC002_TGT}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!! Miocene Canal  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+The Miocene Canal extends from the Miocene Diversion Dam on the West Branch near Magalia to
+Cherokee Reservoir near Oroville. The Upper Miocene (9.1-miles long), from the Diversion
+Dam to the Kunkle Reservoir is owned by PG&E. Water is then diverted through the Lime Saddle
+Powerhouse into the Middle Miocene Canal (11.2-miles long) to the Coal Canyon Powerhouse. The
+maximum flow through the Lime Saddle Powerhouse is 87 cfs.From the Coal Canyon Powerhouse to
+Cherokee Reservoir, the lower reach of the system is called the Lower Miocene or alternately,
+Powers Canal, and is owned by Cal Water. Cal Water takes delivery of water downstream of Coal
+Canyon Powerhouse.
+
+In 2002, the Canyon Powerhouse penstock ruptured. PG&E then decided to abandon the powerhouse. 
+
+The CalWater Oroville District has an agreement with PG&E to receive the
+outflow of its Lime Saddle and Coal Canyon Powerhouse operations. Cal Water’s water supply is
+diverted into the Miocene Canal to the Cherokee Reservoir. The delivery of water is subject to the
+time of use of the power generation facility.
+
+In 2010, CalWater signed an agreement with DWR to allow for the PG&E water supply to CalWater
+be conveyed into Lake Oroville at PG&Es Lime Saddle Power House and subsequently be diverted
+from the Thermalito Power Canal at Station 14 to the Oroville water treatment plant. Additional
+pumps were required at Station 14. Between 2007 and 2010, Station 14 was upgraded.
+
+Miocene Canal water is distributed along to 3 private buyers from the Lime Saddle Penstock and to 11
+buyers from the Middle Miocene Canal and Coal Canyon Forebay. 
+
+*/
+
+!from 2014 Draft Initial Study and Proposed Negative Declaration for the Redirected Contract PG&E Water from the Miocene Canal to the Thermalito Power Canal
+define dem_10_NA {value 0.4} !TAF
+
+!Deliver from CalWater to Oroville now primarily made through Oroville/Thermalito
+!Here, send 400 AF to demand unit 10_NA. The monthly demand pattern is based on the
+!applied water demand.
+
+define D_MIO023_10_NA_TGT {
+	case Oct { 
+		condition month == OCT
+		value dem_10_NA*taf_cfs * 0.04 }
+	case Nov { 
+		condition month == NOV
+		value dem_10_NA*taf_cfs * 0.02 }
+	case Dec { 
+		condition month == DEC
+		value dem_10_NA*taf_cfs * 0.02 }
+	case Jan { 
+		condition month == JAN
+		value dem_10_NA*taf_cfs * 0.01 }
+	case FebMar { 
+		condition month == FEB .or. month == MAR
+		value dem_10_NA*taf_cfs * 0.00 }
+	case April { 
+		condition month == APR
+		value dem_10_NA*taf_cfs * 0.09 }	
+	case May { 
+		condition month == MAY
+		value dem_10_NA*taf_cfs * 0.14 }
+	case Jun { 
+		condition month == JUN
+		value dem_10_NA*taf_cfs * 0.19 }
+	case Jul { 
+		condition month == JUL
+		value dem_10_NA*taf_cfs * 0.22 }
+	case Aug { 
+		condition month == AUG
+		value dem_10_NA*taf_cfs * 0.18 }
+	case Sep { 
+		condition always
+		value dem_10_NA*taf_cfs * 0.10 }
+}
+
+goal set_D_MIO023_10_NA {D_MIO023_10_NA < D_MIO023_10_NA_TGT}
+
+
+! Restrict flows through PG&E Lime Saddle Powerhouse based on 2011-2015 historical data (CDEC=MIO).
+! Significant downward trend in historical canal diversions
+define D_WBF015_MIO010_TGT {
+	case October { 
+		condition month == OCT
+		value 22. }
+	case November { 
+		condition month == NOV
+		value 15. }
+	case December { 
+		condition month == DEC
+		value 11. }
+	case January { 
+		condition month == JAN
+		value 18. }
+	case February { 
+		condition month == FEB .or. month == MAR
+		value 14. }
+	case March { 
+		condition month == FEB .or. month == MAR
+		value 3. }	
+	case April { 
+		condition month == APR
+		value 10. }	
+	case May { 
+		condition month == MAY
+		value 20. }
+	case June { 
+		condition month == JUN
+		value 22. }
+	case July { 
+		condition month == JUL
+		value 21. }
+	case August { 
+		condition month == AUG
+		value 19. }
+	case September { 
+		condition always
+		value 19. }
+}
+
+goal set_D_WBF015_MIO010_TGT {D_WBF015_MIO010 < D_WBF015_MIO010_TGT}
+
+define D_MIO023_10_NA_TGTdv {alias D_MIO023_10_NA_TGT }
+define D_WBF015_MIO010_TGTdv {alias D_WBF015_MIO010_TGT }

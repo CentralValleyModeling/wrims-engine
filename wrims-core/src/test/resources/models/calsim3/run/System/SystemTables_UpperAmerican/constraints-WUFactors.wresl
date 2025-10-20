@@ -1,0 +1,99 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-WUfactors.wresl
+CalSim 3.0 System File
+
+Purpose:
+Apply water use factors
+ 
+Naming takes the following form:
+ EL_{source prefix}_{demand unit} - evaporative loss (non-recoverable)
+ PL_{source prefix}_{demand unit} - percolation loss (to groundwater)
+ RL_{source prefix}_{demand unit} - return flow loss (seepage loss to canal toe drain, available for reuse)
+ SL_{source prefix}_{demand unit} - spill loss (canal spill to main drain, not available for reuse)
+  
+ DL_{source prefix}_{demand unit}  - total conveyance loss  associated with diversion (EL + PL + RL + SL)
+ DL_{demand unit}             - total conveyance loss  associated with demand unit from multiple diversion arcs
+  
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District to EID Eastern and EID Western    !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!DL_ELDID_NU1
+goal setEL_ELDID_NU1    {EL_ELDID_NU1 = (D_WTPRSA_ELDID_NU1 * EF_WTPRSA_ELDID_NU1) + (D_WTPRS1_ELDID_NU1 * EF_WTPRS1_ELDID_NU1)}
+goal setSL_ELDID_NU1    {SL_ELDID_NU1 = (D_WTPRSA_ELDID_NU1 * SF_WTPRSA_ELDID_NU1) + (D_WTPRS1_ELDID_NU1 * SF_WTPRS1_ELDID_NU1)}
+goal setDL_ELDID_NU1    {DL_ELDID_NU1 = EL_ELDID_NU1    + SL_ELDID_NU1}
+
+!DL_ELDID_NA1
+goal setEL_ELDID_NA1    {EL_ELDID_NA1 = D_JNKSN_ELDID_NA1  * EF_JNKSN_ELDID_NA1}
+goal setSL_ELDID_NA1    {SL_ELDID_NA1 = D_JNKSN_ELDID_NA1  * SF_JNKSN_ELDID_NA1}
+goal setDL_ELDID_NA1    {DL_ELDID_NA1 = EL_ELDID_NA1 + SL_ELDID_NA1}
+
+!DL_ELDID_NU2: From EID WTP RSA/RS1 and proposed White Rock Diversion
+goal setEL_ELDID_NU2    {EL_ELDID_NU2 = (D_WTPRSA_ELDID_NU2 * EF_WTPRSA_ELDID_NU2) + (D_WTPRS1_ELDID_NU2 * EF_WTPRS1_ELDID_NU2) + (D_WRT000_ELDID_NU2 * EF_WRT000_ELDID_NU2)}
+goal setSL_ELDID_NU2    {SL_ELDID_NU2 = (D_WTPRSA_ELDID_NU2 * SF_WTPRSA_ELDID_NU2) + (D_WTPRS1_ELDID_NU2 * SF_WTPRS1_ELDID_NU2) + (D_WRT000_ELDID_NU2 * SF_WRT000_ELDID_NU2)}
+goal setDL_ELDID_NU2    {DL_ELDID_NU2 = EL_ELDID_NU2 + SL_ELDID_NU2}
+
+!DL_ELDID_NA1
+goal setEL_ELDID_NA2    {EL_ELDID_NA2 = D_JNKSN_ELDID_NA2 * EF_JNKSN_ELDID_NA2}
+goal setSL_ELDID_NA2    {SL_ELDID_NA2 = D_JNKSN_ELDID_NA2 * SF_JNKSN_ELDID_NA2}
+goal setDL_ELDID_NA2    {DL_ELDID_NA2 = EL_ELDID_NA2 + SL_ELDID_NA2}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District - Potential deliveries to OCA    !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!EDCOCA_NU1: Multiple sources, EID and Potential UARP
+goal setEL_EDCOCA_NU1    {EL_EDCOCA_NU1 = (D_FOLSM_EDCOCA_NU1 * EF_FOLSM_EDCOCA_NU1)+(D_WRT000_EDCOCA_NU1*EF_WRT000_EDCOCA_NU1)}
+goal setSL_EDCOCA_NU1    {SL_EDCOCA_NU1 = (D_FOLSM_EDCOCA_NU1 * SF_FOLSM_EDCOCA_NU1)+(D_WRT000_EDCOCA_NU1*SF_WRT000_EDCOCA_NU1)}
+goal setDL_EDCOCA_NU1    {DL_EDCOCA_NU1 = EL_EDCOCA_NU1    + SL_EDCOCA_NU1}
+
+!EDCOCA_NU3: Multiple sources, EID and Potential UARP
+goal setEL_EDCOCA_NU3    {EL_EDCOCA_NU3 = (D_WRT000_EDCOCA_NU3*EF_WRT000_EDCOCA_NU3)}
+goal setSL_EDCOCA_NU3    {SL_EDCOCA_NU3 = (D_WRT000_EDCOCA_NU3*SF_WRT000_EDCOCA_NU3)}
+goal setDL_EDCOCA_NU3    {DL_EDCOCA_NU3 = EL_EDCOCA_NU3    + SL_EDCOCA_NU3}
+
+!EDCOCA_NA1: Multiple sources, EID and Potential UARP
+goal setEL_EDCOCA_NA1    {EL_EDCOCA_NA1 = (D_FOLSM_EDCOCA_NA1 * EF_FOLSM_EDCOCA_NA1)+(D_WRT000_EDCOCA_NA1*EF_WRT000_EDCOCA_NA1)}
+goal setSL_EDCOCA_NA1    {SL_EDCOCA_NA1 = (D_FOLSM_EDCOCA_NA1 * SF_FOLSM_EDCOCA_NA1)+(D_WRT000_EDCOCA_NA1*SF_WRT000_EDCOCA_NA1)}
+goal setDL_EDCOCA_NA1    {DL_EDCOCA_NA1 = EL_EDCOCA_NA1    + SL_EDCOCA_NA1}
+
+!EDCOCA_NA3: Multiple sources, EID and Potential UARP
+goal setEL_EDCOCA_NA3    {EL_EDCOCA_NA3 = (D_JNKSN_EDCOCA_NA3 * EF_JNKSN_EDCOCA_NA3)+(D_WRT000_EDCOCA_NA3*EF_WRT000_EDCOCA_NA3)+(D_EDC021_EDCOCA_NA3*EF_EDC021_EDCOCA_NA3)}
+goal setSL_EDCOCA_NA3    {SL_EDCOCA_NA3 = (D_JNKSN_EDCOCA_NA3 * SF_JNKSN_EDCOCA_NA3)+(D_WRT000_EDCOCA_NA3*SF_WRT000_EDCOCA_NA3)+(D_EDC021_EDCOCA_NA3*SF_EDC021_EDCOCA_NA3)}
+goal setDL_EDCOCA_NA3    {DL_EDCOCA_NA3 = EL_EDCOCA_NA3    + SL_EDCOCA_NA3}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stumpy Meadows (GDPUD)  - Deliveries to water users within the GDPUD service area
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setEL_GDPUD_NU    {EL_GDPUD_NU = D_WTPWAL_GDPUD_NU  * EF_WTPWAL_GDPUD_NU}
+goal setSL_GDPUD_NU    {SL_GDPUD_NU = D_WTPWAL_GDPUD_NU  * SF_WTPWAL_GDPUD_NU}
+goal setDL_GDPUD_NU    {DL_GDPUD_NU = EL_GDPUD_NU    + SL_GDPUD_NU}
+
+goal setEL_GDPUD_PU    {EL_GDPUD_PU = D_WTPWAL_GDPUD_PU  * EF_WTPWAL_GDPUD_PU}
+goal setSL_GDPUD_PU    {SL_GDPUD_PU = D_WTPWAL_GDPUD_PU  * SF_WTPWAL_GDPUD_PU}
+goal setDL_GDPUD_PU    {DL_GDPUD_PU = EL_GDPUD_PU    + SL_GDPUD_PU}
+
+goal setEL_GDPUD_NA    {EL_GDPUD_NA = D_GDD010_GDPUD_NA  * EF_GDD010_GDPUD_NA}
+goal setSL_GDPUD_NA    {SL_GDPUD_NA = D_GDD010_GDPUD_NA  * SF_GDD010_GDPUD_NA}
+goal setDL_GDPUD_NA    {DL_GDPUD_NA = EL_GDPUD_NA    + SL_GDPUD_NA}
+
+

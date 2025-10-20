@@ -1,0 +1,33 @@
+! OMR_stub.wresl
+!
+! place holder for potential OMR constraints
+!
+define C_OMR014_limit {value -99999.}
+!
+goal bound_Qomr { C_OMR014 > C_OMR014_limit }
+define C_OMR014_LBound  {alias C_OMR014_limit kind 'FLOW-LBOUND' units 'CFS'}
+
+!
+! Split arcs and Goals to force impacts of actions at pumps
+!*********************************************************************************************
+! C_OMR014_Base represents the OMR flow not including COA related pumping at Banks or Tracy
+define C_OMR014_NoEXP1  {lower -99999*taf_cfs upper 99999*taf_cfs kind 'FLOW-CHANNEL' units 'CFS'}
+goal set_C_OMR014NoEXP1 {C_OMR014_NoEXP1 - C_OMR014 = C_CAA003_EXP1_TD + C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SB_E1 + D408_P_WHL_SF_E1}
+!
+goal bound_C_CAA003 {
+  lhs     C_CAA003_EXP1_TD + D408_P_WHL_SB_E1
+  case FWSBOActions{
+  condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}
+!
+goal bound_C_DMC000 {
+  lhs     C_DMC000_EXP1_TD + C_CAA003_CVPDEDEX1TD + D408_P_WHL_SF_E1
+  case FWSBOActions{
+    condition month>=dec .and. month<=jun
+    rhs     0.5*C_OMR014_NoEXP1 - 0.5*C_OMR014_limit
+    lhs>rhs    penalty 1285
+    lhs<rhs penalty    0}
+}

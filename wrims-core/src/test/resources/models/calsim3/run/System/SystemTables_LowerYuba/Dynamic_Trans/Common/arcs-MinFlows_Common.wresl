@@ -1,0 +1,122 @@
+/*
+File Name: arcs-minflows_Common.wresl
+Lower Yuba River System File
+
+Purpose:
+
+Naming takes the following form:
+
+
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Water Year Types !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define wyt_Smartville {value SmartvilleIndex} !Proposed index for new YRDP and YBDS FERC license, 
+define wyt_FERC2246   {value FERC2246Index} !Existing FERC license for Yuba River Development Project
+
+!define wyt_FERC1963 {value wyt_FERC2246}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Slate Creek below Diversion Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_SLT008_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'} 
+define C_SLT008_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+/*
+define OrovilleFNF_WY {case Otherwise    {condition always  value OrovilleFNF_WY_SV}} 
+
+define P2088_WYT {
+       case Wet   {condition OrovilleFNF_WY>7100 value 1}       
+       case AN    {condition OrovilleFNF_WY>4000 value 2} 
+       case BN    {condition OrovilleFNF_WY>2400 value 3} 
+       case Dry   {condition always value 4}}
+*/	   
+define MF_SLT008 {select MinFlow_Ex  from UF_P2088MinFlow where Project=5, WYT=P2088_WYT[UPPERFEATHER], month=month}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Oregon Creek below Log Cabin Diversion Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_OGN004_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'} 
+define C_OGN004_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+!define MF_OGN005  {select logcabindam from yuba_min_FERC2246 where month=month,wytype=wyt_Smartville}!Proposed
+
+
+define MF_OGN004  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=month,wytype=wyt_FERC2246}
+			       case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=month}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=month}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=month}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=month}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=month}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=month}
+}	
+
+define MF_OGN004_BUFF  {value MF_OGN004 + 1.0}! cfs
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Middle Fork Yuba below Our House Diversion Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_MFY012_MIF {std kind 'FLOW-MIN-INSTREAM' units 'CFS'} 
+define C_MFY012_ADD {std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+define MF_MFY012    {case Lic1963 {condition P2246_WQCFlag ==  0. select ourhousedam from Yuba_min_FERC2246 where month=month,wytype=wyt_FERC2246}
+				     case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=month}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=month}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=month}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=month}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=month}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=month}
+	
+}
+
+define MF_MFY012_BUFF  	{value MF_MFY012 + 3.0}! cfs
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Nortb Yuba River below New Bullards Bar Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define MF_C_NFY002  {case Lic1963 {condition P2246_WQCFlag == 0.  select NewBullardsDam from Yuba_min_FERC2246 where month=month,wytype=wyt_FERC2246}
+		     		 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select NewBullards_ECD from Yuba_min_FERC2246_WQC where month=month}
+ 					 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select NewBullards_CDY from Yuba_min_FERC2246_WQC where month=month}
+ 					 case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select NewBullards_DY  from Yuba_min_FERC2246_WQC where month=month}
+ 					 case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select NewBullards_BNY from Yuba_min_FERC2246_WQC where month=month}
+ 					 case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select NewBullards_NY  from Yuba_min_FERC2246_WQC where month=month}
+ 					 case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select NewBullards_Wet from Yuba_min_FERC2246_WQC where month=month}
+ }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Yuba River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Define MF_YUB_BUF {value 30.}	!Minimum flow buffer
+
+! Yuba River's Smartsville gage flow requirement
+define C_YUB024_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'} 
+define C_YUB024_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! Yuba River's Marysville gage flow requirement
+define C_YUB006_MIF		{std kind 'FLOW-MIN-INSTREAM' units 'CFS'} 
+define C_YUB006_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Dry Creek below Virginia Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+A 1953 agreement with Sydney V. Smith (Smith Agreement) requires BVID to bypass up to 4.46
+cfs at the Virginia Ranch Dam during the irrigation season commencing in April to satisfy senior
+water rights along the Smith Ditch, which diverts water from Dry Creek six miles downstream of
+the dam and upstream of the site of the proposed Project. The 1972 Agreement with CDFG
+requires BVID to bypass sufficient water to provide a flow of 3.3 cfs or the natural inflow to
+Collins Reservoir, whichever is less, at Sicard Flat Ditch three miles downstream of Virginia
+Ranch Dam at all times except in years that the reservoir does not spill by June 1. The CDFG
+Agreement allows the minimum bypass flow requirement to be reduced to 1.0 cfs in years that
+Collins Reservoir does not spill by June 1.
+*/
+define MF_FDC006 	{value 3.3} 
+define C_FDC006_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_FDC006_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+

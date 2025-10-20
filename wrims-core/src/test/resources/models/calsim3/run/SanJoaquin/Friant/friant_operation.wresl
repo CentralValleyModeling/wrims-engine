@@ -1,0 +1,217 @@
+! Friant_operation.wresl
+! Determination of Friant San Joaquin River minimum release
+!##############################################################################
+/*
+This file defines the Madera and Friant-Kern Canal demands and deliveries
+*/
+! Define Fraint-Kern Canal Demands
+define dem_D_MLRTN_FRK {std kind 'Friant-Demand' units 'TAF' }
+! Define Madera Canal demands
+define dem_D_MLRTN_MDC {std kind 'Friant-Demand' units 'TAF' }
+! Friant-Kern Canal release
+goal set_FK_release { dem_D_MLRTN_FRK = D_MLRTN_FRK_ini + FK_add - FK_Adj }
+! Madera Canal release
+goal set_Madera_release { dem_D_MLRTN_MDC = D_MLRTN_MDC_ini + Madera_add }
+
+/*
+This file defines the total deliveries from Friant which includes Madera Canal and Friant-Kern Class I & II, canal losses,
+and additional delivery
+*/
+! Total delivery from Friant
+define total_Fr_del {
+    value    Madera_C1_del + Madera_C2_del + Madera_loss + Madera_add
+           + FK_C1_del     + FK_C2_del     + FK_loss     + FK_add     - FK_Adj }
+
+! Friant Kern canal Class 2 water including adjustment
+define FK_final_C2 {value FK_C2_del - FK_Adj}
+
+! Define total canal adjustments to river release
+define Fr_tot_adj { value FK_adj - FK_add - Madera_add }
+! Snowmelt release (SJR) determination, total snowmelt release minus 215 delivery of snowmelt release
+define Fr_snow_rel { value max(0.0,(fr_for_spill_cor * Fr_srp / 100.) - FK_add - Madera_add) }
+
+/*
+Snowmelt release
+C_MLRTNa target is computed considering releases that will be made for minimum
+flows and deliveries.  So C_MLRTNa is above and beyond C_MLRTNm.
+*/
+
+define est_RF_to_MC {value max(0.0, SIO(-1) + I_MLRTN_IMP *cfs_taf - curr_Fr_del - Friant_est_evap
+            - (S_MLRTNlevel5 + S17level3 + mam_fc_credit  - Friant_fs_req) - Madera_add - FK_add)}
+
+define max_SM_to_MC {value max(0.,min(Fr_snow_rel, Madera_cap_head * cfs_taf - D_MLRTN_MDC_ini - Madera_add))}
+
+!Limit Madera Surplus release to estimated snowmelt release and flood release
+goal lim_D_MLRTN_MDC_F_surplus {D_MLRTN_MDC_F < est_RF_to_MC*taf_cfs + max_SM_to_MC*taf_cfs}
+
+!Limit SWP and CVP Madera Canal flows to flood flows
+goal limMadSWPCVPdiv {D_MLRTN_MDC_SWP + D_MLRTN_MDC_CVP < D_MLRTN_MDC_F}
+
+!During flood or snowmelt spills, approximately 7% of the spill will be to Madera Canal capped at 1000 cfs with half
+!going to the Fresno River and half going to Chowchilla
+
+goal set_D_MLRTN_MDC_f_max {D_MLRTN_MDC_F < max(0., Madera_cap_head - D_MLRTN_MDC_ini * taf_cfs - Madera_add * taf_cfs) }
+goal lim_D_MLRTN_MDCf_by_C18AandF {D_MLRTN_MDC_F < 0.07*C_MLRTNF} ! + 0.07*C_MLRTNA}
+goal lim_D_MLRTN_MDCf_1000 {D_MLRTN_MDC_F < 1000.}
+goal set_D_MLRTN_MDCf {D_MLRTN_MDC_F = SP_MDC019_FRS045 + C_MDC032_F}
+goal share_D_MLRTN_MDCf {
+    lhs C_MDC032_F
+    rhs SP_MDC019_FRS045
+    lhs<rhs penalty 5
+    lhs>rhs penalty 5 }
+
+!==============================================================================
+!==============================================================================
+!Subdivide Madera Canal 16B water into direct and in-lieu recharge.
+define D_ASL013_64_PA2_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_ASL013_64_PA2_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_ASL013_64_PA2_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_ASL013_64_PA2_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_BRS018_64_PA2_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_BRS018_64_PA2_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_BRS018_64_PA2_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_BRS018_64_PA2_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_CHW017_64_PA2_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_CHW017_64_PA2_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_CHW017_64_PA2_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_CHW017_64_PA2_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA1_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA1_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA1_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA1_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA3_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA3_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA3_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_MDC006_64_PA3_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_MDC032_64_PA1_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_MDC032_64_PA1_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_MDC032_64_PA1_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_MDC032_64_PA1_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_Fresno_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_Chowch_16B    {std kind 'flow-delivery' units 'cfs'}
+define D_Fresno_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_Chowch_16B_DR {std kind 'flow-delivery' units 'cfs'}
+define D_Fresno_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_Chowch_16B_IL {std kind 'flow-delivery' units 'cfs'}
+define D_Fresno_16B_PC {std kind 'flow-delivery' units 'cfs'}
+define D_Chowch_16B_PC {std kind 'flow-delivery' units 'cfs'}
+
+
+!Route Madera 16B water
+goal route_Mad_16B {D_MLRTN_MDC_16B = D_MDC006_64_PA1_16B + D_MDC006_64_PA3_16B + D_MDC032_64_PA1_16B + 
+                                      D_ASL013_64_PA2_16B + D_BRS018_64_PA2_16B + D_CHW017_64_PA2_16B}
+goal set_C_MDC032_16B {C_MDC032_16B = D_ASL013_64_PA2_16B + D_BRS018_64_PA2_16B + D_CHW017_64_PA2_16B}
+
+goal split_D_ASL013_64_PA2_16B {D_ASL013_64_PA2_16B = D_ASL013_64_PA2_16B_DR + D_ASL013_64_PA2_16B_IL + D_ASL013_64_PA2_16B_PC}
+goal split_D_BRS018_64_PA2_16B {D_BRS018_64_PA2_16B = D_BRS018_64_PA2_16B_DR + D_BRS018_64_PA2_16B_IL + D_BRS018_64_PA2_16B_PC}
+goal split_D_CHW017_64_PA2_16B {D_CHW017_64_PA2_16B = D_CHW017_64_PA2_16B_DR + D_CHW017_64_PA2_16B_IL + D_CHW017_64_PA2_16B_PC}
+goal split_D_MDC006_64_PA1_16B {D_MDC006_64_PA1_16B = D_MDC006_64_PA1_16B_DR + D_MDC006_64_PA1_16B_IL + D_MDC006_64_PA1_16B_PC}
+goal split_D_MDC006_64_PA3_16B {D_MDC006_64_PA3_16B = D_MDC006_64_PA3_16B_DR + D_MDC006_64_PA3_16B_IL + D_MDC006_64_PA3_16B_PC}
+goal split_D_MDC032_64_PA1_16B {D_MDC032_64_PA1_16B = D_MDC032_64_PA1_16B_DR + D_MDC032_64_PA1_16B_IL + D_MDC032_64_PA1_16B_PC}
+goal splitD_Fresno_16B    {D_Fresno_16B = D_Fresno_16B_DR + D_Fresno_16B_IL + D_Fresno_16B_PC}
+goal splitD_Chowch_16B    {D_Chowch_16B = D_Chowch_16B_DR + D_Chowch_16B_IL + D_Chowch_16B_PC}
+goal splitD_Fresno_16B_DR {D_Fresno_16B_DR = D_MDC006_64_PA1_16B_DR + D_MDC006_64_PA3_16B_DR + D_MDC032_64_PA1_16B_DR}
+goal splitD_Chowch_16B_DR {D_Chowch_16B_DR = D_ASL013_64_PA2_16B_DR + D_BRS018_64_PA2_16B_DR + D_CHW017_64_PA2_16B_DR}
+goal splitD_Fresno_16B_IL {D_Fresno_16B_IL = D_MDC006_64_PA1_16B_IL + D_MDC006_64_PA3_16B_IL + D_MDC032_64_PA1_16B_IL}
+goal splitD_Chowch_16B_IL {D_Chowch_16B_IL = D_ASL013_64_PA2_16B_IL + D_BRS018_64_PA2_16B_IL + D_CHW017_64_PA2_16B_IL}
+goal splitD_Fresno_16B_PC {D_Fresno_16B_PC = D_MDC006_64_PA1_16B_PC + D_MDC006_64_PA3_16B_PC + D_MDC032_64_PA1_16B_PC}
+goal splitD_Chowch_16B_PC {D_Chowch_16B_PC = D_ASL013_64_PA2_16B_PC + D_BRS018_64_PA2_16B_PC + D_CHW017_64_PA2_16B_PC}
+
+goal lim_D590_16B_DR {D_Fresno_16B_DR < 200}
+goal lim_D590_16B_IL {D_Fresno_16B_IL < 0}
+goal lim_D582_16B_DR {D_Chowch_16B_DR < 175}
+
+define Mad_ag_pat_pct {
+    select percent
+    from Madera_delivery_total
+    given delivery = 1500.
+    use minimum
+    where month = month }
+
+goal lim_D_Chowch_16B_IL {D_Chowch_16B_IL < 25.*Mad_ag_pat_pct/24.}
+
+define lim_Mad_16B_PC {
+    case    Demand {
+        condition   range(month,dec,jan) .and. I_ESTMN < 30*taf_cfs
+        value       1122.
+    }
+    case    NoDemand {
+        condition   always
+        value       0.
+    }
+}
+
+goal set_lim_D_Chowch_16B_PC {D_Chowch_16B_PC < 0.85*lim_Mad_16B_PC}
+goal set_lim_D_Fresno_16B_PC {D_Fresno_16B_PC < 0.15*lim_Mad_16B_PC}
+
+define tot_mad_16B_ {std kind 'annual-delivery' units 'taf'}
+
+define tot_mad_16B {
+    case October {
+        condition   month == oct
+        value       0.0
+    }
+    case otherwise {
+        condition   always
+        value       (D_MLRTN_MDC_16B(-1)- D_Chowch_16B_PC(-1)- D_Fresno_16B_PC(-1))*cfs_taf(-1)+ tot_mad_16B_(-1)
+    }
+}
+
+goal ann_mad_16B_lim {D_MLRTN_MDC_16B - D_Chowch_16B_PC - D_Fresno_16B_PC < max(0., 35. - tot_mad_16B)*taf_cfs}
+
+goal save_tot_mad_16B {tot_mad_16B_ = tot_mad_16B}
+!==============================================================================
+!==============================================================================
+
+
+! Set limits on Friant-Kern Canal releases
+goal set_D_MLRTN_FRK_C1   {D_MLRTN_FRK_C1   < FK_C1_del*taf_cfs}
+goal set_D_MLRTN_FRK_main {D_MLRTN_FRK_C2   < max(0., FK_final_C2*taf_cfs)}
+goal set_D_MLRTN_FRK_215  {D_MLRTN_FRK_215  < FK_add * taf_cfs }
+
+! Set limits on Madera Canal releases
+goal set_M_rel            { D_MLRTN_MDC006 < dem_D_MLRTN_MDC * taf_cfs + D_MLRTN_MDC_F 
+                                           + tot_und_D_MLRTN_MDC_C1_*taf_cfs*Mad_C1_frc 
+                                           + tot_und_D_MLRTN_MDC_C2_*taf_cfs*Mad_tot_frc 
+                                           + D_MLRTN_MDC_16B }
+goal set_max_MC           {D_MLRTN_MDC006   < Madera_cap_head}
+
+! Madera Canal breakdown
+goal set_D_MLRTN_MDC_C1 {D_MLRTN_MDC_C1 < Madera_C1_del*taf_cfs + tot_und_D_MLRTN_MDC_C1_*taf_cfs*Mad_C1_frc }
+goal set_D_MLRTN_MDC_main { D_MLRTN_MDC_C1 + D_MLRTN_MDC_C2 < max(0., D_MLRTN_MDC_ini * taf_cfs - Madera_loss*taf_cfs) 
+                                                     + tot_und_D_MLRTN_MDC_C1_*taf_cfs*Mad_C1_frc 
+                                                     + tot_und_D_MLRTN_MDC_C2_*taf_cfs*Mad_tot_frc }
+! Set limits on Madera Canal 215 water
+goal set_D_MLRTN_MDC_215 { D_MLRTN_MDC_215 < Madera_add * taf_cfs }
+
+goal set_und_D_MLRTN_MDC_C1 {und_D_MLRTN_MDC_C1 - re_und_D_MLRTN_MDC_C1 = Madera_C1_del - D_MLRTN_MDC_C1*cfs_taf}
+goal set_und_D_MLRTN_MDC_c2 {und_D_MLRTN_MDC_C2 - re_und_D_MLRTN_MDC_C2 = Madera_C2_del - D_MLRTN_MDC_C2*cfs_taf}
+define und_D_MLRTN_FRK_C1 {alias FK_C1_del - D_MLRTN_FRK_C1*cfs_taf kind 'under-delivery' units 'taf'}
+define und_D_MLRTN_FRK_C2 {alias FK_C2_del - D_MLRTN_FRK_C2*cfs_taf kind 'under-delivery' units 'taf'}
+
+
+
+goal restrict_D16B_A {D_MLRTN_FRK_16B_A + D_MLRTN_MDC_16B_A + D_MLRTN_FRK_215 + D_MLRTN_MDC_215 < Fr_fc_rel*taf_cfs}
+
+
+! Alias value for Madera Class 1 water delivery
+define madera_C1_out {alias madera_C1_del kind 'flow_delivery' units 'taf'}
+! Alias value for Madera Class 2 water delivery
+define madera_C2_out {alias madera_C2_del kind 'flow_delivery' units 'taf'}
+! Alias value for Madera loss
+define madera_loss_out {alias madera_loss kind 'flow_delivery' units 'taf'}
+! Alias value for additional Madera Canal delivery
+define madera_add_out {alias madera_add kind 'flow_delivery' units 'taf'}
+! Alias value for Friant Kern Class 1 water delivery
+define FK_C1_del_out {alias FK_C1_del kind 'flow_delivery' units 'taf'}
+! Alias value for Friant Kern Class 2 water delivery
+define FK_C2_del_out {alias FK_C2_del kind 'flow_delivery' units 'taf'}
+! Alias value for Friant Kern loss
+define FK_loss_out {alias FK_loss kind 'flow_delivery' units 'taf'}
+! Alias value for Friant Kern additianal delivery
+define FK_add_out {alias FK_add kind 'flow_delivery' units 'taf'}
+! Alias value for Friant Kern cnal Class 2 water including adjustment
+define FK_final_C2_out {alias FK_final_C2 kind 'flow_delivery' units 'taf'}
+
+
+

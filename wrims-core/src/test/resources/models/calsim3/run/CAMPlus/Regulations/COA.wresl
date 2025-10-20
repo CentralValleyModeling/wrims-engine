@@ -1,0 +1,90 @@
+! parameters used in coa balance:
+
+! surplus delta outflow:
+define(fm) C33B_CVP_fm {std kind 'Flow' units 'TAF'}
+
+! surplus delta outflow:
+define(fm) C33B_SWP_fm {std kind 'Flow' units 'TAF'}
+
+! surplus delta outflow:
+define(fm) C33B_OTH_fm {std kind 'Flow' units 'TAF'}
+
+! Compute the surplus delta outflow
+goal(fm) setC33B_fm {C33B_fm($m) = C33B_CVP_fm($m) + C33B_SWP_fm($m) + C33B_OTH_fm($m)}
+
+! change in oroville storage:
+define(fm) S_Orovl_chg_fm {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'TAF'}
+
+! change in shasta storage:
+define(fm) S_Shsta_chg_fm {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'TAF'}
+
+! change in folsom storage:
+define(fm) S_Folsm_chg_fm {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'TAF'}
+
+! in-basin-use:
+define(fm) IBU_fm {std kind 'IBU' UNITS 'TAF'}
+
+! unstored-water-for-export:
+define(fm) UWFE_fm {std kind 'UWFE' UNITS 'TAF'}
+
+! coa integer (if int=0: UWFE=0,IBU>0; if int=1: UWFE>0,IBU=0):
+define(fm) int_COA_fm {INTEGER std kind 'INTEGER' UNITS 'NONE'}
+
+! oroville change in storage (outflow - inflow):
+goal(fm) swp_change_fm {S_Orovl_chg_fm($m) = D4_fm($m) + C4_fm($m) - I4_fm($m)}
+
+! shasta change in storage (outflow - inflow):
+goal(fm) shasta_change_fm {S_Shsta_chg_fm($m) = C3_fm($m) - I3_fm($m) }
+								  
+! folsom change in storage (outflow - inflow):
+goal(fm) folsom_change_fm {S_Folsm_chg_fm($m) = D5_fm($m) + C5_fm($m) - I5_fm($m)}
+
+! split arcs:
+
+! tracy pp, cvp use of cvp water
+define(fm) D33E_1_fm {std kind 'Flow' units 'TAF'}
+
+! tracy pp, cvp use of swp water
+define(fm) D33E_2_fm {std kind 'Flow' units 'TAF'}
+
+! banks pp, swp use of swp water
+define(fm) D33D_1_fm {std kind 'Flow' units 'TAF'}
+
+! banks pp, swp use of cvp water
+define(fm) D33D_2_fm {std kind 'Flow' units 'TAF'}
+
+! split tracy:
+goal(fm) tracy_split_fm {D33E_fm($m) = D33E_1_fm($m) + D33E_2_fm($m)}
+
+! split banks (change to swp only?):
+goal(fm) banks_split_fm {D33D_fm($m) = D33D_1_fm($m) + D33D_2_fm($m)}
+
+! set coa balance (include cvc & whl, d420, d403b ?):
+goal(fm) setCOA_fm {UWFE_fm($m) - IBU_fm($m) = D33E_1_fm($m) + D33D_1_fm($m) + D33E_2_fm($m) + D33D_2_fm($m) + D33D_WHL_fm($m) + D33B_fm($m) + D33C_fm($m) + C33B_fm($m) - S_Shsta_chg_fm($m) - S_Folsm_chg_fm($m) - S_Orovl_chg_fm($m) - C2_fm($m) + I2_fm($m)}
+
+define IBU_UWFE_maxvalue {value 9999999.}
+
+! if int=0, UWFE=0, IBU=pos :
+goal(fm) setUWFE_fm {UWFE_fm($m) < int_COA_fm($m) * IBU_UWFE_maxvalue}
+
+! if int=1, UWFE=pos, IBU=0
+goal(fm) setIBU_fm {IBU_fm($m) < IBU_UWFE_maxvalue - int_COA_fm($m) * IBU_UWFE_maxvalue}
+
+! limit cvp to its share according to coa (include d420, whiskeytown release?):
+goal(fm) set_coa_cvp_fm {lhs D33E_1_fm($m) case a{condition COA_ind_fm($m) == 1 rhs S_Shsta_chg_fm($m) + S_Folsm_chg_fm($m) + C2_fm($m) - I2_fm($m) - CVP_IBU_CAM*IBU_fm($m) + CVP_UWFE_CAM*UWFE_fm($m) - D33B_fm($m) - D33D_2_fm($m) - C33B_CVP_fm($m) - D33D_WHL_fm($m) lhs<rhs penalty 500} case b{condition always rhs 0. lhs>rhs penalty 0. lhs<rhs penalty 0.}}
+define(fm) chk_coa_cvp1_fm {alias D33E_1_Fm($m) kind 'FLOW' units 'TAF'}
+	
+! limit swp to its share according to coa (include d403b?):
+goal(fm) set_coa_swp_fm {lhs D33D_1_fm($m) case a{condition COA_ind_fm($m) == 1 rhs S_Orovl_chg_fm($m) - SWP_IBU_CAM*IBU_fm($m) + SWP_UWFE_CAM*UWFE_fm($m) - D33E_2_fm($m) - D33C_fm($m) - C33B_SWP_fm($m) lhs<rhs penalty 500} case b{condition always rhs 0. lhs>rhs penalty 0. lhs<rhs penalty 0.}}
+define(fm) chk_coa_swp1_fm {alias D33D_1_fm($m) kind 'FLOW' units 'TAF'}
+
+! if COA is off, equally distribute water to swp and cvp
+goal(fm) set_coa_off_fm {lhs D33E_fm($m) case a{condition COA_ind_fm($m) <= 0.5 rhs D33D_fm($m) lhs>rhs penalty 500. lhs<rhs penalty 500.} case b{condition always rhs 0. lhs>rhs penalty 0. lhs<rhs penalty 0.}}
+
+! The calculation of total delta outflow is here temporarily and wiil be moved to DO.wresl when it is put back in.
+! Total delta outflow
+define(fm) C33_TOTAL_fm {std kind 'Flow' units 'TAF'}
+  
+! Compute the surplus delta outflow
+goal(fm) setC33_TOTAL_fm {C33_TOTAL_fm($m) = C33B_fm($m) + C33_fm($m)}
+

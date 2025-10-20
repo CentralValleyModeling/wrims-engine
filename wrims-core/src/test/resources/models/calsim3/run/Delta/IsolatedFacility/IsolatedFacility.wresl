@@ -1,0 +1,39 @@
+!Isolated Facility Operation
+
+! Isolated Diversion Limits, ready to implement limits in IF diversions as a function of Sac Flows due to fish screens at the IF intake
+define max_IF_cap  {select capacity from IsolatedFacility where month=month}
+define IFBypassPerc   {select minbypass from IsolatedFacility where month=month}
+define IFPercentFlow {select perc_flow from IsolatedFacility where month=month}
+define CCWDmaxIF   {select CCWDmax from IsolatedFacility where month=month}
+
+!Switches that turn IF arcs ON and OFF
+define JonesIFSwitch   {select switch from IsolatedFacilityControl where user = 1}
+define BanksIFSwitch   {select switch from IsolatedFacilityControl where user = 2}
+define CCWDIFSwitch    {select switch from IsolatedFacilityControl where user = 3}
+define TDExports       {select switch from IsolatedFacilityControl where user = 4}
+
+goal setActivateJonesIF { C_DMC000_IF  < JonesIFSwitch * 99999.}
+goal setActivateBanksIF { C_CAA003_IF  < BanksIFSwitch * 99999.}
+goal setActivateCCWDIF  { D_ISF001_OMR024     < CCWDIFSwitch  * 99999.}
+
+goal MaxHoodDiv   { D_SAC041_ISF001 < max_IF_cap }
+goal MaxHoodReq   { D_SAC041_ISF001 < C_SAC048*IFPercentFlow }
+goal BypassReq    { D_SAC041_ISF001 < C_SAC048*(1.-IFBypassPerc) }
+goal MaxCCWDIFDiv { D_ISF001_OMR024 < C_SAC048*IFPercentFlow }
+
+
+!Exports only from IF if TD switch is off
+goal setEXP_TDzero {EXP_TD < TDExports * 99999.}
+
+!Accounting of IF flow between CVP and SWP
+goal setexportsIF { D_SAC041_ISF001 = C_CAA003_IF + C_DMC000_IF + D_ISF001_OMR024}
+
+!CCWD Limit
+goal limitD446A_1 { D_ISF001_OMR024 < D408 + D_RSL004_CCC004 } ! D416 = D408_RS
+goal limitD446A_2 { D_ISF001_OMR024 < D_VCT002_ORP000 }
+goal totC_ISF001 {C_ISF001_OMR027 = C_CAA003_IF + C_DMC000_IF}
+
+!OutputVariables
+!Total Exports
+define TOTAL_EXP  {alias C_CAA003 + C_DMC000 kind 'FLOW-DELIVERY' UNITS 'CFS'}  !for output only
+

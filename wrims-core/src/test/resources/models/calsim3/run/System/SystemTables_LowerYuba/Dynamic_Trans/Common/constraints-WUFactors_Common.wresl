@@ -1,0 +1,65 @@
+/*
+File Name: constraints-WUfactors_Common.wresl
+Lower Yuba River System File
+
+Purpose:
+Apply water use factors
+ 
+Naming takes the following form:
+ EL_{source prefix}_{demand unit} - evaporative loss (non-recoverable)
+ PL_{source prefix}_{demand unit} - percolation loss (to groundwater)
+ RL_{source prefix}_{demand unit} - return flow loss (seepage loss to canal toe drain, available for reuse)
+ SL_{source prefix}_{demand unit} - spill loss (canal spill to main drain, not available for reuse)
+  
+ DL_{source prefix}_{demand unit}  - total conveyance loss  associated with diversion (EL + PL + RL + SL)
+ DL_{demand unit}             - total conveyance loss  associated with demand unit from multiple diversion arcs
+  
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 14_NA - BVID irrigators
+!==============================
+! reuse
+goal setRU_14_NA   {RU_14_NA = min(TW_14_NA, RUFR_14_NA*AWR_14_NA + RUFO_14_NA*AWO_14_NA)} 
+goal setAW_14_NA    {AW_14_NA = AWR_14_NA + AWO_14_NA} 
+! riparian loss
+goal setRP_14_NA    {RP_14_NA = AW_14_NA * RPF_14_NA}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 15N_NA2 - 
+!============================== 
+! reuse
+goal setRU_15N_NA2  {RU_15N_NA2 = min(TW_15N_NA2, RUFR_15N_NA2*AWR_15N_NA2 + RUFO_15N_NA2*AWO_15N_NA2)} 
+goal setAW_15N_NA2  {AW_15N_NA2 = AWR_15N_NA2 + AWO_15N_NA2} 
+! riparian loss
+goal setRP_15N_NA2  {RP_15N_NA2 = AW_15N_NA2 * RPF_15N_NA2} 
+
+!==============================
+! 15N_NU - 
+!============================== 
+goal setEL_YUB_15N_NU    {EL_YUB_15N_NU = D_YUB003_15N_NU  * EF_YUB_15N_NU}
+goal setSL_YUB_15N_NU    {SL_YUB_15N_NU = D_YUB003_15N_NU  * SF_YUB_15N_NU}
+goal setDL_YUB_15N_NU    {DL_YUB_15N_NU = EL_YUB_15N_NU    + SL_YUB_15N_NU}
+
+goal setDL_15N_NU   {DL_15N_NU = DL_YUB_15N_NU}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 15S_NA2 - 
+!==============================
+! reuse
+goal setRU_15S_NA2 {RU_15S_NA2 = min(TW_15S_NA2, RUFR_15S_NA2*AWR_15S_NA2 + RUFO_15S_NA2*AWO_15S_NA2)} 
+goal setAW_15S_NA2  {AW_15S_NA2 = AWR_15S_NA2 + AWO_15S_NA2} 
+! riparian loss   
+goal setRP_15S_NA2  {RP_15S_NA2 = AW_15S_NA2 * RPF_15S_NA2} 

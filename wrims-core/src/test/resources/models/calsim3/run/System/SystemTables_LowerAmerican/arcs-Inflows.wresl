@@ -1,0 +1,77 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: arcs-inflows.wresl
+CalSim 3.0 System File
+
+Purpose:
+Define inflow arcs and rainfall-runoff arcs
+
+Naming takes the following form:
+I_{DESTINATION NODE} 	- boundary inflow from rim watershed
+SR_{WBA} 			- aggregated precipitation runoff from specific WBA 
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! SURFACE RUNOFF FROM WBAs !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define CTNEG {value 88888}
+
+define SR_26N {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+define SR_26S {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+
+define SR_26N_AMR004 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26N_CRC002 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26N_EMD001 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26N_EMD007 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26N_NTOMA 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26S_AMR007 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26S_MOK014 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26S_NTOMA 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+define SR_26S_SAC048 	{std kind 'SURFACE-RUNOFF' units 'CFS'}
+
+
+define I_FOLSM  {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+define CT_FairOaks_SV  {timeseries kind 'CLOSURE-TERM' units 'TAF' convert 'CFS'}
+define CT_FairOaks  {lower unbounded upper unbounded kind 'CLOSURE-TERM' units 'CFS'}
+
+goal setNegativeCT_FairOaks {
+	lhs CT_FairOaks
+	case negative {
+		condition CT_FairOaks_SV < 0
+			rhs CT_FairOaks_SV
+				lhs>rhs penalty CTNEG
+				lhs<rhs constrain
+	}
+}
+goal setNonpositiveCT_FairOaks {
+	lhs CT_FairOaks
+	case negative {
+		condition CT_FairOaks_SV < 0
+			rhs 0
+				lhs>rhs constrain
+				lhs<rhs  penalty 0
+	}
+}
+goal setPostiveCT_FairOaks {
+	lhs CT_FairOaks
+	case postive {
+		condition CT_FairOaks_SV >= 0
+			rhs CT_FairOaks_SV
+	}
+}

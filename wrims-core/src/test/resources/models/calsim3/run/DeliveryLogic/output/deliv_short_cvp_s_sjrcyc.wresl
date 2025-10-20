@@ -1,0 +1,32 @@
+! Shortage_CVP_S_sjrcyc.wresl
+
+! Calculate shortages for Mendota Pool and Sack Dam deliveries in SJR cycles, for checking and review purposes
+! Excluding deliveries that can also get water from other sources from this calculations, since intent
+! is to later be able to check later on if shortages were occurring inappropriately
+define X__91_PA   {alias CLM_91_PA  * taf_cfs * perdel_cvpag_s + WRM_91_PA  * taf_cfs * perdel_cvpex_s - D_MDOTA_91_PA  kind 'delivery-shortage' units 'cfs'} !EX allocation used for water right water for 91_PA
+define X__72_XA1  {alias CLM_72_XA1 * taf_cfs * perdel_cvpex_s - D_ARY010_72_XA1  kind 'delivery-shortage' units 'cfs'}
+define X__72_XA2  {alias CLM_72_XA2 * taf_cfs * perdel_cvpex_s - D_XCC010_72_XA2  kind 'delivery-shortage' units 'cfs'}
+define X__73_XA   {alias CLM_73_XA  * taf_cfs * perdel_cvpex_s - D_MDOTA_73_XA - D_DMC111_73_XA  kind 'delivery-shortage' units 'cfs'}
+define X__64_XA   {alias CLM_64_XA  * taf_cfs * perdel_cvpex_s - D_MDOTA_64_XA  kind 'delivery-shortage' units 'cfs'}
+define X__72_PR3  {alias CLM_72_PR3 * taf_cfs * perdel_cvprf_s - DN_72_PR3  kind 'delivery-shortage' units 'cfs'}  
+define X__72_PR4  {alias CLM_72_PR4 * taf_cfs * perdel_cvprf_s - DN_72_PR4  kind 'delivery-shortage' units 'cfs'}  
+define X__72_PR6  {alias CLM_72_PR6 * taf_cfs * perdel_cvprf_s - DN_72_PR6  kind 'delivery-shortage' units 'cfs'} 
+define X__91_PR   {alias CLM_91_PR  * taf_cfs * perdel_cvprf_s - DN_91_PR  kind 'delivery-shortage' units 'cfs'}   
+define X__72_PA   {alias CLM_72_PA  * taf_cfs * perdel_cvpag_s - D_XCC025_72_PA   kind 'delivery-shortage' units 'cfs'}
+define X__72_XA3  {alias CLM_72_XA3 * taf_cfs * perdel_cvpex_s - D_XCC054_72_XA3  kind 'delivery-shortage' units 'cfs'}
+define X__72_PR2  {alias CLM_72_PR2 * taf_cfs * perdel_cvprf_s - DN_72_PR2  kind 'delivery-shortage' units 'cfs'} 
+
+define short_cvp_tot_mp {alias   X__91_PA + X__72_XA2 + X__73_XA + X__64_XA +
+                                 X__91_PR + X__72_PA + X__72_XA3 + X__72_PR2
+                                 kind  'delivery-shortage-cvp'
+                                 units 'cfs'}
+
+define short_cvp_tot_sd {alias   X__72_XA1 + X__72_PR3 + X__72_PR4 + X__72_PR6
+                                 kind  'delivery-shortage-cvp'
+                                 units 'cfs'}
+
+define short_cvp_tot_mpsd {alias short_cvp_tot_mp + short_cvp_tot_sd
+                                 kind  'delivery-shortage-cvp'
+                                 units 'cfs'}
+                                 
+                                             

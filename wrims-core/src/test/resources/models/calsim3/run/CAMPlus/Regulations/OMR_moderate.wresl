@@ -1,0 +1,32 @@
+define(fm) W_OMR_Target_fm{
+	case Dec{     !Action 1: Jan 1 - 10
+		condition mv($m)==Dec value (-2000.*14. - 8000.*17.)/31.
+	}
+	case JanFeb{  !Action 2: Jan 11 - Feb 20
+		condition mv($m)==Jan .or. mv($m)==Feb value -3500.
+	}
+	case MarApr{  !Action 3
+		!condition mv($m)==Mar .or. mv($m)==Apr value -3500.    ! change from -2000 to -3500, MT, 12/1/2020
+		condition mv($m)==Mar .or. mv($m)==Apr value -2500.    ! change from -3500 to -2500, 20221104
+	}
+	case May{	  !Action 3
+		!condition mv($m)==May value (-3500.*15. - 3500.*16.)/31.   ! change from -2000 to -3500, -2500 to -3500, MT, 12/1/2020
+		condition mv($m)==May value (-2500.*15. - 2500.*16.)/31.   ! change from -3500 to -2500, -2500 to -3500, 20221104
+	}
+	case Jun{	  !Action 3
+		condition mv($m)==Jun value -3500.    ! change from -2500 to -3500, MT, 12/1/2020
+	}
+	case other{
+		condition always  value -999999.
+	}
+}
+
+define(fm) max_swp_omr_fm {value max(200.,SWPExpCapShare_Srpls_CAM*((0.58*I33B_fm($m)*taf_cfs($m)-W_OMR_target_fm($m))/0.913 - D33C_fm($m)*taf_cfs($m)))*cfs_taf($m)}  !change from 300 to 200, MT, 20210611
+define(fm) max_cvp_omr_fm {value max(800.,CVPExpCapShare_Srpls_CAM*((0.58*I33B_fm($m)*taf_cfs($m)-W_OMR_target_fm($m))/0.913 - D33C_fm($m)*taf_cfs($m)))*cfs_taf($m)}
+
+define(fm) W_OMR_Target_dv_fm {alias W_OMR_Target_fm($m) kind 'OMR-LIMIT' units 'cfs'}
+
+define(fm) max_swp_omr_dv_fm {alias max_swp_omr_fm($m) kind 'EXPORT-LIMIT' units 'TAF'}
+define(fm) max_cvp_omr_dv_fm {alias max_cvp_omr_fm($m) kind 'EXPORT-LIMIT' units 'TAF'}
+
+!*********************************************************************************************

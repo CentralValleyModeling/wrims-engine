@@ -1,0 +1,137 @@
+! Tri-Dam and Sand Bar Projects minimum flow requirement
+! Chakri 02/26/08
+! Sarah Hamilton (Stantec) 05/04/2020
+! Bridget Childs (Stantec) 01/12/2023
+! *********************************************************************************
+! FERC Project No. 2005-012: Tri-Dam 
+! Middle Fork Stanislaus River below Donnells Lake (C_DONLL)
+! Minimum Flow Schedule for the Donnell's Reach, FERC Project No. 2005 -012 (Issued January 30, 2006)
+! Based on DWR Forecast Annual Unimpaired Inflow to New Melones Reservoir (AF) 
+! 		Critically Dry: Flow <= 350 TAF
+! 		Dry: 350 TAF < Flow <= 676 TAF
+! 		Normal: 676 TAF < Flow <= 1,585 TAF
+! 		Wet: Flow >= 1,585 TAF
+! Minimum Daily Flow schedule for the Donnells Reach (cfs) - MFS022 in CS3
+!						N		D/C			W
+! 		Oct				40		25			45
+! 		Nov				40		25			40
+! 		Dec				40		25			40
+! 		Jan1-Feb9		40		25			40
+! 		Feb10-Mar9		40		25			40
+!		Mar10-Apr9		40		25			50
+!		Apr10-May9		40		25			50
+!		May10-May31		40		25			50
+!		Jun				40		25			50
+!		Jul				45		25			60
+!		Aug				45		25			60
+! 		Sep				40		25			50
+
+define DONLL_MIF_BYPASS {
+		case critical      {
+		     condition frcst_nmi <= 350
+		     value 25.  }
+		case dry {
+		     condition frcst_nmi > 350 .and. frcst_nmi <= 676
+		     value 25.  }
+		case normal_1 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= sep .and. month <= dec
+		     value 40.  }
+		case normal_2 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= jul .and. month <= aug
+		     value 45.  }
+		case normal_3 {
+		     condition frcst_nmi > 676 .and. frcst_nmi < 1585 .and. month >= jan .and. month <= jun
+		     value 40.  }
+		case wet_1 {
+		     condition frcst_nmi >= 1585 .and. month >= jan .and. month <= feb
+		     value 40.  }
+		case wet_2 {
+		     condition frcst_nmi >= 1585 .and. month == mar
+		     value 47.5  } ! weighted average
+		case wet_3 {
+		     condition frcst_nmi >= 1585 .and. month >= apr .and. month <= jun
+		     value 50.  }
+		case wet_4 {
+		     condition frcst_nmi >= 1585 .and. month >= jul .and. month <= aug
+		     value 60.  }
+		case wet_5 {
+		     condition frcst_nmi >= 1585 .and. month == sep
+		     value 50.  }
+		case wet_6 {
+		     condition frcst_nmi >= 1585 .and. month == oct
+		     value 45.  }
+		case wet_7 {
+		     condition frcst_nmi >= 1585 .and. month >= nov .and. month <= dec 
+		     value 40.  }
+		case other {
+		     condition always
+		     value 0.}
+			   }
+! Minimum Supplemental Flow schedule for the Donnells Reach (cfs) - MFS022 in CS3
+! Based on DWR Forecast Annual Unimpaired Inflow to New Melones Reservoir (AF) 
+! 		This amount must be initiated in addition to the MIF. 
+! 		Can be initiated March 1 - May 1st at discretion of licensee.
+!		Based on analysis of the natural hydrograph (Goodwin FNF), it was determined that supplemental releases for 
+!		Normal, Dry, and Wet years release in the below schedule. 
+
+!			Normal		Dry		Wet	 	Critical	 Month Released
+! Week1			5		5		5		0				3
+! Week2			10		10		10		0				3
+! Week3			25		25		25		0				3
+! Week4			35		35		35		0				4
+! Week5			75		75		75		0				4
+! Week6			125		125		125		0				4
+! Week7			200		200		200		0				4
+! Week8			325		325		325		0				5
+! Week9			175		175		175		0				5
+! Week10		95		95		95		0				5
+! Week11		55		55		55		0				5
+! Week12		25		25		25		0				6
+! Week13 		10		10		10		0				6
+
+! Based on the analysis of natural hydrograph described above, the following supplemental releases were assumed
+! 			Normal 	Dry		Wet		Critical
+! Mar		10		10		10		0
+! Apr		109		109		109		0
+! May		163		163		163		0
+! Jun		9		9		9		0
+! Jul		0		0		0		0
+
+define DONLL_MIF_SUPPL {
+		case critical      {
+		     condition frcst_nmi <= 350.
+		     value 0.  }
+		case march {
+		     condition month == mar .and. frcst_nmi > 350.
+		     value 10.  }
+		case april {
+		     condition month == apr .and. frcst_nmi > 350.
+		     value 109.  }
+		case mmay {
+		     condition month == may .and. frcst_nmi > 350.
+		     value 163.  }
+		case june {
+		     condition month == jun .and. frcst_nmi > 350.
+		     value 9.  }
+		case other {
+		     condition always
+		     value 0.  }
+		     }		   
+
+goal setC_DONLL_MIF {C_DONLL_MIF + C_DONLL_SHTG = DONLL_MIF_BYPASS + DONLL_MIF_SUPPL}
+
+! Middle Fork Stanislaus River below Beardsley After Bay (C_MFS016)
+! Source: 24 FERC P 62278; Sand Bar Water Project No. 2975 (Issued September 9 1983) 
+! 		Based on DWR Forecast Annual Unimpaired Inflow to New Melones Reservoir (AF) 
+
+define MF_BAF {
+		case dry {
+		     condition frcst_nmi < 676 ! Dry WaterYear
+		     value 50.    }
+		case others       {
+		     condition always
+		     value 135.}
+			 }
+goal SetC_MFS016_MIF {C_MFS016_MIF + C_MFS016_SHTG = MF_BAF}
+
+

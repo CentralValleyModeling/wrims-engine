@@ -1,0 +1,64 @@
+/*
+CALSIM III SYSTEM FILE
+SYSTEM_SAC.WRESL
+
+! THIS FILE CONTAINS THE NAMES OF ALL INCLUDE FILES FOR THE SYSTEM DESCRIPTION
+! FOR THE SACRAMENTO VALLEY AS UPDATED FOR CALSIM III
+
+
+Edited ajdraper, MWH, November 15, 2006
+*/
+
+include 'systemtables_Sac\arcs-Channels.wresl'
+!include 'systemtables_Sac\arcs-Deliveries.wresl' !see cycle 1
+!include 'systemtables_Sac\arcs-GWPumping.wresl' !see cycle 1
+include 'systemtables_Sac\arcs-Inflows.wresl'
+include 'SystemTables_UpperFeather\arcs-Inflows.wresl' ! Include for estimate of inflow to Lake Oroville in OroRuleCurv.wresl
+include 'systemtables_Sac\arcs-Weirs.wresl'
+include 'systemtables_Sac\arcs-Diversions.wresl'
+include 'systemtables_Sac\arcs-Seepage.wresl'
+include 'systemtables_Sac\arcs-Returns.wresl'
+include 'systemtables_Sac\arcs-Contracts.wresl' 
+include 'systemtables_Sac\arcs-Contracts-FRSA.wresl'
+include 'systemtables_Sac\arcs-Contracts-Refuges.wresl' 
+!@zrc include 'systemtables_Sac\arcs-Residuals.wresl'
+include 'systemtables_Sac\arcs-Preoperations.wresl'
+!include 'systemtables_Sac\arcs-WUFactors.wresl' !see cycle 1
+include 'systemtables_Sac\arcs-Reservoirs.wresl'
+include 'systemtables_Sac\arcs-MinFlows.wresl'
+include 'systemtables_Sac\arcs-TileDrain.wresl'
+
+include 'systemtables_Sac\constraints-Runoff.wresl'
+include 'systemtables_Sac\constraints-Reservoirs.wresl'
+include 'systemtables_Sac\constraints-Returns.wresl'
+include 'systemtables_Sac\constraints-WUFactors.wresl'
+!include 'systemtables_Sac\constraints-Seepage_zero.wresl'
+include 'systemtables_Sac\constraints-Deliveries.wresl'
+include 'systemtables_Sac\constraints-Connectivity.wresl'
+include 'systemtables_Sac\constraints-MinFlows.wresl'
+include 'systemtables_Sac\constraints-Contracts.wresl'
+include 'systemtables_Sac\constraints-Weirs.wresl'
+include 'systemtables_Sac\constraints-Preoperations.wresl'
+include 'systemtables_Sac\constraints-GWPumping.wresl'
+include 'systemtables_Sac\constraints-DeepPercolation.wresl'
+
+INCLUDE 'systemtables_Sac\constraints-FloodSpill.wresl'   !@jmg 2017v13 
+
+
+!define C_SAC041_ANN {std kind 'FLOW-ANN' units 'CFS'}
+!define C_SAC041_WQ {std kind 'FLOW-WQ' units 'CFS'}
+!goal C_SAC041tot {C_SAC041 = C_SAC041_ANN + C_SAC041_WQ}
+
+!define C_CSL005_ANN {std kind 'FLOW-ANN' units 'CFS'}
+!goal C_CSL005tot {C_CSL005 = C_CSL005_ANN}
+
+!define C_SACtot_ANN {std kind 'FLOW-ANN' units 'CFS'}
+!goal setC_SACtot_ANN {C_SACtot_ANN = C_SAC041_ANN + C_CSL005_ANN}
+
+!goal setC_SAC041_WQ {C_SAC041_WQ = 0.0} ! Remove this goal if NODOS activated
+
+
+
+
+
+

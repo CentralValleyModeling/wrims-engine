@@ -1,0 +1,71 @@
+/*
+Constraints-connectivity.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Dry Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMERLC    {I_MERLC - C_MERLC - E_MERLC = S_MERLC * taf_cfs - S_MERLC(-1) * taf_cfs} 
+goal continuityFDC006   {C_MERLC - D_FDC006_14_NA - C_FDC006 = 0. }!BVID Diversion
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Slate Creek
+goal continuitySLT009   {I_SLT009 - C_SLT009 - D_SLT009_SCT000 = 0. }
+goal continuitySCT000   {D_SLT009_SCT000 - C_SCT000 = 0. }
+goal continuitySLT008   {C_SLT009 - C_SLT008 = 0. }
+
+!North Yuba
+goal continuityNFY029   {I_NFY029 - C_NFY029 = 0. }
+goal continuityNFY017   {C_NFY029 + C_SLT008 - C_NFY017 = 0. }
+
+!Oregon Creek
+goal continuityOGN005   {I_OGN005 + C_LRT000 - D_OGN005_CMT000 - C_OGN005   = 0. }
+goal continuityOGN004   {C_OGN005 - C_OGN004 = 0. }
+
+!Camptonville Tunnel
+goal continuityCMT000   {D_OGN005_CMT000 - C_CMT000 = 0.0}
+
+!Lohman Rideg Tunnel
+goal continuityLRT000   {D_MFY013_LRT000 - C_LRT000 = 0. }
+
+!Middle Yuba
+goal continuityMFY013   {I_MFY013 + C_MFY044 - D_MFY013_LRT000 - C_MFY013 = 0. }
+goal continuityMFY012   {C_MFY013 - C_MFY012 = 0. }
+goal continuityMFY005   {C_MFY012 + C_OGN004 - C_MFY005 = 0. }
+
+!North Yuba
+goal continuityNBLDB    {I_NBLDB + C_NFY017 + C_CMT000 - D_NBLDB_CGT005 - C_NBLDB - E_NBLDB  = S_NBLDB * taf_cfs - S_NBLDB(-1) * taf_cfs + 0. }! New Bullards Bar Reservoir 
+goal continuityNFY002   {C_NBLDB - C_NFY002 = 0.}
+
+!Yuba River
+goal continuityYUB039   {C_NFY002 + C_MFY005 - C_YUB039 = 0. }! Confluence: Middle Fork Yuba
+goal continuityYUB034   {C_YUB039 + C_CGT006 - C_YUB034 = 0.}
+goal continuityYUB030   {C_YUB034 + C_SFY007 - C_YUB030 = 0. }! Confluence: South Fork Yuba
+goal continuityENGLB    {I_ENGLB + C_YUB030 + CT_Smartville - C_ENGLB - E_ENGLB	= S_ENGLB * taf_cfs - S_ENGLB(-1) * taf_cfs + 0. }! Englebright Reservoir 
+goal continuityYUB024   {C_ENGLB - C_YUB024 = 0. }! Smartsville gage (USGS ####), flow requirement
+goal continuityYUB023   {C_DER001 + C_YUB024 - C_YUB023 = 0. }! Confluence: Deere Creek
+goal continuityYUB022   {C_YUB023 - C_YUB022 = 0.} ! Yuba River at Smartville gage (discontinued)
+goal continuityYUB014   {C_YUB022 + C_FDC006 + R_RFS14_YUB014 - C_YUB014 = 0. }! Confluence: French Dry Creek
+goal continuityYUB013   {C_YUB014 - D_YUB013_14_NA - C_YUB013 = 0. }! BVID Pipeline Canal Diversion
+goal continuityYUB011   {C_YUB013 /*+ SG349_YUB011_60*/ + SR_14_YUB011 - D_YUB011_15N_NA2 - D_YUB011_15S_NA2 - C_YUB011   = 0. }! Degeurre Dam & diversions for N. and S. Canals
+goal continuityYUB006   {C_YUB011 /*+ SG350_YUB006_60*/ - C_YUB006 = 0. }! Marysville gage (USGS ####), flow requirement
+goal continuityYUB003   {C_YUB006 - D_YUB003_15N_NU - C_YUB003 = 0. }! Diversion for Marysville's Lake Ellis (presumed)
+!goal continuityYUB002   {C_YUB003 + SG351_YUB002_60 + SG349_YUB011_60+ SG350_YUB006_60- C_YUB002 = 0. }! Yuba River at Marysville
+
+!Colgate Tunnel
+goal continuityCGT005   {D_NBLDB_CGT005 /*- D_CGT005_14_NA*/ - C_CGT005 = 0.} !Colgate diversion abandoned long ago
+goal continuityCGT006   {C_CGT005 - C_CGT006 = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS14    {R_14_NA_RFS14 - R_RFS14_YUB014 - R_RFS14_JCK002 = 0. }

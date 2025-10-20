@@ -1,0 +1,51 @@
+/*
+File Name: constraints-DeepPercolation.wresl
+CalSim 3.0 System File
+
+Purpose:
+Deep percolation for each demand unit is calculated by CalSIm Hydro. This deep
+percolation is split into two timeseries. Percolation that in areas overlying the groundwater
+finite element grid, and areas lying upslope from the finite element grid. These two sets of
+deep percolation are aggregated to the WBA scale.
+
+Naming takes the following form:
+DP_WBA_{WBA id}_INT
+DP_WBA_{WBA id}_EXT
+
+Only the second timeseries is passed to the groundwater dll
+
+*/
+
+!*********************************************************************
+!*********************************************************************
+!Time series definitions for field level deep percolation
+!from precipitation and irrigation
+!*********************************************************************
+!*********************************************************************
+
+define DP_60S_INT        {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_60S   {std kind 'deep-percolation' units 'CFS'}
+goal setDP_WBATotal60S   {DP_WBATotal_60S = DP_60S_INT + DP_60S_PA1 + DP_60S_PA2 +DP_60S_NU1} ! TODO -- ADD distribution DP terms... 
+
+define DP_61_INT         {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_61    {std kind 'deep-percolation' units 'CFS'}
+goal setDP_WBATotal61    {DP_WBATotal_61  = DP_61_INT + DP_61_PA1 + DP_61_PA2 + DP_61_NA2 + DP_61_NA3 
+                                          + DP_61_NA4 + DP_61_NA5 + DP_61_NA6 + DP_61_NU1 + DP_61_NU2
+                                          + WW_61_NU3}                                          
+                                          
+define DP_62_INT         {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_62    {std kind 'deep-percolation' units 'CFS'}
+goal setDP_WBATotal62    {DP_WBATotal_62  = DP_62_INT + DP_62_NA2 + DP_62_NA3 + DP_62_NA4 + DP_62_NA5 
+                                          + DP_62_NA6 + ((1-RFF_TKWWTP)/RFF_TKWWTP)*R_62_NU_TKWWTP}
+
+define DP_63_INT         {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_63    {std kind 'deep-percolation' units 'CFS'}
+goal setDP_WBATotal63    {DP_WBATotal_63  = DP_63_INT + DP_63_PR1 + DP_63_PR2 + DP_63_PR3 + DP_63_NA2 
+                                          + DP_63_NA3 + DP_63_NA4 + DP_63_NA5}
+
+define DP_64_INT         {timeseries kind 'deep-percolation' units 'TAF' convert 'CFS'}
+define DP_WBATotal_64    {std kind 'deep-percolation' units 'CFS'}
+goal setDP_WBATotal64    {DP_WBATotal_64  = DP_64_INT + DP_64_PA1 + DP_64_PA2 + DP_64_PA3 + DP_64_XA + DCL_64_XA 
+                                          + DP_64_NA2 + WW_64_NU}
+
+

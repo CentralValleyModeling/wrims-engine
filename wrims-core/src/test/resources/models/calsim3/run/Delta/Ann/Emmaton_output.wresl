@@ -1,0 +1,75 @@
+! R.Wilbur & S. Wu 5/10/05
+
+!****************************************************************************************
+
+! maximum export given the sacramento river flow
+
+define EM_MaxExport {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+goal setEMMax {
+  lhs EM_MaxExport
+  case NoSalinityControlPossible{
+    condition abs(EM_m_sv) <= 0.001 .and. int(EM_b_sv) == 0
+    rhs ExportCap}
+  case NegSlope{
+    condition EM_m_sv <= 0.0
+    rhs 999999.}
+  /*case HighCost{
+    condition EM_Sac_ZeroExp_sv2 >= ANNcap
+    rhs ExportCap}*/
+  /*case NegCarriage{
+    condition abs(EM_m_sv) >= 1.0
+    rhs 999999.}*/
+  case Normal {
+    condition always
+    rhs EM_m_sv*C_SACtot_ANN + EM_b_sv}
+}
+
+!****************************************************************************************
+
+! required delta outflow given exports
+
+define EM_MRDO {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+goal setEMmrdo {
+  lhs EM_MRDO
+  case NoSalinityControlPossible{
+    condition abs(EM_m_sv) <= 0.001 .and. int(EM_b_sv) == 0
+    rhs 0.}
+  case NegSlope{
+    condition EM_m_sv <= 0.0
+    rhs 0.}
+  /*case HighCost{
+    condition EM_Sac_ZeroExp_sv2 >= ANNcap
+    rhs 0.}*/
+  /*case NegCarriage{
+    condition abs(EM_m_sv) >= 1.0
+    rhs 999999.}*/
+  case Normal {
+    condition always
+    rhs ((1-EM_m_sv)/EM_m_sv)*ExportActualTD /*- ((1-EM_m_sv)/EM_m_sv)*C_CAA003_wts_stg1 - ((1-EM_m_sv)/EM_m_sv)*C_CAA003_cvcrels
+    - ((1-EM_m_sv)/EM_m_sv)*C_CAA003_whlrels*/ - EM_b_sv/EM_m_sv + DeltaInflowforNDOI - C_SACTOT_ANN - DeltaExportforNDOI + C_CAA003_TD + C_DMC000_TD
+						   + DeltaAccretionforNDOI - DeltaDepletionforNDOI}
+ }
+
+!****************************************************************************************
+
+! required sac flow given exports
+
+define EM_ReqSac {lower unbounded upper unbounded kind 'FLOW' units 'cfs'}
+goal set_EM_ReqSac {
+  lhs EM_ReqSac
+  case NoSalinityControlPossible{
+    condition abs(EM_m_sv) <= 0.001 .and. int(EM_b_sv) == 0
+    rhs 0.}
+  case NegSlope{
+    condition EM_m_sv <= 0.0
+    rhs 0.}
+  /*case HighCost{
+    condition EM_Sac_ZeroExp_sv2 >= ANNcap
+    rhs 0.}*/
+  /*case NegCarriage{
+    condition abs(EM_m_sv) >= 1.0
+    rhs 999999.}*/
+  case Normal {
+    condition always
+    rhs ExportActualTD/EM_m_sv - EM_b_sv/EM_m_sv}
+}

@@ -1,0 +1,50 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+!R Wilbur 3/7/07
+
+!Step 1: Determine SWP allocation (use either WSI-DI or CAM):
+  !Option 1a - WSI-DI Procedure:
+INCLUDE 'wsi_di\wsi_swp.wresl'
+INCLUDE 'wsi_di\di_swp.wresl'
+INCLUDE 'wsi_di\export_index_swp.wresl'
+INCLUDE 'wsi_di\exp_based_del_swp_s.wresl'
+INCLUDE 'wsi_di\delcar_swp.wresl'
+  !Option 1b - CAM Procedure (note - must also include CAM cycle in main file):
+!INCLUDE 'allocation\swp_allocation.wresl'
+
+!Step 2: Define delivery parameters for each contractor:
+INCLUDE 'demands\swp_arcsplit.wresl'!*
+INCLUDE 'demands\swp_demands_s.wresl'!*
+
+!Step 3: Keep a running account of actual deliveries made to each contractor
+INCLUDE 'deliveries\sumswpdel.wresl'!*
+INCLUDE 'deliveries\swp_delivery_summary.wresl'!*
+
+!Step 4: Distribute SWP allocation to each contractor:
+INCLUDE 'allocation\swp_contractor_perdel_A.wresl'
+INCLUDE 'allocation\carryover_allocation.wresl'
+INCLUDE 'allocation\swp_contractor_perdel_B.wresl'
+INCLUDE 'allocation\swp_feather_perdel.wresl'
+INCLUDE 'deliveries\swp_bound_del.wresl'
+
+!Misc. code related to SWP facilities:
+  !Seismic concerns have reduced maximum operating capacity at Lake Perris to 74 TAF:
+!goal PerrisSeismic {S_PRRIS < 74.} ! Storage level of Lake Perris has been restored since 2018 per Aaron Miller. 09/2020
+  !Pumping capacity is not 100% reliable; must take unit outages into account:
+INCLUDE 'conveyance_limits.wresl'
+!INCLUDE 'constraints-GPmin.wresl'
+

@@ -1,0 +1,35 @@
+!PCWA_EBMUD_Transfer.wresl
+
+define C_AMR006_EBMUD      {upper 155. kind 'FLOW-MIN-INSTREAM' units 'CFS'} ! EBMUD Transfer water
+define C_AMR006_ADD2       {std kind 'FLOW-MIN-INSTREAM' units 'CFS'} !
+define C_AMR006_ADD3       {std kind 'FLOW-MIN-INSTREAM' units 'CFS'} !
+define C_AMR006_EBMUDspill {std kind 'FLOW-MIN-INSTREAM' units 'CFS'} !
+
+goal AMR006add2     {C_AMR006_ADD = C_AMR006_EBMUD + C_AMR006_ADD2}
+goal AMR006add3     {C_AMR006_ADD2 = C_AMR006_EBMUDspill + C_AMR006_ADD3}
+
+define S_FOLSM_EBMUD {std kind 'STORAGE' units 'TAF'} !Folsom Lake - EBMUD
+define S_FOLSM_CVP   {std kind 'STORAGE' units 'TAF'} !Folsom Lake - CVP
+
+goal S_FOLSMsplit   {S_FOLSM = S_FOLSM_EBMUD + S_FOLSM_CVP}
+
+define EBMUDRelease 		{
+	case NoRelease {
+		condition range(month,OCT,JUN)
+		value 0.}
+	case Release {
+		condition always
+		value min(155., min(WFMitRel, S_FOLSM_EBMUD(-1)*taf_cfs))}
+}
+
+define EBMUDloss {value 0.95} !5% carriage loss
+
+define S_FOLSM_EBMUD_Last {
+        case Firstmonth {condition month == OCT .and. wateryear == BgnWY
+		value 0.}
+	case Otherwise {condition always
+	        value S_FOLSM_EBMUD(-1)}
+}
+
+goal S_FOLSMebmud          {S_FOLSM_EBMUD = S_FOLSM_EBMUD_Last + WFMitReldv*cfs_taf*EBMUDloss - C_AMR006_EBMUD*cfs_taf - C_AMR006_EBMUDspill*cfs_taf}
+goal AMR006_EBMUDrelease   {C_AMR006_EBMUD < EBMUDRelease}

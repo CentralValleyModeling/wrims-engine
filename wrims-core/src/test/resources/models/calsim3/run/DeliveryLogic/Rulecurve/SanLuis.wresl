@@ -1,0 +1,23 @@
+!Draft WRESL for defining storage zones in San Luis reservoir
+!SANLUIS
+!Edward Chang
+!9/17/98 9:00am
+
+!The following code needs to be specified separate from the tables because it includes
+!code dependant on the rule curve.  The rule curve needs to be computed after the total
+!storage zones of S_SLUIS_CVP and S_SLUIS_SWP are defined.
+!Until a new GenWresl is implemented, the following logic needs to be in this file and
+!not in the GenWresl generated files.
+
+define S_SLUIS_CVPlevel3 {value CVPRuleCalc1}  
+
+goal S_SLUIS_CVPZone3 {S_SLUIS_CVP_3 < max(0.0,S_SLUIS_CVPlevel3 - S_SLUIS_CVPlevel2)} 
+goal S_SLUIS_CVPZone4 {S_SLUIS_CVP_4 < S_SLUIS_CVPlevel4 - S_SLUIS_CVPlevel3}          
+goal S_SLUIS_CVPZone5 {S_SLUIS_CVP_5 < S_SLUIS_CVPlevel5 - S_SLUIS_CVPlevel4}          
+
+
+define S_SLUIS_SWPlevel3 {value SWPRuleCalc1}
+
+goal S_SLUIS_SWPZone3 {S_SLUIS_SWP_3 < max(0.0,S_SLUIS_SWPlevel3 - S_SLUIS_SWPlevel2)}
+goal S_SLUIS_SWPZone4 {S_SLUIS_SWP_4 < S_SLUIS_SWPlevel4 - S_SLUIS_SWPlevel3}
+goal S_SLUIS_SWPZone5 {S_SLUIS_SWP_5 < S_SLUIS_SWPlevel5 - S_SLUIS_SWPlevel4}

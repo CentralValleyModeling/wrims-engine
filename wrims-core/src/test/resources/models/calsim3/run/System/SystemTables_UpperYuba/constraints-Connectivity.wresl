@@ -1,0 +1,71 @@
+/*
+Constraints-connectivity.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Middle Yuba
+goal continuityJKSMD  {I_JKSMD - C_JKSMD - E_JKSMD = S_JKSMD * taf_cfs - S_JKSMD(-1) * taf_cfs}! Jackson Meadows Reservoir 
+goal continuityMFY046 {C_JKSMD - C_MFY046 = 0.0}
+goal continuityMFY045 {C_MFY046 - C_MFY045 - D_MFY045_MBT005 = 0.0}
+goal continuityMFY044 {C_MFY045 - C_MFY044 = 0.0}
+
+! Canyon Creek
+goal continuityMBT005 {D_MFY045_MBT005 - C_MBT005 = 0.0}
+goal continuityFRNCH  {I_FRNCH  - C_FRNCH - E_FRNCH = S_FRNCH * taf_cfs - S_FRNCH(-1) * taf_cfs}! French Lake
+goal continuityBOWMN  {I_BOWMN  + C_FRNCH + C_MBT005 - C_BOWMN - E_BOWMN = S_BOWMN * taf_cfs - S_BOWMN(-1) * taf_cfs}! Bowman Lake
+goal continuityCCS010 {C_BOWMN  - C_CCS010 - D_CCS010_BSC000 = 0.0}
+goal continuityCCS009 {C_CCS010 - C_CCS009 = 0.0}
+
+goal continuityLCBRF  {I_LCBRF - C_LCBRF = S_LCBRF * taf_cfs - S_LCBRF(-1) * taf_cfs}! Minor reservoirs
+goal continuityTFR000 {C_LCBRF - D_TFR000_BSC005 - C_TFR000 = 0.}
+
+! Fordyce Creek
+goal continuityFRDYC  {I_FRDYC - C_FRDYC - E_FRDYC = S_FRDYC * taf_cfs - S_FRDYC(-1) * taf_cfs}! + RsdPos_FRDYC - RsdNeg_FRDYC}! Fordyce Lake
+goal continuityFDC010 {C_FRDYC - C_FDC011 = 0.} 
+
+! Bowman-Spaulding Conduit
+goal continuityBSC000 {D_CCS010_BSC000 - C_BSC000 = 0.0}  
+goal continuityBSC005 {C_BSC000 + D_TFR000_BSC005 - C_BSC005 = 0.0} 
+goal continuityBSC009 {C_BSC005 - C_BSC009 = 0.0} 
+goal continuityBSC010 {C_BSC009 - C_BSC010 - D_BSC010_SFY043 = 0.0}
+goal continuityBSC011 {C_BSC010 - C_BSC011 = 0.0} 
+
+! South Yuba
+goal continuitySFY048 {I_SFY048 - C_SFY048 = 0.0} 
+goal continuitySFY044 {C_FDC011 + C_SFY048 - C_SFY044 = 0.0} 
+goal continuitySFY043 {C_SFY044 + C_BSC011 + D_BSC010_SFY043 - C_SFY043	= 0.0} 
+goal continuitySPLDG  {I_SPLDG  + C_SFY043 - C_SPLDG - D_SPLDG_SYC000 - D_SPLDG_DRM000 - E_SPLDG = S_SPLDG * taf_cfs - S_SPLDG(-1) * taf_cfs }! Lake Spaulding
+goal continuitySFY041 {C_SPLDG  + D_SYC000_SFY041 - C_SFY041 = 0.0}
+goal continuitySFY040 {C_SFY041 - C_SFY040 = 0.0}
+goal continuitySFY033 {C_SFY040 + C_CCS009 + C_TFR000 - C_SFY033 = 0.0}
+goal continuitySFY007 {C_SFY033 + I_SFY007 - C_SFY007 = 0.0}
+
+! South Yuba Canal
+goal continuitySYC000 {D_SPLDG_SYC000 - C_SYC000 - D_SYC000_SFY041 = 0.0}
+goal continuitySYC001 {C_SYC000 + D_DRM002_SYC001 - C_SYC001 = 0.0}
+goal continuitySYC002 {C_SYC001 - D_SYC002_BRR074 - C_SYC002 = 0.0} 
+goal continuitySYC003 {C_SYC002 - D_SYC003_SYCLOS - C_SYC003 = 0.0} 
+goal continuitySYC020 {C_SYC003 - C_SYC020 = 0.0}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deer Creek - Nevada Irrigation District !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySFD003 {I_SFD003 + C_SYC020 - C_SFD003 - D_SFD003_CSD014 = 0.0} 
+goal continuityDER027 {C_SFD003 - C_DER027 = 0.0} 
+goal continuitySCOTF  {I_SCOTF  + C_DER027 - C_SCOTF - E_SCOTF = S_SCOTF * taf_cfs - S_SCOTF(-1) * taf_cfs}! Scotts Flat Reservoir 
+goal continuityDER022 {C_SCOTF  - D_DER022_DES006 - C_DER022 = 0.0}
+goal continuityDER018 {C_DER022 - D_DER018_NWT013 - C_DER018 = 0.0}
+goal continuityNWT013 {D_DER018_NWT013 - D_NWT013_NIDDC_NA2 - D_NWT013_WLDWD = 0.0}
+goal continuityDER011 {C_DER018 + R_NIDDC_NA1_DER011 - D_DER011_NIDDC_NA2 - C_DER011 = 0.0}
+goal continuityDER004 {I_DER004 + C_DER011 + R_WLDWD_DER004 - D_DER004_NIDDC_NA2 - C_DER004 = 0.0}
+goal continuityDER002 {C_DER004 + R_NIDDC_NA2_DER002 - C_DER002 = 0.0}
+goal continuityDER001 {I_DER001 + C_DER002 - C_DER001 = 0.0}
+
+goal continuityCSD014 {D_SFD003_CSD014 - D_CSD014_GRSVL - D_CSD014_NIDDC_NA1 - C_CSD014 = 0.0}
+goal continuityDES006 {D_DER022_DES006 - D_DES006_GRSVL - D_DES006_NIDDC_NA1 - D_DES006_WLF017 = 0.0} 

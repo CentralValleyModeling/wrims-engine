@@ -1,0 +1,53 @@
+/*
+ 
+References data from cycle MONTHLYWEIGHTED to reduce ANN function calls to reduce runtime.
+
+See the *_data.wresl file for how these parameters are calculated.
+
+*/
+
+!*************************************************************************************************************
+
+! calculate previous month's value of salinity
+define CO_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define CO_EC_Month_sv {value CO_EC_Month[monthlyweighted]}
+goal setCO_EC_MON {CO_EC_Month = CO_EC_Month_sv}
+
+!get ANN_EC for 2 month earlier 4/14/2005
+define CO_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define CO_EC_Month_smooth_sv {value CO_EC_MonthDSM2[monthlyweighted]}
+goal setCO_EC_DSM2 {CO_EC_MonthDSM2 = CO_EC_Month_smooth_sv}
+
+! calculate the maximum 14 day running average
+define CO_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+define CO_EC_Max14Day_sv {value CO_EC_Max14Day[monthlyweighted]}
+goal setCO_EC_14Ave {CO_EC_Max14Day = CO_EC_Max14Day_sv}
+
+!get ANN_EC for 2 month earlier
+define CO_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define CO_EC_Max14day_smooth_sv {value CO_EC_Max14_DSM2[monthlyweighted]}
+goal setCO_EC_DSM2_2 {CO_EC_Max14_DSM2 = CO_EC_Max14day_smooth_sv}
+
+!****************************************************************************************
+
+! define the EC standard for Jersey Point (millimhos/cm)
+define CO_EC_STD {std kind 'SALINITY' units 'UMHOS/CM'}
+define CO_EC_STD_sv {value CO_EC_STD[monthlyweighted]}
+goal COECstandout {CO_EC_STD = CO_EC_STD_sv}
+
+!****************************************************************************************
+
+!get slope and intercept for constraint exp<=m*sac+b
+define CO_m {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define CO_b {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+define CO_m_sv {value CO_m[monthlyweighted]}
+define CO_b_sv {value CO_b[monthlyweighted]}
+goal setCO_m {CO_m = CO_m_sv}
+goal setCO_b {CO_b = CO_b_sv}
+
+!********************************************************************
+
+!Get the required Sac flow for ZERO exports
+define CO_Sac_ZeroExp {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define CO_Sac_ZeroExp_sv2 {value CO_Sac_ZeroExp[monthlyweighted]}
+goal setCO_Sac_ZeroExp {CO_Sac_ZeroExp = CO_Sac_ZeroExp_sv2}

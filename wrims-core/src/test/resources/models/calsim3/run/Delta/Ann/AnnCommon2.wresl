@@ -1,0 +1,133 @@
+! R.Wilbur & S. Wu 5/10/05
+/*
+
+    ARTIFICIAL NEURAL NETWORK
+    DELTA SALINITY MODELING
+
+    ANN determines salinity (micro-mhos/cm) at various locations in the Delta given flows
+    (Sac, SWP pumping, CVP pumping, SJR, Channel depletions) and the Delta cross-channel
+    position for the past 118 days
+
+    In this CALSIM modeling implementation the 78 days are split into three parts: previous two months
+    and current month.  The previous months flows and gate positions are known values, while the
+    current month flows (at least SAC and Exports) are unknown variables. These
+    are the 2 knobs used to meet salinity standards in the Delta.
+
+    FUNCTION CALLS:
+    ===============
+    LOCATION KEY:
+      1 = Jersey Point
+      2 = Contra Costa - Rock Slough
+      3 = Emmaton
+      4 = Antioch
+      5 = Collinsville
+      6 = Chipps Island
+      7 = Los Vaqueros Intake
+      8 = Middle River
+      9 = Victoria Intake
+      10 = CVP Intake
+      11 = CCFB
+      12 = CCFB Intake
+      20 = Beldan
+      21 = Martinez
+
+
+    VARIABLE KEY:
+      1 = Slope
+      2 = Intercept (Qsac=0)
+      3 = Qsac required for an export of 1500cfs
+
+    DXC KEY:
+      DAYS OPEN (assumed first part of month if not full month)
+
+
+*/
+
+!*************************************************************************************************************
+define JP {value 1}
+define RS {value 2}
+define EM {value 3}
+define AN {value 4}
+define CO {value 5}
+define CH {value 6}
+define LV {value 7}
+define MR {value 8}
+define VI {value 9}
+define CV {value 10}
+define CC {value 11}
+define CI {value 12}
+
+define slope {value 1}
+define intercept {value 2}
+
+define ann_type {value monthly_ave}
+
+define line_JP_lo   {value  5000}
+define line_JP_hi   {value 12000}
+
+define line_EM_lo   {value  5000}
+define line_EM_hi   {value 12000}
+
+define line_CO_lo   {value  8000}
+define line_CO_hi   {value 12000}
+
+define line_RS_1_lo {value  2000}
+define line_RS_1_hi {value  4000}
+define line_RS_2_lo {value  6000}
+define line_RS_2_hi {value  8000}
+define line_RS_3_lo {value 10000}
+define line_RS_3_hi {value 12000}
+
+!*************************************************************************************************************
+! Define largest export if ANN is an infeasible solution
+define ExportCap {  ! value 1500.} shengjun comment 8/16/2004
+  !start of add by Shengjun 8/16/2004
+  /*case tracylowshasta { condition S_SHSTA(-1) < 1500.
+    value 900 }
+  case tracyhighshasta   { condition always
+    value 1100. }*/
+  value 1500. !temporary limit for debugging code
+}
+!end of add
+
+!*************************************************************************************************************
+! Define maximum Qsac for restricting ANN
+define ANNcap {
+  select Qsaclimit
+  from ANNlimit
+  where month=month,wyt_sac=wyt_ann
+}
+define ANNcap_out {alias ANNcap kind 'FLOW' units 'CFS'}
+
+!*************************************************************************************************************
+! define the other flows that go into making the sac component
+! Yolo Bypass is simulated dynamically
+! Mokelumne/Consumnes R. is simulated with SJR in previous cycles
+!define sac_oth { std kind 'FLOW-INFLOW' units 'CFS' } ! Known inflows (previous month): Mokelumne R. with Yolo Bypass
+goal def_sac_oth { sac_oth = C_CSL004A + C_MOK019  + C_CLV004 }
+
+!*************************************************************************************************************
+! Currently known inflows: Mokelumne R., Consumnes R. and Calaveras R. | Yolo Bypass not known.
+define D_BKR004_NBA009_VPW_est { value demand_VLLJO_VPW*taf_cfs } ! Vallejo
+
+
+define sac_oth_est { value C_MOK019[SJR_WQ1] + C_CLV004[SJR_WQ1]} !
+define sac_oth_est_ { alias sac_oth_est kind 'FLOW-INFLOW' units 'CFS'}
+
+!*************************************************************************************************************
+! define the other flows that go into making the export component
+!define exp_oth { lower unbounded kind 'FLOW-EXPORTS' units 'CFS' }
+goal def_exp_oth { exp_oth = D408 /*+ D416*/ + D_SJR028_WTPDWS /* + D514B - D446A*/}
+
+define D_SJR028_WTPDWS_2_est {value 0.0}  !DWSP, diversion for area of origin, in cfs
+
+!define D408D416_est  { timeseries 'CCWD_CS_Init' kind 'DEMAND' units 'TAF' convert 'CFS' }
+define D408D416_est {value min(demand_D420,lim_CVP_ann)}
+
+define exp_oth_est { value D408D416_est
+                         + D_SJR028_WTPDWS_1[SJR_WQ1] + D_SJR028_WTPDWS_2_est } 
+
+!If modelingCCWD off of IF
+!define exp_oth_est { value D_SJR028_WTPDWS_1[SJR_WQ1] + D_SJR028_WTPDWS_2_est } 
+
+define exp_oth_est_ { alias exp_oth_est kind 'FLOW-EXPORTS' units 'CFS' }

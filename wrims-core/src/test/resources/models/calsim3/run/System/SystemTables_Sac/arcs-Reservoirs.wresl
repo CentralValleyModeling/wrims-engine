@@ -1,0 +1,594 @@
+/*
+File Name: arcs-reservoirs.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Claire Engle Lake, Trinity River    !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_TRNTYlevel1 {value 240}
+define S_TRNTY_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRNTYlevel2 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_TRNTY_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRNTY_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRNTYlevel4 {select target from res_level where res_num=1,level=4,month=month}
+define S_TRNTY_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRNTYlevel5 {value 2447.65}  !@jmg 2017v13 - changed from 2447 to 2447.65
+define S_TRNTY_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRNTY       {std kind 'STORAGE' units 'TAF'} !CLAIR ENGLE LAKE
+define E_TRNTY       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_TRNTY       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_TRNTY      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_TRNTYlast   {select area from res_info given storage=1000*S_TRNTY(-1) use linear where res_num=1}
+define A_TRNTYforward {select area from res_info given storage=1050*S_TRNTY(-1) use linear where res_num=1}
+define A_TRNTYback   {select area from res_info given storage=950*S_TRNTY(-1) use linear where res_num=1}
+/* @jmg 2017v13 - coefev_TRNTY section modified according to DWR 2017v13 */
+define coefev_TRNTY  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_TRNTY(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=1}	 
+	case Otherwise { condition always 
+                value (A_TRNTYforward - A_TRNTYback)/(100*max(0.01,S_TRNTY(-1)))} 
+        }
+define RelCap_TRNTY  {select discharge from res_info given storage=1000*S_TRNTY(-1) use linear where res_num=1}
+define I_PTH070_ADD  {std kind 'ADD-FLOW' units 'CFS'}  !Temporary addition to add a little more flow to prevent infeasibilities on Putah South Canal
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lewiston Lake, Trinity River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_LWSTN       {std kind 'STORAGE' units 'TAF'} !
+define E_LWSTN       {std kind 'EVAPORATION' units 'CFS'} !@jmg 2017v13 - changed kind from unbounded to std
+define A_LWSTN       {value 740.} ! 740 acres corresponds to storage of 14 taf
+define ER_LWSTN      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Whiskeytown Lake, Clear Creeek  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_WKYTNlevel1 {value 180}
+define S_WKYTN_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WKYTNlevel2 {select target from res_level where res_num=3,level=2,month=month}
+define S_WKYTN_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WKYTNlevel3 {select target from res_level where res_num=3,level=3,month=month}
+define S_WKYTN_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WKYTNlevel4 {select target from res_level where res_num=3,level=4,month=month}
+define S_WKYTN_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WKYTNlevel5 {value 241.1}  !@jmg 2017v13 - adjusted from 240 to 241.1 according to DWR 2017v13
+define S_WKYTN_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WKYTN       {std kind 'STORAGE' units 'TAF'} !WHISKEYTOWN LAKE
+define E_WKYTN       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_WKYTN       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_WKYTN      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_WKYTNlast   {select area from res_info given storage=1000*S_WKYTN(-1) use linear where res_num=3}
+define A_WKYTNforward {select area from res_info given storage=1050*S_WKYTN(-1) use linear where res_num=3}
+define A_WKYTNback   {select area from res_info given storage=950*S_WKYTN(-1) use linear where res_num=3}
+!define Coefev_WKYTN  {value (A_WKYTNforward - A_WKYTNback)/(100*max(0.01,S_WKYTN(-1)))}
+/* @jmg 2017v13 - coefev_WKYTN section modified according to DWR 2017v13 */
+define coefev_WKYTN  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_WKYTN(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=3}	 
+	case Otherwise { condition always 
+                value (A_WKYTNforward - A_WKYTNback)/(100*max(0.01,S_WKYTN(-1)))}
+        }
+define RelCap_WKYTN  {select discharge from res_info given storage=1000*S_WKYTN(-1) use linear where res_num=3}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Shasta, Sacramento River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_SHSTAlevel1 {value 550}
+define S_SHSTA_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SHSTAlevel2 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTA_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SHSTA_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_SHSTAlevel4 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTA_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_SHSTAlevel5 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTA_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SHSTAlevel6 {value 4552}
+define S_SHSTA_6     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SHSTA       {std kind 'STORAGE' units 'TAF'} !SHASTA LAKE
+define E_SHSTA       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SHSTA       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SHSTA      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SHSTAlast   {select area from res_info given storage=1000*S_SHSTA(-1) use linear where res_num=4}
+define A_SHSTAforward {select area from res_info given storage=1050*S_SHSTA(-1) use linear where res_num=4}
+define A_SHSTAback   {select area from res_info given storage=950*S_SHSTA(-1) use linear where res_num=4}
+!define Coefev_SHSTA  {value (A_SHSTAforward - A_SHSTAback)/(100*max(0.01,S_SHSTA(-1)))}
+/* @jmg 2017v13 - coefev_SHSTA section modified according to DWR 2017v13 */
+define coefev_SHSTA  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_SHSTA(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=4}	 
+	case Otherwise { condition always 
+                value (A_SHSTAforward - A_SHSTAback)/(100*max(0.01,S_SHSTA(-1)))}
+        }
+define RelCap_SHSTA  {select discharge from res_info given storage=1000*S_SHSTA(-1) use linear where res_num=4}
+
+/* Shasta Flood Curve
+Lookup flood control curve based on different flood parameter. 
+The flood parameter consists of two portions (100000 cfs initial flow) + daily inflow. Both of these are subject to 5% reduction per day, since the parameter is computed on a daily basis by adding 0.95 times the earlier day parameter value. 
+To convert this to monthly, I applied two multipliers for the reduction compounded daily:
+For initial: 0.95^(daysin)
+For daily inflow in cfs: ((0.95^(daysin)) – 1)/(-0.05)
+*/
+!Multiplier based on 5% daily reduction on initial
+define ShstaFloodIndexM1 {value pow(0.95,daysin)}
+define ShstaFloodIndexM1dv{alias ShstaFloodIndexM1 kind 'Index' units 'NONE'}
+
+!Multiplier based on 5% daily reduction on daily inflow in cfs
+define ShstaFloodIndexM2 {value (pow(0.95,daysin)-1.)/(-0.05)}
+define ShstaFloodIndexM2dv{alias ShstaFloodIndexM2 kind 'Index' units 'NONE'}
+
+define ShstaFloodIndex {case October {condition month == Oct value 100000. * ShstaFloodIndexM1 + I_Shsta * ShstaFloodIndexM2}
+						case otherwise {condition always value ShstaFloodIndexdv(-1) * ShstaFloodIndexM1  + I_Shsta * ShstaFloodIndexM2}
+}
+define ShstaFloodIndexdv{alias ShstaFloodIndex kind 'Index' units 'CFS'}
+
+define S_SHSTAlevel5 {case C110000 {condition ShstaFloodIndex <= 110000. select FC from shsta_floodCurve where month = month, ShastaFI = 110000.}
+					  case midShastaFI {condition ShstaFloodIndex > 110000. .and. ShstaFloodIndex < 530000. select FC from shsta_floodCurve given ShastaFI = ShstaFloodIndex use linear where month = month}
+!					  case C200000 {condition ShstaFloodIndex <= 200000. select C200000 from shsta_floodCurve where month = month}
+!					  case C300000 {condition ShstaFloodIndex <= 300000. select C300000 from shsta_floodCurve where month = month}
+!					  case C400000 {condition ShstaFloodIndex <= 400000. select C400000 from shsta_floodCurve where month = month}
+!					  case C500000 {condition ShstaFloodIndex <= 500000. select C500000 from shsta_floodCurve where month = month}
+					  case C530000 {condition always  select FC from shsta_floodCurve where month = month, ShastaFI = 530000.}
+}
+
+!define S_SHSTAlevel5dv1 {alias S_SHSTAlevel5 kind 'Storage-Level' units 'TAF'}
+
+define S_SHSTAlevel4 {
+    case October {
+        condition month==OCT
+        value S_SHSTAlevel5-50.}
+    case November {
+        condition month==NOV
+        value S_SHSTAlevel5-52.}
+!    case DecMay {
+!        condition month>=DEC .and. month<=MAY
+!        value S_SHSTAlevel5 }
+    case June {
+        condition month==JUN
+        value S_SHSTAlevel5-1300.}
+    case July {
+        condition month==JUL
+        value S_SHSTAlevel5-950.}
+    case August {
+        condition month==AUG
+        value S_SHSTAlevel5-500.}
+    case September {
+        condition month==SEP
+        value S_SHSTAlevel5-200.}
+    case otherwise {
+    	condition always 
+    	value S_SHSTAlevel5}
+}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Keswick Reservoir, Sacramento River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_KSWCKlevel1 {value 0.014}
+define S_KSWCK_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_KSWCKlevel2 {value 16.3}
+define S_KSWCK_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_KSWCKlevel3 {value 16.3}
+define S_KSWCK_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_KSWCKlevel4 {value 23.77} !@jmg 2017v13
+define S_KSWCK_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_KSWCKlevel5 {value 23.77} !@jmg 2017v13
+define S_KSWCK_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_KSWCK       {std kind 'STORAGE' units 'TAF'} !KESWICK RESERVOIR
+define E_KSWCK       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_KSWCK       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_KSWCK      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_KSWCKlast   {select area from res_info given storage=1000*S_KSWCK(-1) use linear where res_num=5}
+define A_KSWCKforward {select area from res_info given storage=1050*S_KSWCK(-1) use linear where res_num=5}
+define A_KSWCKback   {select area from res_info given storage=950*S_KSWCK(-1) use linear where res_num=5}
+!define Coefev_KSWCK  {value (A_KSWCKforward - A_KSWCKback)/(100*max(0.01,S_KSWCK(-1)))}
+/* @jmg 2017v13 - coefev_KSWCK section modified according to DWR 2017v13 */
+define coefev_KSWCK  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_KSWCK(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=5}	 
+	case Otherwise { condition always 
+                value (A_KSWCKforward - A_KSWCKback)/(100*max(0.01,S_KSWCK(-1)))}
+        }
+define RelCap_KSWCK  {select discharge from res_info given storage=1000*S_KSWCK(-1) use linear where res_num=5}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Oroville, Feather River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_OROVLlevel1 {value 25.6}!29.6!20231027
+define S_OROVL_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVLlevel2 {value 797.6}!852!20231027
+define S_OROVL_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVL_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVL_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVLlevel5 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_OROVL_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVLlevel6 {value 3424.8}  !@jmg 2017v13 !3537.58!20231027
+define S_OROVL_6     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_OROVL       {std kind 'STORAGE' units 'TAF'} !LAKE OROVILLE
+define E_OROVL       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_OROVL       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_OROVL      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_OROVLlast   {select area from res_info given storage=1000*S_OROVL(-1) use linear where res_num=6}
+define A_OROVLforward {select area from res_info given storage=1050*S_OROVL(-1) use linear where res_num=6}
+define A_OROVLback   {select area from res_info given storage=950*S_OROVL(-1) use linear where res_num=6}
+!define Coefev_OROVL  {value (A_OROVLforward - A_OROVLback)/(100*max(0.01,S_OROVL(-1)))}
+/* @jmg 2017v13 - coefev_OROVL section modified according to DWR 2017v13 */
+define coefev_OROVL  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_OROVL(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=6}	 
+	case Otherwise { condition always 
+                value (A_OROVLforward - A_OROVLback)/(100*max(0.01,S_OROVL(-1)))}
+        }
+define Relcap_OROVL  {select discharge from res_info given storage=1000*S_OROVL(-1) use linear where res_num=6}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Thermalito Forebay, Feather River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_THRMF       {std kind 'STORAGE' units 'TAF'} !
+define E_THRMF       {std kind 'EVAPORATION' units 'CFS'} !@jmg 2017v13
+define A_THRMF       {value 700.} ! 700 acres corresponds to Forebay + Power Canal storage of 11.77 taf
+define ER_THRMF      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Thermalito Afterbay, Feather River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_THRMAlevel1 {value 12.888}
+define S_THRMA_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_THRMAlevel2 {value 20.0}
+define S_THRMA_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_THRMAlevel3 {value 30.0}
+define S_THRMA_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_THRMAlevel4 {value 57.041}
+define S_THRMA_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_THRMAlevel5 {value 57.041}
+define S_THRMA_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_THRMA       {std kind 'STORAGE' units 'TAF'}
+define E_THRMA       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_THRMA       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_THRMA      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_THRMAlast   {select area from res_info given storage=1000*S_THRMA(-1) use linear where res_num=7}
+define A_THRMAforward {select area from res_info given storage=1050*S_THRMA(-1) use linear where res_num=7}
+define A_THRMAback   {select area from res_info given storage=950*S_THRMA(-1) use linear where res_num=7}
+define Coefev_THRMAdv {alias (A_THRMAforward - A_THRMAback)/(100*max(0.01,S_THRMA(-1))) kind 'COEFEV' units 'NONE'} !@jmg 2017v13
+/* @jmg 2017v13 - coefev_THRMA section modified according to DWR 2017v13 */
+define coefev_THRMA  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_THRMA(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=7}	 
+	case Otherwise { condition always 
+                value (A_THRMAforward - A_THRMAback)/(100*max(0.01,S_THRMA(-1)))}
+        }
+define RelCap_THRMA  {select discharge from res_info given storage=1000*S_THRMA(-1) use linear where res_num=7}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Bullards Bar Reservoir, North Fork  Yuba River  !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define S_NBLDBlevel1 {value 234}
+!define S_NBLDB_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDBlevel2 {value 234}
+!define S_NBLDB_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDBlevel3 {select target from res_level where res_num=93,level=3,month=month}
+!define S_NBLDB_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDBlevel4 {select target from res_level where res_num=93,level=4,month=month}
+!define S_NBLDB_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDBlevel5 {select target from res_level where res_num=93,level=5,month=month}
+!define S_NBLDB_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDBlevel6 {value 966}
+!define S_NBLDB_6     {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NBLDB       {std kind 'STORAGE' units 'TAF'}
+!define E_NBLDB       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+!define A_NBLDB       {std kind 'SURFACE-AREA' units 'ACRES'}
+!define ER_NBLDB      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+!define A_NBLDBlast   {select area from res_info given storage=1000*S_NBLDB(-1) use linear where res_num=93}
+!define A_NBLDBforward {select area from res_info given storage=1050*S_NBLDB(-1) use linear where res_num=93}
+!define A_NBLDBback   {select area from res_info given storage=950*S_NBLDB(-1) use linear where res_num=93}
+/* @jmg 2017v13 - coefev_NBLDB section modified according to DWR 2017v13 */
+!define coefev_NBLDB  {                                          !Z.Q. Richard Chen 5/8/2017 
+!	case NEARZERO { condition S_NBLDB(-1) <= 0.001
+!		select coefev from res_info given storage=1 use minimum where res_num=93}	 
+!	case Otherwise { condition always 
+!                value (A_NBLDBforward - A_NBLDBback)/(100*max(0.01,S_NBLDB(-1)))}
+!        }
+!define RelCap_NBLDB  {select discharge from res_info given storage=1000*S_NBLDB(-1) use linear where res_num=93}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Merle Collins Reservoir, Dry Creek  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define S_MERLClevel1    {value 7.5}
+!define S_MERLC_1        {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_MERLClevel2    {value 57.0}
+!define S_MERLC_2        {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_MERLC           {std kind 'STORAGE' units 'TAF'}
+!define E_MERLC          {lower unbounded kind 'EVAPORATION' units 'CFS'}
+!define ER_MERLC     {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+!define A_MERLC          {std kind 'SURFACE-AREA' units 'ACRES'}
+!define A_MERLClast      {select area from res_info given storage=1000*S_MERLC(-1) use linear where res_num=600}
+!define A_MERLCforward {select area from res_info given storage=1050*S_MERLC(-1) use linear where res_num=600}
+!define A_MERLCback      {select area from res_info given storage=950*S_MERLC(-1) use linear where res_num=600}
+!/* @jmg 2017v13 - coefev_MERLC section modified according to DWR 2017v13 */
+!define coefev_MERLC  {                                          !Z.Q. Richard Chen 5/8/2017 
+!	case NEARZERO { condition S_MERLC(-1) <= 0.001
+!		select coefev from res_info given storage=1 use minimum where res_num=600}	 
+!	case Otherwise { condition always 
+!                value (A_MERLCforward - A_MERLCback)/(100*max(0.01,S_MERLC(-1)))}
+!        }
+!define RelCap_MERLC     {select discharge from res_info given storage=1000*S_MERLC(-1) use linear where res_num=600}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Valley Reservoir, North Fork American River    !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define S_LKVLY       {std kind 'STORAGE' units 'TAF'} !
+!define E_LKVLY       {value 0.0}
+
+! Folsom
+define S_FOLSMlevel1 {value 90}
+define S_FOLSM_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSMlevel2 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSM_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSM_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSMlevel4 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSM_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSMlevel5 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSM_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSMlevel6 {value 967.}  !@jmg 2017v13 - BoR merged model has this = 966.832; DWR split model 2017v13 has this at 977
+define S_FOLSM_6     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_FOLSM       {std kind 'STORAGE' units 'TAF'}
+define E_FOLSM       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_FOLSM       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_FOLSM      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_FOLSMlast   {select area from res_info given storage=1000*S_FOLSM(-1) use linear where res_num=8}
+define A_FOLSMforward {select area from res_info given storage=1050*S_FOLSM(-1) use linear where res_num=8}
+define A_FOLSMback   {select area from res_info given storage=950*S_FOLSM(-1) use linear where res_num=8}
+!define Coefev_FOLSM  {value (A_FOLSMforward - A_FOLSMback)/(100*max(0.01,S_FOLSM(-1)))}
+/* @jmg 2017v13 - coefev_FOLSM section modified according to DWR 2017v13 */
+define coefev_FOLSM  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_FOLSM(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=8}	 
+	case Otherwise { condition always 
+                value (A_FOLSMforward - A_FOLSMback)/(100*max(0.01,S_FOLSM(-1)))}
+        }
+define Relcap_FOLSM  {select discharge from res_info given storage=1000*S_FOLSM(-1) use linear where res_num=8}
+
+
+! Natoma
+define S_NTOMAlevel1 {value 1.75}
+define S_NTOMA_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NTOMAlevel2 {value 6.5}
+define S_NTOMA_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NTOMAlevel3 {value 6.5}
+define S_NTOMA_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NTOMAlevel4 {value 8.0} !@jmg 2017v13, NSO, 01/25/2022 - Updated to match value in LowerAmerican folder
+define S_NTOMA_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NTOMAlevel5 {value 8.0}  !@jmg 2017v13, NSO, 01/25/2022 - Updated to match value in LowerAmerican folder
+define S_NTOMA_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NTOMA       {std kind 'STORAGE' units 'TAF'} !LAKE NATOMA
+define E_NTOMA       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_NTOMA       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_NTOMA      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_NTOMAlast   {select area from res_info given storage=1000*S_NTOMA(-1) use linear where res_num=9}
+define A_NTOMAforward {select area from res_info given storage=1050*S_NTOMA(-1) use linear where res_num=9}
+define A_NTOMAback   {select area from res_info given storage=950*S_NTOMA(-1) use linear where res_num=9}
+!define Coefev_NTOMA  {value (A_NTOMAforward - A_NTOMAback)/(100*max(0.01,S_NTOMA(-1)))}
+/* @jmg 2017v13 - coefev_NTOMA section modified according to DWR 2017v13 */
+define coefev_NTOMA  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_NTOMA(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=9}	 
+	case Otherwise { condition always 
+                value (A_NTOMAforward - A_NTOMAback)/(100*max(0.01,S_NTOMA(-1)))}
+        }
+define RelCap_NTOMA  {select discharge from res_info given storage=1000*S_NTOMA(-1) use linear where res_num=9}
+
+
+! East Park
+define S_EPARKlevel1 {value 1.5}
+define S_EPARK_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EPARKlevel2 {value 5.0}
+define S_EPARK_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EPARKlevel3 {select target from res_level where res_num=40,level=3,month=month}
+define S_EPARK_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EPARKlevel4 {select target from res_level where res_num=40,level=4,month=month}
+define S_EPARK_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EPARKlevel5 {value 50.9} !@jmg 2017v13 - DWR 2017v13 has this as 50.51, BoR merged model as 50.9
+define S_EPARK_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_EPARK       {std kind 'STORAGE' units 'TAF'}
+define E_EPARK       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_EPARK       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_EPARK      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_EPARKlast   {select area from res_info given storage=1000*S_EPARK(-1) use linear where res_num=40}
+define A_EPARKforward {select area from res_info given storage=1050*S_EPARK(-1) use linear where res_num=40}
+define A_EPARKback   {select area from res_info given storage=950*S_EPARK(-1) use linear where res_num=40}
+!define Coefev_EPARK  {value (A_EPARKforward - A_EPARKback)/(100*max(0.01,S_EPARK(-1)))}
+/* @jmg 2017v13 - coefev_EPARK section modified according to DWR 2017v13 */
+define coefev_EPARK  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_EPARK(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=40}	 
+	case Otherwise { condition always 
+                value (A_EPARKforward - A_EPARKback)/(100*max(0.01,S_EPARK(-1)))}
+        }
+define Relcap_EPARK  {select discharge from res_info given storage=1000*S_EPARK(-1) use linear where res_num=40}
+
+
+!Stony Gorge
+define S_SGRGElevel1 {value 1.5}
+define S_SGRGE_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SGRGElevel2 {value 7.5}
+define S_SGRGE_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SGRGElevel3 {select target from res_level where res_num=41,level=3,month=month}
+define S_SGRGE_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SGRGElevel4 {select target from res_level where res_num=41,level=4,month=month}
+define S_SGRGE_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SGRGElevel5 {value 50.4} !50.0 !@jmg 2017v13 - DWR split model 2017v13 has this at 50., BoR merged model has it as 50.4
+define S_SGRGE_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SGRGE       {std kind 'STORAGE' units 'TAF'} !Stony Gorge Reservoir
+define E_SGRGE       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SGRGE       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SGRGE      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SGRGElast   {select area from res_info given storage=1000*S_SGRGE(-1) use linear where res_num=41}
+define A_SGRGEforward {select area from res_info given storage=1050*S_SGRGE(-1) use linear where res_num=41}
+define A_SGRGEback   {select area from res_info given storage=950*S_SGRGE(-1) use linear where res_num=41}
+!define Coefev_SGRGE  {value (A_SGRGEforward - A_SGRGEback)/(100*max(0.01,S_SGRGE(-1)))}
+/* @jmg 2017v13 - coefev_SGRGE section modified according to DWR 2017v13 */
+define coefev_SGRGE  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_SGRGE(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=41}	 
+	case Otherwise { condition always 
+                value (A_SGRGEforward - A_SGRGEback)/(100*max(0.01,S_SGRGE(-1)))}
+        }
+define Relcap_SGRGE  {select discharge from res_info given storage=1000*S_SGRGE(-1) use linear where res_num=41}
+
+
+! Black Butte
+define S_BLKBTlevel1 {value 1.5}
+define S_BLKBT_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BLKBTlevel2 {value 20.0}
+define S_BLKBT_2     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BLKBT_3     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BLKBT_4     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BLKBTlevel5 {value 144} !@jmg 2017v13 - DWR split model 2017v13 has this as 144; BoR merged model ahs this as 136.2
+define S_BLKBT_5     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BLKBT       {std kind 'STORAGE' units 'TAF'} !Black Butte Lake
+define E_BLKBT       {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_BLKBT       {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_BLKBT      {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_BLKBTlast   {select area from res_info given storage=1000*S_BLKBT(-1) use linear where res_num=42}
+define A_BLKBTforward {select area from res_info given storage=1050*S_BLKBT(-1) use linear where res_num=42}
+define A_BLKBTback   {select area from res_info given storage=950*S_BLKBT(-1) use linear where res_num=42}
+!define Coefev_BLKBT  {value (A_BLKBTforward - A_BLKBTback)/(100*max(0.01,S_BLKBT(-1)))}
+/* @jmg 2017v13 - coefev_BLKBT section modified according to DWR 2017v13 */
+define coefev_BLKBT  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_BLKBT(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=42}	 
+	case Otherwise { condition always 
+                value (A_BLKBTforward - A_BLKBTback)/(100*max(0.01,S_BLKBT(-1)))}
+        }
+define Relcap_BLKBT  {select discharge from res_info given storage=1000*S_BLKBT(-1) use linear where res_num=42}
+
+
+! Lake Berryessa
+define S_BRYSAlevel1    {value 10.3}
+define S_BRYSA_1        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BRYSAlevel2     {value 100.0}
+define S_BRYSA_2        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BRYSAlevel3     {value 500.0}
+define S_BRYSA_3        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BRYSAlevel4     {value 1551.0}
+define S_BRYSA_4        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BRYSAlevel5    {value 1551.0}
+define S_BRYSA_5        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BRYSA              {std kind 'STORAGE' units 'TAF'} !Black Butte Lake
+define E_BRYSA              {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_BRYSA              {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_BRYSA     {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_BRYSAlast      {select area from res_info given storage=1000*S_BRYSA(-1) use linear where res_num=45}
+define A_BRYSAforward   {select area from res_info given storage=1050*S_BRYSA(-1) use linear where res_num=45}
+define A_BRYSAback      {select area from res_info given storage=950*S_BRYSA(-1) use linear where res_num=45}
+/* @jmg 2017v13 - coefev_BRYSA section modified according to DWR 2017v13 */
+!define Coefev_BRYSA  	{value (A_BRYSAforward - A_BRYSAback)/(100*max(0.01,S_BRYSA(-1)))}
+define coefev_BRYSA  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_BRYSA(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=45}	 
+	case Otherwise { condition always 
+                value (A_BRYSAforward - A_BRYSAback)/(100*max(0.01,S_BRYSA(-1)))}
+        }
+define Relcap_BRYSA     {select discharge from res_info given storage=1000*S_BRYSA(-1) use linear where res_num=45}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!Camp Far West Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_CMPFWlevel1 {value 2.9}
+define S_CMPFW_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMPFWlevel2 {select target from res_level where res_num=286,level=2,month=month}
+define S_CMPFW_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMPFWlevel3 {value 103}
+define S_CMPFW_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMPFWlevel4 {value 103}
+define S_CMPFW_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMPFWlevel5 {value 104.5}  !@jmg 2017v13 - DWR split model 2017v13 = 104.5; BOR merged model = 103
+define S_CMPFW_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CMPFW {std kind 'STORAGE' units 'TAF'} !Camp Far West Reservoir
+!define F_CMPFW {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_CMPFW {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_CMPFW {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_CMPFW {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_CMPFWlast {select area from res_info given storage=1000*S_CMPFW(-1) use linear where res_num=286}
+define A_CMPFWforward {select area from res_info given storage=1050*S_CMPFW(-1) use linear where res_num=286}
+define A_CMPFWback {select area from res_info given storage=950*S_CMPFW(-1) use linear where res_num=286}
+!define coefev_CMPFW {value (A_CMPFWforward - A_CMPFWback)/(100*max(0.01,S_CMPFW(-1)))}
+/* @jmg 2017v13 - coefev_CMPFW section modified according to DWR 2017v13 */
+define coefev_CMPFW  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_CMPFW(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=286}	 
+	case Otherwise { condition always 
+                value (A_CMPFWforward - A_CMPFWback)/(100*max(0.01,S_CMPFW(-1)))}
+        }
+define relcap_CMPFW {select discharge from res_info given storage=1000*S_CMPFW(-1) use linear where res_num=286}
+
+
+! Clear Lake
+define S_CLRLKlevel1    {value 842.0}
+define S_CLRLK_1        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CLRLKlevel2    {value 842.0}
+define S_CLRLK_2        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CLRLKlevel3    {value 842.0}
+define S_CLRLK_3        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CLRLKlevel4    {std kind 'STORAGE-LEVEL' units 'TAF'}
+define S_CLRLK_4        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CLRLKlevel5    {value 1270.0}
+define S_CLRLK_5        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_CLRLK          {std kind 'STORAGE' units 'TAF'}
+define E_CLRLK          {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_CLRLK          {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_CLRLK     {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_CLRLKlast      {select area from res_info given storage=1000*S_CLRLK(-1) use linear where res_num=500}
+define A_CLRLKforward   {select area from res_info given storage=1050*S_CLRLK(-1) use linear where res_num=500}
+define A_CLRLKback      {select area from res_info given storage=950*S_CLRLK(-1) use linear where res_num=500}
+!define Coefev_CLRLK  	{value (A_CLRLKforward - A_CLRLKback)/(100*max(0.01,S_CLRLK(-1)))}
+/* @jmg 2017v13 - coefev_CLRLK section modified according to DWR 2017v13 */
+define coefev_CLRLK  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_CLRLK(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=500}	 
+	case Otherwise { condition always 
+                value (A_CLRLKforward - A_CLRLKback)/(100*max(0.01,S_CLRLK(-1)))}
+        }
+define Relcap_CLRLK     {select discharge from res_info given storage=1000*S_CLRLK(-1) use linear where res_num=500}
+
+! A value of zero on the Rumsey gage corresponds to a storage of 842,000 acre-feet
+! Define adjusted storage for Clear Lake that has value of zero for a gage reading of zero
+define S_adjCLRLK   {lower unbounded upper unbounded kind 'STORAGE' units 'TAF'}
+
+! Indian Valley Reservoir
+define S_INDVLlevel1    {value 10.}
+define S_INDVL_1        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_INDVLlevel2    {value 30.0}
+define S_INDVL_2        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_INDVLlevel3    {value 200.0}
+define S_INDVL_3        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_INDVL_4        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_INDVLlevel5    {value 300.6} !USACE 1977 Flood Control Diagram
+define S_INDVLlevel4	{case October {condition month==OCT value S_INDVLlevel5 - 24.416}
+				         case NovFeb  {condition range(month,NOV,FEB)value S_INDVLlevel5 - 40.000}
+				         case March   {condition month==MAR value S_INDVLlevel5 - 31.688}
+				         case April   {condition month==APR value S_INDVLlevel5 - 16.104}
+                         case MayAug  {condition always value S_INDVLlevel5}}
+define S_INDVL_5        {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_INDVL          {std kind 'STORAGE' units 'TAF'}
+define E_INDVL          {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_INDVL          {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_INDVL     {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_INDVLlast      {select area from res_info given storage=1000*S_INDVL(-1) use linear where res_num=501}
+define A_INDVLforward   {select area from res_info given storage=1050*S_INDVL(-1) use linear where res_num=501}
+define A_INDVLback      {select area from res_info given storage=950*S_INDVL(-1) use linear where res_num=501}
+!define Coefev_INDVL  	{value (A_INDVLforward - A_INDVLback)/(100*max(0.01,S_INDVL(-1)))}
+/* @jmg 2017v13 - coefev_INDVL section modified according to DWR 2017v13 */
+define coefev_INDVL  {                                          !Z.Q. Richard Chen 5/8/2017 
+	case NEARZERO { condition S_INDVL(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=501}	 
+	case Otherwise { condition always 
+                value (A_INDVLforward - A_INDVLback)/(100*max(0.01,S_INDVL(-1)))}
+        }
+define Relcap_INDVL     {select discharge from res_info given storage=1000*S_INDVL(-1) use linear where res_num=501}
+

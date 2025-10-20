@@ -1,0 +1,1765 @@
+/*
+Program:	Folsom Storage Forecasting
+Description:	The purpose of this module is to calculate North Fork American River Releases for use as inputs for the following files:
+			FMStandard.wresl
+*/
+
+!---------- North Fork American ---------- 
+define I_NFA022_fcst {timeseries 'I_NFA022' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow to NF American above confluence with MF American
+define I_NFA054_fcst {timeseries 'I_NFA054' kind 'INFLOW' units 'TAF' convert 'CFS'} !NF American River
+!---------- Middle Fork American ---------- 
+define I_DCC010_fcst {timeseries 'I_DCC010' kind 'INFLOW' units 'TAF' convert 'CFS'} !USGS 11427770 Duncan Creek inflow to Duncan Creek Diversion Dam
+define I_NMA003_fcst {timeseries 'I_NMA003' kind 'INFLOW' units 'TAF' convert 'CFS'} !NF of MF American above confluence with MF American
+define I_MFA036_fcst {timeseries 'I_MFA036' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow to MF American River at Interbay Dam
+define I_MFA025_fcst {timeseries 'I_MFA025' kind 'INFLOW' units 'TAF' convert 'CFS'} !OASIS new inflow at node 812, existing conditions input
+define I_MFA023_fcst {timeseries 'I_MFA023' kind 'INFLOW' units 'TAF' convert 'CFS'} !North Fork of MF American River
+define I_MFA001_fcst {timeseries 'I_MFA001' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow to MF American River
+
+!Rubicon River                             
+define I_RUB047_fcst {timeseries 'I_RUB047' kind 'INFLOW' units 'TAF' convert 'CFS'} !Rubicon River inflow to Rubicon Reservoir
+define I_LRB004_fcst {timeseries 'I_LRB004' kind 'INFLOW' units 'TAF' convert 'CFS'} !Little Rubicon River
+define I_RUB002_fcst {timeseries 'I_RUB002' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow at Rubicon River/Long Canyon Creek confluence
+
+!Long Canyon Creek
+define I_LNG012_fcst {timeseries 'I_LNG012' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow at Rubicon River/Long Canyon Creek confluence
+define I_NLC003_fcst {timeseries 'I_NLC003' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow at Rubicon River/Long Canyon Creek confluence
+define I_SLC003_fcst {timeseries 'I_SLC003' kind 'INFLOW' units 'TAF' convert 'CFS'} !Local inflow at Rubicon River/Long Canyon Creek confluence
+
+!Pilot Creek
+define I_STMPY_fcst  {timeseries 'I_STMPY' kind 'INFLOW' units 'TAF' convert 'CFS'} !Pilot Creek nflow to Stumpy Meadows Reservoir
+
+!Define minimum flows by month between February and September
+!****************************************************************************
+!**************Duncan Creek below Duncan Creek Diversion Dam ****************
+!****************************************************************************
+!Compute minimum flow for February
+Define MIF_MFP_DCC008_Feb_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 1}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 1}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 1}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 1}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 1}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+
+!Compute minimum flow for March 1 to 14 starting in February
+Define MIF_MFP_DCC008_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 1}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 1}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 1}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 1}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 1}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31 starting in February
+Define MIF_MFP_DCC008_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 1}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 1}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 1}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 1}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 1}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Mar_fcst1 {value (MIF_MFP_DCC008_Mar1to14_fcst*14. + MIF_MFP_DCC008_Mar15to31_fcst*17.)/31.}
+!Compute minimum flow forecast for April starting in February
+Define MIF_MFP_DCC008_Apr_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 1}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 1}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 1}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 1}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 1}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow forecast for May starting in February
+Define MIF_MFP_DCC008_May_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 1}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 1}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 1}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 1}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 1}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow forecast for June starting in June
+Define MIF_MFP_DCC008_Jun_fcst1 {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 1}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 1}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 1}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 1}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 1}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Jul_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Aug_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Sep_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Oct_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 1}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 1}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 1}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 1}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 1}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_DCC008_Nov_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 1}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 1}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 1}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 1}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 1}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 1}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_DCC008_Dec_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 1}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 1}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 1}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 1}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 1}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 3, identifier = 1}
+	case Other 	{condition always value 0.}
+}
+!Final flow requirement = minimum of requirement, natural flow 
+Define MIF_MFP_DCC008_Feb_fcst {value min(MIF_MFP_DCC008_Feb_fcst1, I_DCC010_fcst(Feb-month))} 
+Define MIF_MFP_DCC008_Mar_fcst {value min(MIF_MFP_DCC008_Mar_fcst1, I_DCC010_fcst(Mar-month))}
+Define MIF_MFP_DCC008_Apr_fcst {value min(MIF_MFP_DCC008_Apr_fcst1, I_DCC010_fcst(Apr-month))} 
+Define MIF_MFP_DCC008_May_fcst {value min(MIF_MFP_DCC008_May_fcst1, I_DCC010_fcst(May-month))} 
+Define MIF_MFP_DCC008_Jun_fcst {value min(MIF_MFP_DCC008_Jun_fcst1, I_DCC010_fcst(Jun-month))} 
+Define MIF_MFP_DCC008_Jul_fcst {value min(MIF_MFP_DCC008_Jul_fcst1, I_DCC010_fcst(Jul-month))} 
+Define MIF_MFP_DCC008_Aug_fcst {value min(MIF_MFP_DCC008_Aug_fcst1, I_DCC010_fcst(Aug-month))} 
+Define MIF_MFP_DCC008_Sep_fcst {value min(MIF_MFP_DCC008_Sep_fcst1, I_DCC010_fcst(Sep-month))} 
+Define MIF_MFP_DCC008_Oct_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_DCC008_Oct_fcst1, I_DCC010_fcst(Oct+12-month))} 
+}
+Define MIF_MFP_DCC008_Nov_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_DCC008_Nov_fcst1, I_DCC010_fcst(Nov+12-month))} 
+}
+Define MIF_MFP_DCC008_Dec_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_DCC008_Dec_fcst1, I_DCC010_fcst(Dec+12-month))} 
+}
+!****************************************************************************
+!*******Middle Fork American River below French Meadows Reservoir Dam *******
+!****************************************************************************
+define MIF_MFP_MFA047_Feb_Fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 2}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 2}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 2}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 2}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 2}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 1 to 14
+Define MIF_MFP_MFA047_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 2}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 2}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 2}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 2}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 2}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31
+Define MIF_MFP_MFA047_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 2}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 2}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 2}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 2}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 2}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define  MIF_MFP_MFA047_Mar_fcst {value (MIF_MFP_MFA047_Mar1to14_fcst*14. + MIF_MFP_MFA047_Mar15to31_fcst*17.)/31.}
+Define MIF_MFP_MFA047_Apr_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 2}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 2}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 2}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 2}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 2}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_May_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 2}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 2}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 2}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 2}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 2}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Jun_fcst {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 2}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 2}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 2}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 2}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 2}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Jul_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 10, identifier = 2}
+	case AN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 10, identifier = 2}
+	case BN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 10, identifier = 2}
+	case Dry 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 10, identifier = 2}
+	case Crit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 10, identifier = 2}
+	case ExCrit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 10, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Aug_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 11, identifier = 2}
+	case AN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 11, identifier = 2}
+	case BN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 11, identifier = 2}
+	case Dry 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 11, identifier = 2}
+	case Crit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 11, identifier = 2}
+	case ExCrit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 11, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Sep_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 12, identifier = 2}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 12, identifier = 2}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 12, identifier = 2}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 12, identifier = 2}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 12, identifier = 2}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 12, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 2}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 2}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 2}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 2}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 2}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA047_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 2}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_MFA047_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 2}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 2}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 2}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 2}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 2}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	    from MIF_MFP where month = 3, identifier = 2}
+	case Other 	{condition always value 0.}
+}
+!****************************************************************************
+!*************Middle Fork American River below Interbay Dam******************
+!**************************************************************************** 
+define MIF_MFP_MFA035_Feb_Fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 3}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 3}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 3}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 3}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 3}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 1 to 14
+Define MIF_MFP_MFA035_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 3}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 3}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 3}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 3}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 3}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31
+Define MIF_MFP_MFA035_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 3}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 3}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 3}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 3}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 3}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define  MIF_MFP_MFA035_Mar_fcst {value (MIF_MFP_MFA035_Mar1to14_fcst*14. + MIF_MFP_MFA035_Mar15to31_fcst*17.)/31.}
+Define MIF_MFP_MFA035_Apr_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 3}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 3}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 3}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 3}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 3}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_May_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 3}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 3}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 3}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 3}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 3}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Jun_fcst {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 3}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 3}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 3}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 3}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 3}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Jul_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 10, identifier = 3}
+	case AN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 10, identifier = 3}
+	case BN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 10, identifier = 3}
+	case Dry 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 10, identifier = 3}
+	case Crit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 10, identifier = 3}
+	case ExCrit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 10, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Aug_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 11, identifier = 3}
+	case AN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 11, identifier = 3}
+	case BN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 11, identifier = 3}
+	case Dry 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 11, identifier = 3}
+	case Crit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 11, identifier = 3}
+	case ExCrit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 11, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Sep_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 12, identifier = 3}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 12, identifier = 3}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 12, identifier = 3}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 12, identifier = 3}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 12, identifier = 3}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 12, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 3}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 3}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 3}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 3}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 3}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA035_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 3}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 3}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 3}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 3}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 3}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 3}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_MFA035_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 3}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	    from MIF_MFP where month = 3, identifier = 3}
+	case Other 	{condition always value 0.}
+}
+!****************************************************************************
+!**************Rubicon River below Hell Hole Reservoir Dam*******************
+!****************************************************************************
+define MIF_MFP_RUB031_Feb_Fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 4}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 4}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 4}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 4}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 4}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 1 to 14
+Define MIF_MFP_RUB031_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 4}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 4}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 4}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 4}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 4}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31
+Define MIF_MFP_RUB031_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 4}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 4}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 4}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 4}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 4}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Mar_fcst {value (MIF_MFP_RUB031_Mar1to14_fcst*14. + MIF_MFP_RUB031_Mar15to31_fcst*17.)/31.}
+Define MIF_MFP_RUB031_Apr_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 4}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 4}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 4}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 4}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 4}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_May_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 4}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 4}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 4}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 4}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 4}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Jun_fcst {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 4}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 4}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 4}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 4}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 4}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Jul_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 10, identifier = 4}
+	case AN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 10, identifier = 4}
+	case BN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 10, identifier = 4}
+	case Dry 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 10, identifier = 4}
+	case Crit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 10, identifier = 4}
+	case ExCrit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 10, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Aug_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 11, identifier = 4}
+	case AN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 11, identifier = 4}
+	case BN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 11, identifier = 4}
+	case Dry 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 11, identifier = 4}
+	case Crit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 11, identifier = 4}
+	case ExCrit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 11, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Sep_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 12, identifier = 4}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 12, identifier = 4}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 12, identifier = 4}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 12, identifier = 4}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 12, identifier = 4}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 12, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 4}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 4}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 4}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 4}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 4}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_RUB031_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 4}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 4}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 4}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 4}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 4}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 4}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_RUB031_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 4}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 4}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 4}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 4}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 4}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	    from MIF_MFP where month = 3, identifier = 4}
+	case Other 	{condition always value 0.}
+}
+!****************************************************************************
+!**North Fork Long Canyon Creek Below North Fork Long Canyon Diversion Dam***
+!****************************************************************************
+define MIF_MFP_NLC002_Feb_Fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 5}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 5}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 5}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 5}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 5}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 1 to 14
+Define MIF_MFP_NLC002_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 5}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 5}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 5}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 5}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 5}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31
+Define MIF_MFP_NLC002_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 5}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 5}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 5}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 5}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 5}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+Define  MIF_MFP_NLC002_Mar_fcst1 {value (MIF_MFP_NLC002_Mar1to14_fcst*14. + MIF_MFP_NLC002_Mar15to31_fcst*17.)/31.}
+Define MIF_MFP_NLC002_Apr_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 5}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 5}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 5}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 5}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 5}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_May_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 5}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 5}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 5}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 5}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 5}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Jun_fcst1 {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 5}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 5}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 5}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 5}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 5}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Jul_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Aug_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Sep_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Oct_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 5}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 5}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 5}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 5}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 5}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_NLC002_Nov_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 5}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 5}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 5}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 5}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 5}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 5}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_NLC002_Dec_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 5}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 5}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 5}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 5}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 5}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 		from MIF_MFP where month = 3, identifier = 5}
+	case Other 	{condition always value 0.}
+}
+!Final flow requirement = minimum of requirement, natural flow 
+Define MIF_MFP_NLC002_Feb_fcst {value min(MIF_MFP_NLC002_Feb_fcst1, I_NLC003_fcst(Feb-month))} 
+Define MIF_MFP_NLC002_Mar_fcst {value min(MIF_MFP_NLC002_Mar_fcst1, I_NLC003_fcst(Mar-month))}
+Define MIF_MFP_NLC002_Apr_fcst {value min(MIF_MFP_NLC002_Apr_fcst1, I_NLC003_fcst(Apr-month))} 
+Define MIF_MFP_NLC002_May_fcst {value min(MIF_MFP_NLC002_May_fcst1, I_NLC003_fcst(May-month))} 
+Define MIF_MFP_NLC002_Jun_fcst {value min(MIF_MFP_NLC002_Jun_fcst1, I_NLC003_fcst(Jun-month))} 
+Define MIF_MFP_NLC002_Jul_fcst {value min(MIF_MFP_NLC002_Jul_fcst1, I_NLC003_fcst(Jul-month))} 
+Define MIF_MFP_NLC002_Aug_fcst {value min(MIF_MFP_NLC002_Aug_fcst1, I_NLC003_fcst(Aug-month))} 
+Define MIF_MFP_NLC002_Sep_fcst {value min(MIF_MFP_NLC002_Sep_fcst1, I_NLC003_fcst(Sep-month))}
+Define MIF_MFP_NLC002_Oct_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_NLC002_Oct_fcst1, I_NLC003_fcst(Oct+12-month))} 
+}
+Define MIF_MFP_NLC002_Nov_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_NLC002_Nov_fcst1, I_NLC003_fcst(Nov+12-month))} 
+}
+Define MIF_MFP_NLC002_Dec_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_NLC002_Dec_fcst1, I_NLC003_fcst(Dec+12-month))} 
+}
+
+!****************************************************************************
+!**South Fork Long Canyon Creek Below South Fork Long Canyon Diversion Dam **
+!****************************************************************************
+define MIF_MFP_SLC002_Feb_Fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 6}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 6}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 6}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 6}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 6}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 5, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 1 to 14
+Define MIF_MFP_SLC002_Mar1to14_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 6.1, identifier = 6}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 6.1, identifier = 6}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 6.1, identifier = 6}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 6.1, identifier = 6}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 6.1, identifier = 6}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 	from MIF_MFP where month = 6.1, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for March 15 to 31
+Define MIF_MFP_SLC002_Mar15to31_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6.2, identifier = 6}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6.2, identifier = 6}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6.2, identifier = 6}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6.2, identifier = 6}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6.2, identifier = 6}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6.2, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+Define  MIF_MFP_SLC002_Mar_fcst1 {value (MIF_MFP_SLC002_Mar1to14_fcst*14. + MIF_MFP_SLC002_Mar15to31_fcst*17.)/31.}
+Define MIF_MFP_SLC002_Apr_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 6}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 6}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 6}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 6}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 6}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_May_fcst1 {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 6}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 6}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 6}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 6}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 6}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Jun_fcst1 {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 6}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 6}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 6}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 6}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 6}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Jul_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Aug_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Sep_fcst1 {
+	case PreJun	{condition  month < 9 value 0.}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Oct_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 6}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 6}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 6}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 6}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 6}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 6}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_SLC002_Nov_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 6}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 6}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 6}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 6}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 6}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 6}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_SLC002_Dec_fcst1 {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 6}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 6}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 6}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 6}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 6}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 		from MIF_MFP where month = 3, identifier = 6}
+	case Other 	{condition always value 0.}
+}	
+!Final flow requirement = minimum of requirement, natural flow 
+Define MIF_MFP_SLC002_Feb_fcst {value min(MIF_MFP_SLC002_Feb_fcst1, I_SLC003_fcst(Feb-month))} 
+Define MIF_MFP_SLC002_Mar_fcst {value min(MIF_MFP_SLC002_Mar_fcst1, I_SLC003_fcst(Mar-month))}
+Define MIF_MFP_SLC002_Apr_fcst {value min(MIF_MFP_SLC002_Apr_fcst1, I_SLC003_fcst(Apr-month))} 
+Define MIF_MFP_SLC002_May_fcst {value min(MIF_MFP_SLC002_May_fcst1, I_SLC003_fcst(May-month))} 
+Define MIF_MFP_SLC002_Jun_fcst {value min(MIF_MFP_SLC002_Jun_fcst1, I_SLC003_fcst(Jun-month))} 
+Define MIF_MFP_SLC002_Jul_fcst {value min(MIF_MFP_SLC002_Jul_fcst1, I_SLC003_fcst(Jul-month))} 
+Define MIF_MFP_SLC002_Aug_fcst {value min(MIF_MFP_SLC002_Aug_fcst1, I_SLC003_fcst(Aug-month))} 
+Define MIF_MFP_SLC002_Sep_fcst {value min(MIF_MFP_SLC002_Sep_fcst1, I_SLC003_fcst(Sep-month))} 
+Define MIF_MFP_SLC002_Oct_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_SLC002_Oct_fcst1, I_SLC003_fcst(Oct+12-month))} 
+}
+Define MIF_MFP_SLC002_Nov_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_SLC002_Nov_fcst1, I_SLC003_fcst(Nov+12-month))} 
+}
+Define MIF_MFP_SLC002_Dec_fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case Other 	{condition always 				value min(MIF_MFP_SLC002_Dec_fcst1, I_SLC003_fcst(Dec+12-month))} 
+}
+
+!****************************************************************************
+!*************Middle Fork American River below Ralston Afterbay Dam**********
+!****************************************************************************
+Define MIF_MFP_MFA025_Feb_Fcst {
+	case PreFeb	{condition month < 5	value 0.}
+	case Feb	{condition month == 5 	value 3.}
+	case Other	{condition always 		value 0.}
+}
+Define MIF_MFP_MFA025_Mar_Fcst {
+	case PreFeb	{condition month < 5					value 0.}
+	case NotEC	{condition month <=6 .and. WY_MFPdv[UpperAmerican] < 6	value (3.+25.)/2}
+	case EC		{condition month <=6 					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_Apr_Fcst {
+	case PreFeb	{condition month < 5					value 0.}
+	case NotEC	{condition month <=7 .and. WY_MFPdv[UpperAmerican] < 6	value 25.}
+	case EC		{condition month <=7 					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_May_Fcst {
+	case PreFeb	{condition month < 5					value 0.}
+	case NotEC	{condition month <=8 .and. WY_MFPdv[UpperAmerican] < 6	value 25.}
+	case EC		{condition month <=8 					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_Jun_Fcst {
+	case PreJun	{condition month < 9					value 0.}
+	case NotEC	{condition month <=9 .and. WY_MFPdv[UpperAmerican] < 6	value 25.}
+	case EC		{condition month <=9 					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_Jul_Fcst {
+	case PreJun	{condition month < 9					value 0.}
+	case NotEC	{condition month <=10 .and. WY_MFPdv[UpperAmerican] < 6	value 10.}
+	case EC		{condition month <=10					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_Aug_Fcst {
+	case PreJun	{condition month < 9					value 0.}
+	case NotEC	{condition month <=11 .and. WY_MFPdv[UpperAmerican] < 6	value 10.}
+	case EC		{condition month <=11					value 3.}
+	case Other	{condition always 						value 0.}
+}
+Define MIF_MFP_MFA025_Sep_Fcst {
+	case PreJun	{condition month < 9					value 0.}
+	case NotEC	{condition month <=12 .and. WY_MFPdv[UpperAmerican] < 6	value 10.}
+	case EC		{condition month <=12					value 3.}
+	case Other	{condition always 						value 0.}
+}
+
+!****************************************************************************
+!******************Middle Fork American River below Oxbow Powerhouse ********
+!****************************************************************************
+!Compute minimum flow for Feb 1 to 14
+define MIF_MFP_MFA023_Feb1to14_Fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 1 select Wet         	from MIF_MFP where month = 5, identifier = 7}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 7}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 7}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 4 select Dry     		from MIF_MFP where month = 5, identifier = 7}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 7}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican](prevJan) == 6 select ExCritical 		from MIF_MFP where month = 5, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+!Compute minimum flow for Feb 15 to 28
+Define MIF_MFP_MFA023_Feb15to28_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 5, identifier = 7}
+	case AN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 5, identifier = 7}
+	case BN  	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 5, identifier = 7}
+	case Dry 	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 5, identifier = 7}
+	case Crit	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 5, identifier = 7}
+	case ExCrit	{condition month == 5. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	 from MIF_MFP where month = 5, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define  MIF_MFP_MFA023_Feb_fcst {value (MIF_MFP_MFA023_Feb1to14_Fcst*14. + MIF_MFP_MFA023_Feb15to28_fcst*14.)/28.}
+Define MIF_MFP_MFA023_Mar_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 6, identifier = 7}
+	case AN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 6, identifier = 7}
+	case BN  	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 6, identifier = 7}
+	case Dry 	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 6, identifier = 7}
+	case Crit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 6, identifier = 7}
+	case ExCrit	{condition month <= 6. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 6, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Apr_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 7, identifier = 7}
+	case AN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 7, identifier = 7}
+	case BN  	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 7, identifier = 7}
+	case Dry 	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 7, identifier = 7}
+	case Crit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 7, identifier = 7}
+	case ExCrit	{condition month <= 7. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 7, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_May_fcst {
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 8, identifier = 7}
+	case AN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 8, identifier = 7}
+	case BN  	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 8, identifier = 7}
+	case Dry 	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 8, identifier = 7}
+	case Crit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 8, identifier = 7}
+	case ExCrit	{condition month <= 8. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 8, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Jun_fcst {
+	case PreJun	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 9, identifier = 7}
+	case AN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 9, identifier = 7}
+	case BN  	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 9, identifier = 7}
+	case Dry 	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 9, identifier = 7}
+	case Crit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 9, identifier = 7}
+	case ExCrit	{condition month == 9. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 9, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Jul_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 10, identifier = 7}
+	case AN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 10, identifier = 7}
+	case BN  	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 10, identifier = 7}
+	case Dry 	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 10, identifier = 7}
+	case Crit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 10, identifier = 7}
+	case ExCrit	{condition month <= 10. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 10, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Aug_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 11, identifier = 7}
+	case AN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 11, identifier = 7}
+	case BN  	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 11, identifier = 7}
+	case Dry 	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 11, identifier = 7}
+	case Crit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 11, identifier = 7}
+	case ExCrit	{condition month <= 11. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 11, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Sep_fcst {
+	case PreJun	{condition  month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 12, identifier = 7}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 12, identifier = 7}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 12, identifier = 7}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 12, identifier = 7}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 12, identifier = 7}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 12, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 1, identifier = 7}
+	case AN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 1, identifier = 7}
+	case BN  	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 1, identifier = 7}
+	case Dry 	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 1, identifier = 7}
+	case Crit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 1, identifier = 7}
+	case ExCrit	{condition month <= 12. .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 	from MIF_MFP where month = 1, identifier = 7}
+	case Other 	{condition always value 0.}
+}
+Define MIF_MFP_MFA023_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 2, identifier = 7}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 2, identifier = 7}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 2, identifier = 7}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 2, identifier = 7}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 2, identifier = 7}
+	case ExCrit	{condition (month <= 12. .OR. month ==1.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical   	from MIF_MFP where month = 2, identifier = 7}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_MFP_MFA023_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 1 select Wet         	from MIF_MFP where month = 3, identifier = 7}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 2 select AboveNormal 	from MIF_MFP where month = 3, identifier = 7}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 3 select BelowNormal 	from MIF_MFP where month = 3, identifier = 7}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 4 select Dry     		from MIF_MFP where month = 3, identifier = 7}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 5 select Critical	 	from MIF_MFP where month = 3, identifier = 7}
+	case ExCrit	{condition (month <= 12. .OR. month <=2.) .and. WY_MFPdv[UpperAmerican] == 6 select ExCritical 		from MIF_MFP where month = 3, identifier = 7}
+	case Other 	{condition always value 0.}
+}	
+
+!****************************************************************************
+!A portion of UARP releases flow into the Rubicon and Middle Fork of the American
+!The Rubicon-side of the UARP is reflected here.
+!****************************************************************************
+
+!****************************************************************************
+!*****************Rubicon River below Rubicon Reservoir Dam******************
+!****************************************************************************
+define MIF_UARP_RUB044_Feb_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 5 }
+	case AN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 5 }
+	case BN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 5 }
+	case Dry 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 5 }
+	case Crit	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 5 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Mar_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 6 }
+	case AN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 6 }
+	case BN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 6 }
+	case Dry 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 6 }
+	case Crit	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 6 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Apr_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 7 }
+	case AN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 7 }
+	case BN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 7 }
+	case Dry 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 7 }
+	case Crit	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 7 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_May_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 8 }
+	case AN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 8 }
+	case BN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 8 }
+	case Dry 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 8 }
+	case Crit	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 8 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Jun_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 9 }
+	case AN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 9 }
+	case BN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 9 }
+	case Dry 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 9 }
+	case Crit	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 9 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Jul_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 10}
+	case AN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 10}
+	case BN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 10}
+	case Dry 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 10}
+	case Crit	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 10}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Aug_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 11}
+	case AN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 11}
+	case BN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 11}
+	case Dry 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 11}
+	case Crit	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 11}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Sep_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 12}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 12}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 12}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 12}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 12}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_RUB044_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 1}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 1}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 1}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 1}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_RUB044_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_UARP_RUB044_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_RUB044 where month = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_RUB044 where month = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_RUB044 where month = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_RUB044 where month = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_RUB044 where month = 3}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_RUB044_Feb_Fcst{value min(MIF_UARP_RUB044_Feb_Fcst1, I_Rub047_fcst(FEB-month))}
+define MIF_UARP_RUB044_Mar_Fcst{value min(MIF_UARP_RUB044_Mar_Fcst1, I_RUB047_fcst(MAR-month))}
+define MIF_UARP_RUB044_Apr_Fcst{value min(MIF_UARP_RUB044_Apr_Fcst1, I_RUB047_fcst(APR-month))}
+define MIF_UARP_RUB044_May_Fcst{value min(MIF_UARP_RUB044_May_Fcst1, I_RUB047_fcst(MAY-month))}
+define MIF_UARP_RUB044_Jun_Fcst{value min(MIF_UARP_RUB044_Jun_Fcst1, I_RUB047_fcst(JUN-month))}
+define MIF_UARP_RUB044_Jul_Fcst{value min(MIF_UARP_RUB044_Jul_Fcst1, I_RUB047_fcst(JUL-month))}
+define MIF_UARP_RUB044_Aug_Fcst{value min(MIF_UARP_RUB044_Aug_Fcst1, I_RUB047_fcst(AUG-month))}
+define MIF_UARP_RUB044_Sep_Fcst{value min(MIF_UARP_RUB044_Sep_Fcst1, I_RUB047_fcst(SEP-month))}
+
+!****************************************************************************
+!*************Little Rubicon River below Buck Island Reservoir Dam***********
+!****************************************************************************
+define MIF_UARP_LRB003_Feb_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 5 }
+	case AN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 5 }
+	case BN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 5 }
+	case Dry 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 5 }
+	case Crit	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 5 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Mar_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 6 }
+	case AN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 6 }
+	case BN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 6 }
+	case Dry 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 6 }
+	case Crit	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 6 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Apr_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 7 }
+	case AN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 7 }
+	case BN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 7 }
+	case Dry 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 7 }
+	case Crit	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 7 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_May_Fcst1{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 8 }
+	case AN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 8 }
+	case BN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 8 }
+	case Dry 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 8 }
+	case Crit	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 8 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Jun_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 9 }
+	case AN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 9 }
+	case BN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 9 }
+	case Dry 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 9 }
+	case Crit	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 9 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Jul_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 10}
+	case AN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 10}
+	case BN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 10}
+	case Dry 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 10}
+	case Crit	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 10}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Aug_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 11}
+	case AN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 11}
+	case BN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 11}
+	case Dry 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 11}
+	case Crit	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 11}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Sep_Fcst1{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 12}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 12}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 12}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 12}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 12}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_LRB003_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 1}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 1}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 1}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 1}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_LRB003_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_UARP_LRB003_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_LRB003 where month = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_LRB003 where month = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_LRB003 where month = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_LRB003 where month = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_LRB003 where month = 3}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_LRB003_Feb_Fcst{value min(MIF_UARP_LRB003_Feb_Fcst1, I_LRB004_fcst(FEB-month))}
+define MIF_UARP_LRB003_Mar_Fcst{value min(MIF_UARP_LRB003_Mar_Fcst1, I_LRB004_fcst(MAR-month))}
+define MIF_UARP_LRB003_Apr_Fcst{value min(MIF_UARP_LRB003_Apr_Fcst1, I_LRB004_fcst(APR-month))}
+define MIF_UARP_LRB003_May_Fcst{value min(MIF_UARP_LRB003_May_Fcst1, I_LRB004_fcst(MAY-month))}
+define MIF_UARP_LRB003_Jun_Fcst{value min(MIF_UARP_LRB003_Jun_Fcst1, I_LRB004_fcst(JUN-month))}
+define MIF_UARP_LRB003_Jul_Fcst{value min(MIF_UARP_LRB003_Jul_Fcst1, I_LRB004_fcst(JUL-month))}
+define MIF_UARP_LRB003_Aug_Fcst{value min(MIF_UARP_LRB003_Aug_Fcst1, I_LRB004_fcst(AUG-month))}
+define MIF_UARP_LRB003_Sep_Fcst{value min(MIF_UARP_LRB003_Sep_Fcst1, I_LRB004_fcst(SEP-month))}
+
+!****************************************************************************
+!*******************Gerle Creek below Loon Lake Reservoir Dam****************
+!****************************************************************************
+define MIF_UARP_GRL010_Feb_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 5 }
+	case AN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 5 }
+	case BN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 5 }
+	case Dry 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 5 }
+	case Crit	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 5 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Mar_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 6 }
+	case AN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 6 }
+	case BN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 6 }
+	case Dry 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 6 }
+	case Crit	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 6 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Apr_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 7 }
+	case AN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 7 }
+	case BN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 7 }
+	case Dry 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 7 }
+	case Crit	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 7 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_May_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 8 }
+	case AN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 8 }
+	case BN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 8 }
+	case Dry 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 8 }
+	case Crit	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 8 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Jun_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 9 }
+	case AN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 9 }
+	case BN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 9 }
+	case Dry 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 9 }
+	case Crit	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 9 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Jul_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 10}
+	case AN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 10}
+	case BN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 10}
+	case Dry 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 10}
+	case Crit	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 10}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Aug_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 11}
+	case AN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 11}
+	case BN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 11}
+	case Dry 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 11}
+	case Crit	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 11}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL010_Sep_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 12}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 12}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 12}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 12}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 12}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_GRL010_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 1}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 1}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 1}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 1}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_GRL010_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_UARP_GRL010_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL010 where month = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL010 where month = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL010 where month = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL010 where month = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL010 where month = 3}
+	case Other 	{condition always value 0.}
+}
+!****************************************************************************
+!****************Gerle Creek below Gerle Creek Reservoir Dam*****************
+!****************************************************************************
+define MIF_UARP_GRL001_Feb_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 5 }
+	case AN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 5 }
+	case BN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 5 }
+	case Dry 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 5 }
+	case Crit	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 5 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Mar_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 6 }
+	case AN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 6 }
+	case BN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 6 }
+	case Dry 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 6 }
+	case Crit	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 6 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Apr_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 7 }
+	case AN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 7 }
+	case BN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 7 }
+	case Dry 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 7 }
+	case Crit	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 7 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_May_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 8 }
+	case AN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 8 }
+	case BN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 8 }
+	case Dry 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 8 }
+	case Crit	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 8 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Jun_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 9 }
+	case AN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 9 }
+	case BN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 9 }
+	case Dry 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 9 }
+	case Crit	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 9 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Jul_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 10}
+	case AN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 10}
+	case BN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 10}
+	case Dry 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 10}
+	case Crit	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 10}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Aug_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 11}
+	case AN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 11}
+	case BN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 11}
+	case Dry 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 11}
+	case Crit	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 11}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_GRL001_Sep_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 12}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 12}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 12}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 12}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 12}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_GRL001_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 1}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 1}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 1}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 1}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_GRL001_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_UARP_GRL001_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_GRL001 where month = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_GRL001 where month = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_GRL001 where month = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_GRL001 where month = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_GRL001 where month = 3}
+	case Other 	{condition always value 0.}
+}
+
+!****************************************************************************
+!***********South Fork Rubicon River below Robbs Peak Reservoir Dam**********
+!****************************************************************************
+define MIF_UARP_SFR006_Feb_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 5 }
+	case AN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 5 }
+	case BN  	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 5 }
+	case Dry 	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 5 }
+	case Crit	{condition month == 5. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 5 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Mar_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 6 }
+	case AN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 6 }
+	case BN  	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 6 }
+	case Dry 	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 6 }
+	case Crit	{condition month <= 6. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 6 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Apr_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 7 }
+	case AN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 7 }
+	case BN  	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 7 }
+	case Dry 	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 7 }
+	case Crit	{condition month <= 7. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 7 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_May_Fcst{
+	case PreFeb	{condition month < 5 value 0.}
+	case Wet 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 8 }
+	case AN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 8 }
+	case BN  	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 8 }
+	case Dry 	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 8 }
+	case Crit	{condition month <= 8. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 8 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Jun_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 9 }
+	case AN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 9 }
+	case BN  	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 9 }
+	case Dry 	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 9 }
+	case Crit	{condition month == 9. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 9 }
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Jul_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 10}
+	case AN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 10}
+	case BN  	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 10}
+	case Dry 	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 10}
+	case Crit	{condition month <= 10. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 10}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Aug_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 11}
+	case AN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 11}
+	case BN  	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 11}
+	case Dry 	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 11}
+	case Crit	{condition month <= 11. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 11}
+	case Other 	{condition always value 0.}
+}
+define MIF_UARP_SFR006_Sep_Fcst{
+	case PreFeb	{condition month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 12}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 12}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 12}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 12}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 12}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_SFR006_Oct_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 1}
+	case AN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 1}
+	case BN  	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 1}
+	case Dry 	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 1}
+	case Crit	{condition month <= 12. .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 1}
+	case Other 	{condition always value 0.}
+}
+Define MIF_UARP_SFR006_Nov_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 2}
+	case AN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 2}
+	case BN  	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 2}
+	case Dry 	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 2}
+	case Crit	{condition (month <= 12. .OR. month ==1.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 2}
+	case Other 	{condition always value 0.} 
+}
+Define MIF_UARP_SFR006_Dec_fcst {
+	case PreJun	{condition month >	3 .and. month < 9 value 0.}
+	case Wet 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 1 select Wet         	from UARPmif_SFR006 where month = 3}
+	case AN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 2 select AboveNormal 	from UARPmif_SFR006 where month = 3}
+	case BN  	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 3 select BelowNormal 	from UARPmif_SFR006 where month = 3}
+	case Dry 	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 4 select Dry     		from UARPmif_SFR006 where month = 3}
+	case Crit	{condition (month <= 12. .OR. month <=2.) .and. UARPYrTypedv[UpperAmerican] == 5 select Critical	 	from UARPmif_SFR006 where month = 3}
+	case Other 	{condition always value 0.}
+}
+
+!****************************************************************************
+!A portion of Georgetown Divide PUD releases from Pilot Creek flow into the Rubicon
+!Pilot Creek in the Section of Stream Downstream of the Pilot Creek Diversion Dam
+!****************************************************************************
+!Compute forecasted cumulative minimum flow release
+Define MIF_GDPUD_PLC006_Feb_Fcst {
+	case preFeb 	{condition month < 5 								value 0.}
+	case abv1500	{condition month == 5 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(Feb-month)))}
+	case blw1500 	{condition month == 5 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_Mar_Fcst {
+	case preFeb 	{condition month < 5 								value 0.}
+	case abv1500	{condition month <= 6 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(MAR-month)))}
+	case blw1500 	{condition month <= 6 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_Apr_Fcst {
+	case preFeb 	{condition month < 5 								value 0.}
+	case abv1500	{condition month <= 7 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(APR-month)))}
+	case blw1500 	{condition month <= 7 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_May_Fcst {
+	case preFeb 	{condition month < 5 								value 0.}
+	case abv1500	{condition month <= 8 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(MAY-month)))}
+	case blw1500 	{condition month <= 8 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_Jun_Fcst {
+	case preJun 	{condition month < 9 								value 0.}
+	case abv1500	{condition month == 9 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(JUN-month)))}
+	case blw1500 	{condition month == 9 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_Jul_Fcst {
+	case preJun 	{condition month < 9 								value 0.}
+	case abv1500	{condition month <= 10 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(JUL-month)))}
+	case blw1500 	{condition month <= 10 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}	
+Define MIF_GDPUD_PLC006_Aug_Fcst {
+	case preJun 	{condition month < 9 								value 0.}
+	case abv1500	{condition month <= 11 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(AUG-month)))}
+	case blw1500 	{condition month <= 11 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+Define MIF_GDPUD_PLC006_Sep_Fcst {
+	case preJun 	{condition month < 9 								value 0.}
+	case abv1500	{condition month <= 12 	.and. amer_annual[UpperAmerican]>=1500.	value  min(4.,max(2.,I_STMPY_fcst(SEP-month)))}
+	case blw1500 	{condition month <= 12 	 							value 2.}
+	case Other 		{condition always 									value 0.}	
+}
+
+!*********************************************************************************
+!************Aggregate minimum flows and local flows from upstream****************
+!**********************************************************************************
+	
+!Compute forecasted minimum contribution from Rubicon River above Long Canyon Creek
+Define MIF_RUB005_Feb_Fcst {value MIF_MFP_RUB031_Feb_Fcst + MIF_UARP_SFR006_Feb_Fcst + MIF_UARP_GRL001_Feb_Fcst + MIF_GDPUD_PLC006_Feb_Fcst }
+Define MIF_RUB005_Mar_Fcst {value MIF_MFP_RUB031_Mar_Fcst + MIF_UARP_SFR006_Mar_Fcst + MIF_UARP_GRL001_Mar_Fcst + MIF_GDPUD_PLC006_Mar_Fcst }
+Define MIF_RUB005_Apr_Fcst {value MIF_MFP_RUB031_Apr_Fcst + MIF_UARP_SFR006_Apr_Fcst + MIF_UARP_GRL001_Apr_Fcst + MIF_GDPUD_PLC006_Apr_Fcst }
+Define MIF_RUB005_May_Fcst {value MIF_MFP_RUB031_May_Fcst + MIF_UARP_SFR006_May_Fcst + MIF_UARP_GRL001_May_Fcst + MIF_GDPUD_PLC006_May_Fcst }
+Define MIF_RUB005_Jun_Fcst {value MIF_MFP_RUB031_Jun_Fcst + MIF_UARP_SFR006_Jun_Fcst + MIF_UARP_GRL001_Jun_Fcst + MIF_GDPUD_PLC006_Jun_Fcst }
+Define MIF_RUB005_Jul_Fcst {value MIF_MFP_RUB031_Jul_Fcst + MIF_UARP_SFR006_Jul_Fcst + MIF_UARP_GRL001_Jul_Fcst + MIF_GDPUD_PLC006_Jul_Fcst }
+Define MIF_RUB005_Aug_Fcst {value MIF_MFP_RUB031_Aug_Fcst + MIF_UARP_SFR006_Aug_Fcst + MIF_UARP_GRL001_Aug_Fcst + MIF_GDPUD_PLC006_Aug_Fcst }
+Define MIF_RUB005_Sep_Fcst {value MIF_MFP_RUB031_Sep_Fcst + MIF_UARP_SFR006_Sep_Fcst + MIF_UARP_GRL001_Sep_Fcst + MIF_GDPUD_PLC006_Sep_Fcst }
+
+!Compute forecasted minimum contribution from Long Canyon Creek
+Define MIF_LNG012_Feb_Fcst {value MIF_MFP_NLC002_Feb_Fcst + MIF_MFP_SLC002_Feb_Fcst + I_LNG012_fcst(Feb-month) }
+Define MIF_LNG012_Mar_Fcst {value MIF_MFP_NLC002_Mar_Fcst + MIF_MFP_SLC002_Mar_Fcst + I_LNG012_fcst(Mar-month) }
+Define MIF_LNG012_Apr_Fcst {value MIF_MFP_NLC002_Apr_Fcst + MIF_MFP_SLC002_Apr_Fcst + I_LNG012_fcst(Apr-month) }
+Define MIF_LNG012_May_Fcst {value MIF_MFP_NLC002_May_Fcst + MIF_MFP_SLC002_May_Fcst + I_LNG012_fcst(May-month) }
+Define MIF_LNG012_Jun_Fcst {value MIF_MFP_NLC002_Jun_Fcst + MIF_MFP_SLC002_Jun_Fcst + I_LNG012_fcst(Jun-month) }
+Define MIF_LNG012_Jul_Fcst {value MIF_MFP_NLC002_Jul_Fcst + MIF_MFP_SLC002_Jul_Fcst + I_LNG012_fcst(Jul-month) }
+Define MIF_LNG012_Aug_Fcst {value MIF_MFP_NLC002_Aug_Fcst + MIF_MFP_SLC002_Aug_Fcst + I_LNG012_fcst(Aug-month) }
+Define MIF_LNG012_Sep_Fcst {value MIF_MFP_NLC002_Sep_Fcst + MIF_MFP_SLC002_Sep_Fcst + I_LNG012_fcst(Sep-month) }
+
+!Compute minimum flow on Middle Fork above confluence with Rubicon.  
+Define MIF_MFP_CUM_MFA025_Feb_Fcst {value max(MIF_MFP_MFA025_Feb_Fcst, MIF_MFP_DCC008_Feb_Fcst + MIF_MFP_MFA047_Feb_Fcst + I_MFA036_fcst(Feb-month) + MIF_RUB005_Feb_Fcst + MIF_LNG012_Feb_Fcst + I_RUB002_fcst(Feb-month) + I_MFA025_fcst(Feb-month))}					
+Define MIF_MFP_CUM_MFA025_Mar_Fcst {value max(MIF_MFP_MFA025_Mar_Fcst, MIF_MFP_DCC008_Mar_Fcst + MIF_MFP_MFA047_Mar_Fcst + I_MFA036_fcst(Mar-month) + MIF_RUB005_Mar_Fcst + MIF_LNG012_Mar_Fcst + I_RUB002_fcst(Mar-month) + I_MFA025_fcst(Mar-month))}					
+Define MIF_MFP_CUM_MFA025_Apr_Fcst {value max(MIF_MFP_MFA025_Apr_Fcst, MIF_MFP_DCC008_Apr_Fcst + MIF_MFP_MFA047_Apr_Fcst + I_MFA036_fcst(Apr-month) + MIF_RUB005_Apr_Fcst + MIF_LNG012_Apr_Fcst + I_RUB002_fcst(Apr-month) + I_MFA025_fcst(Apr-month))}					
+Define MIF_MFP_CUM_MFA025_May_Fcst {value max(MIF_MFP_MFA025_May_Fcst, MIF_MFP_DCC008_May_Fcst + MIF_MFP_MFA047_May_Fcst + I_MFA036_fcst(May-month) + MIF_RUB005_May_Fcst + MIF_LNG012_May_Fcst + I_RUB002_fcst(May-month) + I_MFA025_fcst(May-month))}					
+Define MIF_MFP_CUM_MFA025_Jun_Fcst {value max(MIF_MFP_MFA025_Jun_Fcst, MIF_MFP_DCC008_Jun_Fcst + MIF_MFP_MFA047_Jun_Fcst + I_MFA036_fcst(Jun-month) + MIF_RUB005_Jun_Fcst + MIF_LNG012_Jun_Fcst + I_RUB002_fcst(Jun-month) + I_MFA025_fcst(Jun-month))}					
+Define MIF_MFP_CUM_MFA025_Jul_Fcst {value max(MIF_MFP_MFA025_Jul_Fcst, MIF_MFP_DCC008_Jul_Fcst + MIF_MFP_MFA047_Jul_Fcst + I_MFA036_fcst(Jul-month) + MIF_RUB005_Jul_Fcst + MIF_LNG012_Jul_Fcst + I_RUB002_fcst(Jul-month) + I_MFA025_fcst(Jul-month))}					
+Define MIF_MFP_CUM_MFA025_Aug_Fcst {value max(MIF_MFP_MFA025_Aug_Fcst, MIF_MFP_DCC008_Aug_Fcst + MIF_MFP_MFA047_Aug_Fcst + I_MFA036_fcst(Aug-month) + MIF_RUB005_Aug_Fcst + MIF_LNG012_Aug_Fcst + I_RUB002_fcst(Aug-month) + I_MFA025_fcst(Aug-month))}					
+Define MIF_MFP_CUM_MFA025_Sep_Fcst {value max(MIF_MFP_MFA025_Sep_Fcst, MIF_MFP_DCC008_Sep_Fcst + MIF_MFP_MFA047_Sep_Fcst + I_MFA036_fcst(Sep-month) + MIF_RUB005_Sep_Fcst + MIF_LNG012_Sep_Fcst + I_RUB002_fcst(Sep-month) + I_MFA025_fcst(Sep-month))}		
+
+!Compute minimum flow on Middle Fork near Foresthill
+Define MIF_MFP_MFA001_Feb_Fcst {value max(MIF_MFP_MFA023_Feb_Fcst, MIF_MFP_CUM_MFA025_Feb_Fcst + I_NMA003_fcst(Feb-month) + I_MFA023_fcst(Feb-month)) + I_MFA001_fcst(Feb-month) }
+Define MIF_MFP_MFA001_Mar_Fcst {value max(MIF_MFP_MFA023_Mar_Fcst, MIF_MFP_CUM_MFA025_Mar_Fcst + I_NMA003_fcst(Mar-month) + I_MFA023_fcst(Mar-month)) + I_MFA001_fcst(Mar-month) }
+Define MIF_MFP_MFA001_Apr_Fcst {value max(MIF_MFP_MFA023_Apr_Fcst, MIF_MFP_CUM_MFA025_Apr_Fcst + I_NMA003_fcst(Apr-month) + I_MFA023_fcst(Apr-month)) + I_MFA001_fcst(Apr-month) }
+Define MIF_MFP_MFA001_May_Fcst {value max(MIF_MFP_MFA023_May_Fcst, MIF_MFP_CUM_MFA025_May_Fcst + I_NMA003_fcst(May-month) + I_MFA023_fcst(May-month)) + I_MFA001_fcst(May-month) }
+Define MIF_MFP_MFA001_Jun_Fcst {value max(MIF_MFP_MFA023_Jun_Fcst, MIF_MFP_CUM_MFA025_Jun_Fcst + I_NMA003_fcst(Jun-month) + I_MFA023_fcst(Jun-month)) + I_MFA001_fcst(Jun-month) }
+Define MIF_MFP_MFA001_Jul_Fcst {value max(MIF_MFP_MFA023_Jul_Fcst, MIF_MFP_CUM_MFA025_Jul_Fcst + I_NMA003_fcst(Jul-month) + I_MFA023_fcst(Jul-month)) + I_MFA001_fcst(Jul-month) }
+Define MIF_MFP_MFA001_Aug_Fcst {value max(MIF_MFP_MFA023_Aug_Fcst, MIF_MFP_CUM_MFA025_Aug_Fcst + I_NMA003_fcst(Aug-month) + I_MFA023_fcst(Aug-month)) + I_MFA001_fcst(Aug-month) }
+Define MIF_MFP_MFA001_Sep_Fcst {value max(MIF_MFP_MFA023_Sep_Fcst, MIF_MFP_CUM_MFA025_Sep_Fcst + I_NMA003_fcst(Sep-month) + I_MFA023_fcst(Sep-month)) + I_MFA001_fcst(Sep-month) }
+
+!PCWA operates for a combined MFP reservoir storage of 150 TAF by the end of September.
+!Compute the expected storage release based on the UpperAmerican cycle output
+define MFP_Res_Release_Fcst {
+	case JunSep {condition month <=3 .or. month >=9	value S_FRMDW[UpperAmerican] + S_HHOLE[UpperAmerican] - 150.}
+	case Other 	{condition always 					value 0.}
+}
+
+Define MFP_Res_Release_Fcst_DV {alias MFP_Res_Release_Fcst kind 'debug' units 'taf'}
+
+!Accumulated accretions above the ARPS in case of storage release conditions
+Define MFP_Accretion_Jun_Fcst {
+	case PreJun {condition month  <9	value 0. }
+	case Jun 	{condition month ==9	value I_MFA036_fcst(Jun-month) + I_MFA025_fcst(Jun-month) + I_NMA003_fcst(Jun-month) + I_MFA023_fcst(Jun-month) + I_MFA001_fcst(Jun-month) + I_RUB002_fcst(Jun-month) + I_LNG012_fcst(Jun-month) + I_NFA022_fcst(Jun-month) + I_NFA054_fcst(Jun-month)}
+	case Other 	{condition always 		value 0.}	
+}
+Define MFP_Accretion_Jul_Fcst {
+	case PreJun {condition month  <9	value 0. }
+	case Jun 	{condition month <=10	value I_MFA036_fcst(Jul-month) + I_MFA025_fcst(Jul-month) + I_NMA003_fcst(Jul-month) + I_MFA023_fcst(Jul-month) + I_MFA001_fcst(Jul-month) + I_RUB002_fcst(Jul-month) + I_LNG012_fcst(Jul-month) + I_NFA022_fcst(Jul-month) + I_NFA054_fcst(Jul-month)}
+	case Other 	{condition always 		value 0.}	
+}
+Define MFP_Accretion_Aug_Fcst {
+	case PreJun {condition month  <9	value 0. }
+	case Jun 	{condition month <=11	value I_MFA036_fcst(Aug-month) + I_MFA025_fcst(Aug-month) + I_NMA003_fcst(Aug-month) + I_MFA023_fcst(Aug-month) + I_MFA001_fcst(Aug-month) + I_RUB002_fcst(Aug-month) + I_LNG012_fcst(Aug-month) + I_NFA022_fcst(Aug-month) + I_NFA054_fcst(Aug-month)}
+	case Other 	{condition always 		value 0.}	
+}
+Define MFP_Accretion_Sep_Fcst {
+	case PreJun {condition month  <9	value 0. }
+	case Jun 	{condition month <=12	value I_MFA036_fcst(Sep-month) + I_MFA025_fcst(Sep-month) + I_NMA003_fcst(Sep-month) + I_MFA023_fcst(Sep-month) + I_MFA001_fcst(Sep-month) + I_RUB002_fcst(Sep-month) + I_LNG012_fcst(Sep-month) + I_NFA022_fcst(Sep-month) + I_NFA054_fcst(Sep-month)}
+	case Other 	{condition always 		value 0.}	
+}
+
+!Define volume of diverisons based on ARPS diversion capacity and demand
+!Maximum PCWA Diversion from ARPS of 200 cfs_taf or PCWA applied water demands
+Define PCWA_Div_Feb_FCST {
+	case preFeb {condition month  <5	value 0. }
+	case Feb	{condition month ==5	value (min(200., AWO_24_NA2(Feb-month) + AWR_24_NA2(Feb-month) + 2.5*AWO_24_NA3(Feb-month) + 2.5*AWR_24_NA3(Feb-month) + UD_24_NU2(Feb-month)))*cfs_taf(Feb-month)}
+	case Other 	{condition always 		value 0.}	
+}
+Define PCWA_Div_Mar_FCST {
+	case preFeb {condition month  <5	value 0. }
+	case Mar	{condition month <=6	value (min(200., AWO_24_NA2(Mar-month) + AWR_24_NA2(Mar-month) + 2.5*AWO_24_NA3(Mar-month) + 2.5*AWR_24_NA3(Mar-month) + UD_24_NU2(Mar-month)))*cfs_taf(Mar-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Apr_FCST {
+	case preFeb {condition month  <5	value 0. }
+	case Apr	{condition month <=7	value (min(200., AWO_24_NA2(Apr-month) + AWR_24_NA2(Apr-month) + 2.5*AWO_24_NA3(Apr-month) + 2.5*AWR_24_NA3(Apr-month) + UD_24_NU2(Apr-month)))*cfs_taf(Apr-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_May_FCST {
+	case preFeb {condition month  <5	value 0. }
+	case May	{condition month <=8	value (min(200., AWO_24_NA2(May-month) + AWR_24_NA2(May-month) + 2.5*AWO_24_NA3(May-month) + 2.5*AWR_24_NA3(May-month) + UD_24_NU2(May-month)))*cfs_taf(May-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Jun_FCST {
+	case preJun {condition month  <9	value 0. }
+	case Jun	{condition month ==9	value (min(200., AWO_24_NA2(Jun-month) + AWR_24_NA2(Jun-month) + 2.5*AWO_24_NA3(Jun-month) + 2.5*AWR_24_NA3(Jun-month) + UD_24_NU2(Jun-month)))*cfs_taf(jun-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Jul_FCST {
+	case preJun {condition month  <9	value 0. }
+	case Jul	{condition month <=10	value (min(200., AWO_24_NA2(Jul-month) + AWR_24_NA2(Jul-month) + 2.5*AWO_24_NA3(Jul-month) + 2.5*AWR_24_NA3(Jul-month) + UD_24_NU2(Jul-month)))*cfs_taf(jul-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Aug_FCST {
+	case preJun {condition month  <9	value 0. }
+	case Aug	{condition month <=11	value (min(200., AWO_24_NA2(Aug-month) + AWR_24_NA2(Aug-month) + 2.5*AWO_24_NA3(Aug-month) + 2.5*AWR_24_NA3(Aug-month) + UD_24_NU2(Aug-month)))*cfs_taf(aug-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Sep_FCST {
+	case preJun {condition month  <9	value 0. }
+	case Sep	{condition month <=12	value (min(200., AWO_24_NA2(Sep-month) + AWR_24_NA2(Sep-month) + 2.5*AWO_24_NA3(Sep-month) + 2.5*AWR_24_NA3(Sep-month) + UD_24_NU2(Sep-month)))*cfs_taf(sep-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Oct_FCST {
+	case preJun {condition month  <9	.or. wateryear == EndWY	value 0. }
+	case Jul	{condition month <=12	value (min(200., AWO_24_NA2(Oct+12-month) + AWR_24_NA2(Oct+12-month) + 2.5*AWO_24_NA3(Oct+12-month) + 2.5*AWR_24_NA3(Oct+12-month) + UD_24_NU2(Oct+12-month)))*cfs_taf(Oct+12-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Nov_FCST {
+	case preJun {condition month  <9	.or. wateryear == EndWY	value 0. }
+	case Aug	{condition month <=12	value (min(200., AWO_24_NA2(Nov+12-month) + AWR_24_NA2(Nov+12-month) + 2.5*AWO_24_NA3(Nov+12-month) + 2.5*AWR_24_NA3(Nov+12-month) + UD_24_NU2(Nov+12-month)))*cfs_taf(Nov+12-month)}
+	case Other 	{condition always 		value 0.}
+}
+Define PCWA_Div_Dec_FCST {
+	case preJun {condition month  <9	.or. wateryear == EndWY	value 0. }
+	case Sep	{condition month <=12	value (min(200., AWO_24_NA2(Dec+12-month) + AWR_24_NA2(Dec+12-month) + 2.5*AWO_24_NA3(Dec+12-month) + 2.5*AWR_24_NA3(Dec+12-month) + UD_24_NU2(Dec+12-month)))*cfs_taf(Dec+12-month)}
+	case Other 	{condition always 		value 0.}
+}
+
+Define PCWA_Div_Feb_FCST_DV {alias PCWA_Div_Feb_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Mar_FCST_DV {alias PCWA_Div_Mar_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Apr_FCST_DV {alias PCWA_Div_Apr_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_May_FCST_DV {alias PCWA_Div_May_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Jun_FCST_DV {alias PCWA_Div_Jun_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Jul_FCST_DV {alias PCWA_Div_Jul_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Aug_FCST_DV {alias PCWA_Div_Aug_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Sep_FCST_DV {alias PCWA_Div_Sep_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Oct_FCST_DV {alias PCWA_Div_Oct_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Nov_FCST_DV {alias PCWA_Div_Nov_FCST kind 'debug' units 'cfs'}
+Define PCWA_Div_Dec_FCST_DV {alias PCWA_Div_Dec_FCST kind 'debug' units 'cfs'}
+
+!************************************************************************************************************************
+!Determine the volume of flow below the American River Pumpstation based on storage operations and local flows upstream
+!************************************************************************************************************************
+
+!No way to consider storage operations prior to June
+Define MFP_Stor_NFA016_Feb_Fcst {value 0.}
+Define MFP_Stor_NFA016_Mar_Fcst {value 0.}
+Define MFP_Stor_NFA016_Apr_Fcst {value 0.}
+Define MFP_Stor_NFA016_May_Fcst {value 0.}
+
+!Consider storage operations for June through September
+Define MFP_Stor_NFA016_Jul_Fcst {
+	case Jun    {condition month == 9   value max(75., (MFP_Res_Release_Fcst/((Sep-month) +3))*taf_cfs(Jul-month) + MFP_Accretion_Jul_Fcst - PCWA_Div_Jul_FCST*taf_cfs(Jul-month))}	!Divide remaining storage by number of months through December
+	case other	{condition always	    value 0.}
+}
+Define MFP_Stor_NFA016_Aug_Fcst {
+	case preJun	{condition month <  9   value 0.}	
+	case JunJul	{condition month <= 10  value max(75., (MFP_Res_Release_Fcst/((Sep-month) +3))*taf_cfs(Aug-month) + MFP_Accretion_Aug_Fcst - PCWA_Div_Aug_FCST*taf_cfs(Aug-month))}
+	case other	{condition always	    value 0.}
+}
+Define MFP_Stor_NFA016_Sep_Fcst {
+	case preJun	{condition month <  9   value 0.}		
+	case JunAug {condition month <= 11  value max(75., (MFP_Res_Release_Fcst/((Sep-month) +3))*taf_cfs(Sep-month) + MFP_Accretion_Sep_Fcst - PCWA_Div_Sep_FCST*taf_cfs(Sep-month))}
+	case other	{condition always	    value 0.}
+}
+!************************************************************************************************************************
+!Determine the volume of flow below the American River Pumpstation based on storage operations and local flows upstream
+!************************************************************************************************************************
+Define MIF_MFP_NFA016_Feb_Fcst {value max(75., MIF_MFP_MFA001_Feb_Fcst + I_NFA022_fcst(Feb-month) + I_NFA054_fcst(Feb-month) - PCWA_Div_Feb_FCST)}
+Define MIF_MFP_NFA016_Mar_Fcst {value max(75., MIF_MFP_MFA001_Mar_Fcst + I_NFA022_fcst(Mar-month) + I_NFA054_fcst(Mar-month) - PCWA_Div_Mar_FCST)}
+Define MIF_MFP_NFA016_Apr_Fcst {value max(75., MIF_MFP_MFA001_Apr_Fcst + I_NFA022_fcst(Apr-month) + I_NFA054_fcst(Apr-month) - PCWA_Div_Apr_FCST)}
+Define MIF_MFP_NFA016_May_Fcst {value max(75., MIF_MFP_MFA001_May_Fcst + I_NFA022_fcst(May-month) + I_NFA054_fcst(May-month) - PCWA_Div_May_FCST)}
+Define MIF_MFP_NFA016_Jun_Fcst {value max(75., MIF_MFP_MFA001_Jun_Fcst + I_NFA022_fcst(Jun-month) + I_NFA054_fcst(Jun-month) - PCWA_Div_Jun_FCST)}
+Define MIF_MFP_NFA016_Jul_Fcst {value max(75., MIF_MFP_MFA001_Jul_Fcst + I_NFA022_fcst(Jul-month) + I_NFA054_fcst(Jul-month) - PCWA_Div_Jul_FCST)}
+Define MIF_MFP_NFA016_Aug_Fcst {value max(75., MIF_MFP_MFA001_Aug_Fcst + I_NFA022_fcst(Aug-month) + I_NFA054_fcst(Aug-month) - PCWA_Div_Aug_FCST)}
+Define MIF_MFP_NFA016_Sep_Fcst {value max(75., MIF_MFP_MFA001_Sep_Fcst + I_NFA022_fcst(Sep-month) + I_NFA054_fcst(Sep-month) - PCWA_Div_Sep_FCST)}
+
+!The calculation is intended to determine the remaining inflow volume AFTER the current month based upon maximum of MIF and storage releases
+Define MFP_Release_Fcst {
+	case PreFeb {condition month <5		value 0.}
+	case Feb	{condition month ==5	value (max(MIF_MFP_NFA016_Mar_Fcst,MFP_Stor_NFA016_Mar_Fcst)*cfs_TAF(1)) + (max(MIF_MFP_NFA016_Apr_Fcst,MFP_Stor_NFA016_Apr_Fcst)*cfs_TAF(2)) + (max(MIF_MFP_NFA016_May_Fcst,MFP_Stor_NFA016_May_Fcst)*cfs_TAF(3))}
+	case Mar	{condition month ==6	value (max(MIF_MFP_NFA016_Apr_Fcst,MFP_Stor_NFA016_Apr_Fcst)*cfs_TAF(1)) + (max(MIF_MFP_NFA016_May_Fcst,MFP_Stor_NFA016_May_Fcst)*cfs_TAF(2))}
+	case Apr	{condition month ==7	value (max(MIF_MFP_NFA016_May_Fcst,MFP_Stor_NFA016_May_Fcst)*cfs_TAF(1))}
+	case May	{condition month ==8	value 0.}
+	case Jun	{condition month ==9	value (max(MIF_MFP_NFA016_Jul_Fcst,MFP_Stor_NFA016_Jul_Fcst)*cfs_taf(1)) + (max(MIF_MFP_NFA016_Aug_Fcst,MFP_Stor_NFA016_Aug_Fcst)*cfs_taf(2)) + (max(MIF_MFP_NFA016_Sep_Fcst,MFP_Stor_NFA016_Sep_Fcst)*cfs_taf(3))}
+	case Jul	{condition month ==10	value (max(MIF_MFP_NFA016_Aug_Fcst,MFP_Stor_NFA016_Aug_Fcst)*cfs_taf(1))+ (max(MIF_MFP_NFA016_Sep_Fcst,MFP_Stor_NFA016_Sep_Fcst)*cfs_taf(2))}
+	case Aug	{condition month ==11	value (max(MIF_MFP_NFA016_Sep_Fcst,MFP_Stor_NFA016_Sep_Fcst)*cfs_taf(1))}
+	case Sep	{condition month ==12	value 0.}
+}
+Define NFA_Release_Fcst_DV {alias MFP_Release_Fcst*TAF_CFS kind 'Forecast' units 'CFS' }

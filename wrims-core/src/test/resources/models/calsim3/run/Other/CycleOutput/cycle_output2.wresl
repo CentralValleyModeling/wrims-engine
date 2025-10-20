@@ -1,0 +1,2298 @@
+/*
+==================================================================================================
+Title:		Cycle Output File #2
+Description:	The purpose of this module is to save cycle solutions to decision variables for
+		analysis.
+==================================================================================================
+*/
+define C_SJR070__SJRBASE       {alias  C_SJR070[SJRBASE]      kind 'debug-cfs' units 'cfs'}
+define C_SJR070__SJRBASE_GW1   {alias  C_SJR070[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_SJR070__SJRBASE_GW2   {alias  C_SJR070[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_SJR070__SJRBASE_GW3   {alias  C_SJR070[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_SJR070__SJRBASE_GW4   {alias  C_SJR070[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_SJR070__SJR_WQ1       {alias  C_SJR070[SJR_WQ1]      kind 'debug-cfs' units 'cfs'}
+
+define Inflow__GW0             {alias  Inflow[GW_INITIAL]      kind 'debug-cfs' units 'cfs'}
+define Inflow__GW1             {alias  Inflow[GW_FIRST]        kind 'debug-cfs' units 'cfs'}
+define Inflow__GW3             {alias  Inflow[GW_SECOND]       kind 'debug-cfs' units 'cfs'}
+define Inflow__GW4             {alias  Inflow[GW_THIRD]        kind 'debug-cfs' units 'cfs'}
+define Inflow__SETUP           {alias  Inflow[SETUP]           kind 'debug-cfs' units 'cfs'}
+define Inflow__MONTHLYWEIGHTED {alias  Inflow[MONTHLYWEIGHTED] kind 'debug-cfs' units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! SJR EAST STORAGE CYCLE SOLUTIONS   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Millerton Lake
+define S_MLRTN_GW0a {alias S_MLRTN[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MLRTN_GW1a {alias S_MLRTN[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MLRTN_GW2a {alias S_MLRTN[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MLRTN_GW3a {alias S_MLRTN[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MLRTN_GW4a {alias S_MLRTN[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!Hensley Lake
+define S_HNSLY_GW0a {alias S_HNSLY[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_HNSLY_GW1a {alias S_HNSLY[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_HNSLY_GW2a {alias S_HNSLY[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_HNSLY_GW3a {alias S_HNSLY[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_HNSLY_GW4a {alias S_HNSLY[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!Eastman Lake
+define S_ESTMN_GW0a {alias S_ESTMN[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_ESTMN_GW1a {alias S_ESTMN[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_ESTMN_GW2a {alias S_ESTMN[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_ESTMN_GW3a {alias S_ESTMN[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_ESTMN_GW4a {alias S_ESTMN[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!Lake McClure
+define S_MCLRE_GW0a {alias S_MCLRE[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MCLRE_GW1a {alias S_MCLRE[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MCLRE_GW2a {alias S_MCLRE[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MCLRE_GW3a {alias S_MCLRE[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MCLRE_GW4a {alias S_MCLRE[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!New Don Pedro Reservoir
+define S_PEDRO_GW0a {alias S_PEDRO[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_PEDRO_GW1a {alias S_PEDRO[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_PEDRO_GW2a {alias S_PEDRO[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_PEDRO_GW3a {alias S_PEDRO[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_PEDRO_GW4a {alias S_PEDRO[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!New Melones Reservoir
+define S_MELON_GW0a {alias S_MELON[SJRBASE] 	kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MELON_GW1a {alias S_MELON[SJRBASE_GW1] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MELON_GW2a {alias S_MELON[SJRBASE_GW2] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MELON_GW3a {alias S_MELON[SJRBASE_GW3] kind 'GW-QA-QC' UNITS 'CFS'}
+define S_MELON_GW4a {alias S_MELON[SJRBASE_GW4] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! SAC GROUNDWATER CYCLE SOLUTIONS   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!American River Confluence with Sacramento River
+define SG373_SAC063_65_GW0a {alias SG373_SAC063_65[GW_INITIAL] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG381_SAC063_67_GW0a {alias SG381_SAC063_67[GW_INITIAL] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG379_AMR004_66_GW0a {alias SG379_AMR004_66[GW_INITIAL] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG380_AMR004_66_GW0a {alias SG380_AMR004_66[GW_INITIAL] kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG373_SAC063_65_GW1a {alias SG373_SAC063_65[GW_FIRST] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG381_SAC063_67_GW1a {alias SG381_SAC063_67[GW_FIRST] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG379_AMR004_66_GW1a {alias SG379_AMR004_66[GW_FIRST] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG380_AMR004_66_GW1a {alias SG380_AMR004_66[GW_FIRST] kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG373_SAC063_65_GW2a {alias SG373_SAC063_65[GW_SECOND] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG381_SAC063_67_GW2a {alias SG381_SAC063_67[GW_SECOND] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG379_AMR004_66_GW2a {alias SG379_AMR004_66[GW_SECOND] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG380_AMR004_66_GW2a {alias SG380_AMR004_66[GW_SECOND] kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG373_SAC063_65_GW3a {alias SG373_SAC063_65[GW_THIRD] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG381_SAC063_67_GW3a {alias SG381_SAC063_67[GW_THIRD] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG379_AMR004_66_GW3a {alias SG379_AMR004_66[GW_THIRD] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG380_AMR004_66_GW3a {alias SG380_AMR004_66[GW_THIRD] kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG373_SAC063_65_GW4a {alias SG373_SAC063_65[SETUP] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG381_SAC063_67_GW4a {alias SG381_SAC063_67[SETUP] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG379_AMR004_66_GW4a {alias SG379_AMR004_66[SETUP] kind 'GW-QA-QC' UNITS 'CFS'}
+define SG380_AMR004_66_GW4a {alias SG380_AMR004_66[SETUP] kind 'GW-QA-QC' UNITS 'CFS'}
+
+!Sacramento River at Delta Cross Channel
+define SG387_SAC030_67_GW0a {alias SG387_SAC030_67[GW_INITIAL]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG387_SAC030_67_GW1a {alias SG387_SAC030_67[GW_FIRST]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG387_SAC030_67_GW2a {alias SG387_SAC030_67[GW_SECOND]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG387_SAC030_67_GW3a {alias SG387_SAC030_67[GW_THIRD]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG387_SAC030_67_GW4a {alias SG387_SAC030_67[SETUP]	kind 'GW-QA-QC' UNITS 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!! SJR WEST GROUNDWATER CYCLE SOLUTIONS   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Fresno Slough
+define SG51_FSL012_4_GW0a {alias SG51_FSL012_4[SJRBASE]		kind 'GW-QA-QC' UNITS 'CFS'}
+define SG52_FSL005_4_GW0a {alias SG52_FSL005_4[SJRBASE]		kind 'GW-QA-QC' UNITS 'CFS'}
+define SG53_FSL005_4_GW0a {alias SG53_FSL005_4[SJRBASE]		kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG_FSL_Total_GW0a  {alias SG51_FSL012_4_GW0a +
+				 SG52_FSL005_4_GW0a +
+				 SG53_FSL005_4_GW0a
+			   kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG51_FSL012_4_GW1a {alias SG51_FSL012_4[SJRBASE_GW1]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG52_FSL005_4_GW1a {alias SG52_FSL005_4[SJRBASE_GW1]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG53_FSL005_4_GW1a {alias SG53_FSL005_4[SJRBASE_GW1]	kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG_FSL_Total_GW1a  {alias SG51_FSL012_4_GW1a +
+				 SG52_FSL005_4_GW1a +
+				 SG53_FSL005_4_GW1a
+			   kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG51_FSL012_4_GW2a {alias SG51_FSL012_4[SJRBASE_GW2]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG52_FSL005_4_GW2a {alias SG52_FSL005_4[SJRBASE_GW2]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG53_FSL005_4_GW2a {alias SG53_FSL005_4[SJRBASE_GW2]	kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG_FSL_Total_GW2a  {alias SG51_FSL012_4_GW2a +
+				 SG52_FSL005_4_GW2a +
+				 SG53_FSL005_4_GW2a
+			   kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG51_FSL012_4_GW3a {alias SG51_FSL012_4[SJRBASE_GW3]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG52_FSL005_4_GW3a {alias SG52_FSL005_4[SJRBASE_GW3]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG53_FSL005_4_GW3a {alias SG53_FSL005_4[SJRBASE_GW3]	kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG_FSL_Total_GW3a  {alias SG51_FSL012_4_GW3a +
+				 SG52_FSL005_4_GW3a +
+				 SG53_FSL005_4_GW3a
+			   kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG51_FSL012_4_GW4a {alias SG51_FSL012_4[SJRBASE_GW4]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG52_FSL005_4_GW4a {alias SG52_FSL005_4[SJRBASE_GW4]	kind 'GW-QA-QC' UNITS 'CFS'}
+define SG53_FSL005_4_GW4a {alias SG53_FSL005_4[SJRBASE_GW4]	kind 'GW-QA-QC' UNITS 'CFS'}
+
+define SG_FSL_Total_GW4a  {alias SG51_FSL012_4_GW4a +
+				 SG52_FSL005_4_GW4a +
+				 SG53_FSL005_4_GW4a
+			   kind 'GW-QA-QC' UNITS 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!! SJR EAST GROUNDWATER CYCLE SOLUTIONS   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!#################################  CYCLE 0  ###############################################
+!Calaveras River
+define SG161_CLV035_25_GW0a           {alias SG161_CLV035_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG162_CLV028_25_GW0a           {alias SG162_CLV028_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG163_CLV023_25_GW0a           {alias SG163_CLV023_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG164_CLV016_25_GW0a           {alias SG164_CLV016_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG165_CLV010_25_GW0a           {alias SG165_CLV010_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG166_CLV004_25_GW0a           {alias SG166_CLV004_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG167_CLV004_25_GW0a           {alias SG167_CLV004_25[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_CLV_Total_GW0a	      {alias SG161_CLV035_25_GW0a +
+					     SG162_CLV028_25_GW0a +
+					     SG163_CLV023_25_GW0a +
+					     SG164_CLV016_25_GW0a +
+					     SG165_CLV010_25_GW0a +
+					     SG166_CLV004_25_GW0a +
+					     SG167_CLV004_25_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Stanislaus River
+define SG146_STS058_23_GW0a           {alias SG146_STS058_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG147_STS053_23_GW0a           {alias SG147_STS053_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG148_STS050_23_GW0a           {alias SG148_STS050_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG149_STS043_23_GW0a           {alias SG149_STS043_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG150_STS036_23_GW0a           {alias SG150_STS036_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG151_STS030_23_GW0a           {alias SG151_STS030_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG152_STS020_23_GW0a           {alias SG152_STS020_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG153_STS011_23_GW0a           {alias SG153_STS011_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG154_STS011_23_GW0a           {alias SG154_STS011_23[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_STS_Total_GW0a	      {alias SG146_STS058_23_GW0a +           
+				       	     SG147_STS053_23_GW0a +
+				       	     SG148_STS050_23_GW0a +
+				       	     SG149_STS043_23_GW0a +
+				       	     SG150_STS036_23_GW0a +
+				       	     SG151_STS030_23_GW0a +
+				       	     SG152_STS020_23_GW0a +
+				       	     SG153_STS011_23_GW0a +
+				       	     SG154_STS011_23_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Tuolumne River
+define SG135_TUO053_21_GW0a           {alias SG135_TUO053_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG136_TUO047_21_GW0a           {alias SG136_TUO047_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG137_TUO043_21_GW0a           {alias SG137_TUO043_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG138_TUO036_21_GW0a           {alias SG138_TUO036_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG139_TUO030_21_GW0a           {alias SG139_TUO030_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG140_TUO022_21_GW0a           {alias SG140_TUO022_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG141_TUO015_21_GW0a           {alias SG141_TUO015_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG142_TUO010_21_GW0a           {alias SG142_TUO010_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG143_TUO003_21_GW0a           {alias SG143_TUO003_21[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_TUO_Total_GW0a              {alias SG135_TUO053_21_GW0a +
+					     SG136_TUO047_21_GW0a +
+					     SG137_TUO043_21_GW0a +
+					     SG138_TUO036_21_GW0a +
+					     SG139_TUO030_21_GW0a +
+					     SG140_TUO022_21_GW0a +
+					     SG141_TUO015_21_GW0a +
+					     SG142_TUO010_21_GW0a +
+					     SG143_TUO003_21_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Merced River
+define SG116_MCD052_17_GW0a           {alias SG116_MCD052_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG117_MCD048_17_GW0a           {alias SG117_MCD048_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG118_MCD042_17_GW0a           {alias SG118_MCD042_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG119_MCD036_17_GW0a           {alias SG119_MCD036_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG120_MCD028_17_GW0a           {alias SG120_MCD028_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG121_MCD021_17_GW0a           {alias SG121_MCD021_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG122_MCD014_17_GW0a           {alias SG122_MCD014_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG123_MCD009_17_GW0a           {alias SG123_MCD009_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG124_MCD002_17_GW0a           {alias SG124_MCD002_17[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_MCD_Total_GW0a              {alias SG116_MCD052_17_GW0a +
+					     SG117_MCD048_17_GW0a +
+					     SG118_MCD042_17_GW0a +
+					     SG119_MCD036_17_GW0a +
+					     SG120_MCD028_17_GW0a +
+					     SG121_MCD021_17_GW0a +
+					     SG122_MCD014_17_GW0a +
+					     SG123_MCD009_17_GW0a +
+					     SG124_MCD002_17_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Bear Creek
+define SG105_BCK040_15_GW0a           {alias SG105_BCK040_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG106_BCK035_15_GW0a           {alias SG106_BCK035_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG107_BCK031_15_GW0a           {alias SG107_BCK031_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG108_BCK024_15_GW0a           {alias SG108_BCK024_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG109_BCK017_15_GW0a           {alias SG109_BCK017_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG110_BCK010_15_GW0a           {alias SG110_BCK010_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG111_BCK006_15_GW0a           {alias SG111_BCK006_15[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_BCK_Total_GW0a              {alias SG105_BCK040_15_GW0a +
+					     SG106_BCK035_15_GW0a +
+					     SG107_BCK031_15_GW0a +
+					     SG108_BCK024_15_GW0a +
+					     SG109_BCK017_15_GW0a +
+					     SG110_BCK010_15_GW0a +
+					     SG111_BCK006_15_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Eastside Bypass
+define SG76_FRS016_9_GW0a      {alias SG76_FRS016_9[SJRBASE]      kind 'GW-QA-QC' units 'CFS'}
+define SG77_FRS016_9_GW0a   {alias SG77_FRS016_9[SJRBASE]   kind 'GW-QA-QC' units 'CFS'}
+define SG87_EBP030_11_GW0a     {alias SG87_EBP030_11[SJRBASE]     kind 'GW-QA-QC' units 'CFS'}
+define SG88_EBP030_11_GW0a  {alias SG88_EBP030_11[SJRBASE]  kind 'GW-QA-QC' units 'CFS'}
+define SG101_DED003_13_GW0a {alias SG101_DED003_13[SJRBASE] kind 'GW-QA-QC' units 'CFS'}
+define SG112_BCK006_15_GW0a {alias SG112_BCK006_15[SJRBASE] kind 'GW-QA-QC' units 'CFS'}
+define SG_EBP_Total_GW0a 	      {alias SG76_FRS016_9_GW0a      +
+					     SG77_FRS016_9_GW0a   +
+					     SG87_EBP030_11_GW0a     +
+					     SG88_EBP030_11_GW0a  +
+					     SG101_DED003_13_GW0a +
+					     SG112_BCK006_15_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Deadman Creek
+define SG93_DED044_13_GW0a            {alias SG93_DED044_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG94_DED038_13_GW0a            {alias SG94_DED038_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG95_DED035_13_GW0a            {alias SG95_DED035_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG96_DED032_13_GW0a            {alias SG96_DED032_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG97_DED025_13_GW0a            {alias SG97_DED025_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG98_DED019_13_GW0a            {alias SG98_DED019_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG99_DED010_13_GW0a            {alias SG99_DED010_13[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG100_DED003_13_GW0a           {alias SG100_DED003_13[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_DED_Total_GW0a	      {alias SG93_DED044_13_GW0a  +
+					     SG94_DED038_13_GW0a  +
+					     SG95_DED035_13_GW0a  +
+					     SG96_DED032_13_GW0a  +
+					     SG97_DED025_13_GW0a  +
+					     SG98_DED019_13_GW0a  +
+					     SG99_DED010_13_GW0a  +
+					     SG100_DED003_13_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Chowchilla River
+define SG80_CHW031_11_GW0a            {alias SG80_CHW031_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG81_CHW028_11_GW0a            {alias SG81_CHW028_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG82_CHW024_11_GW0a            {alias SG82_CHW024_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG83_CHW021_11_GW0a            {alias SG83_CHW021_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG84_CHW017_11_GW0a            {alias SG84_CHW017_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG85_CHW011_11_GW0a            {alias SG85_CHW011_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG86_CHW006_11_GW0a            {alias SG86_CHW006_11[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG_CHW_Total_GW0a	      {alias SG80_CHW031_11_GW0a +
+					     SG81_CHW028_11_GW0a +
+					     SG82_CHW024_11_GW0a +
+					     SG83_CHW021_11_GW0a +
+					     SG84_CHW017_11_GW0a +
+					     SG85_CHW011_11_GW0a +
+					     SG86_CHW006_11_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Fresno River
+define SG69_FRS045_9_GW0a             {alias SG69_FRS045_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG70_FRS039_9_GW0a             {alias SG70_FRS039_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG71_FRS036_9_GW0a             {alias SG71_FRS036_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG72_FRS032_9_GW0a             {alias SG72_FRS032_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG73_FRS025_9_GW0a             {alias SG73_FRS025_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG74_FRS020_9_GW0a             {alias SG74_FRS020_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG75_FRS016_9_GW0a             {alias SG75_FRS016_9[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG_FRS_Total_GW0a	      {alias SG69_FRS045_9_GW0a +
+					     SG70_FRS039_9_GW0a +
+					     SG71_FRS036_9_GW0a +
+					     SG72_FRS032_9_GW0a +
+					     SG73_FRS025_9_GW0a +
+					     SG74_FRS020_9_GW0a +
+					     SG75_FRS016_9_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Upper San Joaquin River
+define SG54_SJR263_7_GW0a             {alias SG54_SJR263_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG55_SJR256_7_GW0a             {alias SG55_SJR256_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG56_SJR249_7_GW0a             {alias SG56_SJR249_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG57_SJR242_7_GW0a             {alias SG57_SJR242_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG58_SJR235_7_GW0a             {alias SG58_SJR235_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG59_SJR227_7_GW0a             {alias SG59_SJR227_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG60_SJR221_7_GW0a             {alias SG60_SJR221_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG61_SJR214_7_GW0a             {alias SG61_SJR214_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG62_SJR205_7_GW0a             {alias SG62_SJR205_7[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG63_SJR205_8_GW0a             {alias SG63_SJR205_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG64_SJR198_8_GW0a             {alias SG64_SJR198_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG65_SJR192_8_GW0a             {alias SG65_SJR192_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG66_SJR185_8_GW0a             {alias SG66_SJR185_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG67_SJR180_8_GW0a             {alias SG67_SJR180_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG68_SJR173_8_GW0a             {alias SG68_SJR173_8[SJRBASE]             kind 'GW-QA-QC' units 'CFS'}
+define SG78_SJR173_10_GW0a            {alias SG78_SJR173_10[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG79_SJR166_10_GW0a            {alias SG79_SJR166_10[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG89_SJR166_12_GW0a            {alias SG89_SJR166_12[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG90_SJR157_12_GW0a            {alias SG90_SJR157_12[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG91_SJR152_12_GW0a            {alias SG91_SJR152_12[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG92_SJR145_12_GW0a            {alias SG92_SJR145_12[SJRBASE]            kind 'GW-QA-QC' units 'CFS'}
+define SG102_SJR145_14_GW0a           {alias SG102_SJR145_14[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG103_SJR141_14_GW0a           {alias SG103_SJR141_14[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG104_SJR134_14_GW0a           {alias SG104_SJR134_14[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG113_SJR134_16_GW0a           {alias SG113_SJR134_16[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG114_SJR123_16_GW0a           {alias SG114_SJR123_16[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_UpperSJR_Total_GW0a         {alias SG54_SJR263_7_GW0a   +
+				       	     SG55_SJR256_7_GW0a   +
+				       	     SG56_SJR249_7_GW0a   +
+				       	     SG57_SJR242_7_GW0a   +
+				       	     SG58_SJR235_7_GW0a   +
+				       	     SG59_SJR227_7_GW0a   +
+				       	     SG60_SJR221_7_GW0a   +
+				       	     SG61_SJR214_7_GW0a   +
+				       	     SG62_SJR205_7_GW0a   +
+				       	     SG63_SJR205_8_GW0a   +
+				       	     SG64_SJR198_8_GW0a   +
+				       	     SG65_SJR192_8_GW0a   +
+				       	     SG66_SJR185_8_GW0a   +
+				       	     SG67_SJR180_8_GW0a   +
+				       	     SG68_SJR173_8_GW0a   +
+				       	     SG78_SJR173_10_GW0a  +
+				       	     SG79_SJR166_10_GW0a  +
+				       	     SG89_SJR166_12_GW0a  +
+				       	     SG90_SJR157_12_GW0a  +
+				       	     SG91_SJR152_12_GW0a  +
+				       	     SG92_SJR145_12_GW0a  +
+				       	     SG102_SJR145_14_GW0a +
+				       	     SG103_SJR141_14_GW0a +
+				       	     SG104_SJR134_14_GW0a +
+				       	     SG113_SJR134_16_GW0a +
+				       	     SG114_SJR123_16_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin River Mainstem
+define SG115_SJR116_16_GW0a           {alias SG115_SJR116_16[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG125_SJR116_18_GW0a           {alias SG125_SJR116_18[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG126_SJR111_18_GW0a           {alias SG126_SJR111_18[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG127_SJR106_18_GW0a           {alias SG127_SJR106_18[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG131_SJR106_20_GW0a           {alias SG131_SJR106_20[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG132_SJR096_20_GW0a           {alias SG132_SJR096_20[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG133_SJR090_20_GW0a           {alias SG133_SJR090_20[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG134_SJR081_20_GW0a           {alias SG134_SJR081_20[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG144_SJR081_22_GW0a           {alias SG144_SJR081_22[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG145_SJR072_22_GW0a           {alias SG145_SJR072_22[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG155_SJR072_24_GW0a           {alias SG155_SJR072_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG156_SJR062_24_GW0a           {alias SG156_SJR062_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG157_SJR056_24_GW0a           {alias SG157_SJR056_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG158_SJR048_24_GW0a           {alias SG158_SJR048_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG159_SJR042_24_GW0a           {alias SG159_SJR042_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG160_SJR038_24_GW0a           {alias SG160_SJR038_24[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG168_SJR038_26_GW0a           {alias SG168_SJR038_26[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG169_SJR033_26_GW0a           {alias SG169_SJR033_26[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG170_SJR028_26_GW0a           {alias SG170_SJR028_26[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG171_SJR023_26_GW0a           {alias SG171_SJR023_26[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG172_SJR022_26_GW0a           {alias SG172_SJR022_26[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG200_SJR022_31_GW0a           {alias SG200_SJR022_31[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG201_SJR013_31_GW0a           {alias SG201_SJR013_31[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG202_SJR009_31_GW0a           {alias SG202_SJR009_31[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG203_SJR006_31_GW0a           {alias SG203_SJR006_31[SJRBASE]           kind 'GW-QA-QC' units 'CFS'}
+define SG_SJRMain_Total_GW0a          {alias SG115_SJR116_16_GW0a +
+					     SG125_SJR116_18_GW0a +
+					     SG126_SJR111_18_GW0a +
+					     SG127_SJR106_18_GW0a +
+					     SG131_SJR106_20_GW0a +
+					     SG132_SJR096_20_GW0a +
+					     SG133_SJR090_20_GW0a +
+					     SG134_SJR081_20_GW0a +
+					     SG144_SJR081_22_GW0a +
+					     SG145_SJR072_22_GW0a +
+					     SG155_SJR072_24_GW0a +
+					     SG156_SJR062_24_GW0a +
+					     SG157_SJR056_24_GW0a +
+					     SG158_SJR048_24_GW0a +
+					     SG159_SJR042_24_GW0a +
+					     SG160_SJR038_24_GW0a +
+					     SG168_SJR038_26_GW0a +
+					     SG169_SJR033_26_GW0a +
+					     SG170_SJR028_26_GW0a +
+					     SG171_SJR023_26_GW0a +
+					     SG172_SJR022_26_GW0a +
+					     SG200_SJR022_31_GW0a +
+					     SG201_SJR013_31_GW0a +
+					     SG202_SJR009_31_GW0a +
+					     SG203_SJR006_31_GW0a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin Eastside
+define SG_SJREast_Total_GW0a	      {alias SG_SJRMain_Total_GW0a  +
+				    	     SG_UpperSJR_Total_GW0a +
+				    	     SG_FRS_Total_GW0a      +
+				    	     SG_CHW_Total_GW0a      +
+				    	     SG_DED_Total_GW0a      +
+				    	     SG_EBP_Total_GW0a      +
+				    	     SG_BCK_Total_GW0a      +
+				    	     SG_MCD_Total_GW0a      +
+				    	     SG_TUO_Total_GW0a      +
+				    	     SG_STS_Total_GW0a      +
+				    	     SG_CLV_Total_GW0a
+			      	      kind 'GW-QA-QC' units 'CFS'}
+
+!#################################  CYCLE 1  ###############################################
+!Calaveras River
+define SG161_CLV035_25_GW1a           {alias SG161_CLV035_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG162_CLV028_25_GW1a           {alias SG162_CLV028_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG163_CLV023_25_GW1a           {alias SG163_CLV023_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG164_CLV016_25_GW1a           {alias SG164_CLV016_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG165_CLV010_25_GW1a           {alias SG165_CLV010_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG166_CLV004_25_GW1a           {alias SG166_CLV004_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG167_CLV004_25_GW1a           {alias SG167_CLV004_25[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_CLV_Total_GW1a	      {alias SG161_CLV035_25_GW1a +
+					     SG162_CLV028_25_GW1a +
+					     SG163_CLV023_25_GW1a +
+					     SG164_CLV016_25_GW1a +
+					     SG165_CLV010_25_GW1a +
+					     SG166_CLV004_25_GW1a +
+					     SG167_CLV004_25_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Stanislaus River
+define SG146_STS058_23_GW1a           {alias SG146_STS058_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG147_STS053_23_GW1a           {alias SG147_STS053_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG148_STS050_23_GW1a           {alias SG148_STS050_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG149_STS043_23_GW1a           {alias SG149_STS043_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG150_STS036_23_GW1a           {alias SG150_STS036_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG151_STS030_23_GW1a           {alias SG151_STS030_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG152_STS020_23_GW1a           {alias SG152_STS020_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG153_STS011_23_GW1a           {alias SG153_STS011_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG154_STS011_23_GW1a           {alias SG154_STS011_23[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_STS_Total_GW1a	      {alias SG146_STS058_23_GW1a +           
+				       	     SG147_STS053_23_GW1a +
+				       	     SG148_STS050_23_GW1a +
+				       	     SG149_STS043_23_GW1a +
+				       	     SG150_STS036_23_GW1a +
+				       	     SG151_STS030_23_GW1a +
+				       	     SG152_STS020_23_GW1a +
+				       	     SG153_STS011_23_GW1a +
+				       	     SG154_STS011_23_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Tuolumne River
+define SG135_TUO053_21_GW1a           {alias SG135_TUO053_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG136_TUO047_21_GW1a           {alias SG136_TUO047_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG137_TUO043_21_GW1a           {alias SG137_TUO043_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG138_TUO036_21_GW1a           {alias SG138_TUO036_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG139_TUO030_21_GW1a           {alias SG139_TUO030_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG140_TUO022_21_GW1a           {alias SG140_TUO022_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG141_TUO015_21_GW1a           {alias SG141_TUO015_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG142_TUO010_21_GW1a           {alias SG142_TUO010_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG143_TUO003_21_GW1a           {alias SG143_TUO003_21[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_TUO_Total_GW1a              {alias SG135_TUO053_21_GW1a +
+					     SG136_TUO047_21_GW1a +
+					     SG137_TUO043_21_GW1a +
+					     SG138_TUO036_21_GW1a +
+					     SG139_TUO030_21_GW1a +
+					     SG140_TUO022_21_GW1a +
+					     SG141_TUO015_21_GW1a +
+					     SG142_TUO010_21_GW1a +
+					     SG143_TUO003_21_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Merced River
+define SG116_MCD052_17_GW1a           {alias SG116_MCD052_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG117_MCD048_17_GW1a           {alias SG117_MCD048_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG118_MCD042_17_GW1a           {alias SG118_MCD042_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG119_MCD036_17_GW1a           {alias SG119_MCD036_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG120_MCD028_17_GW1a           {alias SG120_MCD028_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG121_MCD021_17_GW1a           {alias SG121_MCD021_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG122_MCD014_17_GW1a           {alias SG122_MCD014_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG123_MCD009_17_GW1a           {alias SG123_MCD009_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG124_MCD002_17_GW1a           {alias SG124_MCD002_17[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_MCD_Total_GW1a              {alias SG116_MCD052_17_GW1a +
+					     SG117_MCD048_17_GW1a +
+					     SG118_MCD042_17_GW1a +
+					     SG119_MCD036_17_GW1a +
+					     SG120_MCD028_17_GW1a +
+					     SG121_MCD021_17_GW1a +
+					     SG122_MCD014_17_GW1a +
+					     SG123_MCD009_17_GW1a +
+					     SG124_MCD002_17_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Bear Creek
+define SG105_BCK040_15_GW1a           {alias SG105_BCK040_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG106_BCK035_15_GW1a           {alias SG106_BCK035_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG107_BCK031_15_GW1a           {alias SG107_BCK031_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG108_BCK024_15_GW1a           {alias SG108_BCK024_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG109_BCK017_15_GW1a           {alias SG109_BCK017_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG110_BCK010_15_GW1a           {alias SG110_BCK010_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG111_BCK006_15_GW1a           {alias SG111_BCK006_15[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_BCK_Total_GW1a              {alias SG105_BCK040_15_GW1a +
+					     SG106_BCK035_15_GW1a +
+					     SG107_BCK031_15_GW1a +
+					     SG108_BCK024_15_GW1a +
+					     SG109_BCK017_15_GW1a +
+					     SG110_BCK010_15_GW1a +
+					     SG111_BCK006_15_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Eastside Bypass
+define SG76_FRS016_9_GW1a      {alias SG76_FRS016_9[SJRBASE_GW1]      kind 'GW-QA-QC' units 'CFS'}
+define SG77_FRS016_9_GW1a   {alias SG77_FRS016_9[SJRBASE_GW1]   kind 'GW-QA-QC' units 'CFS'}
+define SG87_EBP030_11_GW1a     {alias SG87_EBP030_11[SJRBASE_GW1]     kind 'GW-QA-QC' units 'CFS'}
+define SG88_EBP030_11_GW1a  {alias SG88_EBP030_11[SJRBASE_GW1]  kind 'GW-QA-QC' units 'CFS'}
+define SG101_DED003_13_GW1a {alias SG101_DED003_13[SJRBASE_GW1] kind 'GW-QA-QC' units 'CFS'}
+define SG112_BCK006_15_GW1a {alias SG112_BCK006_15[SJRBASE_GW1] kind 'GW-QA-QC' units 'CFS'}
+define SG_EBP_Total_GW1a 	      {alias SG76_FRS016_9_GW1a      +
+					     SG77_FRS016_9_GW1a   +
+					     SG87_EBP030_11_GW1a     +
+					     SG88_EBP030_11_GW1a  +
+					     SG101_DED003_13_GW1a +
+					     SG112_BCK006_15_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Deadman Creek
+define SG93_DED044_13_GW1a            {alias SG93_DED044_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG94_DED038_13_GW1a            {alias SG94_DED038_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG95_DED035_13_GW1a            {alias SG95_DED035_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG96_DED032_13_GW1a            {alias SG96_DED032_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG97_DED025_13_GW1a            {alias SG97_DED025_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG98_DED019_13_GW1a            {alias SG98_DED019_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG99_DED010_13_GW1a            {alias SG99_DED010_13[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG100_DED003_13_GW1a           {alias SG100_DED003_13[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_DED_Total_GW1a	      {alias SG93_DED044_13_GW1a  +
+					     SG94_DED038_13_GW1a  +
+					     SG95_DED035_13_GW1a  +
+					     SG96_DED032_13_GW1a  +
+					     SG97_DED025_13_GW1a  +
+					     SG98_DED019_13_GW1a  +
+					     SG99_DED010_13_GW1a  +
+					     SG100_DED003_13_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Chowchilla River
+define SG80_CHW031_11_GW1a            {alias SG80_CHW031_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG81_CHW028_11_GW1a            {alias SG81_CHW028_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG82_CHW024_11_GW1a            {alias SG82_CHW024_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG83_CHW021_11_GW1a            {alias SG83_CHW021_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG84_CHW017_11_GW1a            {alias SG84_CHW017_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG85_CHW011_11_GW1a            {alias SG85_CHW011_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG86_CHW006_11_GW1a            {alias SG86_CHW006_11[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG_CHW_Total_GW1a	      {alias SG80_CHW031_11_GW1a +
+					     SG81_CHW028_11_GW1a +
+					     SG82_CHW024_11_GW1a +
+					     SG83_CHW021_11_GW1a +
+					     SG84_CHW017_11_GW1a +
+					     SG85_CHW011_11_GW1a +
+					     SG86_CHW006_11_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Fresno River
+define SG69_FRS045_9_GW1a             {alias SG69_FRS045_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG70_FRS039_9_GW1a             {alias SG70_FRS039_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG71_FRS036_9_GW1a             {alias SG71_FRS036_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG72_FRS032_9_GW1a             {alias SG72_FRS032_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG73_FRS025_9_GW1a             {alias SG73_FRS025_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG74_FRS020_9_GW1a             {alias SG74_FRS020_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG75_FRS016_9_GW1a             {alias SG75_FRS016_9[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG_FRS_Total_GW1a	      {alias SG69_FRS045_9_GW1a +
+					     SG70_FRS039_9_GW1a +
+					     SG71_FRS036_9_GW1a +
+					     SG72_FRS032_9_GW1a +
+					     SG73_FRS025_9_GW1a +
+					     SG74_FRS020_9_GW1a +
+					     SG75_FRS016_9_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Upper San Joaquin River
+define SG54_SJR263_7_GW1a             {alias SG54_SJR263_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG55_SJR256_7_GW1a             {alias SG55_SJR256_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG56_SJR249_7_GW1a             {alias SG56_SJR249_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG57_SJR242_7_GW1a             {alias SG57_SJR242_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG58_SJR235_7_GW1a             {alias SG58_SJR235_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG59_SJR227_7_GW1a             {alias SG59_SJR227_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG60_SJR221_7_GW1a             {alias SG60_SJR221_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG61_SJR214_7_GW1a             {alias SG61_SJR214_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG62_SJR205_7_GW1a             {alias SG62_SJR205_7[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG63_SJR205_8_GW1a             {alias SG63_SJR205_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG64_SJR198_8_GW1a             {alias SG64_SJR198_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG65_SJR192_8_GW1a             {alias SG65_SJR192_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG66_SJR185_8_GW1a             {alias SG66_SJR185_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG67_SJR180_8_GW1a             {alias SG67_SJR180_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG68_SJR173_8_GW1a             {alias SG68_SJR173_8[SJRBASE_GW1]             kind 'GW-QA-QC' units 'CFS'}
+define SG78_SJR173_10_GW1a            {alias SG78_SJR173_10[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG79_SJR166_10_GW1a            {alias SG79_SJR166_10[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG89_SJR166_12_GW1a            {alias SG89_SJR166_12[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG90_SJR157_12_GW1a            {alias SG90_SJR157_12[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG91_SJR152_12_GW1a            {alias SG91_SJR152_12[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG92_SJR145_12_GW1a            {alias SG92_SJR145_12[SJRBASE_GW1]            kind 'GW-QA-QC' units 'CFS'}
+define SG102_SJR145_14_GW1a           {alias SG102_SJR145_14[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG103_SJR141_14_GW1a           {alias SG103_SJR141_14[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG104_SJR134_14_GW1a           {alias SG104_SJR134_14[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG113_SJR134_16_GW1a           {alias SG113_SJR134_16[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG114_SJR123_16_GW1a           {alias SG114_SJR123_16[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_UpperSJR_Total_GW1a         {alias SG54_SJR263_7_GW1a   +
+				       	     SG55_SJR256_7_GW1a   +
+				       	     SG56_SJR249_7_GW1a   +
+				       	     SG57_SJR242_7_GW1a   +
+				       	     SG58_SJR235_7_GW1a   +
+				       	     SG59_SJR227_7_GW1a   +
+				       	     SG60_SJR221_7_GW1a   +
+				       	     SG61_SJR214_7_GW1a   +
+				       	     SG62_SJR205_7_GW1a   +
+				       	     SG63_SJR205_8_GW1a   +
+				       	     SG64_SJR198_8_GW1a   +
+				       	     SG65_SJR192_8_GW1a   +
+				       	     SG66_SJR185_8_GW1a   +
+				       	     SG67_SJR180_8_GW1a   +
+				       	     SG68_SJR173_8_GW1a   +
+				       	     SG78_SJR173_10_GW1a  +
+				       	     SG79_SJR166_10_GW1a  +
+				       	     SG89_SJR166_12_GW1a  +
+				       	     SG90_SJR157_12_GW1a  +
+				       	     SG91_SJR152_12_GW1a  +
+				       	     SG92_SJR145_12_GW1a  +
+				       	     SG102_SJR145_14_GW1a +
+				       	     SG103_SJR141_14_GW1a +
+				       	     SG104_SJR134_14_GW1a +
+				       	     SG113_SJR134_16_GW1a +
+				       	     SG114_SJR123_16_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin River Mainstem
+define SG115_SJR116_16_GW1a           {alias SG115_SJR116_16[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG125_SJR116_18_GW1a           {alias SG125_SJR116_18[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG126_SJR111_18_GW1a           {alias SG126_SJR111_18[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG127_SJR106_18_GW1a           {alias SG127_SJR106_18[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG131_SJR106_20_GW1a           {alias SG131_SJR106_20[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG132_SJR096_20_GW1a           {alias SG132_SJR096_20[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG133_SJR090_20_GW1a           {alias SG133_SJR090_20[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG134_SJR081_20_GW1a           {alias SG134_SJR081_20[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG144_SJR081_22_GW1a           {alias SG144_SJR081_22[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG145_SJR072_22_GW1a           {alias SG145_SJR072_22[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG155_SJR072_24_GW1a           {alias SG155_SJR072_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG156_SJR062_24_GW1a           {alias SG156_SJR062_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG157_SJR056_24_GW1a           {alias SG157_SJR056_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG158_SJR048_24_GW1a           {alias SG158_SJR048_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG159_SJR042_24_GW1a           {alias SG159_SJR042_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG160_SJR038_24_GW1a           {alias SG160_SJR038_24[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG168_SJR038_26_GW1a           {alias SG168_SJR038_26[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG169_SJR033_26_GW1a           {alias SG169_SJR033_26[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG170_SJR028_26_GW1a           {alias SG170_SJR028_26[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG171_SJR023_26_GW1a           {alias SG171_SJR023_26[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG172_SJR022_26_GW1a           {alias SG172_SJR022_26[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG200_SJR022_31_GW1a           {alias SG200_SJR022_31[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG201_SJR013_31_GW1a           {alias SG201_SJR013_31[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG202_SJR009_31_GW1a           {alias SG202_SJR009_31[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG203_SJR006_31_GW1a           {alias SG203_SJR006_31[SJRBASE_GW1]           kind 'GW-QA-QC' units 'CFS'}
+define SG_SJRMain_Total_GW1a          {alias SG115_SJR116_16_GW1a +
+					     SG125_SJR116_18_GW1a +
+					     SG126_SJR111_18_GW1a +
+					     SG127_SJR106_18_GW1a +
+					     SG131_SJR106_20_GW1a +
+					     SG132_SJR096_20_GW1a +
+					     SG133_SJR090_20_GW1a +
+					     SG134_SJR081_20_GW1a +
+					     SG144_SJR081_22_GW1a +
+					     SG145_SJR072_22_GW1a +
+					     SG155_SJR072_24_GW1a +
+					     SG156_SJR062_24_GW1a +
+					     SG157_SJR056_24_GW1a +
+					     SG158_SJR048_24_GW1a +
+					     SG159_SJR042_24_GW1a +
+					     SG160_SJR038_24_GW1a +
+					     SG168_SJR038_26_GW1a +
+					     SG169_SJR033_26_GW1a +
+					     SG170_SJR028_26_GW1a +
+					     SG171_SJR023_26_GW1a +
+					     SG172_SJR022_26_GW1a +
+					     SG200_SJR022_31_GW1a +
+					     SG201_SJR013_31_GW1a +
+					     SG202_SJR009_31_GW1a +
+					     SG203_SJR006_31_GW1a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin Eastside
+define SG_SJREast_Total_GW1a	      {alias SG_SJRMain_Total_GW1a  +
+				    	     SG_UpperSJR_Total_GW1a +
+				    	     SG_FRS_Total_GW1a      +
+				    	     SG_CHW_Total_GW1a      +
+				    	     SG_DED_Total_GW1a      +
+				    	     SG_EBP_Total_GW1a      +
+				    	     SG_BCK_Total_GW1a      +
+				    	     SG_MCD_Total_GW1a      +
+				    	     SG_TUO_Total_GW1a      +
+				    	     SG_STS_Total_GW1a      +
+				    	     SG_CLV_Total_GW1a
+			      	      kind 'GW-QA-QC' units 'CFS'}
+
+!#################################  CYCLE 2  ###############################################
+!Calaveras River
+define SG161_CLV035_25_GW2a           {alias SG161_CLV035_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG162_CLV028_25_GW2a           {alias SG162_CLV028_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG163_CLV023_25_GW2a           {alias SG163_CLV023_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG164_CLV016_25_GW2a           {alias SG164_CLV016_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG165_CLV010_25_GW2a           {alias SG165_CLV010_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG166_CLV004_25_GW2a           {alias SG166_CLV004_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG167_CLV004_25_GW2a           {alias SG167_CLV004_25[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_CLV_Total_GW2a	      {alias SG161_CLV035_25_GW2a +
+					     SG162_CLV028_25_GW2a +
+					     SG163_CLV023_25_GW2a +
+					     SG164_CLV016_25_GW2a +
+					     SG165_CLV010_25_GW2a +
+					     SG166_CLV004_25_GW2a +
+					     SG167_CLV004_25_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Stanislaus River
+define SG146_STS058_23_GW2a           {alias SG146_STS058_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG147_STS053_23_GW2a           {alias SG147_STS053_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG148_STS050_23_GW2a           {alias SG148_STS050_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG149_STS043_23_GW2a           {alias SG149_STS043_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG150_STS036_23_GW2a           {alias SG150_STS036_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG151_STS030_23_GW2a           {alias SG151_STS030_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG152_STS020_23_GW2a           {alias SG152_STS020_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG153_STS011_23_GW2a           {alias SG153_STS011_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG154_STS011_23_GW2a           {alias SG154_STS011_23[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_STS_Total_GW2a	      {alias SG146_STS058_23_GW2a +           
+				       	     SG147_STS053_23_GW2a +
+				       	     SG148_STS050_23_GW2a +
+				       	     SG149_STS043_23_GW2a +
+				       	     SG150_STS036_23_GW2a +
+				       	     SG151_STS030_23_GW2a +
+				       	     SG152_STS020_23_GW2a +
+				       	     SG153_STS011_23_GW2a +
+				       	     SG154_STS011_23_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Tuolumne River
+define SG135_TUO053_21_GW2a           {alias SG135_TUO053_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG136_TUO047_21_GW2a           {alias SG136_TUO047_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG137_TUO043_21_GW2a           {alias SG137_TUO043_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG138_TUO036_21_GW2a           {alias SG138_TUO036_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG139_TUO030_21_GW2a           {alias SG139_TUO030_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG140_TUO022_21_GW2a           {alias SG140_TUO022_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG141_TUO015_21_GW2a           {alias SG141_TUO015_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG142_TUO010_21_GW2a           {alias SG142_TUO010_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG143_TUO003_21_GW2a           {alias SG143_TUO003_21[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_TUO_Total_GW2a              {alias SG135_TUO053_21_GW2a +
+					     SG136_TUO047_21_GW2a +
+					     SG137_TUO043_21_GW2a +
+					     SG138_TUO036_21_GW2a +
+					     SG139_TUO030_21_GW2a +
+					     SG140_TUO022_21_GW2a +
+					     SG141_TUO015_21_GW2a +
+					     SG142_TUO010_21_GW2a +
+					     SG143_TUO003_21_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Merced River
+define SG116_MCD052_17_GW2a           {alias SG116_MCD052_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG117_MCD048_17_GW2a           {alias SG117_MCD048_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG118_MCD042_17_GW2a           {alias SG118_MCD042_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG119_MCD036_17_GW2a           {alias SG119_MCD036_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG120_MCD028_17_GW2a           {alias SG120_MCD028_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG121_MCD021_17_GW2a           {alias SG121_MCD021_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG122_MCD014_17_GW2a           {alias SG122_MCD014_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG123_MCD009_17_GW2a           {alias SG123_MCD009_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG124_MCD002_17_GW2a           {alias SG124_MCD002_17[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_MCD_Total_GW2a              {alias SG116_MCD052_17_GW2a +
+					     SG117_MCD048_17_GW2a +
+					     SG118_MCD042_17_GW2a +
+					     SG119_MCD036_17_GW2a +
+					     SG120_MCD028_17_GW2a +
+					     SG121_MCD021_17_GW2a +
+					     SG122_MCD014_17_GW2a +
+					     SG123_MCD009_17_GW2a +
+					     SG124_MCD002_17_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Bear Creek
+define SG105_BCK040_15_GW2a           {alias SG105_BCK040_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG106_BCK035_15_GW2a           {alias SG106_BCK035_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG107_BCK031_15_GW2a           {alias SG107_BCK031_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG108_BCK024_15_GW2a           {alias SG108_BCK024_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG109_BCK017_15_GW2a           {alias SG109_BCK017_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG110_BCK010_15_GW2a           {alias SG110_BCK010_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG111_BCK006_15_GW2a           {alias SG111_BCK006_15[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_BCK_Total_GW2a              {alias SG105_BCK040_15_GW2a +
+					     SG106_BCK035_15_GW2a +
+					     SG107_BCK031_15_GW2a +
+					     SG108_BCK024_15_GW2a +
+					     SG109_BCK017_15_GW2a +
+					     SG110_BCK010_15_GW2a +
+					     SG111_BCK006_15_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Eastside Bypass
+define SG76_FRS016_9_GW2a      {alias SG76_FRS016_9[SJRBASE_GW2]      kind 'GW-QA-QC' units 'CFS'}
+define SG77_FRS016_9_GW2a   {alias SG77_FRS016_9[SJRBASE_GW2]   kind 'GW-QA-QC' units 'CFS'}
+define SG87_EBP030_11_GW2a     {alias SG87_EBP030_11[SJRBASE_GW2]     kind 'GW-QA-QC' units 'CFS'}
+define SG88_EBP030_11_GW2a  {alias SG88_EBP030_11[SJRBASE_GW2]  kind 'GW-QA-QC' units 'CFS'}
+define SG101_DED003_13_GW2a {alias SG101_DED003_13[SJRBASE_GW2] kind 'GW-QA-QC' units 'CFS'}
+define SG112_BCK006_15_GW2a {alias SG112_BCK006_15[SJRBASE_GW2] kind 'GW-QA-QC' units 'CFS'}
+define SG_EBP_Total_GW2a 	      {alias SG76_FRS016_9_GW2a      +
+					     SG77_FRS016_9_GW2a   +
+					     SG87_EBP030_11_GW2a     +
+					     SG88_EBP030_11_GW2a  +
+					     SG101_DED003_13_GW2a +
+					     SG112_BCK006_15_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Deadman Creek
+define SG93_DED044_13_GW2a            {alias SG93_DED044_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG94_DED038_13_GW2a            {alias SG94_DED038_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG95_DED035_13_GW2a            {alias SG95_DED035_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG96_DED032_13_GW2a            {alias SG96_DED032_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG97_DED025_13_GW2a            {alias SG97_DED025_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG98_DED019_13_GW2a            {alias SG98_DED019_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG99_DED010_13_GW2a            {alias SG99_DED010_13[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG100_DED003_13_GW2a           {alias SG100_DED003_13[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_DED_Total_GW2a	      {alias SG93_DED044_13_GW2a  +
+					     SG94_DED038_13_GW2a  +
+					     SG95_DED035_13_GW2a  +
+					     SG96_DED032_13_GW2a  +
+					     SG97_DED025_13_GW2a  +
+					     SG98_DED019_13_GW2a  +
+					     SG99_DED010_13_GW2a  +
+					     SG100_DED003_13_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Chowchilla River
+define SG80_CHW031_11_GW2a            {alias SG80_CHW031_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG81_CHW028_11_GW2a            {alias SG81_CHW028_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG82_CHW024_11_GW2a            {alias SG82_CHW024_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG83_CHW021_11_GW2a            {alias SG83_CHW021_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG84_CHW017_11_GW2a            {alias SG84_CHW017_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG85_CHW011_11_GW2a            {alias SG85_CHW011_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG86_CHW006_11_GW2a            {alias SG86_CHW006_11[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG_CHW_Total_GW2a	      {alias SG80_CHW031_11_GW2a +
+					     SG81_CHW028_11_GW2a +
+					     SG82_CHW024_11_GW2a +
+					     SG83_CHW021_11_GW2a +
+					     SG84_CHW017_11_GW2a +
+					     SG85_CHW011_11_GW2a +
+					     SG86_CHW006_11_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Fresno River
+define SG69_FRS045_9_GW2a             {alias SG69_FRS045_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG70_FRS039_9_GW2a             {alias SG70_FRS039_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG71_FRS036_9_GW2a             {alias SG71_FRS036_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG72_FRS032_9_GW2a             {alias SG72_FRS032_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG73_FRS025_9_GW2a             {alias SG73_FRS025_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG74_FRS020_9_GW2a             {alias SG74_FRS020_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG75_FRS016_9_GW2a             {alias SG75_FRS016_9[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG_FRS_Total_GW2a	      {alias SG69_FRS045_9_GW2a +
+					     SG70_FRS039_9_GW2a +
+					     SG71_FRS036_9_GW2a +
+					     SG72_FRS032_9_GW2a +
+					     SG73_FRS025_9_GW2a +
+					     SG74_FRS020_9_GW2a +
+					     SG75_FRS016_9_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Upper San Joaquin River
+define SG54_SJR263_7_GW2a             {alias SG54_SJR263_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG55_SJR256_7_GW2a             {alias SG55_SJR256_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG56_SJR249_7_GW2a             {alias SG56_SJR249_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG57_SJR242_7_GW2a             {alias SG57_SJR242_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG58_SJR235_7_GW2a             {alias SG58_SJR235_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG59_SJR227_7_GW2a             {alias SG59_SJR227_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG60_SJR221_7_GW2a             {alias SG60_SJR221_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG61_SJR214_7_GW2a             {alias SG61_SJR214_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG62_SJR205_7_GW2a             {alias SG62_SJR205_7[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG63_SJR205_8_GW2a             {alias SG63_SJR205_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG64_SJR198_8_GW2a             {alias SG64_SJR198_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG65_SJR192_8_GW2a             {alias SG65_SJR192_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG66_SJR185_8_GW2a             {alias SG66_SJR185_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG67_SJR180_8_GW2a             {alias SG67_SJR180_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG68_SJR173_8_GW2a             {alias SG68_SJR173_8[SJRBASE_GW2]             kind 'GW-QA-QC' units 'CFS'}
+define SG78_SJR173_10_GW2a            {alias SG78_SJR173_10[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG79_SJR166_10_GW2a            {alias SG79_SJR166_10[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG89_SJR166_12_GW2a            {alias SG89_SJR166_12[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG90_SJR157_12_GW2a            {alias SG90_SJR157_12[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG91_SJR152_12_GW2a            {alias SG91_SJR152_12[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG92_SJR145_12_GW2a            {alias SG92_SJR145_12[SJRBASE_GW2]            kind 'GW-QA-QC' units 'CFS'}
+define SG102_SJR145_14_GW2a           {alias SG102_SJR145_14[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG103_SJR141_14_GW2a           {alias SG103_SJR141_14[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG104_SJR134_14_GW2a           {alias SG104_SJR134_14[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG113_SJR134_16_GW2a           {alias SG113_SJR134_16[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG114_SJR123_16_GW2a           {alias SG114_SJR123_16[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_UpperSJR_Total_GW2a         {alias SG54_SJR263_7_GW2a   +
+				       	     SG55_SJR256_7_GW2a   +
+				       	     SG56_SJR249_7_GW2a   +
+				       	     SG57_SJR242_7_GW2a   +
+				       	     SG58_SJR235_7_GW2a   +
+				       	     SG59_SJR227_7_GW2a   +
+				       	     SG60_SJR221_7_GW2a   +
+				       	     SG61_SJR214_7_GW2a   +
+				       	     SG62_SJR205_7_GW2a   +
+				       	     SG63_SJR205_8_GW2a   +
+				       	     SG64_SJR198_8_GW2a   +
+				       	     SG65_SJR192_8_GW2a   +
+				       	     SG66_SJR185_8_GW2a   +
+				       	     SG67_SJR180_8_GW2a   +
+				       	     SG68_SJR173_8_GW2a   +
+				       	     SG78_SJR173_10_GW2a  +
+				       	     SG79_SJR166_10_GW2a  +
+				       	     SG89_SJR166_12_GW2a  +
+				       	     SG90_SJR157_12_GW2a  +
+				       	     SG91_SJR152_12_GW2a  +
+				       	     SG92_SJR145_12_GW2a  +
+				       	     SG102_SJR145_14_GW2a +
+				       	     SG103_SJR141_14_GW2a +
+				       	     SG104_SJR134_14_GW2a +
+				       	     SG113_SJR134_16_GW2a +
+				       	     SG114_SJR123_16_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin River Mainstem
+define SG115_SJR116_16_GW2a           {alias SG115_SJR116_16[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG125_SJR116_18_GW2a           {alias SG125_SJR116_18[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG126_SJR111_18_GW2a           {alias SG126_SJR111_18[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG127_SJR106_18_GW2a           {alias SG127_SJR106_18[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG131_SJR106_20_GW2a           {alias SG131_SJR106_20[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG132_SJR096_20_GW2a           {alias SG132_SJR096_20[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG133_SJR090_20_GW2a           {alias SG133_SJR090_20[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG134_SJR081_20_GW2a           {alias SG134_SJR081_20[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG144_SJR081_22_GW2a           {alias SG144_SJR081_22[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG145_SJR072_22_GW2a           {alias SG145_SJR072_22[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG155_SJR072_24_GW2a           {alias SG155_SJR072_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG156_SJR062_24_GW2a           {alias SG156_SJR062_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG157_SJR056_24_GW2a           {alias SG157_SJR056_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG158_SJR048_24_GW2a           {alias SG158_SJR048_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG159_SJR042_24_GW2a           {alias SG159_SJR042_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG160_SJR038_24_GW2a           {alias SG160_SJR038_24[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG168_SJR038_26_GW2a           {alias SG168_SJR038_26[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG169_SJR033_26_GW2a           {alias SG169_SJR033_26[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG170_SJR028_26_GW2a           {alias SG170_SJR028_26[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG171_SJR023_26_GW2a           {alias SG171_SJR023_26[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG172_SJR022_26_GW2a           {alias SG172_SJR022_26[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG200_SJR022_31_GW2a           {alias SG200_SJR022_31[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG201_SJR013_31_GW2a           {alias SG201_SJR013_31[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG202_SJR009_31_GW2a           {alias SG202_SJR009_31[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG203_SJR006_31_GW2a           {alias SG203_SJR006_31[SJRBASE_GW2]           kind 'GW-QA-QC' units 'CFS'}
+define SG_SJRMain_Total_GW2a          {alias SG115_SJR116_16_GW2a +
+					     SG125_SJR116_18_GW2a +
+					     SG126_SJR111_18_GW2a +
+					     SG127_SJR106_18_GW2a +
+					     SG131_SJR106_20_GW2a +
+					     SG132_SJR096_20_GW2a +
+					     SG133_SJR090_20_GW2a +
+					     SG134_SJR081_20_GW2a +
+					     SG144_SJR081_22_GW2a +
+					     SG145_SJR072_22_GW2a +
+					     SG155_SJR072_24_GW2a +
+					     SG156_SJR062_24_GW2a +
+					     SG157_SJR056_24_GW2a +
+					     SG158_SJR048_24_GW2a +
+					     SG159_SJR042_24_GW2a +
+					     SG160_SJR038_24_GW2a +
+					     SG168_SJR038_26_GW2a +
+					     SG169_SJR033_26_GW2a +
+					     SG170_SJR028_26_GW2a +
+					     SG171_SJR023_26_GW2a +
+					     SG172_SJR022_26_GW2a +
+					     SG200_SJR022_31_GW2a +
+					     SG201_SJR013_31_GW2a +
+					     SG202_SJR009_31_GW2a +
+					     SG203_SJR006_31_GW2a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin Eastside
+define SG_SJREast_Total_GW2a	      {alias SG_SJRMain_Total_GW2a  +
+				    	     SG_UpperSJR_Total_GW2a +
+				    	     SG_FRS_Total_GW2a      +
+				    	     SG_CHW_Total_GW2a      +
+				    	     SG_DED_Total_GW2a      +
+				    	     SG_EBP_Total_GW2a      +
+				    	     SG_BCK_Total_GW2a      +
+				    	     SG_MCD_Total_GW2a      +
+				    	     SG_TUO_Total_GW2a      +
+				    	     SG_STS_Total_GW2a      +
+				    	     SG_CLV_Total_GW2a
+			      	      kind 'GW-QA-QC' units 'CFS'}
+
+!#################################  CYCLE 3  ###############################################
+!Calaveras River
+define SG161_CLV035_25_GW3a           {alias SG161_CLV035_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG162_CLV028_25_GW3a           {alias SG162_CLV028_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG163_CLV023_25_GW3a           {alias SG163_CLV023_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG164_CLV016_25_GW3a           {alias SG164_CLV016_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG165_CLV010_25_GW3a           {alias SG165_CLV010_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG166_CLV004_25_GW3a           {alias SG166_CLV004_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG167_CLV004_25_GW3a           {alias SG167_CLV004_25[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_CLV_Total_GW3a	      {alias SG161_CLV035_25_GW3a +
+					     SG162_CLV028_25_GW3a +
+					     SG163_CLV023_25_GW3a +
+					     SG164_CLV016_25_GW3a +
+					     SG165_CLV010_25_GW3a +
+					     SG166_CLV004_25_GW3a +
+					     SG167_CLV004_25_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Stanislaus River
+define SG146_STS058_23_GW3a           {alias SG146_STS058_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG147_STS053_23_GW3a           {alias SG147_STS053_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG148_STS050_23_GW3a           {alias SG148_STS050_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG149_STS043_23_GW3a           {alias SG149_STS043_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG150_STS036_23_GW3a           {alias SG150_STS036_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG151_STS030_23_GW3a           {alias SG151_STS030_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG152_STS020_23_GW3a           {alias SG152_STS020_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG153_STS011_23_GW3a           {alias SG153_STS011_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG154_STS011_23_GW3a           {alias SG154_STS011_23[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_STS_Total_GW3a	      {alias SG146_STS058_23_GW3a +           
+				       	     SG147_STS053_23_GW3a +
+				       	     SG148_STS050_23_GW3a +
+				       	     SG149_STS043_23_GW3a +
+				       	     SG150_STS036_23_GW3a +
+				       	     SG151_STS030_23_GW3a +
+				       	     SG152_STS020_23_GW3a +
+				       	     SG153_STS011_23_GW3a +
+				       	     SG154_STS011_23_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Tuolumne River
+define SG135_TUO053_21_GW3a           {alias SG135_TUO053_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG136_TUO047_21_GW3a           {alias SG136_TUO047_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG137_TUO043_21_GW3a           {alias SG137_TUO043_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG138_TUO036_21_GW3a           {alias SG138_TUO036_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG139_TUO030_21_GW3a           {alias SG139_TUO030_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG140_TUO022_21_GW3a           {alias SG140_TUO022_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG141_TUO015_21_GW3a           {alias SG141_TUO015_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG142_TUO010_21_GW3a           {alias SG142_TUO010_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG143_TUO003_21_GW3a           {alias SG143_TUO003_21[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_TUO_Total_GW3a              {alias SG135_TUO053_21_GW3a +
+					     SG136_TUO047_21_GW3a +
+					     SG137_TUO043_21_GW3a +
+					     SG138_TUO036_21_GW3a +
+					     SG139_TUO030_21_GW3a +
+					     SG140_TUO022_21_GW3a +
+					     SG141_TUO015_21_GW3a +
+					     SG142_TUO010_21_GW3a +
+					     SG143_TUO003_21_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Merced River
+define SG116_MCD052_17_GW3a           {alias SG116_MCD052_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG117_MCD048_17_GW3a           {alias SG117_MCD048_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG118_MCD042_17_GW3a           {alias SG118_MCD042_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG119_MCD036_17_GW3a           {alias SG119_MCD036_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG120_MCD028_17_GW3a           {alias SG120_MCD028_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG121_MCD021_17_GW3a           {alias SG121_MCD021_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG122_MCD014_17_GW3a           {alias SG122_MCD014_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG123_MCD009_17_GW3a           {alias SG123_MCD009_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG124_MCD002_17_GW3a           {alias SG124_MCD002_17[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_MCD_Total_GW3a              {alias SG116_MCD052_17_GW3a +
+					     SG117_MCD048_17_GW3a +
+					     SG118_MCD042_17_GW3a +
+					     SG119_MCD036_17_GW3a +
+					     SG120_MCD028_17_GW3a +
+					     SG121_MCD021_17_GW3a +
+					     SG122_MCD014_17_GW3a +
+					     SG123_MCD009_17_GW3a +
+					     SG124_MCD002_17_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Bear Creek
+define SG105_BCK040_15_GW3a           {alias SG105_BCK040_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG106_BCK035_15_GW3a           {alias SG106_BCK035_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG107_BCK031_15_GW3a           {alias SG107_BCK031_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG108_BCK024_15_GW3a           {alias SG108_BCK024_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG109_BCK017_15_GW3a           {alias SG109_BCK017_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG110_BCK010_15_GW3a           {alias SG110_BCK010_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG111_BCK006_15_GW3a           {alias SG111_BCK006_15[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_BCK_Total_GW3a              {alias SG105_BCK040_15_GW3a +
+					     SG106_BCK035_15_GW3a +
+					     SG107_BCK031_15_GW3a +
+					     SG108_BCK024_15_GW3a +
+					     SG109_BCK017_15_GW3a +
+					     SG110_BCK010_15_GW3a +
+					     SG111_BCK006_15_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Eastside Bypass
+define SG76_FRS016_9_GW3a      {alias SG76_FRS016_9[SJRBASE_GW3]      kind 'GW-QA-QC' units 'CFS'}
+define SG77_FRS016_9_GW3a   {alias SG77_FRS016_9[SJRBASE_GW3]   kind 'GW-QA-QC' units 'CFS'}
+define SG87_EBP030_11_GW3a     {alias SG87_EBP030_11[SJRBASE_GW3]     kind 'GW-QA-QC' units 'CFS'}
+define SG88_EBP030_11_GW3a  {alias SG88_EBP030_11[SJRBASE_GW3]  kind 'GW-QA-QC' units 'CFS'}
+define SG101_DED003_13_GW3a {alias SG101_DED003_13[SJRBASE_GW3] kind 'GW-QA-QC' units 'CFS'}
+define SG112_BCK006_15_GW3a {alias SG112_BCK006_15[SJRBASE_GW3] kind 'GW-QA-QC' units 'CFS'}
+define SG_EBP_Total_GW3a 	      {alias SG76_FRS016_9_GW3a      +
+					     SG77_FRS016_9_GW3a   +
+					     SG87_EBP030_11_GW3a     +
+					     SG88_EBP030_11_GW3a  +
+					     SG101_DED003_13_GW3a +
+					     SG112_BCK006_15_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Deadman Creek
+define SG93_DED044_13_GW3a            {alias SG93_DED044_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG94_DED038_13_GW3a            {alias SG94_DED038_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG95_DED035_13_GW3a            {alias SG95_DED035_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG96_DED032_13_GW3a            {alias SG96_DED032_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG97_DED025_13_GW3a            {alias SG97_DED025_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG98_DED019_13_GW3a            {alias SG98_DED019_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG99_DED010_13_GW3a            {alias SG99_DED010_13[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG100_DED003_13_GW3a           {alias SG100_DED003_13[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_DED_Total_GW3a	      {alias SG93_DED044_13_GW3a  +
+					     SG94_DED038_13_GW3a  +
+					     SG95_DED035_13_GW3a  +
+					     SG96_DED032_13_GW3a  +
+					     SG97_DED025_13_GW3a  +
+					     SG98_DED019_13_GW3a  +
+					     SG99_DED010_13_GW3a  +
+					     SG100_DED003_13_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Chowchilla River
+define SG80_CHW031_11_GW3a            {alias SG80_CHW031_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG81_CHW028_11_GW3a            {alias SG81_CHW028_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG82_CHW024_11_GW3a            {alias SG82_CHW024_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG83_CHW021_11_GW3a            {alias SG83_CHW021_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG84_CHW017_11_GW3a            {alias SG84_CHW017_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG85_CHW011_11_GW3a            {alias SG85_CHW011_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG86_CHW006_11_GW3a            {alias SG86_CHW006_11[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG_CHW_Total_GW3a	      {alias SG80_CHW031_11_GW3a +
+					     SG81_CHW028_11_GW3a +
+					     SG82_CHW024_11_GW3a +
+					     SG83_CHW021_11_GW3a +
+					     SG84_CHW017_11_GW3a +
+					     SG85_CHW011_11_GW3a +
+					     SG86_CHW006_11_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Fresno River
+define SG69_FRS045_9_GW3a             {alias SG69_FRS045_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG70_FRS039_9_GW3a             {alias SG70_FRS039_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG71_FRS036_9_GW3a             {alias SG71_FRS036_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG72_FRS032_9_GW3a             {alias SG72_FRS032_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG73_FRS025_9_GW3a             {alias SG73_FRS025_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG74_FRS020_9_GW3a             {alias SG74_FRS020_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG75_FRS016_9_GW3a             {alias SG75_FRS016_9[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG_FRS_Total_GW3a	      {alias SG69_FRS045_9_GW3a +
+					     SG70_FRS039_9_GW3a +
+					     SG71_FRS036_9_GW3a +
+					     SG72_FRS032_9_GW3a +
+					     SG73_FRS025_9_GW3a +
+					     SG74_FRS020_9_GW3a +
+					     SG75_FRS016_9_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Upper San Joaquin River
+define SG54_SJR263_7_GW3a             {alias SG54_SJR263_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG55_SJR256_7_GW3a             {alias SG55_SJR256_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG56_SJR249_7_GW3a             {alias SG56_SJR249_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG57_SJR242_7_GW3a             {alias SG57_SJR242_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG58_SJR235_7_GW3a             {alias SG58_SJR235_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG59_SJR227_7_GW3a             {alias SG59_SJR227_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG60_SJR221_7_GW3a             {alias SG60_SJR221_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG61_SJR214_7_GW3a             {alias SG61_SJR214_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG62_SJR205_7_GW3a             {alias SG62_SJR205_7[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG63_SJR205_8_GW3a             {alias SG63_SJR205_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG64_SJR198_8_GW3a             {alias SG64_SJR198_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG65_SJR192_8_GW3a             {alias SG65_SJR192_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG66_SJR185_8_GW3a             {alias SG66_SJR185_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG67_SJR180_8_GW3a             {alias SG67_SJR180_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG68_SJR173_8_GW3a             {alias SG68_SJR173_8[SJRBASE_GW3]             kind 'GW-QA-QC' units 'CFS'}
+define SG78_SJR173_10_GW3a            {alias SG78_SJR173_10[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG79_SJR166_10_GW3a            {alias SG79_SJR166_10[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG89_SJR166_12_GW3a            {alias SG89_SJR166_12[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG90_SJR157_12_GW3a            {alias SG90_SJR157_12[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG91_SJR152_12_GW3a            {alias SG91_SJR152_12[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG92_SJR145_12_GW3a            {alias SG92_SJR145_12[SJRBASE_GW3]            kind 'GW-QA-QC' units 'CFS'}
+define SG102_SJR145_14_GW3a           {alias SG102_SJR145_14[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG103_SJR141_14_GW3a           {alias SG103_SJR141_14[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG104_SJR134_14_GW3a           {alias SG104_SJR134_14[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG113_SJR134_16_GW3a           {alias SG113_SJR134_16[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG114_SJR123_16_GW3a           {alias SG114_SJR123_16[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_UpperSJR_Total_GW3a         {alias SG54_SJR263_7_GW3a   +
+				       	     SG55_SJR256_7_GW3a   +
+				       	     SG56_SJR249_7_GW3a   +
+				       	     SG57_SJR242_7_GW3a   +
+				       	     SG58_SJR235_7_GW3a   +
+				       	     SG59_SJR227_7_GW3a   +
+				       	     SG60_SJR221_7_GW3a   +
+				       	     SG61_SJR214_7_GW3a   +
+				       	     SG62_SJR205_7_GW3a   +
+				       	     SG63_SJR205_8_GW3a   +
+				       	     SG64_SJR198_8_GW3a   +
+				       	     SG65_SJR192_8_GW3a   +
+				       	     SG66_SJR185_8_GW3a   +
+				       	     SG67_SJR180_8_GW3a   +
+				       	     SG68_SJR173_8_GW3a   +
+				       	     SG78_SJR173_10_GW3a  +
+				       	     SG79_SJR166_10_GW3a  +
+				       	     SG89_SJR166_12_GW3a  +
+				       	     SG90_SJR157_12_GW3a  +
+				       	     SG91_SJR152_12_GW3a  +
+				       	     SG92_SJR145_12_GW3a  +
+				       	     SG102_SJR145_14_GW3a +
+				       	     SG103_SJR141_14_GW3a +
+				       	     SG104_SJR134_14_GW3a +
+				       	     SG113_SJR134_16_GW3a +
+				       	     SG114_SJR123_16_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin River Mainstem
+define SG115_SJR116_16_GW3a           {alias SG115_SJR116_16[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG125_SJR116_18_GW3a           {alias SG125_SJR116_18[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG126_SJR111_18_GW3a           {alias SG126_SJR111_18[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG127_SJR106_18_GW3a           {alias SG127_SJR106_18[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG131_SJR106_20_GW3a           {alias SG131_SJR106_20[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG132_SJR096_20_GW3a           {alias SG132_SJR096_20[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG133_SJR090_20_GW3a           {alias SG133_SJR090_20[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG134_SJR081_20_GW3a           {alias SG134_SJR081_20[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG144_SJR081_22_GW3a           {alias SG144_SJR081_22[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG145_SJR072_22_GW3a           {alias SG145_SJR072_22[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG155_SJR072_24_GW3a           {alias SG155_SJR072_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG156_SJR062_24_GW3a           {alias SG156_SJR062_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG157_SJR056_24_GW3a           {alias SG157_SJR056_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG158_SJR048_24_GW3a           {alias SG158_SJR048_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG159_SJR042_24_GW3a           {alias SG159_SJR042_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG160_SJR038_24_GW3a           {alias SG160_SJR038_24[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG168_SJR038_26_GW3a           {alias SG168_SJR038_26[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG169_SJR033_26_GW3a           {alias SG169_SJR033_26[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG170_SJR028_26_GW3a           {alias SG170_SJR028_26[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG171_SJR023_26_GW3a           {alias SG171_SJR023_26[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG172_SJR022_26_GW3a           {alias SG172_SJR022_26[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG200_SJR022_31_GW3a           {alias SG200_SJR022_31[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG201_SJR013_31_GW3a           {alias SG201_SJR013_31[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG202_SJR009_31_GW3a           {alias SG202_SJR009_31[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG203_SJR006_31_GW3a           {alias SG203_SJR006_31[SJRBASE_GW3]           kind 'GW-QA-QC' units 'CFS'}
+define SG_SJRMain_Total_GW3a          {alias SG115_SJR116_16_GW3a +
+					     SG125_SJR116_18_GW3a +
+					     SG126_SJR111_18_GW3a +
+					     SG127_SJR106_18_GW3a +
+					     SG131_SJR106_20_GW3a +
+					     SG132_SJR096_20_GW3a +
+					     SG133_SJR090_20_GW3a +
+					     SG134_SJR081_20_GW3a +
+					     SG144_SJR081_22_GW3a +
+					     SG145_SJR072_22_GW3a +
+					     SG155_SJR072_24_GW3a +
+					     SG156_SJR062_24_GW3a +
+					     SG157_SJR056_24_GW3a +
+					     SG158_SJR048_24_GW3a +
+					     SG159_SJR042_24_GW3a +
+					     SG160_SJR038_24_GW3a +
+					     SG168_SJR038_26_GW3a +
+					     SG169_SJR033_26_GW3a +
+					     SG170_SJR028_26_GW3a +
+					     SG171_SJR023_26_GW3a +
+					     SG172_SJR022_26_GW3a +
+					     SG200_SJR022_31_GW3a +
+					     SG201_SJR013_31_GW3a +
+					     SG202_SJR009_31_GW3a +
+					     SG203_SJR006_31_GW3a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin Eastside
+define SG_SJREast_Total_GW3a	      {alias SG_SJRMain_Total_GW3a  +
+				    	     SG_UpperSJR_Total_GW3a +
+				    	     SG_FRS_Total_GW3a      +
+				    	     SG_CHW_Total_GW3a      +
+				    	     SG_DED_Total_GW3a      +
+				    	     SG_EBP_Total_GW3a      +
+				    	     SG_BCK_Total_GW3a      +
+				    	     SG_MCD_Total_GW3a      +
+				    	     SG_TUO_Total_GW3a      +
+				    	     SG_STS_Total_GW3a      +
+				    	     SG_CLV_Total_GW3a
+			      	      kind 'GW-QA-QC' units 'CFS'}
+
+!#################################  CYCLE 4  ###############################################
+!Calaveras River
+define SG161_CLV035_25_GW4a           {alias SG161_CLV035_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG162_CLV028_25_GW4a           {alias SG162_CLV028_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG163_CLV023_25_GW4a           {alias SG163_CLV023_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG164_CLV016_25_GW4a           {alias SG164_CLV016_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG165_CLV010_25_GW4a           {alias SG165_CLV010_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG166_CLV004_25_GW4a           {alias SG166_CLV004_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG167_CLV004_25_GW4a           {alias SG167_CLV004_25[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_CLV_Total_GW4a	      {alias SG161_CLV035_25_GW4a +
+					     SG162_CLV028_25_GW4a +
+					     SG163_CLV023_25_GW4a +
+					     SG164_CLV016_25_GW4a +
+					     SG165_CLV010_25_GW4a +
+					     SG166_CLV004_25_GW4a +
+					     SG167_CLV004_25_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Stanislaus River
+define SG146_STS058_23_GW4a           {alias SG146_STS058_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG147_STS053_23_GW4a           {alias SG147_STS053_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG148_STS050_23_GW4a           {alias SG148_STS050_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG149_STS043_23_GW4a           {alias SG149_STS043_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG150_STS036_23_GW4a           {alias SG150_STS036_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG151_STS030_23_GW4a           {alias SG151_STS030_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG152_STS020_23_GW4a           {alias SG152_STS020_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG153_STS011_23_GW4a           {alias SG153_STS011_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG154_STS011_23_GW4a           {alias SG154_STS011_23[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_STS_Total_GW4a	      {alias SG146_STS058_23_GW4a +           
+				       	     SG147_STS053_23_GW4a +
+				       	     SG148_STS050_23_GW4a +
+				       	     SG149_STS043_23_GW4a +
+				       	     SG150_STS036_23_GW4a +
+				       	     SG151_STS030_23_GW4a +
+				       	     SG152_STS020_23_GW4a +
+				       	     SG153_STS011_23_GW4a +
+				       	     SG154_STS011_23_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Tuolumne River
+define SG135_TUO053_21_GW4a           {alias SG135_TUO053_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG136_TUO047_21_GW4a           {alias SG136_TUO047_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG137_TUO043_21_GW4a           {alias SG137_TUO043_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG138_TUO036_21_GW4a           {alias SG138_TUO036_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG139_TUO030_21_GW4a           {alias SG139_TUO030_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG140_TUO022_21_GW4a           {alias SG140_TUO022_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG141_TUO015_21_GW4a           {alias SG141_TUO015_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG142_TUO010_21_GW4a           {alias SG142_TUO010_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG143_TUO003_21_GW4a           {alias SG143_TUO003_21[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_TUO_Total_GW4a              {alias SG135_TUO053_21_GW4a +
+					     SG136_TUO047_21_GW4a +
+					     SG137_TUO043_21_GW4a +
+					     SG138_TUO036_21_GW4a +
+					     SG139_TUO030_21_GW4a +
+					     SG140_TUO022_21_GW4a +
+					     SG141_TUO015_21_GW4a +
+					     SG142_TUO010_21_GW4a +
+					     SG143_TUO003_21_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Merced River
+define SG116_MCD052_17_GW4a           {alias SG116_MCD052_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG117_MCD048_17_GW4a           {alias SG117_MCD048_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG118_MCD042_17_GW4a           {alias SG118_MCD042_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG119_MCD036_17_GW4a           {alias SG119_MCD036_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG120_MCD028_17_GW4a           {alias SG120_MCD028_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG121_MCD021_17_GW4a           {alias SG121_MCD021_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG122_MCD014_17_GW4a           {alias SG122_MCD014_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG123_MCD009_17_GW4a           {alias SG123_MCD009_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG124_MCD002_17_GW4a           {alias SG124_MCD002_17[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_MCD_Total_GW4a              {alias SG116_MCD052_17_GW4a +
+					     SG117_MCD048_17_GW4a +
+					     SG118_MCD042_17_GW4a +
+					     SG119_MCD036_17_GW4a +
+					     SG120_MCD028_17_GW4a +
+					     SG121_MCD021_17_GW4a +
+					     SG122_MCD014_17_GW4a +
+					     SG123_MCD009_17_GW4a +
+					     SG124_MCD002_17_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Bear Creek
+define SG105_BCK040_15_GW4a           {alias SG105_BCK040_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG106_BCK035_15_GW4a           {alias SG106_BCK035_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG107_BCK031_15_GW4a           {alias SG107_BCK031_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG108_BCK024_15_GW4a           {alias SG108_BCK024_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG109_BCK017_15_GW4a           {alias SG109_BCK017_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG110_BCK010_15_GW4a           {alias SG110_BCK010_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG111_BCK006_15_GW4a           {alias SG111_BCK006_15[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_BCK_Total_GW4a              {alias SG105_BCK040_15_GW4a +
+					     SG106_BCK035_15_GW4a +
+					     SG107_BCK031_15_GW4a +
+					     SG108_BCK024_15_GW4a +
+					     SG109_BCK017_15_GW4a +
+					     SG110_BCK010_15_GW4a +
+					     SG111_BCK006_15_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Eastside Bypass
+define SG76_FRS016_9_GW4a      {alias SG76_FRS016_9[SJRBASE_GW4]      kind 'GW-QA-QC' units 'CFS'}
+define SG77_FRS016_9_GW4a   {alias SG77_FRS016_9[SJRBASE_GW4]   kind 'GW-QA-QC' units 'CFS'}
+define SG87_EBP030_11_GW4a     {alias SG87_EBP030_11[SJRBASE_GW4]     kind 'GW-QA-QC' units 'CFS'}
+define SG88_EBP030_11_GW4a  {alias SG88_EBP030_11[SJRBASE_GW4]  kind 'GW-QA-QC' units 'CFS'}
+define SG101_DED003_13_GW4a {alias SG101_DED003_13[SJRBASE_GW4] kind 'GW-QA-QC' units 'CFS'}
+define SG112_BCK006_15_GW4a {alias SG112_BCK006_15[SJRBASE_GW4] kind 'GW-QA-QC' units 'CFS'}
+define SG_EBP_Total_GW4a 	      {alias SG76_FRS016_9_GW4a      +
+					     SG77_FRS016_9_GW4a   +
+					     SG87_EBP030_11_GW4a     +
+					     SG88_EBP030_11_GW4a  +
+					     SG101_DED003_13_GW4a +
+					     SG112_BCK006_15_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Deadman Creek
+define SG93_DED044_13_GW4a            {alias SG93_DED044_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG94_DED038_13_GW4a            {alias SG94_DED038_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG95_DED035_13_GW4a            {alias SG95_DED035_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG96_DED032_13_GW4a            {alias SG96_DED032_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG97_DED025_13_GW4a            {alias SG97_DED025_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG98_DED019_13_GW4a            {alias SG98_DED019_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG99_DED010_13_GW4a            {alias SG99_DED010_13[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG100_DED003_13_GW4a           {alias SG100_DED003_13[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_DED_Total_GW4a	      {alias SG93_DED044_13_GW4a  +
+					     SG94_DED038_13_GW4a  +
+					     SG95_DED035_13_GW4a  +
+					     SG96_DED032_13_GW4a  +
+					     SG97_DED025_13_GW4a  +
+					     SG98_DED019_13_GW4a  +
+					     SG99_DED010_13_GW4a  +
+					     SG100_DED003_13_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Chowchilla River
+define SG80_CHW031_11_GW4a            {alias SG80_CHW031_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG81_CHW028_11_GW4a            {alias SG81_CHW028_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG82_CHW024_11_GW4a            {alias SG82_CHW024_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG83_CHW021_11_GW4a            {alias SG83_CHW021_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG84_CHW017_11_GW4a            {alias SG84_CHW017_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG85_CHW011_11_GW4a            {alias SG85_CHW011_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG86_CHW006_11_GW4a            {alias SG86_CHW006_11[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG_CHW_Total_GW4a	      {alias SG80_CHW031_11_GW4a +
+					     SG81_CHW028_11_GW4a +
+					     SG82_CHW024_11_GW4a +
+					     SG83_CHW021_11_GW4a +
+					     SG84_CHW017_11_GW4a +
+					     SG85_CHW011_11_GW4a +
+					     SG86_CHW006_11_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Fresno River
+define SG69_FRS045_9_GW4a             {alias SG69_FRS045_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG70_FRS039_9_GW4a             {alias SG70_FRS039_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG71_FRS036_9_GW4a             {alias SG71_FRS036_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG72_FRS032_9_GW4a             {alias SG72_FRS032_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG73_FRS025_9_GW4a             {alias SG73_FRS025_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG74_FRS020_9_GW4a             {alias SG74_FRS020_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG75_FRS016_9_GW4a             {alias SG75_FRS016_9[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG_FRS_Total_GW4a	      {alias SG69_FRS045_9_GW4a +
+					     SG70_FRS039_9_GW4a +
+					     SG71_FRS036_9_GW4a +
+					     SG72_FRS032_9_GW4a +
+					     SG73_FRS025_9_GW4a +
+					     SG74_FRS020_9_GW4a +
+					     SG75_FRS016_9_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!Upper San Joaquin River
+define SG54_SJR263_7_GW4a             {alias SG54_SJR263_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG55_SJR256_7_GW4a             {alias SG55_SJR256_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG56_SJR249_7_GW4a             {alias SG56_SJR249_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG57_SJR242_7_GW4a             {alias SG57_SJR242_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG58_SJR235_7_GW4a             {alias SG58_SJR235_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG59_SJR227_7_GW4a             {alias SG59_SJR227_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG60_SJR221_7_GW4a             {alias SG60_SJR221_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG61_SJR214_7_GW4a             {alias SG61_SJR214_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG62_SJR205_7_GW4a             {alias SG62_SJR205_7[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG63_SJR205_8_GW4a             {alias SG63_SJR205_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG64_SJR198_8_GW4a             {alias SG64_SJR198_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG65_SJR192_8_GW4a             {alias SG65_SJR192_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG66_SJR185_8_GW4a             {alias SG66_SJR185_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG67_SJR180_8_GW4a             {alias SG67_SJR180_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG68_SJR173_8_GW4a             {alias SG68_SJR173_8[SJRBASE_GW4]             kind 'GW-QA-QC' units 'CFS'}
+define SG78_SJR173_10_GW4a            {alias SG78_SJR173_10[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG79_SJR166_10_GW4a            {alias SG79_SJR166_10[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG89_SJR166_12_GW4a            {alias SG89_SJR166_12[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG90_SJR157_12_GW4a            {alias SG90_SJR157_12[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG91_SJR152_12_GW4a            {alias SG91_SJR152_12[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG92_SJR145_12_GW4a            {alias SG92_SJR145_12[SJRBASE_GW4]            kind 'GW-QA-QC' units 'CFS'}
+define SG102_SJR145_14_GW4a           {alias SG102_SJR145_14[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG103_SJR141_14_GW4a           {alias SG103_SJR141_14[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG104_SJR134_14_GW4a           {alias SG104_SJR134_14[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG113_SJR134_16_GW4a           {alias SG113_SJR134_16[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG114_SJR123_16_GW4a           {alias SG114_SJR123_16[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_UpperSJR_Total_GW4a         {alias SG54_SJR263_7_GW4a   +
+				       	     SG55_SJR256_7_GW4a   +
+				       	     SG56_SJR249_7_GW4a   +
+				       	     SG57_SJR242_7_GW4a   +
+				       	     SG58_SJR235_7_GW4a   +
+				       	     SG59_SJR227_7_GW4a   +
+				       	     SG60_SJR221_7_GW4a   +
+				       	     SG61_SJR214_7_GW4a   +
+				       	     SG62_SJR205_7_GW4a   +
+				       	     SG63_SJR205_8_GW4a   +
+				       	     SG64_SJR198_8_GW4a   +
+				       	     SG65_SJR192_8_GW4a   +
+				       	     SG66_SJR185_8_GW4a   +
+				       	     SG67_SJR180_8_GW4a   +
+				       	     SG68_SJR173_8_GW4a   +
+				       	     SG78_SJR173_10_GW4a  +
+				       	     SG79_SJR166_10_GW4a  +
+				       	     SG89_SJR166_12_GW4a  +
+				       	     SG90_SJR157_12_GW4a  +
+				       	     SG91_SJR152_12_GW4a  +
+				       	     SG92_SJR145_12_GW4a  +
+				       	     SG102_SJR145_14_GW4a +
+				       	     SG103_SJR141_14_GW4a +
+				       	     SG104_SJR134_14_GW4a +
+				       	     SG113_SJR134_16_GW4a +
+				       	     SG114_SJR123_16_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin River Mainstem
+define SG115_SJR116_16_GW4a           {alias SG115_SJR116_16[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG125_SJR116_18_GW4a           {alias SG125_SJR116_18[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG126_SJR111_18_GW4a           {alias SG126_SJR111_18[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG127_SJR106_18_GW4a           {alias SG127_SJR106_18[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG131_SJR106_20_GW4a           {alias SG131_SJR106_20[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG132_SJR096_20_GW4a           {alias SG132_SJR096_20[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG133_SJR090_20_GW4a           {alias SG133_SJR090_20[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG134_SJR081_20_GW4a           {alias SG134_SJR081_20[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG144_SJR081_22_GW4a           {alias SG144_SJR081_22[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG145_SJR072_22_GW4a           {alias SG145_SJR072_22[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG155_SJR072_24_GW4a           {alias SG155_SJR072_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG156_SJR062_24_GW4a           {alias SG156_SJR062_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG157_SJR056_24_GW4a           {alias SG157_SJR056_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG158_SJR048_24_GW4a           {alias SG158_SJR048_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG159_SJR042_24_GW4a           {alias SG159_SJR042_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG160_SJR038_24_GW4a           {alias SG160_SJR038_24[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG168_SJR038_26_GW4a           {alias SG168_SJR038_26[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG169_SJR033_26_GW4a           {alias SG169_SJR033_26[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG170_SJR028_26_GW4a           {alias SG170_SJR028_26[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG171_SJR023_26_GW4a           {alias SG171_SJR023_26[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG172_SJR022_26_GW4a           {alias SG172_SJR022_26[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG200_SJR022_31_GW4a           {alias SG200_SJR022_31[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG201_SJR013_31_GW4a           {alias SG201_SJR013_31[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG202_SJR009_31_GW4a           {alias SG202_SJR009_31[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG203_SJR006_31_GW4a           {alias SG203_SJR006_31[SJRBASE_GW4]           kind 'GW-QA-QC' units 'CFS'}
+define SG_SJRMain_Total_GW4a          {alias SG115_SJR116_16_GW4a +
+					     SG125_SJR116_18_GW4a +
+					     SG126_SJR111_18_GW4a +
+					     SG127_SJR106_18_GW4a +
+					     SG131_SJR106_20_GW4a +
+					     SG132_SJR096_20_GW4a +
+					     SG133_SJR090_20_GW4a +
+					     SG134_SJR081_20_GW4a +
+					     SG144_SJR081_22_GW4a +
+					     SG145_SJR072_22_GW4a +
+					     SG155_SJR072_24_GW4a +
+					     SG156_SJR062_24_GW4a +
+					     SG157_SJR056_24_GW4a +
+					     SG158_SJR048_24_GW4a +
+					     SG159_SJR042_24_GW4a +
+					     SG160_SJR038_24_GW4a +
+					     SG168_SJR038_26_GW4a +
+					     SG169_SJR033_26_GW4a +
+					     SG170_SJR028_26_GW4a +
+					     SG171_SJR023_26_GW4a +
+					     SG172_SJR022_26_GW4a +
+					     SG200_SJR022_31_GW4a +
+					     SG201_SJR013_31_GW4a +
+					     SG202_SJR009_31_GW4a +
+					     SG203_SJR006_31_GW4a
+				       kind 'GW-QA-QC' units 'CFS'}
+!San Joaquin Eastside
+define SG_SJREast_Total_GW4a	      {alias SG_SJRMain_Total_GW4a  +
+				    	     SG_UpperSJR_Total_GW4a +
+				    	     SG_FRS_Total_GW4a      +
+				    	     SG_CHW_Total_GW4a      +
+				    	     SG_DED_Total_GW4a      +
+				    	     SG_EBP_Total_GW4a      +
+				    	     SG_BCK_Total_GW4a      +
+				    	     SG_MCD_Total_GW4a      +
+				    	     SG_TUO_Total_GW4a      +
+				    	     SG_STS_Total_GW4a      +
+				    	     SG_CLV_Total_GW4a
+			      	      kind 'GW-QA-QC' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! SJR EAST CHANNEL CYCLE SOLUTIONS   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_BCK040_GW0a {alias C_BCK040[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK035_GW0a {alias C_BCK035[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK033_GW0a {alias C_BCK033[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK031_GW0a {alias C_BCK031[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK024_GW0a {alias C_BCK024[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK017_GW0a {alias C_BCK017[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK010_GW0a {alias C_BCK010[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK006_GW0a {alias C_BCK006[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_EBP001_GW0a {alias C_EBP001[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP005_GW0a {alias C_EBP005[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP016_GW0a {alias C_EBP016[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP019_GW0a {alias C_EBP019[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP022_GW0a {alias C_EBP022[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP030_GW0a {alias C_EBP030[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP032_GW0a {alias C_EBP032[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP033_GW0a {alias C_EBP033[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP041_GW0a {alias C_EBP041[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP042_GW0a {alias C_EBP042[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP043_GW0a {alias C_EBP043[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP048_GW0a {alias C_EBP048[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP050_GW0a {alias C_EBP050[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_ESTMN_GW0a {alias C_ESTMN[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW037_GW0a {alias C_CHW037[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW031_GW0a {alias C_CHW031[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW028_GW0a {alias C_CHW028[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW024_GW0a {alias C_CHW024[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW021_GW0a {alias C_CHW021[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW017_GW0a {alias C_CHW017[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW011_GW0a {alias C_CHW011[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW006_GW0a {alias C_CHW006[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_DED044_GW0a {alias C_DED044[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED038_GW0a {alias C_DED038[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED035_GW0a {alias C_DED035[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED032_GW0a {alias C_DED032[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED025_GW0a {alias C_DED025[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED019_GW0a {alias C_DED019[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED012_GW0a {alias C_DED012[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED010_GW0a {alias C_DED010[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED003_GW0a {alias C_DED003[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_HNSLY_GW0a {alias C_HNSLY[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS048_GW0a {alias C_FRS048[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS046_GW0a {alias C_FRS046[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS045_GW0a {alias C_FRS045[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS039_GW0a {alias C_FRS039[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS036_GW0a {alias C_FRS036[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS032_GW0a {alias C_FRS032[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS025_GW0a {alias C_FRS025[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS022_GW0a {alias C_FRS022[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS020_GW0a {alias C_FRS020[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS016_GW0a {alias C_FRS016[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MCLRE_GW0a {alias C_MCLRE[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD056_GW0a {alias C_MCD056[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD055_GW0a {alias C_MCD055[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD054_GW0a {alias C_MCD054[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD052_GW0a {alias C_MCD052[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD050_GW0a {alias C_MCD050[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD048_GW0a {alias C_MCD048[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD046_GW0a {alias C_MCD046[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD042_GW0a {alias C_MCD042[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD036_GW0a {alias C_MCD036[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD033_GW0a {alias C_MCD033[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD032_GW0a {alias C_MCD032[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD028_GW0a {alias C_MCD028[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD021_GW0a {alias C_MCD021[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD018_GW0a {alias C_MCD018[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD014_GW0a {alias C_MCD014[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD009_GW0a {alias C_MCD009[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD005_GW0a {alias C_MCD005[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD002_GW0a {alias C_MCD002[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MLRTN_GW0a {alias C_MLRTN[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR265_GW0a {alias C_SJR265[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR263_GW0a {alias C_SJR263[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR258_GW0a {alias C_SJR258[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR256_GW0a {alias C_SJR256[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR249_GW0a {alias C_SJR249[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR242_GW0a {alias C_SJR242[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR235_GW0a {alias C_SJR235[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR227_GW0a {alias C_SJR227[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR225_GW0a {alias C_SJR225[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR221_GW0a {alias C_SJR221[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR214_GW0a {alias C_SJR214[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR213_GW0a {alias C_SJR213[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR205_GW0a {alias C_SJR205[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR201_GW0a {alias C_SJR201[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR200_GW0a {alias C_SJR200[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR198_GW0a {alias C_SJR198[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR195_GW0a {alias C_SJR195[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR192_GW0a {alias C_SJR192[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR185_GW0a {alias C_SJR185[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR180_GW0a {alias C_SJR180[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR179_GW0a {alias C_SJR179[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR173_GW0a {alias C_SJR173[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR166_GW0a {alias C_SJR166[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR157_GW0a {alias C_SJR157[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR152_GW0a {alias C_SJR152[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR145_GW0a {alias C_SJR145[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR141_GW0a {alias C_SJR141[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR134_GW0a {alias C_SJR134[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR131_GW0a {alias C_SJR131[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR127_GW0a {alias C_SJR127[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR123_GW0a {alias C_SJR123[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR119_GW0a {alias C_SJR119[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR117_GW0a {alias C_SJR117[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR116_GW0a {alias C_SJR116[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR115_GW0a {alias C_SJR115[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR114_GW0a {alias C_SJR114[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR111_GW0a {alias C_SJR111[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR106_GW0a {alias C_SJR106[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR105_GW0a {alias C_SJR105[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR101_GW0a {alias C_SJR101[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR096_GW0a {alias C_SJR096[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR091_GW0a {alias C_SJR091[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR090_GW0a {alias C_SJR090[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR087_GW0a {alias C_SJR087[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR082_GW0a {alias C_SJR082[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR081_GW0a {alias C_SJR081[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR075_GW0a {alias C_SJR075[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR072_GW0a {alias C_SJR072[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR070_GW0a {alias C_SJR070[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR062_GW0a {alias C_SJR062[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR056_GW0a {alias C_SJR056[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053A_GW0a {alias C_SJR053A[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053B_GW0a {alias C_SJR053B[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR048_GW0a {alias C_SJR048[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR043_GW0a {alias C_SJR043[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR042_GW0a {alias C_SJR042[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR038_GW0a {alias C_SJR038[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR033_GW0a {alias C_SJR033[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR028_GW0a {alias C_SJR028[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_PEDRO_GW0a {alias C_PEDRO[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO054_GW0a {alias C_TUO054[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO053_GW0a {alias C_TUO053[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO047_GW0a {alias C_TUO047[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO043_GW0a {alias C_TUO043[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO036_GW0a {alias C_TUO036[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO030_GW0a {alias C_TUO030[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO022_GW0a {alias C_TUO022[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO017_GW0a {alias C_TUO017[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO015_GW0a {alias C_TUO015[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO010_GW0a {alias C_TUO010[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO004_GW0a {alias C_TUO004[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO003_GW0a {alias C_TUO003[SJRBASE] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_BCK040_GW1a {alias C_BCK040[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK035_GW1a {alias C_BCK035[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK033_GW1a {alias C_BCK033[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK031_GW1a {alias C_BCK031[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK024_GW1a {alias C_BCK024[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK017_GW1a {alias C_BCK017[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK010_GW1a {alias C_BCK010[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK006_GW1a {alias C_BCK006[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_EBP001_GW1a {alias C_EBP001[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP005_GW1a {alias C_EBP005[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP016_GW1a {alias C_EBP016[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP019_GW1a {alias C_EBP019[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP022_GW1a {alias C_EBP022[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP030_GW1a {alias C_EBP030[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP032_GW1a {alias C_EBP032[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP033_GW1a {alias C_EBP033[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP041_GW1a {alias C_EBP041[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP042_GW1a {alias C_EBP042[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP043_GW1a {alias C_EBP043[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP048_GW1a {alias C_EBP048[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP050_GW1a {alias C_EBP050[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_ESTMN_GW1a {alias C_ESTMN[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW037_GW1a {alias C_CHW037[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW031_GW1a {alias C_CHW031[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW028_GW1a {alias C_CHW028[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW024_GW1a {alias C_CHW024[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW021_GW1a {alias C_CHW021[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW017_GW1a {alias C_CHW017[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW011_GW1a {alias C_CHW011[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW006_GW1a {alias C_CHW006[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_DED044_GW1a {alias C_DED044[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED038_GW1a {alias C_DED038[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED035_GW1a {alias C_DED035[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED032_GW1a {alias C_DED032[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED025_GW1a {alias C_DED025[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED019_GW1a {alias C_DED019[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED012_GW1a {alias C_DED012[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED010_GW1a {alias C_DED010[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED003_GW1a {alias C_DED003[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_HNSLY_GW1a {alias C_HNSLY[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS048_GW1a {alias C_FRS048[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS046_GW1a {alias C_FRS046[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS045_GW1a {alias C_FRS045[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS039_GW1a {alias C_FRS039[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS036_GW1a {alias C_FRS036[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS032_GW1a {alias C_FRS032[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS025_GW1a {alias C_FRS025[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS022_GW1a {alias C_FRS022[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS020_GW1a {alias C_FRS020[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS016_GW1a {alias C_FRS016[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MCLRE_GW1a {alias C_MCLRE[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD056_GW1a {alias C_MCD056[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD055_GW1a {alias C_MCD055[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD054_GW1a {alias C_MCD054[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD052_GW1a {alias C_MCD052[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD050_GW1a {alias C_MCD050[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD048_GW1a {alias C_MCD048[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD046_GW1a {alias C_MCD046[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD042_GW1a {alias C_MCD042[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD036_GW1a {alias C_MCD036[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD033_GW1a {alias C_MCD033[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD032_GW1a {alias C_MCD032[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD028_GW1a {alias C_MCD028[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD021_GW1a {alias C_MCD021[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD018_GW1a {alias C_MCD018[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD014_GW1a {alias C_MCD014[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD009_GW1a {alias C_MCD009[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD005_GW1a {alias C_MCD005[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD002_GW1a {alias C_MCD002[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MLRTN_GW1a {alias C_MLRTN[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR265_GW1a {alias C_SJR265[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR263_GW1a {alias C_SJR263[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR258_GW1a {alias C_SJR258[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR256_GW1a {alias C_SJR256[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR249_GW1a {alias C_SJR249[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR242_GW1a {alias C_SJR242[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR235_GW1a {alias C_SJR235[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR227_GW1a {alias C_SJR227[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR225_GW1a {alias C_SJR225[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR221_GW1a {alias C_SJR221[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR214_GW1a {alias C_SJR214[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR213_GW1a {alias C_SJR213[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR205_GW1a {alias C_SJR205[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR201_GW1a {alias C_SJR201[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR200_GW1a {alias C_SJR200[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR198_GW1a {alias C_SJR198[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR195_GW1a {alias C_SJR195[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR192_GW1a {alias C_SJR192[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR185_GW1a {alias C_SJR185[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR180_GW1a {alias C_SJR180[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR179_GW1a {alias C_SJR179[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR173_GW1a {alias C_SJR173[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR166_GW1a {alias C_SJR166[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR157_GW1a {alias C_SJR157[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR152_GW1a {alias C_SJR152[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR145_GW1a {alias C_SJR145[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR141_GW1a {alias C_SJR141[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR134_GW1a {alias C_SJR134[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR131_GW1a {alias C_SJR131[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR127_GW1a {alias C_SJR127[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR123_GW1a {alias C_SJR123[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR119_GW1a {alias C_SJR119[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR117_GW1a {alias C_SJR117[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR116_GW1a {alias C_SJR116[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR115_GW1a {alias C_SJR115[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR114_GW1a {alias C_SJR114[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR111_GW1a {alias C_SJR111[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR106_GW1a {alias C_SJR106[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR105_GW1a {alias C_SJR105[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR101_GW1a {alias C_SJR101[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR096_GW1a {alias C_SJR096[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR091_GW1a {alias C_SJR091[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR090_GW1a {alias C_SJR090[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR087_GW1a {alias C_SJR087[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR082_GW1a {alias C_SJR082[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR081_GW1a {alias C_SJR081[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR075_GW1a {alias C_SJR075[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR072_GW1a {alias C_SJR072[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR070_GW1a {alias C_SJR070[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR062_GW1a {alias C_SJR062[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR056_GW1a {alias C_SJR056[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053A_GW1a {alias C_SJR053A[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053B_GW1a {alias C_SJR053B[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR048_GW1a {alias C_SJR048[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR043_GW1a {alias C_SJR043[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR042_GW1a {alias C_SJR042[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR038_GW1a {alias C_SJR038[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR033_GW1a {alias C_SJR033[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR028_GW1a {alias C_SJR028[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_PEDRO_GW1a {alias C_PEDRO[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO054_GW1a {alias C_TUO054[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO053_GW1a {alias C_TUO053[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO047_GW1a {alias C_TUO047[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO043_GW1a {alias C_TUO043[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO036_GW1a {alias C_TUO036[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO030_GW1a {alias C_TUO030[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO022_GW1a {alias C_TUO022[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO017_GW1a {alias C_TUO017[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO015_GW1a {alias C_TUO015[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO010_GW1a {alias C_TUO010[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO004_GW1a {alias C_TUO004[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO003_GW1a {alias C_TUO003[SJRBASE_GW1] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_BCK040_GW2a {alias C_BCK040[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK035_GW2a {alias C_BCK035[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK033_GW2a {alias C_BCK033[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK031_GW2a {alias C_BCK031[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK024_GW2a {alias C_BCK024[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK017_GW2a {alias C_BCK017[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK010_GW2a {alias C_BCK010[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK006_GW2a {alias C_BCK006[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_EBP001_GW2a {alias C_EBP001[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP005_GW2a {alias C_EBP005[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP016_GW2a {alias C_EBP016[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP019_GW2a {alias C_EBP019[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP022_GW2a {alias C_EBP022[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP030_GW2a {alias C_EBP030[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP032_GW2a {alias C_EBP032[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP033_GW2a {alias C_EBP033[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP041_GW2a {alias C_EBP041[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP042_GW2a {alias C_EBP042[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP043_GW2a {alias C_EBP043[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP048_GW2a {alias C_EBP048[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP050_GW2a {alias C_EBP050[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_ESTMN_GW2a {alias C_ESTMN[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW037_GW2a {alias C_CHW037[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW031_GW2a {alias C_CHW031[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW028_GW2a {alias C_CHW028[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW024_GW2a {alias C_CHW024[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW021_GW2a {alias C_CHW021[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW017_GW2a {alias C_CHW017[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW011_GW2a {alias C_CHW011[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW006_GW2a {alias C_CHW006[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_DED044_GW2a {alias C_DED044[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED038_GW2a {alias C_DED038[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED035_GW2a {alias C_DED035[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED032_GW2a {alias C_DED032[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED025_GW2a {alias C_DED025[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED019_GW2a {alias C_DED019[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED012_GW2a {alias C_DED012[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED010_GW2a {alias C_DED010[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED003_GW2a {alias C_DED003[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_HNSLY_GW2a {alias C_HNSLY[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS048_GW2a {alias C_FRS048[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS046_GW2a {alias C_FRS046[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS045_GW2a {alias C_FRS045[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS039_GW2a {alias C_FRS039[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS036_GW2a {alias C_FRS036[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS032_GW2a {alias C_FRS032[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS025_GW2a {alias C_FRS025[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS022_GW2a {alias C_FRS022[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS020_GW2a {alias C_FRS020[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS016_GW2a {alias C_FRS016[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MCLRE_GW2a {alias C_MCLRE[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD056_GW2a {alias C_MCD056[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD055_GW2a {alias C_MCD055[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD054_GW2a {alias C_MCD054[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD052_GW2a {alias C_MCD052[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD050_GW2a {alias C_MCD050[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD048_GW2a {alias C_MCD048[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD046_GW2a {alias C_MCD046[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD042_GW2a {alias C_MCD042[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD036_GW2a {alias C_MCD036[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD033_GW2a {alias C_MCD033[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD032_GW2a {alias C_MCD032[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD028_GW2a {alias C_MCD028[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD021_GW2a {alias C_MCD021[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD018_GW2a {alias C_MCD018[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD014_GW2a {alias C_MCD014[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD009_GW2a {alias C_MCD009[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD005_GW2a {alias C_MCD005[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD002_GW2a {alias C_MCD002[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MLRTN_GW2a {alias C_MLRTN[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR265_GW2a {alias C_SJR265[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR263_GW2a {alias C_SJR263[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR258_GW2a {alias C_SJR258[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR256_GW2a {alias C_SJR256[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR249_GW2a {alias C_SJR249[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR242_GW2a {alias C_SJR242[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR235_GW2a {alias C_SJR235[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR227_GW2a {alias C_SJR227[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR225_GW2a {alias C_SJR225[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR221_GW2a {alias C_SJR221[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR214_GW2a {alias C_SJR214[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR213_GW2a {alias C_SJR213[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR205_GW2a {alias C_SJR205[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR201_GW2a {alias C_SJR201[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR200_GW2a {alias C_SJR200[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR198_GW2a {alias C_SJR198[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR195_GW2a {alias C_SJR195[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR192_GW2a {alias C_SJR192[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR185_GW2a {alias C_SJR185[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR180_GW2a {alias C_SJR180[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR179_GW2a {alias C_SJR179[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR173_GW2a {alias C_SJR173[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR166_GW2a {alias C_SJR166[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR157_GW2a {alias C_SJR157[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR152_GW2a {alias C_SJR152[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR145_GW2a {alias C_SJR145[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR141_GW2a {alias C_SJR141[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR134_GW2a {alias C_SJR134[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR131_GW2a {alias C_SJR131[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR127_GW2a {alias C_SJR127[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR123_GW2a {alias C_SJR123[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR119_GW2a {alias C_SJR119[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR117_GW2a {alias C_SJR117[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR116_GW2a {alias C_SJR116[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR115_GW2a {alias C_SJR115[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR114_GW2a {alias C_SJR114[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR111_GW2a {alias C_SJR111[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR106_GW2a {alias C_SJR106[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR105_GW2a {alias C_SJR105[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR101_GW2a {alias C_SJR101[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR096_GW2a {alias C_SJR096[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR091_GW2a {alias C_SJR091[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR090_GW2a {alias C_SJR090[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR087_GW2a {alias C_SJR087[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR082_GW2a {alias C_SJR082[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR081_GW2a {alias C_SJR081[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR075_GW2a {alias C_SJR075[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR072_GW2a {alias C_SJR072[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR070_GW2a {alias C_SJR070[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR062_GW2a {alias C_SJR062[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR056_GW2a {alias C_SJR056[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053A_GW2a {alias C_SJR053A[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053B_GW2a {alias C_SJR053B[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR048_GW2a {alias C_SJR048[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR043_GW2a {alias C_SJR043[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR042_GW2a {alias C_SJR042[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR038_GW2a {alias C_SJR038[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR033_GW2a {alias C_SJR033[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR028_GW2a {alias C_SJR028[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_PEDRO_GW2a {alias C_PEDRO[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO054_GW2a {alias C_TUO054[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO053_GW2a {alias C_TUO053[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO047_GW2a {alias C_TUO047[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO043_GW2a {alias C_TUO043[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO036_GW2a {alias C_TUO036[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO030_GW2a {alias C_TUO030[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO022_GW2a {alias C_TUO022[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO017_GW2a {alias C_TUO017[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO015_GW2a {alias C_TUO015[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO010_GW2a {alias C_TUO010[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO004_GW2a {alias C_TUO004[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO003_GW2a {alias C_TUO003[SJRBASE_GW2] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_BCK040_GW3a {alias C_BCK040[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK035_GW3a {alias C_BCK035[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK033_GW3a {alias C_BCK033[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK031_GW3a {alias C_BCK031[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK024_GW3a {alias C_BCK024[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK017_GW3a {alias C_BCK017[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK010_GW3a {alias C_BCK010[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK006_GW3a {alias C_BCK006[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_EBP001_GW3a {alias C_EBP001[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP005_GW3a {alias C_EBP005[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP016_GW3a {alias C_EBP016[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP019_GW3a {alias C_EBP019[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP022_GW3a {alias C_EBP022[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP030_GW3a {alias C_EBP030[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP032_GW3a {alias C_EBP032[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP033_GW3a {alias C_EBP033[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP041_GW3a {alias C_EBP041[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP042_GW3a {alias C_EBP042[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP043_GW3a {alias C_EBP043[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP048_GW3a {alias C_EBP048[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP050_GW3a {alias C_EBP050[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_ESTMN_GW3a {alias C_ESTMN[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW037_GW3a {alias C_CHW037[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW031_GW3a {alias C_CHW031[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW028_GW3a {alias C_CHW028[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW024_GW3a {alias C_CHW024[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW021_GW3a {alias C_CHW021[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW017_GW3a {alias C_CHW017[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW011_GW3a {alias C_CHW011[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW006_GW3a {alias C_CHW006[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_DED044_GW3a {alias C_DED044[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED038_GW3a {alias C_DED038[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED035_GW3a {alias C_DED035[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED032_GW3a {alias C_DED032[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED025_GW3a {alias C_DED025[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED019_GW3a {alias C_DED019[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED012_GW3a {alias C_DED012[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED010_GW3a {alias C_DED010[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED003_GW3a {alias C_DED003[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_HNSLY_GW3a {alias C_HNSLY[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS048_GW3a {alias C_FRS048[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS046_GW3a {alias C_FRS046[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS045_GW3a {alias C_FRS045[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS039_GW3a {alias C_FRS039[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS036_GW3a {alias C_FRS036[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS032_GW3a {alias C_FRS032[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS025_GW3a {alias C_FRS025[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS022_GW3a {alias C_FRS022[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS020_GW3a {alias C_FRS020[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS016_GW3a {alias C_FRS016[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MCLRE_GW3a {alias C_MCLRE[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD056_GW3a {alias C_MCD056[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD055_GW3a {alias C_MCD055[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD054_GW3a {alias C_MCD054[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD052_GW3a {alias C_MCD052[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD050_GW3a {alias C_MCD050[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD048_GW3a {alias C_MCD048[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD046_GW3a {alias C_MCD046[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD042_GW3a {alias C_MCD042[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD036_GW3a {alias C_MCD036[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD033_GW3a {alias C_MCD033[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD032_GW3a {alias C_MCD032[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD028_GW3a {alias C_MCD028[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD021_GW3a {alias C_MCD021[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD018_GW3a {alias C_MCD018[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD014_GW3a {alias C_MCD014[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD009_GW3a {alias C_MCD009[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD005_GW3a {alias C_MCD005[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD002_GW3a {alias C_MCD002[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MLRTN_GW3a {alias C_MLRTN[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR265_GW3a {alias C_SJR265[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR263_GW3a {alias C_SJR263[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR258_GW3a {alias C_SJR258[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR256_GW3a {alias C_SJR256[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR249_GW3a {alias C_SJR249[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR242_GW3a {alias C_SJR242[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR235_GW3a {alias C_SJR235[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR227_GW3a {alias C_SJR227[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR225_GW3a {alias C_SJR225[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR221_GW3a {alias C_SJR221[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR214_GW3a {alias C_SJR214[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR213_GW3a {alias C_SJR213[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR205_GW3a {alias C_SJR205[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR201_GW3a {alias C_SJR201[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR200_GW3a {alias C_SJR200[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR198_GW3a {alias C_SJR198[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR195_GW3a {alias C_SJR195[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR192_GW3a {alias C_SJR192[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR185_GW3a {alias C_SJR185[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR180_GW3a {alias C_SJR180[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR179_GW3a {alias C_SJR179[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR173_GW3a {alias C_SJR173[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR166_GW3a {alias C_SJR166[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR157_GW3a {alias C_SJR157[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR152_GW3a {alias C_SJR152[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR145_GW3a {alias C_SJR145[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR141_GW3a {alias C_SJR141[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR134_GW3a {alias C_SJR134[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR131_GW3a {alias C_SJR131[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR127_GW3a {alias C_SJR127[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR123_GW3a {alias C_SJR123[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR119_GW3a {alias C_SJR119[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR117_GW3a {alias C_SJR117[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR116_GW3a {alias C_SJR116[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR115_GW3a {alias C_SJR115[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR114_GW3a {alias C_SJR114[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR111_GW3a {alias C_SJR111[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR106_GW3a {alias C_SJR106[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR105_GW3a {alias C_SJR105[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR101_GW3a {alias C_SJR101[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR096_GW3a {alias C_SJR096[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR091_GW3a {alias C_SJR091[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR090_GW3a {alias C_SJR090[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR087_GW3a {alias C_SJR087[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR082_GW3a {alias C_SJR082[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR081_GW3a {alias C_SJR081[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR075_GW3a {alias C_SJR075[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR072_GW3a {alias C_SJR072[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR070_GW3a {alias C_SJR070[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR062_GW3a {alias C_SJR062[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR056_GW3a {alias C_SJR056[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053A_GW3a {alias C_SJR053A[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053B_GW3a {alias C_SJR053B[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR048_GW3a {alias C_SJR048[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR043_GW3a {alias C_SJR043[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR042_GW3a {alias C_SJR042[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR038_GW3a {alias C_SJR038[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR033_GW3a {alias C_SJR033[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR028_GW3a {alias C_SJR028[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_PEDRO_GW3a {alias C_PEDRO[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO054_GW3a {alias C_TUO054[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO053_GW3a {alias C_TUO053[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO047_GW3a {alias C_TUO047[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO043_GW3a {alias C_TUO043[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO036_GW3a {alias C_TUO036[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO030_GW3a {alias C_TUO030[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO022_GW3a {alias C_TUO022[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO017_GW3a {alias C_TUO017[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO015_GW3a {alias C_TUO015[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO010_GW3a {alias C_TUO010[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO004_GW3a {alias C_TUO004[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO003_GW3a {alias C_TUO003[SJRBASE_GW3] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_BCK040_GW4a {alias C_BCK040[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK035_GW4a {alias C_BCK035[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK033_GW4a {alias C_BCK033[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK031_GW4a {alias C_BCK031[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK024_GW4a {alias C_BCK024[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK017_GW4a {alias C_BCK017[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK010_GW4a {alias C_BCK010[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_BCK006_GW4a {alias C_BCK006[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_EBP001_GW4a {alias C_EBP001[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP005_GW4a {alias C_EBP005[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP016_GW4a {alias C_EBP016[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP019_GW4a {alias C_EBP019[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP022_GW4a {alias C_EBP022[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP030_GW4a {alias C_EBP030[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP032_GW4a {alias C_EBP032[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP033_GW4a {alias C_EBP033[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP041_GW4a {alias C_EBP041[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP042_GW4a {alias C_EBP042[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP043_GW4a {alias C_EBP043[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP048_GW4a {alias C_EBP048[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_EBP050_GW4a {alias C_EBP050[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_ESTMN_GW4a {alias C_ESTMN[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW037_GW4a {alias C_CHW037[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW031_GW4a {alias C_CHW031[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW028_GW4a {alias C_CHW028[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW024_GW4a {alias C_CHW024[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW021_GW4a {alias C_CHW021[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW017_GW4a {alias C_CHW017[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW011_GW4a {alias C_CHW011[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_CHW006_GW4a {alias C_CHW006[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_DED044_GW4a {alias C_DED044[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED038_GW4a {alias C_DED038[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED035_GW4a {alias C_DED035[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED032_GW4a {alias C_DED032[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED025_GW4a {alias C_DED025[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED019_GW4a {alias C_DED019[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED012_GW4a {alias C_DED012[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED010_GW4a {alias C_DED010[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_DED003_GW4a {alias C_DED003[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_HNSLY_GW4a {alias C_HNSLY[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS048_GW4a {alias C_FRS048[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS046_GW4a {alias C_FRS046[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS045_GW4a {alias C_FRS045[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS039_GW4a {alias C_FRS039[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS036_GW4a {alias C_FRS036[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS032_GW4a {alias C_FRS032[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS025_GW4a {alias C_FRS025[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS022_GW4a {alias C_FRS022[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS020_GW4a {alias C_FRS020[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_FRS016_GW4a {alias C_FRS016[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MCLRE_GW4a {alias C_MCLRE[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD056_GW4a {alias C_MCD056[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD055_GW4a {alias C_MCD055[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD054_GW4a {alias C_MCD054[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD052_GW4a {alias C_MCD052[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD050_GW4a {alias C_MCD050[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD048_GW4a {alias C_MCD048[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD046_GW4a {alias C_MCD046[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD042_GW4a {alias C_MCD042[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD036_GW4a {alias C_MCD036[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD033_GW4a {alias C_MCD033[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD032_GW4a {alias C_MCD032[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD028_GW4a {alias C_MCD028[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD021_GW4a {alias C_MCD021[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD018_GW4a {alias C_MCD018[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD014_GW4a {alias C_MCD014[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD009_GW4a {alias C_MCD009[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD005_GW4a {alias C_MCD005[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_MCD002_GW4a {alias C_MCD002[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_MLRTN_GW4a {alias C_MLRTN[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR265_GW4a {alias C_SJR265[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR263_GW4a {alias C_SJR263[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR258_GW4a {alias C_SJR258[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR256_GW4a {alias C_SJR256[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR249_GW4a {alias C_SJR249[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR242_GW4a {alias C_SJR242[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR235_GW4a {alias C_SJR235[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR227_GW4a {alias C_SJR227[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR225_GW4a {alias C_SJR225[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR221_GW4a {alias C_SJR221[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR214_GW4a {alias C_SJR214[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR213_GW4a {alias C_SJR213[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR205_GW4a {alias C_SJR205[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR201_GW4a {alias C_SJR201[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR200_GW4a {alias C_SJR200[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR198_GW4a {alias C_SJR198[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR195_GW4a {alias C_SJR195[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR192_GW4a {alias C_SJR192[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR185_GW4a {alias C_SJR185[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR180_GW4a {alias C_SJR180[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR179_GW4a {alias C_SJR179[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR173_GW4a {alias C_SJR173[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR166_GW4a {alias C_SJR166[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR157_GW4a {alias C_SJR157[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR152_GW4a {alias C_SJR152[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR145_GW4a {alias C_SJR145[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR141_GW4a {alias C_SJR141[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR134_GW4a {alias C_SJR134[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR131_GW4a {alias C_SJR131[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR127_GW4a {alias C_SJR127[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR123_GW4a {alias C_SJR123[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR119_GW4a {alias C_SJR119[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR117_GW4a {alias C_SJR117[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR116_GW4a {alias C_SJR116[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR115_GW4a {alias C_SJR115[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR114_GW4a {alias C_SJR114[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR111_GW4a {alias C_SJR111[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR106_GW4a {alias C_SJR106[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR105_GW4a {alias C_SJR105[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR101_GW4a {alias C_SJR101[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR096_GW4a {alias C_SJR096[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR091_GW4a {alias C_SJR091[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR090_GW4a {alias C_SJR090[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR087_GW4a {alias C_SJR087[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR082_GW4a {alias C_SJR082[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR081_GW4a {alias C_SJR081[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR075_GW4a {alias C_SJR075[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR072_GW4a {alias C_SJR072[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR070_GW4a {alias C_SJR070[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR062_GW4a {alias C_SJR062[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR056_GW4a {alias C_SJR056[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053A_GW4a {alias C_SJR053A[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR053B_GW4a {alias C_SJR053B[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR048_GW4a {alias C_SJR048[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR043_GW4a {alias C_SJR043[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR042_GW4a {alias C_SJR042[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR038_GW4a {alias C_SJR038[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR033_GW4a {alias C_SJR033[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_SJR028_GW4a {alias C_SJR028[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+define C_PEDRO_GW4a {alias C_PEDRO[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO054_GW4a {alias C_TUO054[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO053_GW4a {alias C_TUO053[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO047_GW4a {alias C_TUO047[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO043_GW4a {alias C_TUO043[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO036_GW4a {alias C_TUO036[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO030_GW4a {alias C_TUO030[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO022_GW4a {alias C_TUO022[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO017_GW4a {alias C_TUO017[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO015_GW4a {alias C_TUO015[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO010_GW4a {alias C_TUO010[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO004_GW4a {alias C_TUO004[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+define C_TUO003_GW4a {alias C_TUO003[SJRBASE_GW4] kind 'CHANNEL-QC' UNITS 'CFS'}
+
+!____________________________________End of file_________________________________________________!

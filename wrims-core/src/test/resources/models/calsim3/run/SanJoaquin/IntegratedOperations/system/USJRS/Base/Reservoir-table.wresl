@@ -1,0 +1,26 @@
+define S17level1 {value 0}
+define S17_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S17Zone1 {S17_1 < S17level1}
+define S17_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S17level3 {value 0}
+define S17_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S17 {std kind 'STORAGE' units 'TAF'} !Temperance Flat
+goal storage17 {S17=S17_1+S17_2+S17_3}
+define F17 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E17 {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A17 {std kind 'SURFACE-AREA' units 'ACRES'}
+!define ER_S17 {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A17last {select area from res_info given storage=1000*S17(-1) use linear where res_num=17}
+define A17forward {select area from res_info given storage=1050*S17(-1) use linear where res_num=17}
+define A17back {select area from res_info given storage=950*S17(-1) use linear where res_num=17}
+!define coefev17 {value (A17forward - A17back)/(100*max(0.01,S17(-1)))}
+define coefev17  {                                         
+    case NEARZERO { condition S17(-1) <= 0.001
+        select coefev from res_info given storage=1 use minimum where res_num=17}    
+    case Otherwise { condition always 
+                value (A17forward - A17back)/(100*max(0.01,S17(-1)))} 
+        }
+goal area17 {A17=A17last+1000*coefev17*S17-1000*coefev17*S17(-1)}
+goal evap17 {E17 = 0.} ! goal evap17 {E17*cfs_af=(ER_S17/24)*A17last+(ER_S17/24)*A17}
+define relcap17 {select discharge from res_info given storage=1000*S17(-1) use linear where res_num=17}
+goal maxrelease17 {C17<relcap17}

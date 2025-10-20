@@ -1,0 +1,265 @@
+
+!Need to disaggregate CC facilities into CCWD, SWP South Bay and CVP San Felipe shares.
+
+!Los Vaqueros Reservoir
+define S422_CC {std kind 'storage' units 'taf'}
+define S422_P {std kind 'storage' units 'taf'}
+
+goal split_S422 {S422 = S422_CC + S422_P}
+
+!Track Fill and Release from LV.
+define C422_REL_CC {std kind 'flow-channel' units 'cfs'}
+define C422_REL_P {std kind 'flow-channel' units 'cfs'}
+define C422_FILL_CC {std kind 'flow-channel' units 'cfs'}
+define C422_FILL_P {std kind 'flow-channel' units 'cfs'}
+goal split_C422_REL {C422_REL = C422_REL_CC + C422_REL_P}
+goal split_C422_FILL {C422_FILL = C422_FILL_CC + C422_FILL_P}
+
+!Disaggregate Partner releases into DEL and WHL
+define C422_REL_P_DEL {std kind 'flow-channel' units 'cfs'}
+define C422_REL_P_WHL {std kind 'flow-channel' units 'cfs'}
+goal split_C422_REL_P {C422_REL_P = C422_REL_P_DEL + C422_REL_P_WHL}
+
+!Disaggregate wheeling release by destination.
+define C422_REL_P_WHLSB {std kind 'flow-channel' units 'cfs'}
+define C422_REL_P_WHLSF {std kind 'flow-channel' units 'cfs'}
+goal split_C422_REL_P_WHL {C422_REL_P_WHL = C422_REL_P_WHLSB + C422_REL_P_WHLSF}
+
+!Disaggregate for COA implementation.
+define C422_RELPWHLSBE1 {std kind 'flow-channel' units 'cfs'}
+define C422_RELPWHLSBE2 {std kind 'flow-channel' units 'cfs'}
+define C422_RELPWHLSFE1 {std kind 'flow-channel' units 'cfs'}
+define C422_RELPWHLSFE2 {std kind 'flow-channel' units 'cfs'}
+
+goal split_C422_REL_WHLSB {C422_REL_P_WHLSB = C422_RELPWHLSBE1 + C422_RELPWHLSBE2}
+goal split_C422_REL_WHLSF {C422_REL_P_WHLSF = C422_RELPWHLSFE1 + C422_RELPWHLSFE2}
+
+!Limit CCWD's share of filling capacity.  C422_FILL_CC_MAX is defined by the user in UserInput.wresl
+goal lim_C422_FILL_CC {C422_FILL_CC < C422_FILL_CC_MAX}
+
+!Transfer-Bethany Pipeline
+define C423B_WHL {std kind 'flow-channel' units 'cfs'}
+define C423B_DEL {std kind 'flow-channel' units 'cfs'}
+goal split_C423B {C423B = C423B_WHL + C423B_DEL}
+
+!Split wheeling and delivery components by destination (SB or SF)
+define C423B_WHL_SB {std kind 'flow-channel' units 'cfs'}
+define C423B_WHL_SF {std kind 'flow-channel' units 'cfs'}
+
+goal split_C423B_WHL {C423B_WHL = C423B_WHL_SB + C423B_WHL_SF}
+
+define C423B_DEL_SB {std kind 'flow-channel' units 'cfs'}
+define C423B_DEL_SF {std kind 'flow-channel' units 'cfs'}
+define C423B_DEL_CA {std kind 'flow-channel' units 'cfs'}
+define C423B_DEL_DMC {std kind 'flow-channel' units 'cfs'}
+
+goal split_C423B_DEL {C423B_DEL = C423B_DEL_SB + C423B_DEL_SF + C423B_DEL_CA + C423B_DEL_DMC}
+
+!Turn wheeling off and on.
+goal set_SB_switch {C423B_WHL_SB < SB_whl_switch*9999.}
+goal set_SF_switch {C423B_WHL_SF < SF_whl_switch*9999.}
+
+!Turn Partner delivery augmentation off and on.
+goal set_del_aug_switch {C423B_DEL_SB + C423B_DEL_SF < Del_aug_switch*9999.}
+goal set_ref_aug_switch {C423B_DEL_CA + C423B_DEL_DMC < Ref_4_switch*9999.}
+
+!LV Accounting
+define F422_P {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+
+define I422_FLEX_P {std kind 'FLOW-INFLOW' units 'CFS'} !INFEASIBLE PREVENTION - WEIGHT HIGHLY NEGATIVE
+
+define E422_CC {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define E422_P {lower unbounded kind 'EVAPORATION' units 'CFS'}
+goal split_E422 {E422 = E422_CC + E422_P}
+
+define P_share {
+    case NoStorage {
+        condition   S422(-1) < 0.1
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       S422_P(-1)/S422(-1)
+    }
+}
+
+
+goal set_E422_P {E422_P = E422*P_share}
+
+!Define arc to allow Kellogg Creek and LV precip to fill partner portion of LV when CC portion is full.
+define I422_P {std kind 'flow-inflow' units 'cfs'}
+!define surp_I422_P {std kind 'surplus-variable' units 'cfs'}
+define INT_I422_P {integer std kind 'KC-spill-integer' units 'none'}
+
+goal set_KC_spill_int {I422_P < 99999*INT_I422_P}
+goal set_KC_spill_int2 {C422_FILL_CC < 99999-99999*INT_I422_P}
+
+!Read in Los Vaqueros Reservoir (LVR) local preciptation and convert to cfs for use in continuity, wq ops, and wq calcs.
+!define I422_ppt { timeseries kind 'PRECIP-RATE' units 'INCHES' }     !inches of precip
+define I422_ppt {			!units inch/day
+    select LV_rain
+    from   LV_Precipitation
+    where  wyear_type = wyt_SAC_LV, month = month
+}
+define I422_ppt_cfs  {value I422_ppt/12000. * A422last * taf_cfs }
+define I422_ppt_cfs_ {alias I422_ppt_cfs kind 'flow-inflow' units 'cfs'}
+
+!goal lim_I422_P {I422_P  < I422+I422_ppt_cfs-C422_KC-E422_CC + surp_I422_P}
+
+goal continuity422_P {I422_P+I422_FLEX_P+C422_FILL_P-C422_REL_P-F422_P-E422_P=S422_P*taf_cfs-S422_P(-1)*taf_cfs} !Los Vaqueros Partnership share
+
+!Route wheeling and deliveries through Transfer-Bethany Pipeline.
+goal route_P_DEL {C423B_DEL = D408_P_DEL + C422_REL_P_DEL}
+goal route_P_WHL_SB {C423B_WHL_SB = D408_P_WHL_SB + C422_REL_P_WHLSB}
+goal route_P_WHL_SF {C423B_WHL_SF = D408_P_WHL_SF + C422_REL_P_WHLSF}
+
+!Route deliveries.
+goal route_SB_del {C423B_DEL_SB = D_SBA009_ACFC_LV + D_SBA020_ACFC_LV + D_SBA029_ACWD_LV + D_SBA036_SCVWD_LV}
+goal route_SF_del {C423B_DEL_SF = D_PCH000_PA_LV + D_PCH000_PU_LV}
+goal route_KC_del {C423B_DEL_CA = D_CAA239_CVPRF_LV}
+goal route_MP_del {C423B_DEL_DMC = D_DMCXCC_PR_LV}
+
+!Route Partner storage
+goal route_P_STR {C422_FILL_P = D408_P_STR}
+
+!Reservoir Operations
+define S422_CC_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S422_CC_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal split_S422_CC {S422_CC = S422_CC_1 + S422_CC_2}
+
+define S422_P_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S422_P_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal split_S422_P {S422_P = S422_P_1 + S422_P_2}
+
+!COA split for diversion of surplus to storage or for delivery.
+define D408_P_STR_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_P_STR_SWP {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P_STR {D408_P_STR = D408_P_STR_CVP + D408_P_STR_SWP}
+
+define D408_P_DEL_CVP {std kind 'flow-delivery' units 'cfs'}
+define D408_P_DEL_SWP {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P_DEL {D408_P_DEL = D408_P_DEL_CVP + D408_P_DEL_SWP}
+
+!COA split for wheeling unused CVP and SWP water.
+define D408_P_WHL_SB_e1 {std kind 'flow-delivery' units 'cfs'}
+define D408_P_WHL_SB_e2 {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P_WHL_SB {D408_P_WHL_SB = D408_P_WHL_SB_e1 + D408_P_WHL_SB_e2}
+
+define D408_P_WHL_SF_e1 {std kind 'flow-delivery' units 'cfs'}
+define D408_P_WHL_SF_e2 {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_P_WHL_SF {D408_P_WHL_SF = D408_P_WHL_SF_e1 + D408_P_WHL_SF_e2}
+
+!Route water to San Felipe Division
+!goal route_to_SF {C423B_SF = D804}  !already routed in wheelcore.wresl
+
+!Limit deliveries of partner storage.
+
+define SF_demand {timeseries kind 'LV-Partner-Demand' units 'cfs'}
+define SB_demand {timeseries kind 'LV-Partner-Demand' units 'cfs'}
+define demand_SF {alias SF_demand kind 'LV-Partner-Demand' units 'cfs'}
+define demand_SB {alias SB_demand kind 'LV-Partner-Demand' units 'cfs'}
+!define demand_CA {alias dem_RefugeL4CA_inc*taf_cfs kind 'LV-Refuge-Demand' units 'cfs'}
+!define demand_DMC {alias dem_RefugeL4DMC_inc*taf_cfs kind 'LV-Refuge-Demand' units 'cfs'}
+
+goal set_dem_D_PCH000_PA_LV {D_PCH000_PA_LV < SF_demand}
+goal set_dem_D_SBA009_ACFC_LV {D_SBA009_ACFC_LV < SB_demand}
+goal set_dem_D_CAA239_CVPRF_LV {D_CAA239_CVPRF_LV = 0 } !< dem_RefugeL4CA_inc*taf_cfs}  !TODO  set to zero for Merging CS3 !dbo ; 2017-07-28 (JAS): Unresolved. Should we keep at 0 or limit to demand?
+goal set_dem_D_DMCXCC_PR_LV {D_DMCXCC_PR_LV = 0 } !< dem_RefugeL4DMC_inc*taf_cfs} !TODO  dbo set to zero for Merging CS3 ; 2017-07-28 (JAS): Unresolved. Should we keep at 0 or limit to demand?
+
+!Turn off other demand arcs for now.
+
+goal set_dem_D_PCH000_PU_LV {D_PCH000_PU_LV < 0}
+goal set_dem_D_SBA020_ACFC_LV {D_SBA020_ACFC_LV < 0}
+goal set_dem_D_SBA029_ACWD_LV {D_SBA029_ACWD_LV < 0}
+goal set_dem_D_SBA036_SCVWD_LV {D_SBA036_SCVWD_LV < 0}
+
+/*
+define dem_D_PCH000_PA_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,mar,apr) .or. perdel_cvpag_s > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       DEM_D710_PAG*taf_cfs - perdel_cvpag_s*DEM_D710_PAG*taf_cfs
+    }
+}
+
+goal lim_dem_D_PCH000_PA_LV {D_PCH000_PA_LV < dem_D_PCH000_PA_LV}
+
+define dem_D_PCH000_PU_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,mar,apr) .or. perdel_cvpmi_s > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       DEM_D711_PMI*taf_cfs - perdel_cvpmi_s*DEM_D711_PMI*taf_cfs
+    }
+}
+
+goal lim_dem_D_PCH000_PU_LV {D_PCH000_PU_LV < dem_D_PCH000_PU_LV}
+
+define dem_D_SBA009_ACFC_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,jan,apr) .or. swp_perdel > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       51.74*(1.-swp_perdel)*taf_cfs/8.   !Where their are 8 months remaining in the calendar year
+    }
+}
+    
+goal lim_D_SBA009_ACFC_LV {D_SBA009_ACFC_LV < dem_D_SBA009_ACFC_LV}
+
+
+define dem_D_SBA020_ACFC_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,jan,apr) .or. swp_perdel > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       28.88*(1.-swp_perdel)*taf_cfs/8.   !Where their are 8 months remaining in the calendar year
+    }
+}
+    
+goal lim_D_SBA020_ACFC_LV {D_SBA020_ACFC_LV < dem_D_SBA020_ACFC_LV}
+
+define dem_D_SBA029_ACWD_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,jan,apr) .or. swp_perdel > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       42.*(1.-swp_perdel)*taf_cfs/8.   !Where their are 8 months remaining in the calendar year
+    }
+}
+    
+goal lim_D_SBA029_ACWD_LV {D_SBA029_ACWD_LV < dem_D_SBA029_ACWD_LV}
+
+define dem_D_SBA036_SCVWD_LV {
+    case EarlyOrFullAlloc {
+        condition   range(month,jan,apr) .or. swp_perdel > 0.75
+        value       0.
+    }
+    case otherwise {
+        condition   always
+        value       100.*(1.-swp_perdel)*taf_cfs/8.   !Where their are 8 months remaining in the calendar year
+    }
+}
+    
+goal lim_D_SBA036_SCVWD_LV {D_SBA036_SCVWD_LV < dem_D_SBA036_SCVWD_LV}
+
+
+define dem_D_PCH000_PA_LV_ {alias dem_D_PCH000_PA_LV kind 'demand' units 'cfs'}
+define dem_D_PCH000_PU_LV_ {alias dem_D_PCH000_PU_LV kind 'demand' units 'cfs'}
+define dem_D_SBA009_ACFC_LV_ {alias dem_D_SBA009_ACFC_LV kind 'demand' units 'cfs'}
+define dem_D_SBA020_ACFC_LV_ {alias dem_D_SBA020_ACFC_LV kind 'demand' units 'cfs'}
+define dem_D_SBA029_ACWD_LV_ {alias dem_D_SBA029_ACWD_LV kind 'demand' units 'cfs'}
+define dem_D_SBA036_SCVWD_LV_ {alias dem_D_SBA036_SCVWD_LV kind 'demand' units 'cfs'}
+
+*/
+

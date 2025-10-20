@@ -1,0 +1,53 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-FloodSpill.wresl
+CalSim 3.0 System File
+
+Purpose:
+To allow flow tops the channel capacity or the reservoir release capacity (RelCap_xxxxx) for flood spill.
+
+Naming takes the following form where {xxxxx} represent the flow node:
+C_{xxxxx}_NCF      -- Normal channel flow (NCF) under channel capacity constraint or normal release under MaxRel constaint
+C_{xxxxx}_Flood    -- Flood release above MaxRel constraint or normal channel capacity
+
+Z.Q. Richard Chen, BDO 3/3/2017 
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Bear Reservoir, Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                              
+define C_LBEAR_NCF	{lower 0 upper RelCap_LBEAR kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_LBEAR  {C_LBEAR < RelCap_LBEAR}
+define C_LBEAR_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_LBEAR  	{C_LBEAR_NCF + C_LBEAR_Flood = C_LBEAR }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Salt Springs Reservoir - Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+define C_SLTSP_NCF	{lower 0 upper RelCap_SLTSP kind 'CHANNEL' units 'CFS'}  !goal   MaxRel_SLTSP  {C_SLTSP < RelCap_SLTSP}
+define C_SLTSP_Flood	{std kind 'SPILL' units 'CFS'}  
+goal   MaxRel_SLTSP  	{C_SLTSP_NCF + C_SLTSP_Flood = C_SLTSP }
+
+Objective obj_FloodEastside = {
+
+[C_LBEAR_Flood, -900000],
+[C_SLTSP_Flood, -900000],
+
+}
+

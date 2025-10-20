@@ -1,0 +1,38 @@
+
+
+
+! Limit PCWA Zone 1 and 5 deliveries based on PG&E WY Allocation
+! Define annual volume of water that may be diverted i.e. the supply
+define CLann_PCWA_1_5 {value 104.}	!TAF
+
+! Calculate annual water demand
+define SumUD_AW_PCWA_1_5 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumUD_AW_PCWA_1_5_sv {
+    case oct{
+    condition month == oct
+        sum(i=0,11,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2) + 2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3) + UD_24_NU1(i)*cfs_taf(i) + UD_24_NU2(i)*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value SumUD_AW_PCWA_1_5(-1) }}
+
+goal setSumUD_AW_PCWA_1_5 {SumUD_AW_PCWA_1_5=SumUD_AW_PCWA_1_5_sv}
+
+! Determine amount of supply that may be be diverted in the current month (TAF)
+define CLmon_PCWA_1_5 {value max(0.0,CLann_PCWA_1_5*((AWR_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFO_24_NA2) + 2.5*AWR_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFO_24_NA3) + UD_24_NU1*cfs_taf + UD_24_NU2*cfs_taf)/SumUD_AW_PCWA_1_5_sv))} 
+define CLmon_PCWA_1_5_sv {alias CLmon_PCWA_1_5 kind 'DEMAND' units 'TAF'}
+
+!Limit diversion to monthly volume
+goal limitPCWA_Zone1_5 {D_BEC022_WTPBWM_PGE + D_WSE003_LBC040 + D_WSE006_24_NA3 + D_STH002_ABN026 + D_STH003_WTPFSS_PGE + D_STH003_24_NA3_PGE + D_STH003_LBC047 + D_STH005_24_NA3_PGE < CLmon_PCWA_1_5*taf_cfs * PGE_WY_Allocation}
+
+!24_NA3 Flow Split (Based on historical data)
+!goal split24_NA3_1 {D_WSE003_LBC040 < 0.1928*(4/3)*(2.5*AWR_24_NA3*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*(1+RPF_24_NA3-RUFO_24_NA3))}!(D_WSE003_LBC040 + D_WSE006_24_NA3	+ D_STH003_24_NA3 + D_STH003_LBC047 + D_BEC021_LBC032)}
+!goal split24_NA3_2 {D_WSE006_24_NA3 < 0.075*(4/3)*(2.5*AWR_24_NA3*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*(1+RPF_24_NA3-RUFO_24_NA3))}
+!goal split24_NA3_3 {D_STH003_24_NA3 < 0.372*(4/3)*(2.5*AWR_24_NA3*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*(1+RPF_24_NA3-RUFO_24_NA3))}
+!goal split24_NA3_4 {D_STH003_LBC047 < 0.243*(4/3)*(2.5*AWR_24_NA3*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*(1+RPF_24_NA3-RUFO_24_NA3))}
+!goal split24_NA3_5 {D_LBC049_24_NA3 < 0.310*(4/3)*(2.5*AWR_24_NA3*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*(1+RPF_24_NA3-RUFO_24_NA3))}
+
+!Flow split for Bowman and Auburn WTP
+goal BowAubSplit { D_BEC022_WTPBWM < 0.587*UD_24_NU1}
+goal RagLim {D_BEC021_LBC032 < D_LBC038_WTPAUB}
+
+

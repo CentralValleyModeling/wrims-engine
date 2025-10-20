@@ -1,0 +1,81 @@
+! SJR_Rest_VA.wresl
+
+! ensure that total Millerton release is at least the restoration release target
+goal setMLRTN_rel {C_MLRTN > MLRTN_rel}  
+
+goal set_C18A { C_MLRTNa < Fr_snow_rel * taf_cfs}
+
+!Set to prior cycle
+goal boundC_MLRTNmain {C_MLRTNM = C_MLRTNM[WHEELJPOD]}
+
+define Rest_Rch_Target {
+        case April {
+                condition   month==APR
+                value       rest_rch_np*14./30. + rest_rch_p*16./30.}
+        case MayOtherwise {
+                condition   always
+                value       rest_rch_np} 
+}
+goal setSJRRflow {D_SJR205_SJR201 < Rest_Rch_Target}
+
+
+define SJRR_Rel {value MLRTN_rel}
+
+!***** Below from CalSim II, do we need to replicate this?  Doesn't seem like this should happen.
+! in some rare cases, upper SJR operations get modified in the VA cycle
+! fix VA cycle operations to transfers_stage1 cycle results
+!goal fixC605A {C605A = C605A[transfers_stage1]}
+!goal fixC605B {C605B = C605B[transfers_stage1]}
+!goal fixC605C {C605C = C605C[transfers_stage1]}
+
+define C_Mlrtnf_fix {
+    case April {
+        condition month==APR
+        value (C_Mlrtnf[SJR_WQ1]*14. + C_Mlrtnf[SJR_WQ2]*16.)/30.}
+    case otherwise {
+        condition always
+        value C_Mlrtnf[SJR_WQ1]}
+}
+
+goal fix_c_mlrtnf {c_mlrtnf = C_Mlrtnf_fix}
+
+!*********************************************************************************************
+! SJRR Recapture Ops
+
+! Set lower SJR recapture to the weighted average of previous cycle solutions (April)
+! or just SJR_WQ1 results (other months).  This accommodates recapture limits due to
+! flood control operations.
+! Enable remaining SJRR flow to proceed to the Delta for recapture by setting D_SJR070_SJRRremove to zero
+! Any SJRR flow that cannot be recaptured or specifically targeted to DO will go to D_SJR022_SJRRnorecap
+
+define D_SJR096_SJRRrecap_limit {
+    case April {
+        condition month==APR
+        value (D_SJR096_SJRRrecap[SJR_WQ1]*14. + D_SJR096_SJRRrecap[SJR_WQ2]*16.)/30.}
+    case otherwise {
+        condition always
+        value D_SJR096_SJRRrecap[SJR_WQ1]}
+}
+define D_SJR082_SJRRrecap_limit {
+    case April {
+        condition month==APR
+        value (D_SJR082_SJRRrecap[SJR_WQ1]*14. + D_SJR082_SJRRrecap[SJR_WQ2]*16.)/30.}
+    case otherwise {
+        condition always
+        value D_SJR082_SJRRrecap[SJR_WQ1]}
+}
+define D_SJR070_SJRRrecap_limit {
+    case April {
+        condition month==APR
+        value (D_SJR070_SJRRrecap[SJR_WQ1]*14. + D_SJR070_SJRRrecap[SJR_WQ2]*16.)/30.}
+    case otherwise {
+        condition always
+        value D_SJR070_SJRRrecap[SJR_WQ1]}
+}
+
+goal set_D_SJR096_SJRRrecap {D_SJR096_SJRRrecap < D_SJR096_SJRRrecap_limit}
+goal set_D_SJR082_SJRRrecap {D_SJR082_SJRRrecap < D_SJR082_SJRRrecap_limit}
+goal set_D_SJR070_SJRRrecap {D_SJR070_SJRRrecap < D_SJR070_SJRRrecap_limit}
+goal set_D_SJR070_SJRRremove {D_SJR070_SJRRremove = 0.}
+
+define LwrSJR_Recap_ {alias D_SJR096_SJRRrecap + D_SJR082_SJRRrecap + D_SJR070_SJRRrecap kind 'SJRR-RECAP' units 'cfs'}

@@ -1,0 +1,97 @@
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Nevada Irrigation District - Deer Creek System   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+There are no land-use based calculations of agricultural demand.
+Therefore, demands are based on recent (2000-2009) historical stream diversions
+
+Cascade Canal:	20.4 TAF/year
+D-S Canal: 		24.2 TAF/year
+Newtown Canal: 	 6.2 TAF/year
+Tunnel Canal: 	 9.4 TAF/year
+Keystone Canal:  0.5 TAF/year
+
+Total = 60.7 TAF/year
+
+Assumed GRSVL urban demand: 8.0 TAF/year
+Assumed WLDWD urban demand: 4.0 TAF/year
+*/
+
+!========================================================================================================================================
+! NID -- Currently not land use based but to be updated after land use based demand is developed in CalSimHydro
+!========================================================================================================================================
+goal setDG_NIDDC_NA1    {DG_NIDDC_NA1 = D_CSD014_NIDDC_NA1 + D_DES006_NIDDC_NA1}! gross surface water diversion
+goal setDN_NIDDC_NA1    {DN_NIDDC_NA1 = DG_NIDDC_NA1 - DL_NIDDC_NA1} ! net surface delivery = surface diversion - conveyance losses
+goal setDL_NIDDC_NA1    {DL_NIDDC_NA1 = 0.}
+goal meetAW_NIDDC_NA1   {DN_NIDDC_NA1 < AW_NIDDC_NA1}! Total Applied Water = net surface delivery; there is no groundwater pumping in NID
+define SHRTG_NIDDC_NA1  {alias AW_NIDDC_NA1 - DN_NIDDC_NA1 kind 'delivery-shortage' units 'cfs'}
+
+
+goal setDG_NIDDC_NA2    {DG_NIDDC_NA2 = D_NWT013_NIDDC_NA2 + D_DER011_NIDDC_NA2 + D_DER004_NIDDC_NA2}! gross surface water diversions
+goal setDN_NIDDC_NA2    {DN_NIDDC_NA2 = DG_NIDDC_NA2 - DL_NIDDC_NA2}! net surface delivery = surface diversion - conveyance losses
+goal setDL_NIDDC_NA2    {DL_NIDDC_NA2 = 0.} ! Total Applied Water = net surface delivery; there is no groundwater pumping in NID
+
+goal meetAW_NIDDC_NA2  {DN_NIDDC_NA2 < AW_NIDDC_NA2}
+define SHRTG_NIDDC_NA2 {alias AW_NIDDC_NA2 - DN_NIDDC_NA2 kind 'delivery-shortage' units 'cfs'}
+
+goal setUD_GRSVL        {D_CSD014_GRSVL + D_DES006_GRSVL < UD_GRSVL}
+define SHRTG_GRSVL	{alias UD_GRSVL - D_CSD014_GRSVL - D_DES006_GRSVL kind 'delivery-shortage' units 'cfs'} 
+
+goal setUD_WLDWD        {D_NWT013_WLDWD < UD_WLDWD}
+define SHRTG_WLDWD	{alias UD_WLDWD - D_NWT013_WLDWD kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! Cascade Canal/DS Canal flow split
+!======================================================================
+!split is based on historical Cascade Canal/DS Canal flow splits (2000-2010)
+goal setD_SFD003_CSD014 {
+	lhs D_SFD003_CSD014  
+	case Summer{
+		condition month>=APR .and. month<=SEP
+		rhs (0.41)*(D_SFD003_CSD014 + D_DER022_DES006)
+		lhs<rhs penalty 99999}
+	case Other {
+		condition always
+		rhs (0.64)*(D_SFD003_CSD014 + D_DER022_DES006)
+		lhs<rhs penalty 99999}}
+	
+
+goal setD_DER022_DES006 {
+	lhs D_DER022_DES006 
+	case Summer {
+		condition month>=APR .and. month<=SEP
+		rhs (0.59)*(D_SFD003_CSD014 + D_DER022_DES006)
+		lhs<rhs penalty 99999}
+	case Other {
+		condition always
+		rhs (0.36)*(D_SFD003_CSD014 + D_DER022_DES006)
+		lhs<rhs penalty 99999}}
+
+!======================================================================
+! NIDDC_NA2 flow split
+!======================================================================
+goal setD_NWT013_NIDDC_NA2  {D_NWT013_NIDDC_NA2  < (2.2/(2.2+9.4+0.5))*(D_NWT013_NIDDC_NA2 + D_DER011_NIDDC_NA2 + D_DER004_NIDDC_NA2)}
+goal setD_DER011_NIDDC_NA2  {D_DER011_NIDDC_NA2  < (9.4/(2.2+9.4+0.5))*(D_NWT013_NIDDC_NA2 + D_DER011_NIDDC_NA2 + D_DER004_NIDDC_NA2)}
+goal setD_DER004_NIDDC_NA2  {D_DER004_NIDDC_NA2  < (0.5/(2.2+9.4+0.5))*(D_NWT013_NIDDC_NA2 + D_DER011_NIDDC_NA2 + D_DER004_NIDDC_NA2)}
+
+! Deer Creek Powerhouse flows are used to meet Cascade canal flows
+goal setDeerPH_minQ {C_SYC020 > D_SFD003_CSD014}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Miscellaneous	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal limit_CSD014 {C_CSD014 = 0.05 * D_SFD003_CSD014}

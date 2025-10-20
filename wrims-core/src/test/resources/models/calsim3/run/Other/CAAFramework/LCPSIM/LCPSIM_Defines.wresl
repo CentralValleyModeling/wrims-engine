@@ -1,0 +1,105 @@
+! LCPSIM_Defines.wresl
+! This file defines parameters required for LCPSIM adjustments
+
+!******************************************************************************
+! setup a year index for use with the Transfers logic - essentially assumes that decisions are made in Apr/May each year
+define transfersyear {
+    case before_Apr {
+         condition  month < APR
+         value      wateryear-1.}
+    case rest {
+         condition  always
+         value      wateryear}
+}
+define wyt_TRANS {
+    case before_Apr {
+         condition  month < APR
+         value wyt_Sac_(PrevMay)}
+    case rest {
+         condition  always
+         value WYT_SAC_Frcst}
+}    
+
+define wyt_TRANS_{alias wyt_TRANS kind 'wateryeartype' units 'none'} 
+
+!******************************************************************************
+! setup a year index for use with the LCPSIM adjustments logic - essentially assumes that knowledge of adjustments starts in Jan each year
+define lcpsimyear {
+    case before_Jan {
+         condition  month < Jan
+         value      wateryear-1.}
+    case rest {
+         condition  always
+         value      wateryear}
+}
+
+!******************************************************************************
+!import operations assumptions
+! NBA - North Bay Aqueduct (M&I)     1        1 (North Bay)
+define DEL_ADJ_NBA_Perc {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=1, ImportID=1}
+define DEL_ADJ_NBA_Fact {value DEL_ADJ_NBA_Perc/100.}
+! EB  - Mokelume Aqueduct            1        2 (South Bay)
+define DEL_ADJ_EB_Perc  {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=1}
+define DEL_ADJ_EB_Fact  {value DEL_ADJ_EB_Perc/100.}
+define GW_ADJ_EB_Perc   {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=1}
+define GW_ADJ_EB_Fact   {value GW_ADJ_EB_Perc/100.}
+! SF  - Hetch Hetchy Aqueduct        2        2 (South Bay)
+define DEL_ADJ_SF_Perc  {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=2}
+define DEL_ADJ_SF_Fact  {value DEL_ADJ_SF_Perc/100.}
+define GW_ADJ_SF_Perc   {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=2}
+define GW_ADJ_SF_Fact   {value GW_ADJ_SF_Perc/100.}
+! CCC - Contra Costa Canal           3        2 (South Bay)
+define DEL_ADJ_CCC_Perc {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=3}
+define DEL_ADJ_CCC_Fact {value DEL_ADJ_CCC_Perc/100.}
+define GW_ADJ_CCC_Perc  {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=3}
+define GW_ADJ_CCC_Fact  {value GW_ADJ_CCC_Perc/100.}
+! SFU - San Felipe Unit (M&I)        4        2 (South Bay)
+define DEL_ADJ_SFU_Perc {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=4}
+define DEL_ADJ_SFU_Fact {value DEL_ADJ_SFU_Perc/100.}
+define GW_ADJ_SFU_Perc  {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=4}
+define GW_ADJ_SFU_Fact  {value GW_ADJ_SFU_Perc/100.}
+! SBA - South Bay Aqueduct (M&I)     5        2 (South Bay)
+define DEL_ADJ_SBA_Perc {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=5}
+define DEL_ADJ_SBA_Fact {value DEL_ADJ_SBA_Perc/100.}
+define GW_ADJ_SBA_Perc  {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=2, ImportID=5}
+define GW_ADJ_SBA_Fact  {value GW_ADJ_SBA_Perc/100.}
+! CR  - Colorado River (M&I)         1        3 (South Coast)
+define DEL_ADJ_CR_Perc  {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=3, ImportID=1}
+define DEL_ADJ_CR_Fact  {value DEL_ADJ_CR_Perc/100.}
+define GW_ADJ_CR_Perc   {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=3, ImportID=1}
+define GW_ADJ_CR_Fact   {value GW_ADJ_CR_Perc/100.}
+! CA  - California Aqueduct (M&I)    2        3 (South Coast)
+define DEL_ADJ_CA_Perc  {select DEL_ADJ_Perc from LCPSIM_JobControl where RegionID=3, ImportID=2}
+define DEL_ADJ_CA_Fact  {value DEL_ADJ_CA_Perc/100.}
+define GW_ADJ_CA_Perc   {select GW_ADJ_Perc from LCPSIM_JobControl where RegionID=3, ImportID=2}
+define GW_ADJ_CA_Fact   {value GW_ADJ_CA_Perc/100.}
+
+!******************************************************************************
+!Split Arcs
+define D852_SB_LCP {lower unbounded upper unbounded kind 'FLOW-DELIVERY' units 'CFS'} !LCPSIM Adjustment to SJV Groundwater Storage for South Bay
+define D852_SC_LCP {lower unbounded upper unbounded kind 'FLOW-DELIVERY' units 'CFS'} !LCPSIM Adjustment to SJV Groundwater Storage for South Coast
+define D_ESB403_MOJVE_SC_LCP {lower unbounded upper unbounded kind 'FLOW-DELIVERY' units 'CFS'} !LCPSIM Adjustment to MWA Groundwater Storage for South Coast
+
+
+!******************************************************************************
+!Error terms
+define D852_SB_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SJV Groundwater Storage for South Bay
+define D852_SC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SJV Groundwater Storage for South Coast
+define D_CAA207_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SJV Groundwater Storage
+define D_ESB403_MOJVE_SC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWA Groundwater Storage for South Coast
+define D_ESB403_MOJVE_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWA Groundwater Storage
+define D_SBA009_ACFC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to ACFC
+define D_SBA020_ACFC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to ACFC
+define D_SBA029_ACWD_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to ACWD
+define D_SBA036_SCVWD_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SCV
+define D711_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to San Felipe SCV
+define D_WSB032_CLRTA2_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to CLWA2
+define D_PRRIS_MWDSC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWD
+define D_ESB413_MWDSC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWD
+define D_WSB031_MWDSC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWD
+define D_ESB433_MWDSC_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to MWD
+define D_ESB414_BRDNO_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SBV
+define D_ESB415_GABRL_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SGV
+define D_ESB420_GRGNO_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to SGP
+define D_PYRMD_VNTRA_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to VC
+define D_CSTIC_VNTRA_LCP_Err {lower unbounded upper unbounded kind 'LCPSIM-ADJUST-ERROR' units 'CFS'} !LCPSIM Adjustment Error related to VC

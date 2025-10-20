@@ -1,0 +1,142 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-WUfactors.wresl
+CalSim 3.0 System File
+
+Purpose:
+Apply water use factors
+ 
+Naming takes the following form:
+ EL_{source prefix}_{demand unit} - evaporative loss (non-recoverable)
+ PL_{source prefix}_{demand unit} - percolation loss (to groundwater)
+ RL_{source prefix}_{demand unit} - return flow loss (seepage loss to canal toe drain, available for reuse)
+ SL_{source prefix}_{demand unit} - spill loss (canal spill to main drain, not available for reuse)
+  
+ DL_{source prefix}_{demand unit}  - total conveyance loss  associated with diversion (EL + PL + RL + SL)
+ DL_{demand unit}             - total conveyance loss  associated with demand unit from multiple diversion arcs
+  
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26N         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setEL_26N_PU1   {EL_26N_PU1 = D_WTPRSV_26N_PU1  * EF_WTPRSV_26N_PU1}
+goal setSL_26N_PU1   {SL_26N_PU1 = D_WTPRSV_26N_PU1  * SF_WTPRSV_26N_PU1}
+goal setDL_26N_PU1   {DL_26N_PU1 = EL_26N_PU1    + SL_26N_PU1}
+
+goal setEL_26N_PU2   {EL_26N_PU2 = D_WTPSJP_26N_PU2  * EF_WTPSJP_26N_PU2}
+goal setSL_26N_PU2   {SL_26N_PU2 = D_WTPSJP_26N_PU2  * SF_WTPSJP_26N_PU2}
+goal setDL_26N_PU2   {DL_26N_PU2 = EL_26N_PU2    + SL_26N_PU2}
+
+goal setEL_26N_PU3   {EL_26N_PU3 = D_WTPSJP_26N_PU3  * EF_WTPSJP_26N_PU3}
+goal setSL_26N_PU3   {SL_26N_PU3 = D_WTPSJP_26N_PU3  * SF_WTPSJP_26N_PU3}
+goal setDL_26N_PU3   {DL_26N_PU3 = EL_26N_PU3    + SL_26N_PU3}
+
+goal setEL_26N_NU2   {EL_26N_NU2 = D_WTPBJM_26N_NU2  * EF_WTPBJM_26N_NU2}
+goal setSL_26N_NU2   {SL_26N_NU2 = D_WTPBJM_26N_NU2  * SF_WTPBJM_26N_NU2}
+goal setDL_26N_NU2   {DL_26N_NU2 = EL_26N_NU2    + SL_26N_NU2}
+
+goal setEL_26N_NU1   {EL_26N_NU1 = D_WTPSJP_26N_NU1  * EF_WTPSJP_26N_NU1 + D_WTPFBN_26N_NU1  * EF_WTPFBN_26N_NU1}
+goal setSL_26N_NU1   {SL_26N_NU1 = D_WTPSJP_26N_NU1  * SF_WTPSJP_26N_NU1 + D_WTPFBN_26N_NU1  * SF_WTPFBN_26N_NU1}
+goal setDL_26N_NU1   {DL_26N_NU1 = EL_26N_NU1    + SL_26N_NU1}
+
+goal setEL_26N_NU3   {EL_26N_NU3 = D_WTPSAC_26N_NU3  * EF_WTPSAC_26N_NU3 + D_WTPFBN_26N_NU3  * EF_WTPFBN_26N_NU3}
+goal setSL_26N_NU3   {SL_26N_NU3 = D_WTPSAC_26N_NU3  * SF_WTPSAC_26N_NU3 + D_WTPFBN_26N_NU3  * SF_WTPFBN_26N_NU3}
+goal setDL_26N_NU3   {DL_26N_NU3 = EL_26N_NU3    + SL_26N_NU3}
+
+goal setEL_26N_NU4   {EL_26N_NU4 = D_WTPFBN_26N_NU4  * EF_WTPFBN_26N_NU4}
+goal setSL_26N_NU4   {SL_26N_NU4 = D_WTPFBN_26N_NU4  * SF_WTPFBN_26N_NU4}
+goal setDL_26N_NU4   {DL_26N_NU4 = EL_26N_NU4    + SL_26N_NU4}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26S         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setEL_26S_PU1   {EL_26S_PU1 = D_WTPFOL_26S_PU1  * EF_WTPFOL_26S_PU1 + D_WTPVNY_26S_PU1  * EF_WTPVNY_26S_PU1}
+goal setSL_26S_PU1   {SL_26S_PU1 = D_WTPFOL_26S_PU1  * SF_WTPFOL_26S_PU1 + D_WTPVNY_26S_PU1  * SF_WTPVNY_26S_PU1}
+goal setDL_26S_PU1   {DL_26S_PU1 = EL_26S_PU1    + SL_26S_PU1}
+
+goal setEL_26S_PU2   {EL_26S_PU2 = D_WTPCOL_26S_PU2  * EF_WTPCOL_26S_PU2}
+goal setSL_26S_PU2   {SL_26S_PU2 = D_WTPCOL_26S_PU2  * SF_WTPCOL_26S_PU2}
+goal setDL_26S_PU2   {DL_26S_PU2 = EL_26S_PU2    + SL_26S_PU2}
+
+goal setEL_26S_NU1   {EL_26S_NU1 = D_WTPFBN_26S_NU1  * EF_WTPFBN_26S_NU1 + D_WTPSAC_26S_NU1  * EF_WTPSAC_26S_NU1}
+goal setSL_26S_NU1   {SL_26S_NU1 = D_WTPFBN_26S_NU1  * SF_WTPFBN_26S_NU1 + D_WTPSAC_26S_NU1  * SF_WTPSAC_26S_NU1}
+goal setDL_26S_NU1   {DL_26S_NU1 = EL_26S_NU1    + SL_26S_NU1}
+
+goal setEL_26S_PU4   {EL_26S_PU4 = D_WTPVNY_26S_PU4  * EF_WTPVNY_26S_PU4 + D_WTPSAC_26S_PU4  * EF_WTPSAC_26S_PU4}
+goal setSL_26S_PU4   {SL_26S_PU4 = D_WTPVNY_26S_PU4  * SF_WTPVNY_26S_PU4 + D_WTPSAC_26S_PU4  * SF_WTPSAC_26S_PU4}
+goal setDL_26S_PU4   {DL_26S_PU4 = EL_26S_PU4    + SL_26S_PU4}
+
+goal setEL_26S_NU2   {EL_26S_NU2 = D_WTPFBN_26S_NU2  * EF_WTPFBN_26S_NU2}
+goal setSL_26S_NU2   {SL_26S_NU2 = D_WTPFBN_26S_NU2  * SF_WTPFBN_26S_NU2}
+goal setDL_26S_NU2   {DL_26S_NU2 = EL_26S_NU2    + SL_26S_NU2}
+
+goal setEL_26S_PU5   {EL_26S_PU5 = D_WTPVNY_26S_PU5  * EF_WTPVNY_26S_PU5}
+goal setSL_26S_PU5   {SL_26S_PU5 = D_WTPVNY_26S_PU5  * SF_WTPVNY_26S_PU5}
+goal setDL_26S_PU5   {DL_26S_PU5 = EL_26S_PU5    + SL_26S_PU5}
+
+goal setEL_26S_PU6   {EL_26S_PU6 = D_WTPVNY_26S_PU6  * EF_WTPVNY_26S_PU6}
+goal setSL_26S_PU6   {SL_26S_PU6 = D_WTPVNY_26S_PU6  * SF_WTPVNY_26S_PU6}
+goal setDL_26S_PU6   {DL_26S_PU6 = EL_26S_PU6    + SL_26S_PU6}
+
+goal setEL_26S_PU3   {EL_26S_PU3 = D_FOLSM_26S_PU3  * EF_FSC003_26S_PU3}
+goal setSL_26S_PU3   {SL_26S_PU3 = D_FOLSM_26S_PU3  * SF_FSC003_26S_PU3}
+goal setDL_26S_PU3   {DL_26S_PU3 = EL_26S_PU3    + SL_26S_PU3}
+
+goal setEL_26S_NU4   {EL_26S_NU4 = D_FOLSM_26S_NU4  * EF_FOLSM_26S_NU4}
+goal setSL_26S_NU4   {SL_26S_NU4 = D_FOLSM_26S_NU4  * SF_FOLSM_26S_NU4}
+goal setDL_26S_NU4   {DL_26S_NU4 = EL_26S_NU4    + SL_26S_NU4}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60N         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 60N_PU
+!==============================
+goal setEL_FSC025_60N_PU{EL_FSC025_60N_PU = D_FSC025_60N_PU  * EF_FSC025_60N_PU}
+goal setSL_FSC025_60N_PU{SL_FSC025_60N_PU = D_FSC025_60N_PU  * SF_FSC025_60N_PU}
+goal setDL_FSC025_60N_PU{DL_FSC025_60N_PU = EL_FSC025_60N_PU + SL_FSC025_60N_PU}
+
+goal setDL_60N_PU   {DL_60N_PU = DL_FSC025_60N_PU}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District to EID Eastern and EID Western    !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal setEL_ELDID_NU3    {EL_ELDID_NU3 = D_WTPEDH_ELDID_NU3  * EF_WTPEDH_ELDID_NU3}
+goal setSL_ELDID_NU3    {SL_ELDID_NU3 = D_WTPEDH_ELDID_NU3  * SF_WTPEDH_ELDID_NU3}
+goal setDL_ELDID_NU3    {DL_ELDID_NU3 = EL_ELDID_NU3    + SL_ELDID_NU3}
+
+!goal setEL_ELDID_NA3    {EL_ELDID_NA3 = D_FOLSM_ELDID_NA3  * EF_FOLSM_ELDID_NA3}
+!goal setSL_ELDID_NA3    {SL_ELDID_NA3 = D_FOLSM_ELDID_NA3  * SF_FOLSM_ELDID_NA3}
+!goal setDL_ELDID_NA3    {DL_ELDID_NA3 = EL_ELDID_NA3    + SL_ELDID_NA3}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! El Dorado Irrigation District - Potential deliveries to OCA    !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setEL_EDCOCA_NU2    {EL_EDCOCA_NU2 = D_FOLSM_EDCOCA_NU2  * EF_FOLSM_EDCOCA_NU2}
+goal setSL_EDCOCA_NU2    {SL_EDCOCA_NU2 = D_FOLSM_EDCOCA_NU2  * SF_FOLSM_EDCOCA_NU2}
+goal setDL_EDCOCA_NU2    {DL_EDCOCA_NU2 = EL_EDCOCA_NU2    + SL_EDCOCA_NU2}
+
+goal setEL_EDCOCA_NA2    {EL_EDCOCA_NA2 = D_FOLSM_EDCOCA_NA2  * EF_FOLSM_EDCOCA_NA2}
+goal setSL_EDCOCA_NA2    {SL_EDCOCA_NA2 = D_FOLSM_EDCOCA_NA2  * SF_FOLSM_EDCOCA_NA2}
+goal setDL_EDCOCA_NA2    {DL_EDCOCA_NA2 = EL_EDCOCA_NA2    + SL_EDCOCA_NA2}

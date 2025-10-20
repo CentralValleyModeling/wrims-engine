@@ -1,0 +1,36 @@
+!*********************************************************************
+!   Add DP to exterior element areas which are located outside WBA 
+!   Z.Q. Richard Chen 10/24/2018
+!*********************************************************************
+
+!====
+! WBA exterior element deep percolation
+!====
+define DP_DELTA_DCD      {timeseries kind 'DP-FLOW' units 'TAF' convert 'CFS'}
+define GW_DELTA_DCD      {timeseries kind 'GW-FLOW' units 'TAF' convert 'CFS'}
+
+define  fgwdelta        {value  0.0    } !fgwdelta is a calibration factor to represent the portion of (0.04)
+                             !DCD groundwater supply in Delta (excluding WBA50) that is from GW aquifer (is not from DCD subsurface storage/DCD seepage)
+define rSetDP_DETAW {value SetDP(DP_DELTA_DCD * cfs_cfm,INT(indxDETAW))}
+define rSetGP_DETAW {value SetGP(fgwdelta*GW_DELTA_DCD * cfs_cfm,INT(indxDETAW))}   
+
+define DP_EA_02 {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define DP_EA_03 {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define DP_EA_05 {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define DP_EA_06 {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define DP_EA_15S {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define rSetDP_EA_02 {value SetDP(DP_EA_02 * cfs_cfm, INT(indxEA_02))}
+define rSetDP_EA_03 {value SetDP(DP_EA_03 * cfs_cfm, INT(indxEA_03))}
+define rSetDP_EA_05 {value SetDP(DP_EA_05 * cfs_cfm, INT(indxEA_05))}
+define rSetDP_EA_06 {value SetDP(DP_EA_06 * cfs_cfm, INT(indxEA_06))}
+define rSetDP_EA_15S {value SetDP(DP_EA_15S * cfs_cfm, INT(indxEA_15S))}      
+
+define DP_EA_60N {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define rSetDP_EA_60N {value SetDP(DP_EA_60N  * cfs_cfm, INT(indxEA_60N))}
+
+define DP_EA_DETAW {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define DP_EA_NBAY {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define rSetDP_EA_DETAW {value SetDP(DP_EA_DETAW  * cfs_cfm, INT(indxEA_DETAW))}
+define rSetDP_EA_NBAY {value SetDP(DP_EA_NBAY  * cfs_cfm, INT(indxEA_NBAY))}
+

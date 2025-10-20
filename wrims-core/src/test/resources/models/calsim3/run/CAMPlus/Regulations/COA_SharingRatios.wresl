@@ -1,0 +1,45 @@
+/*This file was developed to vary following sharing ratios by water year type:
+- COA IBU
+- COA UWFE
+- Available export capacity during months when regulations limit South Delta exports: 1) D1641 EI, 2) D1641 Vernalis 1:1, 3) BO RPA OMR, and 4) NMFS BO RPAs
+
+CVP sharing ratios are included in ShrngRatios.table.
+SWP sharing ratios = (1 - CVP sharing ratio)*/
+
+! CVP COA share of Unstored Water For Export
+define CVP_UWFE_CAM {select cvp_uwfe_
+       from       ShrngRatios
+       where      wyt=wyt_SAC}
+
+define SWP_UWFE_CAM {value 1 - CVP_UWFE_CAM}
+	   
+! CVP COA share of In Basin Use
+define CVP_IBU_CAM {select cvp_ibu_
+       from       ShrngRatios
+       where      wyt=wyt_SAC}
+	   
+define SWP_IBU_CAM {value 1 - CVP_IBU_CAM}
+	   
+! CVP's share of available export capacity during export constrained conditions
+! Balanced months are defined as...
+!	- projects are operated to meet the Delta Water Quality standards (C407 - C407_ANN < 0.1)
+!	- when EI is controlling and projects end up paying tax to push against EI
+!		defined by the EI_Control_On in coa.wresl and coa_BO.wresl
+! Surplus months are defined as...
+!	- non-Balanced month
+!	- if OMR or SJR IE pushes Delta into excess conditions (classified as Excess with limitations or Excess with export restrictions)
+!
+!FOR SIMPLIFICATION, when EI or Vernalis 1:1 is controlling use Balanced Month sharing ratios.
+!FOR SIMPLIFICATION, when OMR or SJE IE is controlling use Surplus Month sharing ratios.
+
+define CVPExpCapShare_Blncd_CAM {select CVPExpCapShare_Blncd_
+       from       ShrngRatios
+       where      wyt=wyt_SAC}
+
+define CVPExpCapShare_Srpls_CAM {select CVPExpCapShare_Srpls_
+       from       ShrngRatios
+       where      wyt=wyt_SAC}
+
+define SWPExpCapShare_Blncd_CAM {value 1 - CVPExpCapShare_Blncd_CAM}
+define SWPExpCapShare_Srpls_CAM {value 1 - CVPExpCapShare_Srpls_CAM} 
+	 

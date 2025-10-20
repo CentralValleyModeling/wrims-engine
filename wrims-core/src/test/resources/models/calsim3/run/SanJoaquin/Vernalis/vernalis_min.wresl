@@ -1,0 +1,181 @@
+! vernalis_min.wresl
+
+! Originally coded by Edward Chang (DWR) 06/27/2000 for Vernalis Minimum Flows
+! revised for NOAA BO and adapted to CalSim3 syntax
+
+/*
+ In Cycle 6:
+ The following code defines and meets the 1995 Water Quality Control Plan codified in D1641
+ (WQCP) Vernalis February thru June minimum flows (excluding the pulse flow period Apr15-May15).
+
+ The Vernalis minimum flow is a function of:
+     1)  60-20-20 index (San Joaquin basin water year type)
+     2)  Where is 2ppt isohaline (measured as 2.64 mmhos/cm surface salinity) is required to be
+ If the day weighted average requirement at Roe, Chipps and Confluence is less than
+ or equal to 74 km, X2 is required to be at or West of Chipps, i.e. <= 74 km
+
+                    X2 Required to be        X2 Required to be at or
+                    East of Chipps           West of Chips
+ Water year type    Minimum flow Req (cfs)   Minimum flow Req (cfs)
+ ----------------------------------------------------------------
+   Wet              2130                     3420
+    AN              2130                     3420
+    BN              1420                     2280
+   Dry              1420                     2280
+   Crt               710                     1140
+
+ Release for the requirement is made from New Melones and may be restricted
+ by a inputted limit on allocation of Stan water for this purpose.  See STAN_YR.TABLE
+ The USBR 1997 two-year Interim Plan of Operations used the following allocation table:
+ Water Supply   Annual
+  Forecast     Allocation
+   (TAF)         (TAF)
+ -----------------------
+     0.        0.
+     1400.     0.
+     2000.     0.
+     2500.     1000.
+     3000.     1000.
+     6000.     1000.
+
+where the Water Supply Forecast was comprised of End-of-Feb New Melones storage in taf + forecasted inflow
+to New Melones from Mar1 to Sep30 in taf.  Usually in modeling thus far, this "forecast" was with perfect foresight.
+
+Per NOAA BO Phase II Action IV.2.1, April 1 - May 31 flows at Vernalis based on WYT.
+*/
+
+!########################################################################################
+
+define NOAAVernMin_req {value     0. }
+!     case AprORMay {
+!          condition month == apr .or. month == may
+!          select NOAAmin from NOAAVern60dayMin where WYT = wyt_SJR }
+!     case otherwise {
+!          condition always
+!          value     0. }
+!          }
+
+define X2EastOfChipps {select VernMinReqEast from VernMin where wyt_SJR=wyt_SJR }
+define X2WestOfChipps {select VernMinReqWest from VernMin where wyt_SJR=wyt_SJR }
+
+define X2VernMin_req {
+     case considerX2 {
+          condition month >= feb .and. month <= jun
+          value ((daysX2_chs*X2WestOfChipps)+((daysin - daysX2_chs)*X2EastOfChipps))/daysin}
+     case otherwise {                                                                                                        !WB
+          condition always                                                                                                   !WB
+          value     0. }                                                                                                     !WB
+          }                                                                                                                  !WB
+
+! the wqcp standard controls feb, mar, and jun
+! the noaa req't controls in the pulse period of Apr/May
+! the max of the noaa and wqcp standards controls in the non-pulse portion of Apr/May
+define VernMin_req {
+    case April {
+        condition month==APR
+        value max(NOAAVernMin_req, X2VernMin_req)*14./30. + NOAAVernMin_req*16./30.}
+    case May {
+        condition month==MAY
+        value max(NOAAVernMin_req, X2VernMin_req)*16./31. + NOAAVernMin_req*15./31.}
+    case otherwise {
+        condition always
+        value X2VernMin_req }
+}
+
+define VernMin_reqdv {alias VernMin_req kind 'flow-requirement' units 'cfs'}
+
+/*
+Vernalis minimum flow requirement deficiency. The deficiency is the
+difference between the Vernalis minimum requirement less the San Joaquin River
+inflow to the Delta in Cycle 2 (SJR_WQ1) 
+*/
+define VernMin_def {
+    case April {
+        condition month==APR
+        value max(0., max(NOAAVernMin_req, X2VernMin_req) - C_SJR070[SJR_WQ1])*14/30.   ! non-pulse
+              + max(0., NOAAVernMin_req - C_SJR070[SJR_WQ2])*16./30.}               ! pulse  
+    case May {
+        condition month==MAY
+        value max(0., max(NOAAVernMin_req, X2VernMin_req) - C_SJR070[SJR_WQ1])*16/31.   ! non-pulse
+              + max(0., NOAAVernMin_req - C_SJR070[SJR_WQ2])*15./31.}               ! pulse  
+    case otherwise {
+        condition always
+        value max (0., VernMin_req - C_SJR070[SJR_WQ1]) } 
+}
+! Final deficiency at Vernalis.
+define VernMin_defDV {alias VernMin_def kind 'flow-requirement' units 'cfs'}
+
+/*
+ Vernalis minimum flow requirement capapcity limits the amount of water to release
+ based on the New Melones Forecast.
+*/
+define VernMinCap { select VernMinCap from stan_yr given NMF=NMforecast1 use minimum }
+
+! Vernalis minimum release cumulative total March through June (summed from Feb to current month-1).
+define VernMinRelTotprv {
+     case MarchthruJun {
+          condition month >= mar .and. month <= jun
+          sum(i=-1,prevfeb,-1) C_MELONmin(i)*cfs_taf(i) }
+     case otherwise {
+          condition always
+          value     0. }
+          }
+/*
+ Vernalis minimum release capacity remaining (Capacity less monthly cumulative total)
+ February through June and reset each February.
+*/
+define VernMinCapRem {
+     case February {
+          condition month == feb
+          value     VernMinCap*TAF_cfs }
+     case MarchthruJun {
+          condition month >= mar .and. month <= jun
+          value     max (0.,VernMinCap - VernMinRelTotprv)*TAF_cfs }
+     case otherwise {
+          condition always
+          value     0. }
+          }
+/*
+ Vernalis minimum release remaining from Goodwin maximum capacity.  Pulse flow periods
+ are addressed in April and May.  Flood flow does not count towards contributing
+ water to the Vernalis minimum flow requrirement.
+*/
+define VernMinRemGoodRipon {
+     case April {
+          condition month == apr
+          value     max(0.,maxGoodwin - C_STS059[SJR_WQ1] + C_STS059F[SJR_WQ1])*14./30.
+                  + max(0.,maxGoodwin - C_STS059[SJR_WQ2] + C_STS059F[SJR_WQ2])*16./30.} 
+    case MayOnly {
+          condition month == may
+          value     max(0.,maxGoodwin - C_STS059[SJR_WQ1] + C_STS059F[SJR_WQ1])*16./31.
+                  + max(0.,maxGoodwin - C_STS059[SJR_WQ2] + C_STS059F[SJR_WQ2])*15./31.} 
+     case JunethruSep {
+          condition month >= jun .and. month <= sep
+          value max(0.,maxGoodwin - C_STS059[SJR_WQ1] + C_STS059F[SJR_WQ1]) } 
+     case otherwise {
+          condition always
+          value  max(0., maxGoodwin - C_STS059[SJR_WQ1] + C_STS059F[SJR_WQ1]) }
+          }
+
+/*
+ Vernalis minimum flow requirement to be met is based on the least value of
+ the maximum allowed release from Goodwin less what has been released for this month,
+ or the Vernalis monthly flow requirement less flow in the Delta in cycle 1 (SJR_WQ1)
+ or the Vernalis minimum release capacity (limit) less the cumulative total released 
+ to meet the requirement.
+*/
+define VernMin_reqtobemet { value min(VernMinRemGoodRipon, VernMin_def, VernMinCapRem)}
+define AL_VrnMintobemet {alias VernMin_reqtobemet kind 'temp' units 'cfs'}
+
+
+! Set minimum flow in C_MELON equal to the Vernalis minimum flow requirment to be met.
+goal meetVernMin {
+     lhs  C_MELONMIN
+     case FebToJun {
+          condition month >= feb .and. month <= jun
+          rhs      0.   !VernMin_reqtobemet
+          lhs<rhs   penalty 0. }
+     case otherwise {
+          condition always
+          rhs       0. }
+          }

@@ -1,0 +1,33 @@
+!R Wilbur 3/7/07
+
+!Step 1: Determine SWP allocation (use either WSI-DI or CAM):
+  !Option 1a - WSI-DI Procedure:
+include 'SWP\wsi_di\wsi_swp.wresl'
+include 'SWP\wsi_di\di_swp.wresl'
+include 'SWP\wsi_di\export_index_swp.wresl'
+include 'SWP\wsi_di\exp_based_del_swp_s.wresl'
+include 'delcar_swp.wresl'
+  !Option 1b - CAM Procedure (note - must also include CAM cycle in main file):
+!include 'SWP\allocation\swp_allocation.wresl'
+
+!Step 2: Define delivery parameters for each contractor:
+include 'SWP\demands\swp_arcsplit.wresl'
+include 'SWP\demands\swp_demands_s.wresl'
+
+!Step 3: Keep a running account of actual deliveries made to each contractor
+include 'SWP\deliveries\sumswpdel.wresl'
+include 'SWP\deliveries\swp_delivery_summary.wresl'
+
+!Step 4: Distribute SWP allocation to each contractor:
+include 'SWP\allocation\swp_contractor_perdel_A.wresl'
+include 'SWP\allocation\carryover_allocation.wresl'
+include 'SWP\allocation\swp_contractor_perdel_B.wresl'
+include 'SWP\allocation\swp_feather_perdel.wresl'
+include 'SWP\deliveries\swp_bound_del.wresl'
+
+!Misc. code related to SWP facilities:
+  !Seismic concerns have reduced maximum operating capacity at Lake Perris to 74 TAF:
+!goal PerrisSeismic {S_PRRIS < 74.} ! Storage level of Lake Perris has been restored since 2018 per Aaron Miller. 09/2020
+  !Pumping capacity is not 100% reliable; must take unit outages into account:
+include 'SWP\conveyance_limits.wresl'
+!include 'SWP\constraints-GPmin.wresl'

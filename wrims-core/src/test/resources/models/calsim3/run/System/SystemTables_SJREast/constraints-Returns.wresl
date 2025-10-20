@@ -1,0 +1,387 @@
+/*
+RETURN FLOWS FROM DEMAND UNITS
+
+NAMING TAKES THE FOLLOWING FORMS:
+R_{DEMAND UNIT}     - return flow from specific demand unit
+R_{WBA}_{DESTINATION}   - aggregated return from WBA to specific location
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!=============================================================
+! 60N_NU1 - Galt, Lodi, small communities - M&I 
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+define R_60N_NU1            {std kind 'RETURN-FLOW' units 'CFS'}
+define RFF_WSWWTP   {select RFFactor from WWTP_Factors where Plant = 69}
+define R_60N_NU1_WSWWTP_temp {value RFF_WSWWTP * min(UD_60N_NU1(3-month),UD_60N_NU1(4-month),UD_60N_NU1(5-month),UD_60N_NU1(6-month))}
+
+goal setR_60N_NU1_WSWWTP{R_60N_NU1_WSWWTP = R_60N_NU1_WSWWTP_temp  }  
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_60N_NU1     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_60N_NU1_WSWWTP {R_60N_NU1_WSWWTP = WW_60N_NU1}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60S     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 60S_PA1 - Stockton East WD - Ag
+!============================================================= 
+define R_60S_PA1        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60S_PA1       {R_60S_PA1        = TW_60S_PA1 + LF_60S_PA1 + OS_60S_PA1 - RU_60S_PA1}
+goal setR_60S_SCD001    {R_60S_PA1_SDC001 = R_60S_PA1}
+
+
+!=============================================================
+! 60S_PA2 - CSJWCD - Ag
+!============================================================= 
+define R_60S_PA2        {std kind 'RETURN-FLOW' units 'CFS'}
+goal setR_60S_PA2       {R_60S_PA2        = TW_60S_PA2 + LF_60S_PA2 + OS_60S_PA2 - RU_60S_PA2}
+goal setR_60N_FSC007    {R_60S_PA2_FCS007 = R_60S_PA2}
+
+
+!=============================================================
+! 60S_NU1 - City of Stockton via SEWD - M&I 
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+define R_60S_NU1            {std kind 'RETURN-FLOW' units 'CFS'}
+define RFF_STWWTP   {select RFFactor from WWTP_Factors where Plant = 72}
+define R_60S_NU1_STWWTP_temp {
+	    case final {
+        condition wateryear == EndWY
+        value RFF_STWWTP * min(UD_60S_NU1(prevdec),UD_60S_NU1(prevjan),UD_60S_NU1(prevfeb),UD_60S_NU1(prevmar))}
+    case otherwise {
+        condition   always
+        value RFF_STWWTP * min(UD_60S_NU1(3-month),UD_60S_NU1(4-month),UD_60S_NU1(5-month),UD_60S_NU1(6-month))}
+}
+goal setR_60S_NU1_STWWTP {R_60S_NU1_STWWTP = R_60S_NU1_STWWTP_temp }     
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_60S_NU1     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_60S_NU1_STWWTP {R_60S_NU1_STWWTP = WW_60S_NU1}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 61      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 61_PA1 - Oakdale ID, North of Stanislaus River - Ag 
+!=============================================================
+goal setR_61_PA1        {R_61_PA1         = TW_61_PA1  + LF_61_PA1  + OS_61_PA1  - RU_61_PA1 }
+goal setR_61_PA1_RFS61C     {R_61_PA1_RFS61C  = R_61_PA1 }
+!goal setR_RFS61C_STS030 {R_RFS61C_STS030  = 0.3*R_61_PA1 + 0.3*R_61_PA3} !defined below in SSJID
+!goal setR_RFS61C_SJR056 {R_RFS61C_SJR056  = 0.7*R_61_PA1 + 0.7*R_61_PA3} !defined below in SSJID
+
+!=============================================================
+! 61_PA2 - Oakdale ID, South of Stanislaus River - Ag
+!=============================================================
+goal setR_61_PA2        {R_61_PA2         = TW_61_PA2  + LF_61_PA2  + OS_61_PA2  - RU_61_PA2 }
+goal setR_61_RFS61B     {R_61_PA2_RFS61B  = R_61_PA2}
+
+goal setR_RFS61B_TUO017 {R_RFS61B_TUO017 < OS_61_PA2_a}   
+goal setD_RFS61B_61_NA2 {D_RFS61B_61_NA2 < OS_61_PA2_b}
+ 
+goal setR_RFS61B_STS036 {R_RFS61B_STS036 < R_61_PA2 } ! OS_61_PA2_d + TW_61_PA2 + LF_61_PA2 - RU_61_PA2}
+
+!=============================================================
+! 61_PA3 - South San Joaquin ID - Ag 
+!=============================================================
+goal setR_61_PA3        {R_61_PA3         = TW_61_PA3  + LF_61_PA3  + OS_61_PA3  - RU_61_PA3 }
+goal setR_61_PA3_RFS61C     {R_61_PA3_RFS61C  = R_61_PA3 }
+goal setR_RFS61C_STS030 {R_RFS61C_STS030  = 0.3*R_61_PA1 + 0.3*R_61_PA3}
+goal setR_RFS61C_SJR056 {R_RFS61C_SJR056  = 0.7*R_61_PA1 + 0.7*R_61_PA3}
+
+
+!=============================================================
+! 61_NA1 - East of Modesto ID and Oakdale ID - Ag
+!=============================================================
+! no returns
+
+!=============================================================
+! 61_NA2 - Modesto ID - Ag
+!=============================================================
+goal setR_61_NA2        {R_61_NA2         = TW_61_NA2  + LF_61_NA2  + OS_61_NA2  - RU_61_NA2 }
+goal setR_61_RFS61D     {R_61_NA2_RFS61D  = R_61_NA2 }
+
+goal setR_RFS61D_TUO017 {R_RFS61D_TUO017 < OS_61_NA2_a + TW_61_NA2 + LF_61_NA2 - RU_61_NA2 } 
+goal setR_RFS61D_RFS61A {R_RFS61D_RFS61A = OS_61_NA2_b + OS_61_NA2_c}
+goal setR_RFS61A_SJR075 {R_RFS61A_SJR075 = OS_61_NA2_b + 0.5*R_61_NA5_RFS61A}
+goal setR_RFS61A_SJR072 {R_RFS61A_SJR072 = OS_61_NA2_c + 0.5*R_61_NA5_RFS61A}
+goal setR_RFS61D_STS017 {R_RFS61D_STS030 = OS_61_NA2_d}
+goal setD_RFS61D_61_NA5 {D_RFS61D_61_NA5 < OS_61_NA2_e + OS_61_PA2_b}
+
+
+!=============================================================
+! 61_NA3 - Tuolumne River Diversions (north bank) - Riparian Ag
+!============================================================= 
+goal setR_61_NA3        {R_61_NA3 = TW_61_NA3  + LF_61_NA3  + OS_61_NA3  - RU_61_NA3 }
+goal setR_61_TUO003  {R_61_NA3_TUO003  = R_61_NA3 }
+
+
+!=============================================================
+! 61_NA4 - Stanislaus River Diversions - Riparian Ag
+!=============================================================
+goal setR_61_NA4        {R_61_NA4         = TW_61_NA4  + LF_61_NA4  + OS_61_NA4  - RU_61_NA4 }
+goal setR_61_SJR072   {R_61_NA4_SJR072  = R_61_NA4 }
+
+
+!=============================================================
+! 61_NA5 - East Bank of SJR, Tuolumne to Stanislaus - Riparian Ag
+!=============================================================
+goal setR_61_NA5        {R_61_NA5         = TW_61_NA5  + LF_61_NA5  + OS_61_NA5  - RU_61_NA5 }
+goal setR_61_RFS61A     {R_61_NA5_RFS61A  = R_61_NA5 }
+
+
+!=============================================================
+! 61_NA6 - East Bank of SJR, Downstream of Stanislaus - Riparian Ag
+!=============================================================
+ goal setR_61_NA6        {R_61_NA6         = TW_61_NA6  + LF_61_NA6  + OS_61_NA6  - RU_61_NA6 }
+ goal setR_61_SJR056     {R_61_NA6_SJR056  = R_61_NA6 }
+
+
+!=============================================================
+! 61_NU1 - City of Modesto - M&I
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+define RFF_MOWWTP {select RFFactor from WWTP_Factors where Plant = 74}
+define R_61_NU1_MOWWTP_temp {
+!	    case final {
+!        condition wateryear == EndWY
+!        value RFF_MOWWTP * min(UD_61_NU1(prevdec),UD_61_NU1(prevjan),UD_61_NU1(prevfeb),UD_61_NU1(prevmar))}
+!    case otherwise {
+!        condition   always
+        value RFF_MOWWTP * min(UD_61_NU1(3-month),UD_61_NU1(4-month),UD_61_NU1(5-month),UD_61_NU1(6-month))}
+!}
+goal setR_61_NU1_MOWWTP {R_61_NU1_MOWWTP  = R_61_NU1_MOWWTP_temp  }
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_61_NU1     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_61_NU1_MOWWTP {R_61_NU1_MOWWTP = WW_61_NU1}
+
+!=============================================================
+! 61_NU2 - Cities of Lathrop, Manteca & Escalon - M&I
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+define RFF_MAWWTP {select RFFactor from WWTP_Factors where Plant = 75}
+define R_61_NU2_MAWWTP_temp {
+	    case final {
+        condition wateryear == EndWY
+        value RFF_MAWWTP * min(UD_61_NU2(prevdec),UD_61_NU2(prevjan),UD_61_NU2(prevfeb),UD_61_NU2(prevmar))}
+    case otherwise {
+        condition   always
+        value RFF_MAWWTP * min(UD_61_NU2(3-month),UD_61_NU2(4-month),UD_61_NU2(5-month),UD_61_NU2(6-month))}
+}
+goal setR_61_NU2_MAWWTP {R_61_NU2_MAWWTP  = R_61_NU2_MAWWTP_temp  }
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_61_NU2     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_61_NU2_MAWWTP {R_61_NU2_MAWWTP = WW_61_NU2}
+
+
+!=============================================================
+! 61_NU3 - Oakdale, Ripon, Riverbank & Small Communities - M&I
+!=============================================================
+! Wastewater returns to deep percolation - set in constraints-DeepPercolation.wresl
+define WW_61_NU3     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 62      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 62_NA1 - East of Turlock, DAU 209 - Ag
+!=============================================================
+! no returns
+
+
+!=============================================================
+! 62_NA2 - Merced River Diversions (north bank) - Riparian Ag
+!=============================================================
+goal setR_62_NA2        {R_62_NA2         = TW_62_NA2  + LF_62_NA2  + OS_62_NA2  - RU_62_NA2 }
+goal setR_62_MCD028     {R_62_NA2_MCD028  = R_62_NA2 }
+
+
+!=============================================================
+! 62_NA3 - Turlock ID - Ag
+!=============================================================
+goal setR_62_NA3        {R_62_NA3         = TW_62_NA3  + LF_62_NA3  + OS_62_NA3  - RU_62_NA3 }
+goal setR_62_RFS62      {R_62_NA3_MCD021 + R_62_NA3_TUO022 + R_62_NA3_SJR082  = R_62_NA3 }
+
+goal setR_RFS62_MCD021  {R_62_NA3_MCD021   = 0.08*R_62_NA3}
+goal setR_RFS62_TUO022  {R_62_NA3_TUO022   = 0.11*R_62_NA3}
+!goal setR_RFS62_SJR082 {R_62_NA3_SJR082   = 0.81*R_62_NA3}
+
+
+!=============================================================
+! 62_NA4 - Tuolumne River Diversions (south bank) - Riparian Ag
+!=============================================================
+goal setR_62_NA4        {R_62_NA4         = TW_62_NA4  + LF_62_NA4  + OS_62_NA4  - RU_62_NA4 }
+goal setR_62_TUO003     {R_62_NA4_TUO003  = R_62_NA4 }
+
+
+!=============================================================
+! 62_NA5 - East Bank of SJR, Merced to Tuolumne - Riparian Ag
+!=============================================================
+goal setR_62_NA5        {R_62_NA5         = TW_62_NA5  + LF_62_NA5  + OS_62_NA5  - RU_62_NA5 }
+goal setR_62_SJR082     {R_62_NA5_SJR082  = R_62_NA5 }
+
+
+!=============================================================
+! 62_NA6 - Merced ID (north of Merced River) - Ag
+!=============================================================
+goal setR_62_NA6        {R_62_NA6         = TW_62_NA6  + LF_62_NA6  + OS_62_NA6  - RU_62_NA6 }
+goal setR_62_MCD028b    {R_62_NA6_MCD028  = R_62_NA6 }
+
+
+!=============================================================
+! 62_NU - Cities of Turlock, Ceres, Dehli, Hilmer, Hughson, Keyes, Denair & Small Communities - M&I
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+define RFF_TKWWTP {select RFFactor from WWTP_Factors where Plant = 77}
+/*define R_62_NU_TKWWTP_temp { value RFF_TKWWTP * min(UD_62_NU(3-month),UD_62_NU(4-month),UD_62_NU(5-month),UD_62_NU(6-month))}
+	    case final {
+        condition wateryear == EndWY
+        value RFF_TKWWTP * min(UD_62_NU(prevdec),UD_62_NU(prevjan),UD_62_NU(prevfeb),UD_62_NU(prevmar))}
+    case otherwise {
+        condition   always
+        value RFF_TKWWTP * min(UD_62_NU(3-month),UD_62_NU(4-month),UD_62_NU(5-month),UD_62_NU(6-month))}
+}*/
+goal setR_62_NU_TKWWTP {R_62_NU_TKWWTP  = RFF_TKWWTP * min(UD_62_NU(3-month),UD_62_NU(4-month),UD_62_NU(5-month),UD_62_NU(6-month))}
+! Alternative implementation - time series wastewater inputs constrain return
+define WW_62_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_62_NU_TKWWTP {R_62_NU_TKWWTP = WW_62_NU}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 63      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 63_PR1 - Arena Plains Unit of Merced NWR - Refuge
+!=============================================================
+goal setR_63_PR1        {R_63_PR1         = TW_63_PR1  + LF_63_PR1  + OS_63_PR1  - RU_63_PR1 }
+goal setR_63_EBP048     {R_63_PR1_EBP048  = R_63_PR1 }
+
+
+!=============================================================
+! 63_PR2 - Merced and Lone Tree Units of Merced NWR - Refuge
+!=============================================================
+goal setR_63_PR2        {R_63_PR2         = TW_63_PR2  + LF_63_PR2  + OS_63_PR2  - RU_63_PR2 }
+goal setR_63_EBP041     {R_63_PR2_EBP041  = R_63_PR2 }
+
+
+!=============================================================
+! 63_PR3 - East Bear Unit of San Luis NWR - Refuge
+!=============================================================
+goal setR_63_PR3        {R_63_PR3         = TW_63_PR3  + LF_63_PR3  + OS_63_PR3  - RU_63_PR3 }
+goal setR_63_SJR134     {R_63_PR3_SJR134  = R_63_PR3 }
+
+
+!=============================================================
+! 63_NA1 - East of Merced ID, DAU 211 - Ag
+!=============================================================
+! no return
+
+
+!=============================================================
+! 63_NA2 - Merced River Diversions (south bank) - Riparian Ag
+!=============================================================
+goal setR_63_NA2        {R_63_NA2         = TW_63_NA2  + LF_63_NA2  + OS_63_NA2  - RU_63_NA2 }
+goal setR_63_MCD028     {R_63_NA2_MCD028  = R_63_NA2 }
+
+
+!=============================================================
+! 63_NA3 - Merced ID (south of Merced River) - Ag
+!=============================================================
+goal setR_63_NA3        {R_63_NA3         = TW_63_NA3  + LF_63_NA3  + OS_63_NA3  - RU_63_NA3 }
+goal setR_63_MCD028b    {R_63_NA3_MCD028  = R_63_NA3 }
+
+
+!=============================================================
+! 63_NA4 - West of Merced ID and Non District Areas in DAU 210 & 212 - Ag
+!=============================================================
+goal setR_63_NA4        {R_63_NA4         = TW_63_NA4  + LF_63_NA4  + OS_63_NA4  - RU_63_NA4 }
+goal setR_63_SJR117     {R_63_NA4_SJR117  = R_63_NA4 }
+
+
+!=============================================================
+! 63_NU - Cities of Merced, Atwater, Livingston, Winton, Planada, LeGrande & Small Communities - M&I
+!=============================================================
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+! Asssume Atwater WWTP discharge is 3/8 of total, based on historical discharge data and permit capacity
+define RFF_AWWWTP {select RFFactor from WWTP_Factors where Plant = 79}
+define RFF_MDWWTP {select RFFactor from WWTP_Factors where Plant = 78}
+define R_RFS63_Demand_temp {
+	    case final {
+        condition wateryear == EndWY
+        value min(UD_63_NU(prevdec),UD_63_NU(prevjan),UD_63_NU(prevfeb),UD_63_NU(prevmar))}
+    case otherwise {
+        condition   always
+        value min(UD_63_NU(3-month),UD_63_NU(4-month),UD_63_NU(5-month),UD_63_NU(6-month))}
+}
+define Debig {value 1* (3./8.)*1}
+goal setR_RFS63_AWWWTP  {R_RFS63_AWWWTP   = RFF_AWWWTP*3./8. *R_RFS63_Demand_temp}!* (3/8)*
+goal setR_RFS63_MDWWTP  {R_RFS63_MDWWTP   = RFF_MDWWTP*5./8. *R_RFS63_Demand_temp}!* (5/8)*
+! Alternative implementation - time series wastewater inputs constrain return
+! define WW_63_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}
+! goal setR_63_NU_TKWWTP {R_63_NU_RFS63 = WW_63_NU}
+! goal setR_RFS63_MDWWTP {R_RFS63_MDWWTP = R_63_NU_RFS63 * 5./8.}
+! goal setR_RFS63_AWWWTP {R_RFS63_AWWWTP = R_63_NU_RFS63 * 3./8.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 64      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=============================================================
+! 64_PA1 - Madera ID - Ag
+!=============================================================
+goal setR_64_PA1        {R_64_PA1         = TW_64_PA1  + LF_64_PA1  + OS_64_PA1 - RU_64_PA1 }
+goal setR_64_SJR235     {R_64_PA1_EBP016 + R_64_PA1_SJR235 = R_64_PA1 }
+goal setR_64_EBP016     {R_64_PA1_EBP016 = 0.63*R_64_PA1 } ! Reference: Madera ID 2013 Water Management Plan
+
+
+!=============================================================
+! 64_PA2 - Chowchilla ID - Ag
+!=============================================================
+goal setR_64_PA2        {R_64_PA2         = TW_64_PA2  + LF_64_PA2  + OS_64_PA2  - RU_64_PA2 }
+goal setR_64_RFS64      {R_64_PA2_RFS64   = R_64_PA2 }
+
+
+!=============================================================
+! 64_PA3 - Gravelly Ford and Root Creek Water Districts - Ag
+!=============================================================
+goal setR_64_PA3        {R_64_PA3         = TW_64_PA3  + LF_64_PA3  + OS_64_PA3  - RU_64_PA3 }
+goal setR_64_EBP016b    {R_64_PA3_EBP016  = R_64_PA3 }
+
+
+!=============================================================
+! 64_XA - Columbia Canal Co. (Exchange Contractor) - Ag
+!=============================================================
+!zrc@20201222 goal setR_64_XA         {R_64_XA          = TW_64_XA   + LF_64_XA   + OS_64_XA   - RU_64_XA  } !overconstaint against goal combineR_64_XA
+goal setR_64_SJR185     {R_64_XA_SJR185   = R_64_XA  }
+
+
+!=============================================================
+! 64_NA1 - East of Madera ID and Non District DAU 213 - Ag
+!=============================================================
+! no return
+
+
+!=============================================================
+! 64_NA2 - West of Madera ID and Chowchilla ID - Ag
+!=============================================================
+goal setR_64_NA2        {R_64_NA2         = TW_64_NA2  + LF_64_NA2  + OS_64_NA2  - RU_64_NA2 }
+goal setR_64_EBP030     {R_64_NA2_EBP030  = R_64_NA2 }
+
+
+!=============================================================
+! 64_NU - Cities of Madera, Chowchilla, Madera Acres & Small Communities - M&I
+!=============================================================
+! Wastewater returns to deep percolation - set in constraints-DeepPercolation.wresl
+define WW_64_NU     {timeseries kind 'WASTEWATER' units 'TAF' convert 'CFS'}

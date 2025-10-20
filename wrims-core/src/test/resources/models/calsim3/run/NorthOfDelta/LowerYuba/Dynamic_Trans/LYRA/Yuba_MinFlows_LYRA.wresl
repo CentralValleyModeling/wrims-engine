@@ -1,0 +1,157 @@
+/*
+File Name: Yuba_MinFlows_LYRA.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Defines minimum instream flow requirements for the LYRA  (Yuba_MinFlowCrit= 4)
+CalSIm 3.0 uses flow requirements established for the lower Yuba River Accord
+
+*/
+
+!**********************************************************        
+!Calculation of Yuba Accord North Yuba Index
+
+define Index_Accord_LYRA {
+	case    FEB {
+		condition month == FEB
+       		value S_NBLDB_LYRA(PREVSEP) - BaseCarryover + EndPrevMONInflow + FEBForecastInflow / 1000.0}
+	case    MAR {
+		condition month == MAR
+       		value S_NBLDB_LYRA(PREVSEP) - BaseCarryover + EndPrevMONInflow + MARForecastInflow / 1000.0}
+	case    APR {
+		condition month == APR
+       		value S_NBLDB_LYRA(PREVSEP) - BaseCarryover + EndPrevMONInflow + APRForecastInflow / 1000.0}
+ 	case    MAY {
+		condition month == MAY
+       		value S_NBLDB_LYRA(PREVSEP) - BaseCarryover + EndPrevMONInflow + MAYForecastInflow / 1000.0}     
+        case    otherwise {
+		condition always
+        	value Index_Accord_LYRAdv(-1)}
+        }
+        
+define Trigger_LYRA {
+	case lowcarryover {
+		condition S_NBLDB_LYRA(PREVSEP) < TriggerValue + BaseCarryover
+		value 6.0}
+	case otherwise {
+		condition always
+        	value 0.0}
+        }
+
+define Index_Accord_LYRAdv {alias Index_Accord_LYRA kind 'INDEX' units 'TAF'}	
+      
+        
+define YrType_Accord_LYRA_Init {
+	case index7 {
+		condition Index_Accord_LYRA < 500.0
+		value 7.0}
+	case index6 {
+		condition Index_Accord_LYRA < 693.0
+		value 6.0}
+	case index5 {
+		condition Index_Accord_LYRA < 820.0
+		value 5.0}
+	case index4 {
+		condition Index_Accord_LYRA < 920.0
+		value 4.0}
+	case index3 {
+		condition Index_Accord_LYRA < 1040.0
+		value 3.0}
+	case index2 {
+		condition Index_Accord_LYRA < 1400.0
+		value 2.0 }
+	case index1 {
+		condition always
+		value 1.0}
+	}
+
+ 
+!**********************************************************        
+!Calculation of Yuba Accord Year Type
+ 
+define YrType_Accord_LYRA {     
+    case Oct_Jan {
+		condition month >= OCT .and. month <= MAR
+		value max(YrType_Accord_LYRA_Init,Trigger_LYRA) }
+	case otherwise {
+		condition always
+		value YrType_Accord_LYRA_init}
+        }
+
+define YrType_Accord_LYRAdv {alias YrType_Accord_LYRA kind 'INDEX' units 'NONE'}	    
+
+!**********************************************************    
+!Marysville- MINFLOWDEFINITION
+
+define MF_YUB006_LYRA {
+ 	case Wet {
+         	condition YrType_Accord_LYRA == 1
+         	select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case AN {
+ 	        condition YrType_Accord_LYRA == 2
+         	select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case BN {
+ 	        condition YrType_Accord_LYRA == 3
+         	select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case Dry {
+ 	        condition YrType_Accord_LYRA == 4
+         	select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case ModCrit {
+ 	        condition YrType_Accord_LYRA == 5 .AND. S_NBLDB_LYRA(PREVSEP) < 450.
+         	select ModCrit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case Crit {
+ 	        condition YrType_Accord_LYRA == 5
+         	select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case ECrit {
+ 	        condition YrType_Accord_LYRA == 6
+         	select ECrit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        case otherwise {
+ 		condition always
+         	select Conf from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=month}
+        }
+
+define MF_YUB006_LYRAdv {alias MF_YUB006_LYRA kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+goal meetYUB006_LYRAmin {C_YUB006_MIF_LYRA < MF_YUB006_LYRA}          	
+
+!**********************************************************    
+!Smartsville- MINFLOWDEFINITION
+define MF_YUB024_LYRA {
+ 	case Wet {
+         	condition YrType_Accord_LYRA == 1
+         	select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case AN {
+ 	        condition YrType_Accord_LYRA == 2
+         	select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case BN {
+ 	        condition YrType_Accord_LYRA == 3
+         	select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case Dry {
+ 	        condition YrType_Accord_LYRA == 4
+         	select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case Crit {
+ 	        condition YrType_Accord_LYRA == 5
+         	select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case ECrit {
+ 	        condition YrType_Accord_LYRA == 6
+         	select ECrit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        case otherwise {
+ 		condition always
+         	select Conf from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=month}
+        }
+
+define MF_YUB024_LYRAdv {alias MF_YUB024_LYRA kind 'FLOW-MIN-INSTREAM' units 'CFS'}  
+goal meetYUB024_LYRAmin  {C_YUB024_MIF_LYRA < MF_YUB024_LYRA} 
+
+!********************************************************** 
+!Conference year (Schedule 7) logic
+define ConfYrDPD_LYRA {alias D_YUB013_14_NA_LYRA + D_YUB011_15N_NA2_LYRA + D_YUB011_15S_NA2_LYRA kind 'FLOW-DELIVERY' units 'CFS'}
+
+define ConfYrDPDAdj_LYRA {
+	case Conf {
+		condition YrType_Accord_LYRA == 7
+		value ConfYrDGRpattern * 250 * taf_cfs}
+	case otherwise {
+		condition always 
+		value 9999}
+	}
+	
+goal setConfYrAdj_LYRA {ConfYrDPD_LYRA < ConfYrDPDAdj_LYRA}

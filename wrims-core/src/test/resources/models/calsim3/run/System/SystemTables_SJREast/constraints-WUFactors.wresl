@@ -1,0 +1,1319 @@
+/*
+ DEFINE AND CALCULATE DELIVERY LOSSES
+
+The CalSim 3 Conceptual Model for determining delivery losses is as follows:
+
+  NAMING TAKES THE FOLLOWING FORMS:
+  EF_{source prefix}_{demand unit} - non recoverable evaporative loss
+  SL_{source prefix}_{demand unit} - seepage loss 
+  DL_{source prefix}_{demand unit} - total conveyance loss (EL + SL)
+
+In some cases, the Calsim-III conceptual model did not allow for consistant 
+representation of delivery losses with Calsim-II.  In these cases, the Calsim-III
+conceptual model was modified in order to be consistant with Calsim-II assumptions.
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60S !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 60S_PA1 - Stockton East WD - Ag
+!==============================
+goal setEV_60S_PA1  {EV_60S_PA1 = D_CLV026_60S_PA1 * EVF_CLV026_60S_PA1  + D_LJC022_60S_PA1 * EVF_LJC022_60S_PA1 } 
+goal setDP_60S_PA1  {DP_60S_PA1 = D_CLV026_60S_PA1 * DPF_CLV026_60S_PA1  + D_LJC022_60S_PA1 * DPF_LJC022_60S_PA1} 
+goal setLF_60S_PA1  {LF_60S_PA1 = D_CLV026_60S_PA1 * LFF_CLV026_60S_PA1  + D_LJC022_60S_PA1 * LFF_LJC022_60S_PA1} 
+goal setOS_60S_PA1  {OS_60S_PA1 = D_CLV026_60S_PA1 * OSF_CLV026_60S_PA1  + D_LJC022_60S_PA1 * OSF_LJC022_60S_PA1}  
+goal setDL_60S_PA1  {DL_60S_PA1 = EV_60S_PA1 + DP_60S_PA1 + LF_60S_PA1 + OS_60S_PA1}
+
+goal set1RU_60S_PA1        {RU_60S_PA1  = min(TW_60S_PA1,RUFR_60S_PA1*AWR_60S_PA1 + RUFO_60S_PA1*AWO_60S_PA1)} 
+!zrc@ goal set2RU_60S_PA1        {RU_60S_PA1  < RUFR_60S_PA1*AWR_60S_PA1 + RUFO_60S_PA1*AWO_60S_PA1} 
+goal setAW_60S_PA1         {AW_60S_PA1  = AWR_60S_PA1 + AWO_60S_PA1} 
+goal setRP_60S_PA1         {RP_60S_PA1  = AW_60S_PA1 * RPF_60S_PA1}
+
+!==============================
+! 60S_PA2 - CSJWCD - Ag
+!==============================
+! deliveries
+goal setEV_60S_PA2        {EV_60S_PA2= D_LJC010_60S_PA2 * EVF_LJC010_60S_PA2}
+goal setDP_60S_PA2        {DP_60S_PA2= D_LJC010_60S_PA2 * DPF_LJC010_60S_PA2}
+goal setLF_60S_PA2        {LF_60S_PA2= D_LJC010_60S_PA2 * LFF_LJC010_60S_PA2}
+goal setOS_60S_PA2        {OS_60S_PA2= D_LJC010_60S_PA2 * OSF_LJC010_60S_PA2}
+goal setDL_60S_PA2        {DL_60S_PA2 = EV_60S_PA2 + DP_60S_PA2 + LF_60S_PA2 + OS_60S_PA2}
+
+goal set1RU_60S_PA2        {RU_60S_PA2  = min(TW_60S_PA2,RUFR_60S_PA2*AWR_60S_PA2 + RUFO_60S_PA2*AWO_60S_PA2)} 
+!zrc@ goal set2RU_60S_PA2        {RU_60S_PA2  < RUFR_60S_PA2*AWR_60S_PA2 + RUFO_60S_PA2*AWO_60S_PA2} 
+goal setAW_60S_PA2         {AW_60S_PA2  = AWR_60S_PA2 + AWO_60S_PA2} 
+goal setRP_60S_PA2         {RP_60S_PA2  = AW_60S_PA2 * RPF_60S_PA2}
+
+!==============================
+! 60S_NU1 - City of Stockton via SEWD - M&I 
+!==============================
+goal setEV_60S_NU1  {EV_60S_NU1 = D_WTPDWS_60S_NU1 * EVF_WTPDWS_60S_NU1 + D_WTPWDH_60S_NU1 * EVF_WTPWDH_60S_NU1} 
+goal setDP_60S_NU1  {DP_60S_NU1 = D_WTPDWS_60S_NU1 * DPF_WTPDWS_60S_NU1 + D_WTPWDH_60S_NU1 * DPF_WTPWDH_60S_NU1 } 
+goal setDL_60S_NU1  {DL_60S_NU1 = EV_60S_NU1 + DP_60S_NU1}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 61      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 61_PA1 - Oakdale ID, North of Stanislaus River - Ag 
+!==============================
+! deliveries
+goal setEV_SSJ004_61_PA1  {EV_SSJ004_61_PA1 = D_SSJ004_61_PA1*EVF_SSJ004_61_PA1}
+goal setEV_61_PA1         {EV_61_PA1       =  EV_SSJ004_61_PA1}
+ 
+goal setDP_SSJ004D_61_PA1 {DP_SSJ004_61_PA1 = D_SSJ004_61_PA1*DPF_SSJ004_61_PA1}
+goal setDP_61_PA1         {DP_61_PA1       = DP_SSJ004_61_PA1}
+
+goal setLF_SSJ004_61_PA1  {LF_SSJ004_61_PA1 = D_SSJ004_61_PA1*LFF_SSJ004_61_PA1}
+goal setLF_61_PA1         {LF_61_PA1       = LF_SSJ004_61_PA1}
+
+goal setDL_SSJ004_61_PA1  {DL_SSJ004_61_PA1  = EV_SSJ004_61_PA1 + DP_SSJ004_61_PA1 + LF_SSJ004_61_PA1 + OS_SSJ004_61_PA1}
+goal setDL_61_PA1         {DL_61_PA1       = EV_61_PA1 + DP_61_PA1 + LF_61_PA1 + OS_61_PA1}
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_PA1        {RU_61_PA1 = min(TW_61_PA1,RUFR_61_PA1*AWR_61_PA1 + RUFO_61_PA1*AWO_61_PA1)}! + LF_61_PA1} 
+!zrc@ goal set2RU_61_PA1        {RU_61_PA1 < RUFR_61_PA1*AWR_61_PA1 + RUFO_61_PA1*AWO_61_PA1} 
+! applied water  = awr + awo
+goal setAW_61_PA1         {AW_61_PA1 = AWR_61_PA1 + AWO_61_PA1} 
+! riparian losse = factor * aw
+goal setRP_61_PA1         {RP_61_PA1 = AW_61_PA1 * RPF_61_PA1} 
+
+
+!==============================
+! 61_PA2 - Oakdale ID, South of Stanislaus River - Ag
+!==============================
+! deliveries
+goal setEV_OAK020_61_PA2  {EV_OAK020_61_PA2 = D_OAK020_61_PA2*EVF_OAK020_61_PA2}
+goal setEV_61_PA2         {EV_61_PA2        = EV_OAK020_61_PA2}
+ 
+goal setDP_OAK020_61_PA2  {DP_OAK020_61_PA2 = D_OAK020_61_PA2*DPF_OAK020_61_PA2}
+goal setDP_61_PA2         {DP_61_PA2        = DP_OAK020_61_PA2}
+
+goal setLF_OAK020_61_PA2  {LF_OAK020_61_PA2 = D_OAK020_61_PA2*LFF_OAK020_61_PA2}
+goal setLF_61_PA2         {LF_61_PA2        = LF_OAK020_61_PA2}
+
+goal setDL_OAK020_61_PA2  {DL_OAK020_61_PA2 = EV_OAK020_61_PA2 + DP_OAK020_61_PA2 + LF_OAK020_61_PA2 + OS_OAK020_61_PA2}
+goal setDL_61_PA2         {DL_61_PA2        = EV_61_PA2 + DP_61_PA2 + LF_61_PA2 + OS_61_PA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_PA2        {RU_61_PA2 = min(TW_61_PA2,RUFR_61_PA2*AWR_61_PA2 + RUFO_61_PA2*AWO_61_PA2)} ! + LF_61_PA2} 
+!zrc@ goal set2RU_61_PA2        {RU_61_PA2 < RUFR_61_PA2*AWR_61_PA2 + RUFO_61_PA2*AWO_61_PA2} 
+! applied water  = awr + awo
+goal setAW_61_PA2         {AW_61_PA2 = AWR_61_PA2 + AWO_61_PA2} 
+! riparian losse = factor * aw
+goal setRP_61_PA2         {RP_61_PA2 = AW_61_PA2 * RPF_61_PA2} 
+
+!==============================
+! 61_PA3 - South San Joaquin ID
+!==============================
+! deliveries
+goal setEV_WDWRD_61_PA3  {EV_WDWRD_61_PA3 = D_WDWRD_61_PA3*EVF_WDWRD_61_PA3}
+goal setEV_61_PA3   {EV_61_PA3 = D_WDWRD_61_PA3*EVF_WDWRD_61_PA3}
+
+goal setDP_WDWRD_61_PA3  {DP_WDWRD_61_PA3 = D_WDWRD_61_PA3*DPF_WDWRD_61_PA3}
+goal setDP_61_PA3   {DP_61_PA3  = D_WDWRD_61_PA3*DPF_WDWRD_61_PA3}
+
+goal setLF_WDWRD_61_PA3  {LF_WDWRD_61_PA3 = D_WDWRD_61_PA3*LFF_WDWRD_61_PA3}
+goal setLF_61_PA3   {LF_61_PA3 = D_WDWRD_61_PA3*LFF_WDWRD_61_PA3}
+
+goal setDL_WDWRD_61_PA3  {DL_WDWRD_61_PA3 = EV_WDWRD_61_PA3 + DP_WDWRD_61_PA3 + LF_WDWRD_61_PA3 + OS_WDWRD_61_PA3}
+goal setDL_61_PA3   {DL_61_PA3 = EV_61_PA3 + DP_61_PA3 + LF_61_PA3 + OS_61_PA3}
+
+!goal setOS_61_PA3  {OS_61_PA3 = D_FSC015_61_PA3 * OSF_FSC015_61_PA3} 
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_PA3        {RU_61_PA3 = min(TW_61_PA3,RUFR_61_PA3*AWR_61_PA3 + RUFO_61_PA3*AWO_61_PA3)}! + LF_61_PA3} 
+!zrc@ goal set2RU_61_PA3        {RU_61_PA3 < RUFR_61_PA3*AWR_61_PA3 + RUFO_61_PA3*AWO_61_PA3} 
+! applied water  = awr + awo
+goal setAW_61_PA3         {AW_61_PA3 = AWR_61_PA3 + AWO_61_PA3} 
+! riparian losse = factor * aw
+goal setRP_61_PA3         {RP_61_PA3 = AW_61_PA3 * RPF_61_PA3} 
+
+!==============================
+! 61_NA1 - East of Modesto ID and Oakdale ID - Ag
+!==============================
+! No surface water delivery
+goal setDL_61_NA1         {DL_61_NA1 = 0.0}
+
+! Still has tailwater/return from GP
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA1        {RU_61_NA1 = min(TW_61_NA1,RUFR_61_NA1*AWR_61_NA1 + RUFO_61_NA1*AWO_61_NA1)} 
+!zrc@ goal set2RU_61_NA1        {RU_61_NA1 < RUFR_61_NA1*AWR_61_NA1 + RUFO_61_NA1*AWO_61_NA1} 
+! applied water  = awr + awo
+goal setAW_61_NA1         {AW_61_NA1 = AWR_61_NA1 + AWO_61_NA1} 
+! riparian losse = factor * aw
+goal setRP_61_NA1         {RP_61_NA1 = AW_61_NA1 * RPF_61_NA1} 
+
+
+!==============================
+! 61_NA2 - Modesto ID - Ag
+!==============================
+
+
+goal setEV_OAK020_61_NA2  {EV_OAK020_61_NA2 = D_OAK020_61_NA2 * EVF_OAK020_61_NA2}
+goal setEV_MDSTO_61_NA2   {EV_MDSTO_61_NA2  = D_MDSTO_61_NA2  * EVF_MDSTO_61_NA2}
+goal setEV_RFS61B_61_NA2  {EV_RFS61B_61_NA2 = D_RFS61B_61_NA2 * EVF_RFS61B_61_NA2}
+goal setEV_61_NA2         {EV_61_NA2        = EV_OAK020_61_NA2 + EV_MDSTO_61_NA2 + EV_RFS61B_61_NA2}
+  
+goal setDP_OAK020_61_NA2  {DP_OAK020_61_NA2 = D_OAK020_61_NA2 * DPF_OAK020_61_NA2}
+goal setDP_MDSTO_61_NA2   {DP_MDSTO_61_NA2  = D_MDSTO_61_NA2  * DPF_MDSTO_61_NA2}
+goal setDP_RFS61B_61_NA2  {DP_RFS61B_61_NA2 = D_RFS61B_61_NA2 * DPF_RFS61B_61_NA2}
+goal setDP_61_NA2         {DP_61_NA2        = DP_OAK020_61_NA2 + DP_MDSTO_61_NA2 + DP_RFS61B_61_NA2}
+  
+goal setLF_OAK020_61_NA2  {LF_OAK020_61_NA2 = D_OAK020_61_NA2 * LFF_OAK020_61_NA2}
+goal setLF_MDSTO_61_NA2   {LF_MDSTO_61_NA2  = D_MDSTO_61_NA2  * LFF_MDSTO_61_NA2}
+goal setLF_RFS61B_61_NA2  {LF_RFS61B_61_NA2 = D_RFS61B_61_NA2 * LFF_RFS61B_61_NA2}
+goal setLF_61_NA2         {LF_61_NA2        = LF_OAK020_61_NA2 + LF_MDSTO_61_NA2 + LF_RFS61B_61_NA2}
+  
+goal setDL_OAK020_61_NA2  {DL_OAK020_61_NA2 = EV_OAK020_61_NA2 + DP_OAK020_61_NA2 + LF_OAK020_61_NA2 + OS_OAK020_61_NA2}
+goal setDL_MDSTO_61_NA2   {DL_MDSTO_61_NA2  = EV_MDSTO_61_NA2  + DP_MDSTO_61_NA2  + LF_MDSTO_61_NA2  + OS_MDSTO_61_NA2}
+goal setDL_RFS61B_61_NA2  {DL_RFS61B_61_NA2 = EV_RFS61B_61_NA2 + DP_RFS61B_61_NA2 + LF_RFS61B_61_NA2 + OS_RFS61B_61_NA2}
+goal setDL_61_NA2         {DL_61_NA2        = EV_61_NA2 + DP_61_NA2 + LF_61_NA2 + OS_61_NA2}
+
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA2    {RU_61_NA2 = min(TW_61_NA2,RUFR_61_NA2*AWR_61_NA2+RUFO_61_NA2*AWO_61_NA2)} 
+!zrc@ goal set2RU_61_NA2    {RU_61_NA2 < RUFR_61_NA2*AWR_61_NA2+RUFO_61_NA2*AWO_61_NA2} 
+! applied water  = awr + awo
+goal setAW_61_NA2     {AW_61_NA2 = AWR_61_NA2+AWO_61_NA2} 
+! riparian losse = factor * aw 
+goal setRP_61_NA2     {RP_61_NA2 = AW_61_NA2*RPF_61_NA2} 
+
+
+!==============================
+! 61_NA3 - Tuolumne River Diversions (north bank) - Riparian Ag
+!==============================
+! deliveries
+goal setEV_TUO047_61_NA3  {EV_TUO047_61_NA3 = D_TUO047_61_NA3 * EVF_TUO047_61_NA3}
+goal setEV_TUO015_61_NA3  {EV_TUO015_61_NA3 = D_TUO015_61_NA3 * EVF_TUO015_61_NA3}
+goal setEV_61_NA3         {EV_61_NA3        = EV_TUO047_61_NA3 + EV_TUO015_61_NA3}
+  
+goal setDP_TUO047_61_NA3  {DP_TUO047_61_NA3 = D_TUO047_61_NA3 * DPF_TUO047_61_NA3}
+goal setDP_TUO015_61_NA3  {DP_TUO015_61_NA3 = D_TUO015_61_NA3 * DPF_TUO015_61_NA3}
+goal setDP_61_NA3         {DP_61_NA3        = DP_TUO047_61_NA3 + DP_TUO015_61_NA3}
+
+goal setLF_TUO047_61_NA3  {LF_TUO047_61_NA3 = D_TUO047_61_NA3 * LFF_TUO047_61_NA3}
+goal setLF_TUO015_61_NA3  {LF_TUO015_61_NA3 = D_TUO015_61_NA3 * LFF_TUO015_61_NA3}
+goal setLF_61_NA3         {LF_61_NA3        = LF_TUO047_61_NA3 + LF_TUO015_61_NA3}
+
+goal setDL_TUO017_61_NA3  {DL_TUO047_61_NA3 = EV_TUO047_61_NA3 + DP_TUO047_61_NA3 + LF_TUO047_61_NA3 + OS_TUO047_61_NA3}
+goal setDL_TUO015_61_NA3  {DL_TUO015_61_NA3 = EV_TUO015_61_NA3 + DP_TUO015_61_NA3 + LF_TUO015_61_NA3 + OS_TUO015_61_NA3}
+goal setDL_61_NA3     {DL_61_NA3        = EV_61_NA3 + DP_61_NA3 + LF_61_NA3 + OS_61_NA3}
+
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA3        {RU_61_NA3  = min(TW_61_NA3,RUFR_61_NA3*AWR_61_NA3  + RUFO_61_NA3*AWO_61_NA3)} 
+!zrc@ goal set2RU_61_NA3        {RU_61_NA3  < RUFR_61_NA3*AWR_61_NA3  + RUFO_61_NA3*AWO_61_NA3 } 
+! applied water  = awr + awo
+goal setAW_61_NA3         {AW_61_NA3  = AWR_61_NA3  + AWO_61_NA3 } 
+! riparian losse = factor * aw
+goal setRP_61_NA3         {RP_61_NA3  = AW_61_NA3  * RPF_61_NA3 } 
+
+
+!==============================
+! 61_NA4 - Stanislaus River Diversions - Riparian Ag
+!==============================
+! deliveries
+goal setEV_STS030_61_NA4  {EV_STS030_61_NA4 = D_STS030_61_NA4 * EVF_STS030_61_NA4}
+goal setEV_61_NA4         {EV_61_NA4        = EV_STS030_61_NA4}
+  
+goal setDP_STS030_61_NA4  {DP_STS030_61_NA4 = D_STS030_61_NA4 * DPF_STS030_61_NA4}
+goal setDP_61_NA4         {DP_61_NA4        = DP_STS030_61_NA4}
+
+goal setLF_STS030_61_NA4  {LF_STS030_61_NA4 = D_STS030_61_NA4 * LFF_STS030_61_NA4}
+goal setLF_61_NA4         {LF_61_NA4        = LF_STS030_61_NA4}
+
+goal setDL_STS030_61_NA4  {DL_STS030_61_NA4 = EV_STS030_61_NA4 + DP_STS030_61_NA4 + LF_STS030_61_NA4 + OS_STS030_61_NA4}
+goal setDL_61_NA4     {DL_61_NA4        = EV_61_NA4 + DP_61_NA4 + LF_61_NA4 + OS_61_NA4}
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA4        {RU_61_NA4 = min(TW_61_NA4,RUFR_61_NA4*AWR_61_NA4 + RUFO_61_NA4*AWO_61_NA4)} 
+!zrc@ goal set2RU_61_NA4        {RU_61_NA4 < RUFR_61_NA4*AWR_61_NA4 + RUFO_61_NA4*AWO_61_NA4} 
+! applied water  = awr + awo
+goal setAW_61_NA4         {AW_61_NA4 = AWR_61_NA4 + AWO_61_NA4} 
+! riparian losse = factor * aw
+goal setRP_61_NA4         {RP_61_NA4 = AW_61_NA4 * RPF_61_NA4} 
+
+
+!==============================
+! 61_NA5 - East Bank of SJR, Tuolumne to Stanislaus - Riparian Ag
+!==============================
+! deliveries
+goal setEV_SJR081_61_NA5  {EV_SJR081_61_NA5 = D_SJR081_61_NA5*EVF_SJR081_61_NA5}
+goal setEV_RFS61D_61_NA5  {EV_RFS61D_61_NA5 = D_RFS61D_61_NA5*EVF_RFS61D_61_NA5}
+goal setEV_61_NA5         {EV_61_NA5        = EV_SJR081_61_NA5}
+  
+goal setDP_SJR081_61_NA5  {DP_SJR081_61_NA5 = D_SJR081_61_NA5*DPF_SJR081_61_NA5}
+goal setDP_RFS61D_61_NA5  {DP_RFS61D_61_NA5 = D_RFS61D_61_NA5*DPF_RFS61D_61_NA5}
+goal setDP_61_NA5         {DP_61_NA5        = DP_SJR081_61_NA5}
+
+goal setLF_SJR081_61_NA5  {LF_SJR081_61_NA5 = D_SJR081_61_NA5*LFF_SJR081_61_NA5}
+goal setLF_RFS61D_61_NA5  {LF_RFS61D_61_NA5 = D_RFS61D_61_NA5*LFF_RFS61D_61_NA5}
+goal setLF_61_NA5         {LF_61_NA5        = LF_SJR081_61_NA5}
+
+goal setDL_SJR081_61_NA5  {DL_SJR081_61_NA5 = EV_SJR081_61_NA5 + DP_SJR081_61_NA5 + LF_SJR081_61_NA5 + OS_SJR081_61_NA5}
+goal setDL_RFS61D_61_NA5  {DL_RFS61D_61_NA5 = EV_RFS61D_61_NA5 + DP_RFS61D_61_NA5 + LF_RFS61D_61_NA5 + OS_RFS61D_61_NA5}
+goal setDL_61_NA5     {DL_61_NA5        = EV_61_NA5 + DP_61_NA5 + LF_61_NA5 + OS_61_NA5}
+
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA5        {RU_61_NA5 = min(TW_61_NA5,RUFR_61_NA5*AWR_61_NA5 + RUFO_61_NA5*AWO_61_NA5)} 
+!zrc@ goal set2RU_61_NA5        {RU_61_NA5 < RUFR_61_NA5*AWR_61_NA5 + RUFO_61_NA5*AWO_61_NA5} 
+! applied water  = awr + awo
+goal setAW_61_NA5         {AW_61_NA5 = AWR_61_NA5 + AWO_61_NA5} 
+! riparian losse = factor * aw
+goal setRP_61_NA5         {RP_61_NA5 = AW_61_NA5 * RPF_61_NA5}
+
+
+!==============================
+! 61_NA6 - East Bank of SJR, Downstream of Stanislaus - Riparian Ag
+!==============================
+! deliveries
+goal setEV_STS004_61_NA6  {EV_STS004_61_NA6 = D_STS004_61_NA6*EVF_STS004_61_NA6}
+goal setEV_61_NA6         {EV_61_NA6        = EV_STS004_61_NA6}
+  
+goal setDP_STS004_61_NA6  {DP_STS004_61_NA6 = D_STS004_61_NA6*DPF_STS004_61_NA6}
+goal setDP_61_NA6         {DP_61_NA6        = DP_STS004_61_NA6}
+
+goal setLF_STS004_61_NA6  {LF_STS004_61_NA6 = D_STS004_61_NA6*LFF_STS004_61_NA6}
+goal setLF_61_NA6         {LF_61_NA6        = LF_STS004_61_NA6}
+
+goal setDL_STS004_61_NA6  {DL_STS004_61_NA6 = EV_STS004_61_NA6 + DP_STS004_61_NA6 + LF_STS004_61_NA6 + OS_STS004_61_NA6}
+goal setDL_61_NA6     {DL_61_NA6        = EV_61_NA6 + DP_61_NA6 + LF_61_NA6 + OS_61_NA6}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_61_NA6        {RU_61_NA6 = min(TW_61_NA6,RUFR_61_NA6*AWR_61_NA6 + RUFO_61_NA6*AWO_61_NA6)} 
+!zrc@ goal set2RU_61_NA6        {RU_61_NA6 < RUFR_61_NA6*AWR_61_NA6 + RUFO_61_NA6*AWO_61_NA6} 
+! applied water  = awr + awo
+goal setAW_61_NA6         {AW_61_NA6 = AWR_61_NA6 + AWO_61_NA6} 
+! riparian losse = factor * aw
+goal setRP_61_NA6         {RP_61_NA6 = AW_61_NA6 * RPF_61_NA6} 
+
+
+!==============================
+! 61_NU1 - City of Modesto - M&I
+!==============================
+! NOTE -- no spills for urban units
+
+goal setEV_WTPMOD_61_NU1  {EV_WTPMOD_61_NU1 = D_WTPMOD_61_NU1 * EVF_WTPMOD_61_NU1}
+goal setEV_61_NU1         {EV_61_NU1        = EV_WTPMOD_61_NU1}
+
+goal setDP_WTPMOD_61_NU1  {DP_WTPMOD_61_NU1 = D_WTPMOD_61_NU1 * DPF_WTPMOD_61_NU1}
+goal setDP_61_NU1         {DP_61_NU1        = DP_WTPMOD_61_NU1}
+
+goal setLF_WTPMOD_61_NU1  {LF_WTPMOD_61_NU1 = D_WTPMOD_61_NU1 * LFF_WTPMOD_61_NU1}
+goal setLF_61_NU1         {LF_61_NU1        = LF_WTPMOD_61_NU1}
+
+goal setDL_WTPMOD_61_NU1  {DL_WTPMOD_61_NU1 = EV_WTPMOD_61_NU1 + DP_WTPMOD_61_NU1 + LF_WTPMOD_61_NU1}
+goal setDL_61_NU1     {DL_61_NU1        = EV_61_NU1 + DP_61_NU1 + LF_61_NU1}
+
+
+!==============================
+! 61_NU2 - Cities of Lathrop, Manteca & Escalon - M&I
+!==============================
+! NOTE -- no spills for urban units
+
+goal setEV_WTPDGT_61_NU2  {EV_WTPDGT_61_NU2 = D_WTPDGT_61_NU2 * EVF_WTPDGT_61_NU2}
+goal setEV_61_NU2         {EV_61_NU2        = EV_WTPDGT_61_NU2}
+
+goal setDP_WTPDGT_61_NU2  {DP_WTPDGT_61_NU2 = D_WTPDGT_61_NU2 * DPF_WTPDGT_61_NU2}
+goal setDP_61_NU2         {DP_61_NU2        = DP_WTPDGT_61_NU2}
+
+goal setLF_WTPDGT_61_NU2  {LF_WTPDGT_61_NU2 = D_WTPDGT_61_NU2 * LFF_WTPDGT_61_NU2}
+goal setLF_61_NU2         {LF_61_NU2        = LF_WTPDGT_61_NU2}
+
+goal setDL_WTPDGT_61_NU2  {DL_WTPDGT_61_NU2 = EV_WTPDGT_61_NU2 + DP_WTPDGT_61_NU2 + LF_WTPDGT_61_NU2}
+goal setDL_61_NU2     {DL_61_NU2        = EV_61_NU2 + DP_61_NU2 + LF_61_NU2}
+
+
+!==============================
+! 61_NU3 - Oakdale, Ripon, Riverbank & Small Communities - M&I
+!==============================
+! No surface water delivery
+goal setDL_61_NU3         {DL_61_NU3 = 0.0}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 62      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 62_NA1 - East of Turlock, DAU 209 - Ag
+!==============================
+! No surface water delivery
+goal setDL_62_NA1         {DL_62_NA1 = 0.0}
+
+! Could still have returns from GP (TWF=0 for now)
+/*
+goal setTW_62_NA1         {TW_62_NA1 = AWO_62_NA1*TWFO_62_NA1 + AWR_62_NA1*TWFR_62_NA1}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA1        {RU_62_NA1 = min(TW_62_NA1,RUFR_62_NA1*AWR_62_NA1 + RUFO_62_NA1*AWO_62_NA1)} 
+!zrc@ goal set2RU_62_NA1        {RU_62_NA1 < RUFR_62_NA1*AWR_62_NA1 + RUFO_62_NA1*AWO_62_NA1} 
+! applied water  = awr + awo
+goal setAW_62_NA1         {AW_62_NA1 = AWR_62_NA1 + AWO_62_NA1} 
+! riparian losse = factor * aw
+goal setRP_62_NA1         {RP_62_NA1 = AW_62_NA1 * RPF_62_NA1} 
+
+
+!==============================
+! 62_NA2 - Merced River Diversions (north bank) - Riparian Ag
+!==============================
+! deliveries
+goal setEV_MCD050_62_NA2  {EV_MCD050_62_NA2 = D_MCD050_62_NA2 * EVF_MCD050_62_NA2}
+goal setEV_62_NA2         {EV_62_NA2        = EV_MCD050_62_NA2}
+  
+goal setDP_MCD050_62_NA2  {DP_MCD050_62_NA2 = D_MCD050_62_NA2 * DPF_MCD050_62_NA2}
+goal setDP_62_NA2         {DP_62_NA2        = DP_MCD050_62_NA2}
+
+goal setLF_MCD050_62_NA2  {LF_MCD050_62_NA2 = D_MCD050_62_NA2 * LFF_MCD050_62_NA2}
+goal setLF_62_NA2         {LF_62_NA2        = LF_MCD050_62_NA2}
+
+goal setDL_MCD050_62_NA2  {DL_MCD050_62_NA2 = EV_MCD050_62_NA2 + DP_MCD050_62_NA2 + LF_MCD050_62_NA2 + OS_MCD050_62_NA2}
+goal setDL_62_NA2     {DL_62_NA2        = EV_62_NA2 + DP_62_NA2 + LF_62_NA2 + OS_62_NA2}
+
+/*
+goal setTW_62_NA2         {TW_62_NA2        = AWO_62_NA2*TWFO_62_NA2 + AWR_62_NA2*TWFR_62_NA2}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA2        {RU_62_NA2 = min(TW_62_NA2,RUFR_62_NA2*AWR_62_NA2 + RUFO_62_NA2*AWO_62_NA2)} 
+!zrc@ goal set2RU_62_NA2        {RU_62_NA2 < RUFR_62_NA2*AWR_62_NA2 + RUFO_62_NA2*AWO_62_NA2} 
+! applied water  = awr + awo
+goal setAW_62_NA2         {AW_62_NA2 = AWR_62_NA2 + AWO_62_NA2} 
+! riparian losse = factor * aw
+goal setRP_62_NA2         {RP_62_NA2 = AW_62_NA2 * RPF_62_NA2}
+
+
+!==============================
+! 62_NA3 - Turlock ID - Ag
+!==============================
+! deliveries
+goal setEV_TRLCK_62_NA3   {EV_TRLCK_62_NA3 = D_TRLCK_62_NA3 * EVF_TRLCK_62_NA3}
+goal setEV_62_NA3         {EV_62_NA3       = EV_TRLCK_62_NA3}
+ 
+goal setDP_TRLCK_62_NA3   {DP_TRLCK_62_NA3 = D_TRLCK_62_NA3 * DPF_TRLCK_62_NA3}
+goal setDP_62_NA3         {DP_62_NA3       = DP_TRLCK_62_NA3}
+
+goal setLF_TRLCK_62_NA3   {LF_TRLCK_62_NA3 = D_TRLCK_62_NA3 * LFF_TRLCK_62_NA3}
+goal setLF_62_NA3         {LF_62_NA3       = LF_TRLCK_62_NA3}
+
+goal setDL_TRLCK_62_NA3   {DL_TRLCK_62_NA3 = EV_TRLCK_62_NA3 + DP_TRLCK_62_NA3 + LF_TRLCK_62_NA3 + OS_TRLCK_62_NA3}
+goal setDL_62_NA3         {DL_62_NA3       = EV_62_NA3 + DP_62_NA3 + LF_62_NA3 + OS_62_NA3}
+
+/*
+goal setTW_62_NA3         {TW_62_NA3       = AWO_62_NA3*TWFO_62_NA3 + AWR_62_NA3*TWFR_62_NA3}
+*/
+
+/*
+! From original setup: 
+! Delivery Losses are the first 800 AF of surface water diversions
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+! NEW:  Assume 25% of seepage goes to LF, 75% goes to DP
+! NOTE: Modified form of constraint to set 800AF as upper limit on losses...
+goal set1DL_62_NA3 {
+     lhs  DL_62_NA3
+     case deliveries_req {
+          condition (AWO_62_NA3 + AWR_62_NA3) > (GPmin_62_NA3_P + GPmin_62_NA3_D)
+          ! rhs       max( 0.0, min( ((AWO_62_NA3+AWR_62_NA3)-(GPmin_62_NA3_P+GPmin_62_NA3_D)), 0.8*taf_cfs) )
+          rhs       0.8*taf_cfs
+          lhs<rhs   penalty 0.0}
+     case otherwise      {
+          condition always
+          
+          
+          rhs       0.0
+          lhs<rhs   penalty 0.0}
+}
+goal set2DL_62_NA3        {DL_62_NA3 < 0.8 * taf_cfs}
+goal setEV_62_NA3         {EV_62_NA3 = 0.1 * DL_62_NA3}
+goal setDP_62_NA3         {DP_62_NA3 = 0.9 * DL_62_NA3 } ! * 0.75}
+goal setLF_62_NA3         {LF_62_NA3 = 0.0 }             ! 0.9 * DL_62_NA3 * 0.25}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA3        {RU_62_NA3 = min(TW_62_NA3,RUFR_62_NA3*AWR_62_NA3 + RUFO_62_NA3*AWO_62_NA3)} 
+!zrc@ goal set2RU_62_NA3        {RU_62_NA3 < RUFR_62_NA3*AWR_62_NA3 + RUFO_62_NA3*AWO_62_NA3} 
+! applied water  = awr + awo
+goal setAW_62_NA3         {AW_62_NA3 = AWR_62_NA3 + AWO_62_NA3} 
+! riparian losse = factor * aw
+goal setRP_62_NA3         {RP_62_NA3 = AW_62_NA3 * RPF_62_NA3} 
+
+! OLD...
+! Delivery Losses are the first 800 AF of surface water diversions
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+! /*
+! goal setDL_62_NA3 {
+!     lhs DL_62_NA3
+!     case deliveries_req {
+!         condition AW_62_NA3 - GPmin_62_NA3_P - GPmin_62_NA3_D > 0.
+!         rhs 0.8 * taf_cfs }
+!     case otherwise {
+!         condition always
+!         rhs 0.0 }
+! }
+! */
+! goal setDL_62_NA3        {DL_62_NA3 < .8 * taf_cfs}
+! goal setEL_62_NA3        {EL_62_NA3 = 0.1 * DL_62_NA3}
+! goal setSL_62_NA3        {SL_62_NA3 = 0.9 * DL_62_NA3}
+!
+! goal setDP_62_NA3        {DP_62_NA3 = SL_62_NA3}
+
+
+!==============================
+! 62_NA4 - Tuolumne River Diversions (south bank) - Riparian Ag
+!==============================
+! deliveries
+goal setEV_TUO047_62_NA4  {EV_TUO047_62_NA4 = D_TUO047_62_NA4*EVF_TUO047_62_NA4}
+goal setEV_TUO015_62_NA4  {EV_TUO015_62_NA4 = D_TUO015_62_NA4*EVF_TUO015_62_NA4}
+goal setEV_62_NA4         {EV_62_NA4        = EV_TUO047_62_NA4 + EV_TUO015_62_NA4}
+  
+goal setDP_TUO047_62_NA4  {DP_TUO047_62_NA4 = D_TUO047_62_NA4*DPF_TUO047_62_NA4}
+goal setDP_TUO015_62_NA4  {DP_TUO015_62_NA4 = D_TUO015_62_NA4*DPF_TUO015_62_NA4}
+goal setDP_62_NA4         {DP_62_NA4        = DP_TUO047_62_NA4 + DP_TUO015_62_NA4}
+
+goal setLF_TUO047_62_NA4  {LF_TUO047_62_NA4 = D_TUO047_62_NA4*LFF_TUO047_62_NA4}
+goal setLF_TUO015_62_NA4  {LF_TUO015_62_NA4 = D_TUO015_62_NA4*LFF_TUO015_62_NA4}
+goal setLF_62_NA4         {LF_62_NA4        = LF_TUO047_62_NA4 + LF_TUO015_62_NA4}
+
+goal setDL_TUO047_62_NA4  {DL_TUO047_62_NA4 = EV_TUO047_62_NA4 + DP_TUO047_62_NA4 + LF_TUO047_62_NA4 + OS_TUO047_62_NA4}
+goal setDL_TUO015_62_NA4  {DL_TUO015_62_NA4 = EV_TUO015_62_NA4 + DP_TUO015_62_NA4 + LF_TUO015_62_NA4 + OS_TUO015_62_NA4}
+goal setDL_62_NA4     {DL_62_NA4        = EV_62_NA4 + DP_62_NA4 + LF_62_NA4 + OS_62_NA4}
+
+/*
+goal setTW_62_NA4         {TW_62_NA4        = AWO_62_NA4*TWFO_62_NA4 + AWR_62_NA4*TWFR_62_NA4}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA4        {RU_62_NA4 = min(TW_62_NA4,RUFR_62_NA4*AWR_62_NA4 + RUFO_62_NA4*AWO_62_NA4)} 
+!zrc@ goal set2RU_62_NA4        {RU_62_NA4 < RUFR_62_NA4*AWR_62_NA4 + RUFO_62_NA4*AWO_62_NA4} 
+! applied water  = awr + awo
+goal setAW_62_NA4         {AW_62_NA4 = AWR_62_NA4 + AWO_62_NA4} 
+! riparian losse = factor * aw
+goal setRP_62_NA4         {RP_62_NA4 = AW_62_NA4 * RPF_62_NA4} 
+
+
+!==============================
+! 62_NA5 - East Bank of SJR, Merced to Tuolumne - Riparian Ag
+!==============================
+! deliveries
+goal setEV_SJR114_62_NA5  {EV_SJR114_62_NA5 = D_SJR114_62_NA5*EVF_SJR114_62_NA5}
+goal setEV_62_NA5         {EV_62_NA5        = EV_SJR114_62_NA5}
+  
+goal setDP_SJR114_62_NA5  {DP_SJR114_62_NA5 = D_SJR114_62_NA5*DPF_SJR114_62_NA5}
+goal setDP_62_NA5         {DP_62_NA5        = DP_SJR114_62_NA5}
+
+goal setLF_SJR114_62_NA5  {LF_SJR114_62_NA5 = D_SJR114_62_NA5*LFF_SJR114_62_NA5}
+goal setLF_62_NA5         {LF_62_NA5        = LF_SJR114_62_NA5}
+
+goal setDL_SJR114_62_NA5  {DL_SJR114_62_NA5 = EV_SJR114_62_NA5 + DP_SJR114_62_NA5 + LF_SJR114_62_NA5 + OS_SJR114_62_NA5}
+goal setDL_62_NA5     {DL_62_NA5        = EV_62_NA5 + DP_62_NA5 + LF_62_NA5 + OS_62_NA5}
+
+/*
+! No returns from GP in CSII...
+! Note -- assumes GP serves non-rice areas only!
+! goal setTW_62_NA5         {TW_62_NA5        = AWO_62_NA5*TWFO_62_NA5 + AWR_62_NA5*TWFR_62_NA5}
+goal setTW_62_NA5         {TW_62_NA5        = AWO_62_NA5*TWFO_62_NA5 + AWR_62_NA5*TWFR_62_NA5
+                                            - GP_62_NA5*TWFO_62_NA5}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA5        {RU_62_NA5 = min(TW_62_NA5,RUFR_62_NA5*AWR_62_NA5 + RUFO_62_NA5*AWO_62_NA5)} 
+!zrc@ goal set2RU_62_NA5        {RU_62_NA5 < RUFR_62_NA5*AWR_62_NA5 + RUFO_62_NA5*AWO_62_NA5} 
+! applied water  = awr + awo
+goal setAW_62_NA5         {AW_62_NA5 = AWR_62_NA5 + AWO_62_NA5} 
+! riparian losse = factor * aw
+goal setRP_62_NA5         {RP_62_NA5 = AW_62_NA5 * RPF_62_NA5} 
+
+
+!==============================
+! 62_NA6 - Merced ID (north of Merced River) - Ag
+!==============================
+! deliveries
+goal setEV_MCD055_62_NA6  {EV_MCD055_62_NA6 = D_MCD055_62_NA6*EVF_MCD055_62_NA6}
+goal setEV_62_NA6         {EV_62_NA6        = EV_MCD055_62_NA6}
+ 
+goal setDP_MCD055_62_NA6  {DP_MCD055_62_NA6 = D_MCD055_62_NA6*DPF_MCD055_62_NA6}
+goal setDP_62_NA6         {DP_62_NA6        = DP_MCD055_62_NA6}
+
+goal setLF_MCD055_62_NA6  {LF_MCD055_62_NA6 = D_MCD055_62_NA6*LFF_MCD055_62_NA6}
+goal setLF_62_NA6         {LF_62_NA6        = LF_MCD055_62_NA6}
+
+goal setDL_MCD055_62_NA6  {DL_MCD055_62_NA6 = EV_MCD055_62_NA6 + DP_MCD055_62_NA6 + LF_MCD055_62_NA6 + OS_MCD055_62_NA6}
+goal setDL_62_NA6     {DL_62_NA6        = EV_62_NA6 + DP_62_NA6 + LF_62_NA6 + OS_62_NA6}
+
+/*
+goal setTW_62_NA6         {TW_62_NA6        = AWO_62_NA6*TWFO_62_NA6 + AWR_62_NA6*TWFR_62_NA6}
+*/
+
+! From original setup: 
+! Delivery losses are 4.2 taf per year (3.5% of 120 taf), distributed from Apr-Oct according to the AW demand.
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+! NEW:  Assume 25% of seepage goes to LF, 75% goes to DP
+/*
+! Decision variable for Merced ID (north) annual AW
+define ann_AW_62_NA6dv {std kind 'annual-demand' units 'taf'}
+ 
+! Determine annual AW at 62_NA6 by summing Apr thru Sept monthly AW
+define ann_AW_62_NA6 {
+    case firstyear {
+        condition wateryear == 1922 .and. month<=mar
+        value 11.9 }!3.5% of 256 taf from CalsimII recalculated to account for difference in CUAW and AW
+    case april  {
+        condition month==apr
+        sum(i=0,6,1) (AWO_62_NA6(i)+AWR_62_NA6(i))*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value ann_AW_62_NA6dv(-1) }
+}
+
+! Divide monthy AW by annual AW to determine the monthly distribution percentage
+define AW_62_NA6_dist {value (AWO_62_NA6+AWR_62_NA6)*cfs_taf/ann_AW_62_NA6}
+
+! Delivery loss is 4.2 taf/year distributed Apr-Oct via AW pattern
+define DL_62_NA6_dv {
+    case AprthruOct {
+        condition month >= Apr .or. month==Oct
+        value AW_62_NA6_dist * 4.2 * taf_cfs }
+    case otherwise {
+        condition always
+        value 0. }
+}
+ 
+! Set Merced ID annual AW equal to the decision variable
+goal set_ann_AW_62_NA6dv  {ann_AW_62_NA6dv = ann_AW_62_NA6}
+goal setDL_62_NA6a        {DL_MCD055_62_NA6 < DL_62_NA6_dv + OS_62_NA6}
+goal setDL_62_NA6b        {DL_MCD055_62_NA6 < DG_62_NA6 + OS_62_NA6 }
+goal setEV_62_NA6         {EV_MCD055_62_NA6 = 0.1*DL_62_NA6      - 0.1*OS_62_NA6}
+goal setDP_62_NA6         {DP_MCD055_62_NA6 = 0.9*0.75*DL_62_NA6 - 0.9*0.75*OS_62_NA6}
+goal setLF_62_NA6         {LF_MCD055_62_NA6 = 0.9*0.25*DL_62_NA6 - 0.9*0.25*OS_62_NA6}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_62_NA6        {RU_62_NA6 = min(TW_62_NA6,RUFR_62_NA6*AWR_62_NA6 + RUFO_62_NA6*AWO_62_NA6)} 
+!zrc@ goal set2RU_62_NA6        {RU_62_NA6 < RUFR_62_NA6*AWR_62_NA6 + RUFO_62_NA6*AWO_62_NA6} 
+! applied water  = awr + awo
+goal setAW_62_NA6         {AW_62_NA6 = AWR_62_NA6 + AWO_62_NA6} 
+! riparian losse = factor * aw
+goal setRP_62_NA6         {RP_62_NA6 = AW_62_NA6 * RPF_62_NA6} 
+
+! OLD...
+! Delivery losses are 4.2 taf per year (3.5% of 120 taf), distributed from 
+! Apr-Oct. according to the AW demand.
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+!
+! ! Decision variable for Merced ID (north) annual AW
+! define ann_AW_62_NA6dv {std kind 'annual-demand' units 'taf'}
+! 
+! ! Determine annual AW at 62_NA6 by summing Apr thru Sept monthly AW
+! define ann_AW_62_NA6 {
+!     case firstyear {
+!         condition wateryear == 1922 .and. month<=mar
+!         value 11.9 }!3.5% of 256 taf from CalsimII recalculated to account for difference in CUAW and AW
+!     case april  {
+!         condition month==apr
+!         sum(i=0,6,1) AW_62_NA6(i)*cfs_taf(i) }
+!     case otherwise {
+!         condition always
+!         value ann_AW_62_NA6dv(-1) }
+! }
+!
+! ! Divide monthy AW by annual AW to determine the monthly distribution percentage
+! define AW_62_NA6_dist {value AW_62_NA6*cfs_taf/ann_AW_62_NA6}
+! 
+! ! Delivery loss is 4.2 taf/year distributed Apr-Oct via AW pattern
+! define DL_62_NA6_dv {
+!     case AprthruOct {
+!         condition month >= Apr .or. month==Oct
+!         value AW_62_NA6_dist * 4.2 * taf_cfs }
+!     case otherwise {
+!         condition always
+!         value 0. }
+! }
+! 
+! ! Set Merced ID annual AW equal to the decision variable
+! goal set_ann_AW_62_NA6dv {ann_AW_62_NA6dv = ann_AW_62_NA6}
+! 
+! goal setDL_62_NA6a     {DL_62_NA6 < DL_62_NA6_dv}
+! goal setDL_62_NA6b     {DL_62_NA6 < DG_62_NA6 }
+! goal setEL_62_NA6      {EL_62_NA6 = 0.1 * DL_62_NA6}
+! goal setSL_62_NA6      {SL_62_NA6 = 0.9 * DL_62_NA6}
+! goal setDP_62_NA6      {DP_62_NA6 = SL_62_NA6}
+
+
+!==============================
+! 62_NU - Cities of Turlock, Ceres, Dehli, Hilmer, Hughson, Keyes, Denair & Small Communities - M&I
+!==============================
+! No surface water delivery
+goal setDL_62_NU          {DL_62_NU = 0.0}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 63      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+!==============================
+! 63_PR1 - Arena Plains Unit of Merced NWR - Refuge
+!==============================
+! deliveries
+goal setEV_ESC000_63_PR1  {EV_ESC000_63_PR1 = D_ESC005_63_PR1*EVF_ESC000_63_PR1}
+goal setEV_63_PR1         {EV_63_PR1        = EV_ESC000_63_PR1}
+  
+goal setDP_ESC000_63_PR1  {DP_ESC000_63_PR1 = D_ESC005_63_PR1*DPF_ESC000_63_PR1}
+goal setDP_63_PR1         {DP_63_PR1        = DP_ESC000_63_PR1}
+
+goal setLF_ESC000_63_PR1  {LF_ESC000_63_PR1 = D_ESC005_63_PR1*LFF_ESC000_63_PR1}
+goal setLF_63_PR1         {LF_63_PR1        = LF_ESC000_63_PR1}
+
+goal setDL_ESC000_63_PR1  {DL_ESC000_63_PR1 = EV_ESC000_63_PR1 + DP_ESC000_63_PR1 + LF_ESC000_63_PR1 + OS_ESC000_63_PR1}
+goal setDL_63_PR1     {DL_63_PR1        = EV_63_PR1 + DP_63_PR1 + LF_63_PR1 + OS_63_PR1}
+
+/*
+goal setTW_63_PR1         {TW_63_PR1        = AWO_63_PR1*TWFO_63_PR1 + AWR_63_PR1*TWFR_63_PR1}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_PR1        {RU_63_PR1 = min(TW_63_PR1,RUFR_63_PR1*AWR_63_PR1 + RUFO_63_PR1*AWO_63_PR1 + RUFW_63_PR1*AWW_63_PR1)} 
+!zrc@ goal set2RU_63_PR1        {RU_63_PR1 < RUFR_63_PR1*AWR_63_PR1 + RUFO_63_PR1*AWO_63_PR1 + RUFW_63_PR1*AWW_63_PR1} 
+! applied water  = awr + awo
+goal setAW_63_PR1         {AW_63_PR1 = AWR_63_PR1 + AWO_63_PR1 + AWW_63_PR1} 
+! riparian losse = factor * aw
+goal setRP_63_PR1         {RP_63_PR1 = AW_63_PR1 * RPF_63_PR1} 
+  
+ 
+!==============================
+! 63_PR2 - Merced and Lone Tree Units of Merced NWR - Refuge
+!==============================
+! deliveries
+goal setEV_DED010_63_PR2  {EV_DED010_63_PR2 = D_DED010_63_PR2*EVF_DED010_63_PR2}
+goal setEV_63_PR2         {EV_63_PR2        = EV_DED010_63_PR2}
+  
+goal setDP_DED010_63_PR2  {DP_DED010_63_PR2 = D_DED010_63_PR2*DPF_DED010_63_PR2}
+goal setDP_63_PR2         {DP_63_PR2        = DP_DED010_63_PR2}
+
+goal setLF_DED010_63_PR2  {LF_DED010_63_PR2 = D_DED010_63_PR2*LFF_DED010_63_PR2}
+goal setLF_63_PR2         {LF_63_PR2        = LF_DED010_63_PR2}
+
+goal setDL_DED010_63_PR2  {DL_DED010_63_PR2 = EV_DED010_63_PR2 + DP_DED010_63_PR2 + LF_DED010_63_PR2 + OS_DED010_63_PR2}
+goal setDL_63_PR2     {DL_63_PR2        = EV_63_PR2 + DP_63_PR2 + LF_63_PR2 + OS_63_PR2}
+
+/*
+goal setTW_63_PR2         {TW_63_PR2        = AWO_63_PR2*TWFO_63_PR2 + AWR_63_PR2*TWFR_63_PR2}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_PR2        {RU_63_PR2 = min(TW_63_PR2,RUFR_63_PR2*AWR_63_PR2 + RUFO_63_PR2*AWO_63_PR2 + RUFW_63_PR2*AWW_63_PR2)} 
+!zrc@ goal set2RU_63_PR2        {RU_63_PR2 < RUFR_63_PR2*AWR_63_PR2 + RUFO_63_PR2*AWO_63_PR2 + RUFW_63_PR2*AWW_63_PR2} 
+! applied water  = awr + awo
+goal setAW_63_PR2         {AW_63_PR2 = AWR_63_PR2 + AWO_63_PR2 + AWW_63_PR2} 
+! riparian losse = factor * aw
+goal setRP_63_PR2         {RP_63_PR2 = AW_63_PR2 * RPF_63_PR2} 
+ 
+ 
+!==============================
+! 63_PR3 - East Bear Unit of San Luis NWR - Refuge
+!==============================
+! deliveries
+goal setEV_EBP048_63_PR3  {EV_EBP048_63_PR3 = D_EBP048_63_PR3*EVF_EBP048_63_PR3}
+goal setEV_63_PR3         {EV_63_PR3        = EV_EBP048_63_PR3}
+  
+goal setDP_EBP048_63_PR3  {DP_EBP048_63_PR3 = D_EBP048_63_PR3*DPF_EBP048_63_PR3}
+goal setDP_63_PR3         {DP_63_PR3        = DP_EBP048_63_PR3}
+
+goal setLF_EBP048_63_PR3  {LF_EBP048_63_PR3 = D_EBP048_63_PR3*LFF_EBP048_63_PR3}
+goal setLF_63_PR3         {LF_63_PR3        = LF_EBP048_63_PR3}
+
+goal setDL_EBP048_63_PR3  {DL_EBP048_63_PR3 = EV_EBP048_63_PR3 + DP_EBP048_63_PR3 + LF_EBP048_63_PR3 + OS_EBP048_63_PR3}
+goal setDL_63_PR3     {DL_63_PR3        = EV_63_PR3 + DP_63_PR3 + LF_63_PR3 + OS_63_PR3}
+
+/*
+goal setTW_63_PR3         {TW_63_PR3        = AWO_63_PR3*TWFO_63_PR3 + AWR_63_PR3*TWFR_63_PR3}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_PR3        {RU_63_PR3 = min(TW_63_PR3,RUFR_63_PR3*AWR_63_PR3 + RUFO_63_PR3*AWO_63_PR3 + RUFW_63_PR3*AWW_63_PR3)} 
+!zrc@ goal set2RU_63_PR3        {RU_63_PR3 < RUFR_63_PR3*AWR_63_PR3 + RUFO_63_PR3*AWO_63_PR3 + RUFW_63_PR3*AWW_63_PR3} 
+! applied water  = awr + awo
+goal setAW_63_PR3         {AW_63_PR3 = AWR_63_PR3 + AWO_63_PR3 + AWW_63_PR3} 
+! riparian losse = factor * aw
+goal setRP_63_PR3         {RP_63_PR3 = AW_63_PR3 * RPF_63_PR3} 
+  
+ 
+!==============================
+! 63_NA1 - East of Merced ID, DAU 211 - Ag
+!==============================
+! No surface water delivery
+goal setDL_63_NA1         {DL_63_NA1 = 0.0}
+
+! Still has tailwater/return from GP
+/*
+goal setTW_63_NA1         {TW_63_NA1 = AWO_63_NA1*TWFO_63_NA1 + AWR_63_NA1*TWFO_63_NA1}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_NA1        {RU_63_NA1 = min(TW_63_NA1,RUFR_63_NA1*AWR_63_NA1 + RUFO_63_NA1*AWO_63_NA1)} 
+!zrc@ goal set2RU_63_NA1        {RU_63_NA1 < RUFR_63_NA1*AWR_63_NA1 + RUFO_63_NA1*AWO_63_NA1} 
+! applied water  = awr + awo
+goal setAW_63_NA1         {AW_63_NA1 = AWR_63_NA1 + AWO_63_NA1} 
+! riparian losse = factor * aw
+goal setRP_63_NA1         {RP_63_NA1 = AW_63_NA1 * RPF_63_NA1} 
+
+
+!==============================
+! 63_NA2 - Merced River Diversions (south bank) - Riparian Ag
+!==============================
+! deliveries
+goal setEV_MCD042_63_NA2  {EV_MCD042_63_NA2 = D_MCD042_63_NA2*EVF_MCD042_63_NA2}
+goal setEV_63_NA2         {EV_63_NA2        = EV_MCD042_63_NA2}
+  
+goal setDP_MCD042_63_NA2  {DP_MCD042_63_NA2 = D_MCD042_63_NA2*DPF_MCD042_63_NA2}
+goal setDP_63_NA2         {DP_63_NA2        = DP_MCD042_63_NA2}
+
+goal setLF_MCD042_63_NA2  {LF_MCD042_63_NA2 = D_MCD042_63_NA2*LFF_MCD042_63_NA2}
+goal setLF_63_NA2         {LF_63_NA2        = LF_MCD042_63_NA2}
+
+goal setDL_MCD042_63_NA2  {DL_MCD042_63_NA2 = EV_MCD042_63_NA2 + DP_MCD042_63_NA2 + LF_MCD042_63_NA2 + OS_MCD042_63_NA2}
+goal setDL_63_NA2     {DL_63_NA2        = EV_63_NA2 + DP_63_NA2 + LF_63_NA2 + OS_63_NA2}
+
+/*
+goal setTW_63_NA2         {TW_63_NA2        = AWO_63_NA2*TWFO_63_NA2 + AWR_63_NA2*TWFR_63_NA2}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_NA2        {RU_63_NA2 = min(TW_63_NA2,RUFR_63_NA2*AWR_63_NA2 + RUFO_63_NA2*AWO_63_NA2)} 
+!zrc@ goal set2RU_63_NA2        {RU_63_NA2 < RUFR_63_NA2*AWR_63_NA2 + RUFO_63_NA2*AWO_63_NA2} 
+! applied water  = awr + awo
+goal setAW_63_NA2         {AW_63_NA2 = AWR_63_NA2 + AWO_63_NA2} 
+! riparian losse = factor * aw
+goal setRP_63_NA2         {RP_63_NA2 = AW_63_NA2 * RPF_63_NA2} 
+
+
+!==============================
+! 63_NA3 - Merced ID (south of Merced River) - Ag
+!==============================
+! deliveries
+goal setEV_MID021_63_NA3  {EV_MID021_63_NA3 = D_MID021_63_NA3 * EVF_MID021_63_NA3}
+goal setEV_63_NA3         {EV_63_NA3        = EV_MID021_63_NA3}
+   
+goal setDP_MID021_63_NA3  {DP_MID021_63_NA3 = D_MID021_63_NA3 * DPF_MID021_63_NA3}
+goal setDP_63_NA3         {DP_63_NA3        = DP_MID021_63_NA3}
+ 
+goal setLF_MID021_63_NA3  {LF_MID021_63_NA3 = D_MID021_63_NA3 * LFF_MID021_63_NA3}
+goal setLF_63_NA3         {LF_63_NA3        = LF_MID021_63_NA3}
+ 
+goal setDL_MID021_63_NA3  {DL_MID021_63_NA3 = EV_MID021_63_NA3 + DP_MID021_63_NA3 + LF_MID021_63_NA3 + OS_MID021_63_NA3}
+goal setDL_63_NA3         {DL_63_NA3        = EV_63_NA3 + DP_63_NA3 + LF_63_NA3 + OS_63_NA3}
+
+/*
+goal setTW_63_NA3         {TW_63_NA3        = AWO_63_NA3*TWFO_63_NA3 + AWR_63_NA3*TWFR_63_NA3}
+*/
+
+! From original setup: 
+! Delivery losses are 115.8 taf per year (96.5% of 120 taf), distributed from Apr-Oct according to the AW demand.
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+! NEW:  Assume 25% of seepage goes to LF, 75% goes to DP
+/*
+! Decision variable for Merced ID (north) annual AW
+define ann_AW_63_NA3dv {std kind 'annual-demand' units 'taf'}
+
+! Determine annual AW at 63_NA3 by summing Apr thru Sept monthly AW
+define ann_AW_63_NA3 {
+    case firstyear {
+        condition wateryear == 1922 .and. month<=mar
+        value 333. }!96.5% of 256 taf from CalsimII recalculated to account for difference in CUAW and AW
+    case april  {
+        condition month==apr
+        sum(i=0,6,1) (AWO_63_NA3(i)+AWR_63_NA3(i))*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value ann_AW_63_NA3dv(-1) }
+}
+
+! Divide monthy AW by annual AW to determine the monthly distribution percentage
+define AW_63_NA3_dist {value (AWO_63_NA3+AWR_63_NA3)*cfs_taf/ann_AW_63_NA3}
+
+! Delivery loss is 115.8 taf/year distributed Apr-Oct via AW pattern
+define DL_63_NA3_sv {
+    case AprthruOct {
+        condition month >= Apr .or. month==Oct
+        value AW_63_NA3_dist * 115.8 * taf_cfs }
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+! Set Merced ID annual AW equal to the decision variable
+goal set_ann_AW_63_NA3dv {ann_AW_63_NA3dv = ann_AW_63_NA3}
+goal setDL_63_NA3a       {DL_MID021_63_NA3 < DL_63_NA3_sv + OS_MID021_63_NA3}
+goal setDL_63_NA3b       {DL_MID021_63_NA3 < DG_63_NA3    + OS_MID021_63_NA3    }
+goal setEV_63_NA3        {EV_63_NA3 = 0.1*DL_63_NA3      - 0.1*OS_63_NA3}
+goal setDP_63_NA3        {DP_63_NA3 = 0.9*0.75*DL_63_NA3 - 0.9*0.75*OS_63_NA3}
+goal setLF_63_NA3        {LF_63_NA3 = 0.9*0.25*DL_63_NA3 - 0.9*0.25*OS_63_NA3}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_NA3        {RU_63_NA3 = min(TW_63_NA3,RUFR_63_NA3*AWR_63_NA3 + RUFO_63_NA3*AWO_63_NA3)} 
+!zrc@ goal set2RU_63_NA3        {RU_63_NA3 < RUFR_63_NA3*AWR_63_NA3 + RUFO_63_NA3*AWO_63_NA3} 
+! applied water  = awr + awo
+goal setAW_63_NA3         {AW_63_NA3 = AWR_63_NA3 + AWO_63_NA3} 
+! riparian losse = factor * aw
+goal setRP_63_NA3         {RP_63_NA3 = AW_63_NA3 * RPF_63_NA3} 
+
+! OLD...
+! !Delivery losses are 115.8 taf per year (96.5% of 120 taf), distributed from 
+! !Apr-Oct. according to the AW demand.
+! !Assume 10% of losses are due to evaporation and 90% due to seepage
+! 
+! ! Decision variable for Merced ID (north) annual AW
+! define ann_AW_63_NA3dv {std kind 'annual-demand' units 'taf'}
+! 
+! ! Determine annual AW at 63_NA3 by summing Apr thru Sept monthly AW
+! define ann_AW_63_NA3 {
+!     case firstyear {
+!         condition wateryear == 1922 .and. month<=mar
+!         value 333. }!96.5% of 256 taf from CalsimII recalculated to account for difference in CUAW and AW
+!     case april  {
+!         condition month==apr
+!         sum(i=0,6,1) AW_63_NA3(i)*cfs_taf(i) }
+!     case otherwise {
+!         condition always
+!         value ann_AW_63_NA3dv(-1) }
+! }
+! 
+! ! Divide monthy AW by annual AW to determine the monthly distribution percentage
+! define AW_63_NA3_dist {value AW_63_NA3*cfs_taf/ann_AW_63_NA3}
+! 
+! ! Delivery loss is 115.8 taf/year distributed Apr-Oct via AW pattern
+! define DL_63_NA3_sv {
+!     case AprthruOct {
+!         condition month >= Apr .or. month==Oct
+!         value AW_63_NA3_dist * 115.8 * taf_cfs }
+!     case otherwise {
+!         condition always
+!         value 0. }
+! }
+! 
+! ! Set Merced ID annual AW equal to the decision variable
+! goal set_ann_AW_63_NA3dv {ann_AW_63_NA3dv = ann_AW_63_NA3}
+! 
+! goal setDL_63_NA3a     {DL_63_NA3 < DL_63_NA3_sv}
+! goal setDL_63_NA3b     {DL_63_NA3 < DG_63_NA3 }
+! goal setEL_63_NA3      {EL_63_NA3 = 0.1 * DL_63_NA3}
+! goal setSL_63_NA3      {SL_63_NA3 = 0.9 * DL_63_NA3}
+! goal setDP_63_NA3      {DP_63_NA3 = SL_63_NA3}
+
+
+!==============================
+! 63_NA4 - West of Merced ID and Non District Areas in DAU 210 & 212 - Ag
+!==============================
+! deliveries
+goal setEV_MCD002_63_NA4  {EV_MCD002_63_NA4 = D_MCD002_63_NA4*EVF_MCD002_63_NA4}
+goal setEV_MCD021_63_NA4  {EV_MCD021_63_NA4 = D_MCD021_63_NA4*EVF_MCD021_63_NA4}
+goal setEV_MID021_63_NA4  {EV_MID021_63_NA4 = D_MID021_63_NA4*EVF_MID021_63_NA4}
+goal setEV_ESC020_63_NA4  {EV_ESC020_63_NA4 = D_ESC020_63_NA4*EVF_ESC020_63_NA4}
+goal setEV_63_NA4         {EV_63_NA4        = EV_MCD002_63_NA4 + EV_MCD021_63_NA4 + EV_MID021_63_NA4 + EV_ESC020_63_NA4}
+  
+goal setDP_MCD002_63_NA4  {DP_MCD002_63_NA4 = D_MCD002_63_NA4*DPF_MCD002_63_NA4}
+goal setDP_MCD021_63_NA4  {DP_MCD021_63_NA4 = D_MCD021_63_NA4*DPF_MCD021_63_NA4}
+goal setDP_MID021_63_NA4  {DP_MID021_63_NA4 = D_MID021_63_NA4*DPF_MID021_63_NA4}
+goal setDP_ESC020_63_NA4  {DP_ESC020_63_NA4 = D_ESC020_63_NA4*DPF_ESC020_63_NA4}
+goal setDP_63_NA4         {DP_63_NA4        = DP_MCD002_63_NA4 + DP_MCD021_63_NA4 + DP_MID021_63_NA4 + DP_ESC020_63_NA4}
+
+goal setLF_MCD002_63_NA4  {LF_MCD002_63_NA4 = D_MCD002_63_NA4*LFF_MCD002_63_NA4}
+goal setLF_MCD021_63_NA4  {LF_MCD021_63_NA4 = D_MCD021_63_NA4*LFF_MCD021_63_NA4}
+goal setLF_MID021_63_NA4  {LF_MID021_63_NA4 = D_MID021_63_NA4*LFF_MID021_63_NA4}
+goal setLF_ESC020_63_NA4  {LF_ESC020_63_NA4 = D_ESC020_63_NA4*LFF_ESC020_63_NA4}
+goal setLF_63_NA4         {LF_63_NA4        = LF_MCD002_63_NA4 + LF_MCD021_63_NA4 + LF_MID021_63_NA4 + LF_ESC020_63_NA4}
+    
+goal setDL_MCD002_63_NA4  {DL_MCD002_63_NA4 = EV_MCD002_63_NA4 + DP_MCD002_63_NA4 + LF_MCD002_63_NA4 + OS_MCD002_63_NA4}
+goal setDL_MCD021_63_NA4  {DL_MCD021_63_NA4 = EV_MCD021_63_NA4 + DP_MCD021_63_NA4 + LF_MCD021_63_NA4 + OS_MCD021_63_NA4}
+goal setDL_MID021_63_NA4  {DL_MID021_63_NA4 = EV_MID021_63_NA4 + DP_MID021_63_NA4 + LF_MID021_63_NA4 + OS_MID021_63_NA4}
+goal setDL_ESC020_63_NA4  {DL_ESC020_63_NA4 = EV_ESC020_63_NA4 + DP_ESC020_63_NA4 + LF_ESC020_63_NA4 + OS_ESC020_63_NA4}
+goal setDL_63_NA4     {DL_63_NA4        = EV_63_NA4 + DP_63_NA4 + LF_63_NA4 + OS_63_NA4}
+
+/*
+goal setTW_63_NA4         {TW_63_NA4        = AWO_63_NA4*TWFO_63_NA4 + AWR_63_NA4*TWFR_63_NA4}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_NA4    {RU_63_NA4 = min(TW_63_NA4,RUFR_63_NA4*AWR_63_NA4+ RUFO_63_NA4*AWO_63_NA4)} 
+!zrc@ goal set2RU_63_NA4    {RU_63_NA4 < RUFR_63_NA4*AWR_63_NA4+ RUFO_63_NA4*AWO_63_NA4} 
+! applied water  = awr + awo
+goal setAW_63_NA4     {AW_63_NA4 = AWR_63_NA4+ AWO_63_NA4} 
+! riparian losse = factor * aw 
+goal setRP_63_NA4     {RP_63_NA4 = AW_63_NA4* RPF_63_NA4} 
+
+!==============================
+! 63_NA5 - El Nido Irrigation District
+!==============================
+! deliveries
+goal setEV_MPS020_63_NA5  {EV_MPS020_63_NA5 = D_MPS020_63_NA5*EVF_MPS020_63_NA5}
+goal setEV_DED025_63_NA5  {EV_DED025_63_NA5 = D_DED025_63_NA5*EVF_DED025_63_NA5}
+goal setEV_63_NA5         {EV_63_NA5        =  EV_MPS020_63_NA5 + EV_DED025_63_NA5}
+  
+goal setDP_MPS020_63_NA5  {DP_MPS020_63_NA5 = D_MPS020_63_NA5*DPF_MPS020_63_NA5}
+goal setDP_DED025_63_NA5  {DP_DED025_63_NA5 = D_DED025_63_NA5*DPF_DED025_63_NA5}
+goal setDP_63_NA5         {DP_63_NA5        =  DP_MPS020_63_NA5 + DP_DED025_63_NA5}
+
+goal setLF_MPS020_63_NA5  {LF_MPS020_63_NA5 = D_MPS020_63_NA5*LFF_MPS020_63_NA5}
+goal setLF_DED025_63_NA5  {LF_DED025_63_NA5 = D_DED025_63_NA5*LFF_DED025_63_NA5}
+goal setLF_63_NA5         {LF_63_NA5        =  LF_MPS020_63_NA5 + LF_DED025_63_NA5}
+    
+goal setDL_MPS020_63_NA5  {DL_MPS020_63_NA5 = EV_MPS020_63_NA5 + DP_MPS020_63_NA5 + LF_MPS020_63_NA5 + OS_MPS020_63_NA5}
+goal setDL_DED025_63_NA5  {DL_DED025_63_NA5 = EV_DED025_63_NA5 + DP_DED025_63_NA5 + LF_DED025_63_NA5 + OS_DED025_63_NA5}
+goal setDL_63_NA5     {DL_63_NA5        = EV_63_NA5 + DP_63_NA5 + LF_63_NA5 + OS_63_NA5}
+
+/*
+goal setTW_63_NA4         {TW_63_NA4        = AWO_63_NA4*TWFO_63_NA4 + AWR_63_NA4*TWFR_63_NA4}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_63_NA5    {RU_63_NA5 = min(TW_63_NA5,RUFR_63_NA5*AWR_63_NA5+ RUFO_63_NA5*AWO_63_NA5)} 
+!zrc@ goal set2RU_63_NA4    {RU_63_NA4 < RUFR_63_NA4*AWR_63_NA4+ RUFO_63_NA4*AWO_63_NA4} 
+! applied water  = awr + awo
+goal setAW_63_NA5     {AW_63_NA5 = AWR_63_NA5+ AWO_63_NA5} 
+! riparian losse = factor * aw 
+goal setRP_63_NA5     {RP_63_NA5 = AW_63_NA5* RPF_63_NA5} 
+!==============================
+! 63_NU - Cities of Merced, Atwater, Livingston, Winton, Planada, LeGrande & Small Communities - M&I
+!==============================
+! No surface water delivery
+goal setDL_63_NU          {DL_63_NU  = 0.0}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 64      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+!==============================
+! 64_PA1 - Madera ID - Ag
+!==============================
+! deliveries
+goal setEV_FRS036_64_PA1  {EV_FRS036_64_PA1 = D_FRS036_64_PA1*EVF_FRS036_64_PA1}
+goal setEV_DBC014_64_PA1  {EV_DBC014_64_PA1 = D_DBC014_64_PA1*EVF_DBC014_64_PA1}
+goal setEV_MDC006_64_PA1  {EV_MDC006_64_PA1 = D_MDC006_64_PA1*EVF_MDC006_64_PA1}
+goal setEV_MDC032_64_PA1  {EV_MDC032_64_PA1 = D_MDC032_64_PA1*EVF_MDC032_64_PA1}
+goal setEV_64_PA1         {EV_64_PA1        = EV_FRS036_64_PA1 + EV_DBC014_64_PA1 + EV_MDC006_64_PA1 + EV_MDC032_64_PA1}
+
+goal setDP_FRS036_64_PA1  {DP_FRS036_64_PA1 = D_FRS036_64_PA1*DPF_FRS036_64_PA1}
+goal setDP_DBC014_64_PA1  {DP_DBC014_64_PA1 = D_DBC014_64_PA1*DPF_DBC014_64_PA1}
+goal setDP_MDC006_64_PA1  {DP_MDC006_64_PA1 = D_MDC006_64_PA1*DPF_MDC006_64_PA1}
+goal setDP_MDC032_64_PA1  {DP_MDC032_64_PA1 = D_MDC032_64_PA1*DPF_MDC032_64_PA1}
+goal setDP_64_PA1         {DP_64_PA1        = DP_FRS036_64_PA1 + DP_DBC014_64_PA1 + DP_MDC006_64_PA1 + DP_MDC032_64_PA1}  
+
+goal setLF_FRS036_64_PA1  {LF_FRS036_64_PA1 = D_FRS036_64_PA1*LFF_FRS036_64_PA1}
+goal setLF_DBC014_64_PA1  {LF_DBC014_64_PA1 = D_DBC014_64_PA1*LFF_DBC014_64_PA1}
+goal setLF_MDC006_64_PA1  {LF_MDC006_64_PA1 = D_MDC006_64_PA1*LFF_MDC006_64_PA1}
+goal setLF_MDC032_64_PA1  {LF_MDC032_64_PA1 = D_MDC032_64_PA1*LFF_MDC032_64_PA1}
+goal setLF_64_PA1         {LF_64_PA1        = LF_FRS036_64_PA1 + LF_DBC014_64_PA1 + LF_MDC006_64_PA1 + LF_MDC032_64_PA1}
+    
+goal setDL_FRS036_64_PA1  {DL_FRS036_64_PA1 = EV_FRS036_64_PA1 + DP_FRS036_64_PA1 + LF_FRS036_64_PA1 + OS_FRS036_64_PA1}
+goal setDL_DBC014_64_PA1  {DL_DBC014_64_PA1 = EV_DBC014_64_PA1 + DP_DBC014_64_PA1 + LF_DBC014_64_PA1 + OS_DBC014_64_PA1}
+goal setDL_MDC006_64_PA1  {DL_MDC006_64_PA1 = EV_MDC006_64_PA1 + DP_MDC006_64_PA1 + LF_MDC006_64_PA1 + OS_MDC006_64_PA1}
+goal setDL_MDC032_64_PA1  {DL_MDC032_64_PA1 = EV_MDC032_64_PA1 + DP_MDC032_64_PA1 + LF_MDC032_64_PA1 + OS_MDC032_64_PA1}
+goal setDL_64_PA1     {DL_64_PA1        = EV_64_PA1 + DP_64_PA1 + LF_64_PA1 + OS_64_PA1}
+
+/*
+goal setTW_64_PA1         {TW_64_PA1        = AWO_64_PA1*TWFO_64_PA1 + AWR_64_PA1*TWFR_64_PA1}
+*/
+
+/* OLD
+! NOTE -- D_DBC014_64_PA1 was not included in original DL sum (i.e., assumed no loss from DBC diversion)
+!         Included here...
+! NOTE -- Modified to include OS in DL...
+!         Add OS in DL constraints, subtract OS in EV/DP/EV constraints.
+! Delivery losses are defined in lookup table as a percentage of surface water diversions, varying with water-year type.
+! Assume 10% of losses are due to evaporation and 90% due to seepage
+! NEW:  Assume 25% of seepage goes to LF, 75% goes to DP
+goal setDL_FRS036_64_PA1  {DL_FRS036_64_PA1  = D_FRS036_64_PA1 * perDL_64_PA1 + OS_FRS036_64_PA1 }
+goal setDL_DBC014_64_PA1  {DL_DBC014_64_PA1  = D_DBC014_64_PA1 * perDL_64_PA1 + OS_DBC014_64_PA1 }
+goal setDL_MDC006_64_PA1  {DL_MDC006_64_PA1  = D_MDC006_64_PA1 * perDL_64_PA1 + OS_MDC006_64_PA1 }
+goal setDL_MDC032_64_PA1  {DL_MDC032_64_PA1  = D_MDC032_64_PA1 * perDL_64_PA1 + OS_MDC032_64_PA1 }
+goal setDL_64_PA1         {DL_64_PA1         = DL_FRS036_64_PA1 + DL_DBC014_64_PA1 + DL_MDC006_64_PA1 + DL_MDC032_64_PA1}
+
+goal setEV_FRS036_64_PA1  {EV_FRS036_64_PA1  = 0.1*DL_FRS036_64_PA1 - 0.1*OS_FRS036_64_PA1} 
+goal setEV_DBC014_64_PA1  {EV_DBC014_64_PA1  = 0.1*DL_DBC014_64_PA1 - 0.1*OS_DBC014_64_PA1} 
+goal setEV_MDC006_64_PA1  {EV_MDC006_64_PA1  = 0.1*DL_MDC006_64_PA1 - 0.1*OS_MDC006_64_PA1} 
+goal setEV_MDC032_64_PA1  {EV_MDC032_64_PA1  = 0.1*DL_MDC032_64_PA1 - 0.1*OS_MDC032_64_PA1} 
+
+goal setDP_FRS036_64_PA1  {DP_FRS036_64_PA1  = 0.9*0.75*DL_FRS036_64_PA1 - 0.9*0.75*OS_FRS036_64_PA1} 
+goal setDP_DBC014_64_PA1  {DP_DBC014_64_PA1  = 0.9*0.75*DL_DBC014_64_PA1 - 0.9*0.75*OS_DBC014_64_PA1} 
+goal setDP_MDC006_64_PA1  {DP_MDC006_64_PA1  = 0.9*0.75*DL_MDC006_64_PA1 - 0.9*0.75*OS_MDC006_64_PA1} 
+goal setDP_MDC032_64_PA1  {DP_MDC032_64_PA1  = 0.9*0.75*DL_MDC032_64_PA1 - 0.9*0.75*OS_MDC032_64_PA1} 
+
+goal setLF_FRS036_64_PA1  {LF_FRS036_64_PA1  = 0.9*0.25*DL_FRS036_64_PA1 - 0.9*0.25*OS_FRS036_64_PA1} 
+goal setLF_DBC014_64_PA1  {LF_DBC014_64_PA1  = 0.9*0.25*DL_DBC014_64_PA1 - 0.9*0.25*OS_DBC014_64_PA1} 
+goal setLF_MDC006_64_PA1  {LF_MDC006_64_PA1  = 0.9*0.25*DL_MDC006_64_PA1 - 0.9*0.25*OS_MDC006_64_PA1} 
+goal setLF_MDC032_64_PA1  {LF_MDC032_64_PA1  = 0.9*0.25*DL_MDC032_64_PA1 - 0.9*0.25*OS_MDC032_64_PA1} 
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_64_PA1    {RU_64_PA1 = min(TW_64_PA1,RUFR_64_PA1*AWR_64_PA1+ RUFO_64_PA1*AWO_64_PA1)} 
+!zrc@ goal set2RU_64_PA1    {RU_64_PA1 < RUFR_64_PA1*AWR_64_PA1+ RUFO_64_PA1*AWO_64_PA1} 
+! applied water  = awr + awo
+!goal setAW_64_PA1     {AW_64_PA1 = 1.1*AWR_64_PA1 + 1.1*AWO_64_PA1} !<--not sure why this 1.1 factor is here? @jmg 2018.03.02
+goal setAW_64_PA1  {AW_64_PA1 = AWR_64_PA1 + AWO_64_PA1}  !@jmg 2018.03.02 - revised AW goal
+! riparian losse = factor * aw 
+goal setRP_64_PA1     {RP_64_PA1 = AW_64_PA1* RPF_64_PA1} 
+
+
+!==============================
+! 64_PA2 - Chowchilla ID - Ag
+!==============================
+! NOTE -- Original formulation assumed losses=35% of delivery, with 10% to evap and 90% to seepage
+!         BUT only included CHW delivery in equation (i.e., assumed zero loss from ASL and BRS diversions)
+!         Assumed loss split as 10% evap (EVF=0.035), 90% seepage (DPF=0.315) ... LFF=0.000
+!         New formulation assumes 25% of seepage to LF (LFF=0.07875), 75% to DP (DPF=0.23625) (factors set in arcs file)
+!         New formulation assumes same factors apply to ASL and BRS diversions
+goal setEV_CHW017_64_PA2  {EV_CHW017_64_PA2 = D_CHW017_64_PA2*EVF_CHW017_64_PA2}
+goal setEV_ASL013_64_PA2  {EV_ASL013_64_PA2 = D_ASL013_64_PA2*EVF_ASL013_64_PA2}
+goal setEV_BRS018_64_PA2  {EV_BRS018_64_PA2 = D_BRS018_64_PA2*EVF_BRS018_64_PA2}
+goal setEV_64_PA2         {EV_64_PA2        = EV_CHW017_64_PA2 + EV_ASL013_64_PA2 + EV_BRS018_64_PA2}
+
+goal setDP_CHW017_64_PA2  {DP_CHW017_64_PA2 = D_CHW017_64_PA2*DPF_CHW017_64_PA2}
+goal setDP_ASL013_64_PA2  {DP_ASL013_64_PA2 = D_ASL013_64_PA2*DPF_ASL013_64_PA2}
+goal setDP_BRS018_64_PA2  {DP_BRS018_64_PA2 = D_BRS018_64_PA2*DPF_BRS018_64_PA2}
+goal setDP_64_PA2         {DP_64_PA2        = DP_CHW017_64_PA2 + DP_ASL013_64_PA2 + DP_BRS018_64_PA2}
+
+goal setLF_CHW017_64_PA2  {LF_CHW017_64_PA2 = D_CHW017_64_PA2*LFF_CHW017_64_PA2}
+goal setLF_ASL013_64_PA2  {LF_ASL013_64_PA2 = D_ASL013_64_PA2*LFF_ASL013_64_PA2}
+goal setLF_BRS018_64_PA2  {LF_BRS018_64_PA2 = D_BRS018_64_PA2*LFF_BRS018_64_PA2}
+goal setLF_64_PA2         {LF_64_PA2        = LF_CHW017_64_PA2 + LF_ASL013_64_PA2 + LF_BRS018_64_PA2}
+
+goal setDL_CHW017_64_PA2  {DL_CHW017_64_PA2 = EV_CHW017_64_PA2 + DP_CHW017_64_PA2 + LF_CHW017_64_PA2 + OS_CHW017_64_PA2}
+goal setDL_ASL013_64_PA2  {DL_ASL013_64_PA2 = EV_ASL013_64_PA2 + DP_ASL013_64_PA2 + LF_ASL013_64_PA2 + OS_ASL013_64_PA2}
+goal setDL_BRS018_64_PA2  {DL_BRS018_64_PA2 = EV_BRS018_64_PA2 + DP_BRS018_64_PA2 + LF_BRS018_64_PA2 + OS_BRS018_64_PA2}
+goal setDL_64_PA2     {DL_64_PA2        = EV_64_PA2 + DP_64_PA2 + LF_64_PA2 + OS_64_PA2}
+
+/*
+goal setTW_64_PA2         {TW_64_PA2        = AWO_64_PA2*TWFO_64_PA2 + AWR_64_PA2*TWFR_64_PA2}
+*/
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_64_PA2    {RU_64_PA2 = min(TW_64_PA2,RUFR_64_PA2*AWR_64_PA2+ RUFO_64_PA2*AWO_64_PA2)} 
+!zrc@ goal set2RU_64_PA2    {RU_64_PA2 < RUFR_64_PA2*AWR_64_PA2+ RUFO_64_PA2*AWO_64_PA2} 
+! applied water  = awr + awo 
+goal setAW_64_PA2   {AW_64_PA2 = AWR_64_PA2 + AWO_64_PA2}
+! riparian losse = factor * aw 
+goal setRP_64_PA2     {RP_64_PA2 = AW_64_PA2* RPF_64_PA2} 
+
+
+!==============================
+! 64_PA3 - Gravelly Ford and Rocky Creek Water Districts - Ag
+!==============================
+! NOTE -- Original formulation assumed losses=35% of delivery, 
+!         Assumed loss split as 10% evap (EVF=0.035), 90% seepage (DPF=0.315) ... LFF=0.000
+!         New formulation assumes 25% of seepage to LF (LFF=0.07875), 75% to DP (DPF=0.23625) (factors set in arcs file)
+goal setEV_MDC006_64_PA3  {EV_MDC006_64_PA3 = D_MDC006_64_PA3*EVF_MDC006_64_PA3}
+goal setEV_SJR227_64_PA3  {EV_SJR227_64_PA3 = D_SJR227_64_PA3*EVF_SJR227_64_PA3}
+goal setEV_64_PA3         {EV_64_PA3        = EV_MDC006_64_PA3 + EV_SJR227_64_PA3}
+
+goal setDP_MDC006_64_PA3  {DP_MDC006_64_PA3 = D_MDC006_64_PA3*DPF_MDC006_64_PA3}
+goal setDP_SJR227_64_PA3  {DP_SJR227_64_PA3 = D_SJR227_64_PA3*DPF_SJR227_64_PA3}
+goal setDP_64_PA3         {DP_64_PA3        = DP_MDC006_64_PA3 + DP_SJR227_64_PA3}
+
+goal setLF_MDC006_64_PA3  {LF_MDC006_64_PA3 = D_MDC006_64_PA3*LFF_MDC006_64_PA3}
+goal setLF_SJR227_64_PA3  {LF_SJR227_64_PA3 = D_SJR227_64_PA3*LFF_SJR227_64_PA3}
+goal setLF_64_PA3         {LF_64_PA3        = LF_MDC006_64_PA3 + LF_SJR227_64_PA3}
+
+goal setDL_MDC006_64_PA3  {DL_MDC006_64_PA3 = EV_MDC006_64_PA3 + DP_MDC006_64_PA3 + LF_MDC006_64_PA3 + OS_MDC006_64_PA3}
+goal setDL_SJR227_64_PA3  {DL_SJR227_64_PA3 = EV_SJR227_64_PA3 + DP_SJR227_64_PA3 + LF_SJR227_64_PA3 + OS_SJR227_64_PA3}
+goal setDL_64_PA3     {DL_64_PA3        = EV_64_PA3 + DP_64_PA3 + LF_64_PA3 + OS_64_PA3}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_64_PA3    {RU_64_PA3 = min(TW_64_PA3,RUFR_64_PA3*AWR_64_PA3+ RUFO_64_PA3*AWO_64_PA3)} 
+!zrc@ goal set2RU_64_PA3    {RU_64_PA3 < RUFR_64_PA3*AWR_64_PA3+ RUFO_64_PA3*AWO_64_PA3} 
+! applied water  = awr + awo
+goal setAW_64_PA3     {AW_64_PA3 = AWR_64_PA3 + AWO_64_PA3} 
+! riparian losse = factor * aw 
+goal setRP_64_PA3     {RP_64_PA3 = AW_64_PA3 * RPF_64_PA3} 
+
+
+!==============================
+! 64_XA - Columbia Canal Co. (Exchange Contractor) - Ag
+!==============================
+!***********************************************************!
+!   New DU Hydrology formulation: Z. Richard Chen July 2020        !
+!***********************************************************!
+!====Reformulated Parameters=====
+define svRU_64_XA {value min(TW_64_XA, RUFR_64_XA*AWR_64_XA +RUFO_64_XA*AWO_64_XA)} !+ RUFW_64_XA*AWW_64_XA !Reuse
+!define    NTW_64_XA  {value max(0,- svRU_64_XA +     TW_64_XA)}     !Net tailwater    
+define    NTW_64_XA  {value max(0,(int(100000*(- svRU_64_XA +     TW_64_XA)))/100000 )}                                
+define AWRPRU_64_XA  {value max(0,- svRU_64_XA +(1 +RPF_64_XA)*(AWR_64_XA +AWO_64_XA))} !+AWW_64_XA)}  !Applied water + Riparian ET -Reuse (full diversion requirement)                   
+                                            
+!===Grounwater pumping and the associated return flow==========
+define rGPmin_64_XA { case zero {condition AWRPRU_64_XA <= 0.0 value 0} case other {condition always value GPmin_64_XA}}
+define IR_64_XA_GP  {lower rGPmin_64_XA upper GPmax_64_XA kind 'IR-Fraction' units 'NONE'} 
+!define  R_64_XA_GP  {lower 0 upper NTW_64_XA kind 'RETURN' units 'CFS'}
+define  R_64_XA_GP  {std kind 'RETURN' units 'CFS'}
+goal   set1R_64_XA_GP   {R_64_XA_GP <   NTW_64_XA }
+goal   setR_64_XA_GP   {R_64_XA_GP = IR_64_XA_GP *    NTW_64_XA }                    
+goal meetAW_64_XA_GP  {GP_64_XA    = IR_64_XA_GP * AWRPRU_64_XA }                               
+    
+!===Surface flow and the associated return flow==========
+define  RFC_MDOTA_64_XA {value LFF_MDOTA_64_XA + OSF_MDOTA_64_XA} !Return Flow Coefficient
+define  NFC_MDOTA_64_XA {value 1-(EVF_MDOTA_64_XA + DPF_MDOTA_64_XA +RFC_MDOTA_64_XA)} !Net Flow Coefficient                                                 
+define    R_MDOTA_64_XA {lower 0 upper (NTW_64_XA +    AWRPRU_64_XA *RFC_MDOTA_64_XA/NFC_MDOTA_64_XA) kind 'RETURN' units 'CFS'}
+
+define   IR_MDOTA_64_XA {std kind 'IR-Fraction' units 'NONE'} !{lower 0 upper CL_64_XA*(1 -FLOSS_MDOTA_64_XA)/GPmax_64_XA_ann kind 'IR-Fraction' units 'NONE'}
+define  DAW_MDOTA_64_XA  {std kind 'DIVERSION' units 'CFS'}
+goal   setR_MDOTA_64_XA { R_MDOTA_64_XA = IR_MDOTA_64_XA * NTW_64_XA + DAW_MDOTA_64_XA *RFC_MDOTA_64_XA }                                                
+goal meetAW_MDOTA_64_XA {IR_MDOTA_64_XA *   AWRPRU_64_XA =           + DAW_MDOTA_64_XA *NFC_MDOTA_64_XA } !DN_64_XA } ! + GP_64_XA+ SHRTG_64_XA }                               
+
+!===Link addtional deep percolations for excess contract limit to diversions
+define  DCL_64_XA {std kind 'DIVERSION' units 'CFS'}
+define  DCL_MDOTA_64_XA  {std kind 'DIVERSION' units 'CFS'}
+goal   setD_MDOTA_64_XA {D_MDOTA_64_XA = DAW_MDOTA_64_XA +DCL_MDOTA_64_XA}
+goal       setDCL_64_XA {    DCL_64_XA = DCL_MDOTA_64_XA}
+
+
+Objective obj_64_XA = {
+[DCL_64_XA, -1000],  !-1000 to allaw excess contract deliver to DU !-99999 not allow excess contract water deliveries
+![GP_64_XA,  -9999]  !defined in Weight-table.wresl
+}
+
+!===Combine all irritation ratio and to allow shortage with penalty
+define IR_64_XA {std kind 'IR-Fraction' units 'NONE'}       !deliveried irrigation ratio
+define IR_64_XA_short {std kind 'IR-Fraction' units 'NONE'} !shorage fraction
+! define SHRTG_64_XA {std kind 'DR-SHORTAGE' units 'CFS'}       !DR shortage (supply shortage to full diversion requirement)      
+define SHRTG_64_XA {alias IR_64_XA_short*AWRPRU_64_XA kind 'DR-SHORTAGE' units 'CFS'} 
+goal combineIR_64_XA_DU {IR_64_XA = IR_64_XA_GP +IR_MDOTA_64_XA}
+goal setIR_64_XA {lhs IR_64_XA rhs 1 lhs<rhs penalty 3000}
+goal setIR_64_XA_short {IR_64_XA_short = 1 - IR_64_XA}
+! goal setSHRTG_64_XA {SHRTG_64_XA = IR_64_XA_short*AWRPRU_64_XA}
+
+!===Combine return flow components
+!define R_64_XA {std kind 'RETURN-FLOW' units 'CFS'}
+!goal  linkR_64_XA {R_64_XA = R_64_PA1_SJR235}
+goal  combineR_64_XA     {R_64_XA =    R_64_XA_GP + R_MDOTA_64_XA}
+
+!===Output summary of demand unit flow components  DG + GP + RU = AW + DL + RP
+goal setRU_64_XA     {RU_64_XA =IR_64_XA*svRU_64_XA} 
+goal setAW_64_XA     {AW_64_XA =IR_64_XA*(AWR_64_XA + AWO_64_XA )} !+ AWW_64_XA
+goal setRP_64_XA     {RP_64_XA = RPF_64_XA * AW_64_XA } 
+goal setDL_64_XA     {DL_64_XA =  EV_64_XA + DP_64_XA + LF_64_XA + OS_64_XA + DCL_64_XA}
+
+!Loss Components
+goal setEV_MDOTA_64_XA  {EV_MDOTA_64_XA = DAW_MDOTA_64_XA*EVF_MDOTA_64_XA}
+goal setEV_64_XA              {EV_64_XA =  EV_MDOTA_64_XA}
+ 
+goal setDP_MDOTA_64_XA  {DP_MDOTA_64_XA = DAW_MDOTA_64_XA*DPF_MDOTA_64_XA}
+goal setDP_64_XA              {DP_64_XA =  DP_MDOTA_64_XA}
+
+goal setLF_MDOTA_64_XA  {LF_MDOTA_64_XA = DAW_MDOTA_64_XA*LFF_MDOTA_64_XA}
+goal setLF_64_XA              {LF_64_XA =  LF_MDOTA_64_XA}
+
+goal setOS_MDOTA_64_XA  {OS_MDOTA_64_XA = DAW_MDOTA_64_XA*OSF_MDOTA_64_XA}
+goal setOS_64_XA              {OS_64_XA =  OS_MDOTA_64_XA}
+
+!====End of DU_64_XA
+/*
+! deliveries
+goal setEV_MDOTA_64_XA    {EV_MDOTA_64_XA  = D_MDOTA_64_XA * EVF_MDOTA_64_XA }
+goal setEV_64_XA          {EV_64_XA        = EV_MDOTA_64_XA}
+
+goal setDP_MDOTA_64_XA    {DP_MDOTA_64_XA  = D_MDOTA_64_XA * DPF_MDOTA_64_XA }
+goal setDP_64_XA          {DP_64_XA        = DP_MDOTA_64_XA}
+
+goal setLF_MDOTA_64_XA    {LF_MDOTA_64_XA  = D_MDOTA_64_XA * LFF_MDOTA_64_XA }
+goal setLF_64_XA          {LF_64_XA        = LF_MDOTA_64_XA}
+
+!zrc@ goal setDL_MDOTA_64_XA    {DL_MDOTA_64_XA  = EV_MDOTA_64_XA + DP_MDOTA_64_XA + LF_MDOTA_64_XA + OS_MDOTA_64_XA}
+goal setDL_64_XA      {DL_64_XA        = EV_64_XA + DP_64_XA + LF_64_XA + OS_64_XA}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_64_XA         {RU_64_XA  = min(TW_64_XA,RUFR_64_XA *AWR_64_XA  + RUFO_64_XA *AWO_64_XA)} 
+!zrc@ goal set2RU_64_XA         {RU_64_XA  < RUFR_64_XA *AWR_64_XA  + RUFO_64_XA *AWO_64_XA } 
+! applied water  = awr + awo
+goal setAW_64_XA          {AW_64_XA  = AWR_64_XA  + AWO_64_XA } 
+! riparian losse = factor * aw
+goal setRP_64_XA          {RP_64_XA  = AW_64_XA  * RPF_64_XA } 
+*/
+
+!==============================
+! 64_NA1 - East of Madera ID and Non District DAU 213 - Ag
+!==============================
+! No surface water delivery...
+! No losses
+! No returns
+goal setDL_64_NA1         {DL_64_NA1  = 0.0}
+
+
+!==============================
+! 64_NA2 - West of Madera ID and Chowchilla ID - Ag
+!==============================
+! deliveries
+goal setEV_EBP016_64_NA2  {EV_EBP016_64_NA2 = D_EBP016_64_NA2*EVF_EBP016_64_NA2}
+goal setEV_RFS64_64_NA2   {EV_RFS64_64_NA2  = D_RFS64_64_NA2*EVF_RFS64_64_NA2}
+goal setEV_64_NA2         {EV_64_NA2        = EV_EBP016_64_NA2 + EV_RFS64_64_NA2}
+  
+goal setDP_EBP016_64_NA2  {DP_EBP016_64_NA2 = D_EBP016_64_NA2*DPF_EBP016_64_NA2}
+goal setDP_RFS64_64_NA2   {DP_RFS64_64_NA2  = D_RFS64_64_NA2*DPF_RFS64_64_NA2}
+goal setDP_64_NA2         {DP_64_NA2        = DP_EBP016_64_NA2 + DP_RFS64_64_NA2}
+
+goal setLF_EBP016_64_NA2  {LF_EBP016_64_NA2 = D_EBP016_64_NA2*LFF_EBP016_64_NA2}
+goal setLF_RFS64_64_NA2   {LF_RFS64_64_NA2  = D_RFS64_64_NA2*LFF_RFS64_64_NA2}
+goal setLF_64_NA2         {LF_64_NA2        = LF_EBP016_64_NA2 + LF_RFS64_64_NA2}
+    
+goal setDL_EBP016_64_NA2  {DL_EBP016_64_NA2 = EV_EBP016_64_NA2 + DP_EBP016_64_NA2 + LF_EBP016_64_NA2 + OS_EBP016_64_NA2}
+goal setDL_RFS64_64_NA2   {DL_RFS64_64_NA2  = EV_RFS64_64_NA2  + DP_RFS64_64_NA2  + LF_RFS64_64_NA2  + OS_RFS64_64_NA2}
+goal setDL_64_NA2     {DL_64_NA2        = EV_64_NA2 + DP_64_NA2 + LF_64_NA2 + OS_64_NA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_64_NA2    {RU_64_NA2 = min(TW_64_NA2,RUFR_64_NA2*AWR_64_NA2 + RUFO_64_NA2*AWO_64_NA2)} 
+!zrc@ goal set2RU_64_NA2    {RU_64_NA2 < RUFR_64_NA2*AWR_64_NA2 + RUFO_64_NA2*AWO_64_NA2} 
+! applied water  = awr + awo
+goal setAW_64_NA2     {AW_64_NA2 = AWR_64_NA2 + AWO_64_NA2} 
+! riparian losse = factor * aw 
+goal setRP_64_NA2     {RP_64_NA2 = AW_64_NA2* RPF_64_NA2} 
+
+
+!==============================
+! 64_NU - Cities of Madera, Chowchilla, Madera Acres & Small Communities - M&I
+!==============================
+! No surface water delivery
+goal setDL_64_NU          {DL_64_NU = 0.0}
+
+

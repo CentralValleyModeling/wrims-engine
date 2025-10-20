@@ -1,0 +1,44 @@
+/*
+Constraints-contracts.wresl
+Lower Yuba River System File
+
+Purpose:
+Limit surface water diversions to contract amounts, water allocations and water rights
+
+Naming takes the following form:
+DLT_{upstream node}_{demand unit}   - monthly contract or water right limit on specific contractors diversion from particular source  
+
+*/
+
+! define YCWA Member Unit allocations
+define YCWA_Alloc {std kind 'fraction' units 'none'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_FDC006_14_NA    {D_FDC006_14_NA < WRmon_FDC006_14_NA*taf_cfs}
+define DLT_FDC006_14_NA     {alias WRmon_FDC006_14_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_YUB013_14_NA    {D_YUB013_14_NA < 1.0*WRmon_YUB013_14_NA*taf_cfs + YCWA_Alloc*CLmon_YUB013_14_NA*taf_cfs}
+define DLT_YUB013_14_NA     {alias 1.0*WRmon_YUB013_14_NA*taf_cfs + YCWA_Alloc*CLmon_YUB013_14_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_YUB011_15N_NA2  {D_YUB011_15N_NA2 < 1.0*WRmon_YUB011_15N_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15N_NA2*taf_cfs}
+define DLT_YUB011_15N_NA2   {alias 1.0*WRmon_YUB011_15N_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15N_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_YUB003_15N_NU   {D_YUB003_15N_NU < 1.0*WRmon_YUB003_15N_NU*taf_cfs + YCWA_Alloc*CLmon_YUB003_15N_NU*taf_cfs}
+define DLT_YUB003_15N_NU    {alias 1.0*WRmon_YUB003_15N_NU*taf_cfs + YCWA_Alloc*CLmon_YUB003_15N_NU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_YUB011_15S_NA2    {D_YUB011_15S_NA2 < 1.0*WRmon_YUB011_15S_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15S_NA2*taf_cfs}
+define DLT_YUB011_15S_NA2     {alias 1.0*WRmon_YUB011_15S_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15S_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+

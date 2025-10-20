@@ -1,0 +1,39 @@
+/*
+File Name: constraints-minflows.wresl
+Lower Yuba River System File
+
+Purpose:
+
+*/
+
+/*
+! Article 33 of the 1963 FERC license specifies minimum streamflow for the Middle Yuba below Hour House Dam,
+! Oregon Creek below Log Cabin Diversion Dam, and North Yuba below New Colgate Diversion.
+
+For the Oregon Creek and Middle Yuba diversions, the diversion is generally left open, with min. flow set through
+the low level/fish outlets. The Our House Middle Yuba diversion acts as “primary” since it will force Oregon Creek
+flows to spill the Log Cabin diversion if it is more than the physical capacity of Camptonville tunnel.
+
+Also because the diversions are not operated in coordination with NBB releases under the current FERC license,
+the diversion occurs no matter what is happening at NBB, even spill.
+*/
+
+!Slate Creek below Diversion Dam
+goal C_SLT008total    {C_SLT008 = C_SLT008_MIF + C_SLT008_ADD}
+goal set_C_SLT008_MIF {C_SLT008_MIF < min(MF_SLT008,I_SLT009)}
+
+! Middle Fork Yuba below Our House Diversion Dam
+goal C_MFY012total    {C_MFY012 = C_MFY012_MIF + C_MFY012_ADD}
+goal set_C_MFY012_MIF {C_MFY012_MIF < min(MF_MFY012,I_MFY013)}
+
+! Oregon Creek below Log Cabin Diversion Dam
+goal C_OGN004total    {C_OGN004 = C_OGN004_MIF + C_OGN004_ADD}
+goal set_C_OGN004_MIF {C_OGN004_MIF < min(MF_OGN004,I_OGN005)}
+
+! French Dry Creek below Sicard Ditch Diversion
+goal C_FDC006total    {C_FDC006 = C_FDC006_MIF + C_FDC006_ADD}
+goal C_FDC006inflow   {C_FDC006_MIF < MF_FDC006}
+
+define MF_MFY012_dv   {alias min(MF_MFY012,I_MFY013) kind 'MIN-FLOW-REQD' UNITS 'CFS'}
+define MF_OGN004_dv   {alias min(MF_OGN004,I_OGN005) kind 'MIN-FLOW-REQD' UNITS 'CFS'}
+define MF_FDC006_dv   {alias MF_FDC006 kind 'MIN-FLOW-REQD' UNITS 'CFS'}

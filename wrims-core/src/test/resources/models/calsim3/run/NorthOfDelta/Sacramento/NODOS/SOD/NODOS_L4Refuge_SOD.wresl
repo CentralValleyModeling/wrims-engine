@@ -1,0 +1,42 @@
+! NODOS_L4Refuge_SOD.wresl
+! this routine estimates the amount that NODOS can provide for L4 Refuges and operates the
+! CVP portion of NODOS for this purpose
+
+! *******************************************************************
+!
+define S32 {std kind 'STORAGE' units 'TAF'} !NODOS CVP  !defined earlier in SystemTables_SOD\reservoir-table
+!
+! Arc defines (added to splitarc file)
+define D607c_NDS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA239_CVPRF_NDS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+!
+! *******************************************************************
+!     NODOS    NODOS    NODOS    NODOS    NODOS    NODOS    NODOS
+!
+! Refuge Level 4 increment based on NODOS supplies
+define ann_RefugeL4_inc   {select NOD     from NODOS_L4Refuge where  month=13 }
+define ann_RefugeL4DMC_inc{select SOD_DMC from NODOS_L4Refuge where  month=13 }
+define ann_RefugeL4CA_inc {select SOD_CA  from NODOS_L4Refuge where  month=13 }
+define ann_RefugeL4TOT_inc{value ann_RefugeL4_inc + ann_RefugeL4DMC_inc + ann_RefugeL4CA_inc}
+!
+! Refuge Level 4 increment based on NODOS supplies
+define Op_RefugeL4_inc {
+       case ShastaColdOffRamp {
+            condition  S_TRNTY(-1) + S_SHSTA(-1) < ColdStorTarg
+        value 0.}
+       case Deliver {
+            condition s32(-1) >= max(ERPStorReserve,ann_RefugeL4TOT_inc) .and. perdel_cvprf_sys > 0.80
+            value min(1.0,min(s32(-1),L4StorReserve,ann_RefugeL4TOT_inc)/ann_RefugeL4TOT_inc) }
+       case NoDeliver {
+            condition always
+            value 0.0 }
+}
+define dem_RefugeL4_inc {select NOD from NODOS_L4Refuge where  month=month }
+define dem_RefugeL4DMC_inc{select SOD_DMC from NODOS_L4Refuge where  month=month }
+define dem_RefugeL4CA_inc {select SOD_CA  from NODOS_L4Refuge where  month=month }
+!
+goal set_D607C_nds {D607C_NDS < Op_RefugeL4_inc*dem_RefugeL4DMC_inc*taf_cfs}
+goal set_D_CAA239_CVPRF_nds  {D_CAA239_CVPRF_NDS  < Op_RefugeL4_inc*dem_RefugeL4CA_inc*taf_cfs}
+!
+! *******************************************************************
+!

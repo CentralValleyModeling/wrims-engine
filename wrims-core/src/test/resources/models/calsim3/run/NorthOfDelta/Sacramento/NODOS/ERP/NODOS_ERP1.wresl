@@ -1,0 +1,132 @@
+/***************************************************************************************
+/  ERP actions taken at Keswick to
+/  Stabilize fall flows from Keswick to Red Bluff
+/  Provide Cold Water releases/protection for Summer flows
+/***************************************************************************************/
+!
+define KesTrig {
+    case Oct {
+        condition month == OCT
+        value S_SHSTA(prevSep) }
+    case rest {
+        condition always
+        value S_SHSTA(-1) }
+}
+define ERPC5_AFRP      {select flow from AFRP_SAC given trigger=KesTrig use minimum where month=month}
+define ERPC5_AFRPNOV97 {select flow from AFRP_SAC_NOV1997 given trigger=KesTrig use minimum where month=month}
+define ERPC5_NODOS     {select flow from AFRP_SAC_NODOS given trigger=KesTrig use minimum where month=month}
+define ERPC5_TempCtrl_1 {select flow from SAC_TemperatureControl given trigger=KesTrig use linear where month=month}
+!
+define ERPC5_FallFlow {
+       case NODOSAFRP{
+        condition FallStabilitySwitch == 4
+        value     ERPC5_NODOS}
+       case NOV97AFRP{
+        condition FallStabilitySwitch == 3 .or. FallStabilitySwitch == 13
+        value     ERPC5_AFRPNOV97}
+       case AFRP{
+        condition FallStabilitySwitch == 2 .or. FallStabilitySwitch == 12
+        value     ERPC5_AFRP}
+       case rest {
+        condition always
+        value     0. }}
+define ERPC5_ColdFlow {
+       case TempControl_1{
+        condition ColdWaterReleases == 1
+        value     ERPC5_TempCtrl_1}
+       case TempControl_2{
+        condition ColdWaterReleases >= 2
+        value     max(ERPC5_TempCtrl_1,ERPC5_TempCtrl_2)}
+       case rest {
+        condition always
+        value     0. }}
+!
+!***************************************************************************************
+define ERPC5_StabFlow03  {select StabFlow from SacStability where month=month }
+define ERPC5_StabFrac03  {select fraction from SacStability where month=month }
+define ERPC5_StabFlow97{select StabFlow from SacStability_NOV1997 where month=month }
+define ERPC5_StabFrac97{select fraction from SacStability_NOV1997 where month=month }
+define ERPC5_StabFlow {
+       case NOV97{
+        condition FallStabilitySwitch == 3 .or. FallStabilitySwitch == 13
+        value     ERPC5_StabFlow97}
+       case otherwise{
+        condition always
+        value     ERPC5_StabFlow03}
+}
+define ERPC5_StabFrac {
+       case NOV97{
+        condition FallStabilitySwitch == 3 .or. FallStabilitySwitch == 13
+        value     ERPC5_StabFrac97}
+       case otherwise{
+        condition always
+        value     ERPC5_StabFrac03}
+}
+!
+!***************************************************************************************
+! Stabilize flows
+define ERP_C5MIF_FlowStab {
+       case ShastaColdOffRamp {
+            condition  S1(-1) + S_SHSTA(-1) < ColdStorTarg
+        value 0.}
+       case CritCondOffRamp {
+        condition wyt_NODOS + prev_wyt_SAC >= 8
+        value 0.}
+       case firstMon{
+            condition  FallStabilitySwitch > 0 .and. month == OCT .and. wateryear == BgnWY
+            value  4500. }
+! Stabilize fall flows - 6000 cfs target
+       case OctJan6000 {
+            condition  FallStabilitySwitch == 1 .and. month <= JAN .and. S_SHSTA(-1) > 2400. ! was originally 2000.
+            value  max(6000.,min(C5(-1),6000.)*ERPC5_StabFrac) }
+       case OctJan4500 {
+            condition  FallStabilitySwitch == 1 .and. month <= JAN
+            value  max(4500.,min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac) }
+       case Sep4500 {
+            condition  FallStabilitySwitch == 1 .and. month == SEP
+            value  max(4500.,min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac) }
+! Stabilize fall flows - AFRP/6000 cfs target combination
+       case OctJanCombo1and3 {
+            condition  FallStabilitySwitch >= 12 .and. FallStabilitySwitch <= 13 .and. month <= JAN .and. S_SHSTA(-1) > 2400. ! was originally 2000.
+            value  max(max(6000.,ERPC5_FallFlow),min(C5(-1),6000.)*ERPC5_StabFrac) }
+       case OctJanCombo4500 {
+            condition  FallStabilitySwitch >= 12 .and. FallStabilitySwitch <= 13 .and. month <= JAN
+            value  max(max(4500.,ERPC5_FallFlow),min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac) }
+       case SepCombo4500 {
+            condition  FallStabilitySwitch >= 12 .and. FallStabilitySwitch <= 13 .and. month == SEP
+            value  max(max(4500.,ERPC5_FallFlow),min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac) }
+! AFRP targets related targets
+       case AFRP {
+            condition  FallStabilitySwitch > 1
+            value  max(ERPC5_FallFlow,min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac) }
+! other months
+       case rest {
+            condition FallStabilitySwitch > 0
+            value  min(C5(-1),ERPC5_StabFlow)*ERPC5_StabFrac }
+       case Zero {
+            condition always
+            value  0. }
+}
+define ERP_C5MIF_Stabdv {alias ERP_C5MIF_FlowStab kind 'FLOW-TARGET' units 'CFS'}
+!
+! Cold Water flows
+define ERP_C5MIF_ColdRel {
+!       case ShastaColdOffRamp {
+!            condition  S1(-1) + S_SHSTA(-1) < ColdStorTarg
+!       value 0.}
+!       case CritCondOffRamp {
+!       condition wyt_NODOS + prev_wyt_SAC >= 8
+!       value 0.}
+! Provide Cold Water Releases - AFRP targets related targets
+       case MaySepAFRP {
+            condition  ColdWaterReleases >= 1
+            value  ERPC5_ColdFlow }
+       case Zero {
+            condition always
+            value  0. }
+}
+define ERP_C5MIF_Colddv {alias ERP_C5MIF_ColdRel kind 'FLOW-TARGET' units 'CFS'}
+!
+!
+define ERP_C5MIF {value max(ERP_C5MIF_FlowStab,ERP_C5MIF_Habt,ERP_C5MIF_ColdRel)}
+define ERP_C5MIFdv {alias ERP_C5MIF kind 'FLOW-TARGET' units 'CFS'}

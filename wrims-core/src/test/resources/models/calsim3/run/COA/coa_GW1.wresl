@@ -1,0 +1,200 @@
+/*  This file contains the logic for the Coordinated Operation Agreement (COA).
+    This logic is based on the 1986 COA document and on DWRSIM documentation and logic.
+    The concept of the COA is as follows:
+
+    1) If total CVP and SWP exports are greater than what was withdrawn from storage then
+       there was excess water in the system called unstored water for export (UWFE).
+       This water must be shared using the negotiated formulas.  The current formula
+       gives CVP 55% of this water.  The rest goes to SWP. INT_IBU_UWFE = 1
+
+    2) If total CVP and SWP storage withdrawals are greater than the total exports then
+       there were In-Basin-Uses (IBU) that required storage withdrawals.  The responsibility
+       for these requirements is to be shared according to the negotiated formulas. The
+       current formula requires CVP to provide 75% of these storage withdrawals.  The rest
+       is provided by SWP.  INT_IBU_UWFE = 0
+
+    3) Often after meeting it's COA obligation one of the projects (usually CVP) can't
+       export all the water it's entitled to due to export capacity.  This logic allows
+       the other project to take any unused portion.  It's important that a project
+       be allowed to take all that it wants before giving up any of its share.
+
+    4) There are very specific definitions for UWFE and IBU in the COA document.  These
+       definitions have been followed as closely as possible. Some things to keep in mind:
+       - Storage increases are considered part of the UWFE and are shared as per the formulas.
+       - CVP only includes Whiskeytown storage withdrawals, not storage increases in its
+         definition of change in storage.
+
+    5) Weights have been placed on the CVP share of UWFE (CVP_UWFE) and each projects unused
+       share to allow each project only to take what it's entitled to plus any unused share.
+       You don't want CVP cutting its export to allow SWP to take more water.
+
+    6) For SWPDS, SHADS and FOLDS: positive is storage withdrawal, negative is storage increase.
+
+    7) Total exports are defined as total Banks pumping including wheeling plus Tracy pumping
+       plus Contra Costa Export.  Wheeling is considered as a CVP export and is defined with
+       separate wresl logic. */
+
+
+!******************* DEFINES  ************************************
+
+! define decision variables to be used in the COA statements
+define SWPDS {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'CFS'} !  SWP change in storage
+define SHADS {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'CFS'} !  Shasta change in storage
+define FOLDS {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'CFS'} !  Folsom change in storage
+define WHSSW {std kind 'STORAGE-WDL' UNITS 'CFS'}                               !  Whiskeytown storage withdrawal
+define WHSSI {std kind 'STORAGE-INC' UNITS 'CFS'}                               !  Whiskeytown storage increase
+define IBU   {std kind 'IBU' UNITS 'CFS'}                                 !  Total In-Basin-Uses met with storage withdrawals
+define UWFE  {std kind 'UWFE' UNITS 'CFS'}                                !  Total Unstored-Water-For-Export
+define CVP_SHARE {std kind 'PERCENT-COA' UNITS 'NONE'}                !  CVP COA Share
+define SWP_SHARE {std kind 'PERCENT-COA' UNITS 'NONE'}                !  SWP COA Share
+define UNUSED_FS {std kind 'UNUSED-FS' UNITS 'CFS' }                      !  Unused Federal Share of surplus
+define UNUSED_SS {std kind 'UNUSED-SS' UNITS 'CFS' }                      !  Unused State Share of surplus
+define Stored_FS {std kind 'UNUSED-FS' UNITS 'CFS'}
+define Stored_SS_SHA {std kind 'UNUSED-FS' UNITS 'CFS'}
+define Stored_SS_FOL {std kind 'UNUSED-FS' UNITS 'CFS'}
+!define C_CAA003_WTS_Stg1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+!define C_DMC000_WTS_Stg1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+!define NDOI_ADD_WTS_Stg1 {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+define WTS_Yuba_Stg1 {std kind 'SUPPLY-TRANSFER' UNITS 'CFS'}
+define WTS_Yuba_Stg1_swp {std kind 'SUPPLY-TRANSFER' UNITS 'CFS'}
+define WTS_Yuba_Stg1_cvp {std kind 'SUPPLY-TRANSFER' UNITS 'CFS'}
+define I_OROVL_WTS {std kind 'Transfer-Accounting' units 'cfs'}
+define I_SHSTA_WTS {std kind 'Transfer-Accounting' units 'cfs'}
+
+!goal split_C_CAA003_WTS {C_CAA003_WTS = C_CAA003_WTS_Stg1}
+!goal split_C_DMC000_WTS {C_DMC000_WTS = C_DMC000_WTS_Stg1}
+!goal split_NDOI_ADD_WTS_Stg1 {NDOI_ADD_WTS = NDOI_ADD_WTS_Stg1}
+goal split_WTS_Yuba_Stg1 {WTS_Yuba_Stg1 = WTS_Yuba_Stg1_swp + WTS_Yuba_Stg1_cvp}
+
+! define binary 'integer' decision variables that are used to force other variables to
+! be either positive or zero
+define int_WHS_stor_chg {INTEGER std kind 'INTEGER' UNITS 'NONE'}         ! this defines an integer with bounds [0,1]
+define int_IBU_UWFE     {INTEGER std kind 'INTEGER' UNITS 'NONE'}         ! this defines an integer with bounds [0,1]
+
+! Define max values for decision variables to be forced.  This simply needs to be
+! sufficiently large so that the variable will never exceed the value, but small enough
+! to avoid truncation/roundoff errors in the force constraints.
+define WHS_stor_chg_max {value 3000.*taf_cfs}
+define IBU_UWFE_max     {value 9999999.}
+
+! *************************** SWP STORAGE CHANGE DEFINITIONS **********************************
+
+/*  COA document actually defines SWPSW as:
+    Palermo Canal Diversion + Thermalito DD Release to Feather River
+  + Thermalito DD Diversion to Hatchery + Butte County Diversion
+  + Thermalito ID Diversion + Richvale Canal + Western Canal + PG&E Lateral
+  + Sutter Butte Canal + Thermalito Afterbay Release to Feather River
+  - Lake Oroville Inflow - Kelly Ridge Power Plant Discharge
+
+                      */
+                      
+! NODOS facility
+!define NODOSswpDS {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'CFS'} !  NODOS change in storage
+!goal NODOSswp_storage_change {NODOSswpDS = C31 + C31A + C5_S32SWP /*+ D31*/ - C177B} !NODOS storage change                      
+
+goal swp_storage_change {SWPDS = C_THRMA + C_FTR068 - C_FTR059_WTS + D_THRMF_11_NU1 + D_THRMF_12_NU1 + D_THRMA_WEC000 + D_THRMA_RVC000 + D_THRMA_JBC000
+         + D_OROVL_13_NU1 - C_FTR074 - I_OROVL - CT_OROVILLE - C_KRT000 + Stored_FS /*+ NODOSswpDS*/}!Define SWP Storage Change
+! **************************** CVP STORAGE CHANGE DEFINITIONS ******************************
+
+! Shasta Reservoir
+
+/*  COA document actually defines Shasta storage withdrawal as:
+    Keswick Dam Release + Keswick Diversions + Shasta Diversions
+    - Shasta Inflow - Discharge from Spring Creek Power Plant
+    This results in:                            */
+
+goal shasta_storage_change {SHADS = C_KSWCK_m - I_SHSTA - D_WKYTN_m + D_SHSTA_WTPJMS - R_03_PU1_KSWCK - SR_02*Area_02_KSWCK - SR_03*Area_03_KSWCK + Stored_SS_SHA} !Define Shasta Storage Change
+
+! Folsom Reservoir
+
+/*  COA Document actually defines Folsom storage withdrawal as:
+    Nimbus Release + Nimbus Diversion to Folsom South Canal
+    + Diversions from Folsom Lake - Inflow to Folsom
+    Including local inflow into Nimbus this results in: */
+
+goal folsom_storage_change { FOLDS = C_NTOMA_m + D_FOLSM_WTPRSV + D_FOLSM_WTPSJP + D_FOLSM_WTPFOL + D_FOLSM_WTPEDH + D_FOLSM_26S_PU3 + D_FOLSM_26S_NU4 + D_NTOMA_FSC003 - SR_26N*Area_26N_NTOMA - SR_26S*Area_26S_NTOMA - I_FOLSM - C_SFA011 - CT_FAIROAKS - C_NFA011 + Stored_SS_FOL}      !Define Folsom Storage Change
+
+! Whiskeytown Reservoir
+
+goal whiskey_storage_change {WHSSW - WHSSI = C_WKYTN_m + D_WKYTN_m + D_WKYTN_02_PU + D_WKYTN_WTPBUK + D_WKYTN_WTPCSD - I_WKYTN}
+
+goal WHSSW_force {WHSSW < int_WHS_stor_chg * WHS_stor_chg_max}                   ! if int=0, WHSSW=0, WHSSI=pos
+goal WHSSI_force {WHSSI < WHS_stor_chg_max - int_WHS_stor_chg * WHS_stor_chg_max}! if int=1, WHSSW=pos, WHSSI=0
+
+! NODOS facility
+!define NODOScvpDS {lower -1000000. upper 1000000. kind 'STORAGE-CHANGE' UNITS 'CFS'} !  NODOS change in storage
+!goal NODOScvp_storage_change {NODOScvpDS = C32_m + C32A + C32B + C32C + D32 - C177C_norm } !NODOS storage change
+
+! ********************** COA BALANCE CONSTRAINTS *******************************************
+
+/* This goal is the guts of COA.  It includes delta surplus plus total exports including wheeling plus
+   total change in storage. If RHS is positive you have UWFE, If negative you have IBU.
+   C_CAA003 = Total Banks pumping = C_CAA003_swp + C_CAA003_cvpded + swp_wheel
+   NDOI_ADD = Delta surplus
+   C_DMC000 = Tracy
+   D408 = Contra Costa
+   D_BKR004_NBA009_PRJ = Northbay Aqueduct project water  */
+   
+!define C_DMC000_EXP1 {std kind 'FLOW-DELIVERY' units 'CFS'}
+!define C_DMC000_EXP2 {std kind 'FLOW-DELIVERY' units 'CFS'}
+
+define D408_DS_EXP1 {std kind 'flow-delivery' units 'cfs'}      !CCWD diversion of Delta surplus under LV water right.
+define D408_DS_EXP2 {std kind 'flow-delivery' units 'cfs'}      !CCWD diversion of Delta surplus under LV water right.
+
+!define D168B_EXP1 {std kind 'FLOW-DELIVERY' units 'CFS'}        !added for Delta Exporter study of Freeport Project- RSR
+!define D168B_EXP2 {std kind 'FLOW-DELIVERY' units 'CFS'}        !added for Delta Exporter study of Freeport Project- RSR
+
+!define C_CAA003_EXP1 {std kind 'FLOW-DELIVERY' units 'CFS'}
+!define C_CAA003_EXP2 {std kind 'FLOW-DELIVERY' units 'CFS'}
+
+define NDOI_ADD_cvp {std kind 'FLOW-CHANNEL' units 'CFS'}
+define NDOI_ADD_swp {std kind 'FLOW-CHANNEL' units 'CFS'}
+define NDOI_ADD_ann {std kind 'FLOW-CHANNEL' units 'CFS'}
+
+goal cvpArcSplit {C_DMC000_cvp = C_DMC000_EXP1 + C_DMC000_EXP2 }
+goal cvpArcSplit2 {C_CAA003_cvpded = C_CAA003_cvpded_exp1 + C_CAA003_cvpded_exp2}
+goal swpArcSplit {C_CAA003_swp = C_CAA003_EXP1 + C_CAA003_EXP2 }
+goal CCWD_DS_arcspit {D408_DS + D408_3f = D408_DS_EXP1 + D408_DS_EXP2}
+
+!goal ebmudArcSplit {D168B = D168B_EXP1 + D168B_EXP2 } !added for Delta Exporter study of Freeport Project- RSR
+goal srpArcSplit {NDOI_ADD = NDOI_ADD_cvp + NDOI_ADD_swp + NDOI_ADD_ann + NDOI_ADD_whlcv
+                       + NDOI_ADD_whljp + NDOI_ADD_WTS}
+
+!goal COA_balance {UWFE - IBU = NDOI_ADD_cvp  + NDOI_ADD_swp + NDOI_ADD_WTS_Stg1 + D408_DS_EXP1
+!                             + C_DMC000_EXP1 + C_CAA003_EXP1 + C_CAA003_cvpded_Exp1 + C_CAA003_WTS_Stg1 + C_DMC000_WTS_Stg1  
+!                             /*+ D168B_EXP1*/ + D408_CVP  + 2./3.*D_BKR004_NBA009_PRJ 
+!                             /*+ D168c_exc_ntDep*/ + Surp1Terms + Surp2Terms
+!                             - SHADS - FOLDS - WHSSW - SWPDS + UNUSED_FS + UNUSED_SS - WTS_Yuba_Stg1 - C_KSWCK_WTS - C_FTR059_WTS + D408_P}
+
+goal UWFE_force {UWFE < int_IBU_UWFE * IBU_UWFE_max}                       ! if int=0, UWFE=0, IBU=pos
+goal IBU_force  {IBU < IBU_UWFE_max - int_IBU_UWFE * IBU_UWFE_max}         ! if int=1, UWFE=pos, IBU=0
+
+! 5/6/2019 Defined in the SharingRatios.wresl
+!define CVP_UWFE {value 0.55}                           ! CVP COA Share of unstored water for export
+!define CVP_IBU  {value 0.75}                             ! CVP COA Share of storage withdrawals
+goal CVP_Split {CVP_share = int_IBU_UWFE * CVP_UWFE + CVP_IBU - CVP_IBU * int_IBU_UWFE}  !CVP Share
+goal SWP_Split {SWP_share = 1.0 - CVP_share }                      !SWP Share
+
+/*  Restrict exports to satisfy COA:  Exports = storage withdrawal - storage increase -
+    share of in basin uses + share of unstored water for export + other party's unused share
+    Note that swp_wheel is amount of water wheeled by SWP for CVP and is considered a CVP export
+    also note C_CAA003_swp = banks pumping without Wheeling  */
+
+!goal coa_cvp3 { C_DMC000_EXP1 + C_CAA003_cvpded_Exp1 + C_CAA003_cvcsurp1 + D408_CS /*+ D168B_EXP1*/ = SHADS + FOLDS + WHSSW /*+ NODOScvpDS*/ - 0.75*IBU + 0.55*UWFE - UNUSED_FS - NDOI_ADD_cvp}
+goal coa_cvp3 { C_DMC000_EXP1 + C_CAA003_CVPDED_EXP1 /*+ D168B_EXP1*/ + D408_CVP + D408_DS_EXP1 + D408_P_WHL_SF_E1 + D408_P_DEL_CVP + D408_P_STR_CVP
+                + Surp1Terms + C_DMC000_WTS_Stg1
+        = SHADS + FOLDS + WHSSW /*+ NODOScvpDS*/ - CVP_IBU*IBU + CVP_UWFE*UWFE - UNUSED_FS - NDOI_ADD_cvp + WTS_Yuba_Stg1_cvp
+                /*- D168c_exc_ntDep1*/ + SMSCG_Dyr_watercost_sv*CVP_UWFE*int_IBU_UWFE + SMSCG_Dyr_watercost_sv*CVP_IBU - SMSCG_Dyr_watercost_sv*CVP_IBU*int_IBU_UWFE }
+
+! if int_IBU_UWFE = 1, last two terms become zero (UWFE)
+! if int_IBU_UWFE = 0, first and third terms become zero (IBU)
+
+!goal coa_swp3 { C_CAA003_EXP1 + 2./3.*D_BKR004_NBA009_PRJ + C_CAA003_cvcsurp2 = SWPDS - 0.25*IBU + 0.45*UWFE - UNUSED_SS - NDOI_ADD_swp}
+goal coa_swp3 { C_CAA003_EXP1 + 2./3.*D_BKR004_NBA009_PRJ
+                + Surp2Terms + C_CAA003_WTS_Stg1 + D408_P_WHL_SB_E1 + D408_P_DEL_SWP + D408_P_STR_SWP
+                = SWPDS - SWP_IBU*IBU + SWP_UWFE*UWFE - UNUSED_SS - NDOI_ADD_swp + WTS_Yuba_Stg1_swp - NDOI_ADD_WTS_Stg1 + C_KSWCK_WTS_Stg1_swp + C_FTR059_WTS_Stg1_swp
+                /*- D168c_exc_ntDep2*/ - SMSCG_Dyr_watercost_sv*CVP_UWFE*int_IBU_UWFE - SMSCG_Dyr_watercost_sv*CVP_IBU + SMSCG_Dyr_watercost_sv*CVP_IBU*int_IBU_UWFE}
+
+
+goal setUNUSED_FS { C_CAA003_EXP2 + D408_P_WHL_SB_E2 + Stored_FS < UNUSED_FS }
+goal setUNUSED_SS { C_DMC000_EXP2 + C_CAA003_cvpded_Exp2 /*+ D168B_EXP2*/ + D408_DS_EXP2 + D408_P_WHL_SF_E2 + Stored_SS_SHA + Stored_SS_FOL < UNUSED_SS }

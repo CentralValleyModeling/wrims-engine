@@ -1,0 +1,241 @@
+!*********************************************************************
+!
+!    Z.Q. Richard Chen 4/28/2020
+!    Modified 7/19/2021
+!
+!*********************************************************************
+! include 'SetGWreservoirFlows.wresl'
+define acm2sfd {value 1452*daysin} !43560/30*daysin
+
+define S_WDWRD_AF {      case SJRBASE_GW1{ condition cyclenum==cn_SJRBASE_GW1    !current cycle is SJRBASE_GW1
+                              value 1000*S_WDWRD[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum==cn_SJRBASE_GW2    !current cycle is SJRBASE_GW2
+                              value 1000*S_WDWRD[SJRBASE_GW1]     }
+                         case SJRBASE_GW3{ condition cyclenum==cn_SJRBASE_GW3    !current cycle is SJRBASE_GW3
+                              value 1000*S_WDWRD[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum==cn_SJRBASE_GW4    !current cycle is SJRBASE_GW4
+                              value 1000*S_WDWRD[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum==cn_SJR_WQ1        !current cycle is SJR_WQ1
+                              value 1000*S_WDWRD[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum==cn_SJR_PULSE      !current cycle is SJR_PULSE
+                              value 1000*S_WDWRD[SJR_WQ1]     }
+                         case SJR_WQ2    { condition cyclenum==cn_SJR_WQ2        !current cycle is SJR_WQ2
+                              value 1000*S_WDWRD[SJR_WQ1]     }
+                         case AprilMay   { condition month==Apr .or. month==May  !other cycles in Apr or May
+                              value 1000*S_WDWRD[SJR_WQ2]     }
+                         case other      { condition always                      !other cycles in other months
+                              value 1000*S_WDWRD[SJR_WQ1]     } }                              
+                                                            
+define Z_WDWRD {select elevation from res_info given storage=S_WDWRD_AF use linear where res_num=75} !180~209 GSZ=183@598
+define AZ_WDWRD {select area from res_info given storage=S_WDWRD_AF use linear where res_num=75} !180~209 GSZ=183@598
+define WDWRDcond {value 1287/5000.0*AZ_WDWRD*acm2sfd}   !1287*0.96 = 1233
+define rSetSeepWDWRD598hd {value SetGeneralHeadBC(598,1, WDWRDcond,Z_WDWRD)}
+define rSetRecharge586 { case firstyear {condition wateryear == bgnWY .and. month == OCT
+                              value 0}
+                         case othercase {condition always
+                              value SetSpecifiedFlowBC(586,1, C_WDWRD_Flood(-1)*cfs_cfm)}
+                       }
+define Z_WDWRD_DLL {alias Z_WDWRD kind 'ELEVATION' units 'FT'} 
+
+define S_MDSTO_AF {      case SJRBASE_GW1{ condition cyclenum ==cn_SJRBASE_GW1
+                              value 1000*S_MDSTO[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum ==cn_SJRBASE_GW2
+                              value 1000*S_MDSTO[SJRBASE_GW1]     } 
+                         case SJRBASE_GW3{ condition cyclenum ==cn_SJRBASE_GW3
+                              value 1000*S_MDSTO[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum ==cn_SJRBASE_GW4
+                              value 1000*S_MDSTO[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum ==cn_SJR_WQ1
+                              value 1000*S_MDSTO[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum ==cn_SJR_PULSE
+                              value 1000*S_MDSTO[SJR_WQ1]     } 
+                         case SJR_WQ2    { condition cyclenum ==cn_SJR_WQ2
+                              value 1000*S_MDSTO[SJR_WQ1]     }                              
+                         case AprilMay   { condition month == Apr .or. month == May
+                              value 1000*S_MDSTO[SJR_WQ2]     }
+                         case other      { condition always
+                              value 1000*S_MDSTO[SJR_WQ1]     } }
+define Z_MDSTO {select elevation from res_info given storage=S_MDSTO_AF use linear where res_num=78} !180~210 GSZ=241@644
+define AZ_MDSTO {select area from res_info given storage=S_MDSTO_AF use linear where res_num=78} !180~210 GSZ=241@644
+define MDSTOcond {value 1760/20000.0*AZ_MDSTO*acm2sfd} !1760*0.52 = 919
+define rSetSeepMDSTO643hd {value SetGeneralHeadBC(643,1, 0.25*MDSTOcond,Z_MDSTO)}
+define rSetSeepMDSTO644hd {value SetGeneralHeadBC(644,1, 0.75*MDSTOcond,Z_MDSTO)}
+define rSetRecharge643 { case firstyear {condition wateryear == bgnWY .and. month == OCT
+                              value 0}
+                         case othercase {condition always
+                              value SetSpecifiedFlowBC(643,1, C_MDSTO_Flood(-1)*cfs_cfm)}
+                       }
+define Z_MDSTO_DLL {alias Z_MDSTO kind 'ELEVATION' units 'FT'}
+                         
+define S_TRLCK_AF {      case SJRBASE_GW1{ condition cyclenum ==cn_SJRBASE_GW1
+                              value 1000*S_TRLCK[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum ==cn_SJRBASE_GW2
+                              value 1000*S_TRLCK[SJRBASE_GW1]     } 
+                         case SJRBASE_GW3{ condition cyclenum ==cn_SJRBASE_GW3
+                              value 1000*S_TRLCK[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum ==cn_SJRBASE_GW4
+                              value 1000*S_TRLCK[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum ==cn_SJR_WQ1
+                              value 1000*S_TRLCK[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum ==cn_SJR_PULSE
+                              value 1000*S_TRLCK[SJR_WQ1]     } 
+                         case SJR_WQ2    { condition cyclenum ==cn_SJR_WQ2
+                              value 1000*S_TRLCK[SJR_WQ1]     }                                                        
+                         case AprilMay   { condition month == Apr .or. month == May
+                              value 1000*S_TRLCK[SJR_WQ2]     }
+                         case other      { condition always
+                              value 1000*S_TRLCK[SJR_WQ1]     } }
+define Z_TRLCK {select elevation from res_info given storage=S_TRLCK_AF use linear where res_num=79} !212.5~241.5 GSZ=224@655 
+define AZ_TRLCK {select area from res_info given storage=S_TRLCK_AF use linear where res_num=79} !212.5~241.5 GSZ=224@655 
+define TRLCKcond {value 1682/500.0*AZ_TRLCK*acm2sfd}  !1682*0.51 = 850
+!define rSetSeepTRLCK665hd {value SetGeneralHeadBC(665,1, 0.10*TRLCKcond,Z_TRLCK)}
+define rSetSeepTRLCK666hd {value SetGeneralHeadBC(666,1, 0.80*TRLCKcond,Z_TRLCK)}
+define rSetSeepTRLCK667hd {value SetGeneralHeadBC(667,1, 0.20*TRLCKcond,Z_TRLCK)}
+define rSetRecharge665 { case firstyear {condition wateryear == bgnWY .and. month == OCT
+                              value 0}
+                         case othercase {condition always
+                              value SetSpecifiedFlowBC(665,1, C_TRLCK_Flood(-1)*cfs_cfm)}
+                       }
+define Z_TRLCK_DLL {alias Z_TRLCK kind 'ELEVATION' units 'FT'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Camanche Reservoir, Mokelumne River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Capacity=417,120 af Low=81,940 af
+!Due to the geology of the area the ground water sources typically do not exceed depths of 300 feet and rarely produce water near 600 feet.
+!Normal surface hight 235 
+define S_CMCHE_AF {      case SJRBASE_GW1{ condition cyclenum ==cn_SJRBASE_GW1
+                              value 1000*S_CMCHE[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum ==cn_SJRBASE_GW2
+                              value 1000*S_CMCHE[SJRBASE_GW1]     } 
+                         case SJRBASE_GW3{ condition cyclenum ==cn_SJRBASE_GW3
+                              value 1000*S_CMCHE[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum ==cn_SJRBASE_GW4
+                              value 1000*S_CMCHE[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum ==cn_SJR_WQ1
+                              value 1000*S_CMCHE[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum ==cn_SJR_PULSE
+                              value 1000*S_CMCHE[SJR_WQ1]     } 
+                         case SJR_WQ2    { condition cyclenum ==cn_SJR_WQ2
+                              value 1000*S_CMCHE[SJR_WQ1]     }                    
+                         case AprilMay   { condition month == Apr .or. month == May
+                              value 1000*S_CMCHE[SJR_WQ2]     }
+                         case other      { condition always
+                              value 1000*S_CMCHE[SJR_WQ1]     } }                                
+define Z_CMCHE {select elevation from res_info given storage=S_CMCHE_AF use linear where res_num=91} !263~94 (244-110)ft !Table???508~716 GSZ=168@516   GSZ=219@550
+define AZ_CMCHE {select area from res_info given storage=S_CMCHE_AF use linear where res_num=91}  
+define CMCHEcond516 {value 1199/80000.0*0.5*AZ_CMCHE*acm2sfd}  !15000/0.19 = 80657
+define CMCHEcond550 {value 1370/80000.0*0.5*AZ_CMCHE*acm2sfd}  
+define rSetSeepCMCHE516hd {value SetGeneralHeadBC(516,1, CMCHEcond516,Z_CMCHE)} !stream node#175
+define rSetSeepCMCHE550hd {value SetGeneralHeadBC(550,1, CMCHEcond550,Z_CMCHE)} !stream node#174
+define Z_CMCHE_DLL {alias Z_CMCHE kind 'ELEVATION' units 'FT'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Pardee Reservoir, Mokelumne River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PARDE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                            
+define S_PARDE_AF {      case SJRBASE_GW1{ condition cyclenum ==cn_SJRBASE_GW1
+                              value 1000*S_PARDE[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum ==cn_SJRBASE_GW2
+                              value 1000*S_PARDE[SJRBASE_GW1]     } 
+                         case SJRBASE_GW3{ condition cyclenum ==cn_SJRBASE_GW3
+                              value 1000*S_PARDE[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum ==cn_SJRBASE_GW4
+                              value 1000*S_PARDE[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum ==cn_SJR_WQ1
+                              value 1000*S_PARDE[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum ==cn_SJR_PULSE
+                              value 1000*S_PARDE[SJR_WQ1]     } 
+                         case SJR_WQ2    { condition cyclenum ==cn_SJR_WQ2
+                              value 1000*S_PARDE[SJR_WQ1]     }                              
+                         case AprilMay   { condition month == Apr .or. month == May
+                              value 1000*S_PARDE[SJR_WQ2]     }
+                         case other      { condition always
+                              value 1000*S_PARDE[SJR_WQ1]     } }
+define Z_PARDE {select elevation from res_info given storage=S_PARDE_AF use linear where res_num=90} !408~619ft GSZ=735@551 
+define Z_PARDE_DLL {alias Z_PARDE kind 'ELEVATION' units 'FEET'}
+
+define AZ_PARDE {select area from res_info given storage=S_PARDE_AF use linear where res_num=90}  
+define PARDEcond551 {value 1419/80000.0*AZ_PARDE*acm2sfd}   !1419*     
+
+!daysin * 86400.0
+
+define HGW_PARDE551         {value max(520.0,GetGW_H(551,1))} ! kind 'HEAD' units 'FEET'}!FEET
+define SFBC_PARDE551_cfm    {value PARDEcond551 *(Z_PARDE -HGW_PARDE551)} !Pardee Reservior
+define rSetGW551SFBC        {value SetSpecifiedFlowBC(551,1, SFBC_PARDE551_cfm)}
+define HGW_PARDE551_prerun  {alias HGW_PARDE551 kind 'HEAD' units 'FEET'}
+
+!define rSetSeepPARDE551hd   {value SetGeneralHeadBC(551,1, PARDEcond551,Z_PARDE)} !stream node#173
+!define SFBC_PARDE551_prerun     {alias -SFBC_PARDE551_cfm kind 'RIVER-SEEPAGE' units 'CFM'} !Pardee Reservior
+!define SFBC_PARDE551cfs_prerun  {alias -SFBC_PARDE551_cfm/cfs_cfm kind 'RIVER-SEEPAGE' units 'CFS'} !Pardee Reservior
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Amador, Jackson Creek       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   AMADR
+!Jackson Creek Dam, a 193-foot (59 m) tall earth-and-rock dam, built in 1965 across Jackson Creek.
+!Its crest is 481 feet (147 m) about sea level,  Surface area 385 acres @ 325 ft
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_AMADR_AF {      case SJRBASE_GW1{ condition cyclenum ==cn_SJRBASE_GW1
+                              value 1000*S_AMADR[SJRBASE]     }
+                         case SJRBASE_GW2{ condition cyclenum ==cn_SJRBASE_GW2
+                              value 1000*S_AMADR[SJRBASE_GW1]     } 
+                         case SJRBASE_GW3{ condition cyclenum ==cn_SJRBASE_GW3
+                              value 1000*S_AMADR[SJRBASE_GW2]     }
+                         case SJRBASE_GW4{ condition cyclenum ==cn_SJRBASE_GW4
+                              value 1000*S_AMADR[SJRBASE_GW3]     }
+                         case SJR_WQ1    { condition cyclenum ==cn_SJR_WQ1
+                              value 1000*S_AMADR[SJRBASE_GW4]     }
+                         case SJR_PULSE  { condition cyclenum ==cn_SJR_PULSE
+                              value 1000*S_AMADR[SJR_WQ1]     } 
+                         case SJR_WQ2    { condition cyclenum ==cn_SJR_WQ2
+                              value 1000*S_AMADR[SJR_WQ1]     }   
+                         case AprilMay   { condition month == Apr .or. month == May
+                              value 1000*S_AMADR[SJR_WQ2]     }
+                         case other      { condition always
+                              value 1000*S_AMADR[SJR_WQ1]     } }
+define Z_AMADR {select elevation from res_info given storage=S_AMADR_AF use linear where res_num=97} ! (table288-385) GSZ=599@510
+define AZ_AMADR {select area from res_info given storage=S_AMADR_AF use linear where res_num=97} 
+define AMADRcond510 {value 1207/5000.0*AZ_AMADR*acm2sfd} !510 518
+define rSetSeepAMADR551hd {value SetGeneralHeadBC(510,1, AMADRcond510,Z_AMADR)} 
+define Z_AMADR_DLL {alias Z_AMADR kind 'ELEVATION' units 'FT'}
+
+!-------------------------------------------------------------------------------
+!define rSetSeepWDWRD598 {value SetSpecifiedFlowBC(598,1, SG_WDWRD_seep*taf_cfm)}
+!define rSetSeepMDSTO644 {value SetSpecifiedFlowBC(644,1, SG_MDSTO_seep*taf_cfm)}
+!define rSetSeepTRLCK666 {value SetSpecifiedFlowBC(666,1, SG_TRLCK_seep*taf_cfm)}
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!PKH=1287@598 
+!    2190@654 
+!    1760@644 
+!    1672@666 
+!    1672@655
+
+! Variables that used GetGW_H or GetStrm_H in constraints-seepage_DeltaES and constraints-seepage_SJReast.wresl are moved here
+! This is to accommodate the updated groundwater DLLs that enforce order of function calls
+! GetGW_H and GetStrm_H need to be called before "SimGW"
+! 11/29/2021
+
+svar HGW_AMADR510_SV  {value GetGW_H(510,1) }!FEET
+svar HGW_PARDE551_SV  {value max(520.0,GetGW_H(551,1))} ! kind 'HEAD' units 'FEET'}!FEET
+svar HGW_CMCHE550_SV  {value GetGW_H(550,1) }!FEET
+svar HGW_CMCHE516_SV  {value GetGW_H(516,1) }!FEET
+
+svar HG_MDSTO643_SV {value GetGW_H(643,1)}
+svar HG_MDSTO644_SV {value GetGW_H(644,1)}
+svar HG_TRLCK665_SV {value GetGW_H(665,1)}
+svar HG_TRLCK666_SV {value GetGW_H(666,1)}
+svar HG_TRLCK667_SV {value GetGW_H(667,1)}
+define HG_MDSTO643_RES {alias HG_MDSTO643_SV kind 'GW-ELEV' units 'FEET'}
+define HG_MDSTO644_RES {alias HG_MDSTO644_SV kind 'GW-ELEV' units 'FEET'}
+define HG_TRLCK665_RES {alias HG_TRLCK665_SV kind 'GW-ELEV' units 'FEET'}
+define HG_TRLCK666_RES {alias HG_TRLCK666_SV kind 'GW-ELEV' units 'FEET'}
+define HG_TRLCK667_RES {alias HG_TRLCK667_SV kind 'GW-ELEV' units 'FEET'}
+
+svar HR_TUO043_137_SV {value GetStrm_H(137)}
+define HR_TUO043_137 {alias HR_TUO043_137_SV kind 'STREAM-STAGE' units 'FEET'}
+
+svar HGW_WDWRD598_SV  {value GetGW_H(598,1) }!FEET
+svar HGW_MDSTO643_SV  {value GetGW_H(643,1) }!FEET
+svar HGW_MDSTO644_SV  {value GetGW_H(644,1) }!FEET
+svar HGW_TRLCK666_SV  {value GetGW_H(666,1) }!FEET
+svar HGW_TRLCK667_SV  {value GetGW_H(667,1) }!FEET

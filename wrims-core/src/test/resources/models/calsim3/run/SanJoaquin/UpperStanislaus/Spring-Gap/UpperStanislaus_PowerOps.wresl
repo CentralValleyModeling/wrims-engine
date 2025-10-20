@@ -1,0 +1,42 @@
+! Spring Gap Stanislaus Project Power Operations
+! Chakri 04/15/08
+
+! Philadelphia Canal Diversion to Spring Gap Power Plant (D_SFS027_PCN000)
+!define comb_stor { value S_PCRST(-1) + S_LYONS(-1) }
+
+!define water_avb { value S_PCRST(-1) + S_LYONS(-1) + (I_PCRST + I_SFS033 + I_LYONS + I_SFS030 - D_LYONS_TCN000_DEM)*cfs_taf } !Jay
+define water_avb { value max(S_PCRST(-1) + S_LYONS(-1) + (I_PCRST + I_SFS033 + I_LYONS + I_SFS030 - D_LYONS_TCN000_DEM)*cfs_taf,0.0) }
+
+!define eq_slope {
+!	select     slope
+!	from       Stanislaus_philadel_div
+!	where      Mon = month }
+
+!define eq_intercept {
+!	select	   intercept
+!	from       Stanislaus_philadel_div
+!	where      Mon = month }
+
+define D_SFS030_PHP000_target {
+	case dryyear {
+		condition frcst_nmi_mar < 200
+		value 0. }
+	case other {
+		condition always
+		select     Diversion
+		from       Stanislaus_philadel_div
+		given      WaterAvb = water_avb
+		use        linear
+		where      Mon = month }
+		  }
+
+goal SetD_SFS030_PHP000 {D_SFS030_PHP000 < D_SFS030_PHP000_target}
+
+define water_avbdv {std kind 'FLOW' units 'TAF'}
+goal checkwater_avb {water_avbdv=water_avb}
+
+!define comb_stordv {std kind 'FLOW' units 'TAF'}
+!goal checkcomb_stor {comb_stordv=comb_stor}
+
+define D_SFS030_PHP000_targetdv {std kind 'DIVERSION' units 'CFS'}
+goal checkD_SFS030_PHP000target {D_SFS030_PHP000_targetdv=D_SFS030_PHP000_target}

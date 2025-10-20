@@ -1,0 +1,1671 @@
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+! For managed wetlands constrain groundwater pumping to minimum specified amount
+! Demand may not be met in full due to contract limits
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 1       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Not used
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 2       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!======================================================================
+! 2_NU 
+!======================================================================
+! No surface water delivery
+
+goal setUD_02_NU        {UD_02_NU = GP_02_NU } ! + SHRTG_02_NU }
+
+!======================================================================
+! 2_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_02_NA        {DG_02_NA = D_CWD009_02_NA + D_CLR009_02_NA + D_SAC281_02_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_02_NA        {DN_02_NA = DG_02_NA - DL_02_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_02_NA       {AW_02_NA + RP_02_NA = DN_02_NA + GP_02_NA + RU_02_NA } ! + SHRTG_02_NA }
+
+
+!======================================================================
+! 2_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_02_PA        {DG_02_PA = D_WTPCSD_02_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_02_PA        {DN_02_PA = DG_02_PA - DL_02_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_02_PA       {AW_02_PA + RP_02_PA = DN_02_PA + GP_02_PA + RU_02_PA } ! + SHRTG_02_PA }
+
+!======================================================================
+! 2_PU
+!======================================================================
+! gross surface water diversions
+goal setDG_02_PU        {DG_02_PU = D_WTPCSD_02_PU + D_WKYTN_02_PU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_02_PU        {DN_02_PU = DG_02_PU - DL_02_PU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_02_PU        {UD_02_PU = DN_02_PU + GP_02_PU } ! + SHRTG_02_PU }
+
+!======================================================================
+! 2_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_02_SA        {DG_02_SA = D_SAC296_02_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_02_SA        {DN_02_SA = DG_02_SA - DL_02_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_02_SA       {AW_02_SA + RP_02_SA = DN_02_SA + GP_02_SA + RU_02_SA } ! + SHRTG_02_SA }
+
+!======================================================================
+! 2_SU
+!======================================================================
+! gross surface water diversions
+goal setDG_02_SU        {DG_02_SU = D_WTPFTH_02_SU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_02_SU        {DN_02_SU = DG_02_SU - DL_02_SU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_02_SU        {UD_02_SU = DN_02_SU + GP_02_SU } ! + SHRTG_02_SU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 3       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 3_NU 
+!======================================================================
+! No surface water delivery
+
+goal setUD_03_NU        {UD_03_NU = GP_03_NU } ! + SHRTG_03_NU }
+
+!======================================================================
+! 3_PU1
+!======================================================================
+! gross surface water diversions
+goal setDG_03_PU        {DG_03_PU1 = D_WTPJMS_03_PU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_PU        {DN_03_PU1 = DG_03_PU1 - DL_03_PU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_03_PU        {UD_03_PU1 = DN_03_PU1 + GP_03_PU1 } ! + SHRTG_03_PU1 }
+
+!======================================================================
+! 3_PU2
+!======================================================================
+! gross surface water diversions
+goal setDG_03_PU2       {DG_03_PU2 = D_WTPBLV_03_PU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_PU2       {DN_03_PU2 = DG_03_PU2 - DL_03_PU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_03_PU2       {UD_03_PU2 = DN_03_PU2 + GP_03_PU2 } ! + SHRTG_03_PU2 }
+
+!======================================================================
+! 3_PU3
+!======================================================================
+! gross surface water diversions
+!goal setDG_03_PU3       {DG_03_PU3 = D_WTPBUK_03_PU3}
+! net surface delivery = surface diversion - conveyance losses
+!goal setDN_03_PU3       {DN_03_PU3 = DG_03_PU3 - DL_03_PU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+!goal setUD_03_PU3       {UD_03_PU3 = DN_03_PU3 + GP_03_PU3 } ! + SHRTG_03_PU3 }
+
+!======================================================================
+! 3_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_03_PA        {DG_03_PA = D_SAC294_03_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_PA        {DN_03_PA = DG_03_PA - DL_03_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_03_PA       {AW_03_PA + RP_03_PA = DN_03_PA + GP_03_PA + RU_03_PA } ! + SHRTG_03_PA }
+
+!======================================================================
+! 3_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_03_SA        {DG_03_SA = D_SAC289_03_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_SA        {DN_03_SA = DG_03_SA - DL_03_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_03_SA       {AW_03_SA + RP_03_SA = DN_03_SA + GP_03_SA + RU_03_SA } ! + SHRTG_03_SA }
+
+!======================================================================
+! 3_SU
+!======================================================================
+! gross surface water diversions
+goal setDG_03_SU        {DG_03_SU = D_WTPFTH_03_SU + D_WTPBUK_03_SU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_SU        {DN_03_SU = DG_03_SU - DL_03_SU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_03_SU        {UD_03_SU = DN_03_SU + GP_03_SU } ! + SHRTG_03_SU }
+
+!======================================================================
+! 3_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_03_NA        {DG_03_NA = D_COW014_03_NA + D_BTL006_03_NA + D_BCN005_03_NA + D_SAC273_03_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_03_NA        {DN_03_NA = DG_03_NA - DL_03_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_03_NA       {AW_03_NA + RP_03_NA = DN_03_NA + GP_03_NA + RU_03_NA } ! + SHRTG_03_NA }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 4       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 4_NU1 
+!======================================================================
+! No surface water delivery
+
+goal setUD_04_NU1       {UD_04_NU1 = GP_04_NU1 } ! + SHRTG_04_NU1 }
+
+!======================================================================
+! 4_NU2 
+!======================================================================
+! No surface water delivery
+
+goal setUD_04_NU2       {UD_04_NU2 = GP_04_NU2 } ! + SHRTG_04_NU2 }
+
+!======================================================================
+! 4_PA1
+!======================================================================
+! gross surface water diversions
+goal setDG_04_PA1   {DG_04_PA1 = D_CCL005_04_PA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_04_PA1   {DN_04_PA1 = DG_04_PA1 - DL_04_PA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_04_PA1  {AW_04_PA1 + RP_04_PA1 = DN_04_PA1 + GP_04_PA1 + RU_04_PA1 } ! + SHRTG_04_PA1 }
+
+!======================================================================
+! 4_PA2
+!======================================================================
+! gross surface water diversions
+goal setDG_04_PA2   {DG_04_PA2 = D_TCC022_04_PA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_04_PA2   {DN_04_PA2 = DG_04_PA2 - DL_04_PA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_04_PA2  {AW_04_PA2 + RP_04_PA2 = DN_04_PA2 + GP_04_PA2 + RU_04_PA2 } ! + SHRTG_04_PA2 }
+
+!======================================================================
+! 4_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_04_NA        {DG_04_NA = D_ELD012_04_NA + D_THM012_04_NA + D_SAC224_04_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_04_NA        {DN_04_NA = DG_04_NA - DL_04_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_04_NA       {AW_04_NA + RP_04_NA = DN_04_NA + GP_04_NA + RU_04_NA } ! + SHRTG_04_NA }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 5       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 5_NU 
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_05_NU        {UD_05_NU = GP_05_NU } ! + SHRTG_05_NU }
+
+!======================================================================
+! 5_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_05_NA        {DG_05_NA = D_ANT010_05_NA + D_MLC006_05_NA + D_DRC010_05_NA + D_DRC005_05_NA + D_SAC240_05_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_05_NA        {DN_05_NA = DG_05_NA - DL_05_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_05_NA       {AW_05_NA + RP_05_NA = DN_05_NA + GP_05_NA + RU_05_NA } ! + SHRTG_05_NA }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 6       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 6_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_06_PA        {DG_06_PA = D_STN026_06_PA + D_STN021_06_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_06_PA        {DN_06_PA = DG_06_PA - DL_06_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_06_PA       {AW_06_PA + RP_06_PA = DN_06_PA + GP_06_PA + RU_06_PA } ! + SHRTG_06_PA }
+
+!======================================================================
+! 6_NA 
+!======================================================================
+! No surface water delivery
+
+goal meetAW_06_NA   {AW_06_NA + RP_06_NA = GP_06_NA + RU_06_NA } ! + SHRTG_06_NA }
+
+!======================================================================
+! 6_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_06_NU        {UD_06_NU = GP_06_NU } ! + SHRTG_06_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-North     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 7N_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_07N_PA   {DG_07N_PA = D_TCC036_07N_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_07N_PA   {DN_07N_PA = DG_07N_PA - DL_07N_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_07N_PA  {AW_07N_PA + RP_07N_PA = DN_07N_PA + GP_07N_PA + RU_07N_PA } ! + SHRTG_07N_PA }
+
+!======================================================================
+! 7N_NA
+!======================================================================
+! No surface water delivery
+
+goal meetAW_07N_NA  {AW_07N_NA + RP_07N_NA = GP_07N_NA + RU_07N_NA } ! + SHRTG_07N_NA }
+
+!======================================================================
+! 7N_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_07N_NU   {UD_07N_NU = GP_07N_NU } ! + SHRTG_07N_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-South     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 7S_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_07S_PA   {DG_07S_PA = D_TCC081_07S_PA + D_TCC111_07S_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_07S_PA   {DN_07S_PA = DG_07S_PA - DL_07S_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_07S_PA  {AW_07S_PA + RP_07S_PA = DN_07S_PA + GP_07S_PA + RU_07S_PA } ! + SHRTG_07S_PA }
+
+!======================================================================
+! 7S_NA
+!======================================================================
+! No surface water delivery
+
+goal meetAW_07S_NA  {AW_07S_NA + RP_07S_NA = GP_07S_NA + RU_07S_NA } ! + SHRTG_07S_NA }
+
+!======================================================================
+! 7S_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_07S_NU   {UD_07S_NU = GP_07S_NU } ! + SHRTG_07S_NU }
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-North     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 8N_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_PA   {DG_08N_PA = D_CBD049_08N_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_PA   {DN_08N_PA = DG_08N_PA - DL_08N_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08N_PA  {AW_08N_PA + RP_08N_PA = DN_08N_PA + GP_08N_PA + RU_08N_PA } ! + SHRTG_08N_PA }
+
+!======================================================================
+! 8N_SA1
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_SA1  {DG_08N_SA1 = D_SAC178_08N_SA1 + D_SAC159_08N_SA1+ D_CBD049_08N_SA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_SA1  {DN_08N_SA1 = DG_08N_SA1 - DL_08N_SA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08N_SA1 {AW_08N_SA1 + RP_08N_SA1 = DN_08N_SA1 + GP_08N_SA1 + RU_08N_SA1 } ! + SHRTG_08N_SA1 }
+
+!======================================================================
+! 8N_SA2
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_SA2  {DG_08N_SA2 = D_GCC027_08N_SA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_SA2  {DN_08N_SA2 = DG_08N_SA2 - DL_08N_SA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08N_SA2 {AW_08N_SA2 + RP_08N_SA2 = DN_08N_SA2 + GP_08N_SA2 + RU_08N_SA2 } ! + SHRTG_08N_SA2 }
+
+!======================================================================
+! 8N_PR1
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_PR1  {DG_08N_PR1 = D_GCC027_08N_PR1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_PR1  {DN_08N_PR1 = DG_08N_PR1 - DL_08N_PR1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_08N_PR1 {AW_08N_PR1 + RP_08N_PR1 = DN_08N_PR1 + GP_08N_PR1 + RU_08N_PR1 + SHRTG_08N_PR1 } ! shortage activated
+
+!======================================================================
+! 8N_PR2
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_PR2  {DG_08N_PR2 = D_GCC039_08N_PR2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_PR2  {DN_08N_PR2 = DG_08N_PR2 - DL_08N_PR2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_08N_PR2 {AW_08N_PR2 + RP_08N_PR2 = DN_08N_PR2 + GP_08N_PR2 + RU_08N_PR2 + SHRTG_08N_PR2 } ! shortage activated
+
+!======================================================================
+! 8N_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_08N_NA   {DG_08N_NA = D_SAC185_08N_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08N_NA   {DN_08N_NA = DG_08N_NA - DL_08N_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08N_NA  {AW_08N_NA + RP_08N_NA = DN_08N_NA + GP_08N_NA + RU_08N_NA } ! + SHRTG_08N_NA }
+
+!======================================================================
+! 8N_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_08N_NU   {UD_08N_NU = GP_08N_NU } ! + SHRTG_08N_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8S      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 8S_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_PA   {DG_08S_PA = D_CBD028_08S_PA + D_GCC065_08S_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_PA   {DN_08S_PA = DG_08S_PA - DL_08S_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_PA  {AW_08S_PA + RP_08S_PA = DN_08S_PA + GP_08S_PA + RU_08S_PA } ! + SHRTG_08S_PA }
+
+
+!======================================================================
+! 8S_SA1
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_SA1  {DG_08S_SA1 = D_SAC159_08S_SA1 + D_CBD041_08S_SA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_SA1  {DN_08S_SA1 = DG_08S_SA1 - DL_08S_SA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_SA1 {AW_08S_SA1 + RP_08S_SA1 = DN_08S_SA1 + GP_08S_SA1 + RU_08S_SA1 } ! + SHRTG_08S_SA1 }
+
+!======================================================================
+! 8S_SA2
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_SA2  {DG_08S_SA2 = D_GCC056_08S_SA2 + D_CBD041_08S_SA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_SA2  {DN_08S_SA2 = DG_08S_SA2 - DL_08S_SA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_SA2 {AW_08S_SA2 + RP_08S_SA2 = DN_08S_SA2 + GP_08S_SA2 + RU_08S_SA2 } ! + SHRTG_08S_SA2 }
+
+!======================================================================
+! 8S_PR
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_PR   {DG_08S_PR = D_GCC056_08S_PR + D_CBD037_08S_PR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_PR   {DN_08S_PR = DG_08S_PR - DL_08S_PR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_08S_PR  {AW_08S_PR + RP_08S_PR = DN_08S_PR + GP_08S_PR + RU_08S_PR + SHRTG_08S_PR } ! shortage activated
+
+!======================================================================
+! 8S_SA3
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_SA3  {DG_08S_SA3 = D_SAC121_08S_SA3 + D_SAC109_08S_SA3 + D_CBD028_08S_SA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_SA3  {DN_08S_SA3 = DG_08S_SA3 - DL_08S_SA3}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_SA3 {AW_08S_SA3 + RP_08S_SA3 = DN_08S_SA3 + GP_08S_SA3 + RU_08S_SA3 } ! + SHRTG_08S_SA3 }
+
+!======================================================================
+! 8S_NA1
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_NA1  {DG_08S_NA1 = D_SAC146_08S_NA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_NA1  {DN_08S_NA1 = DG_08S_NA1 - DL_08S_NA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_NA1 {AW_08S_NA1 + RP_08S_NA1 = DN_08S_NA1 + GP_08S_NA1 + RU_08S_NA1 } ! + SHRTG_08S_NA1 }
+
+!======================================================================
+! 8S_NA2
+!======================================================================
+! gross surface water diversions
+goal setDG_08S_NA2  {DG_08S_NA2 = D_SAC129_08S_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_08S_NA2  {DN_08S_NA2 = DG_08S_NA2 - DL_08S_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_08S_NA2 {AW_08S_NA2 + RP_08S_NA2 = DN_08S_NA2 + GP_08S_NA2 + RU_08S_NA2 } ! + SHRTG_08S_NA2 }
+
+!======================================================================
+! 8S_NU
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_08S_NU   {UD_08S_NU = GP_08S_NU } ! + SHRTG_08S_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 9       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 9_SA1
+!======================================================================
+! gross surface water diversions
+goal setDG_09_SA1   {DG_09_SA1 = D_MTC000_09_SA1 + D_ESL008_09_SA1 + D_LCC029_09_SA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_09_SA1   {DN_09_SA1 = DG_09_SA1 - DL_09_SA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_09_SA1  {AW_09_SA1 + RP_09_SA1 = DN_09_SA1 + GP_09_SA1 + RU_09_SA1 } ! + SHRTG_09_SA1 }
+
+!======================================================================
+! 9_SA2
+!======================================================================
+! gross surface water diversions
+goal setDG_09_SA2   {DG_09_SA2 = D_SAC162_09_SA2 + D_BTC012_09_SA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_09_SA2   {DN_09_SA2 = DG_09_SA2 - DL_09_SA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_09_SA2  {AW_09_SA2 + RP_09_SA2 = DN_09_SA2 + GP_09_SA2 + RU_09_SA2 } ! + SHRTG_09_SA2 }
+
+!======================================================================
+! 9_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_09_NA        {DG_09_NA = D_MTC000_09_NA + D_ESL010_09_NA + D_SAC185_09_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_09_NA        {DN_09_NA = DG_09_NA - DL_09_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_09_NA       {AW_09_NA + RP_09_NA = DN_09_NA + GP_09_NA + RU_09_NA } ! + SHRTG_09_NA }
+
+!======================================================================
+! 9_NU
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_09_NU        {UD_09_NU = GP_09_NU } ! + SHRTG_09_NU }
+
+!======================================================================
+! 9_PR
+!======================================================================
+! gross surface water diversions
+goal setDG_09_PR    {DG_09_PR = D_MTC000_09_PR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_09_PR    {DN_09_PR = DG_09_PR - DL_09_PR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_09_PR   {AW_09_PR + RP_09_PR = DN_09_PR + GP_09_PR + RU_09_PR + SHRTG_09_PR } ! shortage activated
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 10_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_10_NA    {DG_10_NA = D_BTC036_10_NA + D_BTC043_10_NA + D_MIO023_10_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_10_NA    {DN_10_NA = DG_10_NA - DL_10_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!zrc@ goal meetAW_10_NA   {AW_10_NA + RP_10_NA = DN_10_NA + GP_10_NA + RU_10_NA } ! + SHRTG_10_NA }
+
+!======================================================================
+! 10_NU1
+!======================================================================
+! No surface water delivery
+
+goal setUD_10_NU1   {UD_10_NU1 = GP_10_NU1 } ! + SHRTG_10_NU1 }
+
+!======================================================================
+! 10_NU2
+!======================================================================
+! No surface water delivery
+
+goal setUD_10_NU2   {UD_10_NU2 = GP_10_NU2 } ! + SHRTG_10_NU2 }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 11      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!======================================================================
+! 11_SA1
+!======================================================================
+! gross surface water diversions
+goal setDG_11_SA1   {DG_11_SA1 = D_WEC005_11_SA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_SA1   {DN_11_SA1 = DG_11_SA1 - DL_11_SA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!goal meetAW_11_SA1  {AW_11_SA1 + RP_11_SA1 = DN_11_SA1 + GP_11_SA1 + RU_11_SA1 } ! + SHRTG_11_SA1 }
+goal meetAW_11_SA1  {decomp_alloc*AWR_11_SA1 + AWO_11_SA1 + AWW_11_SA1 + RP_11_SA1 = DN_11_SA1 + GP_11_SA1 + RU_11_SA1 } ! + SHRTG_11_SA1 }
+!goal meetAW_11_SA1  {lhs AW_11_SA1 + RP_11_SA1 - (1-decomp_alloc)*AWR_11_SA1 rhs DN_11_SA1 + GP_11_SA1 + RU_11_SA1 lhs>rhs penalty 999999 lhs<rhs penalty 999999} ! + SHRTG_11_SA1 }
+
+!======================================================================
+! 11_SA2
+!======================================================================
+! gross surface water diversions
+goal setDG_11_SA2   {DG_11_SA2 = D_RVC005_11_SA2 + D_LDC007_11_SA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_SA2   {DN_11_SA2 = DG_11_SA2 - DL_11_SA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!goal meetAW_11_SA2  {AW_11_SA2 + RP_11_SA2 = DN_11_SA2 + GP_11_SA2 + RU_11_SA2 } ! + SHRTG_11_SA2 }
+goal meetAW_11_SA2  {decomp_alloc*AWR_11_SA2 + AWO_11_SA2 + AWW_11_SA2 + RP_11_SA2 = DN_11_SA2 + GP_11_SA2 + RU_11_SA2 } ! + SHRTG_11_SA2 }
+!goal meetAW_11_SA2  {lhs AW_11_SA2 + RP_11_SA2 - (1-decomp_alloc)*AWR_11_SA2 rhs DN_11_SA2 + GP_11_SA2 + RU_11_SA2 lhs>rhs penalty 999999 lhs<rhs penalty 999999} ! + SHRTG_11_SA2 }
+
+!======================================================================
+! 11_SA3
+!======================================================================
+! gross surface water diversions
+goal setDG_11_SA3   {DG_11_SA3 = D_JBC004_11_SA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_SA3   {DN_11_SA3 = DG_11_SA3 - DL_11_SA3}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!goal meetAW_11_SA3  {AW_11_SA3 + RP_11_SA3 = DN_11_SA3 + GP_11_SA3 + RU_11_SA3 } ! + SHRTG_11_SA3 }
+goal meetAW_11_SA3  {decomp_alloc*AWR_11_SA3 + AWO_11_SA3 + AWW_11_SA3 + RP_11_SA3 = DN_11_SA3 + GP_11_SA3 + RU_11_SA3 } ! + SHRTG_11_SA3 }
+!goal meetAW_11_SA3  {lhs AW_11_SA3 + RP_11_SA3 - (1-decomp_alloc)*AWR_11_SA3 rhs DN_11_SA3 + GP_11_SA3 + RU_11_SA3 lhs>rhs penalty 999999 lhs<rhs penalty 999999} ! + SHRTG_11_SA3 }
+
+!======================================================================
+! 11_SA4
+!======================================================================
+! gross surface water diversions
+goal setDG_11_SA4   {DG_11_SA4 = D_SEC009_11_SA4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_SA4   {DN_11_SA4 = DG_11_SA4 - DL_11_SA4}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!goal meetAW_11_SA4  {AW_11_SA4 + RP_11_SA4 = DN_11_SA4 + GP_11_SA4 + RU_11_SA4 } ! + SHRTG_11_SA4 }
+goal meetAW_11_SA4  {decomp_alloc*AWR_11_SA4 + AWO_11_SA4 + AWW_11_SA4 + RP_11_SA4 = DN_11_SA4 + GP_11_SA4 + RU_11_SA4 } ! + SHRTG_11_SA4 }
+!goal meetAW_11_SA4  {lhs AW_11_SA4 + RP_11_SA4 - (1-decomp_alloc)*AWR_11_SA4 rhs DN_11_SA4 + GP_11_SA4 + RU_11_SA4 lhs>rhs penalty 999999 lhs<rhs penalty 999999} ! + SHRTG_11_SA4 }
+
+! Encourage use of Sunset Pumps
+goal setDG_11_SA4_2 {
+    lhs D_FTR039_SEC009
+    rhs 0.05*DG_11_SA4
+    lhs > rhs penalty 0
+    lhs < rhs penalty 9999
+}
+
+!======================================================================
+! total rice decomp delivery
+define decomp_del {
+    case Feb {
+      condition month==feb 
+      value DN_11_SA1(-4)+DN_11_SA1(-3)+DN_11_SA1(-2)+DN_11_SA1(-1)+
+            DN_11_SA2(-4)+DN_11_SA2(-3)+DN_11_SA2(-2)+DN_11_SA2(-1)+
+            DN_11_SA3(-4)+DN_11_SA3(-3)+DN_11_SA3(-2)+DN_11_SA3(-1)+
+            DN_11_SA4(-4)+DN_11_SA4(-3)+DN_11_SA4(-2)+DN_11_SA4(-1)}
+    case other{
+      condition always
+      value 0.}
+}
+
+!======================================================================
+! 11_NU1
+!======================================================================
+! gross surface water diversions
+goal split_D_THRMF_11_NU1 {D_THRMF_11_NU1 = D_THRMF_11_NU1_WR + D_THRMF_11_NU1_PMI + D_THRMF_11_NU1_PCO + D_THRMF_11_NU1_PIN}
+goal setDG_11_NU1   {DG_11_NU1 = D_THRMF_11_NU1_WR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_NU1   {DN_11_NU1 = DG_11_NU1 - DL_11_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_11_NU1   {UD_11_NU1 = DN_11_NU1 + GP_11_NU1 } ! + SHRTG_11_NU1 }
+
+!======================================================================
+! 11_NU2
+!======================================================================
+! No surface water delivery
+
+goal setUD_11_NU2   {UD_11_NU2 = GP_11_NU2 } ! + SHRTG_11_NU2 }
+
+!======================================================================
+! 11_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_11_NA    {DG_11_NA = D_DWRPS2_11_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_NA    {DN_11_NA = DG_11_NA - DL_11_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_11_NA   {AW_11_NA + RP_11_NA = DN_11_NA + GP_11_NA + RU_11_NA } ! + SHRTG_11_NA }
+
+!======================================================================
+! 11_PR
+!======================================================================
+! gross surface water diversions
+goal setDG_11_PR    {DG_11_PR = D_WEC005_11_PR + D_RVC005_11_PR}
+/*
+!Limit delivery from Western Canal WD to 50% of total
+!Limit delivery from Richvale ID to 50% of total
+goal setD_WEC005_11_PR {D_WEC005_11_PR - 0.50*DL_11_PR<0.50*AW_11_PR + 0.50*RP_11_PR - 0.50*GP_11_PR - 0.50*RU_11_PR}
+goal setD_RVC005_11_PR {D_RVC005_11_PR - 0.50*DL_11_PR<0.50*AW_11_PR + 0.50*RP_11_PR - 0.50*GP_11_PR - 0.50*RU_11_PR}
+
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_11_PR    {DN_11_PR = DG_11_PR - DL_11_PR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_11_PR   {AW_11_PR + RP_11_PR = DN_11_PR + GP_11_PR + RU_11_PR + SHRTG_11_PR } ! shortage activated
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 12_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_12_NA    {DG_12_NA = D_RFS13_12_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_12_NA    {DN_12_NA = DG_12_NA - DL_12_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_12_NA   {AW_12_NA + RP_12_NA = DN_12_NA + GP_12_NA + RU_12_NA } ! + SHRTG_12_NA }
+
+!======================================================================
+! 12_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_12_SA    {DG_12_SA = D_FTR059_12_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_12_SA    {DN_12_SA = DG_12_SA - DL_12_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_12_SA   {AW_12_SA + RP_12_SA = DN_12_SA + GP_12_SA + RU_12_SA } ! + SHRTG_12_SA }
+
+
+!======================================================================
+! 12_NU1
+!======================================================================
+! gross surface water diversions
+goal setDG_12_NU1   {DG_12_NU1 = D_THRMF_12_NU1 + D_MIO023_12_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_12_NU1   {DN_12_NU1 = DG_12_NU1 - DL_12_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_12_NU1   {UD_12_NU1 = DN_12_NU1 + GP_12_NU1 } ! + SHRTG_12_NU1 }
+
+!======================================================================
+! 12_NU2
+!======================================================================
+! No surface water delivery
+
+goal setUD_12_NU2   {UD_12_NU2 = GP_12_NU2 } ! + SHRTG_12_NU2 }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 13_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_13_NA    {DG_13_NA = D_OWC000_13_NA + D_MNRRH_13_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NA    {DN_13_NA = DG_13_NA - DL_13_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_13_NA   {AW_13_NA + RP_13_NA = DN_13_NA + GP_13_NA + RU_13_NA } ! + SHRTG_13_NA }
+
+!Add code for sharing of water supplies from Forbestown Ditch and Miners Ranch Canal
+! Placeholder - assume used equally
+goal setDG_13_NA_2 {D_OWC000_13_NA = 0.5 * DG_13_NA}
+
+!======================================================================
+! 13_NU1
+!======================================================================
+goal setDG_13_NU1   {DG_13_NU1 = D_WTPMNR_13_NU1 + D_OROVL_13_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NU1   {DN_13_NU1 = DG_13_NU1 - DL_13_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_13_NU1   {UD_13_NU1 = DN_13_NU1 + GP_13_NU1 } ! + SHRTG_13_NU1 }
+
+goal set_D_OROVL_13_NU1 {D_OROVL_13_NU1 - DL_OROVL_13_NU1 < UD_13_NU1 * 0.19} !Factor estimated from historical diversions (5.7 TAF/yr)), demand (6.0 TAF/yr) and 80% diversion loss.
+
+!======================================================================
+! 13_NU2
+!======================================================================
+goal setDG_13_NU2   {DG_13_NU2 = D_MNRRH_13_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NU2   {DN_13_NU2 = DG_13_NU2 - DL_13_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_13_NU2   {UD_13_NU2 = DN_13_NU2 + GP_13_NU2 } ! + SHRTG_13_NU2 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 14_NA - BVID irrigators
+!======================================================================
+! gross surface water diversions
+goal setDG_14_NA    {DG_14_NA = D_FDC006_14_NA + D_YUB013_14_NA}
+! Limit diversion from Dry Creek to be less than 70% of total  (based on historical diversions)
+! Weight diversion from Dry Creek above diversion from Yuba River
+goal setD_YUB013_14_NA {D_FDC006_14_NA < 0.40*DG_14_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_14_NA    {DN_14_NA = DG_14_NA - DL_14_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_14_NA   {AW_14_NA + RP_14_NA = DN_14_NA + GP_14_NA + RU_14_NA } ! + SHRTG_14_NA }
+
+!goal setD_CGT005_14_NA {D_CGT005_14_NA = 0.} ! discontinued in 1990
+
+!======================================================================
+! 14_NU
+!======================================================================
+! No surface water delivery
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_14_NU   {UD_14_NU = GP_14_NU } ! + SHRTG_14_NU }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 15N_NA1
+!======================================================================
+! No surface water delivery
+
+goal meetAW_15N_NA1 {AW_15N_NA1 + RP_15N_NA1 = GP_15N_NA1 + RU_15N_NA1 } ! + SHRTG_15N_NA1 }
+
+!======================================================================
+! 15N_NA2
+!======================================================================
+
+! gross surface water diversions
+goal setDG_15N_NA2  {DG_15N_NA2 = D_YUB011_15N_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15N_NA2  {DN_15N_NA2 = DG_15N_NA2 - DL_15N_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15N_NA2     {AW_15N_NA2 + RP_15N_NA2 = DN_15N_NA2 + GP_15N_NA2 + RU_15N_NA2 } ! + SHRTG_15N_NA2 }
+
+!======================================================================
+! 15N_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_15N_SA   {DG_15N_SA = D_FTR045_15N_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15N_SA   {DN_15N_SA = DG_15N_SA - DL_15N_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15N_SA  {AW_15N_SA + RP_15N_SA = DN_15N_SA + GP_15N_SA + RU_15N_SA } ! + SHRTG_15N_SA }
+
+
+!======================================================================
+! 15N_NU
+!======================================================================
+! gross surface water diversions
+goal setDG_15N_NU   {DG_15N_NU = D_YUB003_15N_NU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15N_NU   {DN_15N_NU = DG_15N_NU - DL_15N_NU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_15N_NU   {UD_15N_NU = DN_15N_NU + GP_15N_NU } ! + SHRTG_15N_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 15S_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_15S_SA   {DG_15S_SA = D_FTR018_15S_SA + D_FTR028_15S_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15S_SA   {DN_15S_SA = DG_15S_SA - DL_15S_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15S_SA  {AW_15S_SA + RP_15S_SA = DN_15S_SA + GP_15S_SA + RU_15S_SA } ! + SHRTG_15S_SA }
+
+!======================================================================
+! 15S_NA1
+!======================================================================
+! No surface water delivery
+
+goal meetAW_15S_NA1 {AW_15S_NA1 + RP_15S_NA1 = GP_15S_NA1 + RU_15S_NA1 } ! + SHRTG_15S_NA1 }
+
+!======================================================================
+! 15S_NA2
+!======================================================================
+
+! gross surface water diversions
+goal setDG_15S_NA2  {DG_15S_NA2 = D_YUB011_15S_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_15S_NA2  {DN_15S_NA2 = DG_15S_NA2 - DL_15S_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_15S_NA2     {AW_15S_NA2 + RP_15S_NA2 = DN_15S_NA2 + GP_15S_NA2 + RU_15S_NA2 } ! + SHRTG_15S_NA2 }
+
+!======================================================================
+! 15S_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_15S_NU   {UD_15S_NU = GP_15S_NU } ! + SHRTG_15S_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 16      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 16_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_16_PA    {DG_16_PA = D_FTR021_16_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_16_PA    {DN_16_PA = DG_16_PA - DL_16_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_16_PA   {AW_16_PA + RP_16_PA = DN_16_PA + GP_16_PA + RU_16_PA } ! + SHRTG_16_PA }
+
+!======================================================================
+! 16_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_16_SA    {DG_16_SA = D_FTR021_16_SA + D_FTR018_16_SA + D_FTR014_16_SA + D_FTR008_16_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_16_SA    {DN_16_SA = DG_16_SA - DL_16_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_16_SA   {AW_16_SA + RP_16_SA = DN_16_SA + GP_16_SA + RU_16_SA } ! + SHRTG_16_SA }
+
+!======================================================================
+! 16_PU
+!======================================================================
+/* ! NSO: Prevent urban demand cap from curtailing Yuba City's SWP deliveries, especially carryover.
+Yuba was not receiving their requested carryover water because the fixed timeseries urban demand was controlling
+how much Yuba will receive.
+With this change, the only limits impacting Yuba PMI and PCO deliveries are in swp_bound_del.wresl
+*/
+! gross surface water diversions
+goal setDG_16_PU    {DG_16_PU = D_WTPCYC_16_PU_NONSWP} 
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_16_PU    {DN_16_PU = DG_16_PU - DL_16_PU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_16_PU    {UD_16_PU = DN_16_PU + GP_16_PU } ! + SHRTG_16_PU }
+
+!======================================================================
+! 16_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_16_NU    {UD_16_NU = GP_16_NU } ! + SHRTG_16_NU }
+
+!======================================================================
+! 16_NA1
+!======================================================================
+! No surface water delivery
+
+goal meetAW_16_NA1  {AW_16_NA1 + RP_16_NA1 = GP_16_NA1 + RU_16_NA1 } ! + SHRTG_16_NA1 }
+
+!======================================================================
+! 16_NA2
+!======================================================================
+! gross surface water diversions
+goal setDG_16_NA2   {DG_16_NA2 = D_DWRPS1_16_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_16_NA2   {DN_16_NA2 = DG_16_NA2 - DL_16_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_16_NA2  {AW_16_NA2 + RP_16_NA2 = DN_16_NA2 + GP_16_NA2 + RU_16_NA2 } ! + SHRTG_16_NA2 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!======================================================================
+! 17N_PR
+!======================================================================
+! gross surface water diversions
+goal setDG_17N_PR   {DG_17N_PR = D_JBC002_17N_PR + D_BGD000_17N_PR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_17N_PR   {DN_17N_PR = DG_17N_PR - DL_17N_PR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_17N_PR  {AW_17N_PR + RP_17N_PR = DN_17N_PR + GP_17N_PR + RU_17N_PR + SHRTG_17N_PR } ! shortage activated
+
+!======================================================================
+! 17N_NR
+!======================================================================
+! gross surface water diversions
+goal setDG_17N_NR   {DG_17N_NR = /*D_BTC012_17N_NR +*/ D_CRK005_17N_NR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_17N_NR   {DN_17N_NR = DG_17N_NR - DL_17N_NR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_17N_NR  {AW_17N_NR + RP_17N_NR = DN_17N_NR + GP_17N_NR + RU_17N_NR + SHRTG_17N_NR } ! shortage activated
+
+!======================================================================
+! 17N_NA
+!======================================================================
+! No surface water delivery
+
+goal meetAW_17N_NA  {AW_17N_NA + RP_17N_NA = GP_17N_NA + RU_17N_NA } ! + SHRTG_17N_NA }
+
+!======================================================================
+! 17N_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_17N_NU   {UD_17N_NU = GP_17N_NU } ! + SHRTG_17N_NU } 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 17S_PR
+!======================================================================
+! gross surface water diversions
+goal setDG_17S_PR   {DG_17S_PR = D_SBP028_17S_PR + D_SEC009_17S_PR}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_17S_PR   {DN_17S_PR = DG_17S_PR - DL_17S_PR}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_17S_PR  {AW_17S_PR + RP_17S_PR = DN_17S_PR + GP_17S_PR + RU_17S_PR + SHRTG_17S_PR } ! shortage activated
+
+!======================================================================
+! 17S_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_17S_NA   {DG_17S_NA = D_SBP014_17S_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_17S_NA   {DN_17S_NA = DG_17S_NA - DL_17S_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_17S_NA  {AW_17S_NA + RP_17S_NA = DN_17S_NA + GP_17S_NA + RU_17S_NA } ! + SHRTG_17S_NA }
+
+!======================================================================
+! 17S_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_17S_SA   {DG_17S_SA = D_FTR003_17S_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_17S_SA   {DN_17S_SA = DG_17S_SA - DL_17S_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_17S_SA  {AW_17S_SA + RP_17S_SA = DN_17S_SA + GP_17S_SA + RU_17S_SA } ! + SHRTG_17S_SA }
+
+!======================================================================
+! 17S_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_17S_NU   {UD_17S_NU = GP_17S_NU } ! + SHRTG_17S_NU } 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 18      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 18_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_18_SA    {DG_18_SA = D_SAC136_18_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_18_SA    {DN_18_SA = DG_18_SA - DL_18_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_18_SA   {AW_18_SA + RP_18_SA = DN_18_SA + GP_18_SA + RU_18_SA } ! + SHRTG_18_SA }
+
+!======================================================================
+! 18_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_18_NA    {DG_18_NA = D_BSL001_18_NA + D_SBP031_18_NA + D_SAC136_18_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_18_NA    {DN_18_NA = DG_18_NA - DL_18_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_18_NA   {AW_18_NA + RP_18_NA = DN_18_NA + GP_18_NA + RU_18_NA } ! + SHRTG_18_NA }
+
+!======================================================================
+! 18_NU
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_18_NU        {UD_18_NU = GP_18_NU } ! + SHRTG_18_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 19      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 19_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_19_SA    {DG_19_SA = D_SAC122_19_SA + D_SAC115_19_SA + D_SAC109_19_SA + D_SAC099_19_SA + D_SAC091_19_SA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_19_SA    {DN_19_SA = DG_19_SA - DL_19_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_19_SA   {AW_19_SA + RP_19_SA = DN_19_SA + GP_19_SA + RU_19_SA } ! + SHRTG_19_SA }
+
+!======================================================================
+! 19_NA
+!======================================================================
+/*! gross surface water diversions
+goal setDG_19_NA    {DG_19_NA = D_SAC109_19_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_19_NA    {DN_19_NA = DG_19_NA - DL_19_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_19_NA   {AW_19_NA + RP_19_NA = DN_19_NA + GP_19_NA + RU_19_NA }!} ! + SHRTG_19_NA  } 
+*/
+
+!======================================================================
+! 19_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_19_NU    {UD_19_NU = GP_19_NU } ! + SHRTG_19_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 20      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! Clear Lake/Lakeport municipal
+!======================================================================
+goal setD_CLRLK_CLLPT {D_CLRLK_CLLPT = 0.}
+
+!======================================================================
+! 20_NA1
+!======================================================================
+! gross surface water diversions
+goal setDG_20_NA1   {DG_20_NA1 = D_CCH030_20_NA1 + D_CCH052_20_NA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_20_NA1   {DN_20_NA1 = DG_20_NA1 - DL_20_NA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_20_NA1  {AW_20_NA1 + RP_20_NA1 = DN_20_NA1 + GP_20_NA1 + RU_20_NA1 } ! + SHRTG_20_NA1 }
+
+!======================================================================
+! 20_NA2
+!======================================================================
+! No surface water delivery
+
+goal meetAW_20_NA2  {AW_20_NA2 + RP_20_NA2 = GP_20_NA2 + RU_20_NA2 } ! + SHRTG_20_NA2 }
+
+!======================================================================
+! 20_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_20_PA    {DG_20_PA = D_PSC003_20_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_20_PA    {DN_20_PA = DG_20_PA - DL_20_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_20_PA   {AW_20_PA + RP_20_PA = DN_20_PA + GP_20_PA + RU_20_PA } ! + SHRTG_20_PA }
+
+!======================================================================
+! 20_NU1
+!======================================================================
+! gross surface water diversions
+goal setDG_20_NU1    {DG_20_NU1 = D_WTPDWP_20_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_20_NU1    {DN_20_NU1 = DG_20_NU1 - DL_20_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_20_NU1    {UD_20_NU1 = DN_20_NU1 + GP_20_NU1 } ! + SHRTG_20_NU1 }
+
+!======================================================================
+! 20_NU2
+!======================================================================
+! No surface water delivery
+goal setUD_20_NU2    {UD_20_NU2 = GP_20_NU2 } ! + SHRTG_20_NU2 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 21      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 21_SA
+!======================================================================
+! gross surface water diversions
+goal setDG_21_SA    {DG_21_SA = D_SAC074_21_SA + D_SAC083_21_SA + D_YBP023_21_SA /*+ D_CCH003_21_SA*/}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_21_SA    {DN_21_SA = DG_21_SA - DL_21_SA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_21_SA   {AW_21_SA + RP_21_SA = DN_21_SA + GP_21_SA + RU_21_SA } ! + SHRTG_21_SA }
+
+!======================================================================
+! 21_PA
+!======================================================================
+! gross surface water diversions
+goal setDG_21_PA    {DG_21_PA = D_KLR005_21_PA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_21_PA    {DN_21_PA = DG_21_PA - DL_21_PA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_21_PA   {AW_21_PA + RP_21_PA = DN_21_PA + GP_21_PA + RU_21_PA } ! + SHRTG_21_PA }
+
+!======================================================================
+! 21_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_21_NA    {DG_21_NA = D_SAC081_21_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_21_NA    {DN_21_NA = DG_21_NA - DL_21_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_21_NA   {AW_21_NA + RP_21_NA = DN_21_NA + GP_21_NA + RU_21_NA } ! + SHRTG_21_NA  }
+
+!======================================================================
+! 21_PU
+!======================================================================
+! gross surface water diversions
+goal setDG_21_PU    {DG_21_PU = D_WTPBTB_21_PU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_21_PU    {DN_21_PU = DG_21_PU - DL_21_PU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_21_PU    {UD_21_PU = DN_21_PU + GP_21_PU } ! + SHRTG_21_PU }
+
+!======================================================================
+! 21_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_21_NU    {UD_21_NU = GP_21_NU } ! + SHRTG_21_NU }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 22      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 22_SA1
+!======================================================================
+! gross surface water diversions
+goal setDG_22_SA1   {DG_22_SA1 = D_SAC082_22_SA1 + D_CRC002_22_SA1 + D_SAC078_22_SA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_22_SA1   {DN_22_SA1 = DG_22_SA1 - DL_22_SA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_22_SA1  {AW_22_SA1 + RP_22_SA1 = DN_22_SA1 + GP_22_SA1 + RU_22_SA1 } ! + SHRTG_22_SA1 }
+
+!======================================================================
+! 22_SA2
+!======================================================================
+! gross surface water diversions
+goal setDG_22_SA2   {DG_22_SA2 = D_FTR003_22_SA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_22_SA2   {DN_22_SA2 = DG_22_SA2 - DL_22_SA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_22_SA2  {AW_22_SA2 + RP_22_SA2 = DN_22_SA2 + GP_22_SA2 + RU_22_SA2 } ! + SHRTG_22_SA2 }
+
+!======================================================================
+! 22_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_22_NA    {DG_22_NA = D_SAC075_22_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_22_NA    {DN_22_NA = DG_22_NA - DL_22_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_22_NA   {AW_22_NA + RP_22_NA = DN_22_NA + GP_22_NA + RU_22_NA } ! + SHRTG_22_NA  } 
+
+!======================================================================
+! 22_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_22_NU    {UD_22_NU = GP_22_NU } ! + SHRTG_22_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 23_NU
+!======================================================================
+! No surface water delivery
+
+goal setUD_23_NU    {UD_23_NU = GP_23_NU } ! + SHRTG_23_NU }
+
+!======================================================================
+! 23_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_23_NA    {DG_23_NA = D_ABN006_23_NA + D_BRR017_23_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_23_NA    {DN_23_NA = DG_23_NA - DL_23_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_23_NA   {AW_23_NA + RP_23_NA = DN_23_NA + GP_23_NA + RU_23_NA } ! + SHRTG_23_NA }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 24_NA1
+!======================================================================
+!goal setD_CBC001_CCK036        {D_CBC001_CCK036 = 0}! < DMD_CBC001_CCK036_NID} !BR319 !Set to zero since does not connect to any demand units                         
+! gross surface water diversions
+goal setDG_24_NA1   {DG_24_NA1 = D_CBC001_24_NA1 + D_WSE004_24_NA1 + D_ABN024_24_NA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA1   {DN_24_NA1 = DG_24_NA1 - DL_24_NA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_24_NA1  {AW_24_NA1 + RP_24_NA1 = DN_24_NA1 + GP_24_NA1 + RU_24_NA1 } ! + SHRTG_24_NA1}
+
+!======================================================================
+! 24_NA2
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NA2   {DG_24_NA2 = D_ABN010_24_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA2   {DN_24_NA2 = DG_24_NA2 - DL_24_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+ goal meetAW_24_NA2  {AW_24_NA2 + AW_24_NA2_add + RP_24_NA2 = DN_24_NA2 + GP_24_NA2 + RU_24_NA2 /*+ SHRTG_24_NA2 */ }
+!define SHRTG_24_NA2    {alias AW_24_NA2 + RP_24_NA2 - DN_24_NA2 - GP_24_NA2 - RU_24_NA2 kind 'delivery-shortage' units 'cfs'} 
+!======================================================================
+! 24_NA3
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NA3   {DG_24_NA3 = D_STH003_24_NA3 + D_STH005_24_NA3 + D_WSE006_24_NA3 + D_LBC049_24_NA3 + D_FOLSM_24_NA3_CVP}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA3   {DN_24_NA3 = DG_24_NA3 - DL_24_NA3}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_24_NA3  {AW_24_NA3 + AW_24_NA3_add + RP_24_NA3 = DN_24_NA3 + GP_24_NA3 + RU_24_NA3} ! + SHRTG_24_NA3 }
+!define SHRTG_24_NA3    {alias AW_24_NA3 + RP_24_NA3 - DN_24_NA3 - GP_24_NA3 - RU_24_NA3 kind 'delivery-shortage' units 'cfs'}    
+
+!======================================================================
+! 24_NU2
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU2   {DG_24_NU2 = D_WTPFSS_24_NU2 + D_FOLSM_24_NU2_CVP}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU2   {DN_24_NU2 = DG_24_NU2 - DL_24_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU2   {UD_24_NU2 + UD_24_NU2_add= DN_24_NU2 + GP_24_NU2 } ! + SHRTG_24_NU2 }
+!define SHRTG_24_NU2    {alias UD_24_NU2 - DN_24_NU2 - GP_24_NU2 kind 'delivery-shortage' units 'cfs'}                                                                                                     
+
+!======================================================================
+! 24_NU1
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU1   {DG_24_NU1 = D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU1   {DN_24_NU1 = DG_24_NU1 - DL_24_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU1   {UD_24_NU1 = DN_24_NU1 + GP_24_NU1 } ! + SHRTG_24_NU1 }
+!define SHRTG_24_NU1    {alias UD_24_NU1 - DN_24_NU1 - GP_24_NU1 kind 'delivery-shortage' units 'cfs'}                                                                                                     
+
+!======================================================================
+! 24_NU3
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU3   {DG_24_NU3 = D_WSE004_24_NU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU3   {DN_24_NU3 = DG_24_NU3 - DL_24_NU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU3   {UD_24_NU3 = DN_24_NU3 + GP_24_NU3 } ! + SHRTG_24_NU3 }
+
+!======================================================================
+! 24_NU4
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+!goal setUD_24_NU4   {UD_24_NU4 = GP_24_NU4 } ! + SHRTG_24_NU4 }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 25      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 25_PA1
+!======================================================================
+! gross surface water diversions
+goal setDG_25_PA1   {DG_25_PA1 = D_PSC003_25_PA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_25_PA1   {DN_25_PA1 = DG_25_PA1 - DL_25_PA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_25_PA1  {AW_25_PA1 + RP_25_PA1 = DN_25_PA1 + GP_25_PA1 + RU_25_PA1 } ! + SHRTG_25_PA1 }
+
+!======================================================================
+! 25_PA2
+!======================================================================
+! gross surface water diversions
+goal setDG_25_PA2   {DG_25_PA2 = D_PSC006_25_PA2 + D_RFS25_25_PA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_25_PA2   {DN_25_PA2 = DG_25_PA2 - DL_25_PA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_25_PA2  {AW_25_PA2 + RP_25_PA2 = DN_25_PA2 + GP_25_PA2 + RU_25_PA2 } ! + SHRTG_25_PA2 }
+
+!======================================================================
+! 25_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_25_NA    {DG_25_NA = D_CSL005_25_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_25_NA    {DN_25_NA = DG_25_NA - DL_25_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_25_NA   {AW_25_NA + RP_25_NA = DN_25_NA + GP_25_NA + RU_25_NA } ! + SHRTG_25_NA }
+
+!======================================================================
+! 25_PU (Vacaville)
+!======================================================================
+! gross surface water diversions
+goal setDG_25_PU        {DG_25_PU = D_WTPNBR_25_PU + D_WTPDEF_25_PU}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_25_PU        {DN_25_PU = DG_25_PU - DL_25_PU}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_25_PU        {UD_25_PU = DN_25_PU + GP_25_PU } ! + SHRTG_25_PU }
+
+!======================================================================
+! Other agricultural deliveries from Putah South Canal (external to WBA25)
+!======================================================================
+goal setD_PSC024_SIDSH        {D_PSC024_SIDSH < (0.23/0.77)*D_PSC003_25_PA1} !23% of SID acreage lies outside WBA25
+goal setD_BRYSA_NAPA2      {D_BRYSA_NAPA2 < UD_NAPA2}
+!goal setD_PTH070_PUTAH      {D_PTH070_PUTAH < UD_PUTAH}
+
+!======================================================================
+! Other urban deliveries from Putah South Canal (external to WBA25) and North Bay Aqueduct
+!======================================================================
+goal setD_PSC015_CSPSO      {D_PSC015_CSPSO < UD_CSPSO}
+goal setD_WTPCMT_SUISN      {D_WTPCMT_SUISN < UD_SUISN}
+goal setD_WTP_FRFLD         {D_WTPNBR_FRFLD + D_WTPWMN_FRFLD < UD_FRFLD }
+goal setD_WTPTAB_TVAFB         {D_WTPTAB_TVAFB < UD_TVAFB}
+goal setD_WTPBNC_BNCIA        {D_WTPBNC_BNCIA < UD_BNCIA}
+goal setD_WTPFMH_VLLJO  {D_WTPFMH_VLLJO < UD_VLLJO}
+
+!======================================================================
+! 25_NU
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_25_NU    {UD_25_NU = GP_25_NU } ! + SHRTG_25_NU }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26N     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! gross surface water diversions
+goal setDG_26N_PU1  {DG_26N_PU1 = D_WTPRSV_26N_PU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_PU1  {DN_26N_PU1 = DG_26N_PU1 - DL_26N_PU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_PU1  {UD_26N_PU1 = DN_26N_PU1 + GP_26N_PU1 } ! + SHRTG_26N_PU1 }
+
+! gross surface water diversions
+goal setDG_26N_PU2  {DG_26N_PU2 = D_WTPSJP_26N_PU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_PU2  {DN_26N_PU2 = DG_26N_PU2 - DL_26N_PU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_PU2  {UD_26N_PU2 = DN_26N_PU2 + GP_26N_PU2 + SHRTG_26N_PU2 } ! shortage activated
+
+! gross surface water diversions
+goal setDG_26N_PU3  {DG_26N_PU3 = D_WTPSJP_26N_PU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_PU3  {DN_26N_PU3 = DG_26N_PU3 - DL_26N_PU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_PU3  {UD_26N_PU3 = DN_26N_PU3 + GP_26N_PU3 } ! + SHRTG_26N_PU3 }
+
+! gross surface water diversions
+goal setDG_26N_NU1  {DG_26N_NU1 = D_WTPFBN_26N_NU1 + D_WTPSJP_26N_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_NU1  {DN_26N_NU1 = DG_26N_NU1 - DL_26N_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_NU1  {UD_26N_NU1 = DN_26N_NU1 + GP_26N_NU1 } ! + SHRTG_26N_NU1 }
+
+! gross surface water diversions
+goal setDG_26N_NU2  {DG_26N_NU2 = D_WTPBJM_26N_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_NU2  {DN_26N_NU2 = DG_26N_NU2 - DL_26N_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_NU2  {UD_26N_NU2 = DN_26N_NU2 + GP_26N_NU2 } ! + SHRTG_26N_NU2 }
+
+! gross surface water diversions
+goal setDG_26N_NU3  {DG_26N_NU3 = D_WTPFBN_26N_NU3 + D_WTPSAC_26N_NU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_NU3  {DN_26N_NU3 = DG_26N_NU3 - DL_26N_NU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_NU3  {UD_26N_NU3 /*+ UD_26N_NU3_add*/ = DN_26N_NU3 + GP_26N_NU3 } ! + SHRTG_26N_NU3 } 
+
+! gross surface water diversions
+goal setDG_26N_NU4  {DG_26N_NU4 = D_WTPFBN_26N_NU4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26N_NU4  {DN_26N_NU4 = DG_26N_NU4 - DL_26N_NU4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26N_NU4  {UD_26N_NU4 = DN_26N_NU4 + GP_26N_NU4 } ! + SHRTG_26N_NU4 }
+
+!======================================================================
+! 26N_NU5
+!======================================================================
+! No surface water delivery
+
+goal setUD_26N_NU5  {UD_26N_NU5 = GP_26N_NU5 } ! + SHRTG_26N_NU5 }
+
+!======================================================================
+! 26N_NA
+!======================================================================
+! No surface water delivery
+goal meetAW_26N_NA  {AW_26N_NA + RP_26N_NA = GP_26N_NA + RU_26N_NA } ! + SHRTG_26N_NA }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26S     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setD_WTPVNY_26S_PU1 {D_WTPVNY_26S_PU1 = 0.0} ! future diversion to City of Folsom
+! gross surface water diversions
+goal setDG_26S_PU1  {DG_26S_PU1 = D_WTPFOL_26S_PU1 + D_WTPVNY_26S_PU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU1  {DN_26S_PU1 = DG_26S_PU1 - DL_26S_PU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU1  {UD_26S_PU1 = DN_26S_PU1 + GP_26S_PU1 } ! + SHRTG_26S_PU1 }
+
+! gross surface water diversions
+goal setDG_26S_PU2  {DG_26S_PU2 = D_WTPCOL_26S_PU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU2  {DN_26S_PU2 = DG_26S_PU2 - DL_26S_PU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU2  {UD_26S_PU2 = DN_26S_PU2 + GP_26S_PU2 } ! + SHRTG_26S_PU2 }
+
+! gross surface water diversions
+goal setDG_26S_NU1  {DG_26S_NU1 = D_WTPFBN_26S_NU1 + D_WTPSAC_26S_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_NU1  {DN_26S_NU1 = DG_26S_NU1 - DL_26S_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_NU1  {UD_26S_NU1 /*+ UD_26S_NU1_add*/ = DN_26S_NU1 + GP_26S_NU1 } ! + SHRTG_26S_NU1 } 
+
+! gross surface water diversions
+goal setDG_26S_PU4  {DG_26S_PU4 = D_WTPVNY_26S_PU4 + D_WTPSAC_26S_PU4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU4  {DN_26S_PU4 = DG_26S_PU4 - DL_26S_PU4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU4  {UD_26S_PU4 = DN_26S_PU4 + GP_26S_PU4 } ! + SHRTG_26S_PU4 }
+
+! gross surface water diversions
+goal setDG_26S_NU2  {DG_26S_NU2 = D_WTPFBN_26S_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_NU2  {DN_26S_NU2 = DG_26S_NU2 - DL_26S_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_NU2  {UD_26S_NU2 = DN_26S_NU2 + GP_26S_NU2 } ! + SHRTG_26S_NU2 }
+
+! gross surface water diversions
+goal setDG_26S_PU5  {DG_26S_PU5 = D_WTPVNY_26S_PU5}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU5  {DN_26S_PU5 = DG_26S_PU5 - DL_26S_PU5}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU5  {UD_26S_PU5 = DN_26S_PU5 + GP_26S_PU5 } ! + SHRTG_26S_PU5 }
+
+! gross surface water diversions
+goal setDG_26S_PU6  {DG_26S_PU6 = D_WTPVNY_26S_PU6}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU6  {DN_26S_PU6 = DG_26S_PU6 - DL_26S_PU6}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU6  {UD_26S_PU6 = DN_26S_PU6 + GP_26S_PU6 } ! + SHRTG_26S_PU6 }
+
+! gross surface water diversions
+goal setDG_26S_PU3  {DG_26S_PU3 = D_FOLSM_26S_PU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_PU3  {DN_26S_PU3 = DG_26S_PU3 - DL_26S_PU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_PU3  {UD_26S_PU3 = DN_26S_PU3 + GP_26S_PU3 } ! + SHRTG_26S_PU3 }
+
+define FSC_Losses {timeseries kind 'SEEPAGE'  units 'TAF' convert 'CFS'}  !Seepage losses for Folsom South Canal
+goal setD_FSC003_FSCLOS {D_FSC003_FSCLOS = FSC_Losses}
+
+!======================================================================
+! 26S_NU3
+!======================================================================
+! gross surface water diversions
+goal setDG_26S_NU3  {DG_26S_NU3 = D_WTPFBN_26S_NU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_NU3  {DN_26S_NU3 = DG_26S_NU3 - DL_26S_NU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_NU3  {UD_26S_NU3 = DN_26S_NU3 + GP_26S_NU3 } ! + SHRTG_26S_NU3 }
+
+!======================================================================
+! 26S_NU4
+!======================================================================
+! gross surface water diversions
+goal setDG_26S_NU4  {DG_26S_NU4 = D_FOLSM_26S_NU4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_26S_NU4  {DN_26S_NU4 = DG_26S_NU4 - DL_26S_NU4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_26S_NU4  {UD_26S_NU4 = DN_26S_NU4 + GP_26S_NU4 } ! + SHRTG_26S_NU4 }
+
+/*
+!======================================================================
+! 26S_NA
+!======================================================================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal meetAW_26S_NA  {AW_26S_NA + RP_26S_NA = GP_26S_NA + RU_26S_NA } ! + SHRTG_26S_NA }
+*/
+!======================================================================
+! ELDID_NU3  - El Dorado Irrigation District to El Dorado Hills
+!======================================================================
+! gross surface water diversions
+goal setDG_ELDID_NU3_  {DG_ELDID_NU3 = D_WTPEDH_ELDID_NU3 + D_EDWWTP_ELDID_NU3 + D_WTPRS1_ELDID_NU3 + D_WTPRSA_ELDID_NU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_ELDID_NU3  {DN_ELDID_NU3 = DG_ELDID_NU3 - DL_ELDID_NU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_ELDID_NU3  {UD_ELDID_NU3 = DN_ELDID_NU3 + SHRTG_ELDID_NU3} /* + GP_ELDID_NU3  + SHRTG_ELDID_NU3 */ ! Made logic consistent with upper watershed file, NSO 01/26/2022
+
+
+!======================================================================
+! DELTA
+!======================================================================
+!goal setDD_SAC017_SACS   {DD_SAC017_SACS < DD_SAC_South}
+
+!goal setDD_SAC041_SACN   {DD_SAC041_SACN < DD_SAC_North}
+
+!goal setDD_SAC000_SACW   {DD_SAC000_SACW < DD_SAC_West}
+ 
+!Byron-Bethany ID; Depletion and Accretion of BBID is from DCD model   
+!Diversion to BBID from Clifton Court Forebay, D_CAA002_50_PA2 is set to meet DD_50_PA2
+!goal setD_CAA002_50_PA2  {lhs D_CAA002_50_PA2 rhs DD_50_PA2 lhs<rhs penalty 999999 } !goal setD_CAA002_50_PA2  {D_CAA002_50_PA2 = DD_50_PA2} 
+ 
+!goal setD_NBLDB_CGT005  {D_NBLDB_CGT005 = 0.}
+
+! Split diversions to the lower boardman canal based on historical flow data (YB-56 & YB-69)
+goal splitRagsdale      {D_BEC021_LBC032 = (9.7/(9.7 + 20.4))*(D_BEC021_LBC032 + D_WSE003_LBC040)}
+goal splitFiddlersGreen {D_WSE003_LBC040 = (20.4/(9.7 + 20.4))*(D_BEC021_LBC032 + D_WSE003_LBC040)}
+
+! Split 24_NA3 based on historical data that are well correlated (YB-67 & YB-91). Further constrained by D_STH005_NA3 capacity (8 cfs)
+!goal splitD_STH005_24_NA3   {D_STH005_24_NA3 = (3.6/(3.6 + 32.4))*(D_STH005_24_NA3 + D_STH003_24_NA3)}
+!goal splitD_STH003_24_NA3   {D_STH003_24_NA3 = (32.4/(3.6 + 32.4))*(D_STH005_24_NA3 + D_STH003_24_NA3)}
+
+! Split 24_NU1 based on historical data from PCWA (1998-2017)
+! Bowman WTP
+goal splitD_WTPBWM_24_NU1 {
+    lhs D_WTPBWM_24_NU1
+        case Jan {
+            condition month==JAN
+            rhs 0.97*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Feb {
+            condition month==FEB
+            rhs 0.95*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Mar {
+            condition month==MAR
+            rhs 0.95*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Apr {
+            condition month==APR
+            rhs 0.82*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case May {
+            condition month==MAY
+            rhs 0.66*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Jun {
+            condition month==JUN
+            rhs 0.61*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Jul {
+            condition month==JUL
+            rhs 0.58*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Aug {
+            condition month==AUG
+            rhs 0.59*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Sep {
+            condition month==SEP
+            rhs 0.59*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Oct {
+            condition month==OCT
+            rhs 0.55*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Nov {
+            condition month==NOV
+            rhs 0.74*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+        case Dec {
+            condition month==DEC
+            rhs 0.93*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+                        lhs<rhs penalty 10
+            lhs>rhs penalty 10}
+}
+! Auburn WTP
+goal splitD_WTPAUB_24_NU1 {
+    lhs D_WTPAUB_24_NU1
+        case Jan {
+            condition month==JAN
+            rhs 0.03*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Feb {
+            condition month==FEB
+            rhs 0.05*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Mar {
+            condition month==MAR
+            rhs 0.05*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Apr {
+            condition month==APR
+            rhs 0.18*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case May {
+            condition month==MAY
+            rhs 0.34*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Jun {
+            condition month==JUN
+            rhs 0.39*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Jul {
+            condition month==JUL
+            rhs 0.58*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Aug {
+            condition month==AUG
+            rhs 0.41*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Sep {
+            condition month==SEP
+            rhs 0.41*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Oct {
+            condition month==OCT
+            rhs 0.45*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Nov {
+            condition month==NOV
+            rhs 0.26*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+        case Dec {
+            condition month==DEC
+            rhs 0.07*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+            lhs<rhs penalty 0}
+} 

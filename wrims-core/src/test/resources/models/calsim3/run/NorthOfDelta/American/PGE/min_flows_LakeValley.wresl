@@ -1,0 +1,106 @@
+! Lake Valley minimum instream flow requirements
+! Matt Bachman, 11/2017
+
+
+! NF NF American River below Lake Valley Reservoir
+define C_LKVLY_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_LKVLY_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! NF NF American River below Lake Valley Canal Diversion Dam
+define C_NNA013_MIF 	{std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_NNA013_ADD 	{std kind 'FLOW-ADD-INSTREAM' units 'CFS'}
+
+! Include buffer to ensure compliance
+define MF_LKVLY_BUFF	{value 3.0}! cfs
+define MF_NNA013_BUFF	{value 1.0}! cfs
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Current Flow Requirements !!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define MF_LKVLY_cur {
+ case jun 		{condition month >= JUN .and. month <= SEP value 3. }
+ case other 	        {condition always value 1. }}
+
+define MF_NNA013_cur {
+ case jun 		{condition month >= JUN .and. month <= SEP value 3. }
+ case other 	        {condition always value 1. }}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Proposed Flow Requirements !!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Source: Final FERC license application for Drum-Spaulding Project
+define wyt_Smartville {value SmartvilleIndex} !Proposed index for new YRDP and YBDS FERC license
+
+! NF NF American River below Lake Valley Reservoir
+define MF_LKVLY_fut{
+	case Wet{
+		condition wyt_smartville == 1
+		select WET from MIF_PGELV
+		where month = month, identifier = 1}
+	case AboveNormal{
+		condition wyt_smartville == 2
+		select AN from MIF_PGELV
+		where month = month, identifier = 1}
+	case BelowNormal{
+		condition wyt_smartville == 3
+		select BN from MIF_PGELV
+		where month = month, identifier = 1}
+	case Dry{
+		condition wyt_smartville == 4
+		select DRY from MIF_PGELV
+		where month = month, identifier = 1}
+	case CriticallyDry{
+		condition wyt_smartville == 5
+		select CD from MIF_PGELV
+		where month = month, identifier = 1}
+	case ExtremeCriticallyDry{
+		condition wyt_smartville == 6
+		select ECD from MIF_PGELV
+		where month = month, identifier = 1}
+	}
+
+! NF NF American River below Lake Valley Reservoir
+define MF_NNA013_fut{
+	case Wet{
+		condition wyt_smartville == 1
+		select WET from MIF_PGELV
+		where month = month, identifier = 2}
+	case AboveNormal{
+		condition wyt_smartville == 2
+		select AN from MIF_PGELV
+		where month = month, identifier = 2}
+	case BelowNormal{
+		condition wyt_smartville == 3
+		select BN from MIF_PGELV
+		where month = month, identifier = 2}
+	case Dry{
+		condition wyt_smartville == 4
+		select DRY from MIF_PGELV
+		where month = month, identifier = 2}
+	case CriticallyDry{
+		condition wyt_smartville == 5
+		select CD from MIF_PGELV
+		where month = month, identifier = 2}
+	case ExtremeCriticallyDry{
+		condition wyt_smartville == 6
+		select ECD from MIF_PGELV
+		where month = month, identifier = 2}
+	}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Existing/Current Implementation !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define MF_PGELV_LKVLY {
+	case Existing {condition LODFlag == 0. value MF_LKVLY_cur + MF_LKVLY_BUFF}
+	case Future   {condition LODFlag == 1. value MF_LKVLY_fut + MF_LKVLY_BUFF}
+	}
+
+define MF_PGELV_NNA013 {
+	case Existing {condition LODFlag == 0. value MF_NNA013_cur + MF_LKVLY_BUFF}
+	case Future   {condition LODFlag == 1. value MF_NNA013_fut + MF_NNA013_BUFF}
+	}

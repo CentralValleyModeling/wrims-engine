@@ -1,0 +1,51 @@
+!ShastaIndex.wresl
+
+define I_Shsta_annual{
+	case JanMay{
+		condition month>=Jan .and. month<=May
+		value (sum(i=Oct-month, -1, 1) UNIMP_SHAS(i)) + (sum(i=0, Sep-month, 1) I_Shsta_fm_med[Forecast2](i))
+	}	
+	case other{
+		condition always
+		sum(i=Oct-month, Sep-month, 1) UNIMP_SHAS(i)	
+	}
+}
+define I_Shsta_annual_dv{alias I_shsta_annual kind 'index' units 'taf'}
+
+define I_Shsta_annual_prev{
+	value (sum(i=Oct-month-12, Sep-month-12, 1) UNIMP_SHAS(i))
+}
+define I_Shsta_annual_prev_dv{alias I_shsta_annual_prev kind 'index' units 'taf'}
+
+define wyt_shasta_frcst1{
+	case a{
+		condition i_shsta_annual >=3200
+		value 0
+	}
+	case b{
+		condition always
+		value 1	
+	}
+}
+
+define wyt_shasta_frcst2{
+	case a{
+		condition I_Shsta_annual<4000 .and. I_Shsta_annual_prev<4000 .and. 8000-I_Shsta_annual-I_Shsta_annual_prev>800
+		value 1
+	}
+	case b{
+		condition always
+		value 0
+	} 
+}
+
+define wyt_shasta_frcst{
+	case a{
+		condition wyt_shasta_frcst1==1 .or. wyt_shasta_frcst2==1
+		value 4
+	}
+	case b{
+		condition always
+		value 1
+	}
+}

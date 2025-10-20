@@ -1,0 +1,120 @@
+! Tuolumne_dems.wresl
+! Deliveries and operations for Tuolumne River demands.
+
+/*
+This file determines surface water diversions from the Tuolumne River.  
+Main water users incorporated in this file are Modesto Irrigation District 
+and Turlock Irrigation District.
+
+Water supply availability based on New Don Pedro storage and forecasted
+inflows, and considering minimum flow requirement needs, is used to determine 
+allocations to irrigation district deliveries.  Diversions are made in 
+concert with minimum groundwater pumping assumptions.  
+
+Revised by: R. Field, USBR, 09/25/03
+Purpose: Indclude addtional M&I, groundwater and M&I return flow arcs.
+Revised by: T. Crawford, USBR, 03/10/03
+Purpose: Review and comment code
+Revised by: C. Olson for Calsim-III 4/22/07
+*/
+
+!############################################################################
+
+! In April, forecast Apr-July inflow to New Don Pedro Reservoir
+define TuolAprJulForc_1 {
+    case April {
+        condition month==apr
+        sum(i=0,3,1) I_PEDRO(i)*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value 0. }
+    }
+
+define TuolAprJulForc {
+    case April {
+        condition month==apr
+        value TuolAprJulForc_1 + S_PEDRO(-1) }
+    case otherwise {
+        condition always
+        value 0. }
+    }
+
+/*
+Surface water allocation (as a percent of demand); 
+based on New Don Pedro water supply - a function of a table lookup
+ForInf      NDP_WS
+0           .50
+1400        .50
+1600        .85
+2000        .85
+2001        1.0
+9999        1.0
+*/
+! Decision variable for New Don Pedro Water Supply
+define NDP_WSdv {std kind 'WATER-SUPPLY' units 'none'}
+define NDP_WS {
+    case firstyear {
+        condition wateryear == BgnWY .and. month<=mar
+        value 1. }
+    case Normal {
+        condition month==apr
+        select NDP_WS from TuolAllocNormal given ForInf=TuolAprJulForc use linear }
+    case otherwise {
+        condition always
+        value NDP_WSdv(-1) }
+}
+! Set New Don Pedro water supply equal to the decision variable
+goal setNDP_WSdv {NDP_WSdv = NDP_WS}
+
+/*
+*******************************Turlock ID************************************
+Surface water diversions from Turlock Lake to Turlock ID is 0 if demand is 0;
+otherwise the surface water delivery is limited to a % of the applied water demand 
+*/
+define DFo_62_NA3  {value ((1 + RPF_62_NA3 )*(1 - GPmin_62_NA3_D - GPmin_62_NA3_P)- RUFo_62_NA3)/(1 - EVF_TRLCK_62_NA3  - DPF_TRLCK_62_NA3  - LFF_TRLCK_62_NA3  - OSF_TRLCK_62_NA3)}
+define DFr_62_NA3  {value ((1 + RPF_62_NA3 )*(1 - GPmin_62_NA3_D - GPmin_62_NA3_P)- RUFr_62_NA3)/(1 - EVF_TRLCK_62_NA3  - DPF_TRLCK_62_NA3  - LFF_TRLCK_62_NA3  - OSF_TRLCK_62_NA3)}
+
+define annSWDEM_TID_dv {std kind 'annual-demand' units 'taf'}   
+define annSWDEM_TID {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_62_NA3(i)*DFo_62_NA3*cfs_taf(i) + AWr_62_NA3(i)*DFr_62_NA3*cfs_taf(i) 
+        }
+    case otherwise {
+        condition   always
+        value annSWDEM_TID_dv (-1) }
+        }     
+goal set_annSWDem_TID {annSWDEM_TID_dv = annSWDEM_TID}
+
+define Dem_SWDEM_TID        {value  AWo_62_NA3*DFo_62_NA3*cfs_taf + AWr_62_NA3*DFr_62_NA3*cfs_taf}
+goal limitD_TRLCK_62_NA3 {D_TRLCK_62_NA3 < NDP_WS*(Dem_SWDEM_TID)*taf_cfs }
+define DLT_TRLCK_62_NA3 {alias NDP_WS*(Dem_SWDEM_TID)*taf_cfs   kind 'DIVERSION-LIMIT' units 'CFS'}
+                                    
+                                   
+/*
+*******************************Modesto ID************************************
+Surface water diversions from Modesto Lake to Modesto are limited to a
+precentage of the applied water demand (with factors for reuse and losses)  Surface
+sources from the Stanislaus side have higher weights and will be used before
+Tuolumne surface water deliveries.
+*/
+
+define DFo_61_NA2  {value ((1 + RPF_61_NA2 )*(1 - GPmin_61_NA2_D - GPmin_61_NA2_P)- RUFo_61_NA2)/(1 - EVF_MDSTO_61_NA2  - DPF_MDSTO_61_NA2  - LFF_MDSTO_61_NA2  - OSF_MDSTO_61_NA2)}
+define DFr_61_NA2  {value ((1 + RPF_61_NA2 )*(1 - GPmin_61_NA2_D - GPmin_61_NA2_P)- RUFr_61_NA2)/(1 - EVF_MDSTO_61_NA2  - DPF_MDSTO_61_NA2  - LFF_MDSTO_61_NA2  - OSF_MDSTO_61_NA2)}
+
+define annSWDEM_MID_dv {std kind 'annual-demand' units 'taf'}   
+define annSWDEM_MID {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_61_NA2(i)*DFo_61_NA2*cfs_taf(i) + AWr_61_NA2(i)*DFr_61_NA2*cfs_taf(i) 
+        }
+    case otherwise {
+        condition   always
+        value annSWDEM_MID_dv (-1) }
+        }     
+goal set_annSWDem_MID {annSWDEM_MID_dv = annSWDEM_MID}
+
+define Dem_SWDEM_MID        {value  AWo_61_NA2*DFo_61_NA2*cfs_taf + AWr_61_NA2*DFr_61_NA2*cfs_taf}
+goal limitD_MDSTO_61_NA2 {D_MDSTO_61_NA2 < NDP_WS*(Dem_SWDEM_MID)*taf_cfs }
+define DLT_MDSTO_61_NA2 {alias NDP_WS*(Dem_SWDEM_MID)*taf_cfs   kind 'DIVERSION-LIMIT' units 'CFS'}
+

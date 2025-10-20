@@ -1,0 +1,217 @@
+! X2 setup for WQCP and FWS Action 4 requirements
+
+! FWS BO Action 4 - Storage Release for X2 outflow capped to inflow
+define InfForX2Nov {
+    case November {
+        condition month==NOV .and. wyt_SAC <= 2
+        value I_WKYTN
+            + I_SHSTA
+            + I_OROVL + CT_OROVILLE_SV + C_FTR074_SV2
+            + I_FOLSM + CT_FAIROAKS_SV + C_NFA016_sv2 + C_SFA011_sv2 + C_STH007_SV + C_MRM001_SV} !Mormon Slough and Newcastle PH are read from SV data
+    case otherwise {
+        condition always
+        value 0. }
+}
+define InfForX2Nov_dv {alias InfForX2Nov kind 'FLOW-FWSBOA4-MIN' units 'CFS'}
+
+! FWS BO Action 4 - Minimum outflow for off ramping in December (make sure to release any November storage gain)
+define NovStoredI {
+      case Dec {
+          condition  month == DEC .and. wyt_SAC <= 2  ! FWS BO (Dec 08) Action 4 - Fall X2
+          value max(0., I_WKYTN(-1) + D_LWSTN_CCT011(-1) - C_CLR011(-1) - D_WKYTN_SPT003(-1) - D_WKYTN_WTPCSD(-1) - D_WKYTN_WTPBUK(-1) - D_WKYTN_02_PU(-1))
+              + max(0., I_SHSTA(-1) - C_SHSTA(-1) - D_SHSTA_WTPJMS(-1))
+              + max(0., I_OROVL(-1) + CT_OROVILLE_SV(-1) + C_FTR074(-1) - C_OROVL(-1) - D_OROVL_13_NU1(-1))
+              + max(0., I_FOLSM(-1) + CT_FAIROAKS_SV(-1) + C_NFA011(-1) + C_SFA011(-1) - C_FOLSM(-1) - D_FOLSM_26S_PU3(-1) - D_FOLSM_WTPSJP(-1) - D_FOLSM_WTPRSV(-1) - D_FOLSM_26S_NU4(-1) - D_FOLSM_WTPFOL(-1) - D_FOLSM_WTPEDH(-1) )} !Missing Folsom Lake diversions
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+define A4NovStoredI_dv {alias NovStoredI kind 'FLOW-FWSBOA4-MIN' units 'CFS'}
+
+! add november stored water to wqcp DO for december FWS action 4 implementation
+define flowmin_DecA4 {
+!    case WetAA_December {
+!        condition month == DEC .and. wyt_SAC <= 2
+!        value mrdo_finaldv[monthlyweighted] + NovStoredI}
+!    case otherwise {
+!        condition always
+        value 0.0}
+!}
+define flowmin_DecA4dv {alias flowmin_DecA4 kind 'flow-fwsboa4-min' units 'cfs'}
+
+! set the flow cap for each station (cfs). this is max flow to meet X2 at each station
+define flowcap_roe {       ! cfs for Roe Island/Port Chicago
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN
+          value 29200. }
+     case othermonths {
+          condition      always
+          value 99999. }
+}
+define flowcap_chs {       ! cfs for Chipps Island
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN
+          value 11400. }
+     case NOV_FWS {
+          condition      month == NOV .and. wyt_sac<=2
+          value mrdo_finaldv[monthlyweighted] + InfForX2Nov }
+     case othermonths {
+          condition      always
+          value 99999. }
+}
+define flowcap_cnf {       ! cfs for Confluence (Sac & SJR)
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN
+          value 7100. }
+     case NOV_FWS {
+          condition      month == NOV .and. wyt_sac<=2
+          value mrdo_finaldv[monthlyweighted] + InfForX2Nov  }
+     case othermonths {
+          condition      always
+          value 99999. }
+}
+
+! set the trigger value which activates the operation of Roe X2 standard
+define trigger_x2roe {value 66.3 } ! km to just beyond Roe Island
+
+! set the minimum flow for the circumstances in which there is no requirement at the confluence
+!   ie. May_SRI < 8.1 maf, then no X2 standard
+define flowmin_specX2 {value 4000. }         ! cfs for months (feb-june) in which no confluence req
+
+! ******************************************************************************************
+! Get the days required for X2 at each location (Roe, Chipps, Confluence)
+!@jmg 2017v13 - following section updated
+define daysX2_roeTB {
+     case FebtoJun {
+         condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0   
+          value     roe_days    }
+          
+     case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1  
+          value          0. }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+
+define daysX2_chs {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0   
+          value     chs_days    }
+          
+    case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1   
+          value          0. }
+          
+     case Aug_FWS_W {
+          condition      month == AUG .and. wyt_SAC <= 1  ! Aug ramped so it is in range of SEP target
+          value          0.    }
+     case Sep_FWS_W {
+          condition      month == SEP .and. wyt_SAC <= 1  ! FWS BO (Dec 08) Action 4 - Fall X2 for Wet Years
+          value          0.} !@jmg - turning off Fall X2 daysin    }
+     case OctNov_FWS_W {
+          condition      month <= NOV .and. wyt_SAC <= 1  ! FWS BO (Dec 08) Action 4 - Fall X2 for Wet Years
+          value          0. }  !@jmg - turning off Fall X2   daysin    }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+
+define daysX2_cnf {
+     case FebtoJun {
+         condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 0    
+          value     cnf_days   }
+          
+     case FebtoJunTUCP {
+          condition      month >= FEB .and. month <= JUN .and. tucp_trigger == 1  
+          value          0. }
+          
+     case Aug_FWS {
+          condition      month == AUG .and. wyt_SAC <= 2  ! Aug ramped so it is in range of SEP target
+          value          14.    }
+     case Sep_FWS {
+          condition      month == SEP .and. wyt_SAC <= 2  ! Smelt Habitat test for Wet through BN years
+          value           daysin } 
+     case Oct_FWS {
+          condition      month == OCT .and. wyt_SAC <= 2  ! Smelt Habitat test for Wet through BN years
+          value           daysin } 
+     case Nov_FWS {
+          condition      month == NOV !.and. wyt_SAC <= 2  
+          value          0. }  
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+
+define daysX2_roe {
+     case FebtoJun {
+          condition      month >= FEB .and. month <= JUN
+          value min( daysX2_roeTB, daysX2_chs) }
+     case StandardOff {
+          condition      always
+          value          0.    }
+}
+!@jmg 2017v13 - end update section
+
+! ******************************************************************************************
+! Modify the days at each location depending on whether the trigger for Roe has been tripped
+! If   X2last > trigger then,
+!              roe_days=0, chs_days=orig, cnf_days=daysinperiod - chs_days
+! If   X2last < trigger then,
+!              roe_days=orig, chs_days=orig-roe_days, cnf_days=daysin period-chs_days-roe_days
+!
+! NOTE: THE DAY MODIFICATION ASSUMES THAT CHS_DAYS >= ROE_DAYS.  IE.  WHEN YOU MEET ROE YOU
+! AUTOMATICALLY MEET CHIPPS. BE SURE TABLE 'X2DAYS' IS SET PROPERLY.
+
+define daysX2_roe_mod {
+     case RoeTrigOutofSeason {
+          condition      month <= JAN .or. month >= JUL       ! If outside D1641 standard X2 season don't do this adjustment
+          value          0.    }
+     case RoeOff {
+         condition      x2_last > trigger_x2roe
+          value          0.    }
+     case RoeOn {
+          condition      always
+          value          daysX2_roe  }
+}
+define daysX2_chs_mod {
+     case RoeTrigOutofSeason {
+          condition      month <= JAN .or. month >= JUL       ! If outside D1641 standard X2 season don't do this adjustment
+          value          daysX2_chs    }
+     case RoeOff {
+          condition      x2_last > trigger_x2roe
+          value          daysX2_chs  }
+     case RoeOn {
+          condition      always
+          value          daysX2_chs - daysX2_roe  }
+}
+define daysX2_bkg_mod {
+    case PA_SmeltAug {
+          condition      daysX2_cnf > 0.5 .and. month == AUG .and. wyt_Sac<=2
+          value          daysin - daysX2_cnf    }
+    case zero {                                                      
+          condition      always                                       
+          value          0.   }                                       
+}
+define daysX2_cnf_mod {
+    case PA_SmeltAug {
+          condition      daysX2_cnf > 0.5 .and. month == AUG .and. wyt_Sac<=2
+          value          daysin - daysX2_bkg_mod }
+    case CnfTrigOutofSeason {
+          condition      month <= JAN .or. month >= JUL       ! If outside D1641 standard X2 season don't do this adjustment
+          value          daysX2_cnf    }
+    case SpecialStd {
+        condition       daysX2_cnf > 0.5
+        value           daysin - daysX2_chs_mod - daysX2_roe_mod  }     ! days here make up the balance
+    case StandardOff {                                                      ! for the period unless the original
+        condition       always                                              ! days at cnf are zero.  in this case
+        value           0.   }                                              ! there is no standard!!
+}
+define modroeday {alias daysX2_roe_mod kind 'debug' units 'none'}
+define modchsday {alias daysX2_chs_mod kind 'debug' units 'none'}
+define modcnfday {alias daysX2_cnf_mod kind 'debug' units 'none'}
+define modbkgday {alias daysX2_bkg_mod kind 'debug' units 'none'}
+
+
+! ******************************************************************************************

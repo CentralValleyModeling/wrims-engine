@@ -1,0 +1,26 @@
+/*
+File name: File Name: constraints-reservoirs_Common.wresl
+Lower Yuba River System File
+
+Purpose:
+
+Naming takes the following form:
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Englebright Dam, Yuba River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal storage_ENGLB {S_ENGLB = 65.0}
+goal evap_ENGLB    {E_ENGLB*cfs_af=(ER_ENGLB/12)*A_ENGLB}  !Z.Q. Richard Chen 4/5/2012 !@jmg 2017v13 - moved to logic at top of file
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Merle Collins Reservoir, Dry Creek  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal S_MERLCZone1   {S_MERLC_1 < S_MERLClevel1}
+goal S_MERLCZone2   {S_MERLC_2 < S_MERLClevel2-S_MERLClevel1}
+goal StoragE_MERLC  {S_MERLC=S_MERLC_1+S_MERLC_2}
+goal Area_MERLC     {A_MERLC=A_MERLClast+1000*coefev_MERLC*S_MERLC-1000*coefev_MERLC*S_MERLC(-1)}
+goal Evap_MERLC     {E_MERLC*cfs_af=(ER_MERLC/24)*A_MERLClast+(ER_MERLC/24)*A_MERLC}
+goal MaxRel_MERLC   {C_MERLC<Relcap_MERLC}

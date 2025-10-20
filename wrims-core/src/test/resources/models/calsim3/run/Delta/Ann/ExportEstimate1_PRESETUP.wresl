@@ -1,0 +1,32 @@
+/*
+Export estimate for use in the first full-system cycle, implementing only 
+an export level of H&S pumping to allow upstream control of operations
+*/
+
+!*********************************************************************************************
+
+! export for south-of-delta SWP: demand + rulecurve
+define EstSWPSodExp {value 300.} !min(BanksMaxAllow, max(300.0, EstSWPSodDem + EstSWPSodRC))}
+define exp_est_SWP {alias EstSWPSodExp kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+!*********************************************************************************************
+
+! export for south-of-delta CVP: demand
+! minimum Tracy pumping
+define TracyMinPumpLevel {
+        case TracyShastaLow {
+                condition S_SHSTA(-1) - S_SHSTA_WTS(-1) < 1500.0
+                value 600.0 }
+        case tracylowshastafolsom {
+                condition S_FOLSM(-1) < 400. .and. S_SHSTA(-1) - S_SHSTA_WTS(-1) < 2000. !Better reflection of actual operations by trying to keep
+                value 800.  }                                                           !water from being released for SL storage during low storage
+        case TracyShastaHigh {
+                condition always
+                value 800.0 }
+}
+! export for south-of-delta CVP: demand + rulecurve
+define CVPexportcap {value maxTracycalc+ CVPDedBanksSwitch*BanksMaxAllowCVP}
+
+define EstCVPSodExp {value TracyMinPumpLevel} !min(CVPexportcap, max(TracyMinPumpLevel, EstCVPSodDem + EstCVPSodRC))}
+
+define exp_est_CVP {alias EstCVPSodExp kind 'EXPORT-ESTIMATE' units 'CFS'}

@@ -1,0 +1,35 @@
+!TrinityIndex.wresl
+define I_TRIN_annual{
+	case JanMay{
+		condition month>=Jan .and. month<=May
+		value (sum(i=Oct-month, -1, 1) UNIMP_TRIN(i)) + (sum(i=0, Sep-month, 1) I_Trnty_fm_med[Forecast2](i))
+	}
+	case other{
+		condition always
+		sum(i=Oct-month, Sep-month, 1) UNIMP_TRIN(i)
+	}
+}
+define I_TRIN_annual_dv{alias I_TRIN_annual kind 'index' units 'taf'}
+
+define wyt_Trin_frcst{
+	case wet{
+		condition i_TRIN_annual > 2000
+		value 1
+	}
+	case AN{
+		condition i_TRIN_annual > 1350
+		value 2
+	}
+	case BN{
+		condition i_TRIN_annual > 1025
+		value 3
+	}
+	case Dry{
+		condition i_TRIN_annual > 650
+		value 4
+	}
+	case critical{
+		condition always
+		value 5
+	}
+}

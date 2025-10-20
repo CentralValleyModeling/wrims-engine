@@ -1,0 +1,106 @@
+/*
+ 
+References data from cycle MONTHLYWEIGHTED to reduce ANN function calls to reduce runtime.
+
+See the *_data.wresl file for how these parameters are calculated.
+
+*/
+
+
+! calculate previous month's value of salinity (using ann directly)
+define RS_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_Month_sv {value RS_EC_Month[monthlyweighted]}
+goal setRS_EC_MON {RS_EC_Month = RS_EC_Month_sv}
+
+define RS_CL_Month {std kind 'SALINITY' units 'MG/L'}
+define RS_CL_Month_sv {value RS_CL_Month[monthlyweighted]}
+goal setRS_CL_Month {RS_CL_Month = RS_CL_Month_sv}
+
+!get ANN_EC for 2 month earlier
+define RS_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_Month_smooth_sv {value RS_EC_MonthDSM2[monthlyweighted]}
+goal setRS_EC_DSM2 {RS_EC_MonthDSM2 = RS_EC_Month_smooth_sv}
+
+! calculate the maximum 14 day running average (using ann directly)
+define RS_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_Max14Day_sv {value RS_EC_Max14Day[monthlyweighted]}
+goal setRS_EC_14Ave {RS_EC_Max14Day = RS_EC_Max14Day_sv}
+
+define RS_CL_Max14Day {std kind 'SALINITY' units 'MG/L'}
+define RS_CL_Max14Day_sv {value RS_CL_Max14Day[monthlyweighted]}
+goal setRS_CL_Max14Day {RS_CL_Max14Day = RS_CL_Max14Day_sv}
+
+
+!get ANN_EC for 2 month earlier
+define RS_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_Max14day_smooth_sv {value RS_EC_Max14_DSM2[monthlyweighted]}
+goal setRS_EC_DSM2_2 {RS_EC_Max14_DSM2 = RS_EC_Max14day_smooth_sv}
+
+!****************************************************************************************
+
+! define the CL standard for Contra Costa Canal
+define RS_CL_STD {std kind 'SALINITY' units 'MG/L'}
+define RS_CL_STD_sv {value RS_CL_STD[monthlyweighted]}
+goal setRS_CL_STD {RS_CL_STD = RS_CL_STD_sv}
+
+! convert ccc cl std to ORRSL standard - Paul Hutton
+define RS_EC_STD {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_STD_sv {value RS_EC_STD[monthlyweighted]}
+goal setRS_EC_STD {RS_EC_STD = RS_EC_STD_sv}
+
+define RS_EC_STD_225 {value (225. + 23.6)/0.268}!sometimes used for #2&3 if #1 is infeasible (always try to meet the 225 mg/l std)
+
+!*************************************************************************************************************
+!**************   Partition linearization into 3 segments   *****************************
+!*************************************************************************************************************
+
+!get the slope (m) and intercept (b) for the 3-piece linearization.
+!each constraint is in the form Exports <= m * SacFlow + b
+
+!*****Linearization #1***************************************************************
+define RS_m_1 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_1 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+define RS_m_1_sv {value RS_m_1[monthlyweighted]}
+define RS_b_1_sv {value RS_b_1[monthlyweighted]}
+goal setRS_m_1 {RS_m_1 = RS_m_1_sv}
+goal setRS_b_1 {RS_b_1 = RS_b_1_sv}
+
+!*****Linearization #2***************************************************************
+define RS_m_2 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_2 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+define RS_m_2_sv {value RS_m_2[monthlyweighted]}
+define RS_b_2_sv {value RS_b_2[monthlyweighted]}
+goal setRS_m_2 {RS_m_2 = RS_m_2_sv}
+goal setRS_b_2 {RS_b_2 = RS_b_2_sv}
+
+!*****Linearization #3***************************************************************
+define RS_m_3 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_3 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+define RS_m_3_sv {value RS_m_3[monthlyweighted]}
+define RS_b_3_sv {value RS_b_3[monthlyweighted]}
+goal setRS_m_3 {RS_m_3 = RS_m_3_sv}
+goal setRS_b_3 {RS_b_3 = RS_b_3_sv}
+
+!********************************************************************
+!Get the required Sac flow for ZERO exports
+define RS_Sac_ZeroExp {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define RS_Sac_ZeroExp_sv2 {value RS_Sac_ZeroExp[monthlyweighted]}
+goal setRS_Sac_ZeroExp {RS_Sac_ZeroExp = RS_Sac_ZeroExp_sv2}
+
+!**************** Shengjun: save the ANN EC with the estimated sa flow and export 3/28/2006
+/*
+define RS_EC_Month_est_ {lower unbounded upper unbounded kind 'SALINITY' units 'UMHOS/CM'}
+define RS_EC_Month_est {value RS_EC_Month_est_[monthlyweighted]}
+goal setRSECMonthest {RS_EC_Month_est_ = RS_EC_Month_est_}
+*/
+!*********************************************************************
+! Additional equations for Banks and Tracy PP water qualities
+! Compute salinity Tracy and Banks (Source: P. Hutton/C. Wang FDM analysis)
+define BanksEC_Max14Day {std kind 'SALINITY-APPROX' units 'UMHOS/CM'}
+define BanksEC_Max14Day_sv {value RS_CL_Max14Day_sv * 1.9818 + 218.1084}  ! This equation reflects WQ at Banks
+goal setBanksEC_Max14Day {BanksEC_Max14Day = BanksEC_Max14Day_sv}
+
+define TracyEC_Max14Day {std kind 'SALINITY-APPROX' units 'UMHOS/CM'}
+define TracyEC_Max14Day_sv {value RS_CL_Max14Day_sv * 1.6225 + 303.3852} ! ! This equation reflects WQ at Tracy
+goal setTracyEC_Max14Day {TracyEC_Max14Day = TracyEC_Max14Day_sv}
+

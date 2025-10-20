@@ -1,0 +1,48 @@
+! This wresl file defines Knights Landing Ridge Cut operations.
+!
+! ==========================================================================
+!
+!define C_SAC097_1         {std kind 'FLOW' units 'CFS'}  ! segment above 15000
+!define C_SAC097_0         {std kind 'FLOW' units 'CFS'}  ! segment from 0 to 15000
+SVAR int_SAC097_sv    {value 1.}
+!define C_SAC097maxmax     {value 50000} 
+ 
+define int_SAC097 {alias int_SAC097_sv kind 'INTEGER' units 'NONE'}
+
+!When Sacramento River above the Colusa Basin Drain are above 15,000 cfs, close C_CBD000
+/*goal C_SAC097SurplusFlow  {C_SAC097 - 15000.0 = C_SAC097_1 - C_SAC097_0}
+goal C_SAC097FlowAbove	  {C_SAC097_1         < C_SAC097maxmax - int_SAC097*C_SAC097maxmax} ! If C_SAC097 > 15000. then int_SAC097 = 0   
+goal C_SAC097FlowBelow    {C_SAC097_0         <                  int_SAC097*C_SAC097maxmax}           ! If C_SAC097 < 15000. then int_SAC097 = 1  */
+
+goal LimitC_CBD000        {C_CBD000 < int_SAC097_sv*99999.0}
+
+
+define C_KLR005Hist {timeseries kind 'FLOW' units 'TAF' convert 'CFS'}
+define C_KLR005Limit {case summer{condition range(month, Apr, Sep) value 5.*taf_cfs}
+					  case winter{condition range(month, Oct, Mar) value C_KLR005Hist}
+}
+define C_KLR005LimitDV { ALIAS C_KLR005Limit KIND 'DEBUG' UNITS 'CFS' }
+
+goal LimitC_KLR005 {C_KLR005 < C_KLR005Limit+(1. - int_SAC097_sv)*99999.0}
+
+! Alternative 1 (Knight's landing set to historical)
+ define C_CBD001HIST {timeseries kind 'FLOW' units 'TAF' convert 'CFS'}
+ define int_CBD001    {INTEGER std kind 'INTEGER' units 'NONE'}
+ define C_CBD001Pos {std kind 'Flow' units 'CFS'}
+ define C_CBD001Neg {std kind 'Flow' units 'CFS'}
+goal SplitC_CBD001 {C_CBD001HIST - C_CBD001 = C_CBD001Pos - C_CBD001Neg}
+goal posCBD001 {C_CBD001Pos < int_CBD001*99999}
+goal negCBD001 {C_CBD001Neg < 99999 - int_CBD001*99999}
+
+define int_KLR005Corr {Integer std kind 'Integer' units 'NONE'}
+define C_KLR005CorrPos {std kind 'FLOW' units 'CFS'}
+define C_KLR005CorrNeg {std kind 'FLOW' units 'CFS'}
+goal split_C_KLR005Corr {C_KLR005Limit - C_CBD001Pos = C_KLR005CorrPos - C_KLR005CorrNeg}
+goal posC_KLR005Corr {C_KLR005CorrPos < int_KLR005Corr*99999}
+goal negC_KLR005Corr {C_KLR005CorrNeg < 99999-int_KLR005Corr*99999}
+
+define C_KLR005_MIN {std kind 'FLOW' units 'CFS'}
+define C_KLR005_ADD {std kind 'FLOW' units 'CFS'}
+!zrc@ goal setC_KLR005_MIN {C_KLR005_MIN = C_KLR005Limit - C_CBD001Pos + C_KLR005CorrNeg}
+goal setC_KLR005_MIN {lhs C_KLR005_MIN rhs C_KLR005CorrPos lhs<rhs penalty 99999} !zrc@ to allow C_KLR005_MIN < C_KLR005CorrPos
+goal setC_KLR005_SPLIT {C_KLR005 = C_KLR005_MIN + C_KLR005_ADD}

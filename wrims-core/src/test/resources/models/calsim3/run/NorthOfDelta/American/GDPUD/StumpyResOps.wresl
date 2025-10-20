@@ -1,0 +1,60 @@
+! Operations governing Stumpy Meadows Reservoir storage
+! M. Bachman 1/2018
+! R. Hoang   5/2019
+
+! Water demand defined using data from SacWAM WEAP model (v1.05 unimpaired)
+
+
+! Drought reduction triggers as specified by 2015 UWMP
+define DroughtReduction {
+	case FirstYear{
+		condition month<May .and. wateryear==BgnWY
+		value 1.
+	}
+	case Stage4{
+		condition month==May .and. S_STMPY(-1)<=10.
+		value 0.5
+	}
+	case Stage3{
+		condition month==May .and. S_STMPY(-1)<=13.
+		value 0.65
+	}
+	case Stage2{
+		condition month==May .and. S_STMPY(-1)<=15.
+		value 0.75
+	}
+	case Stage1{
+		condition month==May .and. S_STMPY(-1)<=17.
+		value 0.85
+	}
+	case NoTrigger{
+		condition month==May .and. S_STMPY(-1)>17.
+		value 1.
+	}
+	case Otherwise{
+		condition always
+		value StumpyDroughtReduction(-1)
+	}
+}
+
+define StumpyDroughtReduction {std kind 'ALLOCATION' units 'NONE'}
+goal setStumpyDroughtReduction {StumpyDroughtReduction = DroughtReduction}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Deliveries !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Define conveyance loss through Georgetown Divide Ditch
+goal setD_GDD010_GDDLOS {D_GDD010_GDDLOS<0.2*D_PLC007_GDD010} !Assumed 20% losses
+
+! GDPUD_NU 
+!define UD_GDPUD_NU {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+define GDPUD_NU_dem_rem {std kind 'URBAN-DEMAND-REM' units 'NONE'}! Remaining GDPUD urban demand - may be fulfilled by Fazio Water
+
+goal setD_WTPWAL_GDPUD_NU {D_WTPWAL_GDPUD_NU<UD_GDPUD_NU*DroughtReduction}
+goal setGDPUD_NU_dem_rem {GDPUD_NU_dem_rem = UD_GDPUD_NU*DroughtReduction-D_WTPWAL_GDPUD_NU}
+
+! GDPUD_NA 
+!define AW_GDPUD_NA {timeseries kind 'AG-DEMAND' units 'TAF' convert 'CFS'}
+goal setD_GDD010_GDPUD_NA {D_GDD010_GDPUD_NA<AW_GDPUD_NA*DroughtReduction}

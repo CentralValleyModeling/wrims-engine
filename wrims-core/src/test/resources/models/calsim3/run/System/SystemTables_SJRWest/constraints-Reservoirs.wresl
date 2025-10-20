@@ -1,0 +1,41 @@
+/*
+ STORAGE CONTINUITY
+  
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Luis Reservoir, California Aqueduct/Delta-Mendota Canal     !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!The SWP and CVP portions of San Luis are represented separately in Calsim
+
+!CVP Portion of San Luis Reseroir
+goal S_SLUIS_CVPZone1 {S_SLUIS_CVP_1 < S_SLUIS_CVPlevel1}
+goal S_SLUIS_CVPZone2 {S_SLUIS_CVP_2 < S_SLUIS_CVPlevel2-S_SLUIS_CVPlevel1}
+goal storage_SLUIS_CVP {S_SLUIS_CVP=S_SLUIS_CVP_1+S_SLUIS_CVP_2+S_SLUIS_CVP_3+S_SLUIS_CVP_4+S_SLUIS_CVP_5}
+goal area_SLUIS_CVP {A_SLUIS_CVP=A_SLUIS_CVPlast+1000*coefev_SLUIS_CVP*S_SLUIS_CVP-1000*coefev_SLUIS_CVP*S_SLUIS_CVP(-1)}
+goal evap_SLUIS_CVP {E_SLUIS_CVP*cfs_af=(ER_SLUIS/24)*A_SLUIS_CVPlast+(ER_SLUIS/24)*A_SLUIS_CVP}
+!goal maxrelease_SLUIS_CVP {C_SLUIS_CVP<relcap_SLUIS_CVP}
+define C_SLUIS_CVP_NCF	{lower 0 upper RelCap_SLUIS_CVP kind 'CHANNEL' units 'CFS'}  
+define C_SLUIS_CVP_Flood	{std kind 'SPILL' units 'CFS'}
+goal   MaxRel_SLUIS_CVP  	{C_SLUIS_CVP_NCF + C_SLUIS_CVP_Flood = C_SLUIS_CVP }
+
+!SWP Portion of San Luis Reservoir
+goal S_SLUIS_SWPZone1 {S_SLUIS_SWP_1 < S_SLUIS_SWPlevel1}
+goal S_SLUIS_SWPZone2 {S_SLUIS_SWP_2 < S_SLUIS_SWPlevel2-S_SLUIS_SWPlevel1}
+goal storage_SLUIS_SWP {S_SLUIS_SWP=S_SLUIS_SWP_1+S_SLUIS_SWP_2+S_SLUIS_SWP_3+S_SLUIS_SWP_4+S_SLUIS_SWP_5}
+goal area_SLUIS_SWP {A_SLUIS_SWP=A_SLUIS_SWPlast+1000*coefev_SLUIS_SWP*S_SLUIS_SWP-1000*coefev_SLUIS_SWP*S_SLUIS_SWP(-1)}
+goal evap_SLUIS_SWP {E_SLUIS_SWP*cfs_af=(ER_SLUIS/24)*A_SLUIS_SWPlast+(ER_SLUIS/24)*A_SLUIS_SWP}
+!goal maxrelease_SLUIS_SWP {C_SLUIS_SWP<relcap_SLUIS_SWP}
+define C_SLUIS_SWP_NCF	{lower 0 upper RelCap_SLUIS_SWP kind 'CHANNEL' units 'CFS'}  
+define C_SLUIS_SWP_Flood	{std kind 'SPILL' units 'CFS'}
+goal   MaxRel_SLUIS_SWP  	{C_SLUIS_SWP_NCF + C_SLUIS_SWP_Flood = C_SLUIS_SWP }
+
+!Set releases from San Luis equal to SWP and CVP releases
+goal totC_SLUIS  {C_SLUIS = C_SLUIS_CVP + C_SLUIS_SWP}
+
+!Diversion to San Luis is the sum of CVP and SWP diversions (Federal and State)
+goal totD_CAA069_SLUIS {D_CAA069_SLUIS = D_CAA069_SLUIS_F + D_CAA069_SLUIS_S}
+
+

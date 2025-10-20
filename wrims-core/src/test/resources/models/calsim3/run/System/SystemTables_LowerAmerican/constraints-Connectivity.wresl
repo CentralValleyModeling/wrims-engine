@@ -1,0 +1,63 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+Constraints-connectivity.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! American River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityFOLSM    {C_NFA011 + I_FOLSM + CT_FAIROAKS + C_SFA011 + SG374_FOLSM_66 - C_FOLSM - D_FOLSM_26S_PU3 - D_FOLSM_26S_NU4 - D_FOLSM_WTPRSV - D_FOLSM_WTPSJP - D_FOLSM_WTPFOL - D_FOLSM_WTPEDH - D_FOLSM_EDCOCA  - D_FOLSM_24_NU2_CVP /*- D_FOLSM_24_NA2*/ - D_FOLSM_24_NA3_CVP - E_FOLSM   = S_FOLSM * taf_cfs - S_FOLSM(-1) * taf_cfs } !Folsom Lake 
+goal continuityNTOMA    {C_FOLSM + SR_26N_NTOMA + SR_26S_NTOMA + SG375_NTOMA_66 - C_NTOMA - D_NTOMA_FSC003 - E_NTOMA = S_NTOMA * taf_cfs - S_NTOMA(-1) * taf_cfs }!Lake Natoma
+goal continuityAMR022   {C_NTOMA /*+ CT_FairOaks*/ - C_AMR022 = 0. } !Lower American River - C2VSIM seepage node
+goal continuityAMR020   {C_AMR022 + SG376_AMR020_66 + R_RFS26S_AMR020 - C_AMR020 = 0. }!Lower American River - C2VSIM seepage node
+goal continuityAMR017   {C_AMR020 - D_AMR017_WTPBJM - C_AMR017 = 0. }  !C2VSIM Node
+goal continuityAMR015   {C_AMR017 + SG377_AMR015_66 - C_AMR015 = 0. } !Lower American River - C2VSIM seepage node
+goal continuityAMR009   {C_AMR015 + SG378_AMR009_66 - C_AMR009 = 0. }  !C2VSIM Node
+goal continuityAMR007   {C_AMR009 + SR_26S_AMR007 - D_AMR007_WTPFBN - C_AMR007 = 0.}!City of Sacramento Diversion from American River
+goal continuityAMR006   {C_AMR007 - C_AMR006 = 0.}  !American River at H Street gage (discontinued)
+goal continuityAMR004   {C_AMR006 + SG379_AMR004_66 + SG380_AMR004_66 + SR_26N_AMR004 - C_AMR004 = 0.} !C2VSIM Node
+goal continuityWTPBJM   {D_AMR017_WTPBJM - D_WTPBJM_26N_NU2 - D_WTPBJM_26S_PU2 = 0.}
+goal continuityWTPFBN   {D_AMR007_WTPFBN - D_WTPFBN_26S_NU1 - D_WTPFBN_26N_NU1 - D_WTPFBN_26N_NU3 - D_WTPFBN_26N_NU4 - D_WTPFBN_26S_NU2 - D_WTPFBN_26S_NU3= 0.}
+goal continuityWTPFOL   {D_FOLSM_WTPFOL  - D_WTPFOL_26S_PU1 = 0.}
+goal continuityWTPRSV   {D_FOLSM_WTPRSV  - D_WTPRSV_26N_PU1 = 0.}
+goal continuityWTPSJP   {D_FOLSM_WTPSJP  - D_WTPSJP_26N_PU2 - D_WTPSJP_26N_PU3 - D_WTPSJP_26N_NU1 = 0. }
+goal continuityWTPCOL   {D_FSC003_WTPCOL - D_WTPCOL_26S_PU2 = 0.}
+goal continuityWTPEDH   {D_FOLSM_WTPEDH  - D_WTPEDH_ELDID_NU3 = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Folsom South Canal  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityFSC003   {D_NTOMA_FSC003 - D_FSC003_FSCLOS - D_FSC003_WTPCOL - C_FSC003 = 0.}
+goal continuityFSC013   {C_FSC003 + D_FPT013_FSC013 - C_FSC013 = 0. }
+goal continuityFSC015   {C_FSC013 - C_FSC015 = 0. }
+goal continuityFSC025   {C_FSC015 - D_FSC025_60N_PU - C_FSC025 = 0. }
+
+! Prevent diversions from Lake Natomas being used by EBMUD
+goal continuityFSC025_60N_PU   {C_FSC003 = D_FSC025_60N_PU }
+! In Upper American module set Freeport diversion to zero
+goal continuityFPT013_FSC013   {D_FPT013_FSC013 = 0} !
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS26S   {R_26S_NU4_RFS26S - R_RFS26S_AMR020 - R_RFS26S_SRWWTP = 0. }

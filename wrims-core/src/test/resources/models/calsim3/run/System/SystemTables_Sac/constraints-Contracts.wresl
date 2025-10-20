@@ -1,0 +1,875 @@
+/*
+Constraints-contracts.wresl
+CalSim 3.0 System File
+
+Purpose:
+Limit surface water diversions to contract amounts, water allocations and water rights
+
+Naming takes the following form:
+DLT_{upstream node}_{demand unit}   - monthly contract or water right limit on specific contractors diversion from particular source  
+
+*/
+
+! Set Non-project diversions from the SacramentoRivertoZero
+goal limit_D_SAC281_02_NA   {D_SAC281_02_NA = 0.}  
+!goal limit_D_SAC224_04_NA   {D_SAC224_04_NA = 0.} 
+goal limit_D_SAC185_08N_NA  {D_SAC185_08N_NA = 0.}
+goal limit_D_SAC146_08S_NA1 {D_SAC146_08S_NA1 = 0.}
+goal limit_D_SAC129_08S_NA2 {D_SAC129_08S_NA2 = 0.}
+goal limit_D_SAC081_21_NA   {D_SAC081_21_NA = 0.}  
+goal limit_D_SAC273_03_NA   {D_SAC273_03_NA = 0.} 
+!goal limit_D_SAC240_05_NA   {D_SAC240_05_NA = 0.} 
+goal limit_D_SAC185_09_NA   {D_SAC185_09_NA = 0.}
+goal limit_D_SAC136_18_NA   {D_SAC136_18_NA = 0.} 
+goal limit_D_SAC109_19_SA   {D_SAC109_19_SA = 0.} 
+goal limit_D_SAC075_22_NA   {D_SAC075_22_NA = 0.} 
+
+
+define swp_perdel_yuba {select yuba from swp_nod_alloc where wytype=wyt_SAC}
+!define swp_perdel_butt {timeseries kind 'percent-delivery' units 'none'} 
+
+! define Orland Unit allocations - near Stony Creek
+!define alloc_ouwua_ndv   {std kind 'percent-delivery' units 'none'}
+!define alloc_ouwua_sdv   {std kind 'percent-delivery' units 'none'}
+
+! define YCWA Member Unit allocations
+define YCWA_Alloc {std kind 'fraction' units 'none'}
+
+! define YCFCWCD allocations
+!define alloc_YCFCWCD_dv    {std kind 'percent-delivery' units 'none'}
+
+! define Solano ID allocations
+define alloc_SID_dv    {std kind 'percent-delivery' units 'none'}
+
+! define SWP allocations 
+!define perdv_swp_ag    {std kind 'percent-delivery' units 'none'}
+!define perdv_swp_mwd   {std kind 'percent-delivery' units 'none'}
+!define perdv_swp_oth   {std kind 'percent-delivery' units 'none'}
+define perdv_swp_fsc   {std kind 'percent-delivery' units 'none'}
+define perdv_swp_oth1 {std kind 'PERCENT-DELIVERY' units 'none'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 1      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Not used
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 2      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_WTPCSD_02_PA      {D_WTPCSD_02_PA < CLmon_WTPCSD_02_PA *taf_cfs* perdel_cvpag_sys + Buy_WTPCSD_02_PA*taf_cfs}
+define DLT_WTPCSD_02_PA {alias CLmon_WTPCSD_02_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPCSD_02_PU      {D_WTPCSD_02_PU < CLmon_WTPCSD_02_PU *taf_cfs* perdel_cvpmi_sys + WRmon_WTPCSD_02_PU*taf_cfs}
+define DLT_WTPCSD_02_PU {alias CLmon_WTPCSD_02_PU *taf_cfs* perdel_cvpmi_sys + WRmon_WTPCSD_02_PU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WKYTN_02_PU       {D_WKYTN_02_PU       < CLmon_WKYTN_02_PU *taf_cfs* perdel_cvpmi_sys}
+define DLT_WKYTN_02_PU  {alias CLmon_WKYTN_02_PU *taf_cfs* perdel_cvpmi_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC296_02_SA      {D_SAC296_02_SA      < CLmon_SAC296_02_SA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC296_02_SA*taf_cfs}
+define DLT_SAC296_02_SA {alias                       CLmon_SAC296_02_SA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC296_02_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CWD009_02_NA      {D_CWD009_02_NA      < WRmon_CWD009_02_NA*taf_cfs}
+define DLT_CWD009_02_NA {alias min(WRmon_CWD009_02_NA*taf_cfs,0.50 * AW_02_NA / (1- EVF_CWD009_02_NA  - DPF_CWD009_02_NA  - LFF_CWD009_02_NA - OSF_CWD009_02_NA))  
+                         kind 'DIVERSION-LIMIT' units 'CFS'} !added to incoporate MinorTribs.wresl constrain Richard Chen 2/9/2012
+
+goal limitD_CLR009_02_NA      {D_CLR009_02_NA      < WRmon_CLR009_02_NA*taf_cfs}
+!define DLT_CLR009_02_NA    {alias WRmon_CLR009_02_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+define DLT_CLR009_02_NA {alias 0 kind 'DIVERSION-LIMIT' units 'CFS'}   !D_CLR009_02_NA was set to zero in "ClearCk.wresl"   Richard Chen  2/9/2012
+
+goal limitD_SAC281_02_NA      {D_SAC281_02_NA      < WRmon_SAC281_02_NA*taf_cfs}
+define DLT_SAC281_02_NA {alias min(WRmon_SAC281_02_NA*taf_cfs,0.50 * AW_02_NA /   (1- EVF_SAC281_02_NA  - DPF_SAC281_02_NA  - LFF_SAC281_02_NA - OSF_SAC281_02_NA)) 
+                          kind 'DIVERSION-LIMIT' units 'CFS'} !added to incoporate MinorTribs.wresl constrain Richard Chen 2/9/2012
+
+goal limitD_WTPFTH_02_SU      {D_WTPFTH_02_SU < CLmon_WTPFTH_02_SU*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_WTPFTH_02_SU*taf_cfs}
+define DLT_WTPFTH_02_SU {alias CLmon_WTPFTH_02_SU*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_WTPFTH_02_SU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 3      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_SHSTA_WTPJMS      {D_SHSTA_WTPJMS < CLmon_SHSTA_03_PU1 *taf_cfs* perdel_cvpmi_sys}
+define DLT_SHSTA_WTPJMS {alias CLmon_SHSTA_03_PU1 *taf_cfs* perdel_cvpmi_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPFTH_03_SU      {D_WTPFTH_03_SU < CLmon_WTPFTH_03_SU*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_WTPFTH_03_SU*taf_cfs}
+define DLT_WTPFTH_03_SU {alias CLmon_WTPFTH_03_SU*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_WTPFTH_03_SU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPBLV_03_PU2       {D_WTPBLV_03_PU2 < CLmon_WTPBLV_03_PU2 *taf_cfs* perdel_cvpmi_sys}
+define DLT_WTPBLV_03_PU2    {alias CLmon_WTPBLV_03_PU2 *taf_cfs* perdel_cvpmi_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WKYTN_WTPBUK      {D_WKYTN_WTPBUK < CLmon_WTPBUK_03_SU *taf_cfs* perdel_cvpmi_sys}
+!goal limitD_WKYTN_WTPBUK      {D_WKYTN_WTPBUK = min(CLmon_WTPBUK_03_SU *taf_cfs* perdel_cvpmi_sys, UD_03_SU*(1-GPmin_03_SU))}
+define DLT_WKYTN_WTPBUK {alias CLmon_WTPBUK_03_SU *taf_cfs* perdel_cvpmi_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC294_03_PA      {D_SAC294_03_PA      < CLmon_SAC294_03_PA *taf_cfs* perdel_cvpag_sys + Buy_SAC294_03_PA*taf_cfs}
+define DLT_SAC294_03_PA {alias CLmon_SAC294_03_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC289_03_SA      {D_SAC289_03_SA      < CLmon_SAC289_03_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC289_03_SA*taf_cfs}
+define DLT_SAC289_03_SA {alias CLmon_SAC289_03_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC289_03_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BTL006_03_NA      {D_BTL006_03_NA      < WRmon_BTL006_03_NA*taf_cfs}
+define DLT_BTL006_03_NA {alias WRmon_BTL006_03_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_COW014_03_NA      {D_COW014_03_NA      < WRmon_COW014_03_NA*taf_cfs}
+define DLT_COW014_03_NA {alias WRmon_COW014_03_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BCN005_03_NA      {D_BCN005_03_NA      < WRmon_BCN005_03_NA*taf_cfs}
+define DLT_BCN005_03_NA {alias WRmon_BCN005_03_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC273_03_NA      {D_SAC273_03_NA      < WRmon_SAC273_03_NA*taf_cfs}
+define DLT_SAC273_03_NA {alias WRmon_SAC273_03_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 4      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_CCL005_04_PA1   {D_CCL005_04_PA1 < CLmon_CCL005_04_PA1 *taf_cfs* perdel_cvpag_sys + Buy_CCL005_04_PA1*taf_cfs}
+define DLT_CCL005_04_PA1    {alias CLmon_CCL005_04_PA1 *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_TCC022_04_PA2    {D_TCC022_04_PA2 < CLmon_TCC022_04_PA2 *taf_cfs* perdel_cvpag_sys + Buy_TCC022_04_PA2*taf_cfs}
+define DLT_TCC022_04_PA2    {alias CLmon_TCC022_04_PA2 *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_ELD012_04_NA      {D_ELD012_04_NA < WRmon_ELD012_04_NA*taf_cfs}
+define DLT_ELD012_04_NA {alias WRmon_ELD012_04_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_THM012_04_NA      {D_THM012_04_NA < WRmon_THM012_04_NA*taf_cfs}
+define DLT_THM012_04_NA {alias WRmon_THM012_04_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC224_04_NA      {D_SAC224_04_NA < CLmon_SAC224_04_NA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC224_04_NA*taf_cfs}
+define DLT_SAC224_04_NA {alias CLmon_SAC224_04_NA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC224_04_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 5      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_ANT010_05_NA      {D_ANT010_05_NA < WRmon_ANT010_05_NA*taf_cfs}
+define DLT_ANT010_05_NA {alias WRmon_ANT010_05_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_MLC006_05_NA      {D_MLC006_05_NA < WRmon_MLC006_05_NA*taf_cfs}
+define DLT_MLC006_05_NA {alias WRmon_MLC006_05_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_DRC010_05_NA      {D_DRC010_05_NA < WRmon_DRC010_05_NA*taf_cfs}
+define DLT_DRC010_05_NA {alias WRmon_DRC010_05_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_DRC005_05_NA      {D_DRC005_05_NA < WRmon_DRC005_05_NA*taf_cfs}
+define DLT_DRC005_05_NA {alias WRmon_DRC005_05_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limit2D_DRC010_05_NA          {D_DRC010_05_NA < 0.34*C_DRC010} ! 1926 adjudication
+goal limit2D_DRC005_05_NA          {D_DRC005_05_NA < 0.66*C_DRC010} ! 1926 adjudication
+
+
+goal limitD_SAC240_05_NA      {D_SAC240_05_NA < CLmon_SAC240_05_NA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC240_05_NA*taf_cfs}
+define DLT_SAC240_05_NA {alias CLmon_SAC240_05_NA*taf_cfs*perdel_cvpsc_sys + WRmon_SAC240_05_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 6      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal limitD_STN026_06_PA          {D_STN026_06_PA < CLmon_STN026_06_PA *taf_cfs* alloc_ouwua_sdv}
+
+!goal limitD_STN021_06_PA          {D_STN021_06_PA < CLmon_STN021_06_PA *taf_cfs* alloc_ouwua_ndv}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-North          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_TCC036_07N_PA          {D_TCC036_07N_PA < CLmon_TCC036_07N_PA *taf_cfs* perdel_cvpag_sys + Buy_TCC036_07N_PA*taf_cfs}
+define DLT_TCC036_07N_PA        {alias CLmon_TCC036_07N_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 7-South          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!The division of deliveries between these two arcs is not important
+goal limitD_TCC081_07S_PA    {D_TCC081_07S_PA < CLmon_TCC081_07S_PA *taf_cfs* perdel_cvpag_sys + Buy_TCC081_07S_PA*taf_cfs}
+define DLT_TCC081_07S_PA    {alias CLmon_TCC081_07S_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_TCC111_07S_PA    {D_TCC111_07S_PA < CLmon_TCC111_07S_PA *taf_cfs* perdel_cvpag_sys + Buy_TCC111_07S_PA*taf_cfs}
+define DLT_TCC111_07S_PA    {alias CLmon_TCC111_07S_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limit2D_TCC111_07S_PA   {D_TCC111_07S_PA = (CLmon_TCC111_07S_PA / CLmon_TCC081_07S_PA) * D_TCC081_07S_PA}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-North          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal limitD_SAC178_08N_SA1         {D_SAC178_08N_SA1 < CLmon_SAC178_08N_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC178_08N_SA1*taf_cfs}
+define DLT_SAC178_08N_SA1       {alias CLmon_SAC178_08N_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC178_08N_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC159_08N_SA1         {D_SAC159_08N_SA1 < CLmon_SAC159_08N_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC159_08N_SA1*taf_cfs}
+define DLT_SAC159_08N_SA1   {alias CLmon_SAC159_08N_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC159_08N_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD049_08N_PA          {D_CBD049_08N_PA < CLmon_CBD049_08N_PA *taf_cfs* perdel_cvpag_sys + WRmon_CBD049_08N_PA*taf_cfs + Buy_CBD049_08N_PA*taf_cfs}
+define DLT_CBD049_08N_PA    {alias CLmon_CBD049_08N_PA *taf_cfs* perdel_cvpag_sys + WRmon_CBD049_08N_PA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD049_08N_SA1         {D_CBD049_08N_SA1 < WRmon_CBD049_08N_SA1*taf_cfs}
+define DLT_CBD049_08N_SA1   {alias WRmon_CBD049_08N_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_GCC027_08N_SA2         {D_GCC027_08N_SA2 < CLmon_GCC027_08N_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC027_08N_SA2*taf_cfs}
+!define DLT_GCC027_08N_SA2          {alias CLmon_GCC027_08N_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC027_08N_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+define DLT_GCC027_08N_SA2      {std  kind 'DIVERSION-LIMIT' units 'CFS'} !Richard Chen added 2/9/2012
+goal setDLT_GCC027_08N_SA2  {lhs DLT_GCC027_08N_SA2 
+           case Jan { condition month == JAN
+                      rhs 0}
+           case others {condition always
+                      rhs CLmon_GCC027_08N_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC027_08N_SA2*taf_cfs}
+                    }                                 
+
+goal limitD_GCC027_08N_PR1         {D_GCC027_08N_PR1 < CLmon_GCC027_08N_PR1 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC027_08N_PR1  - DPF_GCC027_08N_PR1 - LFF_GCC027_08N_PR1 - OSF_GCC027_08N_PR1)}
+define DLT_GCC027_08N_PR1       {alias CLmon_GCC027_08N_PR1 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC027_08N_PR1  - DPF_GCC027_08N_PR1 - LFF_GCC027_08N_PR1 - OSF_GCC027_08N_PR1) kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_GCC039_08N_PR2         {D_GCC039_08N_PR2 < CLmon_GCC039_08N_PR2 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC039_08N_PR2  - DPF_GCC039_08N_PR2 - LFF_GCC039_08N_PR2 - OSF_GCC039_08N_PR2)}
+define DLT_GCC039_08N_PR2       {alias CLmon_GCC039_08N_PR2 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC039_08N_PR2  - DPF_GCC039_08N_PR2 - LFF_GCC039_08N_PR2 - OSF_GCC039_08N_PR2) kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC185_08N_NA          {D_SAC185_08N_NA < WRmon_SAC185_08N_NA*taf_cfs}
+define DLT_SAC185_08N_NA    {alias WRmon_SAC185_08N_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 8-South          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_SAC159_08S_SA1         {D_SAC159_08S_SA1 < CLmon_SAC159_08S_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC159_08S_SA1*taf_cfs}
+define DLT_SAC159_08S_SA1       {alias CLmon_SAC159_08S_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC159_08S_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD041_08S_SA1         {D_CBD041_08S_SA1 < WRmon_CBD041_08S_SA1*taf_cfs}
+define DLT_CBD041_08S_SA1       {alias WRmon_CBD041_08S_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD041_08S_SA2         {D_CBD041_08S_SA2 < WRmon_CBD041_08S_SA2*taf_cfs}
+define DLT_CBD041_08S_SA2       {alias WRmon_CBD041_08S_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_GCC056_08S_SA2         {D_GCC056_08S_SA2 < CLmon_GCC056_08S_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC056_08S_SA2*taf_cfs}
+!define DLT_GCC056_08S_SA2      {alias CLmon_GCC056_08S_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC056_08S_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+define DLT_GCC056_08S_SA2      {std  kind 'DIVERSION-LIMIT' units 'CFS'} !Richard Chen added 2/9/2012
+goal setDLT_GCC056_08S_SA2  {lhs DLT_GCC056_08S_SA2 
+           case Jan { condition month == JAN
+                      rhs 0}            !GCIDpermit
+           case others {condition always
+                      rhs CLmon_GCC056_08S_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_GCC056_08S_SA2*taf_cfs}
+                    } 
+
+goal limitD_SAC121_08S_SA3         {D_SAC121_08S_SA3 < CLmon_SAC121_08S_SA3*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC121_08S_SA3*taf_cfs}
+define DLT_SAC121_08S_SA3       {alias CLmon_SAC121_08S_SA3*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC121_08S_SA3*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC109_08S_SA3         {D_SAC109_08S_SA3 < CLmon_SAC109_08S_SA3*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC109_08S_SA3*taf_cfs}
+define DLT_SAC109_08S_SA3       {alias CLmon_SAC109_08S_SA3*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC109_08S_SA3*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD028_08S_SA3         {D_CBD028_08S_SA3 < WRmon_CBD028_08S_SA3*taf_cfs}
+define DLT_CBD028_08S_SA3       {alias WRmon_CBD028_08S_SA3*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_GCC056_08S_PR          {D_GCC056_08S_PR < CLmon_GCC056_08S_PR *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC056_08S_PR   - DPF_GCC056_08S_PR  - LFF_GCC056_08S_PR  - OSF_GCC056_08S_PR)}
+define DLT_GCC056_08S_PR        {alias CLmon_GCC056_08S_PR *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC056_08S_PR   - DPF_GCC056_08S_PR  - LFF_GCC056_08S_PR  - OSF_GCC056_08S_PR) kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD037_08S_PR          {D_CBD037_08S_PR < CLmon_CBD037_08S_PR *taf_cfs* perdel_cvprf_sys + WRmon_CBD037_08S_PR*taf_cfs}
+define DLT_CBD037_08S_PR        {alias CLmon_CBD037_08S_PR *taf_cfs* perdel_cvprf_sys + WRmon_CBD037_08S_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CBD028_08S_PA          {D_CBD028_08S_PA < CLmon_CBD028_08S_PA *taf_cfs* perdel_cvpag_sys + WRmon_CBD028_08S_PA*taf_cfs + Buy_CBD028_08S_PA*taf_cfs}
+define DLT_CBD028_08S_Pa        {alias CLmon_CBD028_08S_PA *taf_cfs* perdel_cvpag_sys + WRmon_CBD028_08S_PA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_GCC065_08S_PA          {D_GCC065_08S_PA < CLmon_GCC065_08S_PA*taf_cfs + Buy_GCC065_08S_PA*taf_cfs}
+define DLT_GCC065_08S_PA    {alias CLmon_GCC065_08S_PA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC146_08S_NA1         {D_SAC146_08S_NA1 < WRmon_SAC146_08S_NA1*taf_cfs}
+define DLT_SAC146_08S_NA1   {alias WRmon_SAC146_08S_NA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC129_08S_NA2         {D_SAC129_08S_NA2 < WRmon_SAC129_08S_NA2*taf_cfs}
+define DLT_SAC129_08S_NA2   {alias WRmon_SAC129_08S_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+! Limit diversions to GCID at Hamilton City to meet contract requirements
+
+define sacramento_lp               {SELECT sacramento FROM refuge WHERE type=2 }
+define delevan_lp                  {SELECT delevan FROM refuge WHERE type=2 }
+define colusa_lp                        {SELECT colusa FROM refuge WHERE type=2 }
+define WestSacRfgDelTar       {value (CLmon_GCC027_08N_PR1 *taf_cfs) / (1.0 - sacramento_lp) + (CLmon_GCC039_08N_PR2 *taf_cfs) / (1.0 - delevan_lp) + (CLmon_GCC056_08S_PR *taf_cfs) / (1.0 - colusa_lp)}
+
+goal limitD_SAC207_GCC007     {D_SAC207_GCC007 + D_TCC062_GCC036 + D_TCC085_GCC056 < CLmon_GCC027_08N_SA2*taf_cfs * perdel_cvpsc_sys + CLmon_GCC056_08S_SA2*taf_cfs * perdel_cvpsc_sys 
+                         + WRmon_GCC027_08N_SA2 + WRmon_GCC056_08S_SA2
+                         + WestSacRfgDelTar * perdel_cvprf_sys}
+
+! For canal maintenence purposes, no diversion is allowed to Glenn-Colusa Canal in January and February except for Sacramento NWR requirements (08N_PR1).
+goal janfebD_SAC207_GCC007 {
+    lhs D_SAC207_GCC007
+    case jan_feb {
+        condition month == jan .or. month == feb
+        rhs CLmon_GCC027_08N_PR1 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC027_08N_PR1  - DPF_GCC027_08N_PR1 - LFF_GCC027_08N_PR1 - OSF_GCC027_08N_PR1)
+        lhs>rhs penalty 9999
+        lhs<rhs penalty 0   }
+    case other {
+        condition always
+        rhs 99999.
+        lhs>rhs penalty 0
+        lhs<rhs penalty 0   }}
+
+! Limit Glenn-Colusa Canal winter Ag diversions under permit 21101 (max. of 1200 cfs Nov. 1 - Mar.31)
+! and the canal is shut down for maintenence from Jan.7 - Feb.20 (assume Jan.1 - Feb.14 for modeling).
+
+goal GCIDpermit {
+    lhs D_GCC027_08N_SA2 + D_GCC056_08S_SA2
+    case Jan {
+        condition month == JAN
+        rhs 0.}
+    case Feb {
+        condition month == FEB
+        rhs .5*1200.
+        lhs>rhs penalty 9999
+        lhs<rhs penalty 0   }
+    case Winter {
+        condition month >= NOV .and. month <= MAR
+        rhs 1200.
+        lhs>rhs penalty 9999
+        lhs<rhs penalty 0   }
+    case Summer {
+        condition always
+        rhs 99999.
+        lhs>rhs penalty 0
+        lhs<rhs penalty 0   }}
+        
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 9      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_MTC000_09_SA1          {D_MTC000_09_SA1< CLmon_MTC000_09_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_MTC000_09_SA1*taf_cfs}
+define DLT_MTC000_09_SA1    {alias CLmon_MTC000_09_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_MTC000_09_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC162_09_SA2          {D_SAC162_09_SA2 < CLmon_SAC162_09_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC162_09_SA2*taf_cfs}
+define DLT_SAC162_09_SA2    {alias CLmon_SAC162_09_SA2*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC162_09_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal splitD_ESL008_09_SA1              {D_ESL008_09_SA1 = D_ESL008_09_SA1_FW + D_ESL008_09_SA1_Surplus}
+goal limitD_ESL008_09_SA1_FW          {D_ESL008_09_SA1_FW < WRmon_ESL008_09_SA1_FW*taf_cfs}
+goal limitD_ESL008_09_SA1_Surplus          {D_ESL008_09_SA1_Surplus < WRmon_ESL008_09_SA1_Surplus*taf_cfs}
+goal limD_ESL008_09_SA1_FW   { D_ESL008_09_SA1_FW   < C_TTC002*0.95/2}
+
+define DLT_ESL008_09_SA1    {alias (WRmon_ESL008_09_SA1_FW+WRmon_ESL008_09_SA1_Surplus)*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BTC012_09_SA2          {D_BTC012_09_SA2 < WRmon_BTC012_09_SA2*taf_cfs}
+define DLT_BTC012_09_SA2    {alias WRmon_BTC012_09_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_MTC000_09_PR      {D_MTC000_09_PR < CLmon_MTC000_09_PR *taf_cfs* perdel_cvprf_sys}
+define DLT_MTC000_09_PR     {alias CLmon_MTC000_09_PR *taf_cfs* perdel_cvprf_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_MTC000_09_NA      {D_MTC000_09_NA < WRmon_MTC000_09_NA*taf_cfs}
+define DLT_MTC000_09_NA {alias WRmon_MTC000_09_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_ESL010_09_NA      {D_ESL010_09_NA < WRmon_ESL010_09_NA*taf_cfs}
+!define DLT_ESL010_09_NA {alias WRmon_ESL010_09_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal splitD_ESL010_09_NA               {D_ESL010_09_NA = D_ESL010_09_NA_FW + D_ESL010_09_NA_Surplus}
+goal limitD_ESL010_09_NA_FW          {D_ESL010_09_NA_FW < WRmon_ESL010_09_NA_FW*taf_cfs}
+goal limitD_ESL010_09_NA_Surplus          {D_ESL010_09_NA_Surplus < WRmon_ESL010_09_NA_Surplus*taf_cfs}
+goal limD_ESL010_09_NA_FW   { D_ESL010_09_NA_FW   < C_TTC002*0.95/2 + 2}
+
+
+
+goal limitD_SAC185_09_NA      {D_SAC185_09_NA < WRmon_SAC185_09_NA*taf_cfs}
+define DLT_SAC185_09_NA {alias WRmon_SAC185_09_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_LCC029_09_SA1          {D_LCC029_09_SA1 < WRmon_LCC029_09_SA1*taf_cfs}
+define DLT_LCC029_09_SA1    {alias WRmon_LCC029_09_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_BTC043_10_NA      {D_BTC043_10_NA < WRmon_BTC043_10_NA*taf_cfs}
+define DLT_BTC043_10_NA {alias WRmon_BTC043_10_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BTC036_10_NA      {D_BTC036_10_NA < WRmon_BTC036_10_NA*taf_cfs}
+define DLT_BTC036_10_NA {alias WRmon_BTC036_10_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_MIO023_10_NA      {D_MIO023_10_NA < CLmon_MIO023_10_NA*taf_cfs}
+define DLT_MIO023_10_NA {alias CLmon_MIO023_10_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 11          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limit_ButteC                  {CLmon_ButteC_11_NU1 + CLmon_ButteC_12_NU1 = swp_perdel_butt*CLmon_ButteC}
+
+goal limitD_WEC005_11_SA1     {D_WEC005_11_SA1 + D_WEC005_11_PR + D_WEC005_BTC032 < perdel_swp_fsc*CLmon_WEC005*taf_cfs + 1.0*WRmon_WEC005*taf_cfs}
+
+define DLT_WEC005   {alias perdel_swp_fsc*CLmon_WEC005*taf_cfs + 1.0*WRmon_WEC005*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!Joint Water Board can buy and sell water
+! Negatively weight these
+! These only apply April to October
+define CL_11_SA2_Unused   {std kind 'CONTRACT' units 'CFS'}
+define CL_11_SA3_Unused   {std kind 'CONTRACT' units 'CFS'}
+define CL_11_SA4_Unused   {std kind 'CONTRACT' units 'CFS'}
+
+goal limitCL_11_SA2_Unused {CL_11_SA2_Unused < -D_RVC005_11_SA2 + perdel_swp_fsc*CLmon_RVC005_11_SA2PR2*taf_cfs + 1.0*WRmon_RVC005_11_SA2PR2*taf_cfs}
+goal limitCL_11_SA3_Unused {CL_11_SA3_Unused < -D_JBC004_11_SA3 + perdel_swp_fsc*CLmon_JBC004_11_SA3*taf_cfs + 1.0*WRmon_JBC004_11_SA3*taf_cfs}
+goal limitCL_11_SA4_Unused {CL_11_SA4_Unused < -D_SEC009_11_SA4 + perdel_swp_fsc*CLmon_FTR039_11_SA4*taf_cfs + perdel_swp_fsc*CLmon_JBC008_11_SA4*taf_cfs + 1.0*WRmon_JBC008_11_SA4*taf_cfs + R_JBC008_FTR048}
+
+define Season {
+    case AprSep {
+        condition month >= apr .and. month <= sep 
+            value 99999}
+     case Oct {
+             condition month == oct 
+            value 99999}
+     case otherwise {
+          condition always
+               value 0.0}
+    }
+
+goal limitCL_11_SA2_Unused2 {CL_11_SA2_Unused < season}
+goal limitCL_11_SA3_Unused2 {CL_11_SA3_Unused < season}
+goal limitCL_11_SA4_Unused2 {CL_11_SA4_Unused < season}  
+    
+goal limitD_RVC005_11_SA2     {D_RVC005_11_SA2 + D_RVC005_11_PR < perdel_swp_fsc*CLmon_RVC005_11_SA2PR2*taf_cfs + 1.0*WRmon_RVC005_11_SA2PR2*taf_cfs - CL_11_SA2_Unused + CL_11_SA3_Unused + CL_11_SA4_Unused}
+
+goal limitD_LDC007_11_SA2    {D_LDC007_11_SA2 < 1.0*WRmon_LDC007_11_SA2*taf_cfs}
+
+goal limitD_JBC004_11_SA3     {D_JBC004_11_SA3 < perdel_swp_fsc*CLmon_JBC004_11_SA3*taf_cfs + 1.0*WRmon_JBC004_11_SA3*taf_cfs + CL_11_SA2_Unused - CL_11_SA3_Unused + CL_11_SA4_Unused}
+
+goal limitD_SEC009_11_SA4    {D_SEC009_11_SA4 < perdel_swp_fsc*CLmon_FTR039_11_SA4*taf_cfs + perdel_swp_fsc*CLmon_JBC008_11_SA4*taf_cfs + 1.0*WRmon_JBC008_11_SA4*taf_cfs + R_JBC008_FTR048 + CL_11_SA2_Unused + CL_11_SA3_Unused - CL_11_SA4_Unused}
+
+
+goal limitD_THRMF_11_NU1_WR    {D_THRMF_11_NU1_WR < 1.0*WRmon_THRMF_11_NU1*taf_cfs}
+goal limitD_THRMF_11_NU1_PMI    {D_THRMF_11_NU1_PMI < CLmon_ButteC_11_NU1*taf_cfs}
+goal limitD_THRMF_11_NU1_PCO    {D_THRMF_11_NU1_PCO < 0.}
+goal limitD_THRMF_11_NU1_PIN    {D_THRMF_11_NU1_PIN < 0.}
+goal limitD_DWRPS2_11_NA {D_DWRPS2_11_NA < WRmon_DWRPS2_11_NA*taf_cfs}
+
+goal limitD_WEC005_11_PR {D_WEC005_11_PR < WRmon_WEC005_11_PR*taf_cfs}
+define DLT_WEC005_11_PR     {alias WRmon_WEC005_11_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'} 
+
+
+goal limitAW_WEC005_11_PR     {D_WEC005_11_PR < (AWR_11_PR*(1.- RUFR_11_PR) + AWO_11_PR*(1.- RUFO_11_PR) + AWW_11_PR*(1.- RUFW_11_PR))*(1-GPmin_11_PR)*(1.+ EVF_WEC005_11_PR + DPF_WEC005_11_PR + LFF_WEC005_11_PR + OSF_WEC005_11_PR)*(2255./4710.)} ! Factor based on relative areas of the refuges
+
+goal limitD_RVC005_11_PR {D_RVC005_11_PR < WRmon_RVC005_11_PR*taf_cfs}
+define DLT_RVC005_11_PR     {alias WRmon_RVC005_11_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_THRMF_12_NU1      {D_THRMF_12_NU1  < CLmon_THRMF_12_NU1*taf_cfs}
+!goal limitD_MIO023_12_NU1     {D_MIO023_12_NU1 < CLmon_MIO023_12_NU1*taf_cfs}
+!define DLT_MIO023_12_NU1    {alias CLmon_MIO023_12_NU1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR059_12_SA    {D_FTR059_12_SA < WRmon_FTR059_12_SA*taf_cfs}
+define DLT_FTR059_12_SA {alias WRmon_FTR059_12_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_RFS13_12_NA     {D_RFS13_12_NA < WRmon_RFS13_12_NA*taf_cfs}
+define DLT_RFS13_12_NA  {alias WRmon_RFS13_12_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal limitD_OWC000_13_NA {D_OWC000_13_NA < WRmon_OWC000_13_NA*taf_cfs}
+!define DLT_OWC000_13_NA {alias WRmon_OWC000_13_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_MNRRH_13_NA  {D_MNRRH_13_NA < WRmon_MNRRH_13_NA*taf_cfs}
+!define DLT_MNRRH_13_NA  {alias WRmon_MNRRH_13_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_MNRRH_13_NU2 {D_MNRRH_13_NU2 < WRmon_MNRRH_13_NU2*taf_cfs}
+!define DLT_MNRRH_13_NU2 {alias WRmon_MNRRH_13_NU2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_MNRRH_WTPMNR {D_MNRRH_WTPMNR < WRmon_MNRRH_WTPMNR*taf_cfs}
+!define DLT_MNRRH_WTPMNR {alias WRmon_MNRRH_WTPMNR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 14          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_FDC006_14_NA {D_FDC006_14_NA < WRmon_FDC006_14_NA*taf_cfs}
+define DLT_FDC006_14_NA {alias WRmon_FDC006_14_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_YUB013_14_NA {D_YUB013_14_NA < 1.0*WRmon_YUB013_14_NA*taf_cfs + YCWA_Alloc*CLmon_YUB013_14_NA*taf_cfs}
+define DLT_YUB013_14_NA {alias 1.0*WRmon_YUB013_14_NA*taf_cfs + YCWA_Alloc*CLmon_YUB013_14_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_YUB011_15N_NA2         {D_YUB011_15N_NA2 < 1.0*WRmon_YUB011_15N_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15N_NA2*taf_cfs}
+define DLT_YUB011_15N_NA2   {alias 1.0*WRmon_YUB011_15N_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15N_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_YUB003_15N_NU          {D_YUB003_15N_NU < 1.0*WRmon_YUB003_15N_NU*taf_cfs + YCWA_Alloc*CLmon_YUB003_15N_NU*taf_cfs}
+define DLT_YUB003_15N_NU    {alias 1.0*WRmon_YUB003_15N_NU*taf_cfs + YCWA_Alloc*CLmon_YUB003_15N_NU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR045_15N_SA          {D_FTR045_15N_SA < WRmon_FTR045_15N_SA*taf_cfs}
+define DLT_FTR045_15N_SA        {alias WRmon_FTR045_15N_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 15-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal limitD_YUB011_15S_NA2    {D_YUB011_15S_NA2 < 1.0*WRmon_YUB011_15S_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15S_NA2*taf_cfs}
+define DLT_YUB011_15S_NA2     {alias 1.0*WRmon_YUB011_15S_NA2*taf_cfs + YCWA_Alloc*CLmon_YUB011_15S_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR018_15S_SA       {D_FTR018_15S_SA < perdel_swp_fsc*CLmon_FTR018_15S_SA*taf_cfs + 1.0*WRmon_FTR018_15S_SA*taf_cfs}
+define DLT_FTR018_15S_SA    {alias perdel_swp_fsc*CLmon_FTR018_15S_SA*taf_cfs + 1.0*WRmon_FTR018_15S_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR028_15S_SA     {D_FTR028_15S_SA < WRmon_FTR028_15S_SA*taf_cfs}
+define DLT_FTR028_15S_SA    {alias WRmon_FTR028_15S_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 16          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_FTR021_16_PA {D_FTR021_16_PA < CLmon_FTR021_16_PA *taf_cfs* perdel_cvpag_sys}
+define DLT_FTR021_16_PA {alias CLmon_FTR021_16_PA *taf_cfs* perdel_cvpag_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR014_16_SA       {D_FTR014_16_SA < perdel_swp_fsc*CLmon_FTR014_16_SA*taf_cfs + 1.0*WRmon_FTR014_16_SA*taf_cfs}
+define DLT_FTR014_16_SA {alias perdel_swp_fsc*CLmon_FTR014_16_SA*taf_cfs + 1.0*WRmon_FTR014_16_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR018_16_SA       {D_FTR018_16_SA < perdel_swp_fsc*CLmon_FTR018_16_SA*taf_cfs + 1.0*WRmon_FTR018_16_SA*taf_cfs}
+define DLT_FTR018_16_SA {alias perdel_swp_fsc*CLmon_FTR018_16_SA*taf_cfs + 1.0*WRmon_FTR018_16_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR021_16_SA       {D_FTR021_16_SA < perdel_swp_fsc*CLmon_FTR021_16_SA*taf_cfs + 1.0*WRmon_FTR021_16_SA*taf_cfs}
+define DLT_FTR021_16_SA {alias perdel_swp_fsc*CLmon_FTR021_16_SA*taf_cfs + 1.0*WRmon_FTR021_16_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR008_16_SA {D_FTR008_16_SA < WRmon_FTR008_16_SA*taf_cfs}
+define DLT_FTR008_16_SA {alias WRmon_FTR008_16_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPCYC_16_PU {D_WTPCYC_16_PU < swp_perdel_yuba*CL1mon_WTPCYC_16_PU*taf_cfs + CL2mon_WTPCYC_16_PU*taf_cfs + WR1mon_WTPCYC_16_PU*taf_cfs + WR2mon_WTPCYC_16_PU*taf_cfs}
+define DLT_WTPCYC_16_PU {alias swp_perdel_yuba*CL1mon_WTPCYC_16_PU*taf_cfs + CL2mon_WTPCYC_16_PU*taf_cfs + WR1mon_WTPCYC_16_PU*taf_cfs + WR2mon_WTPCYC_16_PU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+goal set_D_WTPCYC_16_PU_NONSWP  {D_WTPCYC_16_PU_NONSWP =  D_WTPCYC_16_PU_YCWD + D_WTPCYC_16_PU_18558 + D_WTPCYC_16_PU_14045}
+goal set_D_WTPCYC_16_PU {D_WTPCYC_16_PU = D_WTPCYC_16_PU_SWP_PRJ + D_WTPCYC_16_PU_NONSWP}
+
+!goal limitD204PMI   {D_WTPCYC_16_PU_SWP_PMI   < CL1mon_WTPCYC_16_PU  *taf_cfs*perdel_7} ! Defined in swp_bound_del.wresl
+!goal limitD204_PCO   {D_WTPCYC_16_PU_SWP_PCO   < co_dem_7} ! Defined in swp_bound_del.wresl
+goal limitD_WTPCYC_16_PU_YCWD   {D_WTPCYC_16_PU_YCWD   < CL2mon_WTPCYC_16_PU*taf_cfs}
+goal limitD_WTPCYC_16_PU_18558   {D_WTPCYC_16_PU_18558   < WR1mon_WTPCYC_16_PU*taf_cfs}
+goal limitD_WTPCYC_16_PU_14045   {D_WTPCYC_16_PU_14045   < WR2mon_WTPCYC_16_PU*taf_cfs}
+
+!goal limitD_WTPCYC_16_PU {D_WTPCYC_16_PU < swp_perdel_yuba*CL1mon_WTPCYC_16_PU*taf_cfs}
+                                                                                  
+
+goal limitD_DWRPS1_16_NA2     {D_DWRPS1_16_NA2 < WRmon_DWRPS1_16_NA2}
+define DLT_DWRPS1_16_NA2    {alias WRmon_DWRPS1_16_NA2 kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_JBC002_17N_PR     {D_JBC002_17N_PR < CLmon_JBC002_17N_PR*taf_cfs/(1 - EVF_JBC002_17N_PR   - DPF_JBC002_17N_PR  - LFF_JBC002_17N_PR  - OSF_JBC002_17N_PR)}
+define DLT_JBC002_17N_PR    {alias CLmon_JBC002_17N_PR*taf_cfs/(1 - EVF_JBC002_17N_PR   - DPF_JBC002_17N_PR  - LFF_JBC002_17N_PR  - OSF_JBC002_17N_PR) kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BGD000_17N_PR     {D_BGD000_17N_PR < WRmon_BGD000_17N_PR*taf_cfs}
+define DLT_BGD000_17N_PR    {alias WRmon_BGD000_17N_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CRK005_17N_NR     {D_CRK005_17N_NR < WRmon_CRK005_17N_NR*taf_cfs}
+define DLT_CRK005_17N_NR    {alias WRmon_CRK005_17N_NR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_BTC012_CRK005     {D_BTC012_CRK005 < D_CRK005_17N_NR}
+
+
+
+! Western Canal closes in mid-January until April and the start of flood-up for rice
+
+define WEC_Open {
+  case OctDec {
+    condition   month <= DEC
+    value      1.0 }
+  case AprSep {
+    condition   month >=APR
+    value       1.0 }
+  case JanMar {
+    condition   always
+    value       0.0 }
+}
+
+goal limitD_WEC005_BTC032     {D_WEC005_BTC032 < WRmon_WEC005_BTC032*taf_cfs*WEC_Open}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 17-South    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_SBP028_17S_PR     {D_SBP028_17S_PR < WRmon_SBP028_17S_PR*taf_cfs}
+define DLT_SBP028_17S_PR    {alias WRmon_SBP028_17S_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SEC009_17S_PR     {D_SEC009_17S_PR < WRmon_SEC009_17S_PR*taf_cfs}
+define DLT_SEC009_17S_PR    {alias WRmon_SEC009_17S_PR*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SBP014_17S_NA     {D_SBP014_17S_NA < WRmon_SBP014_17S_NA*taf_cfs}
+
+goal limitD_FTR003_17S_SA     {D_FTR003_17S_SA < WRmon_FTR003_17S_SA*taf_cfs}
+define DLT_FTR003_17S_SA    {alias WRmon_FTR003_17S_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 18          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_BSL001_18_NA {D_BSL001_18_NA < WRmon_BSL001_18_NA*taf_cfs}
+define DLT_BSL001_18_NA {alias WRmon_BSL001_18_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SBP031_18_NA {D_SBP031_18_NA < WRmon_SBP031_18_NA*taf_cfs}
+define DLT_SBP031_18_NA {alias WRmon_SBP031_18_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC136_18_NA {D_SAC136_18_NA < WRmon_SAC136_18_NA*taf_cfs}
+define DLT_SAC136_18_NA {alias WRmon_SAC136_18_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC136_18_SA {D_SAC136_18_SA < CLmon_SAC136_18_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC136_18_SA*taf_cfs}
+define DLT_SAC136_18_SA {alias CLmon_SAC136_18_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC136_18_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 19          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_SAC122_19_SA {D_SAC122_19_SA < CLmon_SAC122_19_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC122_19_SA*taf_cfs}
+define DLT_SAC122_19_SA {alias CLmon_SAC122_19_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC122_19_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC115_19_SA {D_SAC115_19_SA < CLmon_SAC115_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC115_19_SA*taf_cfs}
+define DLT_SAC115_19_SA {alias CLmon_SAC115_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC115_19_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC099_19_SA {D_SAC099_19_SA < CLmon_SAC099_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC099_19_SA*taf_cfs}
+define DLT_SAC099_19_SA {alias CLmon_SAC099_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC099_19_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC091_19_SA {D_SAC091_19_SA < CLmon_SAC091_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC091_19_SA*taf_cfs}
+define DLT_SAC091_19_SA {alias CLmon_SAC091_19_SA*taf_cfs*perdel_cvpsc_sys +1.0*WRmon_SAC091_19_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC109_19_SA {D_SAC109_19_SA < WRmon_SAC109_19_SA*taf_cfs} ! Represents diversion to 19_NA
+define DLT_SAC109_19_SA {alias WRmon_SAC109_19_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 20          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_CCH052_20_NA1          {D_CCH052_20_NA1 < WRmon_CCH052_20_NA1*taf_cfs}
+define DLT_CCH052_20_NA1       {alias min(WRmon_CCH052_20_NA1*taf_cfs,C_CCH030*1.052) kind 'DIVERSION-LIMIT' units 'CFS'} !2/22/2012 Richard  "CacheCk.wresl" 0.0526/0.05
+
+goal limitD_CCH030_20_NA1          {D_CCH030_20_NA1 < WRmon_CCH030_20_NA1*taf_cfs}
+define DLT_CCH030_20_NA1       {alias min(WRmon_CCH030_20_NA1*taf_cfs, C_CCH030*20.0) kind 'DIVERSION-LIMIT' units 'CFS'}  !2/22/2012 Richard "CacheCk.wresl" 1/0.05
+
+
+goal limitD_PSC003_20_PA      {D_PSC003_20_PA < CLmon_PSC003_20_PA*ALLOC_SID*taf_cfs}
+define DLT_PSC003_20_PA {alias CLmon_PSC003_20_PA*1.0*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+! Davis-Woodland Clean Water Agency (20_NU1)
+! P-20281 Jan1-Dec31 subject to Term 91 45.00 TAF/yr direct diversion + diversion to storage. 80 cfs direct diversion + 5.7 TAF/yr diversion to storage
+! L-904A  Apr1-Sep30 10.00 TAF/yr (Jul1-Sep30 limit of 7.5 TAF), direct diversion only
+! L-5847A Oct1-Oct31 4.919 TAF/yr, direct diversion only
+! Total diversion under L-904A and L-5857A limited to 10 TAF/yr direct diversion
+
+! Note - the diversion arc is D_SAC074_WTPDWP, but D_SAC074_20_NU1 is used here for easier identification
+
+! Track diversion under license 904A
+define WR2mon_SAC074_20_NU1_CumDV {std kind 'WATERRIGHT' UNITS 'CFS'}
+define WR2mon_SAC074_20_NU1_Cum {
+           case OctoberFirstYear   {
+               condition month == OCT .and. wateryear == BgnWY
+               value 0.}
+           case October {
+               condition month == OCT
+               value WR2mon_SAC074_20_NU1_CumDV(-1) + D_SAC074_WTPDWP(-1)*cfs_taf(-1)*(1-int_IBU_UWFE(-1))}
+           case NovMar {
+               condition month >= Nov .and. month <= Mar
+               value 0.}
+           case AprSep {
+               condition always
+               value WR2mon_SAC074_20_NU1_CumDV(-1) + D_SAC074_WTPDWP(-1)*cfs_taf(-1)*(1-int_IBU_UWFE(-1))}} ! Only divert under icense when Term 91 is imposed
+
+goal setWR2mon_SAC074_20_NU1_Cum {WR2mon_SAC074_20_NU1_CumDV = WR2mon_SAC074_20_NU1_Cum}             
+
+define WR2mon_SAC074_20_NU1 {
+               case AprSep {
+                  condition month >= Apr .and. month <= Sep
+                  value  max(0,WR2ann_SAC074_20_NU1 - WR2mon_SAC074_20_NU1_Cum)}   !Limit diversion to 10 TAF/yr
+               case OctMar {
+                  condition always
+                  value 0.}}
+               
+define WR2_SAC074_20_NU1    {alias WR2mon_SAC074_20_NU1 kind 'WATERRIGHT-LIMIT' units 'TAF'}
+
+
+
+define WR3mon_SAC074_20_NU1   {
+                          case OctoberFirstYear   {
+                                condition month == OCT .and. wateryear == BgnWY
+                                value WR3ann_SAC074_20_NU1}
+                          case October   {
+                                condition month == OCT
+                                value min(max(0,WR2ann_SAC074_20_NU1-WR2mon_SAC074_20_NU1_Cum),WR3ann_SAC074_20_NU1)} !Total diversion under two licenses limited to 10 TAF
+                              case Otherwise {
+                                    condition always
+                                    value 0.}}
+                                    
+define WR3_SAC074_20_NU1      {alias WR3mon_SAC074_20_NU1 kind 'WATERRIGHT-LIMIT' units 'TAF'}
+
+
+ 
+goal   limit_SAC074_20_NU1_1  {D_SAC074_WTPDWP < WR1mon_SAC074_20_NU1*taf_cfs*int_IBU_UWFE + WR2mon_SAC074_20_NU1*taf_cfs + WR3mon_SAC074_20_NU1*taf_cfs}
+goal   limit_SAC074_20_NU1_2  {D_SAC074_WTPDWP < 80.} !Maximum rate of direct diversion. Ignore diversion to storage right of 5.7 TAF/yr
+define DLT_SAC074_20_NU1      {alias WR1mon_SAC074_20_NU1*taf_cfs*int_IBU_UWFE + WR2mon_SAC074_20_NU1*taf_cfs + WR3mon_SAC074_20_NU1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 21          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+goal limitD_SAC083_21_SA {D_SAC083_21_SA < CLmon_SAC083_21_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC083_21_SA*taf_cfs}
+define DLT_SAC083_21_SA {alias CLmon_SAC083_21_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC083_21_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC074_21_SA {D_SAC074_21_SA < CLmon_SAC074_21_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC074_21_SA*taf_cfs}
+define DLT_SAC074_21_SA {alias CLmon_SAC074_21_SA*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC074_21_SA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_YBP023_21_SA {D_YBP023_21_SA < WRmon_YBP023_21_SA * perdel_cvpsc_sys*taf_cfs}
+define DLT_YBP023_21_SA {alias WRmon_YBP023_21_SA * perdel_cvpsc_sys*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC065_21_PU {D_SAC065_WTPBTB < WRmon_SAC065_21_PU*taf_cfs}
+define DLT_SAC065_21_PU {alias WRmon_SAC065_21_PU*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_KLR005_21_PA {D_KLR005_21_PA < CLmon_KLR005_21_PA*taf_cfs* perdel_cvpag_sys + WRmon_KLR005_21_PA*taf_cfs + Buy_KLR005_21_PA*taf_cfs}
+define DLT_KLR005_21_PA {alias CLmon_KLR005_21_PA*taf_cfs* perdel_cvpag_sys + WRmon_KLR005_21_PA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC081_21_NA {D_SAC081_21_NA < WRmon_SAC081_21_NA*taf_cfs}
+define DLT_SAC081_21_NA {alias WRmon_SAC081_21_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 22          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_CRC002_22_SA1     {D_CRC002_22_SA1 < WRmon_CRC002_22_SA1*taf_cfs}
+define DLT_CRC002_22_SA1    {alias WRmon_CRC002_22_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_FTR003_22_SA2     {D_FTR003_22_SA2 < WRmon_FTR003_22_SA2*taf_cfs}
+define DLT_FTR003_22_SA2    {alias WRmon_FTR003_22_SA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC082_22_SA1     {D_SAC082_22_SA1 < CLmon_SAC082_22_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC082_22_SA1*taf_cfs}
+define DLT_SAC082_22_SA1    {alias CLmon_SAC082_22_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC082_22_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC078_22_SA1     {D_SAC078_22_SA1 < CLmon_SAC078_22_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC078_22_SA1*taf_cfs}
+define DLT_SAC078_22_SA1    {alias CLmon_SAC078_22_SA1*taf_cfs*perdel_cvpsc_sys + 1.0*WRmon_SAC078_22_SA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_SAC075_22_NA {D_SAC075_22_NA < WRmon_SAC075_22_NA*taf_cfs}
+define DLT_SAC075_22_NA {alias WRmon_SAC075_22_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_BRR017_23_NA {D_BRR017_23_NA < WRmon_BRR017_23_NA*taf_cfs}
+define DLT_BRR017_23_NA {alias WRmon_BRR017_23_NA*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal limitD_ABN024_24_NA1     {D_ABN024_24_NA1 < WRmon_ABN024_24_NA1*taf_cfs}
+!define DLT_ABN024_24_NA1    {alias WRmon_ABN024_24_NA1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_ABN010_24_NA2     {D_ABN010_24_NA2 < WRmon_ABN010_24_NA2*taf_cfs}
+!define DLT_ABN010_24_NA2    {alias WRmon_ABN010_24_NA2*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_STH004_24_NA3     {D_STH004_24_NA3 < WRmon_STH004_24_NA3*taf_cfs}
+!define DLT_STH004_24_NA3    {alias WRmon_STH004_24_NA3*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_LBC049_24_NA3     {D_LBC049_24_NA3 < WRmon_LBC049_24_NA3*taf_cfs}
+!define DLT_LBC049_24_NA3    {alias WRmon_LBC049_24_NA3*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_AMRPS_WTPFSS     {D_AMRPS_WTPFSS < WRmon_AMRPS_24_NU2*taf_cfs}
+
+!goal limitD_BEC022_WTPBWM    {D_BEC022_WTPBWM < WRmon_BEC022_24_NU1*taf_cfs}
+!define DLT_BEC022_WTPBWM   {alias WRmon_BEC022_24_NU1*taf_cfs kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 25          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal limitD_WTPDEF_25_PU {D_WTPDEF_25_PU < CLmon_WTPDEF_25_PU  *taf_cfs* ALLOC_SID}
+define DLT_WTPDEF_25_PU {alias CLmon_WTPDEF_25_PU  *taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal setD_PSC017_WTPNBR {D_PSC017_WTPNBR = 0.} ! For ease of accounting assume Putah South Canal water treated at WTPDEF or WTPWMN
+
+
+goal limitD_PSC003_25_PA1     {D_PSC003_25_PA1 < CLmon_PSC003_25_PA1 *taf_cfs* ALLOC_SID}
+define DLT_PSC003_25_PA1    {alias CLmon_PSC003_25_PA1 *taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_PSC006_25_PA2     {D_PSC006_25_PA2 < CLmon_PSC006_25_PA2 *taf_cfs* ALLOC_SID}
+define DLT_PSC006_25_PA2    {alias CLmon_PSC006_25_PA2 *taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!goal limitD_PTH024_25_PA2    {D_PSC006_25_PA2 < CLmon_PSC006_25_PA2 *taf_cfs* perdel_cvpag_sys}
+
+goal limitD_RFS25_25_PA2 {D_RFS25_25_PA2 < WRmon_RFS25_25_PA2*taf_cfs* 1.0}
+define DLT_RFS25_25_PA2 {alias WRmon_RFS25_25_PA2*taf_cfs* 1.0 kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_CSL005_25_NA {D_CSL005_25_NA < WRmon_CSL005_25_NA*taf_cfs* 1.0}
+define DLT_CSL005_25_NA {alias WRmon_CSL005_25_NA*taf_cfs* 1.0 kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!Putah South Canal deliveries to the cities of Vallejo and Benicia
+goal limitD_PSC033_VJB000     {D_PSC033_VJB000 < CLmon_PSC033_VJB000_V*taf_cfs* ALLOC_SID + CLmon_PSC033_VJB000_B*taf_cfs* ALLOC_SID} ! Change back to inequality constraint due to infeasibility using updated urban demand, NOsorio, 10/2023 ! Force cities to take Putah South Canal water first
+define DLT_PSC033_VJB000    {alias CLmon_PSC033_VJB000_V*taf_cfs* ALLOC_SID + CLmon_PSC033_VJB000_B*taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPCMT_SUISN {D_WTPCMT_SUISN < CLmon_WTPCMT_SUISN*taf_cfs* ALLOC_SID}
+define DLT_WTPCMT_SUISN  {alias CLmon_WTPCMT_SUISN*taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_WTPWMN_FRFLD {D_WTPWMN_FRFLD = min(UD_FRFLD,CLmon_WTPWMN_FRFLD*taf_cfs* ALLOC_SID)} !Force cities to take Putah South Canal water first
+define DLT_WTPWMN_FRFLD  {alias CLmon_WTPWMN_FRFLD*taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+goal limitD_PSC015_CSPSO {D_PSC015_CSPSO < CLmon_PSC015_CSPSO*taf_cfs* ALLOC_SID}
+define DLT_PSC015_CSPSO  {alias CLmon_PSC015_CSPSO*taf_cfs* ALLOC_SID kind 'DIVERSION-LIMIT' units 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 26          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Diversion constraints for WBA 26 are in WaterForum.wresl
+
+!!!!!!!!!!!!!!!!!!!!!Constraints for Settlement Contractors to use CVP water before Tributary Water Rights!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setD_CBD049_08N_SA1_c1 {lhs D_CBD049_08N_SA1 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+goal setD_CBD041_08S_SA1_c1 {lhs D_CBD041_08S_SA1 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs (17.08/53.60)*(D_CBD041_08S_SA1 + D_SAC159_08S_SA1) lhs < rhs penalty 0 lhs > rhs constrain}}!Limit to 17/58 of total demand in cycle 1, from cycle 2 onwards, set a constraint
+goal setD_CBD041_08S_SA2_c1 {lhs D_CBD041_08S_SA2 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+goal setD_CBD028_08S_SA3_c1 {lhs D_CBD028_08S_SA3 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+!goal setD_ESL008_09_SA1_c1 {lhs D_ESL008_09_SA1 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+goal setD_ESL008_09_SA1_SURPLUS_c1 {lhs D_ESL008_09_SA1_SURPLUS case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+!goal setD_MTC000_09_SA1_c1 {lhs D_MTC000_09_SA1 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+
+
+goal setD_BTC012_09_SA2_c1 {lhs D_BTC012_09_SA2 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+goal setD_YBP023_21_SA_c1 {lhs D_YBP023_21_SA case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+goal setD_CRC002_22_SA1_c1 {lhs D_CRC002_22_SA1 case gwfirst {condition cyclenum == cn_GW_INITIAL rhs 0.}}
+
+
+goal setD_SAC296_02_SA_c2 {lhs D_SAC296_02_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC296_02_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC289_03_SA_c2 {lhs D_SAC289_03_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC289_03_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC178_08N_SA1_c2 {lhs D_SAC178_08N_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC178_08N_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC159_08N_SA1_c2 {lhs D_SAC159_08N_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC159_08N_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_GCC027_08N_SA2_c2 {lhs D_GCC027_08N_SA2 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_GCC027_08N_SA2[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs penalty 99999}} ! Temp change for 95% LOC study, NOsorio 10/27/2023
+goal setD_SAC159_08S_SA1_c2 {lhs D_SAC159_08S_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC159_08S_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+
+goal setD_CBD041_08S_SA1_c2 {lhs D_CBD041_08S_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_CBD041_08S_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+
+goal setD_GCC056_08S_SA2_c2 {lhs D_GCC056_08S_SA2 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_GCC056_08S_SA2[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs penalty 99999}} ! Temp change for 95% LOC study, NOsorio 10/27/2023
+goal setD_SAC121_08S_SA3_c2 {lhs D_SAC121_08S_SA3 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC121_08S_SA3[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC109_08S_SA3_c2 {lhs D_SAC109_08S_SA3 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC109_08S_SA3[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+
+goal setD_ESL008_09_SA1_SURPLUS_c2 {lhs D_ESL008_09_SA1_SURPLUS case gwfirst {condition cyclenum == cn_GW_FIRST rhs 0.}}
+
+goal setD_ESL008_09_SA1_FW_c2 {lhs D_ESL008_09_SA1_FW case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_ESL008_09_SA1_FW[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_MTC000_09_SA1_c2 {lhs D_MTC000_09_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_MTC000_09_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+
+goal setD_SAC162_09_SA2_c2 {lhs D_SAC162_09_SA2 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC162_09_SA2[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC136_18_SA_c2 {lhs D_SAC136_18_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC136_18_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC122_19_SA_c2 {lhs D_SAC122_19_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC122_19_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC115_19_SA_c2 {lhs D_SAC115_19_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC115_19_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC099_19_SA_c2 {lhs D_SAC099_19_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC099_19_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC091_19_SA_c2 {lhs D_SAC091_19_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC091_19_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC083_21_SA_c2 {lhs D_SAC083_21_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC083_21_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC074_21_SA_c2 {lhs D_SAC074_21_SA case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC074_21_SA[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC082_22_SA1_c2 {lhs D_SAC082_22_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC082_22_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+goal setD_SAC078_22_SA1_c2 {lhs D_SAC078_22_SA1 case latercycles {condition cyclenum > cn_GW_INITIAL+0.1 rhs D_SAC078_22_SA1[GW_INITIAL] lhs > rhs penalty 0 lhs < rhs constrain}}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!Constraints for Transfers from settlement contractors to other CVP contractors
+/*
+SRSC_to_NOD
+AgAlloc    Factor       ! SRSC contractors will commonly transfer 50 TAF to TCCA in shasta critical years
+0.0         0.3         ! Transfers in wet years will be very low or zero
+0.1         0.2         ! Transfers in other years will depend on availability and demand
+0.2         0.2         ! Factors are set to transfer more in drier years and less in years with 
+0.3         0.2         ! higher CVP allocations
+0.4         0.2
+0.5         0.2
+0.6         0.2
+0.7         0.15
+0.8         0.10
+0.9         0.05
+1.0         0.0
+*/
+define SRSC_NOD_Factor {
+    case ShastaCritical {condition wyt_SHASTA_CVP>3.5 value 0.6} ! 0.6 factor determined to generate approx 50 TAF of transfer in shasta-critical years
+    case otherwise {condition always select Factor from SRSC_to_NOD given AgAlloc=min(1,perdel_cvpag_sys) use maximum}
+}
+goal limittotal_Buy {lhs total_Buy
+    case firstcycle {condition cyclenum == cn_GW_INITIAL rhs 0.}
+    case otherwise {condition always rhs Max_Transfer_C1*SRSC_NOD_Factor lhs < rhs penalty 0 lhs > rhs constrain}}
+
+! Constraint to limit buy to total Max transfer
+goal limittotal_Buy_1 {total_Buy < Max_Transfer_C2*SRSC_NOD_Factor}

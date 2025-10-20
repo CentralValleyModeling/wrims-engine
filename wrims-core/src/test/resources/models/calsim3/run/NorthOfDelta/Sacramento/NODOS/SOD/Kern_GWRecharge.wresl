@@ -1,0 +1,79 @@
+define D_CAA242_KernWYMax {select D_CAA242_KernWYvol from Kern_GW_RechLim where wateryear=wateryear}
+
+define D_CAA242_Kernmonthlydv  {std kind 'RECHARGE' units 'TAF' }
+define D_CAA242_KernAccountdv  {std kind 'RECHARGE' units 'TAF' }
+
+define D_CAA242_KernAccount {
+                case Oct {
+                        condition month==OCT
+                        value D_CAA242_KernWYMax }
+                case Other {
+                        condition always
+                        value max(D_CAA242_KernAccountdv(-1) - D_CAA242_Kernmonthlydv(-1),0.) }
+}
+!upper bound the groundwater recharge
+define Total_Rech_Cap {select TOTRechCap from KernGW_NODStor where month=month}
+define D_CAA242_KernRechCap {value min(Total_Rech_Cap*cfs_taf, D_CAA242_KernAccount)}
+
+!Define the percentage of groundwater relative to available water in NOD
+define SWPGWPerc {select SWPGWFact from KernGW_NODStor where month=month}
+define CVPGWPerc {select CVPGWFact from KernGW_NODStor where month=month}
+
+!Define the storage threshold
+define SWP_Storage_OKAY {select SWPStorOk from KernGW_NODStor where month=month}
+define CVP_Storage_OKAY {select CVPStorOk from KernGW_NODStor where month=month}
+
+!no more than a certain fraction of NOD storages
+define D_CAA242_KernSWPGWFact {value SWPGWPerc*(S31(-1)+S_OROVL(-1) - SWP_Storage_OKAY)}                       ! Need to determine a method to adjust delivery logic for storage dedicated to GW Recharge
+define D_CAA242_KernCVPGWFact {value CVPGWPerc*(S32(-1)+S_TRNTY(-1)+S_SHSTA(-1) - CVP_Storage_OKAY)}        ! Need to determine a method to adjust delivery logic for storage dedicated to GW Recharge
+
+! The following is to allow recharges only when the allocations are high enough.
+define D_CAA242_KernSWPGWRechTarget {
+   case SWP_okay {
+   condition S31(-1)+S_OROVL(-1) > SWP_Storage_OKAY
+   value D_CAA242_KernSWPGWFact*PERDEL_SWP_AG1 }
+   case Other {
+   condition always
+   value 0. }
+ }
+define SWPGWRechTargdv {alias D_CAA242_KernSWPGWRechTarget kind 'GW-RECH-TARGET' UNITS 'TAF'}
+
+define D_CAA242_KernCVPGWRechTarget {
+   case CVP_okay {
+   condition S32(-1)+S_TRNTY(-1)+S_SHSTA(-1) > CVP_Storage_OKAY
+   value D_CAA242_KernCVPGWFact*PERDEL_CVPAG_SYS }
+   case Other {
+   condition always
+   value 0. }
+ }
+define CVPGWRechTargdv {alias D_CAA242_KernCVPGWRechTarget kind 'GW-RECH-TARGET' UNITS 'TAF'}
+
+!Maximum recharge limit
+goal maxD_CAA242_KernGWRECHARGE {D_CAA242_Kern_GWRECHARGE < D_CAA242_KernRechCap*taf_cfs}
+
+!Minimum recharge limit for SWP
+goal minD_CAA242_KernGWRechSWP {
+    lhs D_CAA242_Kern_GWRECH_SWP
+    rhs D_CAA242_KernSWPGWRechTarget*taf_cfs
+    lhs>rhs penalty 0.
+    lhs<rhs penalty 1200.
+}
+!Minimum recharge limit for CVP
+goal minD_CAA242_KernGWRechCVP {
+    lhs D_CAA242_Kern_GWRECH_CVP
+    rhs D_CAA242_KernCVPGWRechTarget*taf_cfs
+    lhs>rhs penalty 0.
+    lhs<rhs penalty 1200.
+}
+
+!Define the max capacities for groundwater recharge
+define SWP_Rech_Cap {select SWPRechCap from KernGW_NODStor where month=month}
+define CVP_Rech_Cap {select CVPRechCap from KernGW_NODStor where month=month}
+
+goal maxD_CAA242_KernGWRechSWP {D_CAA242_Kern_GWRECH_SWP < SWP_Rech_Cap}
+goal maxD_CAA242_KernGWRechCVP {D_CAA242_Kern_GWRECH_CVP < CVP_Rech_Cap}
+
+! accounting
+goal set_D_CAA242_Kernmonthlydv {D_CAA242_Kernmonthlydv = D_CAA242_Kern_GWRECHARGE*cfs_taf }
+goal set_D_CAA242_KernAccountdv {D_CAA242_KernAccountdv = D_CAA242_KernAccount }
+

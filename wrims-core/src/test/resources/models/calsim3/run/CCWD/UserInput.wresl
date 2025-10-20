@@ -1,0 +1,267 @@
+!This file contains input parameters that the model is currently configured simulate user
+!specified variation.
+/*
+Define salinity standard to meet at CCWD point of delivery.  This standard will always be met
+if possible without releasing water from LV emergency pool.  Set as constant or timeseries.
+[WQ420_target, units mg/L]
+*/
+define WQ420_target {value 65.}  !mg/L Cl
+!define WQ420_target {timeseries kind 'delivery-target' units 'mg/L'}
+
+/*
+Define salinity threshold for filling LV.  Filling can occur if source salinity <= threshold or
+source salinity <= current LV salinity.  Current model configuration will not allow filling if
+source salinity > delivery standard even if source salinity < current LV salinity.  Filling
+salinity threshold must be set < delivery salinity standard in current model configuration.
+[WQ422_target, units mg/L]
+*/
+define WQ422_target {value 65.} !mg/L Cl	!LS 12/14/09 changed from 50 Cl
+!define WQ422_target {timeseries kind 'fill-target' units 'mg/L'}
+
+!Still need to insert wresl code for timeseries input of the fill wq standard.
+
+/*
+Set maximum intake capacities.  Intakes can be turned off by setting capacity to zero.
+*/
+!Rock Slough Intake capacity [D408_RS_max, units cfs]
+define D408_RS_max {value 350.} !cfs
+
+!Old River Intake capacity [D408_OR_max, units cfs]
+define D408_OR_max {value 250.} !cfs
+
+!Victoria Canal (Alternative) Intake capacity [D408_VC_max, units cfs]
+define D408_VC_max {value 250.} !cfs
+
+!Mallard Slough intake permitted capacity.  Set to zero to turn Mallard Slough off.  Diversions at Mallard Slough only
+!occur when WQ406A_MS <= WQ420_target.  [D406A_MS_max, units cfs]
+define D406A_MS_max {value 39.3} !cfs
+
+/*
+Old River Pipeline capacity [C421_max, units cfs]
+*/
+define C421_max {value 320.}   !cfs
+
+/*
+Transfer Pipeline capacity to fill Los Vaqueros [C422_FILL_max, units cfs]
+*/
+
+!Lookup table allows for capacity to vary by LV storage.
+!Set Transfer Pipeline max LV fill rate using lookup table LV_max_fill_rate.table.  Transfer Pipeline release capacity currently set to 400 cfs in channel table.
+/*
+define C422_FILL_max_1 {select fill_rate from LV_max_fill_rate given storage = S422(-1) use linear}
+define C422_FILL_max_2 {select fill_rate from LV_max_fill_rate given storage = S422(-1) + C422_FILL_max_1*cfs_taf use linear}
+define C422_FILL_max {value (C422_FILL_max_1 + C422_FILL_max_2)/2.}
+*/
+
+!Or set a constant maximum fill capacity for the Transfer Pipeline
+define C422_FILL_max {value 200.}	!cfs   (positive value)
+
+!Limit CCWD share of the filling capacity.
+define C422_FILL_CC_max {value 200.}
+
+!Set maximum LV release capacity for the Transfer Pipeline.
+define C422_REL_max {value 400.}
+
+/*
+Los Vaqueros Pipeline maximum reverse capacity from the Mokelumne Aqueduct Intertie to fill LV.
+*/
+define C423_FILL_max {value 200.}  !cfs  (positive value)
+
+/*
+Transfer-Bethany Pipeline maximum capacity for wheeling and/or delivery augmentation
+*/
+define C423B_max {value 0.}
+
+/*
+Los Vaqueros is currently divided into two storage pools -- emergency and water quality.  S422level1 defines
+the upper bound of the emergency pool and the remainder -- total reservoir capacity minus emergency pool -- is the water quality pool.
+S422level2 defines total reservoir capacity [S422level2, units TAF]
+*/
+
+/*
+Los Vaqueros is divided into CCWD's share of capacity (CC) and the partner's share of capacity (P).  The total size of the reservoir
+is the sum of the two.
+*/
+
+define S422_CC_level2 {value 160.}	!TAF
+define S422_P_level2 {value 0.} !TAF
+define S422_capacity {value S422_CC_level2 + S422_P_level2}	!TAF
+
+/*
+Specify CCWD user demands through lookup tables or timeseries. [demand_D420 in cfs]
+*/
+
+!Lookup table demand specification
+define CCWD_ann_basedem {			!units TAF
+    select CCWD_base_demand
+    from CCWD_ann_demand
+    where wyear_type = wyt_SAC_LV
+}
+
+define CCWD_basedem_pattern {			!units none
+    select CCWD_base_demand
+    from   CCWD_demand_pattern
+    where  wyear_type = wyt_SAC_LV, month = month
+}
+
+define demand_D420 {value CCWD_basedem_pattern * CCWD_ann_basedem*taf_cfs}  !cfs
+
+!Timeseries demand specification
+!define demand_D420 {timeseries kind 'demand' units 'cfs'}
+
+
+/*
+Specify an annual limit to diversions from the Mokelumne Aqueduct. [ann_MOK_div_max, units TAF]
+Set to zero to turn of MOK diversions.
+*/
+
+define ann_MOK_div_max {value 3.2}  !TAF
+
+
+/*
+CCWD's BO requires a 75 day no fill period. [BO_nofill_days, units days]
+*/
+
+!The following parameters allow the user to set a beginning month and day and and ending month and day for the BO no fill period.  Use integers as input.
+!It is assumed that the beginning month will not equal the ending month.
+!LS 12/14/09  uncommented this section, commented out timeseries defn of BO_nofill_days
+!for Ops Agreement, no-fill = Feb 15-Mar 31 & June
+!Define start month and day of no fill period.
+define nofill_mon_beg {value mar}
+define nofill_day_beg {value 1}
+
+!Define end month and day of no fill period.
+define nofill_mon_end {value jun}
+define nofill_day_end {value 30}
+
+!Determine the fraction of days no filling can occur. (Code at attached to beggining and end of no fill period input above.)
+define BO_nofill_days {
+	case Beginning {
+		condition	month == nofill_mon_beg
+		value		daysinmonth - nofill_day_beg + 1
+	}
+	case End {
+		condition	month == nofill_mon_end
+		value		nofill_day_end
+	}
+!LS 12/14/09  added the following case to allow filling during SJ E/I control of exports
+	case AprilMay {
+		condition 	month == APR .or. month == MAY
+		value		0
+	}
+	case Middle1 {
+		condition	nofill_mon_beg < nofill_mon_end .and. month > nofill_mon_beg .and. month < nofill_mon_end
+		value		daysinmonth
+	}
+	case Middle2 {
+		condition 	nofill_mon_beg > nofill_mon_end .and. month > nofill_mon_beg .or. nofill_mon_beg > nofill_mon_end .and. month < nofill_mon_end
+		value		daysinmonth
+	}
+	case otherwise {
+		condition	always
+		value		0
+	}
+}
+
+!Use the following code if you want to specify the number of no fill days per month with a timeseries.
+!define BO_nofill_days {timeseries kind 'LV-filling-limit' units 'days'}
+
+
+/*
+According to the AIP DFG permit, no filling is allowed for a number of days in February based on LV storage. [feb_NoFill_days, units days]
+	-	if LV >= 90 TAF, no-fill Feb 14-28 (15 days)
+	-	if  90 > LV >= 80 TAF, no-fill Feb 19-28 (10 days)
+	-	if 80 >LV> = 70 TAF, no-fill Feb 24-28 (5 days)
+*/
+!Turn constraint off by entering 0. for feb_NoFill_days.  Otherwise, define feb_NoFill_days according to LV storage.
+!define feb_NoFill_days {value 0}
+
+
+!Turn constraint on
+!LS 12/14/09  add 14 days to Feb no-fill (Ops Agreement has no-fill Feb 15-28 = 14 days)
+define feb_Nofill_days {
+	case LV90 {
+		condition	S422(-1) >= 90
+		value		28
+	}
+	case LV80 {
+		condition	S422(-1) >= 80
+		value		24
+	}
+	case LV70 {
+		condition	S422(-1) >= 70
+		value		19
+	}
+	case otherwise {
+		condition	always
+		value		14
+	}
+}
+
+
+/*
+The BO (?) also has an April minimal diversion constraint where LV water is supposed to be used to meet CCWD
+service area demand without encroaching on emergency pool.  A lookup table CCWD_MinimizeDiv.table is provided
+so that the user can vary the month of this minimize diversion contraint.
+*/
+
+!define MinDiv_switch {select MinDiv_switch from CCWD_MinimizeDiv_Mar where month=month}
+!LS 12/14/09 -- make sure CCWD_MinimizeDiv set for no-diversion in March (month 6)
+
+define MinDiv_switch {
+	case On {
+		condition	month == mar
+		value		1.
+	}
+	case Off {
+		condition 	always
+		value		0.
+	}
+}
+
+/*
+Set intake preference.  The choices are (0) water quality based decision, (1) give RS preference in months
+specified in lookup table CCWD_Intake_Pref, (2) give OR/VC preference in months specified in lookup table CCWD_Intake_Pref.
+*/
+!Select intake preference logic.
+!define intake_pref {value 0}  !intake prefence based solely on water quality
+define intake_pref {value 1}  !Rock Slough preference in months specified in CCWD_Intake_Pref.
+!define intake_pref {value 2}  !Old River and Victoria Canal preference in months specified in CCWD_Intake_Pref.
+!LS 12/14/09  preferential use of RS -- make sure CCWD_Intake_Pref months set Dec-Mar & Jun
+
+/*
+Filling LV -- OMR Flow criteria.
+*/
+!Turn off OMR criteria control of LV filling.
+define OMR_switch {value 0.}
+!Turn on OMR criteria control LV filling.
+!define OMR_switch {select OMR_switch from CCWD_OMR_CONTROL where month=month}
+!LS 12/14/09  no OMR control on CCWD filling
+
+/*
+For LV Expansion, turn on/off wheeling diversions for South Bay and CVP SCV through San Felipe.  Enter 0 for off/ 1 for on
+*/
+define SB_whl_switch {value 0.}
+define SF_whl_switch {value 0.}
+
+/*
+If wheeling turned on, Partner LV storage can be used for wheeling in non-diversion months.  Simply set the switch below to 1.
+*/
+define LV_whl_switch {value 0.}
+
+/*
+For LV Expansion, turn on/off delivery augmentation diversions for South Bay and CVP SCV through San Felipe.  Enter 0 for off/ 1 for on
+*/
+define Del_aug_switch {value 0.}
+
+/*
+For LV Expansion, turn on/off Level 4 Refuge demand for Partner water.
+*/
+define Ref_4_switch {value 0.}
+
+
+
+
+
+
+

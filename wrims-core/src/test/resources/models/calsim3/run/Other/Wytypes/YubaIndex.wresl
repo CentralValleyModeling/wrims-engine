@@ -1,0 +1,54 @@
+! YubaIndex.wresl
+! Dynamically calculate Smartville Index and FERC2246 index based in unimpaired flows in the Yuba River
+
+! Calculate unimpaired inflows at Smartville
+define SmartvilleUnimpaired_ann_dv {std kind'UNIMPAIRED-FLOW' units 'TAF'}
+define SmartvilleUnimpaired_ann {
+	case monthOct{
+	condition month == OCT sum(i=0,11,1) ((I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) 
+										+ I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  
+								        + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) 
+								        + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) 
+								        + I_NFY029(i) + I_MFY013(i) + CT_Smartville_SV(i))*cfs_taf)}
+	case otherwise {condition always value SmartvilleUnimpaired_ann_dv(-1)}}
+
+goal setSmartvilleUnimpaired_ann_dv {SmartvilleUnimpaired_ann_dv = SmartvilleUnimpaired_ann}
+
+!Smartville unimpaired runoff for the entire simulation period - used to calculate FERC 2246 index
+define SmartvilleUnimpAnnAvgSimPer_dv {std kind'UNIMPAIRED-FLOW' units 'TAF'}
+
+define SmartvilleUnimpAnnAvgSimPer {case calcAvg{ condition month == BgnMo .AND. wateryear == BgnWY 
+					                  value (sum(i=0,((EndWY-BgnWY)*12),1) ((I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) 
+										+ I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  
+								        + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) 
+								        + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) 
+								        + I_NFY029(i) + I_MFY013(i) + CT_Smartville_SV(i))*cfs_taf))/(1+EndWY-BgnWY)}
+				                     case otherwise{ condition always value SmartvilleUnimpAnnAvgSimPer_dv(-1)}}
+				                     
+goal setSmartvilleUnimpAnnAvgSimPer_dv {SmartvilleUnimpAnnAvgSimPer_dv = SmartvilleUnimpAnnAvgSimPer}	
+define SmartvillePercUnimp{value min(1.,(SmartvilleUnimpaired_ann/SmartvilleUnimpAnnAvgSimPer))}				                     
+				                     
+! Smartsville Index: 1=W, 2=AN, 3=BN, 4=D, 5=C			
+! Critically Dry Equal to or Less than 900			
+! Dry 901 to 1,460			
+! Below Normal 1,461 to 2,190			
+! Above Normal 2,191 to 3,240			
+! Wet Greater than 3,240	
+define SmartvilleIndex {case CritDry{     condition                                   SmartvilleUnimpaired_ann   <= 900  value 5.}
+						case Dry{         condition SmartvilleUnimpaired_ann > 900  .AND.  SmartvilleUnimpaired_ann  <= 1460 value 4.}
+						case BelowNormal{ condition SmartvilleUnimpaired_ann > 1460 .AND. SmartvilleUnimpaired_ann   <= 2190 value 3.}
+						case AboveNormal{ condition SmartvilleUnimpaired_ann > 2190 .AND. SmartvilleUnimpaired_ann   <= 3240 value 2.}
+						case Wet{         condition SmartvilleUnimpaired_ann > 3240                                      value 1.}}
+
+! FERC2246_index
+! 1 (A) = 50-100% of April-1 forecast of % of average unimpaired runoff in the Yuba River at Smartsville			
+! 2 (B) = 45-50% of April-1 forecast of % of average unimpaired runoff in the Yuba River at Smartsville			
+! 3 (C) = 40-45% of April-1 forecast of % of average unimpaired runoff in the Yuba River at Smartsville			
+! 4 (D) < 40% of April-1 forecast of % of average unimpaired runoff in the Yuba River at Smartsville		
+define FERC2246Index   {case caseA {     condition                                   SmartvillePercUnimp   <= 0.40  value 4.}
+						case caseB {     condition SmartvillePercUnimp > 0.40  .AND. SmartvillePercUnimp   <= 0.45  value 3.}
+						case caseC {     condition SmartvillePercUnimp > 0.45  .AND. SmartvillePercUnimp   <= 0.50  value 2.}
+						case caseD {     condition SmartvillePercUnimp > 0.50  .AND. SmartvillePercUnimp   <= 1.00  value 1.}}
+
+define SmartvilleIndex_dv {alias SmartvilleIndex kind'INDEX' units 'NONE'}
+define FERC2246Index_dv {alias FERC2246Index kind'INDEX' units 'NONE'}

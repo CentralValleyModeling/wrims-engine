@@ -1,0 +1,193 @@
+/*
+File Name: Yuba_NID_PGE_Split_2.wresl
+CalSim 3.0  File for Middle Yuba, South Yuba, and Bear River Operations
+
+Purpose: Separates Nevada ID water (blue) from PG&E water (red)
+
+*/
+
+
+
+
+
+!****************************************************************************************
+!** For debugging purposes only
+!****************************************************************************************
+define DS_RLLNS_NID {lower -99999 upper 99999 kind 'STORAGE-CHANGE' units 'CFS'} 
+define DS_RLLNS_PGE {lower -99999 upper 99999 kind 'STORAGE-CHANGE' units 'CFS'} 
+define DS_CMBIE     {lower -99999 upper 99999 kind 'STORAGE-CHANGE' units 'CFS'}
+
+! For debugging purposes only
+!goal setDS_RLLNS_NID {DS_RLLNS_NID = S_RLLNS_NID*taf_cfs - S_RLLNS_NID(-1)*taf_cfs}
+!goal setDS_RLLNS_PGE {DS_RLLNS_PGE = S_RLLNS_PGE*taf_cfs - S_RLLNS_PGE(-1)*taf_cfs}
+!goal setDS_CMBIE     {DS_CMBIE = S_CMBIE*taf_cfs - S_CMBIE(-1)*taf_cfs}
+goal setD_STH007_STHLOS{D_STH007_STHLOS = 0.15*C_STH005}
+
+!****************************************************************************************
+!** Bear River Canal
+!****************************************************************************************
+define C_BEC000_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_BEC000_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BEC000_split {C_BEC000 = C_BEC000_NID + C_BEC000_PGE}
+
+define C_BEC021_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_BEC021_PGE   {std kind 'DIVERSION' units 'CFS'}
+define C_BEC021_PCWA   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BEC021_split {C_BEC021 = C_BEC021_NID + C_BEC021_PGE + C_BEC021_PCWA}
+goal   continuityBEC021_PCWA {C_BEC021_PCWA = D_LBC030_BEC021}
+
+define C_BEC022_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_BEC022_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BEC022_split {C_BEC022 = C_BEC022_NID + C_BEC022_PGE}
+
+define D_BEC021_BECLOS_NID   {std kind 'DIVERSION' units 'CFS'}
+define D_BEC021_BECLOS_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_BEC021_BECLOS_split {D_BEC021_BECLOS = D_BEC021_BECLOS_NID + D_BEC021_BECLOS_PGE}
+
+goal setD_BECLOS     {D_BEC021_BECLOS = C_BEC000 * 0.069}
+goal setD_BECLOS_PGE {D_BEC021_BECLOS_PGE = C_BEC000_PGE * 0.069}
+
+define C_BEC024_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_BEC024_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_BEC024_split {C_BEC024 = C_BEC024_NID + C_BEC024_PGE}
+
+define D_BEC022_WTPBWM_PCWA  {std kind 'DIVERSION' units 'CFS'}
+define D_BEC022_WTPBWM_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_BEC022_WTPBWM_split {D_BEC022_WTPBWM = D_BEC022_WTPBWM_PCWA + D_BEC022_WTPBWM_PGE}
+goal   continuityBEC022_PCWA {D_BEC022_WTPBWM_PCWA = C_BEC021_PCWA}
+
+goal continuityBRR021_PGE {C_BEC021_PGE = D_BRR050_BEC000_PGE - D_BEC021_LBC032 - D_BEC021_BECLOS_PGE}
+goal continuityBRR022_PGE {C_BEC022_PGE = C_BEC021_PGE - D_BEC022_WTPBWM_PGE}
+goal continuityBRR024_PGE {C_BEC024_PGE = C_BEC022_PGE}
+
+
+!****************************************************************************************
+!** Wise Canal **************************************************************************
+!****************************************************************************************
+define C_WSE000_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_WSE000_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_WSE000_split {C_WSE000 = C_WSE000_NID + C_WSE000_PGE} !No PCWA water in Wise Canal
+
+define C_WSE003_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_WSE003_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_WSE003_split {C_WSE003 = C_WSE003_NID + C_WSE003_PGE}
+
+define C_WSE004_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_WSE004_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_WSE004_split {C_WSE004 = C_WSE004_NID + C_WSE004_PGE}
+
+define C_WSE006_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_WSE006_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_WSE006_split {C_WSE006 = C_WSE006_NID + C_WSE006_PGE}
+
+define C_WSE008_NID   {std kind 'DIVERSION' units 'CFS'}
+define C_WSE008_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   C_WSE008_split {C_WSE008 = C_WSE008_NID + C_WSE008_PGE}
+
+! NID Delivery Splits, North Auburn
+define D_WSE004_24_NU3_NID {std kind 'DIVERSION' units 'CFS'}
+define D_WSE004_24_NU3_PGE {std kind 'DIVERSION' units 'CFS'}
+goal   D_WSE004_24_NU3_split {D_WSE004_24_NU3 = D_WSE004_24_NU3_NID + D_WSE004_24_NU3_PGE}
+
+! NID Delivery Splits, agricultural use
+define D_WSE004_24_NA1_NID {std kind 'DIVERSION' units 'CFS'}
+define D_WSE004_24_NA1_PGE {std kind 'DIVERSION' units 'CFS'}
+goal   D_WSE004_24_NA1_split {D_WSE004_24_NA1 = D_WSE004_24_NA1_NID + D_WSE004_24_NA1_PGE}
+
+!Set to zero to simplify PGE to NID sale
+goal setD_WSE004_24_NA1_NID{D_WSE004_24_NA1_PGE = 0.0} 
+
+! Flow split based on historical gauge data to 24_NA1 (4/3 factor is used for a conveyance loss)
+!goal setD_WSE004_24_NA1     {D_WSE004_24_NA1 < 7./100.0  *(4/3)*(AWR_24_NA1*(1+RPF_24_NA1-RUFR_24_NA1) + AWO_24_NA1*(1+RPF_24_NA3-RUFO_24_NA1))}
+!goal setD_ABN024_24_NA1     {D_ABN024_24_NA1 < 56./100.0 *(4/3)*(AWR_24_NA1*(1+RPF_24_NA1-RUFR_24_NA1) + AWO_24_NA1*(1+RPF_24_NA3-RUFO_24_NA1))}
+!goal setD_CBC001_24_NA1     {D_CBC001_24_NA1 < 37./100.0 *(4/3)*(AWR_24_NA1*(1+RPF_24_NA1-RUFR_24_NA1) + AWO_24_NA1*(1+RPF_24_NA3-RUFO_24_NA1))}
+goal setD_CBC001_CCK036	    {D_CBC001_CCK036 = 0}
+goal setD_WSE004_24_NU3_PGE {D_WSE004_24_NU3_PGE = 0}
+
+goal continuityWSE000_PGE {C_WSE000_PGE = C_BEC024_PGE}
+goal continuityWSE003_PGE {C_WSE003_PGE = C_WSE000_PGE - D_WSE003_LBC040}
+goal continuityWSE004_PGE {C_WSE004_PGE = C_WSE003_PGE - D_WSE004_24_NU3_PGE - D_WSE004_24_NA1_PGE}
+goal continuityWSE006_PGE {C_WSE006_PGE = C_WSE004_PGE - D_WSE006_24_NA3}
+goal continuityWSE008_PGE {C_WSE008_PGE = C_WSE006_PGE}
+
+!****************************************************************************************
+!** South Canal *************************************************************************
+!****************************************************************************************
+define C_STH000_NID   {std kind 'CHANNEL' units 'CFS'}
+define C_STH000_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH000_split {C_STH000 = C_STH000_NID + C_STH000_PGE}
+
+! NID Delivery Splits, Auburn Ravine
+define D_STH000_ABN027_NID {std kind 'DIVERSION' units 'CFS'}
+define D_STH000_ABN027_PGE {std kind 'DIVERSION' units 'CFS'}
+goal   D_STH000_ABN027_split {D_STH000_ABN027 = D_STH000_ABN027_NID + D_STH000_ABN027_PGE}
+
+define C_STH001_PCWA  {std kind 'CHANNEL' units 'CFS'}
+define C_STH001_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH001_split {C_STH001 = C_STH001_PGE + C_STH001_PCWA}
+
+define C_STH002_PCWA  {std kind 'CHANNEL' units 'CFS'}
+define C_STH002_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH002_split {C_STH002 = C_STH002_PGE + C_STH002_PCWA}
+
+! South Canal loss moved to node STH007 to simplify accounting with PCWA
+!define D_STH002_STHLOS_PCWA   {std kind 'DIVERSION' units 'CFS'}
+!define D_STH002_STHLOS_PGE    {std kind 'DIVERSION' units 'CFS'}
+!goal   D_STH002_STHLOS_split  {D_STH002_STHLOS = D_STH002_STHLOS_PGE + D_STH002_STHLOS_PCWA}
+!goal   setD_STH002_STHLOS     {D_STH002_STHLOS = C_STH001_PGE * 0.0}
+!goal   setD_STH002_STHLOS_PGE {D_STH002_STHLOS_PGE = C_STH001_PGE * 0.000}
+!goal setD_STH002_STHLOS_PCWA  {D_STH002_STHLOS_PCWA = 0.0}
+
+define C_STH003_PCWA  {std kind 'CHANNEL' units 'CFS'}
+define C_STH003_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH003_split {C_STH003 = C_STH003_PGE + C_STH003_PCWA}
+
+define D_STH003_WTPFSS_PCWA  {std kind 'DIVERSION' units 'CFS'}
+define D_STH003_WTPFSS_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_STH003_WTPFSS_split {D_STH003_WTPFSS = D_STH003_WTPFSS_PGE + D_STH003_WTPFSS_PCWA}
+
+define D_STH003_24_NA3_PCWA  {std kind 'DIVERSION' units 'CFS'}
+define D_STH003_24_NA3_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_STH003_24_NA3_split {D_STH003_24_NA3 = D_STH003_24_NA3_PGE + D_STH003_24_NA3_PCWA}
+
+define D_STH003_LBC047_PCWA  {std kind 'DIVERSION' units 'CFS'}
+define D_STH003_LBC047_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_STH003_LBC047_split {D_STH003_LBC047 = D_STH003_LBC047_PGE + D_STH003_LBC047_PCWA}
+
+define C_STH004_PCWA  {std kind 'CHANNEL' units 'CFS'}
+define C_STH004_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH004_split {C_STH004 = C_STH004_PGE + C_STH004_PCWA}
+
+define C_STH005_PCWA  {std kind 'CHANNEL' units 'CFS'}
+define C_STH005_PGE   {std kind 'CHANNEL' units 'CFS'}
+goal   C_STH005_split {C_STH005 = C_STH005_PGE + C_STH005_PCWA}
+
+define D_STH005_24_NA3_PCWA  {std kind 'DIVERSION' units 'CFS'}
+define D_STH005_24_NA3_PGE   {std kind 'DIVERSION' units 'CFS'}
+goal   D_STH005_24_NA3_split {D_STH005_24_NA3 = D_STH005_24_NA3_PGE + D_STH005_24_NA3_PCWA}
+
+goal continuitySTH000_PGE  {C_STH000_PGE = C_WSE008_PGE - D_STH000_ABN027_PGE} 
+goal continuitySTH000_NID  {C_STH000_NID = 0.}               !No NID water in South Canal
+goal continuitySTH001_PGE  {C_STH001_PGE = C_STH000_PGE}
+goal continuitySTH001_PCWA {C_STH001_PCWA = D_ABT002_STH001} !Wheeling of PCWA water through South Canal
+goal continuitySTH002_PGE  {C_STH002_PGE = C_STH001_PGE - D_STH002_ABN026}
+goal continuitySTH003_PGE  {C_STH003_PGE = C_STH002_PGE - D_STH003_WTPFSS_PGE - D_STH003_24_NA3_PGE - D_STH003_LBC047_PGE}
+goal continuitySTH004_PGE  {C_STH004_PGE = C_STH003_PGE}
+goal continuitySTH005_PGE  {C_STH005_PGE = C_STH004_PGE - D_STH005_MRM001 - D_STH005_24_NA3_PGE}     !No PCWA water delivered to Mormon Ravine
+goal continuitySTH005_PCWA {C_STH005_PCWA = 0.}                                                      !No PCWA water delivered to Newcastle Powerhouse
+
+
+!****************************************************************************************
+!** Auburn Ravine************************************************************************
+!****************************************************************************************
+! PCWA accounting in PCWAZone5.wresl
+
+! NID Delivery Splits, Auburn Ravine
+define D_ABN024_24_NA1_NID   {std kind 'DIVERSION' units 'CFS'}
+define D_ABN024_24_NA1_PGE   {std kind 'DIVERSION' units 'CFS'}
+define D_ABN024_24_NA1_OTHER {std kind 'DIVERSION' units 'CFS'} ! urban return flows
+goal   D_ABN024_24_NA1_split {D_ABN024_24_NA1 = D_ABN024_24_NA1_NID + D_ABN024_24_NA1_PGE + D_ABN024_24_NA1_other}
+
+goal continuityABN024_NID     {D_ABN024_24_NA1_NID = D_STH000_ABN027_NID}
+goal continuityABN024_PGE     {D_ABN024_24_NA1_PGE = D_STH000_ABN027_PGE}
+goal setD_ABN024_24_NA1_OTHER {D_ABN024_24_NA1_OTHER < R_24_NU1_ABN027}

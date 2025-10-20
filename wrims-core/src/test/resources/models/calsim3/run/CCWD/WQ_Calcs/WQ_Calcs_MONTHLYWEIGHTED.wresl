@@ -1,0 +1,81 @@
+!Define WQ (salinity) decision variables by node
+
+define WQ420 {std kind 'salinity' units 'mg/l'}
+define WQ421 {std kind 'salinity' units 'mg/l'}
+!define WQ422 {std kind 'salinity' units 'mg/l'}
+define WQ423 {std kind 'salinity' units 'mg/l'}
+define WQ424 {std kind 'salinity' units 'mg/l'}
+
+!Calculate water quality
+
+!Old River Pipeline
+define scale_421 {
+	case no_water {
+                condition       D408_OR[MONTHLYWEIGHTED] + D408_VC[MONTHLYWEIGHTED] < 0.01
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           1./(D408_OR[MONTHLYWEIGHTED] + D408_VC[MONTHLYWEIGHTED])
+	}
+}
+goal calc_WQ421 {WQ421 = WQ408_OR*D408_OR[MONTHLYWEIGHTED]*scale_421 + WQ408_VC*D408_VC[MONTHLYWEIGHTED]*scale_421}
+
+!Transfer Facility
+define scale_423 {
+	case no_water {
+                condition       C421_TFR[MONTHLYWEIGHTED] + C423_FILL[MONTHLYWEIGHTED] + C422_REL_CC[MONTHLYWEIGHTED] < 0.01
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           1./(C421_TFR[MONTHLYWEIGHTED] + C423_FILL[MONTHLYWEIGHTED] + C422_REL_CC[MONTHLYWEIGHTED])
+	}
+}
+goal calc_WQ423 {WQ423 = WQ421*C421_TFR[MONTHLYWEIGHTED]*scale_423 + WQ424_MOK*C423_FILL[MONTHLYWEIGHTED]*scale_423 + WQ422(-1)*C422_REL_CC[MONTHLYWEIGHTED]*scale_423}
+
+!Los Vaqueros
+
+define scale_422 {
+	case no_water {
+                condition       S422[MONTHLYWEIGHTED]*taf_cfs < 0.01
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           1./(S422[MONTHLYWEIGHTED]*taf_cfs)
+	}
+}
+
+goal calc_WQ422 {WQ422 = WQ422(-1)*S422(-1)*taf_cfs*scale_422 - WQ422(-1)*C422_REL[MONTHLYWEIGHTED]*scale_422 - WQ422(-1)*C422_KC[MONTHLYWEIGHTED]*scale_422
+                        + WQ422_inflow*I422*scale_422 + WQ422_ppt*I422_ppt_cfs*scale_422 + WQ423*C422_FILL[MONTHLYWEIGHTED]*scale_422}
+
+
+!Los Vaqueros Pipeline at Mok Aq. Intertie
+define scale_424 {
+	case no_water {
+                condition       I424[MONTHLYWEIGHTED] + C423_DEL[MONTHLYWEIGHTED] < 0.01
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           1./(I424[MONTHLYWEIGHTED] + C423_DEL[MONTHLYWEIGHTED])
+	}
+}
+
+goal calc_WQ424 {WQ424 = WQ424_MOK*I424[MONTHLYWEIGHTED]*scale_424 + WQ423*C423_DEL[MONTHLYWEIGHTED]*scale_424}
+
+!Contra Costa Canal downstream of Mallard Slough intake
+
+define scale_420 {
+	case no_water {
+                condition       C424[MONTHLYWEIGHTED] + D408_RS[MONTHLYWEIGHTED] + D406A_MS[MONTHLYWEIGHTED] < 0.01
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           1./(C424[MONTHLYWEIGHTED] + D408_RS[MONTHLYWEIGHTED] + D406A_MS[MONTHLYWEIGHTED])
+	}
+}
+
+goal calc_WQ420 {WQ420 = WQ424*C424[MONTHLYWEIGHTED]*scale_420 + WQ408_RS*D408_RS[MONTHLYWEIGHTED]*scale_420 + WQ406A_MS*D406A_MS[MONTHLYWEIGHTED]*scale_420}

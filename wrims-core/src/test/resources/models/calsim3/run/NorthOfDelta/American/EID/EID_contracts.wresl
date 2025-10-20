@@ -1,0 +1,521 @@
+! El Dorado Water Supply Contracts and Demands
+! M.Bachman 01/2018
+! R. Hoang 05/2019
+!*********************************************************************************                                                
+
+!El Dorado County West Slope Water Assets Summary
+! EID - Pre-1914 Project 184                                 15,080  AF (POD: El Dorado Forebay)
+! EID - Pre-1914/Ditch and License 2184                      4,560   AF [LTWAC 06-WC-20-3315]  (POD: Folsom) Dry year availability: 3 TAF 
+! EID - CVP Water Service Contract                           7,550   AF [14-06-200-1375A-LTR1] (POD: Folsom)Subject to CVP M&I Allocation  
+! EID - Project 184 Permit 21112                             17,000  AF [LTWAC 06-WC-20-3317]  (POD: Folsom)
+! EID - Jenkinson Lake                                       33,400  AF [Lic. 11835 and 11836] (23 TAF @ Normal Year Ops.) Lic. allow for 33,400 acre-feet/yr
+! EID/GDPUD - Fazio Water (P.L. 101-514)                     15,000  AF (7.5 TAF to EID and 7.5 TAF to GDPUD)
+! GDPUD - Stumpy Meadows                     			     20,000  AF [Permit 12827](12.2 TAF Firm Yield)
+
+!TOTAL.......................................................112,590  AF
+
+!El Dorado County West Slope Demand Summary (Future, Low Range)         Sources and Assumptions                                   QA/QC
+! EID Urban                                                  79,316  AF (Source 2014 WRDMP, Table 4-8; 20x2020 TARGET)            [chk1][chk2]
+! EID Ag                                                     13,000  AF (Source 2014 WRDMP, Figure 4-3; 100% Vineyards)            [chk1][chk2]
+! GDPUD Urban                                                9,581   AF (Source 2014 WRDMP, Table 4-16; 20x2020 TARGET)           [chk1][chk2]
+! GDPUD Ag                                                   10,349  AF (Source 2014 WRDMP, Table 4-16; One projection available) [chk1][chk2]
+! EDC OCA Urban                                              12,336  AF (Source 2014 WRDMP, Table 4-22; One projection available) [chk1][chk2]
+! EDC OCA Ag                                                 17,476  AF (Source 2014 WRDMP, Table 4-22; One projection available) [chk1][chk2]
+
+! TOTAL......................................................142,058 AF                                                           [chk1][chk2]
+
+!El Dorado County West Slope Demand Summary (Future, High Range)        Sources and Assumptions
+! EID Urban                                                  99,146  AF (Source 2014 WRDMP, Table 4-8; 20x2020 BASELINE)          [chk1][chk2]
+! EID Ag                                                     25,400  AF (Source 2014 WRDMP, Figure 4-3; 100% Deciduous Orchards)   [chk1][chk2]
+! GDPUD Urban                                                11,824  AF (Source 2014 WRDMP, Table 4-16; 20x2020 BASELINE)         [chk1][chk2]
+! GDPUD Ag                                                   10,349  AF (Source 2014 WRDMP, Table 4-16; One projection available) [chk1][chk2]
+! EDC OCA Urban                                              12,336  AF (Source 2014 WRDMP, Table 4-22; One projection available) [chk1][chk2]
+! EDC OCA Ag                                                 17,476  AF (Source 2014 WRDMP, Table 4-22; One projection available) [chk1][chk2]
+
+! TOTAL......................................................176,531 AF 
+
+  		
+! EID's Folsom diversion is made up of:
+!      (A) CVP: water service contract 14-06-200-1375A-LTR1, full contract amount is 7.550 TAF/yr
+!      (B) Fazio: CVP P.L. 101-5141, 5 TAF of CVP water made available for EDCWA for diversion from Folsom Reservoir or from an exchange on the American River upstream from Folsom
+!          7.5 available to EDCWA and 7.5 TAF to GDPUD via an exchange with PCWA (West Placer).
+!      (C) Project-184 water (Through Folsom via LTWAC)
+!      (D) Pre 1914/Ditch (Through Folsom via LTWAC)
+!      (E) Project-184 water (El Dorado Forebay) - see breakdown below
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!!!!!!!! (A)+(B) CVP WATER  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! CVP water is limited to the  multiplied by the annual CVP North-of-Delta M&I allocation
+! EID will schedule CVP water to be delivered August through October 	
+define annFolsom_Fazio_EDCWA  {value 7.500} !Annual Fazio contract amount for EID (TAF)
+define annFolsom_EID_contract {value 7.550 + annFolsom_Fazio_EDCWA} !Annual contract amount (TAF) subject to CVP M&I allocation
+
+!Define split arcs: CVP contract water and water rights water
+define D_FOLSM_EDCOCA_NU1_CVP     {std kind 'DIVERSION-CVP' units 'CFS'} !Transmission of CVP water for M&I use to EDCOCA_NU1  		
+define D_FOLSM_EDCOCA_NU2_CVP     {std kind 'DIVERSION-CVP' units 'CFS'} !Transmission of CVP water for M&I use to EDCOCA_NU2
+
+define monFolsom_EID_contract_RemainingSupplydv {std kind 'SUPPLY' units 'TAF'}
+define monFolsom_EID_contract_RemainingSupply {
+	case FirstWY {
+		condition wateryear==BgnWY .and. month==Oct
+		value annFolsom_EID_contract*perdel_cvpmi_sys
+	}
+	case March {
+		condition month == Mar
+		value annFolsom_EID_contract*perdel_cvpmi_sys
+		}
+	case April {
+		condition month == Apr
+		value max(0,annFolsom_EID_contract*perdel_cvpmi_sys
+		- D_FOLSM_WTPEDH_CVP(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_CVP(-1)*cfs_taf(-1) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		- D_FOLSM_EDCOCA_NU2_CVP(-1)*cfs_taf(-1)) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		}
+	case monthMay {
+		condition month == May
+		value max(0,annFolsom_EID_contract*perdel_cvpmi_sys
+		- D_FOLSM_WTPEDH_CVP(-1)*cfs_taf(-1) - D_FOLSM_WTPEDH_CVP(-2)*cfs_taf(-2)
+		- D_FOLSM_EDCOCA_NU1_CVP(-1)*cfs_taf(-1) - D_FOLSM_EDCOCA_NU2_CVP(-2)*cfs_taf(-2)  /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		- D_FOLSM_EDCOCA_NU2_CVP(-1)*cfs_taf(-1) - D_FOLSM_EDCOCA_NU2_CVP(-2)*cfs_taf(-2))  /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		}
+	case JunSep {
+		condition range(month,Jun,Sep)
+		value max(0,monFolsom_EID_contract_RemainingSupplydv(-1) 
+		- D_FOLSM_WTPEDH_CVP(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_CVP(-1)*cfs_taf(-1) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		- D_FOLSM_EDCOCA_NU2_CVP(-1)*cfs_taf(-1)) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		}
+	case OctFeb {
+		condition always
+		value max(0,monFolsom_EID_contract_RemainingSupplydv(-1) 
+		- D_FOLSM_WTPEDH_CVP(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_CVP(-1)*cfs_taf(-1) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		- D_FOLSM_EDCOCA_NU2_CVP(-1)*cfs_taf(-1)) /*OCA Deliveries from Folsom are subject to EID contracts @ Folsom*/
+		}}
+	
+goal setmonFolsom_EID_contract_RemainingSupplydv {monFolsom_EID_contract_RemainingSupplydv = monFolsom_EID_contract_RemainingSupply}
+
+goal EIDDiversions { !Prioritize other supply sources over CVP water for EID
+  lhs D_FOLSM_WTPEDH_CVP + D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP
+  case OctMar {
+    condition   range(month,Oct,Mar)
+    rhs         0.
+    lhs>rhs     penalty 10. }}
+
+goal limD_FOLSM_EID_CVP {D_FOLSM_WTPEDH_CVP + D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP  < monFolsom_EID_contract_RemainingSupply*taf_cfs} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  		
+!!!!!!!! (C) Project 184 water Permit 21112 Water !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!P-184 water is made up of direct diversion (DD) water and storage withdrawal (SW) water
+!EID will use this water right water from November through July
+define D_FOLSM_WTPEDH_P21112_WR     {std kind 'DIVERSION' units 'CFS'} !Transmission of Project 184 water under permit 21112
+define D_FOLSM_EDCOCA_NU1_P21112_WR {std kind 'DIVERSION' units 'CFS'} !Transmission of CVP water for M&I use to EDCOCA_NU1  		
+define D_FOLSM_EDCOCA_NU2_P21112_WR {std kind 'DIVERSION' units 'CFS'} !Transmission of CVP water for M&I use to EDCOCA_NU2
+define D_FOLSM_EDCOCA_NA1_P21112_WR {std kind 'DIVERSION' units 'CFS'} !Transmission of CVP water for Ag use to EDCOCA_NA1		
+define D_FOLSM_EDCOCA_NA2_P21112_WR {std kind 'DIVERSION' units 'CFS'} !Transmission of CVP water for Ag use to EDCOCA_NA2
+
+define annFolsom_EID_WR {value 8.5 + 8.5*LODflag} !Annual contract amount for P21112 (TAF)
+
+! Direct Diversion
+!Direct diversion is limited to a maximum diversion of 156 cfs, and 15 TAF/yr
+!It is also limited to the flow in the South Fork American River near Kyburz (C_SFA066 + D_SFA066_EDC000), less the import of water from Echo Lake (D_ECHOL_ELC001).
+!Water imported from Echo Lake can only be diverted at the El Dorado Forebay.
+!Period of direct diversion is from November 1 to July 31.  
+define D_FOLSM_WTPEDH_P21112_WR_DD     {std kind 'DIVERSION' units 'CFS'} !P-184 water under permit 21112 - direct diversion
+define D_FOLSM_EDCOCA_NU1_P21112_WR_DD {std kind 'DIVERSION' units 'CFS'}		
+define D_FOLSM_EDCOCA_NU2_P21112_WR_DD {std kind 'DIVERSION' units 'CFS'} 
+define D_FOLSM_EDCOCA_NA1_P21112_WR_DD {std kind 'DIVERSION' units 'CFS'} 	
+define D_FOLSM_EDCOCA_NA2_P21112_WR_DD {std kind 'DIVERSION' units 'CFS'} 
+
+define annFolsom_EID_WR_DD {value 7.5+7.5*LODflag} 
+
+!keeping track of how much is used
+define P21112_DD_RemainingSupplydv {std kind 'SUPPLY' units 'TAF'}
+
+define P21112_DD_RemainingSupply {
+	case November {
+		condition month==Nov
+		value annFolsom_EID_WR_DD}
+	case DecJul {
+		condition range(month,Dec,Jul)
+		value P21112_DD_RemainingSupplydv(-1) 
+		- D_FOLSM_WTPEDH_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU2_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NA1_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NA2_P21112_WR_DD(-1)*cfs_taf(-1)}			
+	case AugOct {
+		condition always
+		value 0.}}
+	
+goal setP21112_DD_RemainingSupplydv {P21112_DD_RemainingSupplydv=P21112_DD_RemainingSupply}
+
+goal lim_P21112_DD                   {D_FOLSM_WTPEDH_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_DD < 156} !Limit total direct diversion to 156 CFS
+goal limD_FOLSM_EID_P21112_WR_DD     {D_FOLSM_WTPEDH_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_DD < P21112_DD_RemainingSupply*taf_cfs}
+goal limSFA_D_FOLSM_EID_P21112_WR_DD {D_FOLSM_WTPEDH_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_DD < C_SFA066 + D_SFA066_EDC000 - D_ECHOL_ELC001} !Check on subtracting out flow to EID at Forebay (so as not to double count)
+
+!Storage withdrawal
+!Diversion of storage withdrawals must be less than the release from storage in Lake Aloha, Caples Lake, and Silver Lake).
+define D_FOLSM_WTPEDH_P21112_WR_SW      {std kind 'DIVERSION' units 'CFS'} !P-184 water under permit 21112 - storage withdrawals (Aloha, Caples, Silver Lakes)
+define D_FOLSM_EDCOCA_NU1_P21112_WR_SW  {std kind 'DIVERSION' units 'CFS'}		
+define D_FOLSM_EDCOCA_NU2_P21112_WR_SW  {std kind 'DIVERSION' units 'CFS'} 
+define D_FOLSM_EDCOCA_NA1_P21112_WR_SW  {std kind 'DIVERSION' units 'CFS'} 	
+define D_FOLSM_EDCOCA_NA2_P21112_WR_SW  {std kind 'DIVERSION' units 'CFS'} 
+
+define P21112_WR_RemainingSupplydv {std kind 'SUPPLY' units 'TAF'}
+
+define P21112_WR_RemainingSupply {
+	case October {
+		condition month==Oct
+		value annFolsom_EID_WR}
+	case NovJul {
+		condition range(month,Nov,Jul)
+		value 0.}
+	case August {
+		condition month==Aug
+		value max(annFolsom_EID_WR - (15. - (P21112_DD_RemainingSupplydv(-1)		
+		- D_FOLSM_WTPEDH_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU2_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NA1_P21112_WR_DD(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NA2_P21112_WR_DD(-1)*cfs_taf(-1))) 
+			- D_FOLSM_WTPEDH_P21112_WR_SW(prevOct)*cfs_taf(prevOct)
+			- D_FOLSM_EDCOCA_NU1_P21112_WR_SW(prevOct)*cfs_taf(prevOct)
+			- D_FOLSM_EDCOCA_NU2_P21112_WR_SW(prevOct)*cfs_taf(prevOct)
+			- D_FOLSM_EDCOCA_NA1_P21112_WR_SW(prevOct)*cfs_taf(prevOct)
+			- D_FOLSM_EDCOCA_NA2_P21112_WR_SW(prevOct)*cfs_taf(prevOct)
+			,0.)}
+	case September {
+		condition always
+		value max(P21112_WR_RemainingSupplydv(-1) 			- D_FOLSM_WTPEDH_P21112_WR_SW(-1)*cfs_taf(-1)
+			- D_FOLSM_EDCOCA_NU1_P21112_WR_SW(-1)*cfs_taf(-1)
+			- D_FOLSM_EDCOCA_NU2_P21112_WR_SW(-1)*cfs_taf(-1)
+			- D_FOLSM_EDCOCA_NA1_P21112_WR_SW(-1)*cfs_taf(-1)
+			- D_FOLSM_EDCOCA_NA2_P21112_WR_SW(-1)*cfs_taf(-1),0)}}
+						!		value max(annFolsom_EID_WR - P21112_DD_RemainingSupply,0.)}}
+	
+goal limitD_FOLSM_EID_P21112_WR_SW  {D_FOLSM_WTPEDH_P21112_WR_SW + D_FOLSM_EDCOCA_NU1_P21112_WR_SW + D_FOLSM_EDCOCA_NU2_P21112_WR_SW + D_FOLSM_EDCOCA_NA1_P21112_WR_SW + D_FOLSM_EDCOCA_NA2_P21112_WR_SW < P21112_WR_RemainingSupply*taf_cfs}
+goal setP21112_WR_RemainingSupplydv {P21112_WR_RemainingSupplydv=P21112_WR_RemainingSupply}
+
+define P21112_SW {alias (D_FOLSM_WTPEDH_P21112_WR_SW + D_FOLSM_EDCOCA_NU1_P21112_WR_SW + D_FOLSM_EDCOCA_NU2_P21112_WR_SW + D_FOLSM_EDCOCA_NA1_P21112_WR_SW + D_FOLSM_EDCOCA_NA2_P21112_WR_SW)*cfs_taf kind 'DIVERSION' units 'TAF'}
+define P21112_DD {alias (D_FOLSM_WTPEDH_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_DD)*cfs_taf kind 'DIVERSION' units 'TAF'}
+!only limited to storage releases
+goal limD_FOLSM_EID_P21112_WR_SW {
+  lhs D_FOLSM_WTPEDH_P21112_WR_SW + D_FOLSM_EDCOCA_NU1_P21112_WR_SW + D_FOLSM_EDCOCA_NU2_P21112_WR_SW + D_FOLSM_EDCOCA_NA1_P21112_WR_SW + D_FOLSM_EDCOCA_NA2_P21112_WR_SW
+  case AugSep {
+    condition   range(month,Aug,Sep)
+    rhs         C_ALOHA + C_CAPLS + C_SILVR - I_ALOHA - I_CAPLS - I_SILVR - E_ALOHA - E_CAPLS - E_SILVR
+    lhs<rhs     penalty 0
+    lhs>rhs     constrain }
+   case October {
+    condition   month==Oct
+    rhs         C_ALOHA + C_CAPLS + C_SILVR - I_ALOHA - I_CAPLS - I_SILVR - E_ALOHA - E_CAPLS - E_SILVR
+    lhs<rhs     penalty 0
+    lhs>rhs     constrain }}
+
+goal setD_FOLSM_WTPEDH_P21112_WR      {D_FOLSM_WTPEDH_P21112_WR     = D_FOLSM_WTPEDH_P21112_WR_DD     + D_FOLSM_WTPEDH_P21112_WR_SW}
+goal setD_FOLSM_EDCOCA_NU1_P21112_WR  {D_FOLSM_EDCOCA_NU1_P21112_WR = D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_SW} 		
+goal setD_FOLSM_EDCOCA_NU2_P21112_WR  {D_FOLSM_EDCOCA_NU2_P21112_WR = D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_SW}
+goal setD_FOLSM_EDCOCA_NA1_P21112_WR  {D_FOLSM_EDCOCA_NA1_P21112_WR = D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_SW}		
+goal setD_FOLSM_EDCOCA_NA2_P21112_WR  {D_FOLSM_EDCOCA_NA2_P21112_WR = D_FOLSM_EDCOCA_NA2_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_SW}
+
+!Prioritize other sources before LTWAC water
+goal EIDDiversions2 {
+  lhs D_FOLSM_WTPEDH_P21112_WR+D_FOLSM_EDCOCA_NU1_P21112_WR + D_FOLSM_EDCOCA_NU2_P21112_WR+D_FOLSM_EDCOCA_NA1_P21112_WR + D_FOLSM_EDCOCA_NA2_P21112_WR
+  case AprSep {
+    condition   range(month,Apr,Sep)
+    rhs         0.
+    lhs>rhs     penalty 10. }}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!! (D) Pre-1914/Ditch and License 2184 through [LTWAC 06-WC-20-3315] !!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define D_FOLSM_WTPEDH_Ditch_WR      {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_EDCOCA_NU1_Ditch_WR  {std kind 'DIVERSION' units 'CFS'}		
+define D_FOLSM_EDCOCA_NU2_Ditch_WR  {std kind 'DIVERSION' units 'CFS'} 
+
+define annFolsom_Ditch_EID {
+   	case DryCritYear{
+   	      condition WY_EID >=4
+   	      value 3.000}
+   	case otherwise{
+   	      condition always
+   	      value 4.560}}
+  				
+define annFolsom_Ditch_WR {value annFolsom_Ditch_EID} !Annual Ditch/Weber contract amount (TAF)
+
+define monFolsom_Ditch_WR_RemainingSupplydv {std kind 'SUPPLY' units 'TAF'}
+define monFolsom_Ditch_WR_RemainingSupply {
+	case FirstWY {
+		condition wateryear==BgnWY .and. month==Oct
+		value annFolsom_Ditch_EID}
+	case March {
+		condition month == Mar
+		value annFolsom_Ditch_EID}	
+	case April {
+		condition month == Apr
+		value annFolsom_Ditch_EID
+		- D_FOLSM_WTPEDH_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU2_Ditch_WR(-1)*cfs_taf(-1)}	
+	case monthMay {
+		condition month == May
+		value annFolsom_Ditch_EID
+		- D_FOLSM_WTPEDH_Ditch_WR(-1)*cfs_taf(-1)     - D_FOLSM_WTPEDH_Ditch_WR(-2)*cfs_taf(-2)
+		- D_FOLSM_EDCOCA_NU1_Ditch_WR(-1)*cfs_taf(-1) - D_FOLSM_EDCOCA_NU1_Ditch_WR(-2)*cfs_taf(-2)
+		- D_FOLSM_EDCOCA_NU2_Ditch_WR(-1)*cfs_taf(-1) - D_FOLSM_EDCOCA_NU2_Ditch_WR(-2)*cfs_taf(-2)}
+	case JunSep {
+		condition range(month,Jun,Sep)
+		value monFolsom_Ditch_WR_RemainingSupplydv(-1) 
+		- D_FOLSM_WTPEDH_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU2_Ditch_WR(-1)*cfs_taf(-1)}
+	case OctFeb {
+		condition always
+		value monFolsom_Ditch_WR_RemainingSupplydv(-1) 
+		- D_FOLSM_WTPEDH_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU1_Ditch_WR(-1)*cfs_taf(-1)
+		- D_FOLSM_EDCOCA_NU2_Ditch_WR(-1)*cfs_taf(-1)}}
+		
+	
+goal setmonFolsom_Ditch_WR_RemainingSupplydv {monFolsom_Ditch_WR_RemainingSupplydv = monFolsom_Ditch_WR_RemainingSupply}
+goal limD_FOLSM_Ditch_WR    {D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_EDCOCA_NU1_Ditch_WR + D_FOLSM_EDCOCA_NU2_Ditch_WR  < monFolsom_Ditch_WR_RemainingSupply*taf_cfs}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!! (E) El Dorado Forebay Supplies - Project 184 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Monthly pattern based on 1994-2015 data (excluding 1997-1998 missing data). Annual volume based on 2006-2015 deliveries.
+
+The District has a consumptive water entitlement of 15,080 acre-feet per year delivery at the Forebay. 
+The entitlement is a pre-1914 water right, and diversions are made in compliance with the 40-year Federal Energy Regulatory Commission 
+Project 184 operating license issued to the District in October 2006. 
+Because the full entitlement can be provided in all years including the most severe historic single dry years of 1977 and 2015, 
+this source of water is considered assured, and not subject to shortage during droughts. (2015 UWMP)
+*/
+
+define UD_EIDForebay {value 9. + 6.08*LODflag} !9 TAF based on historical. Assume full entitlement with future LOD
+define Forebay_monthlypattern {select fraction from ElDoradoForebay_monthlypattern where month=month}
+
+goal ForebayDistribution {D_EDC021_WTPRS1 + D_EDC021_EDCOCA_NA2 + D_EDC021_EDCOCA_NA3 < UD_EIDForebay*Forebay_monthlypattern*taf_cfs}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! Sum Annual Demands for Output  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SumUD_ELDID_NU1 {std kind 'URBAN-DEMAND' units 'TAF'}
+define SumUD_ELDID_NU1_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) UD_ELDID_NU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_ELDID_NU1(-1)}}
+        
+goal setSumUD_ELDID_NU1 {SumUD_ELDID_NU1=SumUD_ELDID_NU1_sv}
+
+define SumUD_ELDID_NU2 {std kind 'URBAN-DEMAND' units 'TAF'}
+define SumUD_ELDID_NU2_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) UD_ELDID_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_ELDID_NU2(-1)}}
+        
+goal setSumUD_ELDID_NU2 {SumUD_ELDID_NU2=SumUD_ELDID_NU2_sv}
+
+define SumAW_ELDID_NA1 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'}
+define SumAW_ELDID_NA1_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) AW_ELDID_NA1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_ELDID_NA1(-1)}}
+        
+goal setSumAW_ELDID_NA1 {SumAW_ELDID_NA1=SumAW_ELDID_NA1_sv}
+
+define SumAW_ELDID_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'}
+define SumAW_ELDID_NA2_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) AW_ELDID_NA2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_ELDID_NA2(-1)}}
+        
+goal setSumAW_ELDID_NA2 {SumAW_ELDID_NA2=SumAW_ELDID_NA2_sv}
+
+/*define SumAW_ELDID_NA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'}
+define SumAW_ELDID_NA3_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) AW_ELDID_NA3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_ELDID_NA3(-1)}}
+        
+goal setSumAW_ELDID_NA3 {SumAW_ELDID_NA3=SumAW_ELDID_NA3_sv}*/
+
+define SumUD_GDPUD_NU {std kind 'URBAN-DEMAND' units 'TAF'}
+define SumUD_GDPUD_NU_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) UD_GDPUD_NU(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_GDPUD_NU(-1)}}
+        
+goal setSumUD_GDPUD_NU {SumUD_GDPUD_NU=SumUD_GDPUD_NU_sv}
+
+define SumAW_GDPUD_NA {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'}
+define SumAW_GDPUD_NA_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) AW_GDPUD_NA(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_GDPUD_NA(-1)}}
+        
+goal setSumAW_GDPUD_NA {SumAW_GDPUD_NA=SumAW_GDPUD_NA_sv}
+
+define SumUD_EDCOCA_NU1 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_EDCOCA_NU1_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_EDCOCA_NU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_EDCOCA_NU1(-1)
+        }}
+goal setSumUD_EDCOCA_NU1 {SumUD_EDCOCA_NU1=SumUD_EDCOCA_NU1_sv}
+
+define SumUD_EDCOCA_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_EDCOCA_NU2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_EDCOCA_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_EDCOCA_NU2(-1)
+        }}
+goal setSumUD_EDCOCA_NU2 {SumUD_EDCOCA_NU2=SumUD_EDCOCA_NU2_sv}
+
+define SumUD_EDCOCA_NU3 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_EDCOCA_NU3_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_EDCOCA_NU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_EDCOCA_NU3(-1)
+        }}
+goal setSumUD_EDCOCA_NU3 {SumUD_EDCOCA_NU3=SumUD_EDCOCA_NU3_sv}
+
+define SumAW_EDCOCA_NA1 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_EDCOCA_NA1_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) AW_EDCOCA_NA1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_EDCOCA_NA1(-1)
+        }}
+goal setSumAW_EDCOCA_NA1 {SumAW_EDCOCA_NA1=SumAW_EDCOCA_NA1_sv}
+
+define SumAW_EDCOCA_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_EDCOCA_NA2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) AW_EDCOCA_NA2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_EDCOCA_NA2(-1)
+        }}
+goal setSumAW_EDCOCA_NA2 {SumAW_EDCOCA_NA2=SumAW_EDCOCA_NA2_sv}
+
+define SumAW_EDCOCA_NA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_EDCOCA_NA3_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) AW_EDCOCA_NA3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumAW_EDCOCA_NA3(-1)
+        }}
+goal setSumAW_EDCOCA_NA3 {SumAW_EDCOCA_NA3=SumAW_EDCOCA_NA3_sv}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! Summary  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Total Project 184 Permit 21112 water
+define D_FOLSM_P21112_WR {std kind 'DIVERSION' units 'CFS'}
+goal conD_FOLSM_EID_P21112_WR {D_FOLSM_P21112_WR = D_FOLSM_WTPEDH_P21112_WR_DD      + D_FOLSM_WTPEDH_P21112_WR_SW
+						 + D_FOLSM_EDCOCA_NU1_P21112_WR_DD + D_FOLSM_EDCOCA_NU1_P21112_WR_SW
+	                                         + D_FOLSM_EDCOCA_NU2_P21112_WR_DD + D_FOLSM_EDCOCA_NU2_P21112_WR_SW
+	                                         + D_FOLSM_EDCOCA_NA1_P21112_WR_DD + D_FOLSM_EDCOCA_NA1_P21112_WR_SW 
+	                                         + D_FOLSM_EDCOCA_NA2_P21112_WR_DD + D_FOLSM_EDCOCA_NA2_P21112_WR_SW}
+	                                         
+!Total Pre-1914 Weber/Ditch Water
+define D_FOLSM_Ditch_WR {std kind 'DIVERSION' units 'CFS'}
+goal setD_FOLSM_Ditch_WR {D_FOLSM_Ditch_WR = D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_EDCOCA_NU1_Ditch_WR + D_FOLSM_EDCOCA_NU2_Ditch_WR}
+
+!Total Folsom Water Rights Water
+define D_FOLSM_EDCWA_WR {std kind 'DIVERSION' units 'CFS'}
+goal conD_FOLSM_WTPEDH_WR {D_FOLSM_EDCWA_WR = D_FOLSM_P21112_WR + D_FOLSM_Ditch_WR}
+   		
+!!!!!!!!!! Total Folsom Res. contract (CVP + Water Rights) water!!!!!!!!!!
+goal conD_FOLSM_WTPEDH	   {D_FOLSM_WTPEDH     = D_FOLSM_WTPEDH_CVP + D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_WTPEDH_P21112_WR}
+goal conD_FOLSM_EDCOCA_NU1 {D_FOLSM_EDCOCA_NU1 = D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU1_Ditch_WR + D_FOLSM_EDCOCA_NU1_P21112_WR} !OCA Urban dem can be met from CVP and WR
+goal conD_FOLSM_EDCOCA_NU2 {D_FOLSM_EDCOCA_NU2 = D_FOLSM_EDCOCA_NU2_CVP + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR} !OCA Urban dem can be met from CVP and WR
+goal conD_FOLSM_EDCOCA_NA1 {D_FOLSM_EDCOCA_NA1 = D_FOLSM_EDCOCA_NA1_P21112_WR}
+goal conD_FOLSM_EDCOCA_NA2 {D_FOLSM_EDCOCA_NA2 = D_FOLSM_EDCOCA_NA2_P21112_WR} 
+
+goal zeroLTWAC_FolsomAg {D_FOLSM_EDCOCA_NA2_P21112_WR + D_FOLSM_EDCOCA_NA1_P21112_WR =  0.} !Water through P21112-Folsom LTWAC for M&I Use only
+
+define D_FOLSM_EID_WR   {std kind 'DIVERSION' units 'CFS'}
+goal setD_FOLSM_EID_WR {D_FOLSM_EID_WR =   D_FOLSM_WTPEDH_Ditch_WR      + D_FOLSM_WTPEDH_P21112_WR
+                                              + D_FOLSM_EDCOCA_NU1_Ditch_WR  + D_FOLSM_EDCOCA_NU1_P21112_WR
+                                              + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR
+                                              + D_FOLSM_EDCOCA_NA1_P21112_WR + D_FOLSM_EDCOCA_NA2_P21112_WR}
+
+define D_FOLSM_EDCOCA      {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_EDCOCA_WR   {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_EDCOCA_CVP  {std kind 'DIVERSION-CVP' units 'CFS'}
+
+
+goal setD_FOLSM_EDCOCA     {D_FOLSM_EDCOCA = D_FOLSM_EDCOCA_WR + D_FOLSM_EDCOCA_CVP}
+goal setD_FOLSM_EDCOCA_WR  {D_FOLSM_EDCOCA_WR = D_FOLSM_EDCOCA_NU1_Ditch_WR  + D_FOLSM_EDCOCA_NU1_P21112_WR + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR + D_FOLSM_EDCOCA_NA1_P21112_WR + D_FOLSM_EDCOCA_NA2_P21112_WR}                         
+goal setD_FOLSM_EDCOCA_CVP {D_FOLSM_EDCOCA_CVP = D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP} 
+
+define D_FOLSM_EDC_CVP     {std kind 'DIVERSION' units 'CFS'}   
+
+                                                                                       
+goal setD_FOLSM_WTPEDH_WR  {D_FOLSM_WTPEDH_WR  = D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_WTPEDH_P21112_WR }                                             
+goal setD_FOLSM_EDC_CVP    {D_FOLSM_EDC_CVP    = D_FOLSM_WTPEDH_CVP + D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP}
+
+
+

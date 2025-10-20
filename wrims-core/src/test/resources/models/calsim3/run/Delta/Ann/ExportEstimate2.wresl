@@ -1,0 +1,52 @@
+/*
+This file imposes a minimum export level for each project (SWP,CVP).
+Estimates are based on current month delivery and San Luis rule-curve.
+*/
+
+!*********************************************************************************************
+! Estimate of Total Export (specific to South Delta Intakes)
+
+!Take VAMP restrictions in Apr-May into account for total exports
+define pulse_cap {value min(EstSWPSodExp+EstCVPSodExp, max(1500.0, C_SJR070[SJR_WQ2]))}
+
+
+define EstTotExp {
+  case NoSalinityControlPossible{
+    condition abs(JP_m_sv) <= 0.001 .and. int(JP_b_sv) == 0 .or.
+              abs(EM_m_sv) <= 0.001 .and. int(EM_b_sv) == 0 .or.
+              abs(CO_m_sv) <= 0.001 .and. int(CO_b_sv) == 0 .or.
+              abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value ExportCap}
+  case HighCost{
+    condition JP_Sac_ZeroExp_sv2 >= ANNcap .or.
+              EM_Sac_ZeroExp_sv2 >= ANNcap .or.
+              CO_Sac_ZeroExp_sv2 >= ANNcap .or.
+              RS_Sac_ZeroExp_sv2 >= ANNcap
+    value ExportCap}
+  case vamp_apr{
+    condition month == APR
+    value (EstSWPSodExp+EstCVPSodExp)*14.0/daysin + pulse_cap*16.0/daysin}
+  case vamp_may{
+    condition month == MAY
+    value (EstSWPSodExp+EstCVPSodExp)*16.0/daysin + pulse_cap*15.0/daysin}
+  case normal{
+    condition always
+    value EstSWPSodExp + EstCVPSodExp}
+}
+
+define EstTotExpTD {
+    case noIF{
+    condition JonesIFSwitch == 0 .and. BanksIFSwitch == 0
+    value     EstTotExp }
+    case noTD{
+    condition TDExports == 0
+    value     0. }
+    case IFandTD{
+    condition always
+    value     min(EstTotExp, max(3000., min(max_IF_cap,11000.) - TracyMaxAllow - BanksMaxAllow)) }
+}
+
+define exp_est_total {alias EstTotExp kind 'EXPORT-ESTIMATE' units 'CFS'}
+define exp_est_TD    {alias EstTotExpTD kind 'EXPORT-ESTIMATE' units 'CFS'}
+
+!*********************************************************************************************

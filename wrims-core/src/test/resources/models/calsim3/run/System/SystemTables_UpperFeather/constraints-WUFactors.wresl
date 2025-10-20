@@ -1,0 +1,56 @@
+/*
+File Name: constraints-WUfactors.wresl
+CalSim 3.0 System File
+
+Purpose:
+Apply water use factors
+ 
+Naming takes the following form:
+ EL_{source prefix}_{demand unit} - evaporative loss (non-recoverable)
+ PL_{source prefix}_{demand unit} - percolation loss (to groundwater)
+ RL_{source prefix}_{demand unit} - return flow loss (seepage loss to canal toe drain, available for reuse)
+ SL_{source prefix}_{demand unit} - spill loss (canal spill to main drain, not available for reuse)
+  
+ DL_{source prefix}_{demand unit}  - total conveyance loss  associated with diversion (EL + PL + RL + SL)
+ DL_{demand unit}                  - total conveyance loss  associated with demand unit from multiple diversion arcs
+  
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 13_NA -
+!==============================
+goal setEV_13_NA    {EV_13_NA = D_OWC000_13_NA * EVF_OWC000_13_NA + D_MNRRH_13_NA * EVF_MNRRH_13_NA} 
+goal setDP_13_NA    {DP_13_NA = D_OWC000_13_NA * DPF_OWC000_13_NA + D_MNRRH_13_NA * DPF_MNRRH_13_NA} 
+goal setLF_13_NA    {LF_13_NA = D_OWC000_13_NA * LFF_OWC000_13_NA + D_MNRRH_13_NA * LFF_MNRRH_13_NA} 
+goal setOS_13_NA    {OS_13_NA = D_OWC000_13_NA * OSF_OWC000_13_NA + D_MNRRH_13_NA * OSF_MNRRH_13_NA} 
+goal setDL_13_NA    {DL_13_NA = EV_13_NA  + DP_13_NA  + LF_13_NA + OS_13_NA}
+! reuse
+goal setRU_13_NA    {RU_13_NA = min(TW_13_NA, RUFR_13_NA*AWR_13_NA + RUFO_13_NA*AWO_13_NA)} 
+goal setAW_13_NA    {AW_13_NA = AWR_13_NA + AWO_13_NA} 
+! riparian loss
+goal setRP_13_NA    {RP_13_NA = AW_13_NA * RPF_13_NA}
+
+!==============================
+! 13_NU1 -
+!==============================
+goal setEL_WTPMNR_13_NU1 {EL_WTPMNR_13_NU1 = D_WTPMNR_13_NU1  * EF_WTPMNR_13_NU1}
+goal setSL_WTPMNR_13_NU1 {SL_WTPMNR_13_NU1 = D_WTPMNR_13_NU1  * SF_WTPMNR_13_NU1}
+goal setDL_WTPMNR_13_NU1 {DL_WTPMNR_13_NU1 = EL_WTPMNR_13_NU1 + SL_WTPMNR_13_NU1}
+
+goal setEL_OROVL_13_NU1 {EL_OROVL_13_NU1 = D_OROVL_13_NU1  * EF_OROVL_13_NU1}
+goal setSL_OROVL_13_NU1 {SL_OROVL_13_NU1 = D_OROVL_13_NU1  * SF_OROVL_13_NU1}
+goal setDL_OROVL_13_NU1 {DL_OROVL_13_NU1 = EL_OROVL_13_NU1 + SL_OROVL_13_NU1}
+
+goal setDL_13_NU1   {DL_13_NU1 = DL_WTPMNR_13_NU1 + DL_OROVL_13_NU1}
+
+!==============================
+! 13_NU2 -
+!==============================
+goal setEL_MNRRH_13_NU2  {EL_MNRRH_13_NU2 = D_MNRRH_13_NU2  * EF_MNRRH_13_NU2}
+goal setSL_MNRRH_13_NU2  {SL_MNRRH_13_NU2 = D_MNRRH_13_NU2  * SF_MNRRH_13_NU2}
+goal setDL_MNRRH_13_NU2  {DL_MNRRH_13_NU2 = EL_MNRRH_13_NU2 + SL_MNRRH_13_NU2}
+
+goal setDL_13_NU2   {DL_13_NU2 = DL_MNRRH_13_NU2}

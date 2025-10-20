@@ -1,0 +1,211 @@
+/*
+File Name: PGEPowerOps.wresl
+CalSim 3.0  File for Middle Yuba, South Yuba, and Bear River Operations
+
+Purpose: Operations for Spaulding, Rollins, Bear Canal, South Yuba Canal and Drum Canal
+
+By: Puneet Khatavkar and Andy Draper April 10, 2020
+
+*/
+
+
+/*Assumptions
+ * No PGE water to Deer Creek
+ * New Castle PH at Capacity
+ * First 350 inflow to Rollins as PGE water can't be stored in Rollins
+ * Spills can be stored in Spaulding or Rollins
+ * Combined balance on Spaulding, Fordyce, Rollins, Drum canal, South Yuba Canal, NID contract amount, PCWA contract amount
+ * Assume a monthly distribution of contract amount 10 TAF for PCWA + 104 yearly
+ * Assume a monthly distribution of annual contract amount depending water year type
+ * Consider losses assuming all the water goes through Drum canal and bear river canal
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Bear River Release Computations
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SystemInflowForecast_PGE {
+        case Feb_May {condition month >= Feb .and. month <= May
+	       	      sum(i=0,May-month,1)  (I_FRDYC(i) + I_SFY048(i) + I_SPLDG(i) + min(350, I_RLLNS(i))) * cfs_taf(i) }
+	case other   {condition always
+		      value 0.0}
+	                      }
+
+define BECCap_Mon_Feb {value 400.0} ! 
+define BECCap_Mon_Mar {value 400.0} ! 
+define BECCap_Mon_Apr {value 450.0} ! 
+define BECCap_Mon_May {value 450.0} ! 
+define BECFlow {
+    case Feb_May     {condition month == Feb value BECCap_Mon_Feb*cfs_taf+BECCap_Mon_Mar*cfs_taf(1)+BECCap_Mon_Apr*cfs_taf(2)+BECCap_Mon_May*cfs_taf(3)}
+	case Mar_May {condition month == Mar value BECCap_Mon_Mar*cfs_taf+BECCap_Mon_Apr*cfs_taf(1)+BECCap_Mon_May*cfs_taf(2)}
+	case Apr_May {condition month == Apr value BECCap_Mon_Apr*cfs_taf+BECCap_Mon_May*cfs_taf(1)}
+	case mMay    {condition month == May value BECCap_Mon_May*cfs_taf}
+	case other   {condition always
+		      value 0.0}
+	                      }
+define PCWADem_Mon_Feb {value 0.0125} !Average monthly percentage PGE to PCWA contract limit
+define PCWADem_Mon_Mar {value 0.01965} !Average monthly percentage PGE to PCWA contract limit 
+define PCWADem_Mon_Apr {value 0.06404} !Average monthly percentage PGE to PCWA contract limit
+define PCWADem_Mon_May {value 0.13423} !Average monthly percentage PGE to PCWA contract limit
+define PCWAContractMax{value 110.4}
+define PCWADem {
+    case Feb_May     {condition month == Feb value (PCWADem_Mon_Feb+PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)*PCWAContractMax}
+	case Mar_May {condition month == Mar value (PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)*PCWAContractMax}
+	case Apr_May {condition month == Apr value (PCWADem_Mon_Apr+PCWADem_Mon_May)*PCWAContractMax}
+	case mMay    {condition month == May value PCWADem_Mon_May*PCWAContractMax}
+	case other   {condition always
+		      value 0.0}
+	                      }
+define NIDDem_Mon_Feb_0 {value 1.52} ! Average PCWA - NID transfer (TAF) for water year type 0 
+define NIDDem_Mon_Mar_0 {value 1.79} ! Average PCWA - NID transfer (TAF) for water year type 0
+define NIDDem_Mon_Apr_0 {value 1.91} ! Average PCWA - NID transfer (TAF) for water year type 0
+define NIDDem_Mon_May_0 {value 1.87} ! Average PCWA - NID transfer (TAF) for water year type 0
+define NIDDem_Mon_Feb_1 {value 2.59} ! Average PCWA - NID transfer (TAF) for water year type 1
+define NIDDem_Mon_Mar_1 {value 2.82} ! Average PCWA - NID transfer (TAF) for water year type 1
+define NIDDem_Mon_Apr_1 {value 2.18} ! Average PCWA - NID transfer (TAF) for water year type 1
+define NIDDem_Mon_May_1 {value 5.25} ! Average PCWA - NID transfer (TAF) for water year type 1
+define NID_PGE_WY {case Firstyear {condition wateryear == BgnWY value 1}
+				   case monthFeb{condition month == Feb value WaterYearConditions_NID_PGE_DV(-1)}
+				   case otherwise{condition always value WaterYearConditions_NID_PGE_DV(-1)}
+}
+define NIDDem {
+    case Feb_May_0     {condition month == Feb .and. NID_PGE_WY == 0  value NIDDem_Mon_Feb_0+NIDDem_Mon_Mar_0+NIDDem_Mon_Apr_0+NIDDem_Mon_May_0}
+	case Mar_May_0 {condition month == Mar .and. NID_PGE_WY == 0  value NIDDem_Mon_Mar_0+NIDDem_Mon_Apr_0+NIDDem_Mon_May_0}
+	case Apr_May_0 {condition month == Apr .and. NID_PGE_WY == 0  value NIDDem_Mon_Apr_0+NIDDem_Mon_May_0}
+	case mMay_0    {condition month == May .and. NID_PGE_WY == 0  value NIDDem_Mon_May_0}
+    case Feb_May_1     {condition month == Feb .and. NID_PGE_WY == 1  value NIDDem_Mon_Feb_1+NIDDem_Mon_Mar_1+NIDDem_Mon_Apr_1+NIDDem_Mon_May_1}
+	case Mar_May_1 {condition month == Mar .and. NID_PGE_WY == 1  value NIDDem_Mon_Mar_1+NIDDem_Mon_Apr_1+NIDDem_Mon_May_1}
+	case Apr_May_1 {condition month == Apr .and. NID_PGE_WY == 1  value NIDDem_Mon_Apr_1+NIDDem_Mon_May_1}
+	case mMay_1    {condition month == May .and. NID_PGE_WY == 1  value NIDDem_Mon_May_1}
+	case other     {condition always
+		      value 0.0}
+	                      }	 
+define NIDDemMon {
+    case Feb_May_0 {condition month == Feb .and. NID_PGE_WY == 0  value NIDDem_Mon_Feb_0}
+	case Mar_May_0 {condition month == Mar .and. NID_PGE_WY == 0  value NIDDem_Mon_Mar_0}
+	case Apr_May_0 {condition month == Apr .and. NID_PGE_WY == 0  value NIDDem_Mon_Apr_0}
+	case mMay_0    {condition month == May .and. NID_PGE_WY == 0  value NIDDem_Mon_May_0}
+    case Feb_May_1     {condition month == Feb .and. NID_PGE_WY == 1  value NIDDem_Mon_Feb_1}
+	case Mar_May_1 {condition month == Mar .and. NID_PGE_WY == 1  value NIDDem_Mon_Mar_1}
+	case Apr_May_1 {condition month == Apr .and. NID_PGE_WY == 1  value NIDDem_Mon_Apr_1}
+	case mMay_1    {condition month == May .and. NID_PGE_WY == 1  value NIDDem_Mon_May_1}
+	case other   {condition always
+		      value 0.0}
+	                      }	 
+	                                        
+define SystemOutflowForecast_PGE{value BECFlow} !+ PCWADem + NIDDem}
+define SystemLossForecast_PGE{value 0.078*SystemOutflowForecast_PGE + 0.069*BECFlow}
+define SystemStorageForecast_PGE{value S_FRDYC(-1)+S_SPLDG(-1)+S_RLLNS_PGE(-1)+SystemInflowForecast_PGE-SystemOutflowForecast_PGE-SystemLossForecast_PGE}
+define SystemTotalReleaseForecast_PGE{value max(0, SystemStorageForecast_PGE-135.338)}	!135.338 is the end of the May maximum storage in PGE reservoirs
+define PGERelease_Forecast_Mon {case FebMay {condition month >= Feb .and. month <= May value (SystemTotalReleaseForecast_PGE/(8-Month+ 1))*taf_cfs}
+								case Otherwise{condition always value 9999}}
+define C_BRR050_PGE_Forecast{std kind 'channel' units 'CFS'}
+define C_BRR050_PGE_Rest{std kind 'channel' units 'CFS'}
+goal C_BRR050_PGE_Split {C_BRR050_PGE = C_BRR050_PGE_Forecast + C_BRR050_PGE_Rest}
+goal C_BRR050_PGE_Forecast_cons {lhs C_BRR050_PGE_Forecast rhs PGERelease_Forecast_Mon
+								 lhs<rhs penalty 0
+								 lhs>rhs penalty 10000}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Spaulding Dam Level 4 Setting
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define FordyceInflowForecast_PGE {
+        case Feb_May {condition month >= Feb .and. month <= May
+	       	      sum(i=0,May-month,1)  (I_FRDYC(i)*cfs_taf(i))}
+	case other   {condition always
+		      value 0.0}
+	                      }
+define FordyceReleaseForecast{value max(0, S_FRDYC(-1) + FordyceInflowForecast_PGE - 49.426)}
+
+define FordyceReleaseMon{        case monFeb {condition month == Feb 
+	       	     value max(5*cfs_taf, S_FRDYC(-1) + I_FRDYC*cfs_taf - 21.522)*taf_cfs}
+	        case monMar {condition month == Mar 
+	       	     value max(5*cfs_taf, S_FRDYC(-1) + I_FRDYC*cfs_taf - 26.912)*taf_cfs}
+	        case monApr {condition month == Apr 
+	       	     value max(5*cfs_taf, S_FRDYC(-1) + I_FRDYC*cfs_taf - 43.068)*taf_cfs}  
+	       	case monApr {condition month == May 
+	       	     value max(5*cfs_taf, S_FRDYC(-1) + I_FRDYC*cfs_taf - 49.426)*taf_cfs}            	          
+	case other   {condition always
+		      value 0.0}}
+
+define SpauldingInflowForecast {
+        case Feb_May {condition month >= Feb .and. month <= May
+	       	      sum(i=0,May-month,1)  (I_SPLDG(i)+ I_SFY048(i))*cfs_taf(i)}
+	case other   {condition always
+		      value 0.0}
+	                      }
+define SpauldingTotalInflowForecast{value SpauldingInflowForecast + FordyceReleaseForecast}
+
+define PCWADemands_Zone1{        case monFeb {condition month == Feb 
+	       	     value 100.4*(PCWADem_Mon_Feb+PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)}
+	        case monMar {condition month == Mar 
+	       	     value 100.4*(PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)}
+	        case monApr {condition month == Apr 
+	       	     value 100.4*(PCWADem_Mon_Apr+PCWADem_Mon_May)}       	    
+	       	case monApr {condition month == Apr 
+	       	     value 100.4*(PCWADem_Mon_May)}        
+	case other   {condition always
+		      value 0.0}}
+
+define PCWADemands_Zone3{        case monFeb {condition month == Feb 
+	       	     value 9.0*(PCWADem_Mon_Feb+PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)}
+	        case monMar {condition month == Mar 
+	       	     value 9.0*(PCWADem_Mon_Mar+PCWADem_Mon_Apr+PCWADem_Mon_May)}
+	        case monApr {condition month == Apr 
+	       	     value 9.0*(PCWADem_Mon_Apr+PCWADem_Mon_May)}  
+	       	case monApr {condition month == May 
+	       	     value 9.0*(PCWADem_Mon_May)}            	          
+	case other   {condition always
+		      value 0.0}}
+
+define PCWADemands_Zone1_Mon{        case monFeb {condition month == Feb 
+	       	     value 100.4*(PCWADem_Mon_Feb)}
+	        case monMar {condition month == Mar 
+	       	     value 100.4*(PCWADem_Mon_Mar)}
+	        case monApr {condition month == Apr 
+	       	     value 100.4*(PCWADem_Mon_Apr)}       	    
+	       	case monApr {condition month == Apr 
+	       	     value 100.4*(PCWADem_Mon_May)}        
+	case other   {condition always
+		      value 0.0}}
+
+define PCWADemands_Zone3_Mon{        case monFeb {condition month == Feb 
+	       	     value 9.0*(PCWADem_Mon_Feb)}
+	        case monMar {condition month == Mar 
+	       	     value 9.0*(PCWADem_Mon_Mar)}
+	        case monApr {condition month == Apr 
+	       	     value 9.0*(PCWADem_Mon_Apr)}  
+	       	case monApr {condition month == May 
+	       	     value 9.0*(PCWADem_Mon_May)}            	          
+	case other   {condition always
+		      value 0.0}}		      
+		      
+define SpauldingMIF {
+        case Feb_May {condition month >= Feb .and. month <= May
+	       	      sum(i=0,May-month,1)  7*cfs_taf(i)}
+	case other   {condition always
+		      value 0.0}
+	                      }
+
+define SpauldingPowerRelease{value max(0, S_SPLDG(-1)-75.912+SpauldingTotalInflowForecast-NIDDem-PCWADemands_Zone1*1.152-PCWADemands_Zone3*1.3475-SpauldingMIF)}
+
+define SpauldingPowerRelease_Mon {case FebMay {condition month >= Feb .and. month <= May value (SpauldingPowerRelease/(8-Month+ 1))}
+								case Otherwise{condition always value 0}}
+
+define SPLDGLevel4Storage{
+        case monFeb {condition month == Feb 
+	       	     value min(62.690, max(10, S_SPLDG(-1)+ (FordyceReleaseMon + I_SFY048 + I_SPLDG) * cfs_taf - (PCWADemands_Zone1_Mon+NIDDemMon)*1.152- PCWADemands_Zone3_Mon*1.3475 - SpauldingPowerRelease_Mon - 7*cfs_taf))}
+	        case monMar {condition month == Mar 
+	       	     value min(62.690, max(10, S_SPLDG(-1)+ (FordyceReleaseMon + I_SFY048 + I_SPLDG) * cfs_taf - (PCWADemands_Zone1_Mon+NIDDemMon)*1.152- PCWADemands_Zone3_Mon*1.3475 - SpauldingPowerRelease_Mon - 7*cfs_taf))}
+	        case monApr {condition month == Apr 
+	       	     value min(62.690, max(10, S_SPLDG(-1)+ (FordyceReleaseMon + I_SFY048 + I_SPLDG) * cfs_taf- (PCWADemands_Zone1_Mon+NIDDemMon)*1.152 - PCWADemands_Zone3_Mon*1.3475 - SpauldingPowerRelease_Mon - 7*cfs_taf))}       	          
+	case other   {condition always
+		      value 0.0}
+	                      }
+define SPLDGLevel4Storagedv{alias SPLDGLevel4Storage kind 'Storage-Level' units 'TAF'}
+
+!goal setC_STH007Temp{C_STH007 = 100}
+!goal setC_CMBIE{C_CMBIE < 300}
+!goal setC_BEC000{C_BEC000 = 450}
+
+
+

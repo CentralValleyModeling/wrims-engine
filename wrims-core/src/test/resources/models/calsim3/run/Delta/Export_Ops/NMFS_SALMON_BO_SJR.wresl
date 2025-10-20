@@ -1,0 +1,70 @@
+! NMFS_SALMON_BO_SJR.wresl
+!
+!Action 4.2.1
+!*********************************************************************************************
+! Phase I: Interim export restriction under Action 4.2.1
+/*
+define SJRatio_MaxExp{
+        case Flood_flow{
+                condition Vernalis > 21750.    !daily flow condition - should use an equivalent monthly for this level of peak flow
+                value 999999.
+                }
+        case High_flow{
+                condition Vernalis >= 6000.
+                value Vernalis / 4.
+                }
+        case Interim{
+                condition always
+                value 1500.
+                }
+       }
+*/
+!*********************************************************************************************
+! Phase II: Export restriction under Action 4.2.1
+!
+! Determine year typing as defined in the NMFS BO
+
+define SJR_indicator  {value 6. - wyt_SJR}
+define SJR_indicator1 {value 6. - wyt_SJR_prv1}
+define SJR_indicator2 {value 6. - wyt_SJR_prv2}
+
+define SJRatio_MaxExp{
+        case Flood_flow{
+                condition Vernalis > 21750.    !daily flow condition - should use an equivalent monthly for this level of peak flow
+        value 999999.
+        }
+    case mult_drought{
+        condition (SJR_indicator + SJR_indicator1 + SJR_indicator2) <= 6.  .AND. NMforecast1 <= 1000
+        value Vernalis
+        }
+    case critical{
+        condition wyt_SJR == 5
+        value Vernalis
+        }
+        case dry{
+        condition wyt_SJR == 4
+        value Vernalis / 2.
+        }
+    case BelowN{
+        condition wyt_SJR == 3
+        value Vernalis / 3.
+            }
+    case AN_Wet{
+        condition always !wyt_SJR 2 and 1
+        value Vernalis / 4.
+        }
+       }
+
+!*********************************************************************************************
+define SJRatio_MaxExpdv {alias SJRatio_MaxExp kind 'NMFS' units 'NONE'}
+
+define NMFS_MaxExp {
+!    case AprMay {
+!       condition month>=APR .AND. month<=MAY
+!      value SJRatio_MaxExp}
+    case otherwise{
+        condition always
+        value 999999.}
+}
+define NMFS_MaxExpdv {alias NMFS_MaxExp kind 'NMFS' units 'cfs'}
+

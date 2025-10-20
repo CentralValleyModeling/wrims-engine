@@ -1,0 +1,253 @@
+! Ryan Wilbur
+! Hongbing Yin 3-22-04, revised 7-20-04
+! Aaron Miller recoded the minimum flows for oroville 10/29/09
+
+define S_Orovl_Sep {lower 25.6 upper 3424.8 kind 'STORAGE' units 'TAF'} !20231218
+
+goal setS_Orovl_Sep{
+	lhs S_Orovl_Sep
+	case OctDec{
+		condition month<=Dec
+		rhs S_Orovl(prevSep)
+	}
+	case JanSep{
+		condition always
+		rhs S_Orovl(Sep-month)
+	}
+}
+
+define oro_sep{
+	case before {
+		condition month <= Jan 
+		value S_Orovl(prevSep)
+	}
+	case after {
+		condition month <= sep 
+		value S_Orovl_Sep(-1)
+	}
+}
+
+define C4_rlx_fc{
+  case trig_fc {
+		condition oro_sep <= 1500. .and. wyt_SAC >= 2
+!		condition S_Shsta_Sep(-1) <= 1500. .and. WYT >= 2
+		value 0.75
+		}
+  case no_trig{
+		condition always
+		value 1.0
+		}
+}
+
+! determines whether 1500 dfg reduction is possible. "1" take reduction, "0" don't take - Aaron 9/2009
+! This is also used to determine whether minimum flows should be maintained Oct, Nov, Dec - Aaron 2/2010
+define C4_dfg_red_trig {INTEGER std  kind 'INTEGER' UNITS 'NONE'} 
+goal set_dfg_1 {S_Orovl_Sep < 3000. - C4_dfg_red_trig * 1500.}
+goal set_dfg_2 {S_Orovl_Sep > 1500. - C4_dfg_red_trig * 1500.}
+
+define I4_Apr_Jul_0 {value I4_4_7_Unimp}
+define I4_Apr_Jul_1 {select I6_Apr_Jul from CAM_Oro_Apr_Jul where wateryear=wateryear-1}
+define I4_Apr_Jul_2 {select I6_Apr_Jul from CAM_Oro_Apr_Jul where wateryear=wateryear-2}
+
+define C4MIF_Jan {case a{condition I4_Apr_Jul_1<=0.55*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf(4)}
+		  case b{condition I4_Apr_Jul_1<=0.60*1942. .AND. I4_Apr_Jul_2<=0.60*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf(4)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 4)}}
+define C4MIF_Feb {case a{condition I4_Apr_Jul_1<=0.55*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 5)}
+		  case b{condition I4_Apr_Jul_1<=0.60*1942. .AND. I4_Apr_Jul_2<=0.60*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 5)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 5)}}
+define C4MIF_Mar {case a{condition I4_Apr_Jul_1<=0.55*1942. value (1000. * C4_rlx_fc + 50.)*cfs_taf( 6)}
+		  case b{condition I4_Apr_Jul_1<=0.60*1942. .AND. I4_Apr_Jul_2<=0.60*1942. value (1000. * C4_rlx_fc + 50.)*cfs_taf( 6)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 6)}}
+define C4MIF_Apr {value (1000. * C4_rlx_fc + 50.)*cfs_taf( 7)} !Extra changed for Apr through Sep from 300 to 50 cfs to be more in line with current practice BGiorgi 20181227
+define C4MIF_May {value (1000. * C4_rlx_fc + 50.)*cfs_taf( 8)}
+define C4MIF_Jun {value (1000. * C4_rlx_fc + 50.)*cfs_taf( 9)}
+define C4MIF_Jul {value (1000. * C4_rlx_fc + 50.)*cfs_taf(10)}
+define C4MIF_Aug {value (1000. * C4_rlx_fc + 50.)*cfs_taf(11)}
+define C4MIF_Sep {value (1000. * C4_rlx_fc + 50.)*cfs_taf(12)}
+define C4MIF_Oct {case a{condition I4_Apr_Jul_0<=0.55*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 1)}
+		  case b{condition I4_Apr_Jul_0<=0.60*1942. .AND. I4_Apr_Jul_1<=0.60*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 1)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 1)}}
+define C4MIF_Nov {case a{condition I4_Apr_Jul_0<=0.55*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 2)}
+		  case b{condition I4_Apr_Jul_0<=0.60*1942. .AND. I4_Apr_Jul_1<=0.60*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 2)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 2)}}
+define C4MIF_Dec {case a{condition I4_Apr_Jul_0<=0.55*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 3)}
+		  case b{condition I4_Apr_Jul_0<=0.60*1942. .AND. I4_Apr_Jul_1<=0.60*1942. value (1200. * C4_rlx_fc + 50.)*cfs_taf( 3)}
+		  case c{condition always value (1700. * C4_rlx_fc + 50.)*cfs_taf( 3)}}
+/*define C4MIF_Oct {std kind 'MINFLOW' units 'TAF'}
+goal setC4MIF_Oct {lhs C4MIF_Oct case a{condition I4_Apr_Jul_0<=0.55*1942. rhs 0.25*C4_Sep*taf_cfs(12-month)*cfs_taf( 1-month)+0.25*C4MIF_Nov*taf_cfs( 2-month)*cfs_taf( 1-month)+0.5*1250.*cfs_taf( 1-month)}
+		  		 case b{condition I4_Apr_Jul_0<=0.60*1942. .AND. I4_Apr_Jul_1<=0.60*1942. rhs 0.25*C4_Sep*taf_cfs(12-month)*cfs_taf( 1-month)+0.25*C4MIF_Nov*taf_cfs( 2-month)*cfs_taf( 1-month)+0.5*1250.*cfs_taf( 1-month)}
+		  		 case c{condition always rhs 0.25*C4_Sep*taf_cfs(12-month)*cfs_taf( 1-month)+0.25*C4MIF_Nov*taf_cfs( 2-month)*cfs_taf( 1-month)+0.5*1750.*cfs_taf( 1-month)}}
+*/
+
+define(fm) C4MIF_fm{
+	case Jan {condition mv($m)==Jan value C4MIF_Jan}
+	case Feb {condition mv($m)==Feb value C4MIF_Feb}
+	case Mar {condition mv($m)==Mar value C4MIF_Mar}
+	case Apr {condition mv($m)==Apr value C4MIF_Apr}
+	case May {condition mv($m)==May value C4MIF_May}
+	case Jun {condition mv($m)==Jun value C4MIF_Jun}
+	case Jul {condition mv($m)==Jul value C4MIF_Jul}
+	case Aug {condition mv($m)==Aug value C4MIF_Aug}
+	case Sep {condition mv($m)==Sep value C4MIF_Sep}
+	case Oct {condition mv($m)==Oct value C4MIF_Oct}
+	case Nov {condition mv($m)==Nov value C4MIF_Nov}
+	case Dec {condition always value C4MIF_Dec}
+}
+
+define(fm) C4MIF_dv_fm {alias C4MIF_fm($m) kind 'FLOW' units 'TAF'}
+
+goal(fm) set_C4MIF_fm {C4_fm($m) > C4MIF_fm($m) - XX4_fm($m)}
+
+
+
+define oct_trigger_cfs {
+        select    target
+        from      cam_feather_fish_203
+        where   month = OCT}
+
+define nov_trigger_cfs {
+        select    target
+        from      cam_feather_fish_203
+        where   month = NOV}
+
+goal(fm) avoidTrigger_Oct {
+    lhs   oct_trigger_cfs*cfs_taf($m)
+    case Oct{
+    	condition mv($m)==Oct
+   		rhs C4_fm($m)  
+    	lhs>rhs   penalty 0
+    	lhs<rhs   penalty 15000
+    }
+  }
+
+goal(fm) avoidTrigger_Nov {
+    lhs nov_trigger_cfs*cfs_taf($m)
+    case Nov{
+    	condition mv($m)==Nov
+    	rhs C4_fm($m)
+    	lhs>rhs penalty 0
+    	lhs<rhs penalty 15000
+    }
+  }
+
+goal(fm) avoidTrigger_Dec {
+    lhs nov_trigger_cfs*cfs_taf($m-1)
+    case Dec{
+    	condition mv($m)==Dec
+    	rhs C4_fm($m)
+    	lhs>rhs penalty 0
+    	lhs<rhs penalty 15000
+    }
+  }
+
+define(fm) C4_hi_fm {std kind 'Penalty' units 'TAF'}
+
+  ! Maintain minimum releases if Sep storage is less than 1500 (DFG trigger)
+goal(fm) set_C4MIF_OctToDec {
+	lhs C4_fm($m) 
+	case OctDec{
+		condition mv($m)>=Oct .and. mv($m)<=Dec
+		rhs C4MIF_fm($m) + C4_hi_fm($m) + 99999 - 99999 * C4_dfg_red_trig
+		lhs<rhs penalty 0.0	
+	}
+}
+
+! Hyatt Capacity can restrict feather releases
+define(fm) C4_Cap_fm {select data from swp_limits where plant = 11, month = mv($m)}
+
+goal(fm) set_C4MAX_fm {C4_fm($m) < C4_Cap_fm($m)*cfs_taf($m) - D4_fm($m)}
+
+
+! set upper sacramento river minimum flow (keswick) using the same procedure in CALSIM II:
+
+define(fm) C3MIF_fm {std kind 'FLOW' units 'CFS'}
+
+define(fm) C3_TempCtr_fm {upper 99999 lower -99999 kind 'FLOW' units 'CFS'}
+
+define(fm) TempCtr_a{select a from CAM_TempCtrFactor where month = mv($m)}
+define(fm) TempCtr_b{select b from CAM_TempCtrFactor where month = mv($m)}
+
+goal(fm) set_C3_TempCtr_fm {C3_TempCtr_fm($m) = TempCtr_a($m) * S_Shsta($m-1) + TempCtr_b($m)}
+
+goal(fm) set_C3MIF1_fm {C3MIF_fm($m) > 3250 * cfs_taf($m)} 
+
+goal(fm) set_C3MIF2_fm {C3MIF_fm($m) > C3_TempCtr_fm($m) * cfs_taf($m)}
+
+define(fm) C3MIF_dv_fm {alias C3MIF_fm($m) kind 'FLOW' units 'TAF'}
+
+goal(fm) set_C3MIF_fm {C3_fm($m) > C3MIF_fm($m) - XX3_fm($m)}
+    
+
+! lower sacramento river minimum flow (ncp):
+/*define NCP_Nov_Mar {case a{condition              S4(-1)<=1200 value 3500.}
+                    case b{condition wyt==5 .and. S4(-1)<=1900 value 3500.}
+                    case c{condition wyt==5                    value 3500.}
+                    case d{condition              S4(-1)<=1900 value 4000.}
+		    case e{condition always                    value 4000.}}*/
+
+!define perdel_cvpag_sys {value 0.5}
+
+define NCP_Nov_Mar {
+	select flow
+	from ncp_with_relax
+	given Ag_alloc = perdv_cvpag_sys[SJR_WQ1] * 100
+	use maximum	}
+define NCP_Apr_Oct {
+	select flow
+	from ncp_with_relax
+	given Ag_alloc = perdv_cvpag_sys[SJR_WQ1] * 100
+	use maximum	}
+/*define NCP_Apr_Oct {case a{condition              S4(-1)<=1200 value 3500.}
+                    case b{condition wyt==5 .and. S4(-1)<=1900 value 3500.}
+                    case c{condition wyt==5                    value 4000.}
+                    case d{condition              S4(-1)<=1900 value 4000.}
+		    case e{condition always                    value 5000.}}*/
+define NCP_Nov_Mardv {alias NCP_Nov_Mar kind 'FLOW' units 'CFS'}
+define NCP_Apr_Octdv {alias NCP_Apr_Oct kind 'FLOW' units 'CFS'}
+
+define(fm) NCP_Control_fm{
+	case AprOct{condition (mv($m)>=Apr .and. mv($m)<=Sep) .or. mv($m)==Oct  value NCP_Apr_Oct}
+	case NovMar{condition always value NCP_Nov_Mar}
+}
+
+goal(fm) set_C30MIF_fm {C30_fm($m) > NCP_Control_fm($m)*cfs_taf($m) - XX30_fm($m)} 
+
+!lower Sacramento Max flow to prevent Fall Run dewatering BGiorgi 20191024
+define(fm) NCP_Max_Flow_fm{
+	case OctNov{condition (mv($m)>=Oct .and. mv($m)<=Nov) value 6500.} !values of 6500 based on experince of 2019, may not be the best possible values BGiorgi 20191024
+	case rest{condition always value 100000.}  !high values to never control
+}
+
+goal(fm) set_C30MAXF_fm {C30_fm($m) < NCP_Max_Flow_fm($m)*cfs_taf($m) - XX30_fm($m)}
+
+! american river minimum flow:
+define(fm) C5MIF_fm {select Amer from CAM_MinFlow where month= mv($m),wyt=wyt}
+define(fm) C5MIF_dv_fm {alias C5MIF_fm($m) kind 'FLOW' units 'TAF'}
+goal(fm) set_C5MIF_fm {C5_fm($m) > C5MIF_fm($m) - XX5_fm($m)}
+
+! trinity river minimum flow:
+!define T_wyt_OctMar {select Trinityindex from wytypes where wateryear=wateryear - 1.}
+!define T_wyt_AprSep {select Trinityindex from wytypes where wateryear=wateryear}
+define T_wyt_OctMar {value wyt_TRIN_(prevMay)}
+define T_wyt_AprSep {value wyt_Trin_frcst}
+define Minflow_C100 {select river_q from Trinitymin where month=month, wyt_TRIN=T_wyt_OctMar}
+define(fm) T_wyt_fm{
+	case JanMar{condition mv($m)>=Jan .and. mv($m)<=mar value T_wyt_OctMar}
+	case AprDec{condition always value T_wyt_AprSep}
+}
+define(fm) C1MIF_fm {select river_q from Trinitymin where month= mv($m), wyt_TRIN=T_wyt_fm($m)}
+define(fm) C1MIF_dv_fm {alias C1MIF_fm($m)*cfs_taf($m) kind 'FLOW' units 'TAF'}
+goal(fm) set_C1MIF_fm {C1_fm($m) > C1MIF_fm($m)*cfs_taf($m) - XX1_fm($m)}
+
+! set clear creek minimum flows:
+! TFFIX: based on WY types table for now, need to get this working with forecasted WY types (DONE)
+! Also need to switch to clear_crk_min_PA table based on Sac WY type to match CalSim 3.
+define S_wyt_OctFeb {value wyt_SHASTA_cvp_(PrevMay)} 
+define S_wyt_MarSep {value wyt_shasta_frcst}
+define(fm) S_wyt_fm{
+	case JanFeb{condition mv($m)>=Jan .and. mv($m)<=Feb value S_wyt_OctFeb}
+	case AprDec{condition always value S_wyt_MarSep}
+}
+define(fm) C2MIF_fm {select flow from clear_ck_min where month= mv($m),wytype=S_wyt_fm($m)}
+define(fm) C2MIF_dv_fm {alias C2MIF_fm($m)*cfs_taf($m) kind 'FLOW' units 'TAF'}
+goal(fm) set_C2MIF_fm {C2_fm($m) > C2MIF_fm($m)*cfs_taf($m) - XX2_fm($m)}

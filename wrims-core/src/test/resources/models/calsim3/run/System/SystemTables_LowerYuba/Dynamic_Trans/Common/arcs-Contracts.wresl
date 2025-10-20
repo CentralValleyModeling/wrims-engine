@@ -1,0 +1,180 @@
+
+
+/*
+File Name: arcs-contracts.wresl
+Lower Yuba River System File
+
+Purpose:
+
+Naming takes the following form:
+CLann_{ORIGIN PREFIX}_{DESTINATION}     - annual limitation on specific contractors diversion from particular source (state variable)
+CLmon_{ORIGIN PREFIX}_{DESTINATION}     - monthly limitation on specific contractors diversion from particular source (state variable)
+CL_{ORIGIN PREFIX}_{DESTINATION}        - monthly limitation on specific contractors diversion from particular source (decision variable for output)
+
+All units is TAF
+
+*/
+
+! The summation of annual applied water for CVP Ag, M&I and refuge is done in sumcvpDR_sys.wresl
+
+define RUFr1_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! Joint Board
+define RUFr2_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! Western Canal WD
+define RUFr3_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! YCWA Service Area
+define RUFr4_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! GCID
+define RUFr5_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! Others
+define RUFr6_TS	{timeseries kind 'REUSE-FACTOR' units 'NONE' } ! RD 1004
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Browns Valley ID: 14_NA !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define WRmon_FDC006_14_NA     {value 99999.}
+
+
+define SumAW_14_NA  {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_14_NA_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA) }
+    case JanEndWY {
+     condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA) }
+    case otherwise {
+        condition   always
+        value SumAW_14_NA(-1) }
+        }
+       
+goal setSumAW_14_NA      {SumAW_14_NA=SumAW_14_NA_sv}
+
+! Summation of annual applied water (April-October)
+define Sum2AW_14_NA {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Seasonal demand
+define Sum2AW_14_NA_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=6,12,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA)}
+    case aprEndWY {
+        condition month == apr .and. wateryear==EndWY
+        value (sum(i=0,5,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA))
+		+ AWR_14_NA(prevOCT)*cfs_taf(prevOCT)*(1+ RPF_14_NA - RUFR5_TS(prevOCT)) + AWO_14_NA(prevOCT)*cfs_taf(prevOCT)*(1+ RPF_14_NA - RUFo_14_NA)}
+    case april {
+        condition month == apr .and. wateryear < EndWY
+        sum(i=0,6,1) AWR_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFR5_TS(i)) + AWO_14_NA(i)*cfs_taf(i)*(1+ RPF_14_NA - RUFo_14_NA)}
+    case otherwise {
+        condition   always
+        value Sum2AW_14_NA(-1) }
+        }
+       
+goal setSum2AW_14_NA     {Sum2AW_14_NA=Sum2AW_14_NA_sv}
+
+
+define CLann_YUB013_14_NA {select contract from yuba_contracts where diversion=1} ! Annual contract amount from lookup table
+! Contract diversion limited to April to October.
+define CLmon_YUB013_14_NA     {
+     case NovMar{
+          condition month > 1 .and. month < 7
+          value 0.}
+     case otherwise{
+          condition always
+          value max(0.0,  CLann_YUB013_14_NA * (AWR_14_NA*(1+ RPF_14_NA - RUFR5_TS) + AWO_14_NA*(1+ RPF_14_NA - RUFo_14_NA))*cfs_taf / Sum2AW_14_NA_sv)}
+          }
+          
+define CL_YUB013_14_NA        {alias CLmon_YUB013_14_NA kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+define WRann_YUB013_14_NA     {select right from yuba_contracts where diversion=1} ! Annual water right amount from lookup table
+define WRmon_YUB013_14_NA     {value max(0.0,  WRann_YUB013_14_NA * (AWR_14_NA*(1+ RPF_14_NA - RUFr5_TS) + AWO_14_NA*(1+ RPF_14_NA - RUFo_14_NA))*cfs_taf / SumAW_14_NA_sv)}
+define WR_YUB013_14_NA        {alias WRmon_YUB013_14_NA kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba Water Agency - right bank: 15N_NA2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SumAW_15N_NA2               {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_15N_NA2_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) AWR_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFR2_TS(i)) + AWO_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFo_15N_NA2) } !!15N_NA2	 Changed to RUFR2 for 15N_NA2
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWR_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFR2_TS(i)) + AWO_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFo_15N_NA2) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWR_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFR2_TS(i)) + AWO_15N_NA2(i)*cfs_taf(i)*(1+ RPF_15N_NA2 - RUFo_15N_NA2) }
+    case otherwise {
+        condition   always
+        value SumAW_15N_NA2(-1) }
+        }
+       
+goal setSumAW_15N_NA2         {SumAW_15N_NA2=SumAW_15N_NA2_sv}
+ 
+define CLann_YUB011_15N_NA2   {select contract from yuba_contracts where diversion=2} ! Annual contract amount from lookup table
+define CLmon_YUB011_15N_NA2   {value max(0.0, CLann_YUB011_15N_NA2 * (AWR_15N_NA2*(1+ RPF_15N_NA2 - RUFr2_TS) + AWO_15N_NA2*(1+ RPF_15N_NA2 - RUFo_15N_NA2))*cfs_taf / SumAW_15N_NA2_sv)}
+define CL_YUB011_15N_NA2      {alias CLmon_YUB011_15N_NA2 kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+define WRann_YUB011_15N_NA2   {select right from yuba_contracts where diversion=2} ! Annual water right amount from lookup table
+define WRmon_YUB011_15N_NA2   {value max(0.0, WRann_YUB011_15N_NA2 * (AWR_15N_NA2*(1+ RPF_15N_NA2 - RUFr2_TS) + AWO_15N_NA2*(1+ RPF_15N_NA2 - RUFo_15N_NA2))*cfs_taf / SumAW_15N_NA2_sv)}
+define WR_YUB011_15N_NA2      {alias WRmon_YUB011_15N_NA2 kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba Water Agency - left bank: 15S_NA2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SumAW_15S_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumAW_15S_NA2_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) AWR_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFr5_TS(i)) + AWO_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFo_15S_NA2) } !Changed to RUFR5 for 15S_NA2  3/24/2016 Idy
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) AWR_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFr5_TS(i)) + AWO_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFo_15S_NA2) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) AWR_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFr5_TS(i)) + AWO_15S_NA2(i)*cfs_taf(i)*(1+ RPF_15S_NA2 - RUFo_15S_NA2) }
+    case otherwise {
+        condition   always
+        value SumAW_15S_NA2(-1) }
+        }
+       
+goal setSumAW_15S_NA2         {SumAW_15S_NA2=SumAW_15S_NA2_sv}
+ 
+define CLann_YUB011_15S_NA2   {select contract from yuba_contracts where diversion=3} ! Annual contract amount from lookup table 
+define CLmon_YUB011_15S_NA2   {value max(0.0, CLann_YUB011_15S_NA2 * (AWR_15S_NA2*(1+ RPF_15S_NA2 - RUFR5_TS) + AWO_15S_NA2*(1+ RPF_15S_NA2 - RUFo_15S_NA2))*cfs_taf / SumAW_15S_NA2_sv)}
+define CL_YUB011_15S_NA2      {alias CLmon_YUB011_15S_NA2 kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+define WRann_YUB011_15S_NA2   {select right from yuba_contracts where diversion=3} ! Annual/monthly water right = 0 from lookup table
+define WRmon_YUB011_15S_NA2   {value max(0.0, WRann_YUB011_15S_NA2 * (AWR_15S_NA2*(1+ RPF_15S_NA2 - RUFR5_TS) + AWO_15S_NA2*(1+ RPF_15S_NA2 - RUFo_15S_NA2))*cfs_taf / SumAW_15S_NA2_sv)}
+define WR_YUB011_15S_NA2      {alias WRmon_YUB011_15S_NA2 kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! City of Marysville: 15_NU   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SumUD_15N_NU {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumUD_15N_NU_sv {
+    case octBgnWY{
+        condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_15N_NU(i)*cfs_taf(i) }
+    case JanEndWY {
+        condition month == jan .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_15N_NU(i)*cfs_taf(i) }
+    case january {
+        condition month == jan .and. wateryear < EndWY
+        sum(i=0,11,1) UD_15N_NU(i)*cfs_taf(i) }
+    case otherwise {
+        condition   always
+        value SumUD_15N_NU(-1) }
+        }
+       
+goal setSumUD_15N_NU          {SumUD_15N_NU=SumUD_15N_NU_sv}
+ 
+define CLann_YUB003_15N_NU    {select contract from yuba_contracts where diversion=4} ! Annual contract amount from lookup table
+define CLmon_YUB003_15N_NU    {value max(0.0, CLann_YUB003_15N_NU * UD_15N_NU*cfs_taf / SumUD_15N_NU_sv)}
+define CL_YUB003_15N_NU       {alias CLmon_YUB003_15N_NU kind 'NP-CONTRACT-LIMIT' units 'TAF'}
+
+define WRann_YUB003_15N_NU    {select right from yuba_contracts where diversion=4} ! Annual/monthly water right = 0 from lookup table
+define WRmon_YUB003_15N_NU    {value max(0.0, WRann_YUB003_15N_NU * UD_15N_NU*cfs_taf / SumUD_15N_NU_sv)}
+define WR_YUB003_15N_NU       {alias WRmon_YUB003_15N_NU kind 'NP-CONTRACT-LIMIT' units 'TAF'}

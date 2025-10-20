@@ -1,0 +1,111 @@
+! Phoenix Project Operating Rules
+! Chakri 03/11/08
+
+! Lyons Reservoir level 2 set equal to level 1
+define S_LYONSlevel2 {value S_LYONSlevel1}
+goal setS_LYONSlevel2 {S_LYONS_2 < max(S_LYONSlevel2-S_LYONSlevel1,0.)}
+
+! Lyons Reservoir level 3
+! For Jan-Apr target = 4.0 taf; for May-Jun target = 4.3; for July-Dec, target is set as a function of June storage
+define trigger_mon_lyons {value 9.}
+define index_mon0_lyons {value trigger_mon_lyons-month}
+define index_mon_lyons {
+	case shift {
+		condition    index_mon0_lyons>0.
+		value        int(index_mon0_lyons - 12.) }
+	case other {
+		condition    always
+		value        int(index_mon0_lyons) }
+		}
+
+define trigger_value_lyons {
+	case firstyear {
+		condition     wateryear == 1922
+		value         5.2 }
+	case oct2dec {
+		condition     month >= oct .and. month <= dec
+		value         S_LYONS(index_mon_lyons) }
+	case jul2sep {
+		condition     month >= jul .and. month <= sep
+		value         S_LYONS(index_mon_lyons) }
+	case other {
+		condition    always
+		value        5. }
+		}
+
+define watavb_lyons {value S_PCRST(-1) + S_LYONS(-1) + (I_PCRST + I_SFS033 + I_SFS030 + I_LYONS - D_LYONS_TCN000_DEM)*cfs_taf}
+
+define S_LYONSlevel3_all {
+	case firstmon {
+		condition    month==oct .and. wateryear==1922
+		value 2.1}
+	case jan2apr {
+		condition    month >= jan .and. month <= apr
+		select       S_LYONS_level3
+		from         Stanislaus_lyons_reslevel
+		given        WaterAvb = watavb_lyons
+		use          linear
+		where        Mon = month }
+	case wetmay {
+		condition    month == may .and. frcst_nmi_may < 670
+		value	     5.4   }
+	case othermay {
+		condition    month == may
+		value        4.3 }
+	case june  {
+		condition    month == jun
+		select       S_LYONS_level3
+		from         Stanislaus_lyons_reslevel
+		given        WaterAvb = watavb_lyons
+		use          linear
+		where        Mon = month }
+        case other {
+		condition    always
+                select       Target
+                from         lyons_target
+                given        TrigVal=trigger_value_lyons
+                use          linear
+                where        Mon=month}
+		 }
+
+define S_LYONSlevel3_alldv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal ckS_LYONSlevel3_all {S_LYONSlevel3_alldv = S_LYONSlevel3_all}
+
+define S_LYONSlevel3 {
+	case janDRY {
+		condition    month == jan .and. frcst_nmi_may < 300
+		value        min(S_LYONSlevel3_all,2.1) }
+	case feb2marDRY {
+		condition    month >= feb .and. month <= mar .and. frcst_nmi_may < 300
+		value        min(S_LYONSlevel3_all,2.2) }
+	case other {
+		condition always
+		value        S_LYONSlevel3_all }
+	        }
+
+define S_LYONSlevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal setS_LYONSlevel3dv {S_LYONSlevel3dv=S_LYONSlevel3}
+
+
+goal setS_LYONSlevel3 {S_LYONS_3 < max(S_LYONSlevel3-S_LYONSlevel2,0.)}
+
+
+! Lyons Reservoir level 4
+define S_LYONSlevel4 {
+	case jan2apr {
+	        condition    month >= jan .and. month <= apr
+                value        4. }
+	case other {
+	        condition    always
+                value        S_LYONSlevel5 }
+		}
+
+goal setS_LYONSlevel4 {S_LYONS_4 < max(S_LYONSlevel4-S_LYONSlevel3,0.)}
+
+define S_LYONSlevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal setS_LYONSlevel4dv {S_LYONSlevel4dv=S_LYONSlevel4}
+
+! Lyons Reservoir level 5
+goal setS_LYONSlevel5 {S_LYONS_5 < max(S_LYONSlevel5-S_LYONSlevel4,0.)}
+define S_LYONSlevel5dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal setS_LYONSlevel5dv {S_LYONSlevel5dv=S_LYONSlevel5}

@@ -1,0 +1,29 @@
+! X2 Diversion Trigger for NODOS
+define X2DivLimitYrType {select YrType     from NODOS_Div_X2Trigger where Month = month}
+define YrDivLimit       {select YrDivLimit from NODOS_Div_X2Trigger where Month = month}
+define X2Limit          {select X2Limit    from NODOS_Div_X2Trigger where Month = month}
+define X2DivLimit       {select X2DivLimit from NODOS_Div_X2Trigger where Month = month}
+
+goal X2LimitOnExcess {
+    lhs C177A + C177B + C177C_norm + C177D + C177E
+! When the Year Type is greater than or equal to this month's limit
+!   and the previous month's X2 is greater than this month's limit
+!   only allow fill up to this month's X2DivLimit or ERP flows (does not limit EXOP operation)
+    case X2Limited {
+        condition  wyt_SAC >= X2DivLimitYrType .and. X2_last_MOD > X2Limit
+        rhs X2DivLimit + max(ERP_C5MIF - C5_ERPbase,0.)
+        lhs>rhs penalty 99999.
+        lhs<rhs penalty 0.}
+! When the Year Type is greater than or equal to this month's limit
+!   only allow fill up to this month's YrDivLimit or ERP flows (does not limit EXOP operation)
+    case YearLimited {
+        condition  wyt_SAC >= X2DivLimitYrType
+        rhs YrDivLimit + max(ERP_C5MIF - C5_ERPbase,0.)
+        lhs>rhs penalty 99999.
+        lhs<rhs penalty 0.}
+    case NotLimited {
+        condition  always
+        rhs 99999.0
+        lhs>rhs penalty 99999.
+        lhs<rhs penalty 0.}
+}

@@ -1,0 +1,54 @@
+! Pumping Limit can be used to control the pumping limitation for banks and tracy
+! Aaron 1/17/2007
+
+! Banks Pumping Plant
+define(fm) swp_exp_lim_fm {select banks from CAM_pumping_limit where month = mv($m)} 
+
+goal(fm) lim_banks_fm {
+	lhs D33D_fm($m) 
+	case JanMar{
+		condition mv($m)>=Jan .and. mv($m)<=Mar
+		rhs min(swp_exp_lim_fm($m) * cfs_taf($m),6680 * cfs_taf($m)+BanksInc_fm($m),max_swp_omr_fm($m))
+		lhs<rhs penalty 0.0
+	}
+	case AprMay{
+		condition mv($m)>=Apr .and. mv($m)<=May
+		rhs min(swp_exp_lim_fm($m) * cfs_taf($m), max_swp_omr_fm($m)) !,max_swp_sjr_ie_fm($m))
+		lhs<rhs penalty 0.0
+	}
+	case Jun{
+		condition mv($m)==Jun .or. mv($m)==Dec
+		rhs min(swp_exp_lim_fm($m) * cfs_taf($m), max_swp_omr_fm($m))
+		lhs<rhs penalty 0.0
+	}
+	case JulNov{
+		condition always
+		rhs swp_exp_lim_fm($m) * cfs_taf($m)
+		lhs<rhs penalty 0.0
+	}	
+}
+define(fm) banks_max_fm {alias swp_exp_lim_fm($m)*cfs_taf($m) kind 'FLOW' units 'TAF'}
+
+
+! Tracy Pumping Plant
+define(fm) cvp_exp_lim_fm {select tracy from CAM_pumping_limit where month = mv($m)} 
+
+goal(fm) lim_tracy_fm {
+	lhs D33E_fm($m) 
+	case JanFebMarJunDec{
+		condition (mv($m)>=Jan .and. mv($m)<=Mar) .or. mv($m)==Jun .or. mv($m)==Dec
+		rhs min(cvp_exp_lim_fm($m) * cfs_taf($m),max_cvp_omr_fm($m))
+		lhs<rhs penalty 0.0	
+	}
+	case AprMay{
+		condition mv($m)==Apr .or. mv($m)==May
+		rhs min(cvp_exp_lim_fm($m) * cfs_taf($m),max_cvp_omr_fm($m)) !,max_cvp_sjr_ie_fm($m))
+		lhs<rhs penalty 0.0
+	}
+	case JulNov{
+		condition always
+		rhs cvp_exp_lim_fm($m) * cfs_taf($m)
+		lhs<rhs penalty 0.0
+	}
+}
+define(fm) jones_max_fm {alias cvp_exp_lim_fm($m) * cfs_taf($m) kind 'FLOW' units 'TAF'}

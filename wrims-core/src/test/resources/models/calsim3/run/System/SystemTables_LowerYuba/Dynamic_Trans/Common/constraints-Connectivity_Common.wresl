@@ -1,0 +1,42 @@
+/*
+Constraints-connectivity_Common.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Dry Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMERLC    {I_MERLC - C_MERLC - E_MERLC = S_MERLC * taf_cfs - S_MERLC(-1) * taf_cfs} 
+goal continuityFDC006   {C_MERLC - D_FDC006_14_NA - C_FDC006 = 0. }!BVID Diversion
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Slate Creek
+goal continuitySLT009   {I_SLT009 - C_SLT009 - D_SLT009_SCT000 = 0. }
+goal continuitySCT000   {D_SLT009_SCT000 - C_SCT000 = 0. }
+goal continuitySLT008   {C_SLT009 - C_SLT008 = 0. }
+
+!North Yuba
+goal continuityNFY029   {I_NFY029 - C_NFY029 = 0. }
+goal continuityNFY017   {C_NFY029 + C_SLT008 - C_NFY017 = 0. }
+
+!Oregon Creek
+goal continuityOGN005   {I_OGN005 + C_LRT000 - D_OGN005_CMT000 - C_OGN005   = 0. }
+goal continuityOGN004   {C_OGN005 - C_OGN004 = 0. }
+
+!Camptonville Tunnel
+goal continuityCMT000   {D_OGN005_CMT000 - C_CMT000 = 0.0}
+
+!Lohman Rideg Tunnel
+goal continuityLRT000   {D_MFY013_LRT000 - C_LRT000 = 0. }
+
+!Middle Yuba
+goal continuityMFY013   {I_MFY013 + C_MFY044 - D_MFY013_LRT000 - C_MFY013 = 0. }
+goal continuityMFY012   {C_MFY013 - C_MFY012 = 0. }
+goal continuityMFY005   {C_MFY012 + C_OGN004 - C_MFY005 = 0. }

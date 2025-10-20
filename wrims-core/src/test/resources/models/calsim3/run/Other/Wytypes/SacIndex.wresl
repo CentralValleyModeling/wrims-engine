@@ -1,0 +1,174 @@
+! SacIndex.wresl
+! SACRAMENTO VALLEY WATER YEAR TYPE INDEX  40-30-30
+
+define C_BB_OctMar{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_SRBB(i))+(sum(i=0, Mar-month, 1) BB_fm_med[Forecast2](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_SRBB(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define C_BB_OctMar_dv{alias C_BB_OctMar kind 'index' units 'taf'}
+
+define C_BB_AprJul{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Jul-month, 1) BB_fm_med[Forecast2](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_SRBB(-1) + (sum(i=0, Jul-month, 1) BB_fm_med[Forecast2](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define C_BB_AprJul_dv{alias C_BB_AprJul kind 'index' units 'taf'}
+
+
+define i_Orovl_OctMar{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_OROV(i))+(sum(i=0, Mar-month, 1) I_Orovl_fm_Med[SWPForecast](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_OROV(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Orovl_OctMar_dv{alias i_Orovl_OctMar kind 'index' units 'taf'}
+
+define i_Orovl_AprJul{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Jul-month, 1) I_Orovl_fm_Med[SWPForecast](i)
+	}
+	case MonthMay{
+		condition month==May 
+		value UNIMP_OROV(-1) + (sum(i=0, Jul-month, 1) I_Orovl_fm_Med[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Orovl_AprJul_dv{alias i_Orovl_AprJul kind 'index' units 'taf'}
+
+
+define i_Folsm_OctMar{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_FOLS(i))+(sum(i=0, Mar-month, 1) I_Folsm_fm_med[Forecast2](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_FOLS(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Folsm_OctMar_dv{alias i_Folsm_OctMar kind 'index' units 'taf'}
+
+define i_Folsm_AprJul{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Jul-month, 1) I_Folsm_fm_med[Forecast2](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_FOLS(-1) + (sum(i=0, Jul-month, 1) I_Folsm_fm_med[Forecast2](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Folsm_AprJul_dv{alias i_Folsm_AprJul kind 'index' units 'taf'}
+
+
+define yuba_OctMar{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_YUBA(i))+(sum(i=0, Mar-month, 1) yuba_fm_Med[SWPForecast](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_YUBA(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define yuba_OctMar_dv{alias yuba_OctMar kind 'index' units 'taf'}
+
+define yuba_AprJul{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Jul-month, 1) yuba_fm_Med[SWPForecast](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_YUBA(-1) + (sum(i=0, Jul-month, 1) yuba_fm_Med[SWPForecast](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define yuba_AprJul_dv{alias yuba_AprJul kind 'index' units 'taf'}
+
+
+define SacIndex{ 
+    case OCTtoDec {
+         condition  month >= OCT .and. month <= Dec !water year type index for Fish and Wildlife standards in ANN (wyt_ann) renew in Jan
+         value SacIndex_dv(prevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value SacIndex_dv(prevMay)
+         }
+    case rest {
+         condition  always
+	 value 0.4*(C_BB_AprJul+i_Orovl_AprJul+i_Folsm_AprJul+yuba_AprJul)+0.3*(C_BB_OctMar+i_Orovl_OctMar+i_Folsm_OctMar+yuba_OctMar)+0.3*min(10000, SacIndexPrev)
+	}
+}
+define SacIndex_dv{alias SacIndex kind 'index' units 'taf'}
+
+define WYT_Sac_Frcst{
+	case Wet{
+		condition SacIndex>9200
+		value 1
+	}	
+	case AN{
+		condition SacIndex>7800
+		value 2
+	}	
+	case BN{
+		condition SacIndex>6500
+		value 3
+	}
+	case Dry{
+		condition SacIndex>5400
+		value 4
+	}
+	case Critical{
+		condition always
+		value 5
+	}
+}
+define WYT_Sac_Frcst_dv{alias WYT_Sac_Frcst kind 'wateryeartype' units 'none'}

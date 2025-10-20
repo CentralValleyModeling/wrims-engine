@@ -1,0 +1,140 @@
+!WR_RanchoMurieta.wresl
+
+/*
+Rancho Murieta CSD serves the community of Rancho Murieta, a population of approximately 6,000 people. 
+Surface water is diverted from the Cosumnes River at Granlees Dam, which is located x miles below the USGS gauge at Michigan Bar. 
+
+Annual water demands are approximately 1.9 TAF. River water is stored in three small reservoirs (Calero, Chesboro, and Clementia).
+ 
+Water diverted under Water Right Permit 16762 (Application No. 23416) is subject to the following conditions:
+•	Period of direct diversion and diversion to storage is November 1 through May 31. 
+•	The maximum diversion rate for direct diversion is 6 cfs. The maximum allowable diversion rate to storage is 46 cfs.
+•	The maximum diversion to storage is 4,050 acre-feet per water year. 
+•	The maximum total diversion shall not exceed 6,368 acre-feet per water year.
+•	No water may be diverted when river flows are less than 70 cfs at the Michigan Bar gauge.
+	•	For river flow between 70 cfs and 175 cfs, a maximum diversion rate of 6 cfs is allowed provided this diversion does not reduce downstream flow below 70 cfs.
+	•	When river flows exceed 175 cfs, diversion of up to 46 cfs is allowed:
+		a)	If on February 1st, the total amount that could have been diverted under the permit is less than 400 acre-feet, 
+		up to 46 cfs may be diverted during February while maintaining a downstream river flow of 70 cfs.
+		b)	If on March 1st, the total amount that could have been diverted under the permit is less than 2,000 acre-feet, 
+		up to 46 cfs may be diverted during the month of March while maintaining a downstream river flow of 70 cfs.
+		c)	If on April 1st, the total amount that could have been diverted under the permit is less than 4,400 acre-feet, 
+		up to 46 cfs may be diverted for the rest of the season while maintaining a downstream river flow of 70 cfs.
+•	No water shall be diverted during the allowable period except during such time as there is visible surface flow in the bed of the Cosumnes River from 
+point of diversion to the McConnell gauging station at Highway 99.
+*/
+
+! Splitting diversion arc to direct and storage diversions
+define D_CSM033_RNCHO_DD {std kind 'DIVERSION-DIRECT' units 'cfs'}
+define D_CSM033_RNCHO_S  {std kind 'DIVERSION-STORAGE' units 'cfs'}
+
+goal D_CSM033_RNCHOtotal {D_CSM033_RNCHO = D_CSM033_RNCHO_S + D_CSM033_RNCHO_DD}
+
+! Diversion Period
+define DiversionPeriod {
+	case Diversion {
+		condition range(month,Nov,May)
+		value 1.
+	}
+	case NoDiversion {
+		condition always
+		value 0.
+	}
+}
+
+! Annual demand 
+! Rancho Murieta demand defined in arcs-deliveries.wresl (UD_60N_NU2), constrained in constraints-deliveries.wresl
+
+! Diversion Rates - Direct & Storage Diversions
+define MaxDiversionRate_Direct	{value 6.} !cfs
+define MaxDiversionRate_Storage {value 46.} !cfs
+
+! Annual Diversion Volumes 
+define DiversionAnnual_Storage	 {value 3.9} !taf
+define RNCHOWR_REM_Storagedv {std kind 'SUPPLY' units 'TAF'}
+define RNCHOWR_REM_Storage {
+	case November {
+		condition month==Nov
+		value DiversionAnnual_Storage
+	}
+	case DecJul {
+		condition range(month,Dec,May)
+		value max(0., RNCHOWR_REM_Storagedv(-1) - D_CSM033_RNCHO_S(-1)*cfs_taf(-1))
+	}
+	case AugOct {
+		condition always
+		value 0.
+	}
+}
+goal setRNCHOWR_REM_Storagedv {RNCHOWR_REM_Storagedv = RNCHOWR_REM_Storage}
+
+define DiversionAnnual_Total	 {value 6.368} !taf
+define RNCHOWR_REM_Totaldv {std kind 'SUPPLY' units 'TAF'}
+define RNCHOWR_REM_Total {
+	case November {
+		condition month==Nov
+		value DiversionAnnual_Total
+	}
+	case DecJul {
+		condition range(month,Dec,May)
+		value max(0., RNCHOWR_REM_Totaldv(-1) - D_CSM033_RNCHO(-1)*cfs_taf(-1))
+	}
+	case AugOct {
+		condition always
+		value 0.
+	}
+}
+goal setRNCHOWR_REM_Totaldv {RNCHOWR_REM_Totaldv = RNCHOWR_REM_Total}
+
+
+! Diversion Rates - Fish Protection & Preservation
+! CSM051 = North Fork and South Fork Cosumnes and Camp Creek 
+! flow currently being modeled in separate ARBS model (Jenkinson Lake operations primarily determined by EID demand, which is simulated in ARBS)
+! latest C_CSM051 flow from that model imported here 
+define C_CSM051_SV {value C_CMP014_SV+C_JNKSN_SV+I_CMP001} !North+South Fork Cosumnes, Camp Creek
+
+define MaxDiversionRate_total {
+	case MichiganBarBelow70 {
+		condition I_CSM035 + C_CSM051_SV < 70. !flow at Michigan Bar
+		value 0.
+	}
+	case MichiganBarBelow76 { !Allowable diversion of 6 cfs cannot reduce flow at Michigan Bar below 70 cfs
+		condition I_CSM035 + C_CSM051_SV <= 76.
+		value I_CSM035 + C_CSM051_SV - 70.
+	}
+	case MichiganBarBelow175 {
+		condition I_CSM035 + C_CSM051_SV <= 175.
+		value 6.
+	}
+	case MichiganBarDryYear_Feb {
+		condition month==FEB .and. RNCHOWR_REM_Total < (DiversionAnnual_Total - 400.)
+		value min(46., I_CSM035 + C_CSM051_SV - 70.)
+	}
+	case MichiganBarDryYear_Mar {
+		condition month==MAR .and. RNCHOWR_REM_Total < (DiversionAnnual_Total - 2000.)
+		value min(46., I_CSM035 + C_CSM051_SV - 70.)
+	}
+	case MichiganBarDryYear_Apr {
+		condition month==APR .and. RNCHOWR_REM_Total < (DiversionAnnual_Total - 4400.)
+		value min(46., I_CSM035 + C_CSM051_SV - 70.)
+	}
+	case MichiganBarDryYear_May {
+		condition month==MAY .and. RNCHOWR_REM_Totaldv(-1) < (DiversionAnnual_Total - 4400.)
+		value min(46., I_CSM035 + C_CSM051_SV - 70.)
+	}
+	case MichiganBarAbove175 {
+		condition always
+		value 6. + (I_CSM035 + C_CSM051_SV - 175.)
+	}
+}
+
+
+! Constraints
+goal setWRDiversion_Direct1   {D_RNCHO_60N_NU2   > D_CSM033_RNCHO_DD}
+goal setWRDiversion_Direct2   {D_CSM033_RNCHO_DD < DiversionPeriod*MaxDiversionRate_Direct}
+
+goal setWRDiversion_Storage1  {D_CSM033_RNCHO_S  < DiversionPeriod*MaxDiversionRate_Storage}
+goal setWRDiversion_Storage2  {D_CSM033_RNCHO_S  < DiversionPeriod*RNCHOWR_REM_Storage*taf_cfs}
+
+goal setWRDiversion_Total1    {D_CSM033_RNCHO    < DiversionPeriod*RNCHOWR_REM_Total*taf_cfs}
+goal setWRDiversion_Total2    {D_CSM033_RNCHO < DiversionPeriod*MaxDiversionRate_total}

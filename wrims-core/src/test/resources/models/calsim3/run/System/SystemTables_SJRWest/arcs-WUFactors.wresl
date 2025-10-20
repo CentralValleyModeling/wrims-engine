@@ -1,0 +1,1206 @@
+/*
+  File Name: arcs-WUfactors.wresl
+  CalSim 3.0 System File
+  
+  Purpose:
+  Define water use factors
+ 
+  NAMING TAKES THE FOLLOWING FORMS:
+  EVF_{Upstream CalSim 3.0 node}_{demand unit} - evaporative conveyance loss
+  DPF_{Upstream CalSim 3.0 node}_{demand unit} - deep percolation conveyance loss
+  LFF_{Upstream CalSim 3.0 node}_{demand unit} - lateral flow conveyance loss (from canal to toe drain)
+  OSF_{Upstream CalSim 3.0 node}_{demand unit} - spill conveyance loss (from canal to drain outfall - not available for reuse)
+  
+  RUFR_{demand unit}    - reuse fraction for irrigated rice
+  RUFO_{demand unit}    - reuse fraction for all other crops
+  RUFW_{demand unit}    - reuse fraction for wetlands
+  RPF_{demand unit}     - riparian and miscellaneous field/on-farm evaporative losses 
+  EV_{demand unit}  - total evaporative loss associated with surface water conveyance 
+  DP_{demand unit}  - total deep percolation loss associated with surface water conveyance  
+  LF_{demand unit}  - total lateral flow loss associated with surface water conveyance  
+  OS_{demand unit}  - total spill associated with surface water conveyance 
+  DL_{demand unit}  - total loss associated with surface water conveyance (evaporation loss+deep percolation+lateral flow+spill) 
+  
+2017.07.05 - J Gilbert (JMG) - USBR:
+	- set reuse fractions for other crops and rice at their original non-zero values
+	- set riparian/miscellaneous ET fraction at their original non-zero values
+	- This was done to allow the 'meetAW' goals for applied water-based deliveries
+	  deliveries to incorporate riparian losses and reuse-based gains
+	- this reflects the original formulation for on-field water budgets and is 
+		separated from the contract-based formulation by file to facilitate the
+		use of a simple switch in system_SJR.wresl
+		
+2020.12.17 - A Draper - Stantec
+	- set reuse of applied water for rice to that for other crops to simplify preprocessing and scaling of applied water demands 
+	  to match full contract amounts
+  
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 50      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==========================================================================================
+! 50_PA1 - Banta Carbona ID/Westside ID - Ag
+!==========================================================================================
+! The district has a mixed open canal and buried pipe distribution system
+! Operational spills and irrigation return flows are recaptured and reused.
+! Reference: SLWD. 2013. San Luis Water District 2011/2012 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EV_SJR062_50_PA1    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR062_50_PA1    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR062_50_PA1    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR062_50_PA1    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR062_50_PA1    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_SJR062_50_PA1   {value 0.010} ! evaporative loss fraction
+define DPF_SJR062_50_PA1   {value 0.025} ! deep percolation loss fraction
+define LFF_SJR062_50_PA1   {value 0.000} ! lateral flow loss fraction
+define OSF_SJR062_50_PA1   {value 0.000} ! canal operating spill fraction
+
+define EV_DMC021_50_PA1    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC021_50_PA1    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC021_50_PA1    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC021_50_PA1    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC021_50_PA1    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_DMC021_50_PA1   {value 0.010} ! evaporative loss fraction
+define DPF_DMC021_50_PA1   {value 0.025} ! deep percolation loss fraction
+define LFF_DMC021_50_PA1   {value 0.000} ! lateral flow loss fraction
+define OSF_DMC021_50_PA1   {value 0.000} ! canal operating spill fraction
+
+define EV_RFS71A_50_PA1    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_RFS71A_50_PA1    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_RFS71A_50_PA1    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_RFS71A_50_PA1    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_RFS71A_50_PA1    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_RFS71A_50_PA1   {value 0.010} ! evaporative loss fraction
+define DPF_RFS71A_50_PA1   {value 0.025} ! deep percolation loss fraction
+define LFF_RFS71A_50_PA1   {value 0.000} ! lateral flow loss fraction
+define OSF_RFS71A_50_PA1   {value 0.000} ! canal operating spill fraction
+
+define RUFR_50_PA1         {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_50_PA1a        {value 0.0975}! reuse fraction for other irrigated crops 
+define RUFW_50_PA1         {value 0.0975}! reuse fraction for wetlands              
+define RPF_50_PA1          {value 0.025 }! riparian/miscellaneous ET fraction       
+
+define TWF_50_PA1 {case zero {condition AWO_50_PA1 + AWR_50_PA1 < 0.1 value 0.0 }   case otherwise {condition always value TW_50_PA1/(AWO_50_PA1 + AWR_50_PA1)} }
+define RUFO_50_PA1        {value min(TWF_50_PA1, RUFO_50_PA1a)}         ! reuse fraction for other irrigated crops
+
+define EV_50_PA1           {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_50_PA1           {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_50_PA1           {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_50_PA1           {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_50_PA1           {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+
+
+
+!============================================================
+! 50_PU - City of Tracy - M&I
+!============================================================
+define EF_DGT_50_PU        {value 0.0000} !non recoverable loss fraction
+define SF_DGT_50_PU        {value 0.0000} !non recoverable loss fraction
+define EL_DGT_50_PU        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_DGT_50_PU        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+define DL_DGT_50_PU        {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define EF_JJO_50_PU        {value 0.0000} !non recoverable loss fraction
+define SF_JJO_50_PU        {value 0.0000} !non recoverable loss fraction
+define EL_JJO_50_PU        {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_JJO_50_PU        {std kind 'SEEPAGE-LOSS'     units 'CFS'}
+define DL_JJO_50_PU        {std kind 'DELIVERY-LOSS'  units 'CFS'}
+
+define DL_50_PU            {std kind 'DELIVERY-LOSS' units 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!============================================================
+! 71_PA1 - Hospital WD - Ag
+!============================================================
+define EVF_DMC030_71_PA1  {value 0.010} ! evaporative loss fraction
+define DPF_DMC030_71_PA1  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC030_71_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC030_71_PA1  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC030_71_PA1_a {alias EVF_DMC030_71_PA1 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC030_71_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC030_71_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC030_71_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC030_71_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC030_71_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA1        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA1        {value 0.0975}! reuse fraction for other irrigated crops
+define RUFW_71_PA1        {value 0.0975}! reuse fraction for wetlands             
+define RPF_71_PA1         {value 0.025 }! riparian/miscellaneous ET fraction      
+
+
+!============================================================
+! 71_PA2 - West Stanislaus ID - Ag
+!============================================================
+define EVF_SJR082_71_PA2  {value 0.010} ! evaporative loss fraction
+define DPF_SJR082_71_PA2  {value 0.075} ! deep percolation loss fraction. Increased from 0.025 to 0.075 so that 1998 AW demans greater than full contract amount in 1998  
+define LFF_SJR082_71_PA2  {value 0.000} ! lateral flow loss fraction
+define OSF_SJR082_71_PA2  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC034_71_PA2  {value 0.010} ! evaporative loss fraction
+define DPF_DMC034_71_PA2  {value 0.075} ! deep percolation loss fraction. Increased from 0.025 to 0.075 so that 1998 AW demans greater than full contract amount in 1998 
+define LFF_DMC034_71_PA2  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC034_71_PA2  {value 0.000} ! canal operating spill fraction
+
+define EVF_SJR082_71_PA2_a {alias EVF_SJR082_71_PA2 kind 'Loss-Fraction' units 'NONE'}
+define EVF_DMC034_71_PA2_a {alias EVF_DMC034_71_PA2 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_SJR082_71_PA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR082_71_PA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR082_71_PA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR082_71_PA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR082_71_PA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_DMC034_71_PA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC034_71_PA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC034_71_PA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC034_71_PA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC034_71_PA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA2        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA2        {value 0.0975}! reuse fraction for other irrigated crops 
+define RUFW_71_PA2        {value 0.0975}! reuse fraction for wetlands              
+define RPF_71_PA2         {value 0.0300}! riparian/miscellaneous ET fraction. Increased from 0.025 to 0.03 so that 1998 AW demans greater than full contract amount in 1998      
+
+
+!============================================================
+! 71_PA3 - Kern Canon WD - Ag
+!============================================================
+define EVF_DMC034_71_PA3  {value 0.010} ! evaporative loss fraction
+define DPF_DMC034_71_PA3  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC034_71_PA3  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC034_71_PA3  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC034_71_PA3_a {alias EVF_DMC034_71_PA3 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC034_71_PA3   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC034_71_PA3   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC034_71_PA3   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC034_71_PA3   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC034_71_PA3   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA3          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA3          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA3          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA3          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA3          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA3        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA3        {value 0.0975}! reuse fraction for other irrigated crops
+define RUFW_71_PA3        {value 0.0975}! reuse fraction for wetlands             
+define RPF_71_PA3         {value 0.025 }! riparian/miscellaneous ET fraction      
+
+ 
+!============================================================
+! 71_PA4 - Patterson ID - Ag
+!============================================================
+define EVF_DMC044_71_PA4  {value 0.010} ! evaporative loss fraction
+define DPF_DMC044_71_PA4  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC044_71_PA4  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC044_71_PA4  {value 0.000} ! canal operating spill fraction
+
+define EVF_SJR096_71_PA4  {value 0.010} ! evaporative loss fraction
+define DPF_SJR096_71_PA4  {value 0.025} ! deep percolation loss fraction
+define LFF_SJR096_71_PA4  {value 0.000} ! lateral flow loss fraction
+define OSF_SJR096_71_PA4  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC044_71_PA4_a {alias EVF_DMC044_71_PA4 kind 'Loss-Fraction' units 'NONE'}
+define EVF_SJR096_71_PA4_a {alias EVF_SJR096_71_PA4 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC044_71_PA4   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC044_71_PA4   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC044_71_PA4   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC044_71_PA4   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC044_71_PA4   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_SJR096_71_PA4   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR096_71_PA4   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR096_71_PA4   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR096_71_PA4   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR096_71_PA4   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA4          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA4          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA4          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA4          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA4          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA4        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA4        {value 0.0975}! reuse fraction for other irrigated crops
+define RUFW_71_PA4        {value 0.0975}! reuse fraction for wetlands             
+define RPF_71_PA4         {value 0.0250}! riparian/miscellaneous ET fraction      
+
+
+!============================================================
+! 71_PA5 - Del Puerto, Salado WD, Orestimba, Sunflower - Ag
+!============================================================
+define EVF_DMC044_71_PA5  {value 0.010} ! evaporative loss fraction
+define DPF_DMC044_71_PA5  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC044_71_PA5  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC044_71_PA5  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC044_71_PA5_a{alias EVF_DMC044_71_PA5 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC044_71_PA5   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC044_71_PA5   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC044_71_PA5   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC044_71_PA5   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC044_71_PA5   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA5          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA5          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA5          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA5          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA5          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA5        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA5        {value 0.0975}! reuse fraction for other irrigated crops
+define RUFW_71_PA5        {value 0.0975}! reuse fraction for wetlands             
+define RPF_71_PA5         {value 0.0250}! riparian/miscellaneous ET fraction     
+
+
+!============================================================
+! 71_PA6 - Davis, Foothill, Mestang, Quinto, Romero, Centinella - Ag
+!============================================================
+define EVF_DMC064_71_PA6  {value 0.010} ! evaporative loss fraction
+define DPF_DMC064_71_PA6  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC064_71_PA6  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC064_71_PA6  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC064_71_PA6_a {alias EVF_DMC064_71_PA6 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC064_71_PA6   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC064_71_PA6   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC064_71_PA6   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC064_71_PA6   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC064_71_PA6   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_PA6          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA6          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA6          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA6          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA6          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA6        {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_71_PA6        {value 0.0975}! reuse fraction for other irrigated crops  
+define RUFW_71_PA6        {value 0.0975}! reuse fraction for wetlands               
+define RPF_71_PA6         {value 0.0250}! riparian/miscellaneous ET fraction        
+
+!============================================================
+! 71_PA8 - Byron-Bethany ID (portion formerly called Plainview) - Ag
+!============================================================
+define EV_DMC011_71_PA8   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC011_71_PA8   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC011_71_PA8   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC011_71_PA8   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC011_71_PA8   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_DMC011_71_PA8  {value 0.010} ! evaporative loss fraction
+define DPF_DMC011_71_PA8  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC011_71_PA8  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC011_71_PA8  {value 0.000} ! canal operating spill fraction
+
+define EV_71_PA8          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_PA8          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_PA8          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_PA8          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_PA8          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_PA8        {value 0.0975}! reuse fraction for irrigated rice 
+define RUFO_71_PA8        {value 0.0975}! reuse fraction for other irrigated crops
+define RUFW_71_PA8        {value 0.0975}! reuse fraction for wetlands             
+define RPF_71_PA8         {value 0.0250}! riparian/miscellaneous ET fraction      
+
+
+!============================================================
+! 71_PU1 - Musco Olive Products - M&I
+!============================================================
+define EF_CAA012_71_PU1   {value 0.00} ! evaporative loss fraction
+define SF_CAA012_71_PU1   {value 0.00} ! deep percolation loss fraction
+define EL_CAA012_71_PU1   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_CAA012_71_PU1   {std kind 'SEEPAGE-LOSS'     units 'CFS'}        
+define DL_CAA012_71_PU1   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define DL_71_PU1          {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define DP_71_PU1          {std kind 'PERCOLATION-LOSS' units 'CFS'}
+
+
+!============================================================
+! 71_PU2 - VA Cemetary - M&I
+!============================================================
+define EF_CAA066_71_PU2   {value 0.00} ! evaporative loss fraction
+define SF_CAA066_71_PU2   {value 0.00} ! deep percolation loss fraction
+define EL_CAA066_71_PU2   {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_CAA066_71_PU2   {std kind 'SEEPAGE-LOSS'     units 'CFS'}        
+define DL_CAA066_71_PU2   {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define DL_71_PU2          {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define DP_71_PU2          {std kind 'PERCOLATION-LOSS' units 'CFS'}
+
+
+!============================================================
+! 71_NA1 - Non-District - Riparian Ag
+!============================================================
+define EVF_SJR102_71_NA1  {value 0.01} ! evaporative loss fraction
+define DPF_SJR102_71_NA1  {value 0.03} ! deep percolation loss fraction
+define LFF_SJR102_71_NA1  {value 0.03} ! lateral flow loss fraction
+define OSF_SJR102_71_NA1  {value 0.03} ! canal operating spill fraction
+
+define EVF_SJR102_71_NA1_a{alias EVF_SJR102_71_NA1 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_SJR102_71_NA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR102_71_NA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR102_71_NA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR102_71_NA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR102_71_NA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_NA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_NA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_NA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_NA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_NA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_NA1        {value 0.05}! reuse fraction for irrigated rice
+define RUFO_71_NA1        {value 0.05}! reuse fraction for other irrigated crops  
+define RUFW_71_NA1        {value 0.05}! reuse fraction for wetlands               
+define RPF_71_NA1         {value 0.05}! riparian/miscellaneous ET fraction        
+
+!============================================================
+! 71_NA2 - El Solyo WD, Non-District Ag
+!============================================================
+define EVF_SJR090_71_NA2  {value 0.01} ! evaporative loss fraction
+define DPF_SJR090_71_NA2  {value 0.03} ! deep percolation loss fraction
+define LFF_SJR090_71_NA2  {value 0.03} ! lateral flow loss fraction
+define OSF_SJR090_71_NA2  {value 0.03} ! canal operating spill fraction
+
+define EVF_SJR090_71_NA2_a {alias EVF_SJR090_71_NA2 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_SJR090_71_NA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR090_71_NA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR090_71_NA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR090_71_NA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR090_71_NA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_71_NA2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_71_NA2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_71_NA2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_71_NA2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_71_NA2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_71_NA2        {value 0.05}! reuse fraction for irrigated rice
+define RUFO_71_NA2        {value 0.05}! reuse fraction for other irrigated crops  
+define RUFW_71_NA2        {value 0.05}! reuse fraction for wetlands              
+define RPF_71_NA2         {value 0.05}! riparian/miscellaneous ET fraction        
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!============================================================
+! 72_NA1 - West Bank of SJR below Merced - Riparian Ag
+!============================================================
+define EVF_SJR116_72_NA1  {value 0.01} ! evaporative loss fraction
+define DPF_SJR116_72_NA1  {value 0.03} ! deep percolation loss fraction
+define LFF_SJR116_72_NA1  {value 0.03} ! lateral flow loss fraction
+define OSF_SJR116_72_NA1  {value 0.03} ! canal operating spill fraction
+
+define EVF_SJR116_72_NA1_a{alias EVF_SJR116_72_NA1 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_SJR116_72_NA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_SJR116_72_NA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_SJR116_72_NA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_SJR116_72_NA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_SJR116_72_NA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_NA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_NA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_NA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_NA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_NA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_NA1        {value 0.05}! reuse fraction for irrigated rice
+define RUFO_72_NA1        {value 0.05}! reuse fraction for other irrigated crops 
+define RUFW_72_NA1        {value 0.05}! reuse fraction for wetlands              
+define RPF_72_NA1         {value 0.05}! riparian/miscellaneous ET fraction       
+
+
+!============================================================
+! 72_NA2
+!============================================================
+! 72_NA2 -- no surface deliveries
+
+
+!============================================================
+! 72_PA - Laguna WD - Ag
+!============================================================
+! Laguna WD was aquired by Red Fern ranches in 1997. It consists of 417 acres and holds
+! a CVP contract for 800AF. It should be merged with another demand unit
+! Loss fractions are based on RMC (2014) Westside-San Joaquin Integrated Water Resources Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EVF_XCC025_72_PA   {value 0.010} ! evaporative loss fraction
+define DPF_XCC025_72_PA   {value 0.025} ! deep percolation loss fraction
+define LFF_XCC025_72_PA   {value 0.000} ! lateral flow loss fraction
+define OSF_XCC025_72_PA   {value 0.000} ! canal operating spill fraction
+
+define EVF_XCC025_72_PA_a {alias EVF_XCC025_72_PA  kind 'Loss-Fraction' units 'NONE'}
+
+define EV_XCC025_72_PA    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC025_72_PA    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC025_72_PA    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC025_72_PA    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC025_72_PA    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_PA           {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PA           {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PA           {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PA           {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PA           {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PA         {value 0.0975}! reuse fraction for irrigated rice
+define RUFO_72_PA         {value 0.0975}   
+define RUFW_72_PA         {value 0.0975}   
+define RPF_72_PA          {value 0.0250}   
+
+
+!============================================================
+! 72_XA1 - San Luis Canal Co Exchange Contractors - Ag
+!============================================================
+! San Luis Canal Company's distribution system is a mix of lined and unlined
+! open canals. Operational spills that are not recovered are approximately 6%
+! (a further 32% of spills are recaptured by low-lift pumping stations).
+! Tailwater reuse is approximately 2.5% based on measured drainage outflow.
+! Canal seepage is 8%. Miscellaneous ET is approximatelt 2.5%.
+! The district delivers small amounts of groundwater.
+! Drainage from upslope areas is an important source of water 
+
+! Reference SLCC (2014) San Luis Canal Company Water Management Plan
+! Will be available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EVF_ARY010_72_XA1  {value 0.01} ! evaporative loss fraction
+define DPF_ARY010_72_XA1  {value 0.08} ! deep percolation loss fraction
+define LFF_ARY010_72_XA1  {value 0.00} ! lateral flow loss fraction
+define OSF_ARY010_72_XA1  {value 0.06} ! canal operating spill fraction 
+
+define EVF_ARY010_72_XA1_a{alias EVF_ARY010_72_XA1 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_ARY010_72_XA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_ARY010_72_XA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_ARY010_72_XA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_ARY010_72_XA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_ARY010_72_XA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_XA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_XA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_XA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_XA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_XA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_XA1        {value 0.025}! reuse fraction for irrigated rice
+define RUFO_72_XA1        {value 0.025}! reuse fraction for other irrigated crops 
+define RUFW_72_XA1        {value 0.025}! reuse fraction for wetlands              
+define RPF_72_XA1         {value 0.025}! riparian/miscellaneous ET fraction       
+
+
+!============================================================
+! 72_XA2 - Central California ID South Exchange Contractors - Ag
+!============================================================
+
+define EVF_XCC010_72_XA2  {value 0.01} ! evaporative loss fraction
+define DPF_XCC010_72_XA2  {value 0.10} ! deep percolation loss fraction
+define LFF_XCC010_72_XA2  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC010_72_XA2  {value 0.01} ! canal operating spill fraction
+
+define EVF_XCC010_72_XA2_a{alias EVF_XCC010_72_XA2 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_XCC010_72_XA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC010_72_XA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC010_72_XA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC010_72_XA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC010_72_XA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_XA2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_XA2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_XA2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_XA2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_XA2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_XA2        {value 0.075}! reuse fraction for irrigated rice
+define RUFO_72_XA2        {value 0.075}! reuse fraction for other irrigated crops 
+define RUFW_72_XA2        {value 0.075}! reuse fraction for wetlands              
+define RPF_72_XA2         {value 0.025}! riparian/miscellaneous ET fraction       
+
+
+!============================================================
+! 72_XA3 - Central California ID North Exchange Contractors - Ag
+!============================================================
+! The district has a predominantly canal distributions system
+! Operational spills are predominatly recaptured.
+! Seepage losses are approximately 10%
+! There are no details on how much tailwater is recaptured and reused.
+! Reference: CCID. 2014. Central California Irrigation District 2011 Water Management Plan
+! Will be available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EVF_XCC054_72_XA3  {value 0.01} ! evaporative loss fraction
+define DPF_XCC054_72_XA3  {value 0.10} ! deep percolation loss fraction
+define LFF_XCC054_72_XA3  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC054_72_XA3  {value 0.01} ! canal operating spill fraction
+
+define EVF_XCC054_72_XA3_a{alias EVF_XCC054_72_XA3 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_XCC054_72_XA3   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC054_72_XA3   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC054_72_XA3   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC054_72_XA3   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC054_72_XA3   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_XA3          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_XA3          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_XA3          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_XA3          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_XA3          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_XA3        {value 0.075}! reuse fraction for irrigated rice
+define RUFO_72_XA3        {value 0.075}! reuse fraction for other irrigated crops 
+define RUFW_72_XA3        {value 0.075}! reuse fraction for wetlands              
+define RPF_72_XA3         {value 0.025}! riparian/miscellaneous ET fraction       
+
+
+!============================================================
+! 72_PR1 - Volta WA - Refuge
+!============================================================
+define EVF_VLW008_72_PR1  {value 0.00} ! evaporative loss fraction
+define DPF_VLW008_72_PR1  {value 0.00} ! deep percolation loss fraction
+define LFF_VLW008_72_PR1  {value 0.00} ! lateral flow loss fraction
+define OSF_VLW008_72_PR1  {value 0.00} ! canal operating spill fraction
+define CLF_72_PR1         {value EVF_VLW008_72_PR1 + DPF_VLW008_72_PR1 + LFF_VLW008_72_PR1 + OSF_VLW008_72_PR1}
+
+define EV_VLW008_72_PR1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_VLW008_72_PR1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_VLW008_72_PR1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_VLW008_72_PR1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_VLW008_72_PR1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EVF_VLW008_72_PR1_a{alias EVF_VLW008_72_PR1 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_72_PR1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR1        {value 0.00}! reuse fraction for irrigated rice
+define RUFO_72_PR1        {value 0.00}! reuse fraction for other irrigated crops
+define RUFW_72_PR1        {value 0.00}! reuse fraction for wetlands 
+define RPF_72_PR1         {value 0.00}! riparian/miscellaneous ET fraction 
+
+
+!============================================================
+! 72_PR2 - Kesterson, Freitas, & Blue Goose units of San Luis NWR, China Island unit of North Grassland - Refuge
+!============================================================
+define EVF_XCC033_72_PR2  {value 0.00} ! evaporative loss fraction
+define DPF_XCC033_72_PR2  {case OctJan    {condition range(month, oct, jan) value 0.22} case otherwise {condition always value 0.34}} ! deep percolation loss fraction                
+define LFF_XCC033_72_PR2  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC033_72_PR2  {value 0.00} ! canal operating spill fraction
+define CLF_72_PR2         {value EVF_XCC033_72_PR2 + DPF_XCC033_72_PR2 + LFF_XCC033_72_PR2 + OSF_XCC033_72_PR2}
+
+define EV_XCC033_72_PR2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC033_72_PR2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC033_72_PR2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC033_72_PR2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC033_72_PR2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_PR2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR2        {value 0.00}! reuse fraction for irrigated rice
+define RUFO_72_PR2        {value 0.00}! reuse fraction for other irrigated crops
+define RUFW_72_PR2        {value 0.00}! reuse fraction for wetlands 
+define RPF_72_PR2         {value 0.00}! riparian/miscellaneous ET fraction 
+
+
+!============================================================
+! 72_PR3 - West Bear Ck and San Luis units of San Luis NWR - Refuge
+!============================================================
+define EVF_ARY010_72_PR3  {value 0.00} ! evaporative loss fraction
+define DPF_ARY010_72_PR3  {value 0.25} ! deep percolation loss fraction
+define LFF_ARY010_72_PR3  {value 0.00} ! lateral flow loss fraction
+define OSF_ARY010_72_PR3  {value 0.00} ! canal operating spill fraction
+define CLF_72_PR3         {value EVF_ARY010_72_PR3 + DPF_ARY010_72_PR3 + LFF_ARY010_72_PR3 + OSF_ARY010_72_PR3}
+
+define EV_ARY010_72_PR3   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_ARY010_72_PR3   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_ARY010_72_PR3   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_ARY010_72_PR3   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_ARY010_72_PR3   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_PR3          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR3          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR3          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR3          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR3          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR3        {value 0.00} ! reuse fraction for irrigated rice
+define RUFO_72_PR3        {value 0.00} ! reuse fraction for other irrigated crops
+define RUFW_72_PR3        {value 0.00} ! reuse fraction for wetlands 
+define RPF_72_PR3         {value 0.00} ! riparian/miscellaneous ET fraction 
+
+
+!============================================================
+! 72_PR4 - Los Banos WA, Salt Slouth and Gadwall units of North Grassland - Refuge
+!============================================================
+define EVF_XCC033_72_PR4  {value 0.00} ! evaporative loss fraction
+define DPF_XCC033_72_PR4  {case OctJan {condition range(month, oct, jan) value 0.157} case otherwise {condition always value 0.272}}! deep percolation loss fraction
+define LFF_XCC033_72_PR4  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC033_72_PR4  {value 0.00} ! canal operating spill fraction
+
+define EVF_ARY010_72_PR4  {value 0.00} ! evaporative loss fraction
+define DPF_ARY010_72_PR4  {value 0.20} ! deep percolation loss fraction
+define LFF_ARY010_72_PR4  {value 0.00} ! lateral flow loss fraction
+define OSF_ARY010_72_PR4  {value 0.00} ! canal operating spill fraction
+
+define CLF_72_PR4         {value (EVF_XCC033_72_PR4 + DPF_XCC033_72_PR4 + LFF_XCC033_72_PR4 + OSF_XCC033_72_PR4)*0.80 + (EVF_ARY010_72_PR4 + DPF_ARY010_72_PR4 + LFF_ARY010_72_PR4 + OSF_ARY010_72_PR4)*0.20}
+
+define EV_XCC033_72_PR4   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC033_72_PR4   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC033_72_PR4   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC033_72_PR4   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC033_72_PR4   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_ARY010_72_PR4   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_ARY010_72_PR4   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_ARY010_72_PR4   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_ARY010_72_PR4   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_ARY010_72_PR4   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_PR4          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR4          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR4          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR4          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR4          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR4        {value 0.00} ! reuse fraction for irrigated rice
+define RUFO_72_PR4        {value 0.00} ! reuse fraction for other irrigated crops
+define RUFW_72_PR4        {value 0.00} ! reuse fraction for wetlands 
+define RPF_72_PR4         {value 0.00} ! riparian/miscellaneous ET fraction 
+
+
+!============================================================
+! 72_PR5 - Grassland WD North - Refuge
+!============================================================
+define EVF_XCC054_72_PR5  {value 0.00} ! evaporative loss fraction
+define DPF_XCC054_72_PR5  {case OctJan {condition range(month, oct, jan) value 0.00} case otherwise {condition always value 0.115}} ! deep percolation loss fraction
+define LFF_XCC054_72_PR5  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC054_72_PR5  {value 0.00} ! canal operating spill fraction
+
+define EVF_VLW008_72_PR5  {value 0.00} ! evaporative loss fraction
+define DPF_VLW008_72_PR5  {value 0.00} ! deep percolation loss fraction
+define LFF_VLW008_72_PR5  {value 0.00} ! lateral flow loss fraction
+define OSF_VLW008_72_PR5  {value 0.00} ! canal operating spill fraction
+
+define CLF_72_PR5  {value (EVF_XCC054_72_PR5 + DPF_XCC054_72_PR5 + LFF_XCC054_72_PR5 + OSF_XCC054_72_PR5)*0.56 + (EVF_VLW008_72_PR5 + DPF_VLW008_72_PR5 + LFF_VLW008_72_PR5 + OSF_VLW008_72_PR5)*0.44}
+
+define EV_XCC054_72_PR5   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC054_72_PR5   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC054_72_PR5   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC054_72_PR5   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC054_72_PR5   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_VLW008_72_PR5   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_VLW008_72_PR5   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_VLW008_72_PR5   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_VLW008_72_PR5   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_VLW008_72_PR5   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_72_PR5          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR5          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR5          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR5          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR5          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR5        {value 0.00} ! reuse fraction for irrigated rice
+define RUFO_72_PR5        {value 0.00} ! reuse fraction for other irrigated crops
+define RUFW_72_PR5        {value 0.00} ! reuse fraction for wetlands 
+define RPF_72_PR5         {value 0.00} ! riparian/miscellaneous ET fraction 
+
+
+!============================================================
+! 72_PR6 - Grassland WD South - Refuge
+!============================================================
+define EVF_ARY010_72_PR6  {value 0.00} ! evaporative loss fraction
+define DPF_ARY010_72_PR6  {value 0.20} ! deep percolation loss fraction
+define LFF_ARY010_72_PR6  {value 0.00} ! lateral flow loss fraction
+define OSF_ARY010_72_PR6  {value 0.00} ! canal operating spill fraction
+
+define EVF_XCC025_72_PR6  {value 0.00} ! evaporative loss fraction
+define DPF_XCC025_72_PR6  {! deep percolation loss fraction
+                           case OctJan    {condition range(month, oct, jan) value 0.00}
+                           case otherwise {condition always                 value 0.081}}
+define LFF_XCC025_72_PR6  {value 0.00} ! lateral flow loss fraction
+define OSF_XCC025_72_PR6  {value 0.00} ! canal operating spill fraction 
+
+define CLF_72_PR6         {value (EVF_XCC025_72_PR6 + DPF_XCC025_72_PR6 + LFF_XCC025_72_PR6 + OSF_XCC025_72_PR6)*0.88 + (EVF_ARY010_72_PR6 + DPF_ARY010_72_PR6 + LFF_ARY010_72_PR6 + OSF_ARY010_72_PR6)*0.12}
+
+define EV_ARY010_72_PR6   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_ARY010_72_PR6   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_ARY010_72_PR6   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_ARY010_72_PR6   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_ARY010_72_PR6   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+ 
+define EV_XCC025_72_PR6   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_XCC025_72_PR6   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_XCC025_72_PR6   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_XCC025_72_PR6   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_XCC025_72_PR6   {std kind 'DELIVERY-LOSS'     units 'CFS'} 
+
+define EV_72_PR6          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_72_PR6          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_72_PR6          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_72_PR6          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_72_PR6          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_72_PR6        {value 0.00} ! reuse fraction for irrigated rice
+define RUFO_72_PR6        {value 0.00} ! reuse fraction for other irrigated crops
+define RUFW_72_PR6        {value 0.00} ! reuse fraction for wetlands 
+define RPF_72_PR6         {value 0.00} ! riparian/miscellaneous ET fraction 
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!============================================================
+! 73_NA
+!============================================================
+! 73_NA -- no surface deliveries
+
+
+!============================================================
+! 73_NU
+!============================================================
+! 73_NU -- no surface deliveries
+
+
+!============================================================
+! 73_PA1 - San Luis WD - Ag
+!============================================================
+! The district has an open main canal system, but a buried pipe distribution system
+! There are no operational spills and limited losses.
+! All tailwater is recaptured and reused.
+! Reference: SLWD. 2013. San Luis Water District 2011/2012 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EVF_CAA087_73_PA1  {value 0.000} ! evaporative loss fraction
+define DPF_CAA087_73_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA087_73_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA087_73_PA1  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC070_73_PA1  {value 0.000} ! evaporative loss fraction
+define DPF_DMC070_73_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_DMC070_73_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC070_73_PA1  {value 0.000} ! canal operating spill fraction
+
+define EV_CAA087_73_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA087_73_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA087_73_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA087_73_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA087_73_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_DMC070_73_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC070_73_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC070_73_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC070_73_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC070_73_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_73_PA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_73_PA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_73_PA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_73_PA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_73_PA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EVF_CAA087_73_PA1_a{alias EVF_CAA087_73_PA1 kind 'Loss-Fraction' units 'NONE'}
+define EVF_DMC070_73_PA1_a{alias EVF_DMC070_73_PA1 kind 'Loss-Fraction' units 'NONE'}
+
+define RUFR_73_PA1        {value 0.100}  ! reuse fraction for irrigated rice
+define RUFO_73_PA1        {value 0.100}  ! reuse fraction for other irrigated crops !@jmg 2017.06.09 - setting to 0 from 0.010
+define RUFW_73_PA1        {value 0.100}  ! reuse fraction for wetlands              !@jmg 2017.06.09 - setting to 0 from 0.010
+define RPF_73_PA1         {value 0.025}  ! riparian/miscellaneous ET fraction       !@jmg 2017.06.09 - setting to 0 from 0.025
+ 
+
+!============================================================
+! 73_PA2 - Eagle Field WD, Mercy Springs WD, Oro Loma WD - Ag
+!============================================================
+! No agricultural water management plans are available for these ditricts
+
+define EVF_DMC105_73_PA2  {value 0.010} ! evaporative loss fraction
+define DPF_DMC105_73_PA2  {value 0.025} ! deep percolation loss fraction
+define LFF_DMC105_73_PA2  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC105_73_PA2  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC105_73_PA2_a{alias EVF_DMC105_73_PA2 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC105_73_PA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC105_73_PA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC105_73_PA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC105_73_PA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC105_73_PA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_73_PA2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_73_PA2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_73_PA2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_73_PA2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_73_PA2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_73_PA2        {value 0.100} ! reuse fraction for irrigated rice
+define RUFO_73_PA2        {value 0.100} ! reuse fraction for other irrigated crops   !@jmg 2017.06.09 - setting to 0 from 0.100
+define RUFW_73_PA2        {value 0.100} ! reuse fraction for wetlands                !@jmg 2017.06.09 - setting to 0 from 0.100
+define RPF_73_PA2         {value 0.025} ! riparian/miscellaneous ET fraction         !@jmg 2017.06.09 - setting to 0 from 0.025
+
+
+!============================================================
+! 73_PA3 - San Luis WD (S), Pacheco WD, Panoche WD - Ag
+!============================================================
+! San Luis WD has an open main canal system, but a buried pipe distribution system
+! There are no operational spills and limited losses.
+! All tailwater is recaptured and reused.
+! Reference: SLWD. 2013. San Luis Water District 2011/2012 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+! Pacheco WD delivery system consists of a mix of lined and unlined canals.
+! Operational spills are collected in downstream delivery laterals and recirculated
+! Canal seepage losses are approximately 13 percent.
+! All growers are required to eliminate or recirculate their surface runoff.
+! Reference: PWD. 2010. Pacheco Water District Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+! Panoche WD’s delivery system was configured such that no operational spills
+! left the district boundaries. Operational spills from one lateral were picked
+! up into an adjacent lateral, where they were delivered to the farm turnouts.
+! Seepage losses from the canal distribution system are approximately 6 percent.
+! The district requires all tailwater to be recaptured and managed at farm level.
+! Reference: PWD. 2014. Panoche Water District Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+! Deliveries from the Delta-Mendota Canal are to Panoche WD only.
+! The assumed contract amount is 27,000AF.
+define EVF_DMC091_73_PA3  {value 0.010} ! evaporative loss fraction
+define DPF_DMC091_73_PA3  {value 0.040} ! deep percolation loss fraction
+define LFF_DMC091_73_PA3  {value 0.000} ! lateral flow loss fraction
+define OSF_DMC091_73_PA3  {value 0.000} ! canal operating spill fraction
+
+! Deliveries from trhe San Luis Canal are to all 3 districts.
+! The assumed contract amounts are (Pacheco: 10,080AF, Panoche 67,000AF, San Luis WD 62,540AF
+define EVF_CAA109_73_PA3  {value 0.010} ! evaporative loss fraction
+define DPF_CAA109_73_PA3  {value 0.040} ! deep percolation loss fraction (weighted average)
+define LFF_CAA109_73_PA3  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA109_73_PA3  {value 0.000} ! canal operating spill fraction
+
+define EVF_DMC091_73_PA3_a{alias EVF_DMC091_73_PA3 kind 'Loss-Fraction' units 'NONE'}
+define EVF_CAA109_73_PA3_a{alias EVF_CAA109_73_PA3 kind 'Loss-Fraction' units 'NONE'}
+
+define EV_DMC091_73_PA3   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC091_73_PA3   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC091_73_PA3   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC091_73_PA3   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC091_73_PA3   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_CAA109_73_PA3   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA109_73_PA3   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA109_73_PA3   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA109_73_PA3   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA109_73_PA3   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_73_PA3          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_73_PA3          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_73_PA3          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_73_PA3          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_73_PA3          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_73_PA3        {value 0.100} ! reuse fraction for irrigated rice
+define RUFO_73_PA3        {value 0.100} ! reuse fraction for other irrigated crops
+define RUFW_73_PA3        {value 0.100} ! reuse fraction for wetlands             
+define RPF_73_PA3         {value 0.025} ! riparian/miscellaneous ET fraction      
+
+
+!============================================================
+! 73_XA - Firebaugh Canal Company - Ag
+!============================================================
+! District facilities are a mix of lined and unlined canals and buried pipe 
+! Operational spills are predominatly recaptured.
+! Seepage losses are approximately 1%
+! There are no details on how much tailwater is recaptured and reused.
+! Reference: FCWD. 2014. Firebaugh Canal Water District 2011 Water Management Plan
+! Will be available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EVF_MDOTA_73_XA    {value 0.010} ! evaporative loss fraction
+define DPF_MDOTA_73_XA    {value 0.075} ! deep percolation loss fraction
+define LFF_MDOTA_73_XA    {value 0.075} ! lateral flow loss fraction
+define OSF_MDOTA_73_XA    {value 0.075} ! canal operating spill fraction
+
+define EVF_DMC111_73_XA   {value 0.010} ! evaporative loss fraction
+define DPF_DMC111_73_XA   {value 0.075} ! deep percolation loss fraction
+define LFF_DMC111_73_XA   {value 0.075} ! lateral flow loss fraction
+define OSF_DMC111_73_XA   {value 0.075} ! canal operating spill fraction
+
+define EVF_MDOTA_73_XA_a  {alias EVF_MDOTA_73_XA kind 'Loss-Fraction' units 'NONE'}
+define EVF_DMC111_73_XA_a {alias EVF_DMC111_73_XA kind 'Loss-Fraction' units 'NONE'}
+
+define EV_MDOTA_73_XA     {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_MDOTA_73_XA     {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_MDOTA_73_XA     {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_MDOTA_73_XA     {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_MDOTA_73_XA     {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_DMC111_73_XA    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_DMC111_73_XA    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_DMC111_73_XA    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_DMC111_73_XA    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_DMC111_73_XA    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EV_73_XA           {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_73_XA           {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_73_XA           {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_73_XA           {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_73_XA           {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_73_XA         {value 0.100} ! reuse fraction for irrigated rice
+define RUFO_73_XA         {value 0.100} ! reuse fraction for other irrigated crops
+define RUFW_73_XA         {value 0.100} ! reuse fraction for wetlands 
+define RPF_73_XA          {value 0.025} ! riparian/miscellaneous ET fraction 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!============================================================
+! 90_PA1 - Westlands WD I - Ag
+!============================================================
+! The district has a buried pipe distribution system. There are no operational spills.
+! irrigation return flows are recaptured and reused.
+! Reference: WWD. 2013. Westlands Water District 2012 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+define EV_CAA109_90_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA109_90_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA109_90_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA109_90_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA109_90_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_CAA109_90_PA1  {value 0.010} ! evaporative loss fraction
+define DPF_CAA109_90_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA109_90_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA109_90_PA1  {value 0.000} ! canal operating spill fraction
+
+define EV_CAA143_90_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA143_90_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA143_90_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA143_90_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA143_90_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_CAA143_90_PA1  {value 0.010} ! evaporative loss fraction
+define DPF_CAA143_90_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA143_90_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA143_90_PA1  {value 0.000} ! canal operating spill fraction
+
+define EV_CAA155_90_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA155_90_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA155_90_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA155_90_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA155_90_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_CAA155_90_PA1  {value 0.010} ! evaporative loss fraction
+define DPF_CAA155_90_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA155_90_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA155_90_PA1  {value 0.000} ! canal operating spill fraction
+
+define EV_CAA172_90_PA1   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA172_90_PA1   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA172_90_PA1   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA172_90_PA1   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA172_90_PA1   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_CAA172_90_PA1  {value 0.010} ! evaporative loss fraction
+define DPF_CAA172_90_PA1  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA172_90_PA1  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA172_90_PA1  {value 0.000} ! canal operating spill fraction
+
+define EV_MDOTA_90_PA1    {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_MDOTA_90_PA1    {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_MDOTA_90_PA1    {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_MDOTA_90_PA1    {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_MDOTA_90_PA1    {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_MDOTA_90_PA1   {value 0.010} ! evaporative loss fraction
+define DPF_MDOTA_90_PA1   {value 0.010} ! deep percolation loss fraction
+define LFF_MDOTA_90_PA1   {value 0.000} ! lateral flow loss fraction
+define OSF_MDOTA_90_PA1   {value 0.000} ! canal operating spill fraction
+
+define EV_90_PA1          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_90_PA1          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_90_PA1          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_90_PA1          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_90_PA1          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_90_PA1        {value 0.100} ! reuse fraction for irrigated rice
+define RUFO_90_PA1        {value 0.100} ! reuse fraction for other irrigated crops
+define RUFW_90_PA1        {value 0.100} ! reuse fraction for wetlands             
+define RPF_90_PA1         {value 0.000} ! riparian/miscellaneous ET fraction      
+
+!============================================================
+! 90_PA2 - Westlands WD II - Ag
+!============================================================
+define EV_CAA143_90_PA2   {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_CAA143_90_PA2   {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_CAA143_90_PA2   {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_CAA143_90_PA2   {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_CAA143_90_PA2   {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_CAA143_90_PA2  {value 0.010} ! evaporative loss fraction
+define DPF_CAA143_90_PA2  {value 0.010} ! deep percolation loss fraction
+define LFF_CAA143_90_PA2  {value 0.000} ! lateral flow loss fraction
+define OSF_CAA143_90_PA2  {value 0.000} ! canal operating spill fraction
+
+define EV_90_PA2          {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_90_PA2          {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_90_PA2          {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_90_PA2          {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_90_PA2          {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define RUFR_90_PA2        {value 0.100} ! reuse fraction for irrigated rice
+define RUFO_90_PA2        {value 0.100} ! reuse fraction for other irrigated crops
+define RUFW_90_PA2        {value 0.100} ! reuse fraction for wetlands             
+define RPF_90_PA2         {value 0.000} ! riparian/miscellaneous ET fraction      
+
+
+!============================================================
+! 90_PU - Avenal Coalinga Huron - M&I
+!============================================================
+define EF_CAA143_90_PU    {value 0.00} ! evaporative loss fraction
+define SF_CAA143_90_PU    {value 0.00} ! deep percolation loss fraction
+define EL_CAA143_90_PU    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_CAA143_90_PU    {std kind 'SEEPAGE-LOSS'     units 'CFS'}        
+define DL_CAA143_90_PU    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define EF_CAA156_90_PU    {value 0.00} ! evaporative loss fraction
+define SF_CAA156_90_PU    {value 0.00} ! deep percolation loss fraction
+define EL_CAA156_90_PU    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_CAA156_90_PU    {std kind 'SEEPAGE-LOSS'     units 'CFS'}        
+define DL_CAA156_90_PU    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define EF_CAA165_90_PU    {value 0.00} ! evaporative loss fraction
+define SF_CAA165_90_PU    {value 0.00} ! deep percolation loss fraction
+define EL_CAA165_90_PU    {std kind 'EVAPORATIVE-LOSS' units 'CFS'}
+define SL_CAA165_90_PU    {std kind 'SEEPAGE-LOSS'     units 'CFS'}        
+define DL_CAA165_90_PU    {std kind 'DELIVERY-LOSS'    units 'CFS'}
+
+define DL_90_PU           {std kind 'DELIVERY-LOSS'    units 'CFS'}
+define DP_90_PU           {std kind 'PERCOLATION-LOSS' units 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!============================================================
+! 91_PA - Mendota Pool Contractors - Ag
+!============================================================
+! James ID and Tranquility ID are the largest of these Mendota Pool contractors
+
+! James ID canal system consists mainly of unlined canals. Operational spills
+! are not recovered, but flow into Tranquility ID lands, where they are captured
+! and reused. However, operational spills are less than 1 percent. Canal seepage
+! losses are approximately 18 percent. The district operates over 60 groundwater
+! wells with a combined capacity of 200 cfs. Tailwater from on-farm irrigation is
+! generally either reused on farm, or pumped back into the district’s canal system
+! by private landowners.
+! Reference: JID. 2011. James Iirigation District 2010 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+! Tranquility ID canal system consists mainly of unlined canals. Operational spills
+! are less than 1 percent. Canal seepage losses are approximately 2 percent.
+! The district operates 9 groundwater wells. Tailwater from on-farm irrigation is
+! generally either reused on farm.
+! Reference: JID. 2011. James Iirigation District 2010 Water Management Plan
+! Available at: http://www.usbr.gov/mp/watershare/wcplans/
+
+
+define EV_MDOTA_91_PA     {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_MDOTA_91_PA     {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_MDOTA_91_PA     {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_MDOTA_91_PA     {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_MDOTA_91_PA     {std kind 'DELIVERY-LOSS'     units 'CFS'}
+define EVF_MDOTA_91_PA    {value 0.010} ! evaporative loss fraction
+define DPF_MDOTA_91_PA    {value 0.100} ! deep percolation loss fraction; weighted average of JID and TID
+define LFF_MDOTA_91_PA    {value 0.000} ! lateral flow loss fraction
+define OSF_MDOTA_91_PA    {value 0.010} ! canal operating spill fraction
+
+define RUFR_91_PA         {value 0.100}  ! reuse fraction for irrigated rice
+define RUFO_91_PA         {value 0.100}  ! reuse fraction for other irrigated crops  
+define RUFW_91_PA         {value 0.100}  ! reuse fraction for wetlands               
+define RPF_91_PA          {value 0.025}  ! riparian/miscellaneous ET fraction        
+
+define EV_91_PA           {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_91_PA           {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_91_PA           {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_91_PA           {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_91_PA           {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EVF_MDOTA_91_PA_a  {alias EVF_MDOTA_91_PA kind 'loss-factor' units 'none'}
+
+
+!============================================================
+! 91_PR - Mendota WA - Refuge
+!============================================================
+define EV_MDOTA_91_PR     {std kind 'EVAPORATION-LOSS'  units 'CFS'}
+define DP_MDOTA_91_PR     {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_MDOTA_91_PR     {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_MDOTA_91_PR     {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_MDOTA_91_PR     {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EVF_MDOTA_91_PR    {value 0.00} ! evaporative loss fraction
+define DPF_MDOTA_91_PR    {value 0.00} ! deep percolation loss fraction
+define LFF_MDOTA_91_PR    {value 0.00} ! lateral flow loss fraction
+define OSF_MDOTA_91_PR    {value 0.00} ! canal operating spill fraction
+define CLF_91_PR          {value EVF_MDOTA_91_PR + DPF_MDOTA_91_PR + LFF_MDOTA_91_PR + OSF_MDOTA_91_PR}
+
+define RUFR_91_PR         {value 0.00} ! reuse fraction for irrigated rice
+define RUFO_91_PR         {value 0.00} ! reuse fraction for other irrigated crops
+define RUFW_91_PR         {value 0.00} ! reuse fraction for wetlands 
+define RPF_91_PR          {value 0.00} ! riparian/miscellaneous ET fraction 
+
+define EV_91_PR           {std kind 'EVAPORATIVE-LOSS'  units 'CFS'}
+define DP_91_PR           {std kind 'DEEP-PERCOLATION'  units 'CFS'}
+define LF_91_PR           {std kind 'LATERAL-FLOW-LOSS' units 'CFS'}
+define OS_91_PR           {std kind 'SPILL-LOSS'        units 'CFS'}
+define DL_91_PR           {std kind 'DELIVERY-LOSS'     units 'CFS'}
+
+define EVF_MDOTA_91_PR_a  {alias EVF_MDOTA_91_PR kind 'loss-factor' units 'none'}

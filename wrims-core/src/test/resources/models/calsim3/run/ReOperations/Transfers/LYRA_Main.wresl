@@ -1,0 +1,500 @@
+! File Name: LYRA_Main.wresl
+! Purpose: Determination of non-discretionary transfers from Yuba watershed per LYRA. Discretionary SW and GW transfers are not modeled.
+! RHOANG 20200710
+
+!******************************************************************************
+! 0.0 Supporting logic for the LYRA calculations
+!******************************************************************************
+/*
+! Impact of NMFS and FWS BO on April and May SWP Exports
+define ApMySWPExpCngdv {std kind 'Volume-CumImpact' units 'taf'}
+define ApMySWPExpCng {
+    case beforeApr {
+        condition month < Apr
+        value 0. }
+    case AprMay {
+        condition month == Apr .or. month == May
+        value ApMySWPExpCngdv(-1) +
+              max(C_CAA003_SWP[UPSTREAM] - C_CAA003_SWP[DELTA],0.)*cfs_taf }
+    case afterMay {
+        condition always
+        value ApMySWPExpCngdv(-1) }
+}
+goal setApMySWPExpCngdv {ApMySWPExpCngdv = ApMySWPExpCng}
+
+! Cumulative LYRA Transfer that has also been Exported
+define LYRA_SWPExpCumdv {std kind 'Volume-Transfer' units 'taf'}
+define LYRA_SWPExp_Cum {
+    case beforeMay {
+        condition month < MAY
+        value 0. }
+    case otherwise {
+        condition always
+        value LYRA_SWPExpCumdv(-1) + min(C_CAA003_WTS_Stg1(-1),WTS_YubaSW(-1))*cfs_taf(-1) }
+}
+goal set_LYRA_SWPExpCumdv {LYRA_SWPExpCumdv = LYRA_SWPExp_Cum}
+
+! Remaining after export of LYRA
+define RemSWPExpCng {value max(ApMySWPExpCng - LYRA_SWPExp_Cum,0.) }
+*/
+
+!**********************************************************        
+!Calculation of Settlement Yuba River Index
+!Define Water Year Index based on forecasted inflow to New Bullards Bar
+!plus previous years carryover storage.
+
+! For Future conditions use unimpaired inflows at Smartville and Goodyear
+!define SmartvilleUnimpaired {value (I_FRNCH + I_BOWMN + I_DER001 + I_DER004 + I_FRDYC + I_JKSMD  + I_SFD003 + I_SFY007  + I_SPLDG  + I_SFY048 + I_LCBRF + I_SCOTF + I_NBLDB + I_ENGLB + I_SLT009 + I_OGN005 + I_NFY029 + I_MFY013)*cfs_taf + CT_Smartville_SV}
+
+define GoodyearUnimpaired {value (I_NFY029)*cfs_taf}
+
+define BaseCarryover {value 234.0}
+define Triggervalue  {value 0.0} /*{value 166.0}*/
+/*
+define Index_Accorddv   {std kind 'INDEX' units 'TAF'}
+define YrType_Accorddv  {std kind 'INDEX' units 'NONE'}
+
+define EndPrevMONInflow {
+    	case beginYR {
+        	condition month == OCT .and. wateryear == bgnWY
+        	value 0.0 }
+	case otherwise {
+		condition always  
+		sum(i=prevOCT,-1,1) I_NBLDB(i) * cfs_taf(i)  + C_NFY017[LOWERYUBA](i) * cfs_taf(i) + C_CMT000[LOWERYUBA](i) * cfs_taf(i)}
+	}
+
+define EndPrevMONInflowdv  {std kind 'FLOW' units 'TAF'}
+goal set_EndPrevMONInflowdv {EndPrevMONInflowdv = EndPrevMONInflow}
+
+define Feb_ForecastAPRtoJUL_YU {					! Smartsville for Feb
+	case forAPRtoJUL_YU{
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAPRtoJUL_YUdv(-1)}
+	}
+	
+define Feb_ForecastAPRtoJUL_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Feb_ForecastAPRtoJUL_YUdv {Feb_ForecastAPRtoJUL_YUdv = Feb_ForecastAPRtoJUL_YU}
+
+
+define Mar_ForecastAPRtoJUL_YU {					! Smartsville for Mar
+	case forAPRtoJUL_YU {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAPRtoJUL_YUdv(-1)}
+	}
+	
+define Mar_ForecastAPRtoJUL_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Mar_ForecastAPRtoJUL_YUdv {Mar_ForecastAPRtoJUL_YUdv = Mar_ForecastAPRtoJUL_YU}
+
+
+define Apr_ForecastAPRtoJUL_YU {					! Smartsville for Apr
+	case forAPRtoJUL_YU {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAPRtoJUL_YUdv(-1)}
+	}
+	
+define Apr_ForecastAPRtoJUL_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Apr_ForecastAPRtoJUL_YUdv {Apr_ForecastAPRtoJUL_YUdv = Apr_ForecastAPRtoJUL_YU}
+
+
+define May_ForecastAPRtoJUL_YU {					! Smartsville for May
+	case forAPRtoJUL_YU {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAPRtoJUL_YUdv(-1)}
+	}
+	
+define May_ForecastAPRtoJUL_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_May_ForecastAPRtoJUL_YUdv {May_ForecastAPRtoJUL_YUdv = May_ForecastAPRtoJUL_YU}
+
+
+
+!	GoodYear Bar Bulletin 120 Flows
+define Feb_ForecastAPRtoJUL_GB {					! Goodyear for Feb
+	case forAPRtoJUL_GB { 
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAPRtoJUL_GBdv(-1)}
+	}
+	
+define Feb_ForecastAPRtoJUL_GBdv {std kind 'FLOW' units 'TAF'}
+goal set_Feb_ForecastAPRtoJUL_GBdv {Feb_ForecastAPRtoJUL_GBdv = Feb_ForecastAPRtoJUL_GB}
+
+
+define Mar_ForecastAPRtoJUL_GB {					! Goodyear for Mar
+	case forAPRtoJUL_GB {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAPRtoJUL_GBdv(-1)}
+	}
+	
+define Mar_ForecastAPRtoJUL_GBdv {std kind 'FLOW' units 'TAF'}
+goal set_Mar_ForecastAPRtoJUL_GBdv {Mar_ForecastAPRtoJUL_GBdv = Mar_ForecastAPRtoJUL_GB}
+
+
+define Apr_ForecastAPRtoJUL_GB {					! Goodyear for Apr
+	case forAPRtoJUL_GB {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAPRtoJUL_GBdv(-1)}
+	}
+	
+define Apr_ForecastAPRtoJUL_GBdv {std kind 'FLOW' units 'TAF'}
+goal set_Apr_ForecastAPRtoJUL_GBdv {Apr_ForecastAPRtoJUL_GBdv = Apr_ForecastAPRtoJUL_GB}
+
+
+define May_ForecastAPRtoJUL_GB {					! Goodyear for May
+	case forAPRtoJUL_GB {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAPRtoJUL_GBdv(-1)}
+	}
+	
+define May_ForecastAPRtoJUL_GBdv {std kind 'FLOW' units 'TAF'}
+goal set_May_ForecastAPRtoJUL_GBdv {May_ForecastAPRtoJUL_GBdv = May_ForecastAPRtoJUL_GB}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define Feb_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU{
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAUGandSEP_YUdv(-1)}				!Feb
+	}
+	
+	define Feb_ForecastAUGandSEP_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Feb_ForecastAUGandSEP_YUdv {Feb_ForecastAUGandSEP_YUdv = Feb_ForecastAUGandSEP_YU}
+
+define Mar_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAUGandSEP_YUdv(-1)}				!Mar
+	}
+	
+	define Mar_ForecastAUGandSEP_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Mar_ForecastAUGandSEP_YUdv {Mar_ForecastAUGandSEP_YUdv = Mar_ForecastAUGandSEP_YU}
+
+define Apr_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAUGandSEP_YUdv(-1)}				!Apr
+	}
+	
+	define Apr_ForecastAUGandSEP_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_Apr_ForecastAUGandSEP_YUdv {Apr_ForecastAUGandSEP_YUdv = Apr_ForecastAUGandSEP_YU}
+
+define May_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAUGandSEP_YUdv(-1)}				!May
+	}
+
+define May_ForecastAUGandSEP_YUdv {std kind 'FLOW' units 'TAF'}
+goal set_May_ForecastAUGandSEP_YUdv {May_ForecastAUGandSEP_YUdv = May_ForecastAUGandSEP_YU}
+
+
+
+define FEBForecastInflow {		
+    	case beginYR {
+        	condition month <= JAN .and. wateryear == bgnWY
+        	value 0.0 }
+	case FEB {
+		condition month == FEB
+		value -2.146 + 14.24 * EndPrevMONInflow + 525.33 * SmartvilleUnimpaired_ann[LOWERYUBA] - 3.221 + 24.58 * EndPrevMONInflow + 547.87 * ((I_FRNCH(1) + I_BOWMN(1) + I_DER001(1) + I_DER004(1) + I_FRDYC(1) + I_JKSMD(1)  + I_SFD003(1) + I_SFY007(1)  + I_SPLDG(1)  + I_SFY048(1) + I_LCBRF(1) + I_SCOTF(1) + I_NBLDB(1) + I_ENGLB(1) + I_SLT009(1) + I_OGN005(1) + I_NFY029(1) + I_MFY013)*cfs_taf(1))
+		- 30.416 + 14.13 * EndPrevMONInflow + 624.73 * Feb_ForecastAPRtoJUL_YU - 240.81 * Feb_ForecastAPRtoJUL_GB + 15.93 * EndPrevMONInflow 
+		+ 640.37 * Feb_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value FEBForecastInflowdv(-1) * 1000.0}
+	}
+	
+define FEBForecastInflowdv {std kind 'FLOW' units 'TAF'}
+goal set_FEBForecastInflowdv {FEBForecastInflowdv = FEBForecastInflow / 1000.0}
+
+define MARForecastInflow {		
+    	case beginYR {
+        	condition month == OCT .and. wateryear == bgnWY
+        	value 0.0 }
+	case MAR {
+		condition month == MAR
+		value -23.495 + 5.96 * EndPrevMONInflow + 553.86 * SmartvilleUnimpaired_ann[LOWERYUBA] - 31.134 + 12.37 * EndPrevMONInflow + 621.62 * Mar_ForecastAPRtoJUL_YU 
+		- 232.66 * Mar_ForecastAPRtoJUL_GB + 14.73 * EndPrevMONInflow + 593.96 * Mar_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value MARForecastInflowdv(-1) * 1000.0}
+	}
+	
+define MARForecastInflowdv {std kind 'FLOW' units 'TAF'}
+goal set_MARForecastInflowdv {MARForecastInflowdv = MARForecastInflow / 1000.0}
+
+define APRForecastInflow {		
+    	case beginYR {
+        	condition month == OCT .and. wateryear == bgnWY
+        	value 0.0 }
+	case APR {
+		condition month == APR
+		value -30.665 + 5.47 * EndPrevMONInflow + 613.32 * Apr_ForecastAPRtoJUL_YU - 196.23 * Apr_ForecastAPRtoJUL_GB + 14.09 * EndPrevMONInflow + 
+		532.41 * Apr_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value APRForecastInflowdv(-1) * 1000.0}
+	}
+	
+define APRForecastInflowdv {std kind 'FLOW' units 'TAF'}
+goal set_APRForecastInflowdv {APRForecastInflowdv = APRForecastInflow / 1000.0}
+
+define MAYForecastInflow {		
+    	case beginYR {
+        	condition month == OCT .and. wateryear == bgnWY
+        	value 0.0 }
+	case MAY {
+		condition month == MAY
+		value -31.652 + 10.33 * EndPrevMONInflow + 616.45 * May_ForecastAPRtoJUL_YU - 223.53 * May_ForecastAPRtoJUL_GB + 12.98 * EndPrevMONInflow + 
+		500.71 * May_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value MAYForecastInflowdv(-1) * 1000.0}
+	}
+	
+define MAYForecastInflowdv {std kind 'FLOW' units 'TAF'}
+goal set_MAYForecastInflowdv {MAYForecastInflowdv = MAYForecastInflow / 1000.0}
+
+define Index_Accord {
+	case    FEB {
+		condition month == FEB
+       		value S_NBLDB[LOWERYUBA](PREVSEP) - BaseCarryover + EndPrevMONInflow + FEBForecastInflow / 1000.0}
+	case    MAR {
+		condition month == MAR
+       		value S_NBLDB[LOWERYUBA](PREVSEP) - BaseCarryover + EndPrevMONInflow + MARForecastInflow / 1000.0}
+	case    APR {
+		condition month == APR
+       		value S_NBLDB[LOWERYUBA](PREVSEP) - BaseCarryover + EndPrevMONInflow + APRForecastInflow / 1000.0}
+ 	case    MAY {
+		condition month == MAY
+       		value S_NBLDB[LOWERYUBA](PREVSEP) - BaseCarryover + EndPrevMONInflow + MAYForecastInflow / 1000.0}     
+        case    otherwise {
+		condition always
+        	value Index_Accorddv(-1)}
+        }
+        
+define Trigger {
+	case lowcarryover {
+		condition S_NBLDB[LOWERYUBA](PrevSep) < TriggerValue + BaseCarryover
+		value 6.0}
+	case otherwise {
+		condition always
+        	value 0.0}
+        }
+        
+goal set_Index_Accord {Index_Accorddv=Index_Accord}        
+      
+        
+define YrType_Accord_Init {
+	case index7 {
+		condition Index_Accord < 500.0
+		value 7.0}
+	case index6 {
+		condition Index_Accord < 693.0
+		value 6.0}
+	case index5 {
+		condition Index_Accord < 820.0
+		value 5.0}
+	case index4 {
+		condition Index_Accord < 920.0
+		value 4.0}
+	case index3 {
+		condition Index_Accord < 1040.0
+		value 3.0}
+	case index2 {
+		condition Index_Accord < 1400.0
+		value 2.0 }
+	case index1 {
+		condition always
+		value 1.0}
+	}
+
+       
+define YrType_Accord {     
+        case Oct_Jan {
+		condition month >= OCT .and. month <= MAR
+			value max(YrType_Accord_Init,Trigger) }
+	case otherwise {
+		condition always
+		        value YrType_Accord_init}
+        }
+        
+goal set_YrType_Accord {YrType_Accorddv=YrType_Accord}
+
+!******************************************************************************
+!Calculation of D1644 Yuba River Index
+
+define Index_D1644dv   {std kind 'INDEX' units 'TAF'}
+define YrType_D1644dv  {std kind 'INDEX' units 'NONE'}
+
+define OctMarFlow {
+       case APR {
+       		condition month == APR
+       		sum(i=-6,-1,1) UNIMP_YUBA(i) }
+       case Rest { 
+       		condition always
+       		value 0 }
+        }
+
+define AprJulFlow {
+       case APR {
+       		condition month == APR
+       		sum(i=0,3,1) UNIMP_YUBA(i) }
+       case Rest { 
+       		condition always
+       		value 0 }
+        }
+
+define Index_D1644 {
+	case APR {
+	        condition month == APR
+	       	value 0.2*min(1400.,Index_D1644dv(-1))+0.3*OctMarFlow+0.5*AprJulFlow }
+	case Rest { 
+	       	condition always
+	       	value Index_D1644dv(-1) }
+        }
+ 
+ goal set_Index_D1644LT {Index_D1644dv=Index_D1644}
+ 
+ define YrType_D1644 {
+ 	 case Wet {
+         	condition Index_D1644 >=1230
+         	value 1}
+         case AN {
+ 	        condition Index_D1644 >=990
+         	value 2}
+         case BN {
+ 	        condition Index_D1644 >=790
+         	value 3}
+         case Dry {
+ 	        condition Index_D1644 >=630
+         	value 4}
+         case Crit {
+ 	        condition Index_D1644 >=540
+         	value 5}
+         case otherwise {
+ 		condition always
+         	value 6}
+        }
+ 
+!******************************************************************************
+! 1.0 LYRA SW transfers acquisitions
+!   LYRA Transferable SW timeseries is pre-processed by running Lower Yuba module standalone with and without LYRA reoperation
+!   Incorporated into the timeseries: Reservoir Refill impacts & Transfers only during balanced conditions.
+!   Represents additional transferrable water made available from Yuba watershed through reoperation of New Bullards Bar Reservoir with new targets and 
+!   minimum flow requirements at Smartville and Marysville
+define AprSepLYRA_SW {
+    case AprSep {
+        condition month>MAR
+        sum(i=7-month,12-month,1) Yuba_Trans(i)*cfs_taf(i) + .002}
+    case otherwise {
+        condition always
+        value 1. }
+}
+define MonthlyLYRA_SW {
+    case AprSep {
+        condition month>MAR
+        value Yuba_Trans*cfs_taf}
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+define YubaSW_Max {value AprSepLYRA_SW}
+*/
+If simulateYubTransfer == 1. {
+	define YrType_Accord {value YrType_Accord_LYRA[LowerYuba]}}
+elseif simulateYubTransfer ==0. {
+	define YrType_Accord {value YrType_Accord[LowerYuba]}}
+define YrType_D1644 {value YrType_D1644[LowerYuba]}
+
+!******************************************************************************      
+! 2.0 LYRA GW transfers acquisitions
+!   Under the LYRA SCHEDULE 6 YEAR PUMPING COMMITMENT, participating Member Units would agree to
+!   pump specified percentages of 30 TAF of groundwater in Schedule 6 years, thus making the water available for transfer.
+!   The 30 TAF/yr of GW pumping is accordingly incorporated into the Lower Yuba Module under 'Yuba_GW_Substitution.wresl'
+
+define YubaGW_Max {
+
+    case Schedule_6 {
+        condition YrType_Accord == 6
+        value 30.0}
+        
+    case Otherwise {
+        condition always
+        value 0.0}
+}
+
+
+!Maximum annual non-discretionary transfers:
+!define YubaSW_Max_dv {alias YubaSW_Max kind 'Yuba-Max-Acquisition' units 'TAF'}
+define YubaGW_Max_dv {alias YubaGW_Max kind 'Yuba-Max-Acquisition' units 'TAF'}
+!define YubaSWGW_Max_dv {alias YubaGW_Max + YubaSW_Max kind 'Yuba-Max-Acquisition' units 'TAF'}
+
+!******************************************************************************
+! 3.0 Assumed Monthly Distribution for Supplies
+define YubaPattrnPercGW {select Yuba_GW from WTS_Patterns where month=month}
+define YubaPattrnFactGW {value YubaPattrnPercGW/100.}
+!define YubaPattrnFactSW {value MonthlyLYRA_SW/AprSepLYRA_SW}                    !dynamic calc for Yuba LYRA component
+
+goal setWTS_YubaGW_1 {WTS_YubaGW_1 = YubaGW_Max * YubaPattrnFactGW * taf_cfs}
+goal setWTS_YubaSW_1 {WTS_YubaSW_1 = Yuba_Trans} !YubaSW_Max * YubaPattrnFactSW * taf_cfs}  
+goal setYubaGWdv {YubaGWdv = WTS_YubaGW_1*cfs_taf}
+goal setYubaSWdv {YubaSWdv = WTS_YubaSW_1*cfs_taf}
+
+!******************************************************************************
+! 4.0 Shortage bounds
+goal ZeroWTS_YubaGWShort {
+    lhs WTS_YubaGWShort
+    rhs 0.
+    lhs>rhs penalty 9999 }
+goal MaxWTS_YubaGWShort {WTS_YubaGWShort < WTS_YubaGW_1}
+/*
+goal ZeroWTS_YubaSWShort {
+    lhs WTS_YubaSWShort
+    rhs 0.
+    lhs>rhs penalty 9999 }
+goal MaxWTS_YubaSWShort {WTS_YubaSWShort < WTS_YubaSW_1}
+*/
+goal setWTS_YubaShort {WTS_YubaShort = WTS_YubaGWShort }!+ WTS_YubaSWShort}
+
+!******************************************************************************
+! 5.0 Total Acquisitions for the month (cfs)
+goal setWTS_YubaGW {WTS_YubaGW = WTS_YubaGW_1 - WTS_YubaGWShort}
+goal setWTS_YubaSW {WTS_YubaSW = WTS_YubaSW_1 - WTS_YubaSWShort}
+goal setWTS_Yuba {WTS_Yuba = WTS_YubaGW + WTS_YubaSW}
+

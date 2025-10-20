@@ -1,0 +1,58 @@
+! E.Reyes 6/26/98
+! A. Munevar 11/13/99
+
+! Defines Standard allowable & Max allowable pumping at Banks.  Banks can increase pumping
+! up to 1/3 of San Joaquin River flow at Vernalis if flow at Vernalis is greater than 1000 cfs.
+
+!   If SJR flow @ Vernalis > 1000 cfs then,
+!   Banks_max_allow = Banks_standard_allow + 1/3*(SJR @ Vernalis)
+!   But only upto physical capacity.
+
+! Number of days in which the Banks limit *IS* increased by 1/3 of SJR flow
+define BanksDaysIncr {
+       select   DaysIncr
+       from    BanksLimits
+       where   month=month
+}
+
+! Number of days in which the Banks limit *IS NOT* increased by 1/3 of SJR flow
+define BanksDaysNoIncr { value daysin - BanksDaysIncr}
+
+! Finds the Max Pump Capacity with the allowable increase
+!define BanksCapPermit2 {select PermitCap2 from BanksLimits where month=month}
+define BanksMax1 {
+    case Increase {
+         condition  C_SJR070est > 1000.0
+         value      max(BanksCapPermit,
+                        min(BanksCapPermit1 + C_SJR070est/3.0, BanksCapPermit2) - ReservedCap) }
+    case NoIncrease {
+         condition  always
+         value      BanksCapPermit }
+}
+
+! Limit Pumping
+! to allowable, weight for days in which increase is allowed
+define BanksMaxAllow {value BanksMax1*BanksDaysIncr/daysin + BanksCapPermit*BanksDaysNoIncr/daysin }
+
+! Limit Pumping to Allowable and Physical Capacity, whichever is less
+goal banksLessThanAllow { C_CAA003_SWP_TD + C_CAA003_CVP_TD + C_CAA003_WTS_TD1 < BanksMaxAllow}
+goal banksLessThanPhys  { C_CAA003 < BanksCapPhys}
+
+! Limit Pumping with added WTS pumping
+goal banksLessThanResrvd { C_CAA003_SWP_TD + C_CAA003_CVP_TD + C_CAA003_WTS_TD
+                          < BanksMaxAllow + ReservedCap}
+
+! Output Allowable Pumping Cap for Checking Only
+define BanksAllowOut {alias BanksMaxAllow kind 'FLOW-ALLOW-BANKS' UNITS 'CFS' }
+
+! Banks PP Minimum Cap
+define banksminpump {value 300.}
+define banksminpumpdv {alias banksminpump kind 'health-safety' units 'cfs'}
+
+goal setbanksminpump {
+    lhs C_CAA003_SWP
+    rhs banksminpump
+    lhs>rhs penalty 0
+    lhs<rhs penalty 2700
+}
+

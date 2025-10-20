@@ -1,0 +1,139 @@
+
+! The Water Supply Index (WSI) for the SWP is the sum of the beginning of months storages
+! (BOM) for Lake Oroville (S_OROVL) and SWP-San Luis Reservoir (S_SLUIS_SWP) and the Forecast of Runoff
+! for the Feather River.
+
+! Forecast of Runoff for SWP is defined as: Feather River component of the Sacramento
+! River Index (SRI) - Sum of Oroville Lake Inflows (I_OROVL) since 1-OCT.
+
+! Forecast of Feather River Runoff into Lake Oroville for REMAINDER of WATER YEAR
+
+define frcst_fea {
+    case JantoMay  {
+        condition   month >= JAN .and. month <=MAY
+        sum(i=0, 12-month, 1) I4_fm[SWPForecast](i)}
+  case other {
+    condition   always
+    value       0.0 }
+}
+
+define frcst_fea_dv{alias frcst_fea kind 'forecast-flow' units 'taf'}
+
+define co_final_dv {std kind 'carryover' units 'taf'}
+define co_final_sod_dv {std kind 'carryover' units 'taf'}
+define co_final_nod_dv {std kind 'carryover' units 'taf'}
+define co_available_dv {std kind 'carryover' units 'taf'}
+define co_available_nod_dv {std kind 'carryover' units 'taf'}
+define co_available_sod_dv {std kind 'carryover' units 'taf'}
+
+define S_SLUIS_SWPeffective {case Jan {
+                       condition month == JAN
+                       value max(S_SLUIS_SWP(-1) - co_final_sod_dv(-1), 0.0)}
+                     case FebtoMar {
+                       condition month >= FEB .and. month <= MAR
+                       value max(S_SLUIS_SWP(-1) - co_available_sod_dv(-1), 0.0)}
+                     case Rest {
+                       condition always
+                       value S_SLUIS_SWP(-1)}}
+
+
+!This is carryover of W and AN year 100 TAF ITP export cut.  It should not be included in the Table A allocation
+!since it will be used to support summer 80 km X2 in W, AN, BN years or salinity impacts of
+!re-operating the SMSCG in Dry years.
+define ITP_Carryover_ {std kind 'carryover' units 'taf'}
+
+
+define WSI_SWP {
+    case January {
+        condition  month == JAN
+        value      S_OROVL(-1)-co_final_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1) + S_SLUIS_SWPeffective +
+                   /*- swp_co_1 + */  
+                   frcst_fea  }     ! Previous month storage plus forecast inflow
+    case FebtoApr {
+        condition  month >= FEB .and. month <= APR
+        value      S_OROVL(-1)-co_available_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1) + S_SLUIS_SWPeffective +
+                   /*- swp_co_1 + */  
+                   frcst_fea  }     ! Previous month storage plus forecast inflow
+    case May {
+        condition  month == MAY
+        value      S_OROVL(-1)-co_available_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1) + S_SLUIS_SWP(-1) +
+                   min(perdel_cvpag_s*100.,37.5)*SWPShastaSwitch +
+                   /*- swp_co_1 + */
+                   frcst_fea  }     ! Previous month storage plus forecast inflow
+  case other {
+    condition   always
+    value       0.0 }
+}
+
+define WSI_SWP_dv {alias WSI_SWP kind 'water-supply-index' units 'taf'}
+
+define WSI_SWP_io {
+    case January {
+        condition  month == JAN
+        value      S_OROVL(-1)-co_final_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1)  + S_SLUIS_SWPeffective +
+                   /*- swp_co_1 + */
+                   frcst_fea + min(SIO_SWP(-1),max_return_swp2)  }     ! Previous month storage plus forecast inflow
+    case FebtoApr {
+        condition  month >= FEB .and. month <= APR
+        value      S_OROVL(-1)-co_available_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1) + S_SLUIS_SWPeffective +
+                   /*- swp_co_1 + */
+                   frcst_fea + min(SIO_SWP(-1),max_return_swp2)  }     ! Previous month storage plus forecast inflow
+    case May {
+        condition  month == MAY
+        value      S_OROVL(-1)-co_available_nod_dv(-1)- S_OROVL_WTS(-1) - ITP_Carryover_(-1) + S_SLUIS_SWP(-1) +
+                   min(perdel_cvpag_s*100.,37.5)*SWPShastaSwitch +
+                   /*- swp_co_1 + */
+                   frcst_fea + min(SIO_SWP(-1),max_return_swp2)  }     ! Previous month storage plus forecast inflow
+  case other {
+    condition   always
+    value       0.0 }
+}
+
+define WSI_SWP_io_ {alias WSI_SWP_io kind 'water-supply-index' units 'taf'}
+
+! Do another version of WSI that includes NODOS SWP component contribution
+
+! have found that this is a reasonable limit on how much water can be drawn from NODOS based on new pipeline release capacity only
+define lmtWSIS31_conv {value 500.*upperC17603/1500.}
+
+! don't rely on S31 if can't access the supply because of release limits
+define lmtWSIS31_DryCap {
+    case ShastaColdOffRamp {
+         condition  S_TRNTY(-1) + S_SHSTA(-1) < ColdStorTarg
+         value lmtWSIS31_conv}                          ! only release pipe in driest conditions
+    case CritCondOffRamp {
+         condition wyt_NODOS + prev_wyt_SAC >= 8
+         value lmtWSIS31_conv}
+    case otherwise {
+         condition  always
+         value 99999.0 }
+}
+
+/*
+! use NODOS to top off SWP Storage first (scale use of Sites according to Oroville condition)
+define lmtWSIS31_OroStr {
+    case Low {
+         condition  S_OROVL(-1) < 2000. .or. wyt_SAC >= 5.
+         value 200.}
+    case Medium {
+         condition  S_OROVL(-1) < 2500. .or. wyt_SAC >= 4.
+         value 400.}
+    case otherwise {
+         condition  always
+         value 99999.0 }
+}
+
+define lmtWSIforS31 {value min(lmtWSIS31_OroStr,lmtWSIS31_drycap)}
+*/
+define lmtWSIforS31 {value lmtWSIS31_drycap}
+
+define WSI_SWP_NDS {
+    case JantoMay {
+        condition  month >= JAN .and. month <= MAY
+        value      WSI_SWP + min(S31(-1),lmtWSIforS31)}
+    case other {
+        condition  always
+        value      0.0 }
+}
+
+define WSI_SWP_NDS_dv {alias WSI_SWP_NDS kind 'water-supply-index' units 'taf'}

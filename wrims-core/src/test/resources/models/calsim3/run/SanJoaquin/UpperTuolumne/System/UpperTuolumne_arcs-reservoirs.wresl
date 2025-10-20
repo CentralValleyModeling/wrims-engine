@@ -1,0 +1,146 @@
+/*
+File Name: UpperTuolumne_arcs-reservoirs.wresl
+CalSim 3.0 System File
+
+*/
+
+
+!*******************************************************************************
+!** Hetch Hetchy Reservoir  ****************************************************
+!*******************************************************************************
+define S_HTCHY_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HTCHY_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HTCHY_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HTCHY_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HTCHY_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HTCHY   {std kind 'STORAGE' units 'TAF'} !Hetch Hetchy Reservoir 
+
+define S_HTCHYlevel1 {value 81.6}
+define S_HTCHYlevel2 {value 81.6}
+define S_HTCHYlevel3 { !Tuolumne Daily Model Target Storage
+	case October {
+		condition month == oct
+		value 330.}	
+	case NovApr {
+		condition month >= nov .and. month <= apr
+		value 320.}
+	case MaySep {
+		condition always
+		value 360.4}}
+define S_HTCHYlevel4 {value 360.4}  !drum gates raised year-round; PEIR on SFPUC Water System Improvement Program, Chapter 2
+define S_HTCHYlevel5 {value 360.4}
+
+define E_HTCHY  {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_HTCHY  {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_HTCHY {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_HTCHYlast    {select area from Tuolumne_ResInfo given storage=1000*S_HTCHY(-1) use linear where res_num=1}
+define A_HTCHYforward {select area from Tuolumne_ResInfo given storage=1050*S_HTCHY(-1) use linear where res_num=1}
+define A_HTCHYback    {select area from Tuolumne_ResInfo given storage=950*S_HTCHY(-1) use linear where res_num=1}
+define coefev_HTCHY {value (A_HTCHYforward - A_HTCHYback)/(100*max(0.01,S_HTCHY(-1)))}
+define relcap1 {select discharge from Tuolumne_ResInfo given storage=1000*S_HTCHY(-1) use linear where res_num=1}
+
+!*******************************************************************************
+!** Eleanor Reservoir  *********************************************************
+!*******************************************************************************
+define S_ELENR_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ELENR   {std kind 'STORAGE' units 'TAF'} !New ELENR Meadow Reservoir
+
+define S_ELENRlevel1 {value 1.06}
+define S_ELENRlevel2 {value 1.06}
+define S_ELENRlevel3 { ! Tuolumne Daily Model Target Storage
+        case OctNov {
+		condition month >= oct  .and.  month <= nov
+		value 15.}	
+	case Dec {
+		condition month == dec
+		value 18.3}		
+	case JanMar {
+		condition month == jan .and. month <= mar
+		value 21.5}
+	case AprAug {
+		condition month == apr .and. month <= aug
+		value 27.1}
+	case Sept {
+		condition always
+		value 15.}} 
+define S_ELENRlevel4 {  ! WEAP Top of Conservation Values
+	case OctMar {
+	condition month >= oct .and. month <= mar
+	value 21.5}
+	case Otherwise {
+	condition always
+	value 27.1}
+	}	
+define S_ELENRlevel5 {value 27.1} !Tuolumne Daily Model 
+
+define E_ELENR        {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_ELENR        {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_ELENR       {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_ELENRlast    {select area from Tuolumne_ResInfo given storage=1000*S_ELENR(-1) use linear where res_num=2}
+define A_ELENRforward {select area from Tuolumne_ResInfo given storage=1050*S_ELENR(-1) use linear where res_num=2}
+define A_ELENRback    {select area from Tuolumne_ResInfo given storage=950*S_ELENR(-1) use linear where res_num=2}
+define coefev_ELENR   {value (A_ELENRforward - A_ELENRback)/(100*max(0.01,S_ELENR(-1)))}
+define relcap2        {select discharge from Tuolumne_ResInfo given storage=1000*S_ELENR(-1) use linear where res_num=2}
+
+
+!*******************************************************************************
+!** Lloyd/Cherry Reservoir  ****************************************************
+!*******************************************************************************
+define S_LLOYD_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LLOYD   {std kind 'STORAGE' units 'TAF'}
+
+define S_LLOYDlevel1 {value 41.0}
+define S_LLOYDlevel2 {value 41.0}
+define S_LLOYDlevel3 { ! Tuolumne Daily Model Target Storage
+        case Octo {
+		condition month == oct
+		value 248.}	
+	case NovMar {
+		condition month >= nov  .and.  month <= mar
+		value 238.}	
+	case AprJun {
+	    condition month >= apr .and. month <= jun
+		value 273.}
+	case July    {
+		condition month == jul 
+		value 268.}
+	case Augu    {
+		condition month == aug 
+		value 258.}
+	case Sept    {
+		condition always
+		value 248.}}
+define S_LLOYDlevel4 {! Max(WEAP Top of Conservation Values, FERC model), so level 3 < level 4
+	case OctMar {
+	condition month >= oct .and. month <= mar
+	value 248.8}
+	case AprJun {
+	condition month >= apr .and. month <= jun
+	value 273.3}
+	case July    {
+	condition month == jul 
+	value 268.} !FERC Daily model
+	case Augu    {
+		condition month == aug 
+		value 258.} !FERC Daily model
+	case Sept    {
+		condition always
+		value 248.}}	
+define S_LLOYDlevel5 {value 273.3}! Tuolumne Daily Model
+
+define E_LLOYD  {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_LLOYD  {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_LLOYD {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_LLOYDlast    {select area from Tuolumne_ResInfo given storage=1000*S_LLOYD(-1) use linear where res_num=3}
+define A_LLOYDforward {select area from Tuolumne_ResInfo given storage=1050*S_LLOYD(-1) use linear where res_num=3}
+define A_LLOYDback    {select area from Tuolumne_ResInfo given storage=950*S_LLOYD(-1) use linear where res_num=3}
+define coefev_LLOYD   {value (A_LLOYDforward - A_LLOYDback)/(100*max(0.01,S_LLOYD(-1)))}
+define relcap3        {select discharge from Tuolumne_ResInfo given storage=1000*S_LLOYD(-1) use linear where res_num=3}

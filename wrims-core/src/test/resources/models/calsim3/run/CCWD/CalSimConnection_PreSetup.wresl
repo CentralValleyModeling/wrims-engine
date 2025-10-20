@@ -1,0 +1,39 @@
+!First, connect the Rock Slough, Old River and Victoria Canal intakes to D416 and D408.
+goal connect_D408 {D408 = D408_OR + D408_VC + D408_RS}
+!goal connect_D416 {D416 = D408_RS}
+goal connect_D408_OR {D408_OR = D_OMR021_ORP000}
+goal connect_D408_VC {D408_VC = D_VCT002_ORP000}
+goal connect_D408_RS {D408_RS = D_RSL004_CCC004}
+!Connect Mokelumne Intertie to Freeport diversion and limit to interie diversion planned in cycle 1.
+!goal connect_MOK_Intertie {I424 = 0.0}!D168B_ccwd}
+
+!Limit LV water right to Delta Surplus
+goal lim_LVright_toDS {D408_DS + D408_3f_H < 1000.*NDOI_ADD_CVP + 1000.*NDOI_ADD_SWP}
+
+goal early_cycle_3f_limit {
+	lhs	D408_3f
+	case D420_demand_met {
+		condition	S422_CC_maxWQrel + lim_cvp_ann > demand_d420
+		rhs			0.
+		lhs<rhs		penalty 0
+	}
+}
+	
+
+!Limit transfers to in-Delta
+goal lim_TX {DD_SAC017_SACS /*+ DD_SAC000_SACW*/ + DD_MOK004_MOK + DD_SJR026_SJRE + DD_SJR013_SJRW + DD_OMR027_OMR + D408_TX_H < DD_SAC_South /*+ DD_SAC_West*/ + DD_MOK + DD_SJR_East + DD_SJR_West + DD_OMR}
+
+goal low_priority_TX_limit {
+	lhs	D408_TX_L
+	case D420_demand_met {
+		condition	S422_CC_maxWQrel + lim_cvp_ann > demand_d420
+		rhs			0.
+		lhs<rhs		penalty 0
+	}
+}
+
+!Do not use low priority transfers for filling.
+goal low_priority_SA_limit {D408_TX_L < D420}
+
+
+

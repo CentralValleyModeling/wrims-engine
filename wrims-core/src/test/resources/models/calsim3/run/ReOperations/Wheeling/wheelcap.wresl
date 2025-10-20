@@ -1,0 +1,112 @@
+! This file sets the cap on Wheeling.
+
+!---------------------- CVC -----------------------
+! Banks will wheel for Cross Valley Canal up to their allocation.  Wheeling for CVC will be done in July, Aug, Sep, Oct, Nov and Dec.
+define CVC_Alloc {value perdel_cvpag_s*128.0}  ! This is CVC's allocation
+define CVC_AllocDv {alias CVC_Alloc Units 'taf'}
+
+! Compute amount of water that is already wheeled this year (taf)
+ define WheeledCVCamtdv {lower -10000.0 upper 10000.0 kind 'Alias' units 'TAF'}
+ define WheeledCVCamt{
+       case OctbgnWY {
+            condition month == Oct .and. wateryear == bgnWY ! First year of simulation, compute the amount of wheeling that has occurred since Oct.
+            value 0.0}
+       case Oct_Dec {
+            condition month >= Oct .and. month <= Dec  ! Compute the amount of wheeling that has occurred from July of previous WY to current month
+            value WheeledCVCamtdv(-1) + C_CAA003_cvc(-1)*cfs_taf(-1)}
+       case Aug_Sep {
+            condition month >= Aug .and. month <=Sep   ! Compute the amount of wheeling that has occurred from July of current WY
+            value WheeledCVCamtdv(-1) + C_CAA003_cvc(-1)*cfs_taf(-1)}
+       case all_others {
+            condition always
+            value 0.0 }
+            }
+
+goal setWheeledCVCamt {WheeledCVCamtdv = WheeledCVCamt}
+
+! Remaining Wheeling
+define RemainWheelCVC {
+       case OctDec {
+            condition month >= Oct .and. month <= Dec  ! Wheel for CVC in Oct, Nov and Dec up to the remaining amount of previous year's allocation (Mar - Feb)
+              value max(0.0,CVC_Alloc - WheeledCVCamt)}
+       case JulSep {
+            condition month >= Jul .and. month <= Sep  ! Wheel for CVC in Jul, Aug, and Sep up to the remaining amount of current years allocation (Mar - Feb)
+              value max(0.0,CVC_Alloc - WheeledCVCamt)}
+         case All_others {
+            condition always                           ! Do not wheel water for Cross Valley Canal in the rest of the months
+              value 0.0}
+             }
+
+goal Wheeling2 {
+     lhs C_CAA003_cvc
+       case OctDec {
+           condition month >= Oct .and. month <= Dec  ! Wheel for CVC in Oct, Nov and Dec up to the remaining amount of previous year's allocation (Mar - Feb)
+             rhs  RemainWheelCVC*taf_cfs
+             lhs<rhs penalty 0.0}
+       case JulSep {
+           condition month >= Jul .and. month <= Sep  ! Wheel for CVC in Jul, Aug, and Sep up to the remaining amount of current years allocation (Mar - Feb)
+             rhs RemainWheelCVC*taf_cfs
+             lhs<rhs penalty 0.0}
+       case All_others {
+           condition always                           ! Do not wheel water in the rest of the months
+             rhs 0.0}
+             }
+
+! See wheelcontinuity for Surplus side and total Release side
+goal CVCReleaseCont {C_WKYTN_whlcv + C_KSWCK_whlcv + C_NTOMA_whlcv + C32_whlcv = NDOI_ADD_whlcv + C_CAA003_cvcrels}
+
+!Only allow wheeling carriage during wheeling release operation.
+goal lim_CVC_carriage {NDOI_ADD_whlcv < C_CAA003_cvcrels}
+
+! discourage Summer CVC wheeling of storage release under very low Shasta conditions
+goal DryCVClimit {
+    lhs C_CAA003_cvcrels
+    case JulSep {
+        condition month>JUN .and. S_SHSTA[MONTHLYWEIGHTED]<2400.
+        rhs 0.
+        lhs<rhs penalty 0.
+        lhs>rhs penalty 3000.}
+}
+
+!---------------------- JPOD ----------------------
+! Determine JPOD Wheeling
+define wheelCap {select cap from WheelCap where year=wateryear }
+
+! Allow JPOD Wheeling only when Tracy is running at its capacity
+define tracy_int {
+    case TracyMax {
+      condition C_DMC000_Base + 0.5 > maxTracyCalc
+      value 1.0}
+    case Rest {
+      condition always
+      value 0.0}
+      }
+
+! Amount of CVP water Wheeled to CVP San Luis this year (TAF)
+define usedWheelAmt {
+  case OCT {
+    condition month==OCT
+    value     0.0 }
+  case Rest {
+    condition always
+    sum(i=-1,prevOCT,-1) C_CAA003_cvpwhl(i)*cfs_taf(i) }
+}
+
+! Remaining Wheeling under cap
+define remWheelCap { value max(0.0,wheelCap - usedWheelAmt) }
+define remWheelCap_ {alias remWheelCap units 'TAF'}
+
+! Restrict wheeling to be less than remaining cap
+goal wheelingCVP1 {C_CAA003_cvpwhl < remWheelCap*taf_cfs }
+
+! Determine available JPOD capacity
+define CVPWHLcap {value max(BanksMaxAllow - C_CAA003_Base,0.)}
+goal maxJPOD_CVP {C_CAA003_cvpwhl < CVPWHLcap*tracy_int}
+
+! See wheelcontinuity for Surplus side and total Release side
+goal JPODReleaseCont {C_wkytn_whljp + C_kswck_whljp + C_ntoma_whljp = NDOI_ADD_whljp + C_CAA003_whlrels}
+
+goal lim_JPOD_carriage {NDOI_ADD_whljp < C_CAA003_whlrels}
+
+!Only allow JPOD with surplus in current operation
+goal notstoragerelease {C_CAA003_whlrels = 0.}

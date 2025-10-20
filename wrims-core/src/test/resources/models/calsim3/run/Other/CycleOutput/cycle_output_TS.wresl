@@ -1,0 +1,2083 @@
+! Controls Analysis
+define[local] eiexpctrlUP     {alias eiexpctrl[UPSTREAM]      KIND 'debug' units 'cfs'}
+
+
+! Exports Section
+define[local] C_CAA003_UPSTREAM {alias C_CAA003[UPSTREAM] kind 'CHANNEL' UNITS 'CFS'} ! Banks
+define[local] C_CAA003_PRESETUP {alias C_CAA003[GW_INITIAL] kind 'CHANNEL' UNITS 'CFS'} ! Banks
+
+define[local] C_CAA003_swp_TDUPSTREAM {alias C_CAA003_swp_TD[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'} ! SWP Banks
+define[local] C_CAA003_swp_UPSTREAM {alias C_CAA003_swp[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'} ! SWP Banks
+define[local] C_CAA003_cvp_TDUPSTREAM {alias C_CAA003_cvp_TD[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Total CVP wheeling at Banks
+define[local] C_CAA003_cvp_UPSTREAM {alias C_CAA003_cvp[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Total CVP wheeling at Banks
+define[local] C_CAA003_EXP1_TDUPSTREAM {alias C_CAA003_EXP1_TD[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define[local] C_CAA003_EXP2_TDUPSTREAM {alias C_CAA003_EXP2_TD[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'}
+define[local] C_DMC000_cvp_TDUPSTREAM {alias C_DMC000_cvp_TD[UPSTREAM] kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Tracy
+define[local] C_DMC000_PRESETUP {alias C_DMC000[GW_INITIAL] kind 'CHANNEL' UNITS 'CFS'} ! Tracy
+define[local] C_DMC000_UPSTREAM {alias C_DMC000[UPSTREAM] kind 'CHANNEL' UNITS 'CFS'} ! Tracy
+
+
+
+! Variables for Post Analysis of FWS BO and NMFS BO Action specific Costs
+define[local] EXP_TD_PRE {alias EXP_TD[GW_INITIAL] kind 'FLOW-DELIVERY' units 'CFS'}
+
+
+define[local] S_TRNTY_BASE {alias S_TRNTY[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] S_SHSTA_BASE {alias S_SHSTA[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] S_OROVL_BASE {alias S_OROVL[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] S_FOLSM_BASE {alias S_FOLSM[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_CVP_BASE {alias S_SLUIS_CVP[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_SWP_BASE {alias S_SLUIS_SWP[MONTHLYWEIGHTED] kind 'STORAGE' units 'TAF'}
+define[local] C_WKYTN_BASE {alias C_WKYTN[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_KSWCK_BASE {alias C_KSWCK[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_FTR059_BASE {alias C_FTR059[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_NTOMA_BASE {alias C_NTOMA[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] NDOI_BASE {alias NDOI_ADD[MONTHLYWEIGHTED] + NDOI_MIN[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] EXP_TD_BASE {alias EXP_TD[MONTHLYWEIGHTED] kind 'FLOW-DELIVERY' units 'CFS'}
+!
+define[local] S_TRNTY_UPSTREAM {alias S_TRNTY[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] S_SHSTA_UPSTREAM {alias S_SHSTA[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] S_OROVL_UPSTREAM {alias S_OROVL[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] S_FOLSM_UPSTREAM {alias S_FOLSM[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_CVP_UPSTREAM {alias S_SLUIS_CVP[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_SWP_UPSTREAM {alias S_SLUIS_SWP[UPSTREAM] kind 'STORAGE' units 'TAF'}
+define[local] C_WKYTN_UPSTREAM {alias C_WKYTN[UPSTREAM] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_KSWCK_UPSTREAM {alias C_KSWCK[UPSTREAM] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_FTR059_UPSTREAM {alias C_FTR059[UPSTREAM] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_NTOMA_UPSTREAM {alias C_NTOMA[UPSTREAM] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] NDOI_UPSTREAM {alias NDOI_ADD[UPSTREAM] + NDOI_MIN[UPSTREAM] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] EXP_TD_UPSTREAM {alias EXP_TD[UPSTREAM] kind 'FLOW-DELIVERY' units 'CFS'}
+define[local] C_OMR014_UPSTREAM {alias C_OMR014[UPSTREAM] kind 'CHANNEL' units 'CFS'}
+
+!
+define[local] S_TRNTY_DELTA {alias S_TRNTY[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] S_SHSTA_DELTA {alias S_SHSTA[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] S_OROVL_DELTA {alias S_OROVL[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] S_FOLSM_DELTA {alias S_FOLSM[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_CVP_DELTA {alias S_SLUIS_CVP[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] S_SLUIS_SWP_DELTA {alias S_SLUIS_SWP[DELTA] kind 'STORAGE' units 'TAF'}
+define[local] C_WKYTN_DELTA {alias C_WKYTN[DELTA] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_KSWCK_DELTA {alias C_KSWCK[DELTA] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_FTR059_DELTA {alias C_FTR059[DELTA] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_NTOMA_DELTA {alias C_NTOMA[DELTA] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] NDOI_DELTA {alias NDOI_ADD[DELTA] + NDOI_MIN[DELTA] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] EXP_TD_DELTA {alias EXP_TD[DELTA] kind 'FLOW-DELIVERY' units 'CFS'}
+
+
+!Save cycle results for LV
+define D408_c6 {alias D408[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define D408_CVP_c6 {alias D408_CVP[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define D408_DS_c6 {alias D408_DS[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define D408_TX_c6 {alias D408_TX[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define D408_ECC_c6 {alias D408_ECC[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define I424_c6 {alias I424[monthlyweighted] kind 'flow-inflow' units 'cfs'}
+define S422_c6 {alias S422[monthlyweighted] kind 'storage' units 'taf'}
+define D420_c6 {alias D420[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+
+define D408_c7 {alias D408[upstream] kind 'flow-delivery' units 'cfs'}
+define D408_CVP_c7 {alias D408_CVP[upstream] kind 'flow-delivery' units 'cfs'}
+define D408_DS_c7 {alias D408_DS[upstream] kind 'flow-delivery' units 'cfs'}
+define D408_TX_c7 {alias D408_TX[upstream] kind 'flow-delivery' units 'cfs'}
+define D408_ECC_c7 {alias D408_ECC[upstream] kind 'flow-delivery' units 'cfs'}
+define I424_c7 {alias I424[upstream] kind 'flow-inflow' units 'cfs'}
+define S422_c7 {alias S422[upstream] kind 'storage' units 'taf'}
+define D420_c7 {alias D420[upstream] kind 'flow-delivery' units 'cfs'}
+
+define D408_c8 {alias D408[delta] kind 'flow-delivery' units 'cfs'}
+define D408_CVP_c8 {alias D408_CVP[delta] kind 'flow-delivery' units 'cfs'}
+define D408_DS_c8 {alias D408_DS[delta] kind 'flow-delivery' units 'cfs'}
+define D408_TX_c8 {alias D408_TX[delta] kind 'flow-delivery' units 'cfs'}
+define D408_ECC_c8 {alias D408_ECC[delta] kind 'flow-delivery' units 'cfs'}
+define I424_c8 {alias I424[delta] kind 'flow-inflow' units 'cfs'}
+define S422_c8 {alias S422[delta] kind 'storage' units 'taf'}
+define D420_c8 {alias D420[delta] kind 'flow-delivery' units 'cfs'}
+
+define NMFSdaysopen_c8  {alias NMFSdaysopendv[DELTA] kind 'DCC-DAYS-OPEN' UNITS 'NONE'}
+define NMFSMaxExpDCC_c8 {alias NMFS_MaxExpDCCdv[DELTA] kind 'Export-Limit' units 'cfs'}
+
+! Outputs for US FWS RPA Verification
+define NDO_cyc_MW {alias NDO[monthlyweighted] kind 'flow-ndo' units 'cfs'}
+define C_DMC000_cyc_MW {alias C_DMC000[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define C_CAA003_cyc_MW {alias C_CAA003[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define D408_cyc_MW {alias D408[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+define EXP_TD_cyc_MW {alias EXP_TD[monthlyweighted] kind 'flow-delivery' units 'cfs'}
+
+!MONTHLYWEIGHTED
+define[local] QsacFth_Cycle6 {alias QsacFth[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_SAC066_Cycle6 {alias C_SAC066[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+!define[local] C_SAC048IFMIN_Cycle6 {alias C_SAC048_IFMIN[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+!define[local] C_SAC048IF400_Cycle6 {alias C_SAC048_IF400[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+define[local] C_SAC048_Cycle6 {alias C_SAC048[MONTHLYWEIGHTED] kind 'FLOW-CHANNEL' units 'CFS'}
+
+define[local] SP_SAC083_YBP037_Cycle6 {alias SP_SAC083_YBP037[MONTHLYWEIGHTED] kind 'FLOW-DELIVERY' units 'CFS'}
+define[local] SP_SAC066_YBP020_Cycle6 {alias SP_SAC066_YBP020[MONTHLYWEIGHTED] kind 'FLOW-DELIVERY' units 'CFS'}
+!define[local] D400_Cycle6 {alias D400[MONTHLYWEIGHTED] kind 'FLOW-DELIVERY' units 'CFS'}
+
+
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle2 - SJRBASE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*define C_DMC000__SJRBASE   {alias  C_DMC000[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJRBASE   {alias  C_DMC003[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJRBASE   {alias  C_DMC007[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJRBASE   {alias  C_DMC011[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJRBASE   {alias  C_DMC016[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJRBASE   {alias  C_DMC021[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJRBASE   {alias  C_DMC024[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJRBASE   {alias  C_DMC030[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJRBASE   {alias  C_DMC034[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJRBASE   {alias  C_DMC039[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJRBASE   {alias  C_DMC044[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJRBASE   {alias  C_DMC049[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJRBASE   {alias  C_DMC054[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJRBASE   {alias  C_DMC058[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJRBASE   {alias  C_DMC064[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJRBASE   {alias  C_DMC070[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJRBASE   {alias  C_DMC074[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJRBASE   {alias  C_DMC076[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJRBASE   {alias  C_DMC080[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJRBASE   {alias  C_DMC085[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJRBASE   {alias  C_DMC091[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJRBASE   {alias  C_DMC097[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJRBASE   {alias  C_DMC105[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJRBASE   {alias  C_DMC111[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJRBASE   {alias  C_DMC116[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJRBASE   {alias  D_DMC007_CAA009[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJRBASE   {alias  D_DMC011_71_PA8[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJRBASE   {alias  D_DMC016_WTPJJO[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJRBASE   {alias  D_WTPJJO_50_PU[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJRBASE   {alias  D_DMC021_50_PA1[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJRBASE   {alias  D_DMC030_71_PA1[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJRBASE   {alias  D_DMC034_71_PA2[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJRBASE   {alias  D_DMC034_71_PA3[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJRBASE   {alias  D_DMC034_WWW001[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJRBASE   {alias  D_DMC044_71_PA4[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJRBASE   {alias  D_DMC044_71_PA5[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJRBASE   {alias  D_DMC054_NMW004[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJRBASE   {alias  D_DMC064_71_PA6[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJRBASE   {alias  D_DMC070_CAA069[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJRBASE   {alias  D_DMC070_73_PA1[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJRBASE   {alias  D_DMC070_VLW008[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJRBASE   {alias  D_DMC076_XCC043[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJRBASE   {alias  D_DMC091_73_PA3[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJRBASE   {alias  D_DMC111_FBW001[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJRBASE   {alias  D_DMC105_73_PA2[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJRBASE   {alias  D_DMC111_73_XA[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJRBASE   {alias  C_CAA003[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJRBASE   {alias  C_CAA003_CVC[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJRBASE   {alias  C_CAA003_CVP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJRBASE   {alias  C_CAA002[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJRBASE   {alias  C_CAA005[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJRBASE   {alias  C_CAA006[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJRBASE   {alias  C_CAA009[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJRBASE   {alias  C_CAA012[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJRBASE   {alias  C_CAA024[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJRBASE   {alias  C_CAA046[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJRBASE   {alias  C_CAA051[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJRBASE   {alias  C_CAA066[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJRBASE   {alias  C_CAA067[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJRBASE   {alias  C_CAA067_CVP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJRBASE   {alias  C_CAA067_SWP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJRBASE   {alias  C_CAA069[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJRBASE   {alias  C_CAA069_CVP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJRBASE   {alias  C_CAA069_SWP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJRBASE   {alias  C_CAA071[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJRBASE   {alias  C_CAA087[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJRBASE   {alias  C_CAA087_SWP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJRBASE   {alias  C_CAA087_CVP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJRBASE   {alias  C_CAA095[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJRBASE   {alias  C_CAA109[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJRBASE   {alias  C_CAA143[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJRBASE   {alias  C_CAA155[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJRBASE   {alias  C_CAA156[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJRBASE   {alias  C_CAA165[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJRBASE   {alias  C_CAA172[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJRBASE   {alias  C_CAA172_SWP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJRBASE   {alias  C_CAA172_CVP[SJRBASE]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJRBASE   {alias C_SLUIS_CVP[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJRBASE   {alias C_SLUIS_SWP[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJRBASE   {alias D_CAA069_SLUIS[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJRBASE   {alias D_CAA069_DMC070[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJRBASE   {alias D_CAA087_73_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJRBASE   {alias D_CAA109_73_PA3[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJRBASE   {alias D_CAA109_90_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJRBASE   {alias D_CAA143_90_PA2[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJRBASE   {alias D_CAA143_90_PU[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJRBASE   {alias D_CAA143_90_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJRBASE   {alias D_CAA155_90_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJRBASE   {alias D_CAA156_90_PU[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJRBASE   {alias D_CAA165_90_PU[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJRBASE   {alias D_CAA172_90_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJRBASE   {alias C_FSL005[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJRBASE   {alias C_SJR205[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJRBASE   {alias D_MDOTA_73_XA[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJRBASE   {alias D_MDOTA_90_PA1[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJRBASE   {alias D_MDOTA_91_PA[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJRBASE   {alias D_MDOTA_91_PR[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJRBASE   {alias D_MDOTA_64_XA[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJRBASE   {alias D_MDOTA_XCC010[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJRBASE   {alias C_MDOTA[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJRBASE   {alias D_SJR205_SJR201[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJRBASE   {alias C_SJR201[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJRBASE   {alias C_SJR200[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJRBASE   {alias SG64_SJR198_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJRBASE   {alias C_SJR198[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJRBASE   {alias C_FBW001[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJRBASE   {alias C_SJR195[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJRBASE   {alias SG65_SJR192_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJRBASE   {alias C_SJR192[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJRBASE   {alias R_64_XA_SJR185[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJRBASE   {alias SG66_SJR185_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJRBASE   {alias C_SJR185[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJRBASE   {alias SG67_SJR180_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJRBASE   {alias SR_64_SJR180[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJRBASE   {alias D_SJR180_ARY010[SJRBASE] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJRBASE   {alias C_SJR180[SJRBASE] kind 'debug-cfs' units 'cfs'}
+*/
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle3 - SJRBASE_GW1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*define C_DMC000__SJRBASE_GW1   {alias  C_DMC000[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJRBASE_GW1   {alias  C_DMC003[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJRBASE_GW1   {alias  C_DMC007[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJRBASE_GW1   {alias  C_DMC011[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJRBASE_GW1   {alias  C_DMC016[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJRBASE_GW1   {alias  C_DMC021[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJRBASE_GW1   {alias  C_DMC024[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJRBASE_GW1   {alias  C_DMC030[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJRBASE_GW1   {alias  C_DMC034[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJRBASE_GW1   {alias  C_DMC039[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJRBASE_GW1   {alias  C_DMC044[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJRBASE_GW1   {alias  C_DMC049[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJRBASE_GW1   {alias  C_DMC054[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJRBASE_GW1   {alias  C_DMC058[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJRBASE_GW1   {alias  C_DMC064[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJRBASE_GW1   {alias  C_DMC070[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJRBASE_GW1   {alias  C_DMC074[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJRBASE_GW1   {alias  C_DMC076[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJRBASE_GW1   {alias  C_DMC080[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJRBASE_GW1   {alias  C_DMC085[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJRBASE_GW1   {alias  C_DMC091[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJRBASE_GW1   {alias  C_DMC097[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJRBASE_GW1   {alias  C_DMC105[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJRBASE_GW1   {alias  C_DMC111[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJRBASE_GW1   {alias  C_DMC116[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJRBASE_GW1   {alias  D_DMC007_CAA009[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJRBASE_GW1   {alias  D_DMC011_71_PA8[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJRBASE_GW1   {alias  D_DMC016_WTPJJO[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJRBASE_GW1   {alias  D_WTPJJO_50_PU[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJRBASE_GW1   {alias  D_DMC021_50_PA1[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJRBASE_GW1   {alias  D_DMC030_71_PA1[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJRBASE_GW1   {alias  D_DMC034_71_PA2[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJRBASE_GW1   {alias  D_DMC034_71_PA3[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJRBASE_GW1   {alias  D_DMC034_WWW001[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJRBASE_GW1   {alias  D_DMC044_71_PA4[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJRBASE_GW1   {alias  D_DMC044_71_PA5[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJRBASE_GW1   {alias  D_DMC054_NMW004[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJRBASE_GW1   {alias  D_DMC064_71_PA6[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJRBASE_GW1   {alias  D_DMC070_CAA069[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJRBASE_GW1   {alias  D_DMC070_73_PA1[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJRBASE_GW1   {alias  D_DMC070_VLW008[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJRBASE_GW1   {alias  D_DMC076_XCC043[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJRBASE_GW1   {alias  D_DMC091_73_PA3[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJRBASE_GW1   {alias  D_DMC111_FBW001[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJRBASE_GW1   {alias  D_DMC105_73_PA2[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJRBASE_GW1   {alias  D_DMC111_73_XA[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJRBASE_GW1   {alias  C_CAA003[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJRBASE_GW1   {alias  C_CAA003_CVC[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJRBASE_GW1   {alias  C_CAA003_CVP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJRBASE_GW1   {alias  C_CAA002[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJRBASE_GW1   {alias  C_CAA005[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJRBASE_GW1   {alias  C_CAA006[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJRBASE_GW1   {alias  C_CAA009[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJRBASE_GW1   {alias  C_CAA012[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJRBASE_GW1   {alias  C_CAA024[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJRBASE_GW1   {alias  C_CAA046[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJRBASE_GW1   {alias  C_CAA051[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJRBASE_GW1   {alias  C_CAA066[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJRBASE_GW1   {alias  C_CAA067[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJRBASE_GW1   {alias  C_CAA067_CVP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJRBASE_GW1   {alias  C_CAA067_SWP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJRBASE_GW1   {alias  C_CAA069[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJRBASE_GW1   {alias  C_CAA069_CVP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJRBASE_GW1   {alias  C_CAA069_SWP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJRBASE_GW1   {alias  C_CAA071[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJRBASE_GW1   {alias  C_CAA087[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJRBASE_GW1   {alias  C_CAA087_SWP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJRBASE_GW1   {alias  C_CAA087_CVP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJRBASE_GW1   {alias  C_CAA095[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJRBASE_GW1   {alias  C_CAA109[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJRBASE_GW1   {alias  C_CAA143[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJRBASE_GW1   {alias  C_CAA155[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJRBASE_GW1   {alias  C_CAA156[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJRBASE_GW1   {alias  C_CAA165[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJRBASE_GW1   {alias  C_CAA172[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJRBASE_GW1   {alias  C_CAA172_SWP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJRBASE_GW1   {alias  C_CAA172_CVP[SJRBASE_GW1]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJRBASE_GW1   {alias C_SLUIS_CVP[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJRBASE_GW1   {alias C_SLUIS_SWP[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJRBASE_GW1   {alias D_CAA069_SLUIS[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJRBASE_GW1   {alias D_CAA069_DMC070[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJRBASE_GW1   {alias D_CAA087_73_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJRBASE_GW1   {alias D_CAA109_73_PA3[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJRBASE_GW1   {alias D_CAA109_90_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJRBASE_GW1   {alias D_CAA143_90_PA2[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJRBASE_GW1   {alias D_CAA143_90_PU[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJRBASE_GW1   {alias D_CAA143_90_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJRBASE_GW1   {alias D_CAA155_90_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJRBASE_GW1   {alias D_CAA156_90_PU[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJRBASE_GW1   {alias D_CAA165_90_PU[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJRBASE_GW1   {alias D_CAA172_90_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJRBASE_GW1   {alias C_FSL005[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJRBASE_GW1   {alias C_SJR205[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJRBASE_GW1   {alias D_MDOTA_73_XA[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJRBASE_GW1   {alias D_MDOTA_90_PA1[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJRBASE_GW1   {alias D_MDOTA_91_PA[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJRBASE_GW1   {alias D_MDOTA_91_PR[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJRBASE_GW1   {alias D_MDOTA_64_XA[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJRBASE_GW1   {alias D_MDOTA_XCC010[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJRBASE_GW1   {alias C_MDOTA[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJRBASE_GW1   {alias D_SJR205_SJR201[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJRBASE_GW1   {alias C_SJR201[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJRBASE_GW1   {alias C_SJR200[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJRBASE_GW1   {alias SG64_SJR198_8[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJRBASE_GW1   {alias C_SJR198[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJRBASE_GW1   {alias C_FBW001[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJRBASE_GW1   {alias C_SJR195[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJRBASE_GW1   {alias SG65_SJR192_8[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJRBASE_GW1   {alias C_SJR192[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJRBASE_GW1   {alias R_64_XA_SJR185[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJRBASE_GW1   {alias SG66_SJR185_8[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJRBASE_GW1   {alias C_SJR185[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJRBASE_GW1   {alias SG67_SJR180_8[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJRBASE_GW1   {alias SR_64_SJR180[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJRBASE_GW1   {alias D_SJR180_ARY010[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJRBASE_GW1   {alias C_SJR180[SJRBASE_GW1] kind 'debug-cfs' units 'cfs'}
+*/
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle4 - SJRBASE_GW2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*define C_DMC000__SJRBASE_GW2   {alias  C_DMC000[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJRBASE_GW2   {alias  C_DMC003[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJRBASE_GW2   {alias  C_DMC007[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJRBASE_GW2   {alias  C_DMC011[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJRBASE_GW2   {alias  C_DMC016[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJRBASE_GW2   {alias  C_DMC021[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJRBASE_GW2   {alias  C_DMC024[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJRBASE_GW2   {alias  C_DMC030[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJRBASE_GW2   {alias  C_DMC034[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJRBASE_GW2   {alias  C_DMC039[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJRBASE_GW2   {alias  C_DMC044[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJRBASE_GW2   {alias  C_DMC049[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJRBASE_GW2   {alias  C_DMC054[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJRBASE_GW2   {alias  C_DMC058[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJRBASE_GW2   {alias  C_DMC064[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJRBASE_GW2   {alias  C_DMC070[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJRBASE_GW2   {alias  C_DMC074[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJRBASE_GW2   {alias  C_DMC076[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJRBASE_GW2   {alias  C_DMC080[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJRBASE_GW2   {alias  C_DMC085[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJRBASE_GW2   {alias  C_DMC091[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJRBASE_GW2   {alias  C_DMC097[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJRBASE_GW2   {alias  C_DMC105[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJRBASE_GW2   {alias  C_DMC111[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJRBASE_GW2   {alias  C_DMC116[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJRBASE_GW2   {alias  D_DMC007_CAA009[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJRBASE_GW2   {alias  D_DMC011_71_PA8[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJRBASE_GW2   {alias  D_DMC016_WTPJJO[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJRBASE_GW2   {alias  D_WTPJJO_50_PU[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJRBASE_GW2   {alias  D_DMC021_50_PA1[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJRBASE_GW2   {alias  D_DMC030_71_PA1[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJRBASE_GW2   {alias  D_DMC034_71_PA2[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJRBASE_GW2   {alias  D_DMC034_71_PA3[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJRBASE_GW2   {alias  D_DMC034_WWW001[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJRBASE_GW2   {alias  D_DMC044_71_PA4[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJRBASE_GW2   {alias  D_DMC044_71_PA5[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJRBASE_GW2   {alias  D_DMC054_NMW004[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJRBASE_GW2   {alias  D_DMC064_71_PA6[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJRBASE_GW2   {alias  D_DMC070_CAA069[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJRBASE_GW2   {alias  D_DMC070_73_PA1[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJRBASE_GW2   {alias  D_DMC070_VLW008[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJRBASE_GW2   {alias  D_DMC076_XCC043[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJRBASE_GW2   {alias  D_DMC091_73_PA3[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJRBASE_GW2   {alias  D_DMC111_FBW001[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJRBASE_GW2   {alias  D_DMC105_73_PA2[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJRBASE_GW2   {alias  D_DMC111_73_XA[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJRBASE_GW2   {alias  C_CAA003[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJRBASE_GW2   {alias  C_CAA003_CVC[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJRBASE_GW2   {alias  C_CAA003_CVP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJRBASE_GW2   {alias  C_CAA002[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJRBASE_GW2   {alias  C_CAA005[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJRBASE_GW2   {alias  C_CAA006[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJRBASE_GW2   {alias  C_CAA009[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJRBASE_GW2   {alias  C_CAA012[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJRBASE_GW2   {alias  C_CAA024[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJRBASE_GW2   {alias  C_CAA046[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJRBASE_GW2   {alias  C_CAA051[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJRBASE_GW2   {alias  C_CAA066[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJRBASE_GW2   {alias  C_CAA067[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJRBASE_GW2   {alias  C_CAA067_CVP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJRBASE_GW2   {alias  C_CAA067_SWP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJRBASE_GW2   {alias  C_CAA069[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJRBASE_GW2   {alias  C_CAA069_CVP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJRBASE_GW2   {alias  C_CAA069_SWP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJRBASE_GW2   {alias  C_CAA071[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJRBASE_GW2   {alias  C_CAA087[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJRBASE_GW2   {alias  C_CAA087_SWP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJRBASE_GW2   {alias  C_CAA087_CVP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJRBASE_GW2   {alias  C_CAA095[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJRBASE_GW2   {alias  C_CAA109[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJRBASE_GW2   {alias  C_CAA143[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJRBASE_GW2   {alias  C_CAA155[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJRBASE_GW2   {alias  C_CAA156[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJRBASE_GW2   {alias  C_CAA165[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJRBASE_GW2   {alias  C_CAA172[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJRBASE_GW2   {alias  C_CAA172_SWP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJRBASE_GW2   {alias  C_CAA172_CVP[SJRBASE_GW2]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJRBASE_GW2   {alias C_SLUIS_CVP[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJRBASE_GW2   {alias C_SLUIS_SWP[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJRBASE_GW2   {alias D_CAA069_SLUIS[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJRBASE_GW2   {alias D_CAA069_DMC070[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJRBASE_GW2   {alias D_CAA087_73_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJRBASE_GW2   {alias D_CAA109_73_PA3[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJRBASE_GW2   {alias D_CAA109_90_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJRBASE_GW2   {alias D_CAA143_90_PA2[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJRBASE_GW2   {alias D_CAA143_90_PU[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJRBASE_GW2   {alias D_CAA143_90_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJRBASE_GW2   {alias D_CAA155_90_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJRBASE_GW2   {alias D_CAA156_90_PU[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJRBASE_GW2   {alias D_CAA165_90_PU[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJRBASE_GW2   {alias D_CAA172_90_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJRBASE_GW2   {alias C_FSL005[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJRBASE_GW2   {alias C_SJR205[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJRBASE_GW2   {alias D_MDOTA_73_XA[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJRBASE_GW2   {alias D_MDOTA_90_PA1[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJRBASE_GW2   {alias D_MDOTA_91_PA[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJRBASE_GW2   {alias D_MDOTA_91_PR[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJRBASE_GW2   {alias D_MDOTA_64_XA[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJRBASE_GW2   {alias D_MDOTA_XCC010[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJRBASE_GW2   {alias C_MDOTA[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJRBASE_GW2   {alias D_SJR205_SJR201[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJRBASE_GW2   {alias C_SJR201[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJRBASE_GW2   {alias C_SJR200[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJRBASE_GW2   {alias SG64_SJR198_8[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJRBASE_GW2   {alias C_SJR198[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJRBASE_GW2   {alias C_FBW001[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJRBASE_GW2   {alias C_SJR195[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJRBASE_GW2   {alias SG65_SJR192_8[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJRBASE_GW2   {alias C_SJR192[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJRBASE_GW2   {alias R_64_XA_SJR185[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJRBASE_GW2   {alias SG66_SJR185_8[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJRBASE_GW2   {alias C_SJR185[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJRBASE_GW2   {alias SG67_SJR180_8[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJRBASE_GW2   {alias SR_64_SJR180[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJRBASE_GW2   {alias D_SJR180_ARY010[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJRBASE_GW2   {alias C_SJR180[SJRBASE_GW2] kind 'debug-cfs' units 'cfs'}
+*/
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle5 - SJRBASE_GW3
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*define C_DMC000__SJRBASE_GW3   {alias  C_DMC000[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJRBASE_GW3   {alias  C_DMC003[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJRBASE_GW3   {alias  C_DMC007[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJRBASE_GW3   {alias  C_DMC011[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJRBASE_GW3   {alias  C_DMC016[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJRBASE_GW3   {alias  C_DMC021[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJRBASE_GW3   {alias  C_DMC024[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJRBASE_GW3   {alias  C_DMC030[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJRBASE_GW3   {alias  C_DMC034[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJRBASE_GW3   {alias  C_DMC039[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJRBASE_GW3   {alias  C_DMC044[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJRBASE_GW3   {alias  C_DMC049[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJRBASE_GW3   {alias  C_DMC054[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJRBASE_GW3   {alias  C_DMC058[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJRBASE_GW3   {alias  C_DMC064[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJRBASE_GW3   {alias  C_DMC070[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJRBASE_GW3   {alias  C_DMC074[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJRBASE_GW3   {alias  C_DMC076[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJRBASE_GW3   {alias  C_DMC080[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJRBASE_GW3   {alias  C_DMC085[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJRBASE_GW3   {alias  C_DMC091[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJRBASE_GW3   {alias  C_DMC097[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJRBASE_GW3   {alias  C_DMC105[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJRBASE_GW3   {alias  C_DMC111[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJRBASE_GW3   {alias  C_DMC116[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJRBASE_GW3   {alias  D_DMC007_CAA009[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJRBASE_GW3   {alias  D_DMC011_71_PA8[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJRBASE_GW3   {alias  D_DMC016_WTPJJO[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJRBASE_GW3   {alias  D_WTPJJO_50_PU[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJRBASE_GW3   {alias  D_DMC021_50_PA1[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJRBASE_GW3   {alias  D_DMC030_71_PA1[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJRBASE_GW3   {alias  D_DMC034_71_PA2[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJRBASE_GW3   {alias  D_DMC034_71_PA3[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJRBASE_GW3   {alias  D_DMC034_WWW001[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJRBASE_GW3   {alias  D_DMC044_71_PA4[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJRBASE_GW3   {alias  D_DMC044_71_PA5[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJRBASE_GW3   {alias  D_DMC054_NMW004[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJRBASE_GW3   {alias  D_DMC064_71_PA6[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJRBASE_GW3   {alias  D_DMC070_CAA069[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJRBASE_GW3   {alias  D_DMC070_73_PA1[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJRBASE_GW3   {alias  D_DMC070_VLW008[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJRBASE_GW3   {alias  D_DMC076_XCC043[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJRBASE_GW3   {alias  D_DMC091_73_PA3[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJRBASE_GW3   {alias  D_DMC111_FBW001[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJRBASE_GW3   {alias  D_DMC105_73_PA2[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJRBASE_GW3   {alias  D_DMC111_73_XA[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJRBASE_GW3   {alias  C_CAA003[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJRBASE_GW3   {alias  C_CAA003_CVC[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJRBASE_GW3   {alias  C_CAA003_CVP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJRBASE_GW3   {alias  C_CAA002[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJRBASE_GW3   {alias  C_CAA005[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJRBASE_GW3   {alias  C_CAA006[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJRBASE_GW3   {alias  C_CAA009[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJRBASE_GW3   {alias  C_CAA012[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJRBASE_GW3   {alias  C_CAA024[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJRBASE_GW3   {alias  C_CAA046[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJRBASE_GW3   {alias  C_CAA051[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJRBASE_GW3   {alias  C_CAA066[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJRBASE_GW3   {alias  C_CAA067[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJRBASE_GW3   {alias  C_CAA067_CVP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJRBASE_GW3   {alias  C_CAA067_SWP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJRBASE_GW3   {alias  C_CAA069[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJRBASE_GW3   {alias  C_CAA069_CVP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJRBASE_GW3   {alias  C_CAA069_SWP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJRBASE_GW3   {alias  C_CAA071[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJRBASE_GW3   {alias  C_CAA087[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJRBASE_GW3   {alias  C_CAA087_SWP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJRBASE_GW3   {alias  C_CAA087_CVP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJRBASE_GW3   {alias  C_CAA095[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJRBASE_GW3   {alias  C_CAA109[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJRBASE_GW3   {alias  C_CAA143[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJRBASE_GW3   {alias  C_CAA155[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJRBASE_GW3   {alias  C_CAA156[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJRBASE_GW3   {alias  C_CAA165[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJRBASE_GW3   {alias  C_CAA172[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJRBASE_GW3   {alias  C_CAA172_SWP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJRBASE_GW3   {alias  C_CAA172_CVP[SJRBASE_GW3]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJRBASE_GW3   {alias C_SLUIS_CVP[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJRBASE_GW3   {alias C_SLUIS_SWP[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJRBASE_GW3   {alias D_CAA069_SLUIS[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJRBASE_GW3   {alias D_CAA069_DMC070[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJRBASE_GW3   {alias D_CAA087_73_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJRBASE_GW3   {alias D_CAA109_73_PA3[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJRBASE_GW3   {alias D_CAA109_90_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJRBASE_GW3   {alias D_CAA143_90_PA2[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJRBASE_GW3   {alias D_CAA143_90_PU[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJRBASE_GW3   {alias D_CAA143_90_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJRBASE_GW3   {alias D_CAA155_90_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJRBASE_GW3   {alias D_CAA156_90_PU[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJRBASE_GW3   {alias D_CAA165_90_PU[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJRBASE_GW3   {alias D_CAA172_90_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJRBASE_GW3   {alias C_FSL005[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJRBASE_GW3   {alias C_SJR205[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJRBASE_GW3   {alias D_MDOTA_73_XA[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJRBASE_GW3   {alias D_MDOTA_90_PA1[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJRBASE_GW3   {alias D_MDOTA_91_PA[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJRBASE_GW3   {alias D_MDOTA_91_PR[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJRBASE_GW3   {alias D_MDOTA_64_XA[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJRBASE_GW3   {alias D_MDOTA_XCC010[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJRBASE_GW3   {alias C_MDOTA[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJRBASE_GW3   {alias D_SJR205_SJR201[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJRBASE_GW3   {alias C_SJR201[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJRBASE_GW3   {alias C_SJR200[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJRBASE_GW3   {alias SG64_SJR198_8[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJRBASE_GW3   {alias C_SJR198[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJRBASE_GW3   {alias C_FBW001[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJRBASE_GW3   {alias C_SJR195[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJRBASE_GW3   {alias SG65_SJR192_8[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJRBASE_GW3   {alias C_SJR192[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJRBASE_GW3   {alias R_64_XA_SJR185[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJRBASE_GW3   {alias SG66_SJR185_8[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJRBASE_GW3   {alias C_SJR185[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJRBASE_GW3   {alias SG67_SJR180_8[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJRBASE_GW3   {alias SR_64_SJR180[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJRBASE_GW3   {alias D_SJR180_ARY010[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJRBASE_GW3   {alias C_SJR180[SJRBASE_GW3] kind 'debug-cfs' units 'cfs'}
+*/
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle6 - SJRBASE_GW4
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_DMC000__SJRBASE_GW4   {alias  C_DMC000[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJRBASE_GW4   {alias  C_DMC003[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJRBASE_GW4   {alias  C_DMC007[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJRBASE_GW4   {alias  C_DMC011[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJRBASE_GW4   {alias  C_DMC016[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJRBASE_GW4   {alias  C_DMC021[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJRBASE_GW4   {alias  C_DMC024[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJRBASE_GW4   {alias  C_DMC030[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJRBASE_GW4   {alias  C_DMC034[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJRBASE_GW4   {alias  C_DMC039[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJRBASE_GW4   {alias  C_DMC044[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJRBASE_GW4   {alias  C_DMC049[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJRBASE_GW4   {alias  C_DMC054[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJRBASE_GW4   {alias  C_DMC058[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJRBASE_GW4   {alias  C_DMC064[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJRBASE_GW4   {alias  C_DMC070[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJRBASE_GW4   {alias  C_DMC074[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJRBASE_GW4   {alias  C_DMC076[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJRBASE_GW4   {alias  C_DMC080[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJRBASE_GW4   {alias  C_DMC085[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJRBASE_GW4   {alias  C_DMC091[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJRBASE_GW4   {alias  C_DMC097[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJRBASE_GW4   {alias  C_DMC105[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJRBASE_GW4   {alias  C_DMC111[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJRBASE_GW4   {alias  C_DMC116[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJRBASE_GW4   {alias  D_DMC007_CAA009[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJRBASE_GW4   {alias  D_DMC011_71_PA8[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJRBASE_GW4   {alias  D_DMC016_WTPJJO[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJRBASE_GW4   {alias  D_WTPJJO_50_PU[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJRBASE_GW4   {alias  D_DMC021_50_PA1[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJRBASE_GW4   {alias  D_DMC030_71_PA1[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJRBASE_GW4   {alias  D_DMC034_71_PA2[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJRBASE_GW4   {alias  D_DMC034_71_PA3[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJRBASE_GW4   {alias  D_DMC034_WWW001[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJRBASE_GW4   {alias  D_DMC044_71_PA4[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJRBASE_GW4   {alias  D_DMC044_71_PA5[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJRBASE_GW4   {alias  D_DMC054_NMW004[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJRBASE_GW4   {alias  D_DMC064_71_PA6[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJRBASE_GW4   {alias  D_DMC070_CAA069[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJRBASE_GW4   {alias  D_DMC070_73_PA1[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJRBASE_GW4   {alias  D_DMC070_VLW008[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJRBASE_GW4   {alias  D_DMC076_XCC043[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJRBASE_GW4   {alias  D_DMC091_73_PA3[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJRBASE_GW4   {alias  D_DMC111_FBW001[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJRBASE_GW4   {alias  D_DMC105_73_PA2[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJRBASE_GW4   {alias  D_DMC111_73_XA[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJRBASE_GW4   {alias  C_CAA003[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJRBASE_GW4   {alias  C_CAA003_CVC[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJRBASE_GW4   {alias  C_CAA003_CVP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJRBASE_GW4   {alias  C_CAA002[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJRBASE_GW4   {alias  C_CAA005[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJRBASE_GW4   {alias  C_CAA006[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJRBASE_GW4   {alias  C_CAA009[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJRBASE_GW4   {alias  C_CAA012[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJRBASE_GW4   {alias  C_CAA024[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJRBASE_GW4   {alias  C_CAA046[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJRBASE_GW4   {alias  C_CAA051[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJRBASE_GW4   {alias  C_CAA066[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJRBASE_GW4   {alias  C_CAA067[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJRBASE_GW4   {alias  C_CAA067_CVP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJRBASE_GW4   {alias  C_CAA067_SWP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJRBASE_GW4   {alias  C_CAA069[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJRBASE_GW4   {alias  C_CAA069_CVP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJRBASE_GW4   {alias  C_CAA069_SWP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJRBASE_GW4   {alias  C_CAA071[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJRBASE_GW4   {alias  C_CAA087[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJRBASE_GW4   {alias  C_CAA087_SWP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJRBASE_GW4   {alias  C_CAA087_CVP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJRBASE_GW4   {alias  C_CAA095[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJRBASE_GW4   {alias  C_CAA109[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJRBASE_GW4   {alias  C_CAA143[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJRBASE_GW4   {alias  C_CAA155[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJRBASE_GW4   {alias  C_CAA156[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJRBASE_GW4   {alias  C_CAA165[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJRBASE_GW4   {alias  C_CAA172[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJRBASE_GW4   {alias  C_CAA172_SWP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJRBASE_GW4   {alias  C_CAA172_CVP[SJRBASE_GW4]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJRBASE_GW4   {alias C_SLUIS_CVP[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJRBASE_GW4   {alias C_SLUIS_SWP[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJRBASE_GW4   {alias D_CAA069_SLUIS[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJRBASE_GW4   {alias D_CAA069_DMC070[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJRBASE_GW4   {alias D_CAA087_73_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJRBASE_GW4   {alias D_CAA109_73_PA3[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJRBASE_GW4   {alias D_CAA109_90_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJRBASE_GW4   {alias D_CAA143_90_PA2[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJRBASE_GW4   {alias D_CAA143_90_PU[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJRBASE_GW4   {alias D_CAA143_90_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJRBASE_GW4   {alias D_CAA155_90_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJRBASE_GW4   {alias D_CAA156_90_PU[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJRBASE_GW4   {alias D_CAA165_90_PU[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJRBASE_GW4   {alias D_CAA172_90_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJRBASE_GW4   {alias C_FSL005[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJRBASE_GW4   {alias C_SJR205[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJRBASE_GW4   {alias D_MDOTA_73_XA[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJRBASE_GW4   {alias D_MDOTA_90_PA1[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJRBASE_GW4   {alias D_MDOTA_91_PA[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJRBASE_GW4   {alias D_MDOTA_91_PR[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJRBASE_GW4   {alias D_MDOTA_64_XA[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJRBASE_GW4   {alias D_MDOTA_XCC010[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJRBASE_GW4   {alias C_MDOTA[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJRBASE_GW4   {alias D_SJR205_SJR201[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJRBASE_GW4   {alias C_SJR201[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJRBASE_GW4   {alias C_SJR200[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJRBASE_GW4   {alias SG64_SJR198_8[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJRBASE_GW4   {alias C_SJR198[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJRBASE_GW4   {alias C_FBW001[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJRBASE_GW4   {alias C_SJR195[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJRBASE_GW4   {alias SG65_SJR192_8[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJRBASE_GW4   {alias C_SJR192[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJRBASE_GW4   {alias R_64_XA_SJR185[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJRBASE_GW4   {alias SG66_SJR185_8[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJRBASE_GW4   {alias C_SJR185[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJRBASE_GW4   {alias SG67_SJR180_8[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJRBASE_GW4   {alias SR_64_SJR180[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJRBASE_GW4   {alias D_SJR180_ARY010[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJRBASE_GW4   {alias C_SJR180[SJRBASE_GW4] kind 'debug-cfs' units 'cfs'}
+
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle7 - SJR_WQ1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_DMC000__SJR_WQ1   {alias  C_DMC000[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJR_WQ1   {alias  C_DMC003[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJR_WQ1   {alias  C_DMC007[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJR_WQ1   {alias  C_DMC011[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJR_WQ1   {alias  C_DMC016[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJR_WQ1   {alias  C_DMC021[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJR_WQ1   {alias  C_DMC024[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJR_WQ1   {alias  C_DMC030[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJR_WQ1   {alias  C_DMC034[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJR_WQ1   {alias  C_DMC039[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJR_WQ1   {alias  C_DMC044[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJR_WQ1   {alias  C_DMC049[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJR_WQ1   {alias  C_DMC054[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJR_WQ1   {alias  C_DMC058[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJR_WQ1   {alias  C_DMC064[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJR_WQ1   {alias  C_DMC070[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJR_WQ1   {alias  C_DMC074[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJR_WQ1   {alias  C_DMC076[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJR_WQ1   {alias  C_DMC080[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJR_WQ1   {alias  C_DMC085[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJR_WQ1   {alias  C_DMC091[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJR_WQ1   {alias  C_DMC097[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJR_WQ1   {alias  C_DMC105[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJR_WQ1   {alias  C_DMC111[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJR_WQ1   {alias  C_DMC116[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJR_WQ1   {alias  D_DMC007_CAA009[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJR_WQ1   {alias  D_DMC011_71_PA8[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJR_WQ1   {alias  D_DMC016_WTPJJO[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJR_WQ1   {alias  D_WTPJJO_50_PU[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJR_WQ1   {alias  D_DMC021_50_PA1[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJR_WQ1   {alias  D_DMC030_71_PA1[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJR_WQ1   {alias  D_DMC034_71_PA2[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJR_WQ1   {alias  D_DMC034_71_PA3[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJR_WQ1   {alias  D_DMC034_WWW001[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJR_WQ1   {alias  D_DMC044_71_PA4[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJR_WQ1   {alias  D_DMC044_71_PA5[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJR_WQ1   {alias  D_DMC054_NMW004[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJR_WQ1   {alias  D_DMC064_71_PA6[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJR_WQ1   {alias  D_DMC070_CAA069[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJR_WQ1   {alias  D_DMC070_73_PA1[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJR_WQ1   {alias  D_DMC070_VLW008[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJR_WQ1   {alias  D_DMC076_XCC043[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJR_WQ1   {alias  D_DMC091_73_PA3[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJR_WQ1   {alias  D_DMC111_FBW001[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJR_WQ1   {alias  D_DMC105_73_PA2[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJR_WQ1   {alias  D_DMC111_73_XA[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJR_WQ1   {alias  C_CAA003[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJR_WQ1   {alias  C_CAA003_CVC[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJR_WQ1   {alias  C_CAA003_CVP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJR_WQ1   {alias  C_CAA002[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJR_WQ1   {alias  C_CAA005[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJR_WQ1   {alias  C_CAA006[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJR_WQ1   {alias  C_CAA009[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJR_WQ1   {alias  C_CAA012[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJR_WQ1   {alias  C_CAA024[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJR_WQ1   {alias  C_CAA046[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJR_WQ1   {alias  C_CAA051[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJR_WQ1   {alias  C_CAA066[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJR_WQ1   {alias  C_CAA067[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJR_WQ1   {alias  C_CAA067_CVP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJR_WQ1   {alias  C_CAA067_SWP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJR_WQ1   {alias  C_CAA069[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJR_WQ1   {alias  C_CAA069_CVP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJR_WQ1   {alias  C_CAA069_SWP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJR_WQ1   {alias  C_CAA071[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJR_WQ1   {alias  C_CAA087[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJR_WQ1   {alias  C_CAA087_SWP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJR_WQ1   {alias  C_CAA087_CVP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJR_WQ1   {alias  C_CAA095[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJR_WQ1   {alias  C_CAA109[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJR_WQ1   {alias  C_CAA143[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJR_WQ1   {alias  C_CAA155[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJR_WQ1   {alias  C_CAA156[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJR_WQ1   {alias  C_CAA165[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJR_WQ1   {alias  C_CAA172[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJR_WQ1   {alias  C_CAA172_SWP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJR_WQ1   {alias  C_CAA172_CVP[SJR_WQ1]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJR_WQ1   {alias C_SLUIS_CVP[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJR_WQ1   {alias C_SLUIS_SWP[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJR_WQ1   {alias D_CAA069_SLUIS[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJR_WQ1   {alias D_CAA069_DMC070[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJR_WQ1   {alias D_CAA087_73_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJR_WQ1   {alias D_CAA109_73_PA3[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJR_WQ1   {alias D_CAA109_90_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJR_WQ1   {alias D_CAA143_90_PA2[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJR_WQ1   {alias D_CAA143_90_PU[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJR_WQ1   {alias D_CAA143_90_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJR_WQ1   {alias D_CAA155_90_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJR_WQ1   {alias D_CAA156_90_PU[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJR_WQ1   {alias D_CAA165_90_PU[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJR_WQ1   {alias D_CAA172_90_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJR_WQ1   {alias C_FSL005[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJR_WQ1   {alias C_SJR205[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJR_WQ1   {alias D_MDOTA_73_XA[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJR_WQ1   {alias D_MDOTA_90_PA1[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJR_WQ1   {alias D_MDOTA_91_PA[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJR_WQ1   {alias D_MDOTA_91_PR[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJR_WQ1   {alias D_MDOTA_64_XA[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJR_WQ1   {alias D_MDOTA_XCC010[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJR_WQ1   {alias C_MDOTA[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJR_WQ1   {alias D_SJR205_SJR201[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJR_WQ1   {alias C_SJR201[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJR_WQ1   {alias C_SJR200[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJR_WQ1   {alias SG64_SJR198_8[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJR_WQ1   {alias C_SJR198[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJR_WQ1   {alias C_FBW001[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJR_WQ1   {alias C_SJR195[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJR_WQ1   {alias SG65_SJR192_8[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJR_WQ1   {alias C_SJR192[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJR_WQ1   {alias R_64_XA_SJR185[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJR_WQ1   {alias SG66_SJR185_8[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJR_WQ1   {alias C_SJR185[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJR_WQ1   {alias SG67_SJR180_8[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJR_WQ1   {alias SR_64_SJR180[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJR_WQ1   {alias D_SJR180_ARY010[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJR_WQ1   {alias C_SJR180[SJR_WQ1] kind 'debug-cfs' units 'cfs'}
+
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle8 - SJR_PULSE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_DMC000__SJR_PULSE   {alias  C_DMC000[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJR_PULSE   {alias  C_DMC003[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJR_PULSE   {alias  C_DMC007[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJR_PULSE   {alias  C_DMC011[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJR_PULSE   {alias  C_DMC016[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJR_PULSE   {alias  C_DMC021[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJR_PULSE   {alias  C_DMC024[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJR_PULSE   {alias  C_DMC030[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJR_PULSE   {alias  C_DMC034[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJR_PULSE   {alias  C_DMC039[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJR_PULSE   {alias  C_DMC044[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJR_PULSE   {alias  C_DMC049[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJR_PULSE   {alias  C_DMC054[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJR_PULSE   {alias  C_DMC058[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJR_PULSE   {alias  C_DMC064[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJR_PULSE   {alias  C_DMC070[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJR_PULSE   {alias  C_DMC074[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJR_PULSE   {alias  C_DMC076[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJR_PULSE   {alias  C_DMC080[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJR_PULSE   {alias  C_DMC085[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJR_PULSE   {alias  C_DMC091[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJR_PULSE   {alias  C_DMC097[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJR_PULSE   {alias  C_DMC105[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJR_PULSE   {alias  C_DMC111[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJR_PULSE   {alias  C_DMC116[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJR_PULSE   {alias  D_DMC007_CAA009[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJR_PULSE   {alias  D_DMC011_71_PA8[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJR_PULSE   {alias  D_DMC016_WTPJJO[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJR_PULSE   {alias  D_WTPJJO_50_PU[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJR_PULSE   {alias  D_DMC021_50_PA1[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJR_PULSE   {alias  D_DMC030_71_PA1[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJR_PULSE   {alias  D_DMC034_71_PA2[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJR_PULSE   {alias  D_DMC034_71_PA3[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJR_PULSE   {alias  D_DMC034_WWW001[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJR_PULSE   {alias  D_DMC044_71_PA4[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJR_PULSE   {alias  D_DMC044_71_PA5[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJR_PULSE   {alias  D_DMC054_NMW004[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJR_PULSE   {alias  D_DMC064_71_PA6[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJR_PULSE   {alias  D_DMC070_CAA069[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJR_PULSE   {alias  D_DMC070_73_PA1[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJR_PULSE   {alias  D_DMC070_VLW008[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJR_PULSE   {alias  D_DMC076_XCC043[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJR_PULSE   {alias  D_DMC091_73_PA3[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJR_PULSE   {alias  D_DMC111_FBW001[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJR_PULSE   {alias  D_DMC105_73_PA2[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJR_PULSE   {alias  D_DMC111_73_XA[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJR_PULSE   {alias  C_CAA003[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJR_PULSE   {alias  C_CAA003_CVC[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJR_PULSE   {alias  C_CAA003_CVP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJR_PULSE   {alias  C_CAA002[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJR_PULSE   {alias  C_CAA005[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJR_PULSE   {alias  C_CAA006[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJR_PULSE   {alias  C_CAA009[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJR_PULSE   {alias  C_CAA012[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJR_PULSE   {alias  C_CAA024[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJR_PULSE   {alias  C_CAA046[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJR_PULSE   {alias  C_CAA051[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJR_PULSE   {alias  C_CAA066[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJR_PULSE   {alias  C_CAA067[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJR_PULSE   {alias  C_CAA067_CVP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJR_PULSE   {alias  C_CAA067_SWP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJR_PULSE   {alias  C_CAA069[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJR_PULSE   {alias  C_CAA069_CVP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJR_PULSE   {alias  C_CAA069_SWP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJR_PULSE   {alias  C_CAA071[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJR_PULSE   {alias  C_CAA087[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJR_PULSE   {alias  C_CAA087_SWP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJR_PULSE   {alias  C_CAA087_CVP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJR_PULSE   {alias  C_CAA095[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJR_PULSE   {alias  C_CAA109[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJR_PULSE   {alias  C_CAA143[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJR_PULSE   {alias  C_CAA155[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJR_PULSE   {alias  C_CAA156[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJR_PULSE   {alias  C_CAA165[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJR_PULSE   {alias  C_CAA172[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJR_PULSE   {alias  C_CAA172_SWP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJR_PULSE   {alias  C_CAA172_CVP[SJR_PULSE]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJR_PULSE   {alias C_SLUIS_CVP[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJR_PULSE   {alias C_SLUIS_SWP[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJR_PULSE   {alias D_CAA069_SLUIS[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJR_PULSE   {alias D_CAA069_DMC070[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJR_PULSE   {alias D_CAA087_73_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJR_PULSE   {alias D_CAA109_73_PA3[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJR_PULSE   {alias D_CAA109_90_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJR_PULSE   {alias D_CAA143_90_PA2[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJR_PULSE   {alias D_CAA143_90_PU[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJR_PULSE   {alias D_CAA143_90_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJR_PULSE   {alias D_CAA155_90_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJR_PULSE   {alias D_CAA156_90_PU[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJR_PULSE   {alias D_CAA165_90_PU[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJR_PULSE   {alias D_CAA172_90_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJR_PULSE   {alias C_FSL005[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJR_PULSE   {alias C_SJR205[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJR_PULSE   {alias D_MDOTA_73_XA[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJR_PULSE   {alias D_MDOTA_90_PA1[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJR_PULSE   {alias D_MDOTA_91_PA[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJR_PULSE   {alias D_MDOTA_91_PR[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJR_PULSE   {alias D_MDOTA_64_XA[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJR_PULSE   {alias D_MDOTA_XCC010[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJR_PULSE   {alias C_MDOTA[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJR_PULSE   {alias D_SJR205_SJR201[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJR_PULSE   {alias C_SJR201[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJR_PULSE   {alias C_SJR200[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJR_PULSE   {alias SG64_SJR198_8[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJR_PULSE   {alias C_SJR198[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJR_PULSE   {alias C_FBW001[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJR_PULSE   {alias C_SJR195[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJR_PULSE   {alias SG65_SJR192_8[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJR_PULSE   {alias C_SJR192[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJR_PULSE   {alias R_64_XA_SJR185[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJR_PULSE   {alias SG66_SJR185_8[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJR_PULSE   {alias C_SJR185[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJR_PULSE   {alias SG67_SJR180_8[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJR_PULSE   {alias SR_64_SJR180[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJR_PULSE   {alias D_SJR180_ARY010[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJR_PULSE   {alias C_SJR180[SJR_PULSE] kind 'debug-cfs' units 'cfs'}
+
+! SJR Cycle Solutions - mjw 021616
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Cycle9 - SJR_WQ2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define C_DMC000__SJR_WQ2   {alias  C_DMC000[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC003__SJR_WQ2   {alias  C_DMC003[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC007__SJR_WQ2   {alias  C_DMC007[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC011__SJR_WQ2   {alias  C_DMC011[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC016__SJR_WQ2   {alias  C_DMC016[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC021__SJR_WQ2   {alias  C_DMC021[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC024__SJR_WQ2   {alias  C_DMC024[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC030__SJR_WQ2   {alias  C_DMC030[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC034__SJR_WQ2   {alias  C_DMC034[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC039__SJR_WQ2   {alias  C_DMC039[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC044__SJR_WQ2   {alias  C_DMC044[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC049__SJR_WQ2   {alias  C_DMC049[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC054__SJR_WQ2   {alias  C_DMC054[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC058__SJR_WQ2   {alias  C_DMC058[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC064__SJR_WQ2   {alias  C_DMC064[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC070__SJR_WQ2   {alias  C_DMC070[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC074__SJR_WQ2   {alias  C_DMC074[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC076__SJR_WQ2   {alias  C_DMC076[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC080__SJR_WQ2   {alias  C_DMC080[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC085__SJR_WQ2   {alias  C_DMC085[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC091__SJR_WQ2   {alias  C_DMC091[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC097__SJR_WQ2   {alias  C_DMC097[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC105__SJR_WQ2   {alias  C_DMC105[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC111__SJR_WQ2   {alias  C_DMC111[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_DMC116__SJR_WQ2   {alias  C_DMC116[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC007_CAA009__SJR_WQ2   {alias  D_DMC007_CAA009[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC011_71_PA8__SJR_WQ2   {alias  D_DMC011_71_PA8[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC016_WTPJJO__SJR_WQ2   {alias  D_DMC016_WTPJJO[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_WTPJJO_50_PU__SJR_WQ2   {alias  D_WTPJJO_50_PU[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC021_50_PA1__SJR_WQ2   {alias  D_DMC021_50_PA1[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC030_71_PA1__SJR_WQ2   {alias  D_DMC030_71_PA1[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA2__SJR_WQ2   {alias  D_DMC034_71_PA2[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_71_PA3__SJR_WQ2   {alias  D_DMC034_71_PA3[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC034_WWW001__SJR_WQ2   {alias  D_DMC034_WWW001[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA4__SJR_WQ2   {alias  D_DMC044_71_PA4[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC044_71_PA5__SJR_WQ2   {alias  D_DMC044_71_PA5[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC054_NMW004__SJR_WQ2   {alias  D_DMC054_NMW004[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC064_71_PA6__SJR_WQ2   {alias  D_DMC064_71_PA6[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_CAA069__SJR_WQ2   {alias  D_DMC070_CAA069[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_73_PA1__SJR_WQ2   {alias  D_DMC070_73_PA1[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC070_VLW008__SJR_WQ2   {alias  D_DMC070_VLW008[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC076_XCC043__SJR_WQ2   {alias  D_DMC076_XCC043[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC091_73_PA3__SJR_WQ2   {alias  D_DMC091_73_PA3[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_FBW001__SJR_WQ2   {alias  D_DMC111_FBW001[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC105_73_PA2__SJR_WQ2   {alias  D_DMC105_73_PA2[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define D_DMC111_73_XA__SJR_WQ2   {alias  D_DMC111_73_XA[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003__SJR_WQ2   {alias  C_CAA003[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVC__SJR_WQ2   {alias  C_CAA003_CVC[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA003_CVP__SJR_WQ2   {alias  C_CAA003_CVP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA002__SJR_WQ2   {alias  C_CAA002[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA005__SJR_WQ2   {alias  C_CAA005[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA006__SJR_WQ2   {alias  C_CAA006[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA009__SJR_WQ2   {alias  C_CAA009[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA012__SJR_WQ2   {alias  C_CAA012[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA024__SJR_WQ2   {alias  C_CAA024[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA046__SJR_WQ2   {alias  C_CAA046[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA051__SJR_WQ2   {alias  C_CAA051[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA066__SJR_WQ2   {alias  C_CAA066[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067__SJR_WQ2   {alias  C_CAA067[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_CVP__SJR_WQ2   {alias  C_CAA067_CVP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA067_SWP__SJR_WQ2   {alias  C_CAA067_SWP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069__SJR_WQ2   {alias  C_CAA069[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_CVP__SJR_WQ2   {alias  C_CAA069_CVP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA069_SWP__SJR_WQ2   {alias  C_CAA069_SWP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA071__SJR_WQ2   {alias  C_CAA071[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087__SJR_WQ2   {alias  C_CAA087[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_SWP__SJR_WQ2   {alias  C_CAA087_SWP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA087_CVP__SJR_WQ2   {alias  C_CAA087_CVP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA095__SJR_WQ2   {alias  C_CAA095[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA109__SJR_WQ2   {alias  C_CAA109[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA143__SJR_WQ2   {alias  C_CAA143[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA155__SJR_WQ2   {alias  C_CAA155[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA156__SJR_WQ2   {alias  C_CAA156[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA165__SJR_WQ2   {alias  C_CAA165[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172__SJR_WQ2   {alias  C_CAA172[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_SWP__SJR_WQ2   {alias  C_CAA172_SWP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_CAA172_CVP__SJR_WQ2   {alias  C_CAA172_CVP[SJR_WQ2]  kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_CVP__SJR_WQ2   {alias C_SLUIS_CVP[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SLUIS_SWP__SJR_WQ2   {alias C_SLUIS_SWP[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_SLUIS__SJR_WQ2   {alias D_CAA069_SLUIS[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA069_DMC070__SJR_WQ2   {alias D_CAA069_DMC070[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA087_73_PA1__SJR_WQ2   {alias D_CAA087_73_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_73_PA3__SJR_WQ2   {alias D_CAA109_73_PA3[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA109_90_PA1__SJR_WQ2   {alias D_CAA109_90_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA2__SJR_WQ2   {alias D_CAA143_90_PA2[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PU__SJR_WQ2   {alias D_CAA143_90_PU[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA143_90_PA1__SJR_WQ2   {alias D_CAA143_90_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA155_90_PA1__SJR_WQ2   {alias D_CAA155_90_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA156_90_PU__SJR_WQ2   {alias D_CAA156_90_PU[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA165_90_PU__SJR_WQ2   {alias D_CAA165_90_PU[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_CAA172_90_PA1__SJR_WQ2   {alias D_CAA172_90_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_FSL005__SJR_WQ2   {alias C_FSL005[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR205__SJR_WQ2   {alias C_SJR205[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_73_XA__SJR_WQ2   {alias D_MDOTA_73_XA[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_90_PA1__SJR_WQ2   {alias D_MDOTA_90_PA1[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PA__SJR_WQ2   {alias D_MDOTA_91_PA[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_91_PR__SJR_WQ2   {alias D_MDOTA_91_PR[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_64_XA__SJR_WQ2   {alias D_MDOTA_64_XA[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_MDOTA_XCC010__SJR_WQ2   {alias D_MDOTA_XCC010[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_MDOTA__SJR_WQ2   {alias C_MDOTA[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_SJR205_SJR201__SJR_WQ2   {alias D_SJR205_SJR201[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR201__SJR_WQ2   {alias C_SJR201[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR200__SJR_WQ2   {alias C_SJR200[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define SG64_SJR198_8__SJR_WQ2   {alias SG64_SJR198_8[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR198__SJR_WQ2   {alias C_SJR198[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_FBW001__SJR_WQ2   {alias C_FBW001[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR195__SJR_WQ2   {alias C_SJR195[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define SG65_SJR192_8__SJR_WQ2   {alias SG65_SJR192_8[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR192__SJR_WQ2   {alias C_SJR192[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define R_64_XA_SJR185__SJR_WQ2   {alias R_64_XA_SJR185[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define SG66_SJR185_8__SJR_WQ2   {alias SG66_SJR185_8[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR185__SJR_WQ2   {alias C_SJR185[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define SG67_SJR180_8__SJR_WQ2   {alias SG67_SJR180_8[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define SR_64_SJR180__SJR_WQ2   {alias SR_64_SJR180[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define D_SJR180_ARY010__SJR_WQ2   {alias D_SJR180_ARY010[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+define C_SJR180__SJR_WQ2   {alias C_SJR180[SJR_WQ2] kind 'debug-cfs' units 'cfs'}
+
+
+
+!SG SJR GW cycles (SJRBase thru SJRGW_4) dbo
+! [SJR Base]
+!define  SG110_BCK010_15_SJRB    {alias  SG110_BCK010_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG109_BCK017_15_SJRB    {alias  SG109_BCK017_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG108_BCK024_15_SJRB    {alias  SG108_BCK024_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG107_BCK031_15_SJRB    {alias  SG107_BCK031_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG106_BCK035_15_SJRB    {alias  SG106_BCK035_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG105_BCK040_15_SJRB    {alias  SG105_BCK040_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_589_SJRB    {alias  SG_CAA005_589[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_602_SJRB    {alias  SG_CAA005_602[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_608_SJRB    {alias  SG_CAA051_608[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_609_SJRB    {alias  SG_CAA051_609[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_611_SJRB    {alias  SG_CAA051_611[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_613_SJRB    {alias  SG_CAA051_613[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_631_SJRB    {alias  SG_CAA051_631[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_647_SJRB    {alias  SG_CAA051_647[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_658_SJRB    {alias  SG_CAA051_658[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_669_SJRB    {alias  SG_CAA051_669[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_680_SJRB    {alias  SG_CAA051_680[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_681_SJRB    {alias  SG_CAA051_681[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_711_SJRB    {alias  SG_CAA067_711[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_723_SJRB    {alias  SG_CAA067_723[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_758_SJRB    {alias  SG_CAA067_758[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_763_SJRB    {alias  SG_CAA067_763[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_764_SJRB    {alias  SG_CAA087_764[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_780_SJRB    {alias  SG_CAA087_780[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_793_SJRB    {alias  SG_CAA087_793[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_814_SJRB    {alias  SG_CAA109_814[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_839_SJRB    {alias  SG_CAA109_839[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_854_SJRB    {alias  SG_CAA109_854[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_862_SJRB    {alias  SG_CAA109_862[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_846_SJRB    {alias  SG_CAA143_846[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_866_SJRB    {alias  SG_CAA143_866[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_869_SJRB    {alias  SG_CAA143_869[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_883_SJRB    {alias  SG_CAA143_883[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_888_SJRB    {alias  SG_CAA143_888[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_903_SJRB    {alias  SG_CAA143_903[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_920_SJRB    {alias  SG_CAA143_920[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_954_SJRB    {alias  SG_CAA143_954[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_961_SJRB    {alias  SG_CAA143_961[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_968_SJRB    {alias  SG_CAA143_968[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_1009_SJRB    {alias  SG_CAA155_1009[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_977_SJRB    {alias  SG_CAA155_977[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_990_SJRB    {alias  SG_CAA155_990[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1020_SJRB    {alias  SG_CAA172_1020[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1038_SJRB    {alias  SG_CAA172_1038[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1053_SJRB    {alias  SG_CAA172_1053[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1062_SJRB    {alias  SG_CAA172_1062[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG86_CHW006_11_SJRB    {alias  SG86_CHW006_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG85_CHW011_11_SJRB    {alias  SG85_CHW011_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG84_CHW017_11_SJRB    {alias  SG84_CHW017_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG83_CHW021_11_SJRB    {alias  SG83_CHW021_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG82_CHW024_11_SJRB    {alias  SG82_CHW024_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG81_CHW028_11_SJRB    {alias  SG81_CHW028_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG80_CHW031_11_SJRB    {alias  SG80_CHW031_11[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG166_CLV004_25_SJRB    {alias  SG166_CLV004_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG165_CLV010_25_SJRB    {alias  SG165_CLV010_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG164_CLV016_25_SJRB    {alias  SG164_CLV016_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG163_CLV023_25_SJRB    {alias  SG163_CLV023_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG162_CLV028_25_SJRB    {alias  SG162_CLV028_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG161_CLV035_25_SJRB    {alias  SG161_CLV035_25[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG175_CMCHE_27_SJRB    {alias  SG175_CMCHE_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG193_CSM005_29_SJRB    {alias  SG193_CSM005_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG192_CSM011_29_SJRB    {alias  SG192_CSM011_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG191_CSM016_29_SJRB    {alias  SG191_CSM016_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG190_CSM021_29_SJRB    {alias  SG190_CSM021_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG189_CSM026_29_SJRB    {alias  SG189_CSM026_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG188_CSM033_29_SJRB    {alias  SG188_CSM033_29[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG99_DED010_13_SJRB    {alias  SG99_DED010_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG98_DED019_13_SJRB    {alias  SG98_DED019_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG97_DED025_13_SJRB    {alias  SG97_DED025_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG96_DED032_13_SJRB    {alias  SG96_DED032_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG95_DED035_13_SJRB    {alias  SG95_DED035_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG94_DED038_13_SJRB    {alias  SG94_DED038_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG93_DED044_13_SJRB    {alias  SG93_DED044_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC003_590_SJRB    {alias  SG_DMC003_590[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC007_590_SJRB    {alias  SG_DMC007_590[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_602_SJRB    {alias  SG_DMC011_602[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_608_SJRB    {alias  SG_DMC011_608[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC016_609_SJRB    {alias  SG_DMC016_609[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC021_611_SJRB    {alias  SG_DMC021_611[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC024_614_SJRB    {alias  SG_DMC024_614[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC030_631_SJRB    {alias  SG_DMC030_631[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC034_647_SJRB    {alias  SG_DMC034_647[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC039_658_SJRB    {alias  SG_DMC039_658[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC044_669_SJRB    {alias  SG_DMC044_669[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC049_680_SJRB    {alias  SG_DMC049_680[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC054_692_SJRB    {alias  SG_DMC054_692[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC058_711_SJRB    {alias  SG_DMC058_711[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC064_723_SJRB    {alias  SG_DMC064_723[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_758_SJRB    {alias  SG_DMC070_758[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_763_SJRB    {alias  SG_DMC070_763[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC074_764_SJRB    {alias  SG_DMC074_764[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC080_780_SJRB    {alias  SG_DMC080_780[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC085_793_SJRB    {alias  SG_DMC085_793[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC091_815_SJRB    {alias  SG_DMC091_815[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC097_840_SJRB    {alias  SG_DMC097_840[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_841_SJRB    {alias  SG_DMC105_841[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_842_SJRB    {alias  SG_DMC105_842[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC111_858_SJRB    {alias  SG_DMC111_858[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC116_872_SJRB    {alias  SG_DMC116_872[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_LOWER_DV_SJRB    {alias  SG_DMC_LOWER_DV[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_UPPER_DV_SJRB    {alias  SG_DMC_UPPER_DV[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG186_DSC008_28_SJRB    {alias  SG186_DSC008_28[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG185_DSC016_28_SJRB    {alias  SG185_DSC016_28[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG184_DSC023_28_SJRB    {alias  SG184_DSC023_28[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG183_DSC028_28_SJRB    {alias  SG183_DSC028_28[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG182_DSC035_28_SJRB    {alias  SG182_DSC035_28[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG76_FRS016_9_SJRB    {alias  SG76_FRS016_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG77_FRS016_9_SJRB    {alias  SG77_FRS016_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRB    {alias  SG101_DED003_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRB    {alias  SG112_BCK006_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG75_FRS016_9_SJRB    {alias  SG75_FRS016_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG74_FRS020_9_SJRB    {alias  SG74_FRS020_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG73_FRS025_9_SJRB    {alias  SG73_FRS025_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG72_FRS032_9_SJRB    {alias  SG72_FRS032_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG71_FRS036_9_SJRB    {alias  SG71_FRS036_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG70_FRS039_9_SJRB    {alias  SG70_FRS039_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG69_FRS045_9_SJRB    {alias  SG69_FRS045_9[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG52_FSL005_4_SJRB    {alias  SG52_FSL005_4[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG51_FSL012_4_SJRB    {alias  SG51_FSL012_4[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_LPC000_840_SJRB    {alias  SG_LPC000_840[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  sg123_mcd009_17_SJRB    {alias  sg123_mcd009_17[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG122_MCD014_17_SJRB    {alias  SG122_MCD014_17[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG121_MCD021_17_SJRB    {alias  SG121_MCD021_17[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG198_MOK004_30_SJRB    {alias  SG198_MOK004_30[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG197_MOK014_30_SJRB    {alias  SG197_MOK014_30[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG196_MOK019_30_SJRB    {alias  SG196_MOK019_30[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG181_MOK022_27_SJRB    {alias  SG181_MOK022_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG180_MOK028_27_SJRB    {alias  SG180_MOK028_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG179_MOK035_27_SJRB    {alias  SG179_MOK035_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG178_MOK044_27_SJRB    {alias  SG178_MOK044_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG177_MOK050_27_SJRB    {alias  SG177_MOK050_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG176_MOK055_27_SJRB    {alias  SG176_MOK055_27[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_ORG000_793_SJRB    {alias  SG_ORG000_793[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG129_ORT009_19_SJRB    {alias  SG129_ORT009_19[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG128_ORT014_19_SJRB    {alias  SG128_ORT014_19[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG203_SJR006_31_SJRB    {alias  SG203_SJR006_31[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG202_SJR009_31_SJRB    {alias  SG202_SJR009_31[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG201_SJR013_31_SJRB    {alias  SG201_SJR013_31[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG172_SJR022_26_SJRB    {alias  SG172_SJR022_26[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG171_SJR023_26_SJRB    {alias  SG171_SJR023_26[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG170_SJR028_26_SJRB    {alias  SG170_SJR028_26[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG169_SJR033_26_SJRB    {alias  SG169_SJR033_26[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG160_SJR038_24_SJRB    {alias  SG160_SJR038_24[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG159_SJR042_24_SJRB    {alias  SG159_SJR042_24[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG158_SJR048_24_SJRB    {alias  SG158_SJR048_24[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG157_SJR056_24_SJRB    {alias  SG157_SJR056_24[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG156_SJR062_24_SJRB    {alias  SG156_SJR062_24[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG154_STS011_23_SJRB    {alias  SG154_STS011_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG143_TUO003_21_SJRB    {alias  SG143_TUO003_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG133_SJR090_20_SJRB    {alias  SG133_SJR090_20[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG132_SJR096_20_SJRB    {alias  SG132_SJR096_20[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG130_ORT001_19_SJRB    {alias  SG130_ORT001_19[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG126_SJR111_18_SJRB    {alias  SG126_SJR111_18[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  sg124_mcd002_17_SJRB    {alias  sg124_mcd002_17[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG114_SJR123_16_SJRB    {alias  SG114_SJR123_16[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRB    {alias  SG112_BCK006_15[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG103_SJR141_14_SJRB    {alias  SG103_SJR141_14[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRB    {alias  SG101_DED003_13[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG91_SJR152_12_SJRB    {alias  SG91_SJR152_12[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG90_SJR157_12_SJRB    {alias  SG90_SJR157_12[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG67_SJR180_8_SJRB    {alias  SG67_SJR180_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG66_SJR185_8_SJRB    {alias  SG66_SJR185_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG65_SJR192_8_SJRB    {alias  SG65_SJR192_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG64_SJR198_8_SJRB    {alias  SG64_SJR198_8[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG61_SJR214_7_SJRB    {alias  SG61_SJR214_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG60_SJR221_7_SJRB    {alias  SG60_SJR221_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG59_SJR227_7_SJRB    {alias  SG59_SJR227_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG58_SJR235_7_SJRB    {alias  SG58_SJR235_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG57_SJR242_7_SJRB    {alias  SG57_SJR242_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG56_SJR249_7_SJRB    {alias  SG56_SJR249_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG55_SJR256_7_SJRB    {alias  SG55_SJR256_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG54_SJR263_7_SJRB    {alias  SG54_SJR263_7[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_SLO000_659_SJRB    {alias  SG_SLO000_659[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG153_STS011_23_SJRB    {alias  SG153_STS011_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG152_STS020_23_SJRB    {alias  SG152_STS020_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG151_STS030_23_SJRB    {alias  SG151_STS030_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG150_STS036_23_SJRB    {alias  SG150_STS036_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG149_STS043_23_SJRB    {alias  SG149_STS043_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG148_STS050_23_SJRB    {alias  SG148_STS050_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG147_STS053_23_SJRB    {alias  SG147_STS053_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG146_STS058_23_SJRB    {alias  SG146_STS058_23[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG_TRLCK_666_SJRB    {alias  SG_TRLCK_666[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG142_TUO010_21_SJRB    {alias  SG142_TUO010_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG141_TUO015_21_SJRB    {alias  SG141_TUO015_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG140_TUO022_21_SJRB    {alias  SG140_TUO022_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG139_TUO030_21_SJRB    {alias  SG139_TUO030_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG138_TUO036_21_SJRB    {alias  SG138_TUO036_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG137_TUO043_21_SJRB    {alias  SG137_TUO043_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG136_TUO047_21_SJRB    {alias  SG136_TUO047_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!define  SG135_TUO053_21_SJRB    {alias  SG135_TUO053_21[SJRBASE] kind 'debug-cfs' units 'cfs'}
+!! [SJR GW1]
+!define  SG110_BCK010_15_SJRGW1    {alias  SG110_BCK010_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG109_BCK017_15_SJRGW1    {alias  SG109_BCK017_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG108_BCK024_15_SJRGW1    {alias  SG108_BCK024_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG107_BCK031_15_SJRGW1    {alias  SG107_BCK031_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG106_BCK035_15_SJRGW1    {alias  SG106_BCK035_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG105_BCK040_15_SJRGW1    {alias  SG105_BCK040_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_589_SJRGW1    {alias  SG_CAA005_589[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_602_SJRGW1    {alias  SG_CAA005_602[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_608_SJRGW1    {alias  SG_CAA051_608[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_609_SJRGW1    {alias  SG_CAA051_609[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_611_SJRGW1    {alias  SG_CAA051_611[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_613_SJRGW1    {alias  SG_CAA051_613[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_631_SJRGW1    {alias  SG_CAA051_631[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_647_SJRGW1    {alias  SG_CAA051_647[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_658_SJRGW1    {alias  SG_CAA051_658[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_669_SJRGW1    {alias  SG_CAA051_669[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_680_SJRGW1    {alias  SG_CAA051_680[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_681_SJRGW1    {alias  SG_CAA051_681[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_711_SJRGW1    {alias  SG_CAA067_711[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_723_SJRGW1    {alias  SG_CAA067_723[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_758_SJRGW1    {alias  SG_CAA067_758[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_763_SJRGW1    {alias  SG_CAA067_763[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_764_SJRGW1    {alias  SG_CAA087_764[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_780_SJRGW1    {alias  SG_CAA087_780[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_793_SJRGW1    {alias  SG_CAA087_793[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_814_SJRGW1    {alias  SG_CAA109_814[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_839_SJRGW1    {alias  SG_CAA109_839[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_854_SJRGW1    {alias  SG_CAA109_854[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_862_SJRGW1    {alias  SG_CAA109_862[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_846_SJRGW1    {alias  SG_CAA143_846[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_866_SJRGW1    {alias  SG_CAA143_866[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_869_SJRGW1    {alias  SG_CAA143_869[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_883_SJRGW1    {alias  SG_CAA143_883[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_888_SJRGW1    {alias  SG_CAA143_888[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_903_SJRGW1    {alias  SG_CAA143_903[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_920_SJRGW1    {alias  SG_CAA143_920[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_954_SJRGW1    {alias  SG_CAA143_954[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_961_SJRGW1    {alias  SG_CAA143_961[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_968_SJRGW1    {alias  SG_CAA143_968[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_1009_SJRGW1    {alias  SG_CAA155_1009[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_977_SJRGW1    {alias  SG_CAA155_977[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_990_SJRGW1    {alias  SG_CAA155_990[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1020_SJRGW1    {alias  SG_CAA172_1020[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1038_SJRGW1    {alias  SG_CAA172_1038[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1053_SJRGW1    {alias  SG_CAA172_1053[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1062_SJRGW1    {alias  SG_CAA172_1062[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG86_CHW006_11_SJRGW1    {alias  SG86_CHW006_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG85_CHW011_11_SJRGW1    {alias  SG85_CHW011_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG84_CHW017_11_SJRGW1    {alias  SG84_CHW017_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG83_CHW021_11_SJRGW1    {alias  SG83_CHW021_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG82_CHW024_11_SJRGW1    {alias  SG82_CHW024_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG81_CHW028_11_SJRGW1    {alias  SG81_CHW028_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG80_CHW031_11_SJRGW1    {alias  SG80_CHW031_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG166_CLV004_25_SJRGW1    {alias  SG166_CLV004_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG165_CLV010_25_SJRGW1    {alias  SG165_CLV010_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG164_CLV016_25_SJRGW1    {alias  SG164_CLV016_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG163_CLV023_25_SJRGW1    {alias  SG163_CLV023_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG162_CLV028_25_SJRGW1    {alias  SG162_CLV028_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG161_CLV035_25_SJRGW1    {alias  SG161_CLV035_25[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG175_CMCHE_27_SJRGW1    {alias  SG175_CMCHE_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG193_CSM005_29_SJRGW1    {alias  SG193_CSM005_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG192_CSM011_29_SJRGW1    {alias  SG192_CSM011_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG191_CSM016_29_SJRGW1    {alias  SG191_CSM016_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG190_CSM021_29_SJRGW1    {alias  SG190_CSM021_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG189_CSM026_29_SJRGW1    {alias  SG189_CSM026_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG188_CSM033_29_SJRGW1    {alias  SG188_CSM033_29[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG99_DED010_13_SJRGW1    {alias  SG99_DED010_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG98_DED019_13_SJRGW1    {alias  SG98_DED019_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG97_DED025_13_SJRGW1    {alias  SG97_DED025_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG96_DED032_13_SJRGW1    {alias  SG96_DED032_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG95_DED035_13_SJRGW1    {alias  SG95_DED035_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG94_DED038_13_SJRGW1    {alias  SG94_DED038_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG93_DED044_13_SJRGW1    {alias  SG93_DED044_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC003_590_SJRGW1    {alias  SG_DMC003_590[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC007_590_SJRGW1    {alias  SG_DMC007_590[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_602_SJRGW1    {alias  SG_DMC011_602[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_608_SJRGW1    {alias  SG_DMC011_608[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC016_609_SJRGW1    {alias  SG_DMC016_609[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC021_611_SJRGW1    {alias  SG_DMC021_611[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC024_614_SJRGW1    {alias  SG_DMC024_614[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC030_631_SJRGW1    {alias  SG_DMC030_631[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC034_647_SJRGW1    {alias  SG_DMC034_647[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC039_658_SJRGW1    {alias  SG_DMC039_658[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC044_669_SJRGW1    {alias  SG_DMC044_669[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC049_680_SJRGW1    {alias  SG_DMC049_680[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC054_692_SJRGW1    {alias  SG_DMC054_692[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC058_711_SJRGW1    {alias  SG_DMC058_711[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC064_723_SJRGW1    {alias  SG_DMC064_723[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_758_SJRGW1    {alias  SG_DMC070_758[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_763_SJRGW1    {alias  SG_DMC070_763[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC074_764_SJRGW1    {alias  SG_DMC074_764[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC080_780_SJRGW1    {alias  SG_DMC080_780[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC085_793_SJRGW1    {alias  SG_DMC085_793[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC091_815_SJRGW1    {alias  SG_DMC091_815[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC097_840_SJRGW1    {alias  SG_DMC097_840[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_841_SJRGW1    {alias  SG_DMC105_841[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_842_SJRGW1    {alias  SG_DMC105_842[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC111_858_SJRGW1    {alias  SG_DMC111_858[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC116_872_SJRGW1    {alias  SG_DMC116_872[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_LOWER_DV_SJRGW1    {alias  SG_DMC_LOWER_DV[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_UPPER_DV_SJRGW1    {alias  SG_DMC_UPPER_DV[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG186_DSC008_28_SJRGW1    {alias  SG186_DSC008_28[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG185_DSC016_28_SJRGW1    {alias  SG185_DSC016_28[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG184_DSC023_28_SJRGW1    {alias  SG184_DSC023_28[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG183_DSC028_28_SJRGW1    {alias  SG183_DSC028_28[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG182_DSC035_28_SJRGW1    {alias  SG182_DSC035_28[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG76_FRS016_9_SJRGW1    {alias  SG76_FRS016_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG77_FRS016_9_SJRGW1    {alias  SG77_FRS016_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW1    {alias  SG101_DED003_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW1    {alias  SG112_BCK006_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG75_FRS016_9_SJRGW1    {alias  SG75_FRS016_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG74_FRS020_9_SJRGW1    {alias  SG74_FRS020_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG73_FRS025_9_SJRGW1    {alias  SG73_FRS025_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG72_FRS032_9_SJRGW1    {alias  SG72_FRS032_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG71_FRS036_9_SJRGW1    {alias  SG71_FRS036_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG70_FRS039_9_SJRGW1    {alias  SG70_FRS039_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG69_FRS045_9_SJRGW1    {alias  SG69_FRS045_9[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG52_FSL005_4_SJRGW1    {alias  SG52_FSL005_4[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG51_FSL012_4_SJRGW1    {alias  SG51_FSL012_4[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_LPC000_840_SJRGW1    {alias  SG_LPC000_840[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  sg123_mcd009_17_SJRGW1    {alias  sg123_mcd009_17[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG122_MCD014_17_SJRGW1    {alias  SG122_MCD014_17[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG121_MCD021_17_SJRGW1    {alias  SG121_MCD021_17[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG198_MOK004_30_SJRGW1    {alias  SG198_MOK004_30[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG197_MOK014_30_SJRGW1    {alias  SG197_MOK014_30[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG196_MOK019_30_SJRGW1    {alias  SG196_MOK019_30[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG181_MOK022_27_SJRGW1    {alias  SG181_MOK022_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG180_MOK028_27_SJRGW1    {alias  SG180_MOK028_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG179_MOK035_27_SJRGW1    {alias  SG179_MOK035_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG178_MOK044_27_SJRGW1    {alias  SG178_MOK044_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG177_MOK050_27_SJRGW1    {alias  SG177_MOK050_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG176_MOK055_27_SJRGW1    {alias  SG176_MOK055_27[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_ORG000_793_SJRGW1    {alias  SG_ORG000_793[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG129_ORT009_19_SJRGW1    {alias  SG129_ORT009_19[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG128_ORT014_19_SJRGW1    {alias  SG128_ORT014_19[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG203_SJR006_31_SJRGW1    {alias  SG203_SJR006_31[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG202_SJR009_31_SJRGW1    {alias  SG202_SJR009_31[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG201_SJR013_31_SJRGW1    {alias  SG201_SJR013_31[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG172_SJR022_26_SJRGW1    {alias  SG172_SJR022_26[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG171_SJR023_26_SJRGW1    {alias  SG171_SJR023_26[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG170_SJR028_26_SJRGW1    {alias  SG170_SJR028_26[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG169_SJR033_26_SJRGW1    {alias  SG169_SJR033_26[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG160_SJR038_24_SJRGW1    {alias  SG160_SJR038_24[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG159_SJR042_24_SJRGW1    {alias  SG159_SJR042_24[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG158_SJR048_24_SJRGW1    {alias  SG158_SJR048_24[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG157_SJR056_24_SJRGW1    {alias  SG157_SJR056_24[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG156_SJR062_24_SJRGW1    {alias  SG156_SJR062_24[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG154_STS011_23_SJRGW1    {alias  SG154_STS011_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG143_TUO003_21_SJRGW1    {alias  SG143_TUO003_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG133_SJR090_20_SJRGW1    {alias  SG133_SJR090_20[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG132_SJR096_20_SJRGW1    {alias  SG132_SJR096_20[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG130_ORT001_19_SJRGW1    {alias  SG130_ORT001_19[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG126_SJR111_18_SJRGW1    {alias  SG126_SJR111_18[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  sg124_mcd002_17_SJRGW1    {alias  sg124_mcd002_17[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG114_SJR123_16_SJRGW1    {alias  SG114_SJR123_16[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW1    {alias  SG112_BCK006_15[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG103_SJR141_14_SJRGW1    {alias  SG103_SJR141_14[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW1    {alias  SG101_DED003_13[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG91_SJR152_12_SJRGW1    {alias  SG91_SJR152_12[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG90_SJR157_12_SJRGW1    {alias  SG90_SJR157_12[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG88_EBP030_11_SJRGW1    {alias  SG88_EBP030_11[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG67_SJR180_8_SJRGW1    {alias  SG67_SJR180_8[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG66_SJR185_8_SJRGW1    {alias  SG66_SJR185_8[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG65_SJR192_8_SJRGW1    {alias  SG65_SJR192_8[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG64_SJR198_8_SJRGW1    {alias  SG64_SJR198_8[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG61_SJR214_7_SJRGW1    {alias  SG61_SJR214_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG60_SJR221_7_SJRGW1    {alias  SG60_SJR221_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG59_SJR227_7_SJRGW1    {alias  SG59_SJR227_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG58_SJR235_7_SJRGW1    {alias  SG58_SJR235_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG57_SJR242_7_SJRGW1    {alias  SG57_SJR242_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG56_SJR249_7_SJRGW1    {alias  SG56_SJR249_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG55_SJR256_7_SJRGW1    {alias  SG55_SJR256_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG54_SJR263_7_SJRGW1    {alias  SG54_SJR263_7[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_SLO000_659_SJRGW1    {alias  SG_SLO000_659[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG153_STS011_23_SJRGW1    {alias  SG153_STS011_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG152_STS020_23_SJRGW1    {alias  SG152_STS020_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG151_STS030_23_SJRGW1    {alias  SG151_STS030_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG150_STS036_23_SJRGW1    {alias  SG150_STS036_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG149_STS043_23_SJRGW1    {alias  SG149_STS043_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG148_STS050_23_SJRGW1    {alias  SG148_STS050_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG147_STS053_23_SJRGW1    {alias  SG147_STS053_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG146_STS058_23_SJRGW1    {alias  SG146_STS058_23[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG_TRLCK_666_SJRGW1    {alias  SG_TRLCK_666[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG142_TUO010_21_SJRGW1    {alias  SG142_TUO010_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG141_TUO015_21_SJRGW1    {alias  SG141_TUO015_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG140_TUO022_21_SJRGW1    {alias  SG140_TUO022_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG139_TUO030_21_SJRGW1    {alias  SG139_TUO030_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG138_TUO036_21_SJRGW1    {alias  SG138_TUO036_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG137_TUO043_21_SJRGW1    {alias  SG137_TUO043_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG136_TUO047_21_SJRGW1    {alias  SG136_TUO047_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!define  SG135_TUO053_21_SJRGW1    {alias  SG135_TUO053_21[SJRBASE_GW1]kind 'debug-cfs' units 'cfs'}
+!! [SJR GW2]
+!define  SG110_BCK010_15_SJRGW2    {alias  SG110_BCK010_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG109_BCK017_15_SJRGW2    {alias  SG109_BCK017_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG108_BCK024_15_SJRGW2    {alias  SG108_BCK024_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG107_BCK031_15_SJRGW2    {alias  SG107_BCK031_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG106_BCK035_15_SJRGW2    {alias  SG106_BCK035_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG105_BCK040_15_SJRGW2    {alias  SG105_BCK040_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_589_SJRGW2    {alias  SG_CAA005_589[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_602_SJRGW2    {alias  SG_CAA005_602[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_608_SJRGW2    {alias  SG_CAA051_608[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_609_SJRGW2    {alias  SG_CAA051_609[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_611_SJRGW2    {alias  SG_CAA051_611[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_613_SJRGW2    {alias  SG_CAA051_613[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_631_SJRGW2    {alias  SG_CAA051_631[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_647_SJRGW2    {alias  SG_CAA051_647[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_658_SJRGW2    {alias  SG_CAA051_658[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_669_SJRGW2    {alias  SG_CAA051_669[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_680_SJRGW2    {alias  SG_CAA051_680[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_681_SJRGW2    {alias  SG_CAA051_681[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_711_SJRGW2    {alias  SG_CAA067_711[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_723_SJRGW2    {alias  SG_CAA067_723[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_758_SJRGW2    {alias  SG_CAA067_758[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_763_SJRGW2    {alias  SG_CAA067_763[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_764_SJRGW2    {alias  SG_CAA087_764[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_780_SJRGW2    {alias  SG_CAA087_780[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_793_SJRGW2    {alias  SG_CAA087_793[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_814_SJRGW2    {alias  SG_CAA109_814[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_839_SJRGW2    {alias  SG_CAA109_839[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_854_SJRGW2    {alias  SG_CAA109_854[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_862_SJRGW2    {alias  SG_CAA109_862[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_846_SJRGW2    {alias  SG_CAA143_846[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_866_SJRGW2    {alias  SG_CAA143_866[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_869_SJRGW2    {alias  SG_CAA143_869[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_883_SJRGW2    {alias  SG_CAA143_883[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_888_SJRGW2    {alias  SG_CAA143_888[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_903_SJRGW2    {alias  SG_CAA143_903[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_920_SJRGW2    {alias  SG_CAA143_920[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_954_SJRGW2    {alias  SG_CAA143_954[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_961_SJRGW2    {alias  SG_CAA143_961[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_968_SJRGW2    {alias  SG_CAA143_968[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_1009_SJRGW2    {alias  SG_CAA155_1009[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_977_SJRGW2    {alias  SG_CAA155_977[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_990_SJRGW2    {alias  SG_CAA155_990[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1020_SJRGW2    {alias  SG_CAA172_1020[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1038_SJRGW2    {alias  SG_CAA172_1038[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1053_SJRGW2    {alias  SG_CAA172_1053[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1062_SJRGW2    {alias  SG_CAA172_1062[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG86_CHW006_11_SJRGW2    {alias  SG86_CHW006_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG85_CHW011_11_SJRGW2    {alias  SG85_CHW011_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG84_CHW017_11_SJRGW2    {alias  SG84_CHW017_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG83_CHW021_11_SJRGW2    {alias  SG83_CHW021_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG82_CHW024_11_SJRGW2    {alias  SG82_CHW024_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG81_CHW028_11_SJRGW2    {alias  SG81_CHW028_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG80_CHW031_11_SJRGW2    {alias  SG80_CHW031_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG166_CLV004_25_SJRGW2    {alias  SG166_CLV004_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG165_CLV010_25_SJRGW2    {alias  SG165_CLV010_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG164_CLV016_25_SJRGW2    {alias  SG164_CLV016_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG163_CLV023_25_SJRGW2    {alias  SG163_CLV023_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG162_CLV028_25_SJRGW2    {alias  SG162_CLV028_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG161_CLV035_25_SJRGW2    {alias  SG161_CLV035_25[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG175_CMCHE_27_SJRGW2    {alias  SG175_CMCHE_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG193_CSM005_29_SJRGW2    {alias  SG193_CSM005_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG192_CSM011_29_SJRGW2    {alias  SG192_CSM011_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG191_CSM016_29_SJRGW2    {alias  SG191_CSM016_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG190_CSM021_29_SJRGW2    {alias  SG190_CSM021_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG189_CSM026_29_SJRGW2    {alias  SG189_CSM026_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG188_CSM033_29_SJRGW2    {alias  SG188_CSM033_29[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG99_DED010_13_SJRGW2    {alias  SG99_DED010_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG98_DED019_13_SJRGW2    {alias  SG98_DED019_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG97_DED025_13_SJRGW2    {alias  SG97_DED025_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG96_DED032_13_SJRGW2    {alias  SG96_DED032_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG95_DED035_13_SJRGW2    {alias  SG95_DED035_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG94_DED038_13_SJRGW2    {alias  SG94_DED038_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG93_DED044_13_SJRGW2    {alias  SG93_DED044_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC003_590_SJRGW2    {alias  SG_DMC003_590[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC007_590_SJRGW2    {alias  SG_DMC007_590[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_602_SJRGW2    {alias  SG_DMC011_602[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_608_SJRGW2    {alias  SG_DMC011_608[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC016_609_SJRGW2    {alias  SG_DMC016_609[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC021_611_SJRGW2    {alias  SG_DMC021_611[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC024_614_SJRGW2    {alias  SG_DMC024_614[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC030_631_SJRGW2    {alias  SG_DMC030_631[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC034_647_SJRGW2    {alias  SG_DMC034_647[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC039_658_SJRGW2    {alias  SG_DMC039_658[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC044_669_SJRGW2    {alias  SG_DMC044_669[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC049_680_SJRGW2    {alias  SG_DMC049_680[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC054_692_SJRGW2    {alias  SG_DMC054_692[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC058_711_SJRGW2    {alias  SG_DMC058_711[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC064_723_SJRGW2    {alias  SG_DMC064_723[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_758_SJRGW2    {alias  SG_DMC070_758[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_763_SJRGW2    {alias  SG_DMC070_763[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC074_764_SJRGW2    {alias  SG_DMC074_764[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC080_780_SJRGW2    {alias  SG_DMC080_780[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC085_793_SJRGW2    {alias  SG_DMC085_793[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC091_815_SJRGW2    {alias  SG_DMC091_815[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC097_840_SJRGW2    {alias  SG_DMC097_840[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_841_SJRGW2    {alias  SG_DMC105_841[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_842_SJRGW2    {alias  SG_DMC105_842[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC111_858_SJRGW2    {alias  SG_DMC111_858[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC116_872_SJRGW2    {alias  SG_DMC116_872[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_LOWER_DV_SJRGW2    {alias  SG_DMC_LOWER_DV[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_UPPER_DV_SJRGW2    {alias  SG_DMC_UPPER_DV[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG186_DSC008_28_SJRGW2    {alias  SG186_DSC008_28[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG185_DSC016_28_SJRGW2    {alias  SG185_DSC016_28[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG184_DSC023_28_SJRGW2    {alias  SG184_DSC023_28[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG183_DSC028_28_SJRGW2    {alias  SG183_DSC028_28[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG182_DSC035_28_SJRGW2    {alias  SG182_DSC035_28[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG76_FRS016_9_SJRGW2    {alias  SG76_FRS016_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG77_FRS016_9_SJRGW2    {alias  SG77_FRS016_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW2    {alias  SG101_DED003_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW2    {alias  SG112_BCK006_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG75_FRS016_9_SJRGW2    {alias  SG75_FRS016_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG74_FRS020_9_SJRGW2    {alias  SG74_FRS020_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG73_FRS025_9_SJRGW2    {alias  SG73_FRS025_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG72_FRS032_9_SJRGW2    {alias  SG72_FRS032_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG71_FRS036_9_SJRGW2    {alias  SG71_FRS036_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG70_FRS039_9_SJRGW2    {alias  SG70_FRS039_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG69_FRS045_9_SJRGW2    {alias  SG69_FRS045_9[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG52_FSL005_4_SJRGW2    {alias  SG52_FSL005_4[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG51_FSL012_4_SJRGW2    {alias  SG51_FSL012_4[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_LPC000_840_SJRGW2    {alias  SG_LPC000_840[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  sg123_mcd009_17_SJRGW2    {alias  sg123_mcd009_17[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG122_MCD014_17_SJRGW2    {alias  SG122_MCD014_17[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG121_MCD021_17_SJRGW2    {alias  SG121_MCD021_17[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG198_MOK004_30_SJRGW2    {alias  SG198_MOK004_30[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG197_MOK014_30_SJRGW2    {alias  SG197_MOK014_30[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG196_MOK019_30_SJRGW2    {alias  SG196_MOK019_30[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG181_MOK022_27_SJRGW2    {alias  SG181_MOK022_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG180_MOK028_27_SJRGW2    {alias  SG180_MOK028_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG179_MOK035_27_SJRGW2    {alias  SG179_MOK035_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG178_MOK044_27_SJRGW2    {alias  SG178_MOK044_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG177_MOK050_27_SJRGW2    {alias  SG177_MOK050_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG176_MOK055_27_SJRGW2    {alias  SG176_MOK055_27[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_ORG000_793_SJRGW2    {alias  SG_ORG000_793[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG129_ORT009_19_SJRGW2    {alias  SG129_ORT009_19[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG128_ORT014_19_SJRGW2    {alias  SG128_ORT014_19[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG203_SJR006_31_SJRGW2    {alias  SG203_SJR006_31[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG202_SJR009_31_SJRGW2    {alias  SG202_SJR009_31[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG201_SJR013_31_SJRGW2    {alias  SG201_SJR013_31[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG172_SJR022_26_SJRGW2    {alias  SG172_SJR022_26[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG171_SJR023_26_SJRGW2    {alias  SG171_SJR023_26[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG170_SJR028_26_SJRGW2    {alias  SG170_SJR028_26[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG169_SJR033_26_SJRGW2    {alias  SG169_SJR033_26[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG160_SJR038_24_SJRGW2    {alias  SG160_SJR038_24[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG159_SJR042_24_SJRGW2    {alias  SG159_SJR042_24[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG158_SJR048_24_SJRGW2    {alias  SG158_SJR048_24[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG157_SJR056_24_SJRGW2    {alias  SG157_SJR056_24[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG156_SJR062_24_SJRGW2    {alias  SG156_SJR062_24[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG154_STS011_23_SJRGW2    {alias  SG154_STS011_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG143_TUO003_21_SJRGW2    {alias  SG143_TUO003_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG133_SJR090_20_SJRGW2    {alias  SG133_SJR090_20[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG132_SJR096_20_SJRGW2    {alias  SG132_SJR096_20[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG130_ORT001_19_SJRGW2    {alias  SG130_ORT001_19[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG126_SJR111_18_SJRGW2    {alias  SG126_SJR111_18[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  sg124_mcd002_17_SJRGW2    {alias  sg124_mcd002_17[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG114_SJR123_16_SJRGW2    {alias  SG114_SJR123_16[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW2    {alias  SG112_BCK006_15[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG103_SJR141_14_SJRGW2    {alias  SG103_SJR141_14[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW2    {alias  SG101_DED003_13[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG91_SJR152_12_SJRGW2    {alias  SG91_SJR152_12[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG90_SJR157_12_SJRGW2    {alias  SG90_SJR157_12[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG88_EBP030_11_SJRGW2    {alias  SG88_EBP030_11[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG67_SJR180_8_SJRGW2    {alias  SG67_SJR180_8[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG66_SJR185_8_SJRGW2    {alias  SG66_SJR185_8[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG65_SJR192_8_SJRGW2    {alias  SG65_SJR192_8[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG64_SJR198_8_SJRGW2    {alias  SG64_SJR198_8[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG61_SJR214_7_SJRGW2    {alias  SG61_SJR214_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG60_SJR221_7_SJRGW2    {alias  SG60_SJR221_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG59_SJR227_7_SJRGW2    {alias  SG59_SJR227_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG58_SJR235_7_SJRGW2    {alias  SG58_SJR235_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG57_SJR242_7_SJRGW2    {alias  SG57_SJR242_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG56_SJR249_7_SJRGW2    {alias  SG56_SJR249_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG55_SJR256_7_SJRGW2    {alias  SG55_SJR256_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG54_SJR263_7_SJRGW2    {alias  SG54_SJR263_7[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_SLO000_659_SJRGW2    {alias  SG_SLO000_659[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG153_STS011_23_SJRGW2    {alias  SG153_STS011_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG152_STS020_23_SJRGW2    {alias  SG152_STS020_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG151_STS030_23_SJRGW2    {alias  SG151_STS030_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG150_STS036_23_SJRGW2    {alias  SG150_STS036_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG149_STS043_23_SJRGW2    {alias  SG149_STS043_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG148_STS050_23_SJRGW2    {alias  SG148_STS050_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG147_STS053_23_SJRGW2    {alias  SG147_STS053_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG146_STS058_23_SJRGW2    {alias  SG146_STS058_23[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG_TRLCK_666_SJRGW2    {alias  SG_TRLCK_666[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG142_TUO010_21_SJRGW2    {alias  SG142_TUO010_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG141_TUO015_21_SJRGW2    {alias  SG141_TUO015_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG140_TUO022_21_SJRGW2    {alias  SG140_TUO022_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG139_TUO030_21_SJRGW2    {alias  SG139_TUO030_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG138_TUO036_21_SJRGW2    {alias  SG138_TUO036_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG137_TUO043_21_SJRGW2    {alias  SG137_TUO043_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG136_TUO047_21_SJRGW2    {alias  SG136_TUO047_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!define  SG135_TUO053_21_SJRGW2    {alias  SG135_TUO053_21[SJRBASE_GW2]kind 'debug-cfs' units 'cfs'}
+!! [SJR GW3]
+!define  SG110_BCK010_15_SJRGW3    {alias  SG110_BCK010_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG109_BCK017_15_SJRGW3    {alias  SG109_BCK017_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG108_BCK024_15_SJRGW3    {alias  SG108_BCK024_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG107_BCK031_15_SJRGW3    {alias  SG107_BCK031_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG106_BCK035_15_SJRGW3    {alias  SG106_BCK035_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG105_BCK040_15_SJRGW3    {alias  SG105_BCK040_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_589_SJRGW3    {alias  SG_CAA005_589[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_602_SJRGW3    {alias  SG_CAA005_602[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_608_SJRGW3    {alias  SG_CAA051_608[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_609_SJRGW3    {alias  SG_CAA051_609[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_611_SJRGW3    {alias  SG_CAA051_611[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_613_SJRGW3    {alias  SG_CAA051_613[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_631_SJRGW3    {alias  SG_CAA051_631[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_647_SJRGW3    {alias  SG_CAA051_647[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_658_SJRGW3    {alias  SG_CAA051_658[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_669_SJRGW3    {alias  SG_CAA051_669[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_680_SJRGW3    {alias  SG_CAA051_680[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_681_SJRGW3    {alias  SG_CAA051_681[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_711_SJRGW3    {alias  SG_CAA067_711[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_723_SJRGW3    {alias  SG_CAA067_723[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_758_SJRGW3    {alias  SG_CAA067_758[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_763_SJRGW3    {alias  SG_CAA067_763[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_764_SJRGW3    {alias  SG_CAA087_764[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_780_SJRGW3    {alias  SG_CAA087_780[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_793_SJRGW3    {alias  SG_CAA087_793[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_814_SJRGW3    {alias  SG_CAA109_814[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_839_SJRGW3    {alias  SG_CAA109_839[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_854_SJRGW3    {alias  SG_CAA109_854[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_862_SJRGW3    {alias  SG_CAA109_862[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_846_SJRGW3    {alias  SG_CAA143_846[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_866_SJRGW3    {alias  SG_CAA143_866[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_869_SJRGW3    {alias  SG_CAA143_869[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_883_SJRGW3    {alias  SG_CAA143_883[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_888_SJRGW3    {alias  SG_CAA143_888[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_903_SJRGW3    {alias  SG_CAA143_903[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_920_SJRGW3    {alias  SG_CAA143_920[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_954_SJRGW3    {alias  SG_CAA143_954[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_961_SJRGW3    {alias  SG_CAA143_961[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_968_SJRGW3    {alias  SG_CAA143_968[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_1009_SJRGW3    {alias  SG_CAA155_1009[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_977_SJRGW3    {alias  SG_CAA155_977[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_990_SJRGW3    {alias  SG_CAA155_990[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1020_SJRGW3    {alias  SG_CAA172_1020[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1038_SJRGW3    {alias  SG_CAA172_1038[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1053_SJRGW3    {alias  SG_CAA172_1053[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1062_SJRGW3    {alias  SG_CAA172_1062[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG86_CHW006_11_SJRGW3    {alias  SG86_CHW006_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG85_CHW011_11_SJRGW3    {alias  SG85_CHW011_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG84_CHW017_11_SJRGW3    {alias  SG84_CHW017_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG83_CHW021_11_SJRGW3    {alias  SG83_CHW021_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG82_CHW024_11_SJRGW3    {alias  SG82_CHW024_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG81_CHW028_11_SJRGW3    {alias  SG81_CHW028_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG80_CHW031_11_SJRGW3    {alias  SG80_CHW031_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG166_CLV004_25_SJRGW3    {alias  SG166_CLV004_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG165_CLV010_25_SJRGW3    {alias  SG165_CLV010_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG164_CLV016_25_SJRGW3    {alias  SG164_CLV016_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG163_CLV023_25_SJRGW3    {alias  SG163_CLV023_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG162_CLV028_25_SJRGW3    {alias  SG162_CLV028_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG161_CLV035_25_SJRGW3    {alias  SG161_CLV035_25[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG175_CMCHE_27_SJRGW3    {alias  SG175_CMCHE_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG193_CSM005_29_SJRGW3    {alias  SG193_CSM005_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG192_CSM011_29_SJRGW3    {alias  SG192_CSM011_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG191_CSM016_29_SJRGW3    {alias  SG191_CSM016_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG190_CSM021_29_SJRGW3    {alias  SG190_CSM021_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG189_CSM026_29_SJRGW3    {alias  SG189_CSM026_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG188_CSM033_29_SJRGW3    {alias  SG188_CSM033_29[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG99_DED010_13_SJRGW3    {alias  SG99_DED010_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG98_DED019_13_SJRGW3    {alias  SG98_DED019_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG97_DED025_13_SJRGW3    {alias  SG97_DED025_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG96_DED032_13_SJRGW3    {alias  SG96_DED032_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG95_DED035_13_SJRGW3    {alias  SG95_DED035_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG94_DED038_13_SJRGW3    {alias  SG94_DED038_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG93_DED044_13_SJRGW3    {alias  SG93_DED044_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC003_590_SJRGW3    {alias  SG_DMC003_590[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC007_590_SJRGW3    {alias  SG_DMC007_590[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_602_SJRGW3    {alias  SG_DMC011_602[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_608_SJRGW3    {alias  SG_DMC011_608[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC016_609_SJRGW3    {alias  SG_DMC016_609[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC021_611_SJRGW3    {alias  SG_DMC021_611[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC024_614_SJRGW3    {alias  SG_DMC024_614[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC030_631_SJRGW3    {alias  SG_DMC030_631[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC034_647_SJRGW3    {alias  SG_DMC034_647[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC039_658_SJRGW3    {alias  SG_DMC039_658[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC044_669_SJRGW3    {alias  SG_DMC044_669[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC049_680_SJRGW3    {alias  SG_DMC049_680[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC054_692_SJRGW3    {alias  SG_DMC054_692[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC058_711_SJRGW3    {alias  SG_DMC058_711[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC064_723_SJRGW3    {alias  SG_DMC064_723[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_758_SJRGW3    {alias  SG_DMC070_758[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_763_SJRGW3    {alias  SG_DMC070_763[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC074_764_SJRGW3    {alias  SG_DMC074_764[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC080_780_SJRGW3    {alias  SG_DMC080_780[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC085_793_SJRGW3    {alias  SG_DMC085_793[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC091_815_SJRGW3    {alias  SG_DMC091_815[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC097_840_SJRGW3    {alias  SG_DMC097_840[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_841_SJRGW3    {alias  SG_DMC105_841[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_842_SJRGW3    {alias  SG_DMC105_842[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC111_858_SJRGW3    {alias  SG_DMC111_858[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC116_872_SJRGW3    {alias  SG_DMC116_872[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_LOWER_DV_SJRGW3    {alias  SG_DMC_LOWER_DV[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_UPPER_DV_SJRGW3    {alias  SG_DMC_UPPER_DV[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG186_DSC008_28_SJRGW3    {alias  SG186_DSC008_28[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG185_DSC016_28_SJRGW3    {alias  SG185_DSC016_28[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG184_DSC023_28_SJRGW3    {alias  SG184_DSC023_28[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG183_DSC028_28_SJRGW3    {alias  SG183_DSC028_28[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG182_DSC035_28_SJRGW3    {alias  SG182_DSC035_28[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG76_FRS016_9_SJRGW3    {alias  SG76_FRS016_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG77_FRS016_9_SJRGW3    {alias  SG77_FRS016_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW3    {alias  SG101_DED003_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW3    {alias  SG112_BCK006_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG75_FRS016_9_SJRGW3    {alias  SG75_FRS016_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG74_FRS020_9_SJRGW3    {alias  SG74_FRS020_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG73_FRS025_9_SJRGW3    {alias  SG73_FRS025_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG72_FRS032_9_SJRGW3    {alias  SG72_FRS032_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG71_FRS036_9_SJRGW3    {alias  SG71_FRS036_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG70_FRS039_9_SJRGW3    {alias  SG70_FRS039_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG69_FRS045_9_SJRGW3    {alias  SG69_FRS045_9[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG52_FSL005_4_SJRGW3    {alias  SG52_FSL005_4[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG51_FSL012_4_SJRGW3    {alias  SG51_FSL012_4[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_LPC000_840_SJRGW3    {alias  SG_LPC000_840[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  sg123_mcd009_17_SJRGW3    {alias  sg123_mcd009_17[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG122_MCD014_17_SJRGW3    {alias  SG122_MCD014_17[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG121_MCD021_17_SJRGW3    {alias  SG121_MCD021_17[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG198_MOK004_30_SJRGW3    {alias  SG198_MOK004_30[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG197_MOK014_30_SJRGW3    {alias  SG197_MOK014_30[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG196_MOK019_30_SJRGW3    {alias  SG196_MOK019_30[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG181_MOK022_27_SJRGW3    {alias  SG181_MOK022_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG180_MOK028_27_SJRGW3    {alias  SG180_MOK028_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG179_MOK035_27_SJRGW3    {alias  SG179_MOK035_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG178_MOK044_27_SJRGW3    {alias  SG178_MOK044_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG177_MOK050_27_SJRGW3    {alias  SG177_MOK050_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG176_MOK055_27_SJRGW3    {alias  SG176_MOK055_27[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_ORG000_793_SJRGW3    {alias  SG_ORG000_793[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG129_ORT009_19_SJRGW3    {alias  SG129_ORT009_19[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG128_ORT014_19_SJRGW3    {alias  SG128_ORT014_19[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG203_SJR006_31_SJRGW3    {alias  SG203_SJR006_31[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG202_SJR009_31_SJRGW3    {alias  SG202_SJR009_31[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG201_SJR013_31_SJRGW3    {alias  SG201_SJR013_31[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG172_SJR022_26_SJRGW3    {alias  SG172_SJR022_26[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG171_SJR023_26_SJRGW3    {alias  SG171_SJR023_26[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG170_SJR028_26_SJRGW3    {alias  SG170_SJR028_26[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG169_SJR033_26_SJRGW3    {alias  SG169_SJR033_26[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG160_SJR038_24_SJRGW3    {alias  SG160_SJR038_24[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG159_SJR042_24_SJRGW3    {alias  SG159_SJR042_24[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG158_SJR048_24_SJRGW3    {alias  SG158_SJR048_24[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG157_SJR056_24_SJRGW3    {alias  SG157_SJR056_24[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG156_SJR062_24_SJRGW3    {alias  SG156_SJR062_24[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG154_STS011_23_SJRGW3    {alias  SG154_STS011_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG143_TUO003_21_SJRGW3    {alias  SG143_TUO003_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG133_SJR090_20_SJRGW3    {alias  SG133_SJR090_20[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG132_SJR096_20_SJRGW3    {alias  SG132_SJR096_20[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG130_ORT001_19_SJRGW3    {alias  SG130_ORT001_19[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG126_SJR111_18_SJRGW3    {alias  SG126_SJR111_18[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  sg124_mcd002_17_SJRGW3    {alias  sg124_mcd002_17[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG114_SJR123_16_SJRGW3    {alias  SG114_SJR123_16[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW3    {alias  SG112_BCK006_15[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG103_SJR141_14_SJRGW3    {alias  SG103_SJR141_14[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW3    {alias  SG101_DED003_13[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG91_SJR152_12_SJRGW3    {alias  SG91_SJR152_12[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG90_SJR157_12_SJRGW3    {alias  SG90_SJR157_12[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG88_EBP030_11_SJRGW3    {alias  SG88_EBP030_11[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG67_SJR180_8_SJRGW3    {alias  SG67_SJR180_8[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG66_SJR185_8_SJRGW3    {alias  SG66_SJR185_8[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG65_SJR192_8_SJRGW3    {alias  SG65_SJR192_8[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG64_SJR198_8_SJRGW3    {alias  SG64_SJR198_8[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG61_SJR214_7_SJRGW3    {alias  SG61_SJR214_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG60_SJR221_7_SJRGW3    {alias  SG60_SJR221_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG59_SJR227_7_SJRGW3    {alias  SG59_SJR227_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG58_SJR235_7_SJRGW3    {alias  SG58_SJR235_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG57_SJR242_7_SJRGW3    {alias  SG57_SJR242_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG56_SJR249_7_SJRGW3    {alias  SG56_SJR249_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG55_SJR256_7_SJRGW3    {alias  SG55_SJR256_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG54_SJR263_7_SJRGW3    {alias  SG54_SJR263_7[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_SLO000_659_SJRGW3    {alias  SG_SLO000_659[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG153_STS011_23_SJRGW3    {alias  SG153_STS011_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG152_STS020_23_SJRGW3    {alias  SG152_STS020_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG151_STS030_23_SJRGW3    {alias  SG151_STS030_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG150_STS036_23_SJRGW3    {alias  SG150_STS036_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG149_STS043_23_SJRGW3    {alias  SG149_STS043_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG148_STS050_23_SJRGW3    {alias  SG148_STS050_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG147_STS053_23_SJRGW3    {alias  SG147_STS053_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG146_STS058_23_SJRGW3    {alias  SG146_STS058_23[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG_TRLCK_666_SJRGW3    {alias  SG_TRLCK_666[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG142_TUO010_21_SJRGW3    {alias  SG142_TUO010_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG141_TUO015_21_SJRGW3    {alias  SG141_TUO015_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG140_TUO022_21_SJRGW3    {alias  SG140_TUO022_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG139_TUO030_21_SJRGW3    {alias  SG139_TUO030_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG138_TUO036_21_SJRGW3    {alias  SG138_TUO036_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG137_TUO043_21_SJRGW3    {alias  SG137_TUO043_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG136_TUO047_21_SJRGW3    {alias  SG136_TUO047_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!define  SG135_TUO053_21_SJRGW3    {alias  SG135_TUO053_21[SJRBASE_GW3]kind 'debug-cfs' units 'cfs'}
+!! [SJR GW4]
+!define  SG110_BCK010_15_SJRGW4    {alias  SG110_BCK010_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG109_BCK017_15_SJRGW4    {alias  SG109_BCK017_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG108_BCK024_15_SJRGW4    {alias  SG108_BCK024_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG107_BCK031_15_SJRGW4    {alias  SG107_BCK031_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG106_BCK035_15_SJRGW4    {alias  SG106_BCK035_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG105_BCK040_15_SJRGW4    {alias  SG105_BCK040_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_589_SJRGW4    {alias  SG_CAA005_589[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA005_602_SJRGW4    {alias  SG_CAA005_602[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_608_SJRGW4    {alias  SG_CAA051_608[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_609_SJRGW4    {alias  SG_CAA051_609[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_611_SJRGW4    {alias  SG_CAA051_611[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_613_SJRGW4    {alias  SG_CAA051_613[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_631_SJRGW4    {alias  SG_CAA051_631[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_647_SJRGW4    {alias  SG_CAA051_647[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_658_SJRGW4    {alias  SG_CAA051_658[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_669_SJRGW4    {alias  SG_CAA051_669[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_680_SJRGW4    {alias  SG_CAA051_680[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA051_681_SJRGW4    {alias  SG_CAA051_681[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_711_SJRGW4    {alias  SG_CAA067_711[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_723_SJRGW4    {alias  SG_CAA067_723[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_758_SJRGW4    {alias  SG_CAA067_758[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA067_763_SJRGW4    {alias  SG_CAA067_763[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_764_SJRGW4    {alias  SG_CAA087_764[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_780_SJRGW4    {alias  SG_CAA087_780[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA087_793_SJRGW4    {alias  SG_CAA087_793[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_814_SJRGW4    {alias  SG_CAA109_814[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_839_SJRGW4    {alias  SG_CAA109_839[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_854_SJRGW4    {alias  SG_CAA109_854[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA109_862_SJRGW4    {alias  SG_CAA109_862[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_846_SJRGW4    {alias  SG_CAA143_846[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_866_SJRGW4    {alias  SG_CAA143_866[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_869_SJRGW4    {alias  SG_CAA143_869[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_883_SJRGW4    {alias  SG_CAA143_883[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_888_SJRGW4    {alias  SG_CAA143_888[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_903_SJRGW4    {alias  SG_CAA143_903[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_920_SJRGW4    {alias  SG_CAA143_920[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_954_SJRGW4    {alias  SG_CAA143_954[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_961_SJRGW4    {alias  SG_CAA143_961[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA143_968_SJRGW4    {alias  SG_CAA143_968[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_1009_SJRGW4    {alias  SG_CAA155_1009[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_977_SJRGW4    {alias  SG_CAA155_977[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA155_990_SJRGW4    {alias  SG_CAA155_990[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1020_SJRGW4    {alias  SG_CAA172_1020[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1038_SJRGW4    {alias  SG_CAA172_1038[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1053_SJRGW4    {alias  SG_CAA172_1053[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_CAA172_1062_SJRGW4    {alias  SG_CAA172_1062[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG86_CHW006_11_SJRGW4    {alias  SG86_CHW006_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG85_CHW011_11_SJRGW4    {alias  SG85_CHW011_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG84_CHW017_11_SJRGW4    {alias  SG84_CHW017_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG83_CHW021_11_SJRGW4    {alias  SG83_CHW021_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG82_CHW024_11_SJRGW4    {alias  SG82_CHW024_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG81_CHW028_11_SJRGW4    {alias  SG81_CHW028_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG80_CHW031_11_SJRGW4    {alias  SG80_CHW031_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG166_CLV004_25_SJRGW4    {alias  SG166_CLV004_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG165_CLV010_25_SJRGW4    {alias  SG165_CLV010_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG164_CLV016_25_SJRGW4    {alias  SG164_CLV016_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG163_CLV023_25_SJRGW4    {alias  SG163_CLV023_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG162_CLV028_25_SJRGW4    {alias  SG162_CLV028_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG161_CLV035_25_SJRGW4    {alias  SG161_CLV035_25[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG175_CMCHE_27_SJRGW4    {alias  SG175_CMCHE_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG193_CSM005_29_SJRGW4    {alias  SG193_CSM005_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG192_CSM011_29_SJRGW4    {alias  SG192_CSM011_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG191_CSM016_29_SJRGW4    {alias  SG191_CSM016_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG190_CSM021_29_SJRGW4    {alias  SG190_CSM021_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG189_CSM026_29_SJRGW4    {alias  SG189_CSM026_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG188_CSM033_29_SJRGW4    {alias  SG188_CSM033_29[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG99_DED010_13_SJRGW4    {alias  SG99_DED010_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG98_DED019_13_SJRGW4    {alias  SG98_DED019_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG97_DED025_13_SJRGW4    {alias  SG97_DED025_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG96_DED032_13_SJRGW4    {alias  SG96_DED032_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG95_DED035_13_SJRGW4    {alias  SG95_DED035_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG94_DED038_13_SJRGW4    {alias  SG94_DED038_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG93_DED044_13_SJRGW4    {alias  SG93_DED044_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC003_590_SJRGW4    {alias  SG_DMC003_590[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC007_590_SJRGW4    {alias  SG_DMC007_590[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_602_SJRGW4    {alias  SG_DMC011_602[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC011_608_SJRGW4    {alias  SG_DMC011_608[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC016_609_SJRGW4    {alias  SG_DMC016_609[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC021_611_SJRGW4    {alias  SG_DMC021_611[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC024_614_SJRGW4    {alias  SG_DMC024_614[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC030_631_SJRGW4    {alias  SG_DMC030_631[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC034_647_SJRGW4    {alias  SG_DMC034_647[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC039_658_SJRGW4    {alias  SG_DMC039_658[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC044_669_SJRGW4    {alias  SG_DMC044_669[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC049_680_SJRGW4    {alias  SG_DMC049_680[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC054_692_SJRGW4    {alias  SG_DMC054_692[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC058_711_SJRGW4    {alias  SG_DMC058_711[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC064_723_SJRGW4    {alias  SG_DMC064_723[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_758_SJRGW4    {alias  SG_DMC070_758[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC070_763_SJRGW4    {alias  SG_DMC070_763[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC074_764_SJRGW4    {alias  SG_DMC074_764[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC080_780_SJRGW4    {alias  SG_DMC080_780[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC085_793_SJRGW4    {alias  SG_DMC085_793[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC091_815_SJRGW4    {alias  SG_DMC091_815[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC097_840_SJRGW4    {alias  SG_DMC097_840[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_841_SJRGW4    {alias  SG_DMC105_841[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC105_842_SJRGW4    {alias  SG_DMC105_842[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC111_858_SJRGW4    {alias  SG_DMC111_858[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC116_872_SJRGW4    {alias  SG_DMC116_872[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_LOWER_DV_SJRGW4    {alias  SG_DMC_LOWER_DV[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_DMC_UPPER_DV_SJRGW4    {alias  SG_DMC_UPPER_DV[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG186_DSC008_28_SJRGW4    {alias  SG186_DSC008_28[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG185_DSC016_28_SJRGW4    {alias  SG185_DSC016_28[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG184_DSC023_28_SJRGW4    {alias  SG184_DSC023_28[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG183_DSC028_28_SJRGW4    {alias  SG183_DSC028_28[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG182_DSC035_28_SJRGW4    {alias  SG182_DSC035_28[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG76_FRS016_9_SJRGW4    {alias  SG76_FRS016_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG77_FRS016_9_SJRGW4    {alias  SG77_FRS016_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW4    {alias  SG101_DED003_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW4    {alias  SG112_BCK006_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG75_FRS016_9_SJRGW4    {alias  SG75_FRS016_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG74_FRS020_9_SJRGW4    {alias  SG74_FRS020_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG73_FRS025_9_SJRGW4    {alias  SG73_FRS025_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG72_FRS032_9_SJRGW4    {alias  SG72_FRS032_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG71_FRS036_9_SJRGW4    {alias  SG71_FRS036_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG70_FRS039_9_SJRGW4    {alias  SG70_FRS039_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG69_FRS045_9_SJRGW4    {alias  SG69_FRS045_9[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG52_FSL005_4_SJRGW4    {alias  SG52_FSL005_4[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG51_FSL012_4_SJRGW4    {alias  SG51_FSL012_4[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_LPC000_840_SJRGW4    {alias  SG_LPC000_840[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  sg123_mcd009_17_SJRGW4    {alias  sg123_mcd009_17[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG122_MCD014_17_SJRGW4    {alias  SG122_MCD014_17[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG121_MCD021_17_SJRGW4    {alias  SG121_MCD021_17[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG198_MOK004_30_SJRGW4    {alias  SG198_MOK004_30[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG197_MOK014_30_SJRGW4    {alias  SG197_MOK014_30[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG196_MOK019_30_SJRGW4    {alias  SG196_MOK019_30[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG181_MOK022_27_SJRGW4    {alias  SG181_MOK022_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG180_MOK028_27_SJRGW4    {alias  SG180_MOK028_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG179_MOK035_27_SJRGW4    {alias  SG179_MOK035_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG178_MOK044_27_SJRGW4    {alias  SG178_MOK044_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG177_MOK050_27_SJRGW4    {alias  SG177_MOK050_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG176_MOK055_27_SJRGW4    {alias  SG176_MOK055_27[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_ORG000_793_SJRGW4    {alias  SG_ORG000_793[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG129_ORT009_19_SJRGW4    {alias  SG129_ORT009_19[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG128_ORT014_19_SJRGW4    {alias  SG128_ORT014_19[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG203_SJR006_31_SJRGW4    {alias  SG203_SJR006_31[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG202_SJR009_31_SJRGW4    {alias  SG202_SJR009_31[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG201_SJR013_31_SJRGW4    {alias  SG201_SJR013_31[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG172_SJR022_26_SJRGW4    {alias  SG172_SJR022_26[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG171_SJR023_26_SJRGW4    {alias  SG171_SJR023_26[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG170_SJR028_26_SJRGW4    {alias  SG170_SJR028_26[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG169_SJR033_26_SJRGW4    {alias  SG169_SJR033_26[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG160_SJR038_24_SJRGW4    {alias  SG160_SJR038_24[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG159_SJR042_24_SJRGW4    {alias  SG159_SJR042_24[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG158_SJR048_24_SJRGW4    {alias  SG158_SJR048_24[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG157_SJR056_24_SJRGW4    {alias  SG157_SJR056_24[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG156_SJR062_24_SJRGW4    {alias  SG156_SJR062_24[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG154_STS011_23_SJRGW4    {alias  SG154_STS011_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG143_TUO003_21_SJRGW4    {alias  SG143_TUO003_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG133_SJR090_20_SJRGW4    {alias  SG133_SJR090_20[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG132_SJR096_20_SJRGW4    {alias  SG132_SJR096_20[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG130_ORT001_19_SJRGW4    {alias  SG130_ORT001_19[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG126_SJR111_18_SJRGW4    {alias  SG126_SJR111_18[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  sg124_mcd002_17_SJRGW4    {alias  sg124_mcd002_17[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG114_SJR123_16_SJRGW4    {alias  SG114_SJR123_16[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG112_BCK006_15_SJRGW4    {alias  SG112_BCK006_15[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG103_SJR141_14_SJRGW4    {alias  SG103_SJR141_14[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG101_DED003_13_SJRGW4    {alias  SG101_DED003_13[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG91_SJR152_12_SJRGW4    {alias  SG91_SJR152_12[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG90_SJR157_12_SJRGW4    {alias  SG90_SJR157_12[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG88_EBP030_11_SJRGW4    {alias  SG88_EBP030_11[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG67_SJR180_8_SJRGW4    {alias  SG67_SJR180_8[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG66_SJR185_8_SJRGW4    {alias  SG66_SJR185_8[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG65_SJR192_8_SJRGW4    {alias  SG65_SJR192_8[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG64_SJR198_8_SJRGW4    {alias  SG64_SJR198_8[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG61_SJR214_7_SJRGW4    {alias  SG61_SJR214_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG60_SJR221_7_SJRGW4    {alias  SG60_SJR221_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG59_SJR227_7_SJRGW4    {alias  SG59_SJR227_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG58_SJR235_7_SJRGW4    {alias  SG58_SJR235_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG57_SJR242_7_SJRGW4    {alias  SG57_SJR242_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG56_SJR249_7_SJRGW4    {alias  SG56_SJR249_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG55_SJR256_7_SJRGW4    {alias  SG55_SJR256_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG54_SJR263_7_SJRGW4    {alias  SG54_SJR263_7[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_SLO000_659_SJRGW4    {alias  SG_SLO000_659[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG153_STS011_23_SJRGW4    {alias  SG153_STS011_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG152_STS020_23_SJRGW4    {alias  SG152_STS020_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG151_STS030_23_SJRGW4    {alias  SG151_STS030_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG150_STS036_23_SJRGW4    {alias  SG150_STS036_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG149_STS043_23_SJRGW4    {alias  SG149_STS043_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG148_STS050_23_SJRGW4    {alias  SG148_STS050_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG147_STS053_23_SJRGW4    {alias  SG147_STS053_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG146_STS058_23_SJRGW4    {alias  SG146_STS058_23[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG_TRLCK_666_SJRGW4    {alias  SG_TRLCK_666[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG142_TUO010_21_SJRGW4    {alias  SG142_TUO010_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG141_TUO015_21_SJRGW4    {alias  SG141_TUO015_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG140_TUO022_21_SJRGW4    {alias  SG140_TUO022_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG139_TUO030_21_SJRGW4    {alias  SG139_TUO030_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG138_TUO036_21_SJRGW4    {alias  SG138_TUO036_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG137_TUO043_21_SJRGW4    {alias  SG137_TUO043_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG136_TUO047_21_SJRGW4    {alias  SG136_TUO047_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+!define  SG135_TUO053_21_SJRGW4    {alias  SG135_TUO053_21[SJRBASE_GW4]kind 'debug-cfs' units 'cfs'}
+
+!Various reservoir target levels that used in OperationsControl spreadsheet
+define S_TRNTYLEVEL1DV {alias S_TRNTYlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_TRNTYLEVEL2DV {alias S_TRNTYlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_TRNTYLEVEL4DV {alias S_TRNTYlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_TRNTYLEVEL5DV {alias S_TRNTYlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_SHSTALEVEL1DV {alias S_SHSTAlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTALEVEL2DV {alias S_SHSTAlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+!define S_SHSTALEVEL3DV {alias S_SHSTAlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTALEVEL4DV {alias S_SHSTAlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTALEVEL5DV {alias S_SHSTAlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SHSTALEVEL6DV {alias S_SHSTAlevel6 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_OROVLLEVEL1DV {alias S_OROVLlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_OROVLLEVEL2DV {alias S_OROVLlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+! Level 3-4 oroville storage levels are defined in ororulecurve.wresl
+define S_OROVLLEVEL5DV {alias S_OROVLlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSMLEVEL4DV {alias S_FOLSMlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FOLSMLEVEL5DV {alias S_FOLSMlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+! San Luis levels
+define S_SLUIS_CVPlevel1DV {alias S_SLUIS_CVPlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_CVPlevel2DV {alias S_SLUIS_CVPlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_CVPlevel3DV {alias S_SLUIS_CVPlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_CVPlevel4DV {alias S_SLUIS_CVPlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_CVPlevel5DV {alias S_SLUIS_CVPlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_SLUIS_SWPlevel1DV {alias S_SLUIS_SWPlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_SWPlevel2DV {alias S_SLUIS_SWPlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_SWPlevel3DV {alias S_SLUIS_SWPlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_SWPlevel4DV {alias S_SLUIS_SWPlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_SLUIS_SWPlevel5DV {alias S_SLUIS_SWPlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+! EPPT outputs, CQ
+
+define RICE_DECOMP_DEL {alias decomp_del kind 'flow-delivery' units 'cfs'}
+define SPILL_TO_SUTTER    {alias SP_SAC193_BTC003 + SP_SAC188_BTC003 + SP_SAC178_BTC003 kind 'WEIR-OP-VALUE' units 'cfs'}

@@ -1,0 +1,44 @@
+! This wresl file defines Red Bluff gate operations.
+!
+! Maximum diversion
+!  May15-Sep15: 2100 cfs
+!  Otherwise:   400 cfs
+!
+! ==========================================================================
+!
+!  Assume that either interim ops and temporary pumps are in place for existing
+!  or improved facility is in place for future and the diversion is able to operate:
+goal RBDD_DivCap { D_SAC240_TCC001 < 2500. }  !Max Facility Capacity (actual dependent on gate ops)
+
+/*  OLD CODE NOT USED
+! The gate is down during May 15 to September 15.
+goal RedBluffGate {
+  lhs D_SAC240_TCC001
+  case Apr {
+    condition    month == APR
+    rhs         400.
+    lhs<rhs     penalty 0 }
+  case May {
+    condition    month == MAY ! "Gate-in" allows for 2100 cfs from May 15 - 31
+    rhs         400. * 14./daysin + 2100. * (daysin-14.)/daysin
+    lhs<rhs     penalty 0 }
+  case JunAug {
+    condition    month >= JUN .and. month <= AUG
+    rhs         2100.
+    lhs<rhs     penalty 0 }
+  case Sep {
+    condition    month == SEP ! "Gate-in" allows for 2100 cfs from Sept 1 - 15
+    rhs         2100. * 15/daysin + 400. * (daysin-15.)/daysin
+    lhs<rhs     penalty 0 }
+  case Oct {
+    condition    month == OCT
+    rhs         400.
+    lhs<rhs     penalty 0 }
+! The following is not needed since the diversion season is over
+! This is removed to allow for NODOS facility operations
+!  case NovMar {
+!    condition    month >= NOV .and. month <= MAR
+!    rhs         400.
+!    lhs<rhs     penalty 0 }
+}
+*/

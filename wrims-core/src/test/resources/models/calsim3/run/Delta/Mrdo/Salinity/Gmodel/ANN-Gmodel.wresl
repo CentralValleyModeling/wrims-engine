@@ -1,0 +1,54 @@
+! Ryan Wilbur 7/12/00
+
+/* Outputs G-Model values for previous time period */
+
+
+! The time step for monthly model in years
+define g_delT {value 0.08333}      ! 1month*1year/12months
+
+/*
+ G-MODEL BELOW IS FOR JERSEY POINT (JPT)															*/
+
+! Coefficients for this Jersey Point
+define g_beta_jpt   {value 550.0    }        ! ft^3
+
+! define Dvars needed for this station's G model
+define Go_jpt {std kind 'GMODEL-PARAM' units 'CFS'}
+
+! Calculate Go for the current period. This is the beginning of period G value based upon
+! last month's flow and beginning of last month's G value, Go(-1). Units are cfs
+
+define NDOprv {value max(1.0, NDOI(-1))}    !add to avoid error of "divided by zero" since NDO and Go_jpt can be zero, Z.Q. Richard Chen 3/17/2017  !@jmg 2017v13
+
+define Go_hist_jpt {value	NDOprv/(1 + (NDOprv/Go_jpt(-1) - 1)  !@jmg 2017v13
+                          *EXP(-NDOprv*g_delT/g_beta_jpt))}         !@jmg 2017v13
+
+goal setGo_jpt {Go_jpt = Go_hist_jpt}
+
+! Calculate G
+define Gavg_prv_jpt {value	NDOprv + (g_beta_jpt/g_delT)*log((1+(NDOprv/Go_jpt(-1) - 1)*  !@jmg 2017v13
+                          		EXP(-NDOprv*g_delT/g_beta_jpt))/(NDOprv/Go_jpt(-1))) }    !@jmg 2017v13
+define Gave_prv_jpt {alias Gavg_prv_jpt units 'CFS'}
+
+/*
+ G-MODEL BELOW IS FOR EMMATON (EMT)																	*/
+
+! Coefficients for Emmaton       
+define g_beta_emt   {value 500.0    }                                 ! ft^3
+
+! define Dvars needed for this station's G model
+define Go_emt {std kind 'GMODEL-PARAM' units 'CFS'}
+
+! Calculate Go for the current period. This is the beginning of period G value based upon
+! last month's flow and beginning of last month's G value, Go(-1). Units are cfs
+
+define Go_hist_emt {value	NDOprv/(1 + (NDOprv/Go_emt(-1) - 1)               !@jmg 2017v13
+                          *EXP(-NDOprv*g_delT/g_beta_emt))           }        !@jmg 2017v13
+
+goal setGo_emt {Go_emt = Go_hist_emt}
+
+! Calculate G
+define Gavg_prv_emt {value 	NDOprv + (g_beta_emt/g_delT)*log((1+(NDOprv/Go_emt(-1) - 1)*         !@jmg 2017v13
+                         		EXP(-NDOprv*g_delT/g_beta_emt))/(NDOprv/Go_emt(-1)))   }         !@jmg 2017v13
+define Gave_prv_emt {alias Gavg_prv_emt units 'CFS'}
+

@@ -1,0 +1,800 @@
+!Operational priorities.
+!Meet CCWD demand with water that does not exceed target (WQ420_target) set in UserInput.wresl
+!Fill LV with water where source salinity <= user specified threshold set in UserInput.wresl or source salinity <= current LV salinity .
+!Deliver best available water quality from the Delta
+!Use reservoir storage only to maintain delivery salinity standard or in April when no Delta diversions are allowed.
+!Emergency pool is not to be used for either.
+!When there is a choice from Jan to Jul, use OR and VC diversions over RS as long as 65 mg/L CL delivery quality maintained
+!and LV storage maximized.
+
+
+!Save water quality ([CL]) target for CCWD deliveries (node 420).
+define WQ420_target_ {alias WQ420_target kind 'delivery-target' units 'mg/L'}
+
+
+!Define water quality ([CL]) target for Los Vaqueros storage (node  422)
+define WQ422 {std kind 'salinity' units 'mg/L'}     !define early for use in next statement
+define WQ422_target1 {value max(WQ422_target,WQ422(-1))}
+
+!Save LV fill rule target.
+define WQ422_target_ {alias WQ422_target kind 'fill-target' units 'mg/L'}
+define WQ422_target1_ {alias WQ422_target1 kind 'fill-target' units 'mg/L'}
+
+!*****************************
+!Calculate the maximum delivery without depleting emergency storage.
+!*****************************
+
+!Maximum quantity of water for wq control.  Deduct estimated MS diversion from service area demand.
+define max_total_wqc {value min(demand_D420 - D406A_MS_est, min(D408_OR_max + D408_VC_max, C421_max) + D408_RS_max + S422_CC_maxWQrel)}
+
+!*****************************
+!Calculate the best water quality that can be delivered.  Do not include Mokelumne Intake.  Assume Mallard Slough
+!Intake will pump at full capacity if WQ406A_MS <=WQ420_target and will pump nothing otherwise.
+!*****************************
+
+!Priority RS
+!Note the min and max salinity between OR and VC diversions
+define WQ408_ORVC_min {
+	case VCmin {
+		condition	WQ408_VC < WQ408_OR
+		value		WQ408_VC
+	}
+	case otherwise {
+		condition	always
+		value		WQ408_OR
+	}
+}
+define WQ408_ORVC_max {
+	case ORmax {
+		condition	WQ408_VC < WQ408_OR
+		value		WQ408_OR
+	}
+	case otherwise {
+		condition	always
+		value		WQ408_VC
+	}
+}
+!Note the max capacities of the min and max salinity ORVC intakes
+define D408_ORVC_minmax {
+	case VCmin {
+		condition	WQ408_VC < WQ408_OR
+		value		min(D408_VC_max, C421_max)
+	}
+	case otherwise {
+		condition	always
+		value		min(D408_OR_max, C421_max)
+	}
+}
+define D408_ORVC_maxmax {
+	case ORmax {
+		condition	WQ408_VC < WQ408_OR
+		value		min(D408_OR_max,max(0.,C421_max - D408_VC_max))
+	}
+	case otherwise {
+		condition	always
+		value		min(D408_VC_max,max(0.,C421_max - D408_OR_max))
+	}
+}
+
+!Now determine order by water quality of water to be taken from OR, VC, and LV
+define WQ_OVL_min {
+	case LVmin {
+		condition	WQ422(-1) < WQ408_ORVC_min
+		value		WQ422(-1)
+	}
+	case ORVC_minmin {
+		condition	always
+		value		WQ408_ORVC_min
+	}
+}
+define WQ_OVL_mid {
+	case ORVC_maxmid {
+		condition	WQ422(-1) >= WQ408_ORVC_max
+		value		WQ408_ORVC_max
+	}
+	case LVmid {
+		condition	WQ422(-1) >= WQ408_ORVC_min
+		value		WQ422(-1)
+	}
+	case ORVC_minmid {
+		condition	always
+		value		WQ408_ORVC_min
+	}
+}
+define WQ_OVL_max {
+	case LVmax {
+		condition 	WQ422(-1) >= WQ408_ORVC_max
+		value		WQ422(-1)
+	}
+	case ORVC_maxmax {
+		condition	always
+		value		WQ408_ORVC_max
+	}
+}
+
+!Now determine max contribution from each OVL source.
+define D_OVL_minmax {
+	case LVmin {
+		condition	WQ422(-1) < WQ408_ORVC_min
+		value		S422_CC_maxWQrel
+	}
+	case ORVC_minmin {
+		condition	always
+		value		D408_ORVC_minmax
+	}
+}
+define D_OVL_midmax {
+	case ORVC_maxmid {
+		condition	WQ422(-1) >= WQ408_ORVC_max
+		value		D408_ORVC_maxmax
+	}
+	case LVmid {
+		condition	WQ422(-1) >= WQ408_ORVC_min
+		value		S422_CC_maxWQrel
+	}
+	case ORVC_minmid {
+		condition	always
+		value		D408_ORVC_minmax
+	}
+}
+define D_OVL_maxmax {
+	case LVmax {
+		condition 	WQ422(-1) >= WQ408_ORVC_max
+		value		S422_CC_maxWQrel
+	}
+	case ORVC_maxmax {
+		condition	always
+		value		D408_ORVC_maxmax
+	}
+}
+
+!Use information compiled on OR, VC, and LV to determine best water quality that can be delivered when RS diversions
+!are given priority (maximized under current assumptions).
+
+define WQ420_pRS {
+	case NoZeroDenom {
+                condition       max_total_wqc + D406A_MS_est < 0.01
+		value		WQ408_RS
+	}
+	case MeetsDemand {
+		condition	D408_RS_max >= max_total_wqc
+                value           (max_total_wqc*WQ408_RS + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case TwoSource {
+		condition	D408_RS_max + D_OVL_minmax >= max_total_wqc
+                value           (D408_RS_max*WQ408_RS + (max_total_wqc - D408_RS_max)*WQ_OVL_min + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case ThreeSource {
+		condition	D408_RS_max + D_OVL_minmax + D_OVL_midmax >= max_total_wqc
+		value		(D408_RS_max*WQ408_RS + D_OVL_minmax*WQ_OVL_min + (max_total_wqc - D408_RS_max - D_OVL_minmax)*WQ_OVL_mid
+                                + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case FourSource {
+		condition	always
+		value		(D408_RS_max*WQ408_RS + D_OVL_minmax*WQ_OVL_min + D_OVL_midmax*WQ_OVL_mid
+                                + (max_total_wqc - D408_RS_max - D_OVL_minmax - D_OVL_midmax)*WQ_OVL_max + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+}
+
+!Priority OR
+define WQ_RVL_min {
+	case LVmin {
+		condition	WQ422(-1) < min(WQ408_RS,WQ408_VC)
+		value		WQ422(-1)
+	}
+	case VCmin {
+		condition	WQ408_VC < WQ408_RS
+		value		WQ408_VC
+	}
+	case RSmin {
+		condition	always
+		value		WQ408_RS
+	}
+}
+define WQ_RVL_max {
+	case LVmax {
+		condition	WQ422(-1) >= max(WQ408_RS,WQ408_VC)
+		value		WQ422(-1)
+	}
+	case VCmax {
+		condition	WQ408_VC >= WQ408_RS
+		value		WQ408_VC
+	}
+	case RSmax {
+		condition	always
+		value		WQ408_RS
+	}
+}
+define WQ_RVL_mid {
+	case LVmid {
+		condition	WQ422(-1) < max(WQ408_RS,WQ408_VC) .and. WQ422(-1) >= min(WQ408_RS,WQ408_VC)
+		value		WQ422(-1)
+	}
+	case VCmid {
+		condition	WQ408_VC <= WQ422(-1) .and. WQ408_VC >= WQ408_RS .or. WQ408_VC < WQ408_RS .and. WQ408_VC > WQ422(-1)
+		value		WQ408_VC
+	}
+	case RSmid {
+		condition	always
+		value		WQ408_RS
+	}
+}
+
+define D_RVL_minmax {
+	case LVmin {
+		condition	WQ422(-1) < min(WQ408_RS,WQ408_VC)
+		value		S422_CC_maxWQrel
+	}
+	case VCmin {
+		condition	WQ408_VC < WQ408_RS
+		value		min(D408_VC_max, max(0.,C421_max - D408_OR_max))
+	}
+	case RSmin {
+		condition	always
+		value		D408_RS_max
+	}
+}
+define D_RVL_maxmax {
+	case LVmax {
+		condition	WQ422(-1) >= max(WQ408_RS,WQ408_VC)
+		value		S422_CC_maxWQrel
+	}
+	case VCmax {
+		condition	WQ408_VC >= WQ408_RS
+		value		min(D408_VC_max, max(0.,C421_max - D408_OR_max))
+	}
+	case RSmax {
+		condition	always
+		value		D408_RS_max
+	}
+}
+define D_RVL_midmax {
+	case LVmid {
+		condition	WQ422(-1) < max(WQ408_RS,WQ408_VC) .and. WQ422(-1) >= min(WQ408_RS,WQ408_VC)
+		value		S422_CC_maxWQrel
+	}
+	case VCmid {
+		condition	WQ408_VC <= WQ422(-1) .and. WQ408_VC >= WQ408_RS .or. WQ408_VC < WQ408_RS .and. WQ408_VC > WQ422(-1)
+		value		min(D408_VC_max, max(0.,C421_max - D408_OR_max))
+	}
+	case RSmid {
+		condition	always
+		value		D408_RS_max
+	}
+}
+
+define WQ420_pOR {
+	case NoZeroDenom {
+                condition       max_total_wqc + D406A_MS_est < 0.01
+		value		WQ408_OR
+	}
+	case MeetsDemand {
+		condition	min(D408_OR_max,C421_max) >= max_total_wqc
+                value           (max_total_wqc*WQ408_OR + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case TwoSource {
+		condition	min(D408_OR_max,C421_max) + D_RVL_minmax >= max_total_wqc
+                value           (min(D408_OR_max,C421_max)*WQ408_OR + (max_total_wqc - min(D408_OR_max,C421_max))*WQ_RVL_min + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case ThreeSource {
+		condition	min(D408_OR_max,C421_max) + D_RVL_minmax + D_RVL_midmax >= max_total_wqc
+		value		(min(D408_OR_max,C421_max)*WQ408_OR + D_RVL_minmax*WQ_RVL_min + (max_total_wqc - min(D408_OR_max,C421_max) - D_RVL_minmax)*WQ_RVL_mid
+                                + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case FourSource {
+		condition	always
+		value		(min(D408_OR_max,C421_max)*WQ408_OR + D_RVL_minmax*WQ_RVL_min + D_RVL_midmax*WQ_RVL_mid
+                                + (max_total_wqc - min(D408_OR_max,C421_max) - D_RVL_minmax - D_RVL_midmax)*WQ_RVL_max + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+}
+
+!Priority VC
+
+define WQ_ROL_min {
+	case LVmin {
+		condition	WQ422(-1) < min(WQ408_RS,WQ408_OR)
+		value		WQ422(-1)
+	}
+	case ORmin {
+		condition	WQ408_OR < WQ408_RS
+		value		WQ408_OR
+	}
+	case RSmin {
+		condition	always
+		value		WQ408_RS
+	}
+}
+define WQ_ROL_max {
+	case LVmax {
+		condition	WQ422(-1) >= max(WQ408_RS,WQ408_OR)
+		value		WQ422(-1)
+	}
+	case ORmax {
+		condition	WQ408_OR >= WQ408_RS
+		value		WQ408_OR
+	}
+	case RSmax {
+		condition	always
+		value		WQ408_RS
+	}
+}
+define WQ_ROL_mid {
+	case LVmid {
+		condition	WQ422(-1) < max(WQ408_RS,WQ408_OR) .and. WQ422(-1) >= min(WQ408_RS,WQ408_OR)
+		value		WQ422(-1)
+	}
+	case ORmid {
+		condition	WQ408_OR <= WQ422(-1) .and. WQ408_OR >= WQ408_RS .or. WQ408_OR < WQ408_RS .and. WQ408_OR > WQ422(-1)
+		value		WQ408_OR
+	}
+	case RSmid {
+		condition	always
+		value		WQ408_RS
+	}
+}
+
+define D_ROL_minmax {
+	case LVmin {
+		condition	WQ422(-1) < min(WQ408_RS,WQ408_OR)
+		value		S422_CC_maxWQrel
+	}
+	case VCmin {
+		condition	WQ408_OR < WQ408_RS
+		value		min(D408_OR_max, max(0.,C421_max - D408_VC_max))
+	}
+	case RSmin {
+		condition	always
+		value		D408_RS_max
+	}
+}
+define D_ROL_maxmax {
+	case LVmax {
+		condition	WQ422(-1) >= max(WQ408_RS,WQ408_OR)
+		value		S422_CC_maxWQrel
+	}
+	case VCmax {
+		condition	WQ408_OR >= WQ408_RS
+		value		min(D408_OR_max, max(0.,C421_max - D408_VC_max))
+	}
+	case RSmax {
+		condition	always
+		value		D408_RS_max
+	}
+}
+define D_ROL_midmax {
+	case LVmid {
+		condition	WQ422(-1) < max(WQ408_RS,WQ408_OR) .and. WQ422(-1) >= min(WQ408_RS,WQ408_OR)
+		value		S422_CC_maxWQrel
+	}
+	case VCmid {
+		condition	WQ408_OR <= WQ422(-1) .and. WQ408_OR >= WQ408_RS .or. WQ408_OR < WQ408_RS .and. WQ408_OR > WQ422(-1)
+		value		min(D408_OR_max, max(0.,C421_max - D408_VC_max))
+	}
+	case RSmid {
+		condition	always
+		value		D408_RS_max
+	}
+}
+
+define WQ420_pVC {
+	case NoZeroDenom {
+                condition       max_total_wqc + D406A_MS_est < 0.01
+		value		WQ408_VC
+	}
+	case MeetsDemand {
+		condition	min(D408_VC_max,C421_max) >= max_total_wqc
+                value           (max_total_wqc*WQ408_VC + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case TwoSource {
+		condition	min(D408_VC_max,C421_max) + D_ROL_minmax >= max_total_wqc
+                value           (min(D408_VC_max,C421_max)*WQ408_VC + (max_total_wqc - min(D408_VC_max,C421_max))*WQ_ROL_min + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case ThreeSource {
+		condition	min(D408_VC_max,C421_max) + D_ROL_minmax + D_ROL_midmax >= max_total_wqc
+		value		(min(D408_VC_max,C421_max)*WQ408_VC + D_ROL_minmax*WQ_ROL_min + (max_total_wqc - min(D408_VC_max,C421_max) - D_ROL_minmax)*WQ_ROL_mid
+                                + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case FourSource {
+		condition	always
+		value		(min(D408_VC_max,C421_max)*WQ408_VC + D_ROL_minmax*WQ_ROL_min + D_ROL_midmax*WQ_ROL_mid
+                                + (max_total_wqc - min(D408_VC_max,C421_max) - D_ROL_minmax - D_ROL_midmax)*WQ_ROL_max + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+}
+
+!Priority LV
+
+define WQ_OVR_min {
+	case RSmin {
+		condition	WQ408_RS <= WQ408_ORVC_min
+		value		WQ408_RS
+	}
+	case ORVCminmin {
+		condition	always
+		value		WQ408_ORVC_min
+	}
+}
+define WQ_OVR_mid {
+	case ORVC_maxmid {
+		condition	WQ408_RS > WQ408_ORVC_max
+		value		WQ408_ORVC_max
+	}
+	case RSmid {
+		condition	WQ408_RS > WQ408_ORVC_min
+		value		WQ408_RS
+	}
+	case ORVCminmid {
+		condition	always
+		value		WQ408_ORVC_min
+	}
+}
+define WQ_OVR_max {
+	case RSmax {
+		condition 	WQ408_RS > WQ408_ORVC_max
+		value		WQ408_RS
+	}
+	case otherwise {
+		condition	always
+		value		WQ408_ORVC_max
+	}
+}
+
+!Now determine max contribution from each OVR source.
+define D_OVR_minmax {
+	case RSmin {
+		condition	WQ408_RS <= WQ408_ORVC_min
+		value		D408_RS_max
+	}
+	case ORVCminmin {
+		condition	always
+		value		D408_ORVC_minmax
+	}
+}
+define D_OVR_midmax {
+	case ORVC_maxmid {
+		condition	WQ408_RS > WQ408_ORVC_max
+		value		D408_ORVC_maxmax
+	}
+	case RSmid {
+		condition	WQ408_RS > WQ408_ORVC_min
+		value		D408_RS_max
+	}
+	case ORVCminmid {
+		condition	always
+		value		D408_ORVC_minmax
+	}
+}
+define D_OVR_maxmax {
+	case RSmax {
+		condition 	WQ408_RS > WQ408_ORVC_max
+		value		D408_RS_max
+	}
+	case otherwise {
+		condition	always
+		value		D408_ORVC_maxmax
+	}
+}
+
+!Use information compiled on OR, VC, and LV to determine best water quality that can be delivered when RS diversions
+!are given priority (maximized under current assumptions).
+
+define WQ420_pLV {
+	case NoZeroDenom {
+                condition       max_total_wqc + D406A_MS_est < 0.01
+		value		WQ422(-1)
+	}
+	case MeetsDemand {
+		condition	S422_CC_maxWQrel >= max_total_wqc
+                value           (max_total_wqc*WQ422(-1) + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case TwoSource {
+		condition	S422_CC_maxWQrel + D_OVR_minmax >= max_total_wqc
+                value           (S422_CC_maxWQrel*WQ422(-1) + (max_total_wqc - S422_CC_maxWQrel)*WQ_OVR_min + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case ThreeSource {
+		condition	S422_CC_maxWQrel + D_OVR_minmax + D_OVR_midmax >= max_total_wqc
+		value		(S422_CC_maxWQrel*WQ422(-1) + D_OVR_minmax*WQ_OVR_min + (max_total_wqc - S422_CC_maxWQrel - D_OVR_minmax)*WQ_OVR_mid
+                                + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+	case FourSource {
+		condition	always
+		value		(S422_CC_maxWQrel*WQ422(-1) + D_OVR_minmax*WQ_OVR_min + D_OVR_midmax*WQ_OVR_mid
+                                + (max_total_wqc - S422_CC_maxWQrel - D_OVR_minmax - D_OVR_midmax)*WQ_OVR_max + D406A_MS_est*WQ406A_MS)/(max_total_wqc + D406A_MS_est)
+	}
+}
+
+!Save water quality estimates
+define WQ420_pRS_ {alias WQ420_pRS kind 'salinity-estimate' units 'mg/L'}
+define WQ420_pOR_ {alias WQ420_pOR kind 'salinity-estimate' units 'mg/L'}
+define WQ420_pVC_ {alias WQ420_pVC kind 'salinity-estimate' units 'mg/L'}
+define WQ420_pLV_ {alias WQ420_pLV kind 'salinity-estimate' units 'mg/L'}
+
+!Calculate best delivery water quality.
+!If WQ420_best > WQ420_target, then must relax standard but deliver best water quality possible without reducing emergency pool (unless in April).
+
+define WQ420_best {
+	case MinimizeDiversions {
+		condition	MinDiv_switch == 1
+		value		WQ420_pLV
+	}
+	case otherwise {
+		condition	always
+		value		min(WQ420_pRS, WQ420_pOR, WQ420_pVC, WQ420_pLV)
+	}
+}
+
+define WQ420_best_ {alias WQ420_best kind 'salinity-estimate' units 'mg/L'}
+
+!
+!****************************
+!Determine bounds of operation without storing or releasing water from Los Vaqueros or diverting water from MOK
+!****************************
+
+!Determine water quality at node 420 if OR or VC intake with minimum salinity was used as priority source for CCWD delivery and RS was used as second source.
+define WQ420_pORVC_min {
+	case NoDemandOrCapacity {
+                condition       min(demand_D420 - D406A_MS_est, min(D408_ORVC_minmax, C421_max) + D408_RS_max) < 0.01   !Protecting against zero denominator.
+		value		WQ408_ORVC_min
+	}
+	case otherwise {
+		condition	always
+                value           ( min(D408_ORVC_minmax, C421_max,demand_D420 - D406A_MS_est)*WQ408_ORVC_min
+                                + min(D408_RS_max,demand_D420 - D406A_MS_est - min(D408_ORVC_minmax, C421_max,demand_D420 - D406A_MS_est))*WQ408_RS
+                                + D406A_MS_est*WQ406A_MS) / min(demand_D420, min(D408_ORVC_minmax,C421_max) + D408_RS_max + D406A_MS_est)
+	}
+}
+!Determine water quality at node 420 if priority given first to ORVC min, then ORVC max, then RS.
+
+!First, maximum diversions from intakes for water quality control.  Deduct estimated MS diversion from service area demand.
+define max_intake_wqc {value min(demand_D420 - D406A_MS_est, min(D408_OR_max + D408_VC_max, C421_max) + D408_RS_max)}
+
+
+define WQ420_pORVC {
+	case NoDemandOrCapacity {
+                condition       max_intake_wqc + D406A_MS_est < 0.01    !Protecting against zero denominator.
+		value		WQ408_ORVC_min
+	}
+	case otherwise {
+		condition	always
+                value           ( min(D408_ORVC_minmax, C421_max, demand_D420 - D406A_MS_est)*WQ408_ORVC_min
+                                + min(D408_ORVC_maxmax, max(0., C421_max - D408_ORVC_minmax), max(0., demand_D420 - D406A_MS_est-D408_ORVC_minmax))*WQ408_ORVC_max
+                                + min(D408_RS_max,max(0.,demand_D420 - D406A_MS_est - min(D408_ORVC_minmax + D408_ORVC_maxmax, C421_max)))*WQ408_RS
+                                + D406A_MS_est*WQ406A_MS) / (max_intake_wqc + D406A_MS_est)
+	}
+}
+
+
+!Determine water quality if RS mixed with MS
+define WQ420_RSMS {value (D406A_MS_est*WQ406A_MS + min(demand_D420 - D406A_MS_est, D408_RS_max)*WQ408_RS)/min(demand_D420, D406A_MS_est + D408_RS_max)}
+
+!Given RS, OR, and VC water quality, determine max use of RS intake to meet CCWD demand and delivery salinity standards ignoring LV storage.
+define D_RS_max {
+	case MeetsStandard {
+                condition       WQ420_RSMS <= WQ420_target .or. max_intake_wqc + 0.01 < demand_D420 - D406A_MS_est
+                value           min(demand_D420 - D406A_MS_est, D408_RS_max)
+	}
+	case MixORVCmin {
+                condition       WQ420_pORVC_min <= WQ420_target .and. demand_D420 - D406A_MS_est <= D408_ORVC_minmax + D408_RS_max
+                value           (demand_D420*(WQ420_target-WQ408_ORVC_min)-D406A_MS_est*(WQ406A_MS-WQ408_ORVC_min))/(WQ408_RS-WQ408_ORVC_min)
+	}
+	case MixORVCmax {
+		condition	WQ420_pORVC <= WQ420_target
+		value		max(0.,(demand_D420*(WQ420_target-WQ408_ORVC_max)+D408_ORVC_minmax*(WQ408_ORVC_max-WQ408_ORVC_min)
+                                +D406A_MS_est*(WQ408_ORVC_max-WQ406A_MS))/(WQ408_RS-WQ408_ORVC_max))
+	}
+	case OverStandard {
+		condition	always
+                value           min(demand_D420 - D406A_MS_est, D408_RS_max)
+	}
+}
+
+!Knowing maximum use of RS intake as delivery source, calc minimum use of OR and VC intakes as delivery sources.
+define D_ORVC_min {value max(0.,min(D408_OR_max + D408_VC_max, C421_max, demand_D420 - D_RS_max - D406A_MS_est))}
+
+!Estimate salinity at 420 with this max RS and min ORVC operation
+define WQ420_est_1 {
+	case NoDemand {
+                condition       max_intake_wqc + D406A_MS_est < 0.01
+		value		WQ408_RS
+	}
+	case otherwise {
+		condition	always
+		value		(WQ408_ORVC_min*min(D408_ORVC_minmax,D_ORVC_min)+WQ408_ORVC_max*max(0.,D_ORVC_min - D408_ORVC_minmax)
+                                +WQ408_RS*D_RS_max+WQ406A_MS*D406A_MS_est)/(max_intake_wqc + D406A_MS_est)
+	}
+}
+
+!Estimate salinity at 421 with this min ORVC operation
+define WQ421_est_1 {
+	case NoDemand {
+		condition	D_ORVC_min < 0.01
+		value		WQ408_ORVC_min
+	}
+	case otherwise {
+		condition	always
+		value 		(WQ408_ORVC_min*min(D408_ORVC_minmax,D_ORVC_min)+WQ408_ORVC_max*max(0.,D_ORVC_min - D408_ORVC_minmax))/D_ORVC_min
+	}
+}
+
+define D_RS_max_ {alias D_RS_max kind 'diversion-estimate' units 'cfs'}
+define D_ORVC_min_ {alias D_ORVC_min kind 'diversion-estimate' units 'cfs'}
+
+define WQ420_est_1_ {alias WQ420_est_1 kind 'salinity-estimate' units 'cfs'}
+define WQ421_est_1_ {alias WQ421_est_1 kind 'salinity-estimate' units 'cfs'}
+
+!****************************
+!Determine potential Los Vaqueros WQ operations
+!****************************
+!Define Los Vaqueros fill demand.  Depends on available storage capacity, expected inflows, evaporation, conveyance capacity, and fill regulations.
+define S422_CC_demand {value max(0.,min((S422_CC_level2 - S422_CC(-1))*taf_cfs - max(0.,I422 - 5.) - I422_ppt_cfs + E422_CC_est, lim_NoFill, lim_FebNoFill, lim_fill_X2, C422_FILL_max))}
+define S422_demand {value max(0.,min((S422_CC_level2+S422_P_level2 - S422(-1))*taf_cfs - max(0.,I422 - 5.) - I422_ppt_cfs + E422_est, lim_NoFill, lim_FebNoFill, lim_fill_X2, C422_FILL_max))}
+
+!If WQ421_est_1 > WQ422_target1 or WQ420_est_1 > WQ420_target or LV is full then no filling opportunity exists and releases from LV may be necessary.
+define fill_switch {
+	case MokFilling {
+                condition       WQ420_RSMS <= WQ420_target .and. D408_RS_max >= demand_D420 - D406A_MS_est .and. S422_CC_demand > 1
+				.and. min(lim_min_div,lim_MOK_ann,lim_CVP_ann,FPT_Capacity_Available) > 1 .and. WQ424_MOK < WQ408_ORVC_min
+		value		1.
+	}
+	case NoFilling {
+                condition       WQ421_est_1 > WQ422_target1 .or. WQ420_est_1 > WQ420_target + 0.1 .or. S422_demand < 0.1 .or. max_intake_wqc + 0.01 < demand_D420 - D406A_MS_est .or. lim_Fill_OMR < 0.1
+		value		0.
+	}
+	case Filling {
+		condition	always
+		value		1.
+	}
+}
+
+define fill_switch_MOK {
+	case MokFilling {
+                condition       WQ420_RSMS <= WQ420_target .and. D408_RS_max >= demand_D420 - D406A_MS_est .and. S422_CC_demand > 1
+				.and. min(lim_min_div,lim_MOK_ann,lim_CVP_ann,FPT_Capacity_Available) > 1 .and. WQ424_MOK < WQ408_ORVC_min
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+goal set_filling_switch {C422_FILL < fill_switch*9999.}
+goal set_fill_switch_MOK {C423_FILL < fill_switch_MOK*9999.}
+
+define fill_switch_ {alias fill_switch kind 'allow-LV-filling' units 'none'}
+define fill_switch_MOK_ {alias fill_switch_MOK kind 'allow-LV-filling' units 'none'}
+
+!This variable is for optimal implementation of MOK diversions for WQ purposes.  Use of this variable is commented out below
+!so that MOK diversions occur in whole amounts.
+define WQ420_MOK {value (max(0.,demand_D420 - min(lim_min_div,lim_MOK_ann,lim_CVP_ann,FPT_Capacity_Available))*WQ420_best + min(lim_min_div,lim_MOK_ann,lim_CVP_ann,FPT_Capacity_Available)*WQ424_MOK)/demand_D420}
+
+define WQ420_bestMW {
+	case Adjust_3f {
+		condition	S422_CC_maxWQrel + lim_cvp_ann < demand_d420 .and. 
+					D408_OR_3F[SETUP] + D408_VC_3F[SETUP] > C_OMR014[SETUP] - C_OMR014_limit .and. 
+					D408_OR_3F[SETUP]*WQ408_OR + D408_VC_3F[SETUP]*WQ408_VC < (D408_OR_3F[SETUP] + D408_VC_3F[SETUP])*WQ408_RS .and.
+					NDOI_ADD_CVP[SETUP] + NDOI_ADD_SWP[SETUP] - 500. + D408_DS[SETUP] + D408_3f[SETUP] > 0
+		value		(D420[SETUP]*WQ420_best - D408_OR_3F[SETUP]*WQ408_OR - D408_VC_3F[SETUP]*WQ408_VC + (D408_OR_3F[SETUP] + D408_VC_3F[SETUP])*WQ408_RS)/demand_D420
+	}
+	case Otherwise {
+		condition	always
+		value		WQ420_best
+	}
+}
+
+goal no_fill_salinity_const {
+        lhs C422_REL_CC*WQ422(-1)+D408_OR_CC*WQ408_OR+D408_VC_CC*WQ408_VC+D408_RS*WQ408_RS+D406A_MS*WQ406A_MS+I424*WQ424_MOK
+  	/*case NoFillMeetStandard {
+    		condition	fill_switch < 0.5 .and. WQ420_MOK <= WQ420_target
+                rhs             (max_total_wqc + D406A_MS_est)*WQ420_target
+    		lhs<rhs 	penalty 0
+    	}*/
+  	case NoFillDeliverBestOrStandard {
+    		condition	fill_switch < 0.5
+                rhs             (max_total_wqc + D406A_MS_est)*max(WQ420_target,WQ420_bestMW)
+    		lhs<rhs 	penalty 0
+    	}
+  	case Otherwise {
+    		condition	always
+                rhs             (max_total_wqc + D406A_MS_est)*99999.
+    		lhs<rhs		penalty 0
+    	}
+}
+
+!If WQ421_est_1 <= WQ422_target1 and WQ420_est_1 <= WQ420_target then an LV filling opportunity might exist.
+!If D_ORVC_min < D408_ORVC_minmax then filling can occur at 1:1 ratio over range 0 to D408_ORVC_minmax - D_ORVC_min.
+!Once the second OR-VC intake is used, water quality at nodes 421 and 423 will begin degrading which will change the necessary mix at 420.
+!Need to determine if increase in C423 and decrease in D408_RS is necessary.  For now will simplify algorithm.
+
+!What is the maximum ORVC diversion where WQ421 <= WQ422_target1
+
+define D_ORVC_422_targ {
+	case NoFill {
+		condition	fill_switch < 0.5
+		value		9999.
+	}
+	case	AlwaysMeetTarg {
+		condition	WQ408_ORVC_max <= WQ422_target1
+		value		min(D408_OR_max + D408_VC_max, C421_max)
+	}
+	case	MixToTarg {
+		condition	WQ408_ORVC_min <= WQ422_target1
+		value		min(D408_ORVC_minmax*(WQ408_ORVC_max - WQ408_ORVC_min)/(WQ408_ORVC_max - WQ422_target1),D408_OR_max + D408_VC_max, C421_max)
+	}
+	case	MOKFill_NoORVC {
+		condition	always
+		value		0.
+	}
+}
+define D_ORVC_422_targ_ {alias D_ORVC_422_targ kind 'diversion-target' units 'cfs'}
+
+define WQ_ORVC_422_targ {
+	case NoFill {
+		condition	fill_switch < 0.5 .or. D_ORVC_422_targ < 0.1
+		value		WQ421_est_1
+	}
+	case otherwise {
+		condition	always
+		value		(min(D408_ORVC_minmax,D_ORVC_422_targ)*WQ408_ORVC_min + max(0.,D_ORVC_422_targ - D408_ORVC_minmax)*WQ408_ORVC_max)/D_ORVC_422_targ
+	}
+}
+
+define wq_orvc_422_trg_ {alias wq_orvc_422_targ kind 'inter-wq-calc' units 'mg/L'}
+
+define C423_D_422_targ {
+	case NoFill {
+		condition	fill_switch < 0.5
+		value		9999.
+	}
+	case RSMeetsStandard {
+		condition	WQ420_RSMS <= WQ420_target
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           (demand_D420*(WQ420_target - WQ408_RS) - D406A_MS_est*(WQ406A_MS-WQ408_RS)) /(WQ_ORVC_422_targ - WQ408_RS)
+	}
+}
+
+define C423_D_422_targ_ {alias C423_D_422_targ kind 'flow-split-target' units 'cfs'}
+
+define C422_F_422_targ {value max(0., D_ORVC_422_targ - C423_D_422_targ)}
+
+define C422_F_422_targ_ {alias C422_F_422_targ kind 'flow-split-target' units 'cfs'}
+
+goal lim_LVfill_byWQ {C422_FILL < C422_F_422_targ + C423_FILL}
+goal lim_D_ORVC_forFill {C421_TFR < D_ORVC_422_targ}
+
+!Mokelumne Intake operations logic.  First priority is to use water to increase LV storage and improve LV water quality.  This
+!is why C423_FILL is weighted highly.  LV storage can be maintained by using MOK water to maintain the CCWD delivery target instead of water in LV storage.
+!By December or if unable to meet delivery target, priority given to using MOK for delivery purposes.
+
+/*define lim_I424_HP {
+	case HighPriority {
+		condition	month == feb .or. WQ420_best > WQ420_target + 10 .or. lim_CVP_ann <= demand_D420 + lim_MOK_ann
+		value		9999.
+	}
+	case LowPriority {
+		condition	always
+		value		0.
+	}
+}
+
+goal set_lim_I424_HP {I424_HP < lim_I424_HP}
+*/
+
+!Route MOK water to LV unless it is a high priority diversion in which case it can go in the most beneficial direction.  This
+!constraint should be removed for the optimal MOK operation.
+
+goal route_MOK_div {
+	lhs	I424
+	case HighPriority {
+		condition	month == feb .or. min(WQ408_RS,WQ408_OR,WQ408_VC) > WQ420_target + 10. .or. lim_CVP_ann <= demand_D420 + lim_MOK_ann
+		rhs		9999.
+		lhs<rhs		penalty 0
+	}
+	case otherwise {
+		condition	always
+		rhs		C423_FILL
+		lhs<rhs		penalty 0
+	}
+}

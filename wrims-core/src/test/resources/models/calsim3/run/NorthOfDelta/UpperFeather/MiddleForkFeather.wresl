@@ -1,0 +1,59 @@
+/*
+MiddleForkFeather.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+Operation of Frenchman and Davis Reservoirs
+Upper Feather River Module
+
+Created A Draper M Bachman, MWH/Stantec, 06.14.17 
+ */
+ 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!! Frenchman Lake !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Estimate Frenchman Lake September carryover storage 
+define I_FRMAN_fcast {
+	case March {condition month==Mar sum(i=0,6) I_FRMAN(i)*cfs_taf(i)}
+	case otherwise {condition always value 0.}
+}
+
+define ER_FRMAN_fcast {
+	case March {condition month==Mar sum(i=0,6) ER_FRMAN(i)}
+	case otherwise {condition always value 0.}
+}
+define E_FRMAN_fcast {
+	case March {condition month==Mar value (ER_FRMAN_fcast/12)*A_FRMANlast/1000}
+	case otherwise {condition always value 0.}
+}
+
+define I_FRMAN_fcastDV {alias I_FRMAN_fcast kind 'FORECAST' units 'TAF'}
+define E_FRMAN_fcastDV {alias E_FRMAN_fcast kind 'FORECAST' units 'TAF'}
+
+define S_FRMAN_fcast {
+	case March {condition month==Mar value S_FRMAN(-1) + I_FRMAN_fcast - E_FRMAN_fcast - 12.} !assumed 12 TAF delivery; no IFR during this period
+	case otherwise {condition always value 0.}
+}
+
+define S_FRMAN_fcastDV {alias S_FRMAN_fcast kind 'FORECAST' units 'TAF'}
+
+!Target storage based on observed operation during sequence of dry years
+define FRMANSepStorageTarget   {value min(5.,min(S_FRMAN(prevSEP)-10.,S_FRMAN_fcast))}
+define FRMANSepStorageTargetDV {alias FRMANSepStorageTarget kind 'STORAGE-TARGET' units 'TAF'}
+
+
+define LCCWDContractMax {value 12.} !could be refined
+define LCCWDMonthDist {select LCCWDPatt from UF_MFFDelivery where month = month}
+
+goal setD_NLL016_LCCWD {D_NLL016_LCCWD < LCCWDContractMax*taf_cfs * LCCWDMonthDist}
+goal setR_LCCWD_MFF095	{R_LCCWD_MFF095 < 0.2*D_NLL016_LCCWD} !Guesstimate
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!! Lake Davis !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define PLMASContractMax {value 0.672} ! 0.6 MGD = 672 acre-feet/yr (City of Portola); Could be refined
+define PLMASMonthDist {select PLMASPatt from UF_MFFDelivery where month = month}
+
+goal setD_BGC002_PLMAS {D_BGC002_PLMAS < PLMASContractMax*taf_cfs * PLMASMonthDist}

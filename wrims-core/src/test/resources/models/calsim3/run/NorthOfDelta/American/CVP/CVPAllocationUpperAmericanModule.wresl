@@ -1,0 +1,43 @@
+!*********************************************************************************
+! CVP M&I allocation for Upper American River watershed module
+! A. Draper 09/2019
+!*********************************************************************************
+
+/*
+The CVP allocation is defined in common\cvp_dellogic\cvp_dellogic_sys\cvpcut_sys\cvpcut_sys.wresl
+
+! Final Percent Delivery for output
+define perdv_cvpag_sys { alias  perdel_cvpag_sys kind 'percent-delivery' units 'none'}
+define perdv_cvpmi_sys { alias  perdel_cvpmi_sys kind 'percent-delivery' units 'none'}
+define perdv_cvpex_sys { alias  perdel_cvpex_sys kind 'percent-delivery' units 'none'}
+define perdv_cvpsc_sys { alias  perdel_cvpsc_sys kind 'percent-delivery' units 'none'}
+define perdv_cvprf_sys { alias  perdel_cvprf_sys kind 'percent-delivery' units 'none'}
+
+The upper American module uses the variable PerDel_CVPMI_SYS in the initial simulation
+of diversion of CVP water from Folosm Lake.
+
+This is subsequnetly updated to the current timestep allocation in simulation of the Sacramento Valley.
+
+*/
+
+
+
+
+
+! CVP allocation - lagged by one month
+Define PerDV_CVPMI_SYS {std kind 'percent-delivery' units 'none'}
+Define PERDV_CVPMI_SYS_SV {timeseries kind 'percent-delivery' units 'none'}
+
+define PerDel_CVPMI_SYS {
+    	case FirstMonth {
+    		condition month == BgnMo .AND. wateryear == BgnWY
+    		value 1.0}
+    	case WatershedsOn {condition simulateSacramentoValley == 0 .and. simulateUpperAmerican ==1.
+    	        value PERDV_CVPMI_SYS_SV}
+    	case WatershedsOn {condition simulateSacramentoValley == 1 .and. simulateUpperAmerican ==1. ! Allocation lagged by one month in upper American module
+    	        value Perdv_CVPMI_SYS(-1)}
+    	case WatershedsOn {condition simulateSacramentoValley == 0 .and. simulateUpperAmerican ==0.
+    	        value 1.}
+    	case Other {
+    		condition always 
+    		value 1.}}

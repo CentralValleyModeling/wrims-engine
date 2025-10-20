@@ -1,0 +1,171 @@
+! WQ_Bound_SJR.wresl
+
+!This code bounds decision variables using monthly weighted solutions from previous cycles
+!Water quality release and remaining CAP calculations; final water quality
+!******************************************************************************************
+
+
+!WQ deficiency
+define wq_defdv {std kind 'flow-deficiency' units 'cfs'}
+goal setWQ_defdv {
+    lhs     WQ_defdv
+    case Oct_Mar {
+        condition month >= OCT .and. month <= MAR
+        rhs     WQ_MIN_defdv[SJR_WQ1] }
+    case April {
+        condition month  == apr
+        rhs     14.*WQ_MIN_defdv[SJR_WQ1]/30. + 16.*WQ_pulse_defdv[SJR_WQ2]/30. }
+    case MayOnly {
+        condition month  == may
+        rhs     15.*WQ_pulse_defdv[SJR_WQ2]/31. + 16.*WQ_MIN_defdv[SJR_WQ1]/31. }
+    case otherwise {
+        condition always
+        rhs     WQ_MIN_defdv[SJR_WQ1] }
+}
+
+define wq_red_defdv {std kind 'flow-deficiency' units 'cfs'}
+goal setWQ_red_defdv {
+    lhs     WQ_red_defdv
+    case Oct_Mar {
+        condition month >= OCT .and. month <= MAR
+        rhs     WQ_reduced_min_defdv[SJR_WQ1] }
+    case April {
+        condition month  == apr
+        rhs     14.*WQ_reduced_min_defdv[SJR_WQ1]/30. + 16.*WQ_reduced_pulse_defdv[SJR_WQ2]/30. }
+    case MayOnly {
+        condition month  == may
+        rhs     15.*WQ_reduced_pulse_defdv[SJR_WQ2]/31. + 16.*WQ_reduced_min_defdv[SJR_WQ1]/31. }
+    case otherwise {
+        condition always
+        rhs     WQ_reduced_min_defdv[SJR_WQ1] }
+}
+
+! calculate monthly release from pulse and non-pulse results
+define WQreleasecycle6 {
+    case April {
+        condition month  == apr
+        value     14.*C_MELONwq[SJR_WQ1]/30. + 16.*C_MELONwq[SJR_WQ2]/30. }
+    case MayOnly {
+        condition month  == may
+        value     15.*C_MELONwq[SJR_WQ2]/31. + 16.*C_MELONwq[SJR_WQ1]/31. }
+    case otherwise {
+        condition always
+        value     C_MELONwq[SJR_WQ1] }
+          }
+goal capC_MELONwqcycle6 { C_MELONwq = WQreleasecycle6  }
+
+define remWQrelCAPsv {   !TAF; state variable to be  written to a decision variable
+    case march {
+        condition   month == mar
+        value     max(0.,WQRelCap - C_MELONwq[SJR_WQ1]*cfs_TAF) }
+    case April {
+        condition month == apr
+        value     max(0.,remWQrelCap(-1) - 14.*C_MELONwq[SJR_WQ1]*cfs_TAF/30. - 16.*C_MELONwq[SJR_WQ2]*cfs_TAF/30.) }
+    case MayOnly {
+        condition month == may
+        value     max(0.,remWQrelCap(-1) - 15.*C_MELONwq[SJR_WQ2]*cfs_TAF/31. - 16.*C_MELONwq[SJR_WQ1]*cfs_TAF/31.) }
+    case Otherwise {
+        condition   always
+        value     max(0.,remWQrelCap(-1) - C_MELONwq[SJR_WQ1]*cfs_TAF) }
+        }
+goal setremWQrelCap { remWQrelCap = remWQrelCAPsv }
+
+
+!Final Vernalis Water Quality
+
+define VERNWQNONPULSE { 
+    case NonPulseNonDO {
+        condition month <= may
+		value max((C_SJR070[SJR_WQ1]*
+			max(0., regEC_intercept_SJR070 *
+			exp(C_BCK024[SJR_WQ1] * regEC_C_BCK024_SJR070) *
+			exp(C_MCD005[SJR_WQ1] * regEC_C_MCD005_SJR070) * 
+			exp(C_MSN005[SJR_WQ1] * regEC_C_MSN005_SJR070) *
+			exp(C_SJR096[SJR_WQ1] * regEC_C_SJR096_SJR070) *
+			exp(C_TUO017[SJR_WQ1] * regEC_C_TUO017_SJR070) *
+			exp(C_SJR070Diff[SJR_WQ1] * regEC_SJR070Diff) 
+			) +
+			C_MELONwq[SJR_WQ1]*NewMelonAssumedECDV[SJR_WQ1])/
+			(C_SJR070[SJR_WQ1]+C_MELONwq[SJR_WQ1]-0.0001), 0.0)
+		}
+	case NonPulseDO {  !@jmg 2017.11.07 - removed [VAMP_AND_DO] references below
+        condition always
+		value max((C_SJR070[SJR_WQ1]*
+			max(0., regEC_intercept_SJR070  *
+			exp(C_BCK024[SJR_WQ1] * regEC_C_BCK024_SJR070) *
+			exp(C_MCD005[SJR_WQ1] * regEC_C_MCD005_SJR070) * 
+			exp(C_MSN005[SJR_WQ1] * regEC_C_MSN005_SJR070) *
+			exp(C_SJR096[SJR_WQ1] * regEC_C_SJR096_SJR070) *
+			exp(C_TUO017[SJR_WQ1] * regEC_C_TUO017_SJR070) *
+			exp(C_SJR070Diff[SJR_WQ1] * regEC_SJR070Diff) 
+			) +
+			C_MELONwq[SJR_WQ1]*NewMelonAssumedECDV[SJR_WQ1])/
+			(C_SJR070[SJR_WQ1]+C_MELONwq[SJR_WQ1]-0.0001), 0.0)
+             }
+}
+
+! ************************************************************************
+
+define VERNWQPULSE {  !@jmg 2017.11.07 - changed [VAMP_AND_DO] to [SJR_WQ2]
+    case AprMay {
+        condition month==apr .or. month==may
+		value max((C_SJR070[SJR_WQ2]*                             !@jmg 2018.03.07 - calculating
+			max(0., regEC_intercept_SJR070 *                   !   the EC at Vernalis assuming
+			exp(C_BCK024[SJR_WQ2] * regEC_C_BCK024_SJR070) *       !  an average of the 
+			exp(C_MCD005[SJR_WQ2] * regEC_C_MCD005_SJR070) *       ! estimated Vernalis EC and the 
+			exp(C_MSN005[SJR_WQ2] * regEC_C_MSN005_SJR070) *       ! New Melones EC, weighted by the 
+			exp(C_SJR096[SJR_WQ2] * regEC_C_SJR096_SJR070) *       ! flows at Vernalis and New Melones 
+			exp(C_TUO017[SJR_WQ2] * regEC_C_TUO017_SJR070) *
+			exp(C_SJR070Diff[SJR_WQ2] * regEC_SJR070Diff)          ! water quality release
+			) +
+			C_MELONwq[SJR_WQ2]*NewMelonAssumedECDV[SJR_WQ2])/
+			(C_SJR070[SJR_WQ2]+C_MELONwq[SJR_WQ2]-0.0001), 0.0)		
+		              }
+     case otherwise {
+               condition always
+               value   VERNWQNONPULSE}
+}
+
+! Weight average the April and May flows
+! set lower bound of VernWQfinal as 95 us/cm 
+! set upper bound of VernWQfinal as 1000 us/cm when Vernalis flow (C_SJR070) higher than 2000 cfs and for non-pulse months (Not Apr, May, Oct)
+! Based on historical Vernalis EC from Aug, 1999 Aug to Sep, 2015, if Vernalis flow higher than 2000 cfs, EC is lower 1000 us/cm. 
+! The max historical EC is 983 us/cm at Feb, 2015 when flow is 912 cfs. 
+define VernWQfinalLowerBound {value   95.}
+define VernWQfinalUpperBound {
+  case Apr {
+	condition   abs(month-apr) < 0.001 
+	value 9999.}
+  case May {
+	condition   abs(month-may) < 0.001
+	value 9999.}
+  case Oct {
+	condition   abs(month-oct) < 0.001 
+	value 9999.}	
+  case Bound {
+  	condition C_SJR070[SJR_WQ2] > 2000.
+  	value 1000.}
+  case nobound {
+  	condition always
+  	value 9999.} 	
+}
+
+define VernWQfinalSV { 
+     case April {
+          condition month == apr
+          value     min(VernWQfinalUpperBound,max(VernWQfinalLowerBound,(14.*VernWQnonpulse/30. + 16.*VernWQpulse/30.))) }
+     case MayOnly {
+          condition month == may
+          value     min(VernWQfinalUpperBound,max(VernWQfinalLowerBound,(15.*VernWQpulse/31. + 16.*VernWQnonpulse/31.))) }
+     case otherwise {
+          condition always
+          value     min(VernWQfinalUpperBound,max(VernWQfinalLowerBound,VernWQnonpulse))}
+}
+
+goal setVernWQfinal {VernWQfinal = VernWQfinalSV}
+define VERNWQPULSEdv { alias VERNWQPULSE kind 'Salinity-EC' units 'umhos/cm'}
+define VERNWQNONPULSEdv { alias VERNWQNONPULSE kind 'Salinity-EC' units 'umhos/cm'}
+define VernWQfinalLowerBounddv { alias VernWQfinalLowerBound kind 'Salinity-EC' units 'umhos/cm'}
+define VernWQfinalUpperBounddv { alias VernWQfinalUpperBound kind 'Salinity-EC' units 'umhos/cm'}
+
+

@@ -1,0 +1,1044 @@
+! VA_flow_calcs.wresl
+
+!*********************************************************************************************
+! Calculate disposition of SJR flows from Millerton Flood Release and Restoration Release
+! As part of this track Millerton flood releases, other (main) releases, and flow from other sources that leave each node.  
+! Below Mendota Pool tracking switches from main releases to SJRR flows
+! Two possible approaches to doing these calculations when there is a net depletion at a node.
+! (1) Distribute depletion proportionally
+! (2) Have a priority order of depletions, i.e. depletions come from other flow first, other (main) releases next, and flood releases next, for example
+! Do calculations both ways for now to evaluate the difference this makes, _1 versions use the priority method
+
+!************* Node 265
+! Connectivity *** goal continuitySJR265       {C_MLRTN + I_SJR265 - C_SJR265            = 0.}  
+!Net change to distribute
+define SJR265_netchg {value I_SJR265} !Net inflow/diversion/accretion/depletion other than river inflow
+define Mlrtn_fldrel_Mlrtn {value C_MLRTNA[WHEELJPOD] + C_MLRTNF[WHEELJPOD]}
+define Mlrtn_mainrel_Mlrtn {value C_MLRTNM[WHEELJPOD] }
+define Otherflow_Mlrtn {value 0.}
+!proportional calcs
+define Totalflow_Mlrtn {value Mlrtn_fldrel_Mlrtn + Mlrtn_mainrel_Mlrtn + Otherflow_Mlrtn}
+define Fldrel_proportion_Mlrtn {case posflow { condition Totalflow_Mlrtn > 0. value Mlrtn_fldrel_Mlrtn/Totalflow_Mlrtn} case otherwise { condition always value 0.}}
+define Mainrel_proportion_Mlrtn {case posflow { condition Totalflow_Mlrtn > 0. value Mlrtn_mainrel_Mlrtn/Totalflow_Mlrtn} case otherwise { condition always value 0.}}
+define Otherflow_proportion_Mlrtn {case posflow { condition Totalflow_Mlrtn > 0. value Otherflow_Mlrtn/Totalflow_Mlrtn} case otherwise { condition always value 0.}}
+define SJR265_otherflow {
+        case depletion {
+        condition SJR265_netchg < 0.
+        value max(0., Otherflow_Mlrtn + (SJR265_netchg * Otherflow_proportion_Mlrtn))}
+    case otherwise {
+        condition always
+        value Otherflow_Mlrtn + SJR265_netchg}
+}
+define SJR265_unmet1 {value min(0.,(SJR265_netchg * Otherflow_proportion_Mlrtn) + Otherflow_Mlrtn)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR265_Mlrtn_mainrel {
+        case depletion {
+        condition SJR265_netchg < 0.
+        value max(0., Mlrtn_mainrel_Mlrtn + (SJR265_netchg * Mainrel_proportion_Mlrtn) + SJR265_unmet1)}
+    case otherwise {
+        condition always
+        value Mlrtn_mainrel_Mlrtn}
+}
+define SJR265_unmet2 {value min(0.,(SJR265_netchg * Mainrel_proportion_Mlrtn) + SJR265_unmet1 + Mlrtn_mainrel_Mlrtn)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR265_Mlrtn_fldrel {
+    case depletion {
+        condition SJR265_netchg < 0.
+        value max(0.,Mlrtn_fldrel_Mlrtn + (SJR265_netchg * Fldrel_proportion_Mlrtn) + SJR265_unmet2)}
+    case otherwise {
+        condition always
+        value Mlrtn_fldrel_Mlrtn}
+}
+!priority calcs (same as above but without proportions)
+define SJR265_otherflow_1 {
+        case depletion {
+        condition SJR265_netchg < 0.
+        value max(0., Otherflow_Mlrtn + SJR265_netchg)}
+    case otherwise {
+        condition always
+        value Otherflow_Mlrtn + SJR265_netchg}
+}
+define SJR265_unmet1_1 {value min(0.,SJR265_netchg + Otherflow_Mlrtn)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR265_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR265_netchg < 0.
+        value max(0., Mlrtn_mainrel_Mlrtn + SJR265_unmet1_1)}
+    case otherwise {
+        condition always
+        value Mlrtn_mainrel_Mlrtn}
+}
+define SJR265_unmet2_1 {value min(0.,SJR265_unmet1_1 + Mlrtn_mainrel_Mlrtn)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR265_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR265_netchg < 0.
+        value max(0.,Mlrtn_fldrel_Mlrtn + SJR265_unmet2_1)}
+    case otherwise {
+        condition always
+        value Mlrtn_fldrel_Mlrtn}
+}
+define SJR265_otherflow_dv {alias SJR265_otherflow kind 'alias' units 'cfs'}
+define SJR265_Mlrtn_mainrel_dv {alias SJR265_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR265_Mlrtn_fldrel_dv {alias SJR265_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR265_otherflow_1_dv {alias SJR265_otherflow_1 kind 'alias' units 'cfs'}
+define SJR265_Mlrtn_mainrel_1_dv {alias SJR265_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR265_Mlrtn_fldrel_1_dv {alias SJR265_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 263
+! Connectivity *** goal continuitySJR263       {C_SJR265 + SG54_SJR263_7 - C_SJR263     = 0.} 
+!Net change to distribute
+define SJR263_netchg {value SG54_SJR263_7[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR265 {value SJR265_Mlrtn_fldrel + SJR265_Mlrtn_mainrel + SJR265_Otherflow}
+define Fldrel_proportion_SJR265 {case posflow { condition Totalflow_SJR265 > 0. value SJR265_Mlrtn_fldrel/Totalflow_SJR265} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR265 {case posflow { condition Totalflow_SJR265 > 0. value SJR265_Mlrtn_mainrel/Totalflow_SJR265} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR265 {case posflow { condition Totalflow_SJR265 > 0. value SJR265_otherflow/Totalflow_SJR265} case otherwise { condition always value 0.}}
+define SJR263_otherflow {
+        case depletion {
+        condition SJR263_netchg < 0.
+        value max(0., SJR265_otherflow + (SJR263_netchg * Otherflow_proportion_SJR265))}
+    case otherwise {
+        condition always
+        value SJR265_otherflow + SJR263_netchg}
+}
+define SJR263_unmet1 {value min(0.,(SJR263_netchg * Otherflow_proportion_SJR265) + SJR265_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR263_Mlrtn_mainrel {
+        case depletion {
+        condition SJR263_netchg < 0.
+        value max(0., SJR265_Mlrtn_mainrel + (SJR263_netchg * Mainrel_proportion_SJR265) + SJR263_unmet1)}
+    case otherwise {
+        condition always
+        value SJR265_Mlrtn_mainrel}
+}
+define SJR263_unmet2 {value min(0.,(SJR263_netchg * Mainrel_proportion_SJR265) + SJR263_unmet1 + SJR265_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR263_Mlrtn_fldrel {
+    case depletion {
+        condition SJR263_netchg < 0.
+        value max(0.,SJR265_Mlrtn_fldrel + (SJR263_netchg * Fldrel_proportion_SJR265) + SJR263_unmet2)}
+    case otherwise {
+        condition always
+        value SJR265_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR263_otherflow_1 {
+        case depletion {
+        condition SJR263_netchg < 0.
+        value max(0., SJR265_otherflow_1 + SJR263_netchg)}
+    case otherwise {
+        condition always
+        value SJR265_otherflow_1 + SJR263_netchg}
+}
+define SJR263_unmet1_1 {value min(0.,SJR263_netchg + SJR265_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR263_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR263_netchg < 0.
+        value max(0., SJR265_Mlrtn_mainrel_1 + SJR263_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR265_Mlrtn_mainrel_1}
+}
+define SJR263_unmet2_1 {value min(0.,SJR263_unmet1_1 + SJR265_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR263_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR263_netchg < 0.
+        value max(0.,SJR265_Mlrtn_fldrel_1 + SJR263_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR265_Mlrtn_fldrel_1}
+}
+define SJR263_otherflow_dv {alias SJR263_otherflow kind 'alias' units 'cfs'}
+define SJR263_Mlrtn_mainrel_dv {alias SJR263_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR263_Mlrtn_fldrel_dv {alias SJR263_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR263_otherflow_1_dv {alias SJR263_otherflow_1 kind 'alias' units 'cfs'}
+define SJR263_Mlrtn_mainrel_1_dv {alias SJR263_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR263_Mlrtn_fldrel_1_dv {alias SJR263_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 258
+! Connectivity ***  goal continuitySJR258       {C_SJR263 + I_SJR258 - C_SJR258        = 0.}   
+define SJR258_netchg {value I_SJR258} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR263 {value SJR263_Mlrtn_fldrel + SJR263_Mlrtn_mainrel + SJR263_Otherflow}
+define Fldrel_proportion_SJR263 {case posflow { condition Totalflow_SJR263 > 0. value SJR263_Mlrtn_fldrel/Totalflow_SJR263} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR263 {case posflow { condition Totalflow_SJR263 > 0. value SJR263_Mlrtn_mainrel/Totalflow_SJR263} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR263 {case posflow { condition Totalflow_SJR263 > 0. value SJR263_otherflow/Totalflow_SJR263} case otherwise { condition always value 0.}}
+define SJR258_otherflow {
+        case depletion {
+        condition SJR258_netchg < 0.
+        value max(0., SJR263_otherflow + (SJR258_netchg * Otherflow_proportion_SJR263))}
+    case otherwise {
+        condition always
+        value SJR263_otherflow + SJR258_netchg}
+}
+define SJR258_unmet1 {value min(0.,(SJR258_netchg * Otherflow_proportion_SJR263) + SJR263_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR258_Mlrtn_mainrel {
+        case depletion {
+        condition SJR258_netchg < 0.
+        value max(0., SJR263_Mlrtn_mainrel + (SJR258_netchg * Mainrel_proportion_SJR263) + SJR258_unmet1)}
+    case otherwise {
+        condition always
+        value SJR263_Mlrtn_mainrel}
+}
+define SJR258_unmet2 {value min(0.,(SJR258_netchg * Mainrel_proportion_SJR263) + SJR258_unmet1 + SJR263_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR258_Mlrtn_fldrel {
+    case depletion {
+        condition SJR258_netchg < 0.
+        value max(0.,SJR263_Mlrtn_fldrel + (SJR258_netchg * Fldrel_proportion_SJR263) + SJR258_unmet2)}
+    case otherwise {
+        condition always
+        value SJR263_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR258_otherflow_1 {
+        case depletion {
+        condition SJR258_netchg < 0.
+        value max(0., SJR263_otherflow_1 + SJR258_netchg)}
+    case otherwise {
+        condition always
+        value SJR263_otherflow_1 + SJR258_netchg}
+}
+define SJR258_unmet1_1 {value min(0.,SJR258_netchg + SJR263_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR258_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR258_netchg < 0.
+        value max(0., SJR263_Mlrtn_mainrel_1 + SJR258_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR263_Mlrtn_mainrel_1}
+}
+define SJR258_unmet2_1 {value min(0.,SJR258_unmet1_1 + SJR263_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR258_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR258_netchg < 0.
+        value max(0.,SJR263_Mlrtn_fldrel_1 + SJR258_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR263_Mlrtn_fldrel_1}
+}
+define SJR258_otherflow_dv {alias SJR258_otherflow kind 'alias' units 'cfs'}
+define SJR258_Mlrtn_mainrel_dv {alias SJR258_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR258_Mlrtn_fldrel_dv {alias SJR258_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR258_otherflow_1_dv {alias SJR258_otherflow_1 kind 'alias' units 'cfs'}
+define SJR258_Mlrtn_mainrel_1_dv {alias SJR258_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR258_Mlrtn_fldrel_1_dv {alias SJR258_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 256
+! Connectivity *** goal continuitySJR256       {C_SJR258  + SG55_SJR256_7 - C_SJR256    = 0.} 
+define SJR256_netchg {value SG55_SJR256_7[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR258 {value SJR258_Mlrtn_fldrel + SJR258_Mlrtn_mainrel + SJR258_Otherflow}
+define Fldrel_proportion_SJR258 {case posflow { condition Totalflow_SJR258 > 0. value SJR258_Mlrtn_fldrel/Totalflow_SJR258} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR258 {case posflow { condition Totalflow_SJR258 > 0. value SJR258_Mlrtn_mainrel/Totalflow_SJR258} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR258 {case posflow { condition Totalflow_SJR258 > 0. value SJR258_otherflow/Totalflow_SJR258} case otherwise { condition always value 0.}}
+define SJR256_otherflow {
+        case depletion {
+        condition SJR256_netchg < 0.
+        value max(0., SJR258_otherflow + (SJR256_netchg * Otherflow_proportion_SJR258))}
+    case otherwise {
+        condition always
+        value SJR258_otherflow + SJR256_netchg}
+}
+define SJR256_unmet1 {value min(0.,(SJR256_netchg * Otherflow_proportion_SJR258) + SJR258_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR256_Mlrtn_mainrel {
+        case depletion {
+        condition SJR256_netchg < 0.
+        value max(0., SJR258_Mlrtn_mainrel + (SJR256_netchg * Mainrel_proportion_SJR258) + SJR256_unmet1)}
+    case otherwise {
+        condition always
+        value SJR258_Mlrtn_mainrel}
+}
+define SJR256_unmet2 {value min(0.,(SJR256_netchg * Mainrel_proportion_SJR258) + SJR256_unmet1 + SJR258_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR256_Mlrtn_fldrel {
+    case depletion {
+        condition SJR256_netchg < 0.
+        value max(0.,SJR258_Mlrtn_fldrel + (SJR256_netchg * Fldrel_proportion_SJR258) + SJR256_unmet2)}
+    case otherwise {
+        condition always
+        value SJR258_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR256_otherflow_1 {
+        case depletion {
+        condition SJR256_netchg < 0.
+        value max(0., SJR258_otherflow_1 + SJR256_netchg)}
+    case otherwise {
+        condition always
+        value SJR258_otherflow_1 + SJR256_netchg}
+}
+define SJR256_unmet1_1 {value min(0.,SJR256_netchg + SJR258_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR256_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR256_netchg < 0.
+        value max(0., SJR258_Mlrtn_mainrel_1 + SJR256_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR258_Mlrtn_mainrel_1}
+}
+define SJR256_unmet2_1 {value min(0.,SJR256_unmet1_1 + SJR258_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR256_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR256_netchg < 0.
+        value max(0.,SJR258_Mlrtn_fldrel_1 + SJR256_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR258_Mlrtn_fldrel_1}
+}
+define SJR256_otherflow_dv {alias SJR256_otherflow kind 'alias' units 'cfs'}
+define SJR256_Mlrtn_mainrel_dv {alias SJR256_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR256_Mlrtn_fldrel_dv {alias SJR256_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR256_otherflow_1_dv {alias SJR256_otherflow_1 kind 'alias' units 'cfs'}
+define SJR256_Mlrtn_mainrel_1_dv {alias SJR256_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR256_Mlrtn_fldrel_1_dv {alias SJR256_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 249
+! Connectivity *** goal continuitySJR249       {C_SJR256  + SG56_SJR249_7 - C_SJR249    = 0.} 
+define SJR249_netchg {value SG56_SJR249_7[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR256 {value SJR256_Mlrtn_fldrel + SJR256_Mlrtn_mainrel + SJR256_Otherflow}
+define Fldrel_proportion_SJR256 {case posflow { condition Totalflow_SJR256 > 0. value SJR256_Mlrtn_fldrel/Totalflow_SJR256} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR256 {case posflow { condition Totalflow_SJR256 > 0. value SJR256_Mlrtn_mainrel/Totalflow_SJR256} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR256 {case posflow { condition Totalflow_SJR256 > 0. value SJR256_otherflow/Totalflow_SJR256} case otherwise { condition always value 0.}}
+define SJR249_otherflow {
+        case depletion {
+        condition SJR249_netchg < 0.
+        value max(0., SJR256_otherflow + (SJR249_netchg * Otherflow_proportion_SJR256))}
+    case otherwise {
+        condition always
+        value SJR256_otherflow + SJR249_netchg}
+}
+define SJR249_unmet1 {value min(0.,(SJR249_netchg * Otherflow_proportion_SJR256) + SJR256_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR249_Mlrtn_mainrel {
+        case depletion {
+        condition SJR249_netchg < 0.
+        value max(0., SJR256_Mlrtn_mainrel + (SJR249_netchg * Mainrel_proportion_SJR256) + SJR249_unmet1)}
+    case otherwise {
+        condition always
+        value SJR256_Mlrtn_mainrel}
+}
+define SJR249_unmet2 {value min(0.,(SJR249_netchg * Mainrel_proportion_SJR256) + SJR249_unmet1 + SJR256_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR249_Mlrtn_fldrel {
+    case depletion {
+        condition SJR249_netchg < 0.
+        value max(0.,SJR256_Mlrtn_fldrel + (SJR249_netchg * Fldrel_proportion_SJR256) + SJR249_unmet2)}
+    case otherwise {
+        condition always
+        value SJR256_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR249_otherflow_1 {
+        case depletion {
+        condition SJR249_netchg < 0.
+        value max(0., SJR256_otherflow_1 + SJR249_netchg)}
+    case otherwise {
+        condition always
+        value SJR256_otherflow_1 + SJR249_netchg}
+}
+define SJR249_unmet1_1 {value min(0.,SJR249_netchg + SJR256_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR249_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR249_netchg < 0.
+        value max(0., SJR256_Mlrtn_mainrel_1 + SJR249_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR256_Mlrtn_mainrel_1}
+}
+define SJR249_unmet2_1 {value min(0.,SJR249_unmet1_1 + SJR256_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR249_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR249_netchg < 0.
+        value max(0.,SJR256_Mlrtn_fldrel_1 + SJR249_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR256_Mlrtn_fldrel_1}
+}
+define SJR249_otherflow_dv {alias SJR249_otherflow kind 'alias' units 'cfs'}
+define SJR249_Mlrtn_mainrel_dv {alias SJR249_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR249_Mlrtn_fldrel_dv {alias SJR249_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR249_otherflow_1_dv {alias SJR249_otherflow_1 kind 'alias' units 'cfs'}
+define SJR249_Mlrtn_mainrel_1_dv {alias SJR249_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR249_Mlrtn_fldrel_1_dv {alias SJR249_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 242
+! Connectivity *** goal continuitySJR242       {C_SJR249 + SG57_SJR242_7 - C_SJR242          = 0.}  
+define SJR242_netchg {value SG57_SJR242_7[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR249 {value SJR249_Mlrtn_fldrel + SJR249_Mlrtn_mainrel + SJR249_Otherflow}
+define Fldrel_proportion_SJR249 {case posflow { condition Totalflow_SJR249 > 0. value SJR249_Mlrtn_fldrel/Totalflow_SJR249} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR249 {case posflow { condition Totalflow_SJR249 > 0. value SJR249_Mlrtn_mainrel/Totalflow_SJR249} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR249 {case posflow { condition Totalflow_SJR249 > 0. value SJR249_otherflow/Totalflow_SJR249} case otherwise { condition always value 0.}}
+define SJR242_otherflow {
+        case depletion {
+        condition SJR242_netchg < 0.
+        value max(0., SJR249_otherflow + (SJR242_netchg * Otherflow_proportion_SJR249))}
+    case otherwise {
+        condition always
+        value SJR249_otherflow + SJR242_netchg}
+}
+define SJR242_unmet1 {value min(0.,(SJR242_netchg * Otherflow_proportion_SJR249) + SJR249_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR242_Mlrtn_mainrel {
+        case depletion {
+        condition SJR242_netchg < 0.
+        value max(0., SJR249_Mlrtn_mainrel + (SJR242_netchg * Mainrel_proportion_SJR249) + SJR242_unmet1)}
+    case otherwise {
+        condition always
+        value SJR249_Mlrtn_mainrel}
+}
+define SJR242_unmet2 {value min(0.,(SJR242_netchg * Mainrel_proportion_SJR249) + SJR242_unmet1 + SJR249_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR242_Mlrtn_fldrel {
+    case depletion {
+        condition SJR242_netchg < 0.
+        value max(0.,SJR249_Mlrtn_fldrel + (SJR242_netchg * Fldrel_proportion_SJR249) + SJR242_unmet2)}
+    case otherwise {
+        condition always
+        value SJR249_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR242_otherflow_1 {
+        case depletion {
+        condition SJR242_netchg < 0.
+        value max(0., SJR249_otherflow_1 + SJR242_netchg)}
+    case otherwise {
+        condition always
+        value SJR249_otherflow_1 + SJR242_netchg}
+}
+define SJR242_unmet1_1 {value min(0.,SJR242_netchg + SJR249_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR242_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR242_netchg < 0.
+        value max(0., SJR249_Mlrtn_mainrel_1 + SJR242_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR249_Mlrtn_mainrel_1}
+}
+define SJR242_unmet2_1 {value min(0.,SJR242_unmet1_1 + SJR249_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR242_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR242_netchg < 0.
+        value max(0.,SJR249_Mlrtn_fldrel_1 + SJR242_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR249_Mlrtn_fldrel_1}
+}
+define SJR242_otherflow_dv {alias SJR242_otherflow kind 'alias' units 'cfs'}
+define SJR242_Mlrtn_mainrel_dv {alias SJR242_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR242_Mlrtn_fldrel_dv {alias SJR242_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR242_otherflow_1_dv {alias SJR242_otherflow_1 kind 'alias' units 'cfs'}
+define SJR242_Mlrtn_mainrel_1_dv {alias SJR242_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR242_Mlrtn_fldrel_1_dv {alias SJR242_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 235
+! Connectivity *** goal continuitySJR235       {C_SJR242  + SG58_SJR235_7 + R_64_PA1_SJR235 - C_SJR235         = 0.} 
+define SJR235_netchg {value SG58_SJR235_7[WHEELJPOD] + R_64_PA1_SJR235[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR242 {value SJR242_Mlrtn_fldrel + SJR242_Mlrtn_mainrel + SJR242_Otherflow}
+define Fldrel_proportion_SJR242 {case posflow { condition Totalflow_SJR242 > 0. value SJR242_Mlrtn_fldrel/Totalflow_SJR242} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR242 {case posflow { condition Totalflow_SJR242 > 0. value SJR242_Mlrtn_mainrel/Totalflow_SJR242} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR242 {case posflow { condition Totalflow_SJR242 > 0. value SJR242_otherflow/Totalflow_SJR242} case otherwise { condition always value 0.}}
+define SJR235_otherflow {
+        case depletion {
+        condition SJR235_netchg < 0.
+        value max(0., SJR242_otherflow + (SJR235_netchg * Otherflow_proportion_SJR242))}
+    case otherwise {
+        condition always
+        value SJR242_otherflow + SJR235_netchg}
+}
+define SJR235_unmet1 {value min(0.,(SJR235_netchg * Otherflow_proportion_SJR242) + SJR242_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR235_Mlrtn_mainrel {
+        case depletion {
+        condition SJR235_netchg < 0.
+        value max(0., SJR242_Mlrtn_mainrel + (SJR235_netchg * Mainrel_proportion_SJR242) + SJR235_unmet1)}
+    case otherwise {
+        condition always
+        value SJR242_Mlrtn_mainrel}
+}
+define SJR235_unmet2 {value min(0.,(SJR235_netchg * Mainrel_proportion_SJR242) + SJR235_unmet1 + SJR242_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR235_Mlrtn_fldrel {
+    case depletion {
+        condition SJR235_netchg < 0.
+        value max(0.,SJR242_Mlrtn_fldrel + (SJR235_netchg * Fldrel_proportion_SJR242) + SJR235_unmet2)}
+    case otherwise {
+        condition always
+        value SJR242_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR235_otherflow_1 {
+        case depletion {
+        condition SJR235_netchg < 0.
+        value max(0., SJR242_otherflow_1 + SJR235_netchg)}
+    case otherwise {
+        condition always
+        value SJR242_otherflow_1 + SJR235_netchg}
+}
+define SJR235_unmet1_1 {value min(0.,SJR235_netchg + SJR242_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR235_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR235_netchg < 0.
+        value max(0., SJR242_Mlrtn_mainrel_1 + SJR235_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR242_Mlrtn_mainrel_1}
+}
+define SJR235_unmet2_1 {value min(0.,SJR235_unmet1_1 + SJR242_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR235_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR235_netchg < 0.
+        value max(0.,SJR242_Mlrtn_fldrel_1 + SJR235_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR242_Mlrtn_fldrel_1}
+}
+define SJR235_otherflow_dv {alias SJR235_otherflow kind 'alias' units 'cfs'}
+define SJR235_Mlrtn_mainrel_dv {alias SJR235_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR235_Mlrtn_fldrel_dv {alias SJR235_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR235_otherflow_1_dv {alias SJR235_otherflow_1 kind 'alias' units 'cfs'}
+define SJR235_Mlrtn_mainrel_1_dv {alias SJR235_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR235_Mlrtn_fldrel_1_dv {alias SJR235_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 227
+! Connectivity *** goal continuitySJR227       {C_SJR235  + SR_64_SJR227 + SG59_SJR227_7 - D_SJR227_64_PA3 - C_SJR227 + TD_SJR227_059 = 0.} 
+define SJR227_netchg {value SR_64_SJR227[WHEELJPOD] + SG59_SJR227_7[WHEELJPOD] - D_SJR227_64_PA3[WHEELJPOD] + TD_SJR227_059[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR235 {value SJR235_Mlrtn_fldrel + SJR235_Mlrtn_mainrel + SJR235_Otherflow}
+define Fldrel_proportion_SJR235 {case posflow { condition Totalflow_SJR235 > 0. value SJR235_Mlrtn_fldrel/Totalflow_SJR235} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR235 {case posflow { condition Totalflow_SJR235 > 0. value SJR235_Mlrtn_mainrel/Totalflow_SJR235} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR235 {case posflow { condition Totalflow_SJR235 > 0. value SJR235_otherflow/Totalflow_SJR235} case otherwise { condition always value 0.}}
+define SJR227_otherflow {
+        case depletion {
+        condition SJR227_netchg < 0.
+        value max(0., SJR235_otherflow + (SJR227_netchg * Otherflow_proportion_SJR235))}
+    case otherwise {
+        condition always
+        value SJR235_otherflow + SJR227_netchg}
+}
+define SJR227_unmet1 {value min(0.,(SJR227_netchg * Otherflow_proportion_SJR235) + SJR235_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR227_Mlrtn_mainrel {
+        case depletion {
+        condition SJR227_netchg < 0.
+        value max(0., SJR235_Mlrtn_mainrel + (SJR227_netchg * Mainrel_proportion_SJR235) + SJR227_unmet1)}
+    case otherwise {
+        condition always
+        value SJR235_Mlrtn_mainrel}
+}
+define SJR227_unmet2 {value min(0.,(SJR227_netchg * Mainrel_proportion_SJR235) + SJR227_unmet1 + SJR235_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR227_Mlrtn_fldrel {
+    case depletion {
+        condition SJR227_netchg < 0.
+        value max(0.,SJR235_Mlrtn_fldrel + (SJR227_netchg * Fldrel_proportion_SJR235) + SJR227_unmet2)}
+    case otherwise {
+        condition always
+        value SJR235_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR227_otherflow_1 {
+        case depletion {
+        condition SJR227_netchg < 0.
+        value max(0., SJR235_otherflow_1 + SJR227_netchg)}
+    case otherwise {
+        condition always
+        value SJR235_otherflow_1 + SJR227_netchg}
+}
+define SJR227_unmet1_1 {value min(0.,SJR227_netchg + SJR235_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR227_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR227_netchg < 0.
+        value max(0., SJR235_Mlrtn_mainrel_1 + SJR227_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR235_Mlrtn_mainrel_1}
+}
+define SJR227_unmet2_1 {value min(0.,SJR227_unmet1_1 + SJR235_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR227_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR227_netchg < 0.
+        value max(0.,SJR235_Mlrtn_fldrel_1 + SJR227_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR235_Mlrtn_fldrel_1}
+}
+define SJR227_otherflow_dv {alias SJR227_otherflow kind 'alias' units 'cfs'}
+define SJR227_Mlrtn_mainrel_dv {alias SJR227_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR227_Mlrtn_fldrel_dv {alias SJR227_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR227_otherflow_1_dv {alias SJR227_otherflow_1 kind 'alias' units 'cfs'}
+define SJR227_Mlrtn_mainrel_1_dv {alias SJR227_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR227_Mlrtn_fldrel_1_dv {alias SJR227_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 225
+! Connectivity *** goal continuitySJR225       {C_SJR227 - C_SJR225                 = 0.} 
+! No additional tracking needed
+
+!************* Node 221
+! Connectivity *** goal continuitySJR221       {C_SJR225 + SG60_SJR221_7 - C_SJR221         = 0.}  
+define SJR221_netchg {value SG60_SJR221_7[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR227 {value SJR227_Mlrtn_fldrel + SJR227_Mlrtn_mainrel + SJR227_Otherflow}
+define Fldrel_proportion_SJR227 {case posflow { condition Totalflow_SJR227 > 0. value SJR227_Mlrtn_fldrel/Totalflow_SJR227} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR227 {case posflow { condition Totalflow_SJR227 > 0. value SJR227_Mlrtn_mainrel/Totalflow_SJR227} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR227 {case posflow { condition Totalflow_SJR227 > 0. value SJR227_otherflow/Totalflow_SJR227} case otherwise { condition always value 0.}}
+define SJR221_otherflow {
+        case depletion {
+        condition SJR221_netchg < 0.
+        value max(0., SJR227_otherflow + (SJR221_netchg * Otherflow_proportion_SJR227))}
+    case otherwise {
+        condition always
+        value SJR227_otherflow + SJR221_netchg}
+}
+define SJR221_unmet1 {value min(0.,(SJR221_netchg * Otherflow_proportion_SJR227) + SJR227_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR221_Mlrtn_mainrel {
+        case depletion {
+        condition SJR221_netchg < 0.
+        value max(0., SJR227_Mlrtn_mainrel + (SJR221_netchg * Mainrel_proportion_SJR227) + SJR221_unmet1)}
+    case otherwise {
+        condition always
+        value SJR227_Mlrtn_mainrel}
+}
+define SJR221_unmet2 {value min(0.,(SJR221_netchg * Mainrel_proportion_SJR227) + SJR221_unmet1 + SJR227_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR221_Mlrtn_fldrel {
+    case depletion {
+        condition SJR221_netchg < 0.
+        value max(0.,SJR227_Mlrtn_fldrel + (SJR221_netchg * Fldrel_proportion_SJR227) + SJR221_unmet2)}
+    case otherwise {
+        condition always
+        value SJR227_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJR221_otherflow_1 {
+        case depletion {
+        condition SJR221_netchg < 0.
+        value max(0., SJR227_otherflow_1 + SJR221_netchg)}
+    case otherwise {
+        condition always
+        value SJR227_otherflow_1 + SJR221_netchg}
+}
+define SJR221_unmet1_1 {value min(0.,SJR221_netchg + SJR227_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR221_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR221_netchg < 0.
+        value max(0., SJR227_Mlrtn_mainrel_1 + SJR221_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR227_Mlrtn_mainrel_1}
+}
+define SJR221_unmet2_1 {value min(0.,SJR221_unmet1_1 + SJR227_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR221_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR221_netchg < 0.
+        value max(0.,SJR227_Mlrtn_fldrel_1 + SJR221_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR227_Mlrtn_fldrel_1}
+}
+define SJR221_otherflow_dv {alias SJR221_otherflow kind 'alias' units 'cfs'}
+define SJR221_Mlrtn_mainrel_dv {alias SJR221_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR221_Mlrtn_fldrel_dv {alias SJR221_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR221_otherflow_1_dv {alias SJR221_otherflow_1 kind 'alias' units 'cfs'}
+define SJR221_Mlrtn_mainrel_1_dv {alias SJR221_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR221_Mlrtn_fldrel_1_dv {alias SJR221_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!Have to track flows into the Chowchilla bypass (D_SJR214_EBP001), then need to compute how much comes outt the Eastside Bypass and Mariosa bypass
+!************* Node 214
+! Connectivity ***goal continuitySJR214       {C_SJR221  + SG61_SJR214_7 + SR_64_SJR214 - D_SJR214_EBP001 - C_SJR214  = 0.} !Chowchilla Bypass  
+! First thing to do is to track flows into the Chowchilla Bypass, assume all are flood flows but calculate what remains to check
+define D_SJR214_EBP001_fldflow {value min(D_SJR214_EBP001[WHEELJPOD],SJR221_Mlrtn_fldrel)}
+define D_SJR214_EBP001_restflow {value D_SJR214_EBP001[WHEELJPOD] - D_SJR214_EBP001_fldflow}
+define D_SJR214_EBP001_fldflow_1 {value min(D_SJR214_EBP001[WHEELJPOD],SJR221_Mlrtn_fldrel_1)}
+define D_SJR214_EBP001_restflow_1 {value D_SJR214_EBP001[WHEELJPOD] - D_SJR214_EBP001_fldflow_1}
+!From here on flows that went into the Chowchilla Bypass are removed
+define SJR221_Mlrtn_fldreladj {value SJR221_Mlrtn_fldrel - D_SJR214_EBP001_fldflow} 
+define SJR221_Mlrtn_mainreladj {value SJR221_Mlrtn_mainrel - D_SJR214_EBP001_restflow }
+define SJR221_Mlrtn_fldreladj_1 {value SJR221_Mlrtn_fldrel_1 - D_SJR214_EBP001_fldflow_1 } 
+define SJR221_Mlrtn_mainreladj_1 {value SJR221_Mlrtn_mainrel_1 - D_SJR214_EBP001_restflow_1 }
+define SJR214_netchg {value SG61_SJR214_7[WHEELJPOD] + SR_64_SJR214[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs 
+define Totalflow_SJR221 {value SJR221_Mlrtn_fldreladj + SJR221_Mlrtn_mainreladj + SJR221_Otherflow }
+define Fldrel_proportion_SJR221 {case posflow { condition Totalflow_SJR221 > 0. value SJR221_Mlrtn_fldreladj/Totalflow_SJR221} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR221 {case posflow { condition Totalflow_SJR221 > 0. value SJR221_Mlrtn_mainreladj/Totalflow_SJR221} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR221 {case posflow { condition Totalflow_SJR221 > 0. value SJR221_otherflow/Totalflow_SJR221} case otherwise { condition always value 0.}}
+define SJR214_otherflow {
+        case depletion {
+        condition SJR214_netchg < 0.
+        value max(0., SJR221_otherflow + (SJR214_netchg * Otherflow_proportion_SJR221))}
+    case otherwise {
+        condition always
+        value SJR221_otherflow + SJR214_netchg}
+}
+define SJR214_unmet1 {value min(0.,(SJR214_netchg * Otherflow_proportion_SJR221) + SJR221_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR214_Mlrtn_mainrel {
+        case depletion {
+        condition SJR214_netchg < 0.
+        value max(0., SJR221_Mlrtn_mainreladj + (SJR214_netchg * Mainrel_proportion_SJR221) + SJR214_unmet1)}
+    case otherwise {
+        condition always
+        value SJR221_Mlrtn_mainreladj}
+}
+define SJR214_unmet2 {value min(0.,(SJR214_netchg * Mainrel_proportion_SJR221) + SJR214_unmet1 + SJR221_Mlrtn_mainreladj)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR214_Mlrtn_fldrel {
+    case depletion {
+        condition SJR214_netchg < 0.
+        value max(0.,SJR221_Mlrtn_fldreladj + (SJR214_netchg * Fldrel_proportion_SJR221) + SJR214_unmet2)}
+    case otherwise {
+        condition always
+        value SJR221_Mlrtn_fldreladj}
+}
+!priority calcs (same as above but without proportions)
+define SJR214_otherflow_1 {
+        case depletion {
+        condition SJR214_netchg < 0.
+        value max(0., SJR221_otherflow_1 + SJR214_netchg)}
+    case otherwise {
+        condition always
+        value SJR221_otherflow_1 + SJR214_netchg}
+}
+define SJR214_unmet1_1 {value min(0.,SJR214_netchg + SJR221_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR214_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR214_netchg < 0.
+        value max(0., SJR221_Mlrtn_mainreladj_1 + SJR214_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR221_Mlrtn_mainreladj_1}
+}
+define SJR214_unmet2_1 {value min(0.,SJR214_unmet1_1 + SJR221_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR214_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR214_netchg < 0.
+        value max(0.,SJR221_Mlrtn_fldreladj_1 + SJR214_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR221_Mlrtn_fldreladj_1}
+}
+define SJR214_otherflow_dv {alias SJR214_otherflow kind 'alias' units 'cfs'}
+define SJR214_Mlrtn_mainrel_dv {alias SJR214_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR214_Mlrtn_fldrel_dv {alias SJR214_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR214_otherflow_1_dv {alias SJR214_otherflow_1 kind 'alias' units 'cfs'}
+define SJR214_Mlrtn_mainrel_1_dv {alias SJR214_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR214_Mlrtn_fldrel_1_dv {alias SJR214_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+define D_SJR214_EBP001_fldflow_dv {alias D_SJR214_EBP001_fldflow kind 'alias' units 'cfs'}
+define D_SJR214_EBP001_restflow_dv {alias D_SJR214_EBP001_restflow kind 'alias' units 'cfs'}
+define D_SJR214_EBP001_fldflow_1_dv {alias D_SJR214_EBP001_fldflow_1 kind 'alias' units 'cfs'}
+define D_SJR214_EBP001_restflow_1_dv {alias D_SJR214_EBP001_restflow_1 kind 'alias' units 'cfs'}
+
+!************* Node 213
+! Connectivity *** goal continuitySJR213       {C_SJR214  - C_SJR213              = 0.}  
+! No additional tracking needed
+
+!************* Node 205
+! Connectivity *** goal continuitySJR205       {C_SJR213  - D_SJR205_SJR201 - C_SJR205  + SG62_SJR205_7 + SG63_SJR205_8  = 0.} !Outflow to Mendota Pool Bypass 
+! What to do here:
+! First remove restoration flows and save those to be put back in downstream.
+! These flows can come from main flow releases or accretions, so pull first from mainrel, then from otherrel, then from floodrel if that is needed (hopefully not).
+! Then using the rest of the water partition things as normal through node 205 and Mendota Pool
+! At node 201 and downstream switch partitioning to flood flows, restoration flows, and other flows 
+define D_SJR205_SJR201_mainflow {value min(D_SJR205_SJR201[WHEELJPOD],SJR214_Mlrtn_mainrel)}
+define D_SJR205_SJR201_otherflow {value min(D_SJR205_SJR201[WHEELJPOD] - D_SJR205_SJR201_mainflow, SJR214_otherflow)}
+define D_SJR205_SJR201_fldflow {value min(D_SJR205_SJR201[WHEELJPOD] - D_SJR205_SJR201_mainflow - D_SJR205_SJR201_otherflow, SJR214_Mlrtn_fldrel)}
+define D_SJR205_SJR201_mainflow_1 {value min(D_SJR205_SJR201[WHEELJPOD],SJR214_Mlrtn_mainrel_1)}
+define D_SJR205_SJR201_otherflow_1 {value min(D_SJR205_SJR201[WHEELJPOD] - D_SJR205_SJR201_mainflow_1, SJR214_otherflow_1)}
+define D_SJR205_SJR201_fldflow_1 {value min(D_SJR205_SJR201[WHEELJPOD] - D_SJR205_SJR201_mainflow_1 - D_SJR205_SJR201_otherflow_1, SJR214_Mlrtn_fldrel_1)}
+!From here on SJRR flows are removed
+define SJR214_Mlrtn_fldreladj {value SJR214_Mlrtn_fldrel - D_SJR205_SJR201_fldflow } 
+define SJR214_Mlrtn_mainreladj {value SJR214_Mlrtn_mainrel - D_SJR205_SJR201_mainflow }
+define SJR214_otherflowadj {value SJR214_otherflow - D_SJR205_SJR201_otherflow }
+define SJR214_Mlrtn_fldreladj_1 {value SJR214_Mlrtn_fldrel_1 - D_SJR205_SJR201_fldflow_1 } 
+define SJR214_Mlrtn_mainreladj_1 {value SJR214_Mlrtn_mainrel_1 - D_SJR205_SJR201_mainflow_1 }
+define SJR214_otherflowadj_1 {value SJR214_otherflow_1 - D_SJR205_SJR201_otherflow_1 }
+define SJR205_netchg {value SG62_SJR205_7[WHEELJPOD] + SG63_SJR205_8[WHEELJPOD]} !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs 
+define Totalflow_SJR214 {value SJR214_Mlrtn_fldreladj + SJR214_Mlrtn_mainreladj + SJR214_Otherflowadj }
+define Fldrel_proportion_SJR214 {case posflow { condition Totalflow_SJR214 > 0. value SJR214_Mlrtn_fldreladj/Totalflow_SJR214} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR214 {case posflow { condition Totalflow_SJR214 > 0. value SJR214_Mlrtn_mainreladj/Totalflow_SJR214} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR214 {case posflow { condition Totalflow_SJR214 > 0. value SJR214_otherflowadj/Totalflow_SJR214} case otherwise { condition always value 0.}}
+define SJR205_otherflow {
+        case depletion {
+        condition SJR205_netchg < 0.
+        value max(0., SJR214_otherflowadj + (SJR205_netchg * Otherflow_proportion_SJR214))}
+    case otherwise {
+        condition always
+        value SJR214_otherflowadj + SJR205_netchg}
+}
+define SJR205_unmet1 {value min(0.,(SJR205_netchg * Otherflow_proportion_SJR214) + SJR214_otherflowadj)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR205_Mlrtn_mainrel {
+        case depletion {
+        condition SJR205_netchg < 0.
+        value max(0., SJR214_Mlrtn_mainreladj + (SJR205_netchg * Mainrel_proportion_SJR214) + SJR205_unmet1)}
+    case otherwise {
+        condition always
+        value SJR214_Mlrtn_mainreladj}
+}
+define SJR205_unmet2 {value min(0.,(SJR205_netchg * Mainrel_proportion_SJR214) + SJR205_unmet1 + SJR214_Mlrtn_mainreladj)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJR205_Mlrtn_fldrel {
+    case depletion {
+        condition SJR205_netchg < 0.
+        value max(0.,SJR214_Mlrtn_fldreladj + (SJR205_netchg * Fldrel_proportion_SJR214) + SJR205_unmet2)}
+    case otherwise {
+        condition always
+        value SJR214_Mlrtn_fldreladj}
+}
+!priority calcs (same as above but without proportions)
+define SJR205_otherflow_1 {
+        case depletion {
+        condition SJR205_netchg < 0.
+        value max(0., SJR214_otherflowadj_1 + SJR205_netchg)}
+    case otherwise {
+        condition always
+        value SJR214_otherflowadj_1 + SJR205_netchg}
+}
+define SJR205_unmet1_1 {value min(0.,SJR205_netchg + SJR214_otherflowadj_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR205_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJR205_netchg < 0.
+        value max(0., SJR214_Mlrtn_mainreladj_1 + SJR205_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR214_Mlrtn_mainreladj_1}
+}
+define SJR205_unmet2_1 {value min(0.,SJR205_unmet1_1 + SJR214_Mlrtn_mainreladj_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJR205_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJR205_netchg < 0.
+        value max(0.,SJR214_Mlrtn_fldreladj_1 + SJR205_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR214_Mlrtn_fldreladj_1}
+}
+define SJR205_otherflow_dv {alias SJR205_otherflow kind 'alias' units 'cfs'}
+define SJR205_Mlrtn_mainrel_dv {alias SJR205_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR205_Mlrtn_fldrel_dv {alias SJR205_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR205_otherflow_1_dv {alias SJR205_otherflow_1 kind 'alias' units 'cfs'}
+define SJR205_Mlrtn_mainrel_1_dv {alias SJR205_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR205_Mlrtn_fldrel_1_dv {alias SJR205_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+define D_SJR205_SJR201_mainflow_dv {alias D_SJR205_SJR201_mainflow kind 'alias' units 'cfs'}
+define D_SJR205_SJR201_otherflow_dv {alias D_SJR205_SJR201_otherflow kind 'alias' units 'cfs'}
+define D_SJR205_SJR201_floodflow_dv {alias D_SJR205_SJR201_flDflow kind 'alias' units 'cfs'}
+define D_SJR205_SJR201_mainflow_1_dv {alias D_SJR205_SJR201_mainflow_1 kind 'alias' units 'cfs'}
+define D_SJR205_SJR201_otherflow_1_dv {alias D_SJR205_SJR201_otherflow_1 kind 'alias' units 'cfs'}
+define D_SJR205_SJR201_floodflow_1_dv {alias D_SJR205_SJR201_fldflow_1 kind 'alias' units 'cfs'}
+
+!************* Node MDOTA
+! Connectivity *** goal continuityMDOTA        {C_SJR205  + SG_MDOTA_872 + C_DMC116 + C_FSL005 /*+ I_MDOTA_WTS*/ - C_MDOTA  - D_MDOTA_64_XA - D_MDOTA_73_XA - D_MDOTA_90_PA1 
+!                            - D_MDOTA_91_PR - D_MDOTA_91_PA - D_MDOTA_XCC010               = 0.} !Mendota Pool
+define SJRMDOTA_netchg {value SG_MDOTA_872[WHEELJPOD] + C_DMC116[WHEELJPOD] + C_FSL005[WHEELJPOD] - D_MDOTA_64_XA[WHEELJPOD] - D_MDOTA_73_XA[WHEELJPOD] - D_MDOTA_90_PA1[WHEELJPOD] - D_MDOTA_91_PR[WHEELJPOD] - D_MDOTA_91_PA[WHEELJPOD] - D_MDOTA_XCC010[WHEELJPOD] } !Net inflow/diversion/accretion/depletion other than river inflow
+!proportional calcs
+define Totalflow_SJR205 {value SJR205_Mlrtn_fldrel + SJR205_Mlrtn_mainrel + SJR205_Otherflow}
+define Fldrel_proportion_SJR205 {case posflow { condition Totalflow_SJR205 > 0. value SJR205_Mlrtn_fldrel/Totalflow_SJR205} case otherwise { condition always value 0.}}
+define Mainrel_proportion_SJR205 {case posflow { condition Totalflow_SJR205 > 0. value SJR205_Mlrtn_mainrel/Totalflow_SJR205} case otherwise { condition always value 0.}}
+define Otherflow_proportion_SJR205 {case posflow { condition Totalflow_SJR205 > 0. value SJR205_otherflow/Totalflow_SJR205} case otherwise { condition always value 0.}}
+define SJRMDOTA_otherflow {
+        case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0., SJR205_otherflow + (SJRMDOTA_netchg * Otherflow_proportion_SJR205))}
+    case otherwise {
+        condition always
+        value SJR205_otherflow + SJRMDOTA_netchg}
+}
+define SJRMDOTA_unmet1 {value min(0.,(SJRMDOTA_netchg * Otherflow_proportion_SJR205) + SJR205_otherflow)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJRMDOTA_Mlrtn_mainrel {
+        case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0., SJR205_Mlrtn_mainrel + (SJRMDOTA_netchg * Mainrel_proportion_SJR205) + SJRMDOTA_unmet1)}
+    case otherwise {
+        condition always
+        value SJR205_Mlrtn_mainrel}
+}
+define SJRMDOTA_unmet2 {value min(0.,(SJRMDOTA_netchg * Mainrel_proportion_SJR205) + SJRMDOTA_unmet1 + SJR205_Mlrtn_mainrel)}  !compute residual in case not enough water to meet, gets shifted to other terms
+define SJRMDOTA_Mlrtn_fldrel {
+    case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0.,SJR205_Mlrtn_fldrel + (SJRMDOTA_netchg * Fldrel_proportion_SJR205) + SJRMDOTA_unmet2)}
+    case otherwise {
+        condition always
+        value SJR205_Mlrtn_fldrel}
+}
+!priority calcs (same as above but without proportions)
+define SJRMDOTA_otherflow_1 {
+        case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0., SJR205_otherflow_1 + SJRMDOTA_netchg)}
+    case otherwise {
+        condition always
+        value SJR205_otherflow_1 + SJRMDOTA_netchg}
+}
+define SJRMDOTA_unmet1_1 {value min(0.,SJRMDOTA_netchg + SJR205_otherflow_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJRMDOTA_Mlrtn_mainrel_1 {
+        case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0., SJR205_Mlrtn_mainrel_1 + SJRMDOTA_unmet1_1)}
+    case otherwise {
+        condition always
+        value SJR205_Mlrtn_mainrel_1}
+}
+define SJRMDOTA_unmet2_1 {value min(0.,SJRMDOTA_unmet1_1 + SJR205_Mlrtn_mainrel_1)}  !compute residual in case not enough water to meet, gets shifted to other terms (will be 0 or negative)
+define SJRMDOTA_Mlrtn_fldrel_1 {
+    case depletion {
+        condition SJRMDOTA_netchg < 0.
+        value max(0.,SJR205_Mlrtn_fldrel_1 + SJRMDOTA_unmet2_1)}
+    case otherwise {
+        condition always
+        value SJR205_Mlrtn_fldrel_1}
+}
+define SJRMDOTA_otherflow_dv {alias SJRMDOTA_otherflow kind 'alias' units 'cfs'}
+define SJRMDOTA_Mlrtn_mainrel_dv {alias SJRMDOTA_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJRMDOTA_Mlrtn_fldrel_dv {alias SJRMDOTA_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJRMDOTA_otherflow_1_dv {alias SJRMDOTA_otherflow_1 kind 'alias' units 'cfs'}
+define SJRMDOTA_Mlrtn_mainrel_1_dv {alias SJRMDOTA_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJRMDOTA_Mlrtn_fldrel_1_dv {alias SJRMDOTA_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+!************* Node 201
+!Need to put SJRR flows back in here
+! Connectivity *** goal continuitySJR201       {C_MDOTA + D_SJR205_SJR201 - C_SJR201               = 0.} !Inflow from Mendota Pool Bypass
+! No additional tracking needed, except that from here on SJRR flows are added back in
+define SJR201_Mlrtn_fldrel {value SJRMDOTA_Mlrtn_fldrel + D_SJR205_SJR201_fldflow } 
+define SJR201_Mlrtn_mainrel {value SJRMDOTA_Mlrtn_mainrel + D_SJR205_SJR201_mainflow }
+define SJR201_otherflow {value SJRMDOTA_otherflow + D_SJR205_SJR201_otherflow }
+define SJR201_Mlrtn_fldrel_1 {value SJRMDOTA_Mlrtn_fldrel_1 + D_SJR205_SJR201_fldflow_1 } 
+define SJR201_Mlrtn_mainrel_1 {value SJRMDOTA_Mlrtn_mainrel_1 + D_SJR205_SJR201_mainflow_1 }
+define SJR201_otherflow_1 {value SJRMDOTA_otherflow_1 + D_SJR205_SJR201_otherflow_1 }
+
+define SJR201_otherflow_dv {alias SJR201_otherflow kind 'alias' units 'cfs'}
+define SJR201_Mlrtn_mainrel_dv {alias SJR201_Mlrtn_mainrel kind 'alias' units 'cfs'}
+define SJR201_Mlrtn_fldrel_dv {alias SJR201_Mlrtn_fldrel kind 'alias' units 'cfs'}
+define SJR201_otherflow_1_dv {alias SJR201_otherflow_1 kind 'alias' units 'cfs'}
+define SJR201_Mlrtn_mainrel_1_dv {alias SJR201_Mlrtn_mainrel_1 kind 'alias' units 'cfs'}
+define SJR201_Mlrtn_fldrel_1_dv {alias SJR201_Mlrtn_fldrel_1 kind 'alias' units 'cfs'}
+
+
+
+/*goal continuitySJR200       {C_SJR201  - C_SJR200                       = 0.} !USGS 11254000 SJR Nr Mendota
+goal continuitySJR198       {C_SJR200  + SG64_SJR198_8 - C_SJR198       = 0.} 
+goal continuitySJR195       {C_SJR198  + C_FBW001 - C_SJR195             = 0.} 
+goal continuitySJR192       {C_SJR195  + SG65_SJR192_8 - C_SJR192           = 0.} 
+goal continuitySJR185       {C_SJR192  + SG66_SJR185_8 + R_64_XA_SJR185 - C_SJR185   = 0.} 
+goal continuitySJR180       {C_SJR185  + SG67_SJR180_8 + SR_64_SJR180 - D_SJR180_ARY010 - C_SJR180 + TD_SJR180_067   = 0.} !Sack Dam  
+goal continuitySJR179       {C_SJR180 - C_SJR179                            = 0.} !SJR Near Dos Palos
+goal continuitySJR173       {C_SJR179 + SG68_SJR173_8 + SG78_SJR173_10 - C_SJR173           = 0.} 
+goal continuitySJR166       {C_SJR173 + SG79_SJR166_10 + SG89_SJR166_12 - D_SJR166_EBP032 - C_SJR166    = 0.} 
+goal continuitySJR157       {C_SJR166 + SG90_SJR157_12 - C_SJR157                   = 0.} 
+goal continuitySJR152       {C_SJR157 + SG91_SJR152_12 - C_SJR152                   = 0.} 
+
+
+define D_SJR214_EBP001_fldflow {value min(D_SJR214_EBP001[WHEELJPOD],SJR221_Mlrtn_fldrel)}
+define D_SJR214_EBP001_restflow {value D_SJR214_EBP001[WHEELJPOD] - D_SJR214_EBP001_fldflow}
+define D_SJR214_EBP001_fldflow_1 {value min(D_SJR214_EBP001[WHEELJPOD],SJR221_Mlrtn_fldrel_1)}
+define D_SJR214_EBP001_restflow_1 {value D_SJR214_EBP001[WHEELJPOD] - D_SJR214_EBP001_fldflow_1}
+
+Add in Eastside bypass flows that go through Mariposa bypass
+goal continuitySJR145       {C_SJR152 + SG92_SJR145_12 + SG102_SJR145_14 + SP_EBP041_SJR145 - C_SJR145  = 0.} 
+goal continuitySJR141       {C_SJR145 + SG103_SJR141_14 - C_SJR141                  = 0.} 
+
+Add in remaining Eastside bypass flows
+goal continuitySJR134       {C_SJR141 + SG104_SJR134_14 + SG113_SJR134_16 + SR_63_SJR134 + R_63_PR3_SJR134 + C_EBP050 - C_SJR134 + TD_SJR134_103 = 0.} !Confluence with Chowchilla/Eastside Bypass
+goal continuitySJR131       {C_SJR134 + CT_STEVINSON - C_SJR131                            = 0.} !SJR Nr Stevinson
+goal continuitySJR127       {C_SJR131 + C_SAL006 - C_SJR127                     = 0.} !Confluence with Mud/Salt Slough
+goal continuitySJR123       {C_SJR127 + SG114_SJR123_16 - C_SJR123            = 0.} 
+goal continuitySJR119       {C_SJR123 + C_MSN004 - C_SJR119                     = 0.} 
+goal continuitySJR117       {C_SJR119 + C_NMW004 + SR_71_SJR117 + SR_72_SJR117 + SR_63_SJR117 + R_63_NA4_SJR117 - C_SJR117 + TD_SJR117_125 + TD_SJR117_124 = 0.} 
+goal continuitySJR116       {C_SJR117 + SG115_SJR116_16 + SG125_SJR116_18  + C_MCD002 - D_SJR116_72_NA1 - C_SJR116 = 0.} !Confluence with Merced
+
+
+goal continuitySJR115       {C_SJR116 - C_SJR115                            = 0.} !USGS 11274000
+goal continuitySJR114       {C_SJR115  + C_MRS000  - D_SJR114_62_NA5 - C_SJR114               = 0.} 
+goal continuitySJR111       {C_SJR114 + SG126_SJR111_18 - C_SJR111                  = 0.} 
+goal continuitySJR106       {C_SJR111 + SR_71_SJR106 + SR_72_SJR106 + SG127_SJR106_18 + SG131_SJR106_20 + R_71_PA5_SJR106 + R_72_XA3_SJR106 + R_72_NA1_SJR106 + C_ORT001 - C_SJR106 + TD_SJR106_130 + TD_SJR106_127 = 0.} 
+goal continuitySJR105       {C_SJR106 - C_SJR105                  = 0.} !USGS 11274550 SJR nr Crows Landing
+goal continuitySJR102       {C_SJR105 - D_SJR102_71_NA1 - C_SJR102              = 0.}
+goal continuitySJR101       {C_SJR102 + R_TKWWTP_SJR101 - C_SJR101                  = 0.}
+goal continuitySJR096       {C_SJR101 + SG132_SJR096_20 - D_SJR096_71_PA4 - C_SJR096 - D_SJR096_SJRRrecap = 0.} !SJR Nr Patterson
+goal continuitySJR091       {C_SJR096 + SR_71_SJR091 + SR_72_SJR091 + R_71_NA1_SJR091 + R_71_PA4_SJR091 + R_71_PA5_SJR091 + R_71_PA7_SJR091 + C_DPC008 - C_SJR091 + TD_SJR091_133 + TD_SJR091_132 = 0.} 
+goal continuitySJR090       {C_SJR091 + SG133_SJR090_20 - D_SJR090_71_NA2 - C_SJR090            = 0.} 
+goal continuitySJR087       {C_SJR090 + C_WWW001 - C_SJR087                     = 0.} 
+goal continuitySJR082       {C_SJR087 + R_62_NA5_SJR082 + R_62_NA3_SJR082 - D_SJR082_71_PA2 - C_SJR082 - D_SJR082_SJRRrecap = 0.} 
+goal continuitySJR081       {C_SJR082 + SR_62_SJR081 + SG134_SJR081_20 + SG144_SJR081_22 + C_TUO003 - D_SJR081_61_NA5 - C_SJR081 + TD_SJR081_143 = 0.} !confluence with Tuolumne
+goal continuitySJR075       {C_SJR081 + C_ING008 + SR_61_SJR075 + R_RFS61A_SJR075 + SR_71_SJR075 + R_71_PA1_SJR075 + R_71_PA2_SJR075 - C_SJR075 + TD_SJR075_145 + TD_SJR075_154 = 0.} !USGS 11290500 SJR @ Maze Road Bridge nr Modesto
+goal continuitySJR072       {C_SJR075 + SG145_SJR072_22 + SG155_SJR072_24 + R_RFS61A_SJR072 + R_61_NA4_SJR072 + C_STS004 - C_SJR072 = 0.} !confluence with Stanislaus 
+goal continuitySJR070       {C_SJR072 + SR_61_SJR070 + SR_71_SJR070 + R_71_NA2_SJR070 + CT_Vernalis - C_SJR070 + TD_SJR070_156 - D_SJR070_SJRRrecap - D_SJR070_SJRRremove= 0.} !USGS 11303500 SJR at Vernalis
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+! Calculate Friant Flood Release presence in SJR river flows
+! Chowchilla Bypass flow that makes it to C595 + other flood release that is not delivered at Mendota Pool
+! Are flood flows needed to meet D620's or D630's, considering other flow available?
+! Once past Tuolumne confluence, assume they make it to Vernalis
+! From there, calculate what continues to the delta via HORB or the lower SJR
+define FrFld_to_Merc   {value max(0., min(C605B[transfers_stage1] - L595[transfers_stage1], C595[transfers_stage1] - L587[transfers_stage1])) 
+                                    + min(C605A[transfers_stage1], C608[transfers_stage1] - C605C[transfers_stage1])}
+define D620_from_FrFld {value max(0., D620A[transfers_stage1] + D620B[transfers_stage1] + D620C[transfers_stage1]
+                                    - C566[transfers_stage1] - C619[transfers_stage1] - R620[transfers_stage1] - (C614[transfers_stage1] - FrFld_to_Merc))}
+define FrFld_to_Tuol   {value max(0., FrFld_to_Merc - D620_from_FrFld)}
+define D630_from_FrFld {value max(0., D630A[transfers_stage1] + D630B[transfers_stage1] - (C620[transfers_stage1] - FrFld_to_Tuol) - C545[transfers_stage1])}
+define FrFld_to_Vern   {value max(0., FrFld_to_Tuol - D630_from_FrFld)}
+
+define FrFld_to_Merc_   {alias FrFld_to_Merc    kind 'debug-cfs' units 'cfs'}
+define D620_from_FrFld_ {alias D620_from_FrFld  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Tuol_   {alias FrFld_to_Tuol    kind 'debug-cfs' units 'cfs'}
+define D630_from_FrFld_ {alias D630_from_FrFld  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Vern_   {alias FrFld_to_Vern    kind 'debug-cfs' units 'cfs'}
+
+define FrFld_to_HORB { value FrFld_to_Vern * C417B[transfers_stage1]/C644[transfers_stage1] } 
+define FrFld_to_SJR  { value FrFld_to_Vern - FrFld_to_HORB}
+define FrFld_to_409  { value max(0., min(FrFld_to_HORB, C409[transfers_stage1]))}
+define FrFld_to_Exp  { value FrFld_to_HORB - FrFld_to_409}
+define FrFld_to_CCWD { value min(max(0., D408[transfers_stage1]-C416B[transfers_stage1]-C408[transfers_stage1]), FrFld_to_409)}
+define FrFld_to_OMR  { value FrFld_to_409 - FrFld_to_CCWD}
+define FrFld_needed_at_514 {value max(0., D514A[transfers_stage1] + D514B[transfers_stage1] - (C417A[transfers_stage1]-FrFld_to_SJR))}
+define FrFld_needed_at_412 {value max(0., D412[transfers_stage1] - (C514[transfers_stage1] - FrFld_needed_at_514))}
+define FrFld_needed_at_410 {value max(0., D410[transfers_stage1] - C413[transfers_stage1] - (C412[transfers_stage1] - FrFld_needed_at_412))}
+define FrFld_to_410 { value FrFld_to_SJR - FrFld_needed_at_514 - FrFld_needed_at_412 - FrFld_needed_at_410}
+define FrFld_to_Dlt  { value min(max(0., C416A[transfers_stage1]), FrFld_to_OMR + FrFld_to_410)}
+
+define FrFld_to_HORB_  {alias FrFld_to_HORB kind 'debug-cfs' units 'cfs'}
+define FrFld_to_SJR_   {alias FrFld_to_SJR  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_409_   {alias FrFld_to_409  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_OMR_   {alias FrFld_to_OMR  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Exp_   {alias FrFld_to_Exp  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_410_   {alias FrFld_to_410  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Dlt_   {alias FrFld_to_Dlt  kind 'debug-cfs' units 'cfs'}
+
+! compute SJRR flows abandoned due to flood control release
+! it's assumed that this flow proceeds to Vernalis 
+! Note that SJRR abandonment is triggered by any flood release from Millerton,
+! not just by flood release that makes it to the Merced confluence.
+define SJRR_Abandoned_at_Merced {
+    case Flood { 
+        condition Friant_FloodRels>1. 
+        value min(C605C[transfers_stage1], C608[transfers_stage1]-L609[transfers_stage1])}
+    case otherwise {
+        condition always 
+        value 0.}
+}
+define AbSJRR_to_Vern    {value SJRR_Abandoned_at_Merced}
+! Track the combined Flood Release and SJRR flow
+define FrRels_to_Vern  {value AbSJRR_to_Vern + FrFld_to_Vern}
+define FrRels_to_HORB { value FrRels_to_Vern * C417B[transfers_stage1]/C644[transfers_stage1] } 
+define FrRels_to_SJR  { value FrRels_to_Vern - FrRels_to_HORB}
+define FrRels_to_409  { value max(0., min(FrRels_to_HORB, C409[transfers_stage1]))}
+define FrRels_to_Exp  { value FrRels_to_HORB - FrRels_to_409}
+define FrRels_to_CCWD { value min(max(0., D408[transfers_stage1]-C416B[transfers_stage1]-C408[transfers_stage1]), FrRels_to_409)}
+define FrRels_to_OMR  { value FrRels_to_409 - FrRels_to_CCWD}
+define FrRels_needed_at_514 {value max(0., D514A[transfers_stage1] + D514B[transfers_stage1] - (C417A[transfers_stage1]-FrRels_to_SJR))}
+define FrRels_needed_at_412 {value max(0., D412[transfers_stage1] - (C514[transfers_stage1] - FrRels_needed_at_514))}
+define FrRels_needed_at_410 {value max(0., D410[transfers_stage1] - C413[transfers_stage1] - (C412[transfers_stage1] - FrRels_needed_at_412))}
+define FrRels_to_410 { value FrRels_to_SJR - FrRels_needed_at_514 - FrRels_needed_at_412 - FrRels_needed_at_410}
+define FrRels_to_Dlt  { value min(max(0., C416A[transfers_stage1]), FrRels_to_OMR + FrRels_to_410)}
+
+define AbSJRR_to_Vern_  {alias AbSJRR_to_Vern kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Vern_  {alias FrRels_to_Vern kind 'debug-cfs' units 'cfs'}
+define FrRels_to_HORB_  {alias FrRels_to_HORB kind 'debug-cfs' units 'cfs'}
+define FrRels_to_SJR_   {alias FrRels_to_SJR  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_409_   {alias FrRels_to_409  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_OMR_   {alias FrRels_to_OMR  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Exp_   {alias FrRels_to_Exp  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_410_   {alias FrRels_to_410  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Dlt_   {alias FrRels_to_Dlt  kind 'debug-cfs' units 'cfs'}
+
+define C644_VAchg_ {alias C644 - C644[transfers_stage1] kind 'va-flow' units 'cfs'}*/
+
+
+    

@@ -1,0 +1,54 @@
+!FeatherIndex.wresl
+
+define I_Orovl_annual{
+	case JanMay{
+		condition month>=Jan .and. month<=May
+		value (sum(i=Oct-month, -1, 1) UNIMP_OROV(i)) + (sum(i=0, Sep-month, 1) I_Orovl_fm_Med[SWPForecast](i))
+	}
+	case other{
+		condition always
+		sum(i=Oct-month, Sep-month, 1) UNIMP_OROV(i)
+	}
+}
+define I_Orovl_annual_dv{alias I_Orovl_annual kind 'index' units 'taf'}
+
+define I_Orovl_annual_prev{
+	value (sum(i=Oct-month-12, Sep-month-12, 1) UNIMP_OROV(i))
+}
+define I_Orovl_annual_prev_dv{alias I_Orovl_annual_prev kind 'index' units 'taf'}
+
+define WYT_FEATHER_Frcst_1{
+	case critical{
+		condition i_Orovl_AprJul<600
+		value 1
+	}
+	case other{
+		condition always
+		value 0
+	}
+}
+
+define WYT_FEATHER_Frcst_2a{
+	case casea{
+		condition i_Orovl_annual<2500 .and. i_Orovl_annual_prev<2500
+		value 5000-i_Orovl_annual-i_Orovl_annual_prev
+	}
+	case other{
+		condition always
+		value 0
+	}
+}
+
+define WYT_FEATHER_Frcst_2{
+	case casea{
+		condition WYT_FEATHER_Frcst_2a>400
+		value 1
+	}
+	case other{
+		condition always
+		value 0
+	}
+}
+
+define WYT_FEATHER_Frcst{value max(WYT_FEATHER_Frcst_1, WYT_FEATHER_Frcst_2)}
+define WYT_FEATHER_Frcst_dv{alias WYT_FEATHER_Frcst kind 'wateryeartype' units 'none'}

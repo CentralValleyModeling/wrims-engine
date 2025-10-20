@@ -1,0 +1,102 @@
+/*
+CALSIM 3.0 NORTH OF DELTA OPERATIONS FILE
+BUTTESLOUGH.WRESL
+
+Created ajdraper, MWH, August 24, 2010
+*/
+
+!Butte Slough has a capacity of approximately 1,000 cfs; flows greater than this cause flooding of adjacent agricultural land
+!During the irrigation season (April-September), excess water is diverted through the Butte Slough Outfall Gates
+
+!Define sub-arcs
+define C_BSL001b_max    {lower 0 upper 1000 kind 'CHANNEL' units 'CFS'}
+define C_BSL001b_exc  	{std kind 'CHANNEL' units 'CFS'} !{lower 0 upper 150000 kind 'CHANNEL' units 'CFS'} !mega flooding > 150000 !@jmg 2017v13
+
+goal setC_BSL001b   {C_BSL001b = C_BSL001b_max + C_BSL001b_exc}
+
+goal setC_BSL001b_exc2  {
+    lhs C_BSL001b_exc
+        case Season {
+        condition   month >= Apr .and. month <= Sep
+        rhs     0
+        lhs>rhs     penalty 999
+        lhs<rhs     penalty 0 }
+        case Otherwise {
+        condition   always
+        rhs     0
+        lhs>rhs     penalty 99						
+        lhs<rhs     penalty 0 }
+}
+
+! Todo: Refine Butte Slough Outfall gate operations
+! The Butte Slough Outfall Gates are configured as a culvert through the levee with a one-way (flap) gate on the Sacramento River end.
+! When the Sacramento River surface elevation is higher than Butte Creek’s surface elevation, the flap remains shut,
+! preventing outflow to the Sacramento River, and forcing 100% of the Butte Creek flow through Butte Slough
+
+goal setC_BSL001a  { /*To prevent model instability and non-unique solutions, Introduce small bias to route water through Butte Slough instead of the outfall gates.*/
+    lhs C_BSL001a
+        case YearRound {
+        condition   always
+        rhs     0
+        lhs>rhs     penalty 99
+        lhs<rhs     penalty 0 }
+}
+
+goal setD_BSL000_SAC141  { 
+     lhs D_BSL000_SAC141
+           case Apr_Nov_Shasta { ! Done in 95% LOC study to prevent "spills" to try to meet downstream demands, NOsorio 12/2023
+                condition (month >= Oct .and. month <= Nov .or. month >= Apr .and. month <= Sep) .and. S_SHSTA(-1) > 550.
+               rhs 0
+               lhs>rhs     constrain
+               lhs<rhs     penalty 0 }
+
+           case Apr_Nov {
+                condition month >= Oct .and. month <= Nov .or. month >= Apr .and. month <= Sep
+               rhs 0
+               lhs>rhs     penalty 99999
+               lhs<rhs     penalty 0 }
+}
+
+/*goal setD_BSL000_SAC141  {
+     lhs D_BSL000_SAC141
+           case April {
+                condition   month== Apr
+               rhs 110
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case May {
+                condition   month== May
+               rhs 120
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case June {
+                condition   month== Jun
+               rhs 40
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case July {
+                condition   month== Jul
+               rhs 20
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case August {
+                condition   month== Aug
+               rhs 160
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case September {
+                condition   month== Sep
+               rhs 190
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case October {
+                condition   month== Oct
+               rhs 220
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+           case November {
+                condition   month== Nov
+               rhs 370
+               lhs>rhs     penalty 999
+               lhs<rhs     penalty 0 }
+}*/

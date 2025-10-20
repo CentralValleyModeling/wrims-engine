@@ -1,0 +1,292 @@
+! Calaveras_ops.wresl
+! R. Field
+! 11/25/03
+! USBR
+! Defines demands on the Calaveras River (City of Stockton SEWD, Calaveras County Water District)
+! Revised C. Olson, 5/1/2007 for Calsim-III
+!###################################################################################
+/*
+***************************Calaveras River Operations*******************************
+*/
+! Each April, forecast April through Sept inflow to New Hogan Reservoir (as the sum of April through Sept inflows)
+define sumI_NHGAN_part {
+    case apr {
+        condition   month == apr
+        sum(i=0,5,1) I_NHGAN(i) * cfs_TAF(i) }
+    case otherwise {
+        condition   always
+        value 0. }
+        }
+define sumI_CLV026 {
+    case apr {
+        condition month == apr
+        sum(i=0,5,1) I_CLV026(i) * cfs_TAF(i) }
+    case otherwise {
+        condition always
+        value 0. }
+        }
+        
+/*
+Deliveries are reduced to Calaveras AG and M&I in the first year, the second year,
+and again in the third year of drought.Determine from lookup table, monthly percent reduction
+reduction of available ag water given drought conditions.
+*/
+define S_NHGANcarovrtgt {
+     case third_yr_of_drought {
+          condition wyt_SJR >= 4 .and. wyt_SJR_prv1 >= 4 .and. wyt_SJR_prv2 >= 4
+          select S92
+          from S92carryover
+          where yrtype = 4}
+     case second_yr_of_drought {
+          condition wyt_SJR >= 4 .and. wyt_SJR_prv1 >= 4
+          select S92
+          from S92carryover
+          where yrtype = 3}
+     case first_yr_of_drought {
+          condition wyt_SJR >= 5
+          select S92
+          from S92carryover
+          where yrtype = 2}
+     case otherwise {
+          condition always
+          select S92
+          from S92carryover
+          where yrtype = 1}
+     }
+
+! New Hogan Reservoir carryover storage, record as decision variable
+define S_NHGANcarovrdv {std kind 'water-supply' units 'taf'}
+
+! Set New Hoagn Reservoir carryover storage target
+goal set_S_NHGANcarovr {S_NHGANcarovrdv = S_NHGANcarovrtgt}
+
+! New Hogan Reservoir evaporation estimate (from table, based on SJRindex year type)
+define S_NHGANevap_est {select S92 from evap_est where yrtype=wyt_SJR}
+
+! Calaveras River seepage estimate is 13 cfs and 6.5 cfs from New Hogan Reservoir to below Bellota
+define Calaveras_seep { value 19.5 }
+
+! Decision variable for New Hoagn Reservoir available water supply
+define S_NHGANAvaildv {std kind 'water-supply' units 'taf'}
+
+/*
+Apr-Sep available water is forecasted in April; that value is stored in prevNHGANavail
+decision variable each month until it is reforecasted the following April.
+*/
+define prevNHGANavail {std kind 'water-supply' units 'taf'}
+
+/*
+Determine the annual Riparian use available surface water,
+assume 100% is used befor end of september (forcast horizon)
+*/
+define ann_ALLOC_60N_NA1 {value 13.0 }
+
+/*
+Determine the annual Calaveras County Water District available surface water
+assume 100% is used befor end of september (forcast horizon)
+*/
+define ann_ALLOC_CACWD {value 3.5}
+
+/*
+New Hogan Reservoir available water supply for Stockton East WD ;
+
+Water Supply Forecast (TAF) =   End-of-March storage
+                        + Apr-Sep inflow
+                        - Carryover target (end of September)
+                        - Calaveras River seepage
+                        + Accretion below New Hogan
+                        - Evap Estimate
+                        - Riparian diversions (13.35)
+                        - Calaveras County WD diversion (3.5)
+*/
+define S_NHGANAvail {
+    case first5months {
+        condition month <= mar .and. wateryear == BgnWY
+        value         S_NHGAN(-1)}
+    case April {
+        condition month == apr
+        value         S_NHGAN(-1) + sumI_NHGAN_part + sumI_CLV026 - S_NHGANcarovrdv(-5) - (Calaveras_seep * cfs_taf) -S_NHGANevap_est
+                        - ann_ALLOC_60N_NA1  - ann_ALLOC_CACWD }
+    case otherwise {
+        condition   always
+        value         prevNHGANavail(-1) }
+        }
+
+! Store Calaveras April water supply forecast value in prevNHGANavail decision variable
+goal set_prevNHGANavail {prevNHGANavail = max(0.0, S_NHGANAvail)}
+
+! Set WS forecast equal to the decision variable; ensure non-negative value
+goal set_S_NHGANAvaildv {S_NHGANAvaildv = max(0.0, S_NHGANAvail)}
+
+/*
+Determine the annual SEWD M&I available surface water
+First portion of water available to SEWD goes to M&I (20 taf for 18 months or 13.35 for 12 months)
+assume 100% is used before end of september (forcast horizon)
+*/
+define ann_mi_avail_1 {value max(0.0, min(13.35, S_NHGANavail))}
+
+
+! Determine the annual remaining available water
+define ann_S_NHGANrem {value max(0.0, S_NHGANavail - ann_mi_avail_1)}
+
+/*
+Determine the annual SEWD M&I available surface water including 50% of annual remaining water
+assume 100% is used befor end of september (forcast horizon)
+*/
+define ann_mi_avail_2 {value ann_S_NHGANrem * 0.5 }
+
+! Limit the annual SEWD M&I available surface water to no more than 40 TAF
+define ann_mi_avail_3 {value min(40.0, ann_mi_avail_2 + ann_mi_avail_1) }
+
+/*
+Reduce annual M&I use of Calaveras River supply by supply available from stanislaus
+Calculate the amount of additional surface water from CVP allocation and purchased
+this value is only used adjust the amount of New Hogan release to use to meet City of Stockton
+use 90% to account for losses and slight variation in delivery pattern
+*/
+define stan_avail_sewd {value /*Ann_OIDSSJID_to_SEWD_saleVol * 0.9 (no more sale*)+ */  AnnAlloc_SEWD_PMI* 0.9 }
+
+/*
+Determine the quantity of water available for M&I use as the minimum of the previously computed
+available water or 40 less the water available from the Stanislaus River, which ever is less.
+The available water is the maximum half the forecasted available water or what determined
+previous.
+*/
+define ann_mi_avail {value max(ann_mi_avail_1 /2. , min(ann_mi_avail_3, 40.0 - stan_avail_sewd)) }
+
+! Determine the annual SEWD Ag available surface water including any annual remaining water
+define ann_ALLOC_60S_PA1 {value min(25.0, max(0., ann_S_NHGANrem - ann_mi_avail + ann_mi_avail_1))}
+
+! Determine from lookup table, monthly distribution of available ag water
+define SEWD_Ag_Dist {
+    select sewd_ag
+    from calaveras_dist
+    where month = month }
+
+! Calaveras County Water District. Assume 3.5 taf CACWD demand, 60% M&I, 40% AG CACWD_ag  CACWD_mi
+define CACWD_Ag_Dist {
+    select cacwd_ag
+    from calaveras_dist
+    where month = month }
+
+! Calaveras County Water District. Assumme 3.5 taf CACWD demand, 60% M&I, 40% AG CACWD_ag  CACWD_mi
+define CACWD_MI_Dist {
+    select cacwd_mi
+    from calaveras_dist
+    where month = month }
+    
+/*
+Deliveries to CACWD (Calaveras County Water District) 
+*/
+
+! Define the monthly CACWD M&I amount of available water given the annual amount and a monthly distribution
+define CACWD_ALLOC_MI { value (ann_ALLOC_CACWD* taf_cfs * 0.6 * CACWD_MI_Dist/100.) }
+
+! Define the monthly CACWD AG amount of available water given the annual amount and a monthly distribution
+define CACWD_ALLOC_AG { value (ann_ALLOC_CACWD* taf_cfs * 0.4 * CACWD_Ag_Dist/100.) }
+
+! Set the monthly diversion limit to supply CACWD M&I
+goal limitD_CLV043_WTPJYL { D_CLV043_WTPJYL < max(0.,(CACWD_ALLOC_MI))}
+
+! Set the monthly diversion limit to supply CACWD AG
+goal limitD_CLV037_CACWD  { D_CLV037_CACWD < max(0.,(CACWD_ALLOC_AG))}
+
+/*
+****************************Deliveries to SEWD and Riparian Users*********************************
+*/
+
+! Define the variable for remaining amount of surface water to SEWD M&I
+define prevremain_mi {std kind 'water-supply' units 'taf'}
+
+
+!Limit monthly delivery to remaining amount of surface water to SEWD M&I
+define remain_mi_avail {
+    case first5months {
+        condition month <= mar .and. wateryear == BgnWY
+        value         13.}
+    case April {
+        condition month == apr
+        value         ann_mi_avail}
+    case otherwise {
+        condition   always
+        value        max(0.0, prevremain_mi(-1) - D_CLV026_WTPWDH(-1) * cfs_taf) }
+        }
+
+! Set remaining available surface water equal to decision variable
+goal set_prv_rmn_mi {prevremain_mi = max(0.0, remain_mi_avail)}
+
+! SEWD Ag monthly surface water available
+define ALLOC_60S_PA1 { value (ann_ALLOC_60S_PA1 * SEWD_Ag_Dist/100.) * taf_cfs}
+
+! Riparian Users monthly surface water available
+define ALLOC_60N_NA1 { value (ann_ALLOC_60N_NA1 * SEWD_Ag_Dist/100.) * taf_cfs}
+
+! Set a limit on the monthly surface water available to City of Stockton/SEWD M&I from Calaveras
+goal limitD_CLV034_WTPWDH {D_CLV026_WTPWDH < remain_mi_avail * taf_cfs }
+
+! Set a limit on the monthly surface water available to riparian diversions on Calaveras
+!goal limitD_CLV030_60N_NA1 {D_CLV030_60N_NA1 < }
+
+! Set limit on the monthly delivery to SEWD Ag as the monthly diversions
+goal limitDG_60S_PA1 {D_CLV026_60S_PA1 + D_LJC022_60S_PA1 < ALLOC_60S_PA1 + ALLOC_60N_NA1}
+
+
+!!! New Hogan Flood Curve
+define daysin1 {value daysin}
+define lossfactor1 {value pow(0.96,15.)}						!4 percent loss per day compounded for monthly operations for first 15 days
+define lossfactor2 {value pow(0.96,daysin1-15)}					!4 percent loss per day compounded for monthly operations for end of month
+define PP_NHG {timeseries kind 'Precip' units 'INCHES'}		!Rainfall at New Hogan Dam from PRISM Climate Group Database (Lat: 38.1645   Lon: -120.8323   Elev: 650ft) 
+define PP_PRY {timeseries kind 'Precip' units 'INCHES'}		!Rainfall at Perry Ranch from PRISM Climate Group Database (Lat: 38.1490   Lon: -120.9220   Elev: 308ft)
+define PP_SHR {timeseries kind 'Precip' units 'INCHES'}		!Rainfall at Sheep Ranch from PRISM Climate Group Database (Lat: 38.2100   Lon: -120.4620   Elev: 2375ft)
+define PP_RRF {timeseries kind 'Precip' units 'INCHES'}		!Rainfall at Railroad Flat from PRISM Climate Group Database (Lat: 38.3140   Lon: -120.5430   Elev: 2598ft)
+
+define PP_Combined {value (PP_NHG + PP_PRY + PP_SHR + PP_RRF)*(33./121.)}			!Weighted average of rainfall for the four gauge stations
+
+define pardv {std kind 'Precipitation' units 'INCHES'}
+
+define par1 {case October {condition month == Oct value 0.}
+			 case otherwise {condition always value pardv(-1)*lossfactor1}
+}												
+
+define par1dv {alias par1 kind 'Precipitation' units 'INCHES'}
+
+define par_eom {value (par1+PP_Combined)*lossfactor2}		!End of month PAR
+
+goal setpardv {pardv = par_eom}
+
+define par_cons {value min(max(4., par_eom), 12.)}			!For flood space computation, the average precipitation should be between 4 and 12
+
+define par_consdv {alias par_cons kind 'Precipitation' units 'INCHES'}		
+
+define MONTH_DAYS {timeseries kind 'DAY' units 'DAYS'}		!Timeseries for number of days in a month
+
+define monthDayCounterdv {std kind 'DAY' units 'DAYS'}		!Counter of days since start of the calendar year
+
+define  monthDayCounter {case firstyearOct {condition wateryear == BgnWY .and. month == Oct value 304.}
+	case January {condition month == Jan value MONTH_DAYS}
+		case Otherwise {condition always value monthDayCounterdv(-1) + MONTH_DAYS}
+}
+define monthDayCounterMardv {std kind 'DAY' units 'DAYS'}
+define monthDayCounterMar {case FirstYear {condition wateryear == BgnWY .and. month < Mar value 90.}
+							case March {condition month == Mar value monthDayCounter-11}
+						   case Otherwise {condition always value monthDayCounterMardv(-1)}
+}
+goal setmonthDayCounterMardv {monthDayCounterMardv = monthDayCounterMar}
+goal setMonthDayCounterdv {monthDayCounterdv = monthDayCounter}
+!the flood curve is interpolated till March 21st
+define inter_Days {case January {condition month == Jan value (monthDayCounter/(31.+MONTH_DAYS(1)+21.))}
+				   case February {condition month == Feb value (monthDayCounter/(31. + MONTH_DAYS + 21.))}
+				   case March {condition month == Mar value monthDayCounter/(31. + MONTH_DAYS(-1) + 21.)}
+				   case otherwise {condition always value 0.}
+}
+
+define S_NHGANlevel4 {
+	case October	{condition month == Oct value 234.60}
+	case NovDec	{condition month >= Nov .and. month <= Dec value 152.10}
+	case JanFeb {condition month >= Jan .and. month <= Feb value 152.10 + inter_Days*(12-par_cons)*8.}
+	case March {condition month == Mar value 152.10 + min(8.*(12.-par_cons)+(11./81.)*165.,165.)}
+	case JunSep {condition month >= Jun .and. month <= Sep value 317.10}
+	case Otherwise {condition always value 152.100 + min(8.*(12.-par_cons)+((monthDayCounter-monthDayCounterMar)/81.)*165.,165.)} 
+}
+
+

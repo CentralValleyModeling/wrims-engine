@@ -1,0 +1,274 @@
+!MFP Operating Rules
+!M.Bachman 12/2017
+
+!Storage requirements from FERC Middle Fork Project No.2079 License
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! French Meadows !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Duncan Tunnel is closed Jul 1 - Nov 1 (OASIS model)
+define D_DCC009_FRMDW_capacity {
+	case Closed 	{condition (range(month,JUL,SEP) .or. month==OCT) value 0.} 
+	case Otherwise 	{condition always value 400.}
+}	
+goal setD_DCC009_FRMDW_capacity	{D_DCC009_FRMDW < D_DCC009_FRMDW_capacity}
+
+
+! Level 2
+/*
+Condition 38 in MFP FERC license specifies the following minimum reservoir pool elevations:
+	Year Type			Date Range		WSE (ft)
+ 	Wet					6/1-9/15		5,220
+ 						9/16-5/31		5,152
+ 	Above Normal		6/1-9/15		5,220
+ 						9/16-5/31		5,152
+ 	Below Normal		6/1-9/15		5,220
+ 						9/16-5/31		5,152
+ 	Dry					6/1-9/1			5,200
+ 						9/2-5/31		5,152
+ 	Critical			6/1-9/1			5,175
+ 						9/2-5/31		5,152
+ 	Extreme Critical	6/1-9/1			5,175
+ 						9/2-5/31		5,120
+*/
+
+define S_FRMDWlevel2_af {
+	case OctMay_1 {
+		condition range(month,Oct,May) .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=5152. use linear where ResNum=1
+		}
+	case OctMay_2 {
+		condition range(month,Oct,May) .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=5120. use linear where ResNum=1
+		}
+	case JunAug_1 {
+		condition range(month,Jun,Aug) .and. amer_annual >= 1500
+		select storage from American_ResInfo given elevation=5220. use linear where ResNum=1
+		}
+	case JunAug_2 {
+		condition range(month,Jun,Aug) .and. amer_annual >= 1000
+		select storage from American_ResInfo given elevation=5200. use linear where ResNum=1
+		}
+	case JunAug_3 {
+		condition range(month,Jun,Aug) .and. amer_annual < 1000
+		select storage from American_ResInfo given elevation=5175. use linear where ResNum=1
+		}
+	case Sep_1 {
+		condition month==12 .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=5152. use linear where ResNum=1
+		}
+	case Sep_2 {
+		condition month==12 .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=5120. use linear where ResNum=1
+		}
+	}
+define S_FRMDWlevel2 {value max(S_FRMDWlevel1,S_FRMDWlevel2_af/1000.)} !American_ResInfo storage is in AF, so need to convert to TAF
+
+goal set_S_FRMDWlevel2{S_FRMDW_2 < max(S_FRMDWlevel2-S_FRMDWlevel1,0.)}
+
+! Level 3
+/* 
+Recreational objectives 
+Defined by FERC license (Condition 38)
+*/
+define S_FRMDWlevel3_af {
+	case JulAug_1 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 2400
+		select storage from American_ResInfo given elevation=5245. use linear where ResNum=1
+		}
+	case JulAug_2 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 1500
+		select storage from American_ResInfo given elevation=5240. use linear where ResNum=1
+		}
+	case JulAug_3 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 1000
+		select storage from American_ResInfo given elevation=5220. use linear where ResNum=1
+		}
+	case JulAug_4 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=5200. use linear where ResNum=1
+		}
+	case Otherwise {
+		condition always
+		value S_FRMDWlevel2*1000.
+		}
+	}
+define S_FRMDWlevel3 {value S_FRMDWlevel3_af/1000.} !American_ResInfo storage is in AF, so need to convert to TAF
+
+goal Set950level3 {S_FRMDW_3 < max (S_FRMDWlevel3-S_FRMDWlevel2,0.)}
+
+
+! Level 6 
+/* 
+Physical top of reservoir
+Spill gates are open from November through March
+Spill gates are closed April through October
+*/
+define S_FRMDWlevel6 { 
+	case OpenGates { 
+		condition range(month,Nov,Mar)
+		value 111.602
+		} 
+	case ClosedGates {
+		condition always
+		value 134.993
+		}	
+	}
+
+goal S_FRMDWZone6 {S_FRMDW_6 < max(S_FRMDWlevel6-S_FRMDWlevel5,0.)}
+
+
+! Level 5 
+/* 
+Discretionary releases for hydropower (and all other uses)
+*/
+define S_FRMDWlevel5 {value S_FRMDWlevel6}
+goal Set950level5 {S_FRMDW_5 < max (S_FRMDWlevel5-S_FRMDWlevel4,0.)}
+
+
+! Level 4 
+/* 
+Discretionary releases for deliveries, not hydropower
+In Cycle 1, this is set to the top of S_FRMDW_5
+As Level 4 weight > hydropower weights, this will prevent hydropower deliveries
+  (outside of spill) in Cycle 1
+*/
+!define S_FRMDWlevel4 {value S_FRMDWlevel3}
+goal Set950level4 {S_FRMDW_4 < max (S_FRMDWlevel4-S_FRMDWlevel3,0.)}
+
+
+/*define TestConstraint {case Constrained {condition month==APR .and. wateryear==1926 value 100.}
+					 case Unconstrained {condition always value 99999.}}
+goal TestConstrain {C_FRMDW < TestConstraint}*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Hell Hole !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Level 2
+/*
+FERC mandated minimum pool elevations (Condition 38)
+*/
+define S_HHOLElevel2_af {
+	case OctMay_1 {
+		condition range(month,Oct,May) .and. amer_annual >= 2400
+		select storage from American_ResInfo given elevation=4451. use linear where ResNum=2
+		}
+	case OctMay_2 {
+		condition range(month,Oct,May) .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=4402. use linear where ResNum=2
+		}
+	case OctMay_3 {
+		condition range(month,Oct,May) .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=4341. use linear where ResNum=2
+		}
+	case JunAug_1 {
+		condition range(month,Jun,Aug) .and. amer_annual >= 1500
+		select storage from American_ResInfo given elevation=4530. use linear where ResNum=2
+		}
+	case JunAug_2 {
+		condition range(month,Jun,Aug) .and. amer_annual >= 1000
+		select storage from American_ResInfo given elevation=4485. use linear where ResNum=2
+		}
+	case JunAug_3 {
+		condition range(month,Jun,Aug) .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=4555. use linear where ResNum=2
+		}
+	case JunAug_4 {
+		condition range(month,Jun,Aug) .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=4404. use linear where ResNum=2
+		}
+	case Sep_1 {
+		condition month==12 .and. amer_annual >= 2400
+		select storage from American_ResInfo given elevation=4451. use linear where ResNum=2
+		}
+	case Sep_2 {
+		condition month==12 .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=4402. use linear where ResNum=2
+		}
+	case Sep_3 {
+		condition month==12 .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=4341. use linear where ResNum=2
+		}
+	}
+define S_HHOLElevel2 {value max(S_HHOLElevel1, S_HHOLElevel2_af/1000.)} !American_ResInfo storage is in AF, so need to convert to TAF
+goal set_S_HHOLElevel2{S_HHOLE_2 < max(S_HHOLElevel2-S_HHOLElevel1,0.)}
+
+
+!Level 3 
+/* 
+Recreational objectives 
+Defined by FERC license (Condition 38)
+*/
+define S_HHOLElevel3_af {
+	case JulAug_1 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 3400
+		select storage from American_ResInfo given elevation=4590. use linear where ResNum=2
+		}
+	case JulAug_2 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 2400
+		select storage from American_ResInfo given elevation=4580. use linear where ResNum=2
+		}
+	case JulAug_3 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 1500
+		select storage from American_ResInfo given elevation=4570. use linear where ResNum=2
+		}
+	case JulAug_4 {
+		condition range(month,Jul,Aug) .and. amer_annual >= 600
+		select storage from American_ResInfo given elevation=4530. use linear where ResNum=2
+		}
+	case Aug_1 {
+		condition month==Aug		   .and. amer_annual < 600
+		select storage from American_ResInfo given elevation=4450. use linear where ResNum=2
+		}
+	case Otherwise {
+		condition always
+		value S_HHOLElevel2*1000.
+		}
+	}
+define S_HHOLElevel3 {value max(S_HHOLElevel2,S_HHOLElevel3_af/1000.)} !American_ResInfo storage is in AF, so need to convert to TAF
+goal Set951level3 {S_HHOLE_3 < max (S_HHOLElevel3-S_HHOLElevel2,0.)}
+
+! Level 6 
+/* 
+Physical top of reservoir
+*/
+define S_HHOLElevel6 {value 207.59}
+
+
+! Level 5 
+/* 
+Discretionary releases for hydropower (and all other uses)
+*/
+! defined in WatForum_mitigation.wresl
+
+
+! Level 4 
+/* 
+Discretionary releases for deliveries, not hydropower
+In Cycle 1, this is set to the top of S_HHOLElevel5
+As Level 4 weight > hydropower weights, this will prevent hydropower deliveries
+  (outside of spill) in Cycle 1
+*/
+!define S_HHOLElevel4 {value S_HHOLElevel3}
+!goal SetHHOLElevel4  {S_HHOLE_4 < max (S_HHOLElevel4-S_HHOLElevel3,0.)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define S_FRMDWlevel2dv {alias S_FRMDWlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel3dv {alias S_FRMDWlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel4dv {alias S_FRMDWlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel5dv {alias S_FRMDWlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_FRMDWlevel6dv {alias S_FRMDWlevel6 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_HHOLElevel2dv {alias S_HHOLElevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HHOLElevel3dv {alias S_HHOLElevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HHOLElevel4dv {alias S_HHOLElevel4 kind 'STORAGE-LEVEL' units 'TAF'} 
+!define S_HHOLElevel5dv {alias S_HHOLElevel5} !defined in WatForum_mitigation
+define S_HHOLElevel6dv {alias S_HHOLElevel6 kind 'STORAGE-LEVEL' units 'TAF'}

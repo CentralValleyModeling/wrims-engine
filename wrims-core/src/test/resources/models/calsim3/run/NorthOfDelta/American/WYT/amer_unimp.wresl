@@ -1,0 +1,151 @@
+! Calculation of annual, April-July, March-September, and March-November unimpaired flow at Fair Oaks
+! Originally developed by B. Van Lienden 05/23/06, N. Riegels 08/30/05
+! Updated for CS3 by M. Bachman 12/17 and R.Hoang 20200811
+
+! ---------- Calculating unimpaired flow for WY ----------
+!define UNIMP_FOLS {timeseries kind 'FLOW-UNIMPAIRED' units 'TAF'}
+
+! UIFR for the entire simulation period - used later to calculate the AprJul percent
+define UNIMP_FOLSAnnAvgSimPer_dv {std kind'UNIMPAIRED-FLOW' units 'TAF'}
+define UNIMP_FOLSAnnAvgSimPer {
+				case calcAvg{ 
+					condition month == BgnMo .AND. wateryear == BgnWY 
+					!value (sum(i=0,((EndWY-BgnWY)*12),1) (UNIMP_FOLS(i)))/(1+EndWY-BgnWY)}
+					value (sum(i=6,6+((EndWY-BgnWY)*12),12) (UNIMP_FOLS(i)))/(1+EndWY-BgnWY)
+					+ (sum(i=7,7+((EndWY-BgnWY)*12),12) (UNIMP_FOLS(i)))/(1+EndWY-BgnWY)
+					+ (sum(i=8,8+((EndWY-BgnWY)*12),12) (UNIMP_FOLS(i)))/(1+EndWY-BgnWY)
+					+ (sum(i=9,9+((EndWY-BgnWY)*12),12) (UNIMP_FOLS(i)))/(1+EndWY-BgnWY)
+					}
+				case otherwise{ 
+					condition always 
+					value UNIMP_FOLSAnnAvgSimPer_dv(-1)}
+}
+				                     
+goal setUNIMP_FOLSAnnAvgSimPer_dv {UNIMP_FOLSAnnAvgSimPer_dv = UNIMP_FOLSAnnAvgSimPer}	
+
+
+! Water Forum Dry Year Cutbacks are based on Unimpaired Flow into Folsom Res between Mar and Nov.
+
+! Note: the upper watershed calculation of Mar-Nov UIFR differs from the valley floor calculation. 
+! The upper watershed calculation of Mar-Nov UIFR uses perfect foresight for Mar-Sep and average of Oct & Nov
+! The Valley Floor calculation uses the CAM forecasting DLL, which is called after the upper watershed cycles.
+
+! Oct-Nov is not forecasted, so in calculating the Mar-Nov unimpaired runoff for Water Forum, use average Oct-Nov runoff from the entire simulation period.
+  ! 2020 LOD Avg Oct = 25 TAF, Avg Nov = 81 TAF
+  ! 2040 LOD Avg Oct = 29 TAF, Avg Nov = 75 TAF
+  ! Sum of Oct-Nov runoff is about 105 TAF for both levels of development.
+  
+define UIFR_MarNov{
+	case OctFeb{  !If in Oct - Feb, use the sum of previous year's Mar-Nov sum
+		condition month>=Oct .and. month<=Feb
+		sum(i=-Mar-month,Nov-month,1) UNIMP_FOLS(i)
+		}
+	case MarSep{ ! In March, sum March-September unimpaired inflows + average Oct & Nov
+		condition month>=Mar .and. month<=Sep
+		value (sum(i=Mar-month, -1, 1) UNIMP_FOLS(i)) + (sum(i=0,Sep-month, 1)UNIMP_FOLS(i)) + 105.
+		}
+}
+
+! Write Mar-Nov unimpaired inflow to Folsom reservoir to DV file (Upper Watershed Calculation using perfect foresight for Mar-Sep)
+define UIFR_MarNov_UW_dv {alias UIFR_MarNov kind 'index' units 'TAF'}  
+
+! Forecast of unimpaired flow at Fair Oaks for REMAINDER of water year
+define frcst_amr {
+       case FebSep {
+           condition  month >= FEB .and. month<=SEP
+			value (sum(i=0,SEP-MONTH,1) UNIMP_FOLS(i))	}
+      case Oct_Jan {
+                condition  always
+                value 0.0 }
+       }
+       
+! Oct-Sep unimpaired inflow to Folsom reservoir calculated using perfect foresight
+define amer_annualdv {std kind 'FLOW' units 'TAF'}
+define amer_annual {
+	case firstYear {
+		condition wateryear==BgnWY .and. month==OCT
+		value 3223. !Set equal to actual 1921 water year Fair Oaks flow
+		}
+	case monthFeb { 
+		condition month == Feb
+		value (sum(i=-4,7,1)UNIMP_FOLS(i))}
+	case other {
+		condition always
+		value amer_annualdv(-1)}
+	}
+goal set_amer_annualdv {amer_annualdv=amer_annual}
+
+! ---------- Calculating unimpaired flow for March-September ----------
+define amer_mar_septdv {std kind 'FLOW' units 'TAF'}       
+define amer_mar_sept {
+	case firstYear {
+		condition wateryear==BgnWY .and. month==OCT
+		value 2622.}
+	case monthMar{
+		condition month == MAR
+		value (sum(i=0,6,1)UNIMP_FOLS(i))}
+	case otherwise{
+		condition always
+		value amer_mar_septdv(-1)}
+       }
+goal setamer_mar_septdv {amer_mar_septdv = amer_mar_sept}       
+
+! ---------- Calculating unimpaired flow for April-September ----------
+define amer_apr_septdv {std kind 'FLOW' units 'TAF'}
+define amer_apr_sept {
+	case firstYear {
+		condition wateryear==BgnWY .and. month==OCT
+		value 2298.}
+	case monthApr{
+		condition month == Oct
+		value (sum(i=6,11,1)UNIMP_FOLS(i))}
+	case otherwise{
+		condition always
+		value amer_apr_septdv(-1)}
+	}
+goal setamer_apr_septdv {amer_apr_septdv = amer_apr_sept}
+       
+! ---------- Calculating unimpaired flow for April-July ----------
+define amer_apr_julydv {std kind 'FLOW' units 'TAF'}
+define amer_apr_july {
+	case firstYear {
+		condition wateryear==BgnWY .and. month==OCT
+		value 1256.}
+	case monthFeb{ ! The Apr-July unimpaired flow is made in February
+		condition month == Feb
+		value (sum(i=2,5,1)UNIMP_FOLS(i))}
+	case otherwise{
+		condition always
+		value amer_apr_julydv(-1)}
+}
+goal setamer_apr_julydv {amer_apr_julydv = amer_apr_july}
+
+! ---------- Calculation of April-July unimpaired flow as a percent of average  ----------
+define amr_aprjul_pctdv {std kind 'UNIMPFLOW' units 'PERCENT'}
+define amr_aprjul_pct {
+	case firstYear {
+		condition wateryear==BgnWY .and. month==OCT
+		value 100. !Set equal to 100% for first year
+		}
+	case calcamr_aprjul_pct {
+		condition  month == Feb
+		value amer_apr_july*100./UNIMP_FOLSAnnAvgSimPer}
+    case other {
+		condition always
+		value amr_aprjul_pctdv(-1)
+		}
+	}
+
+goal set_amr_aprjul_pctdv {amr_aprjul_pctdv=amr_aprjul_pct}       
+       
+! ---------- Calculating unimpaired flow for March-November ----------
+define WaterForum_wetyear {
+	case Wet {
+		condition UIFR_MarNov > 1600.
+		value 1.
+	}
+	case Other {
+		condition always
+		value 0.
+	}
+}

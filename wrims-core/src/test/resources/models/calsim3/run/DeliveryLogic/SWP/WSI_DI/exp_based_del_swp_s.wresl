@@ -1,0 +1,37 @@
+! Robert Leaf 10/09/2001
+
+! exp_based_del_swp_s.wresl
+/*
+ Using the Export Based rule for SWP SOD Delivery, Maximum Delivery is computed from the
+ Export Index.  The Export Index (Mar-Aug) is increased by the EOFeb SWP SL over low point target.
+ Then divided by the fraction of Mar-Aug SWP Delivery of total Annual SWP Delivery, thus
+ providing an estimate of Delivery capability associated with the Export Index.
+*/
+
+define init_SWPRuleDrainTar {value 110.}
+
+! Determination of Maximum SOD SWP Delivery
+define Exp_Idx_SWP_adj {
+    case MartoMay {
+            condition month >= MAR .and. month <= MAY
+            value Exp_Idx_SWP_s + S_SLUIS_SWP(PrevFEB) - init_SWPRuleDrainTar  }
+
+    case JuntoFeb {
+           condition  always
+           value      0 }
+                       }
+define max_exp_based_del_swp {value Exp_Idx_SWP_adj/0.602}
+!
+
+
+define Exp_Idx_SWP_adj_io {
+    case MartoMay {
+            condition month >= MAR .and. month <= MAY
+            value Exp_Idx_SWP_s + S_SLUIS_SWP(PrevFEB) - init_SWPRuleDrainTar  + min(SIO_SWP(PrevFEB), max_return_swp) }
+
+    case JuntoFeb {
+           condition  always
+           value      0 }
+                       }
+define max_exp_based_del_swp_io {value Exp_Idx_SWP_adj_io/0.602}
+

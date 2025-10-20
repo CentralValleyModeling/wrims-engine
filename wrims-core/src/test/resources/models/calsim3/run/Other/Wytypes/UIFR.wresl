@@ -1,0 +1,45 @@
+!UIFR.wresl
+! Define UIFR; to be used in WaterForum.wresl and FMStandard.wresl.
+! Water Forum Dry Year Cutbacks are based on Unimpaired Flow into Folsom Res between Mar and Nov.
+
+! Note: the upper watershed calculation of Mar-Nov UIFR differs from the valley floor calculation. 
+! The upper watershed calculation of Mar-Nov UIFR uses perfect foresight for Mar-Sep and average of Oct & Nov
+! The Valley Floor calculation uses the CAM forecasting DLL, which is called after the upper watershed cycles.
+
+define UIFR_MarNov{
+
+	case firstMon  {
+      		condition month == Oct .and. WaterYear == BgnWY
+      		value 1800. !approx average historical value
+      	}
+	case OctFeb{
+            	condition month>=Oct .and. month<=Feb
+            	value UIFR_MarNov_VF_dv(-1)
+        }
+	case Mar{
+		condition month==Mar
+		sum(i=0, 12+Nov-month, 1) I_Folsm_fm_med[Forecast2](i)
+		}
+	case AprMay{
+		condition month==Apr .or. month==May
+		value (sum(i=Mar-month, -1, 1) UNIMP_FOLS(i)) + (sum(i=0, 12+Nov-month, 1) I_Folsm_fm_med[Forecast2](i))
+		}
+	case JunSep{
+		condition always
+		value UIFR_MarNov_VF_dv(-1)	
+		}
+}
+
+! Write Mar-Nov unimpaired inflow to Folsom reservoir to DV file (Valley Floor Calculation using CAM DLL)		
+define UIFR_MarNov_VF_dv {alias UIFR_MarNov kind 'index' units 'taf'}
+
+define WaterForum_wetyear {
+	case Wet {
+		condition UIFR_MarNov > 1600.
+		value 1.
+	}
+	case Other {
+		condition always
+		value 0.
+	}
+}

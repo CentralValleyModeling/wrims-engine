@@ -1,0 +1,197 @@
+! ProjectDemands.wresl
+! R. Yaworski
+! Date Unknown
+!  Andy Draper 0Reclamation
+! Revised1/31/2005 MWH
+
+
+/* This file defines all demands (OUWUA, TCCA, etc.)
+OUWUA South & North Canal demands based on 1999-2000 data.
+*/
+
+define StonyCkWSmaxdv  {std kind 'water-supply'  units 'taf'}
+define StonyCkInflowdv {std kind 'flow-inflow'   units 'taf'}
+define TCCA_demdv      {std kind 'demand-annual' units 'taf'}
+define total_allocdv   {std kind 'demand-annual' units 'taf'}
+define OUWUA_allocdv   {std kind 'demand-annual' units 'taf'}
+define TCCA_allocdv    {std kind 'demand-annual' units 'taf'}
+
+/*Calculate sum of flow from Apr to Sep to replace the use of lookup table BlkBtForecastInflow.table  
+  Unimpaired flow at Stony Creek below Black Butte Dam is assumed to be the sum of inflow to Black Butte Dam, inflow to Stony Gorge Lake, and inflow to East Park Lake. 
+  Perfect forsesight inflows are used because forecasted flows are not available. 
+*/
+
+define apr_sep_inflow {
+        case WYbgnWY { ! Special case for 1st water year
+		condition month >= OCT .and. month <= MAR .and. wateryear == bgnWY
+		value (sum(i=Apr-month,Sep-month,1) (I_BLKBT(i)*cfs_taf(i) + I_SGRGE(i)*cfs_taf(i) + I_EPARK(i)*cfs_taf(i)))
+		}
+	case april_september {
+		condition month == APR
+		value (sum(i=0,Sep-month,1) (I_BLKBT(i)*cfs_taf(i) + I_SGRGE(i)*cfs_taf(i) + I_EPARK(i)*cfs_taf(i)))
+		}
+	case otherwise {
+		condition always
+		value StonyCkinflowdv(-1) }
+		}
+
+goal setStonyCkinflowdv {StonyCkinflowdv = apr_sep_inflow}	
+
+define StonyCkWSmax {
+	case WYbgnWY { ! Special case for 1st water year
+		condition month >= OCT .and. month <= MAR .and. wateryear == bgnWY
+		value 250.0 }
+	case april_StonyCkWSmax {
+		condition month == APR
+		value S_EPARK(prevMAR) + S_SGRGE(prevMAR) + S_BLKBT(prevMAR) + apr_sep_inflow}
+	case otherwise {
+		condition always
+		value StonyCkWSmaxdv(-1) }
+		}
+
+goal setStonyCkWSmaxdv {StonyCkWSmaxdv = StonyCkWSmax}
+
+define carryover_target {
+	case carryover_trigger {
+		condition StonyCkWSmax <= 60.0
+		value 5.0 }
+	case otherwise {
+		condition always
+		value 32.5 }
+		}
+
+define evap_tot {
+	case evap_trigger {
+		condition StonyCkWSmax <= 60.0
+		value 5.0 }
+	case otherwise {
+		condition always
+		value 12.5 }
+		}
+
+define StonyCkSupply   {value StonyCkWSmax - carryover_target - evap_tot}
+define StonyCkSupplydv {alias StonyCkSupply kind 'supply' units 'taf'}
+
+/*
+! Define annual applied water demand
+define AnnAW_06_PAdv {std kind 'demand' units 'taf'}
+define AnnAW_06_PA {
+
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       condition month == OCT .and. wateryear == bgnWY
+       sum(i=0,11,1) AW_06_PA(i)*cfs_taf(i) }
+
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       condition month == MAR .and. wateryear == EndWY
+       sum(i=prevOCT,SEP-month,1) AW_06_PA(i)*cfs_taf(i) }
+
+       case April { ! April for wateryears bgnWY - year before EndWY
+       condition month == APR .and. wateryear < EndWY
+       sum(i=0,11,1) AW_06_PA(i)*cfs_taf(i) }
+
+       case Rest {
+       condition always
+       value AnnAW_06_PAdv(-1) }
+}
+
+goal set_AnnAW_06_PA {AnnAW_06_PAdv = AnnAW_06_PA}
+*/
+define AnnGPmin_06_PAdv {std kind 'min-pump' units 'taf'}
+define AnnGPmin_06_PA {
+
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       condition month == OCT .and. wateryear == bgnWY
+       sum(i=0,11,1) GPmin_06_PA*(AWR_06_PA(i) + AWO_06_PA(i))*cfs_taf(i) }
+
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       condition month == MAR .and. wateryear == EndWY
+       sum(i=prevOCT,SEP-month,1) GPmin_06_PA*(AWR_06_PA(i) + AWO_06_PA(i))*cfs_taf(i) }
+
+       case April { ! April for wateryears bgnWY - year before EndWY
+       condition month == APR .and. wateryear < EndWY
+       sum(i=0,11,1) GPmin_06_PA*(AWR_06_PA(i) + AWO_06_PA(i))*cfs_taf(i) }
+
+       case Rest {
+       condition always
+       value AnnGPmin_06_PAdv(-1) }
+}
+
+goal set_AnnGPmin_06_PA {AnnGPmin_06_PAdv = AnnGPmin_06_PA}
+
+
+define AnnCL_06_PAdv {std kind 'contract-limit' units 'taf'}
+define AnnCL_06_PA {value CLann_STN026_06_PA + CLann_STN021_06_PA }
+
+/*       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+       condition month == OCT .and. wateryear == bgnWY
+       sum(i=0,11,1) (CL_STN026_06_PA(i)+CL_STN021_06_PA(i)) }
+
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+       condition month == MAR .and. wateryear == EndWY
+       sum(i=prevOCT,SEP-month,1)  (CL_STN026_06_PA(i)+CL_STN021_06_PA(i)) }
+
+       case April { ! April for wateryears bgnWY - year before EndWY
+       condition month == APR .and. wateryear < EndWY
+       sum(i=0,11,1)  (CL_STN026_06_PA(i)+CL_STN021_06_PA(i)) }
+
+       case Rest {
+       condition always
+       value AnnCL_06_PAdv(-1) }
+*/
+
+goal set_AnnCL_06_PA {AnnCL_06_PAdv = AnnCL_06_PA}
+
+define OUWUA_maxdr   {value min((AWRann_06_PA*(1.- RUFR_06_PA) + AWOann_06_PA*(1.- RUFO_06_PA) - AnnGPmin_06_PA) * (1 + RPF_06_PA) / (1 - EVF_STN_06_PA  - DPF_STN_06_PA - LFF_STN_06_PA - OSF_STN_06_PA),AnnCL_06_PA)}
+define OUWUA_maxdrdv {alias OUWUA_maxdr kind 'demand' units 'taf'}
+
+define TCCA_dem {value 38.3}
+
+goal setTCCA_demdv {TCCA_demdv = TCCA_dem}
+
+define StonyCkAlloc { value max(0.0,min(OUWUA_maxdr + TCCA_dem,StonyCkSupply)) }
+define StonyCkAllocdv {std kind 'allocation' units 'taf'}
+
+goal setStonyCkAllocdv {StonyCkAllocdv = StonyCkAlloc}
+
+define alloc_OUWUA {
+	case met_OUWUA {
+		condition StonyCkAlloc >= OUWUA_maxdr
+		value OUWUA_maxdr }
+	case otherwise {
+		condition always
+		value StonyCkAlloc }
+		}
+
+goal setOUWUA_allocdv {OUWUA_allocdv = alloc_OUWUA}
+
+define alloc_TCCA {
+	case met_TCCA {
+		condition StonyCkAlloc >= OUWUA_maxdr + TCCA_dem
+		value TCCA_dem }
+	case partial_TCCA {
+		condition StonyCkAlloc >= OUWUA_maxdr
+		value StonyCkAlloc - OUWUA_maxdr }
+	case otherwise {
+		condition always
+		value 0.0 }
+		}
+
+goal setTCCA_allocdv {TCCA_allocdv = alloc_TCCA}
+
+
+! define the monthly allocation for OUWUA South Canal (units = cfs)
+define alloc_OUWUA_s     {VALUE (max(0.0,min(1.0,(alloc_OUWUA/OUWUA_maxdr))*0.65*(AWR_06_PA*(1.- RUFR_06_PA) + AWO_06_PA*(1.- RUFO_06_PA)) * (1.- GPmin_06_PA) * (1 + RPF_06_PA)))/(1 - EVF_STN026_06_PA - DPF_STN026_06_PA - LFF_STN026_06_PA - OSF_STN026_06_PA) }
+goal set_D_STN026_06_PA   { D_STN026_06_PA  < alloc_OUWUA_s}
+
+! define the monthly allocation for OUWUA North Canal (units = cfs)
+define alloc_OUWUA_n     {VALUE (max(0.0,min(1.0,(alloc_OUWUA/OUWUA_maxdr))*0.35*(AWR_06_PA*(1.- RUFR_06_PA) + AWO_06_PA*(1.- RUFO_06_PA)) * (1.- GPmin_06_PA) * (1 + RPF_06_PA)))/(1 - EVF_STN021_06_PA - DPF_STN021_06_PA - LFF_STN021_06_PA - OSF_STN021_06_PA) }
+goal set_D_STN021_06_PA   { D_STN021_06_PA  < alloc_OUWUA_n}
+
+! define monthly distribution percent for TCCA
+define per_TCCA_tot      {SELECT per_TCCA FROM TCCA_per where month=month }
+goal set_D_STN014_TCC031 { D_STN014_TCC031 < alloc_TCCA*per_TCCA_tot*taf_cfs}
+
+define alloc_ouwua_ndv   {std kind 'allocation' units 'cfs'}
+define alloc_ouwua_sdv   {std kind 'allocation' units 'cfs'}
+goal setalloc_ouwua_sdv		{alloc_ouwua_sdv = alloc_OUWUA_s}
+goal setalloc_ouwua_ndv		{alloc_ouwua_ndv = alloc_OUWUA_n}

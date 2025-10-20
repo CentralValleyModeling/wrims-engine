@@ -1,0 +1,185 @@
+! Mok_P137.wresl
+
+/*
+PG&E owns and operates five powerhouses in the North Fork Mokelumne River watershed:
+Salt Spring #1, Salt Springs #2,Tiger Creek, West Point, and Electra
+PG&E also operates 7 reservoirs - the principal storage reservoirs are:
+the Lower Bear River Reservoir and Salt Springs Reservoir.
+
+The FERC relicensing for Project 137, completed in 2001, established instream flow requirements
+associated with the project. Additionally, there are recreational flow requirements associated with
+rafting and canoeing at weekends and public holidays. These are included below.
+
+FERC license specifies flow requirements at:
+ - North Fork Mokelumne River below Salt Springs Reservoir Dam
+ - North Fork Mokelumne River below Tiger Creek Afterbay Dam
+ - North Fork Mokelumne River below Electra Diversion Dam
+ - Bear River below Lower Bear River Reservoir Dam
+ - Cole Creek below Bear River Tunnel Diversion
+ - Tiger Creek below Tiger Creek Regulator Dam
+
+The FERC schedules specify minimum streamflows, by month and water year type, for each of the specified stream reaches (except those described under Condition 7).
+Minimum streamflows for February through May shall begin on or before the 5th day of each month. In all other months, minimum streamflows shall begin by the 1st of the
+month.
+*/
+
+/* 
+ Taken from FERC License Appendix, Condition Nos. 28, 29
+ To simplify the code, MIF requirements (defined and previously constrained above) are included in these requirements
+ i.e. the requirement below at Devil's Nose = Devil's Nose_MIF + Devil's Nose_REC
+ Spreadsheet Mokelumne_RecreationalFlows.xlsb contains the calculations and rationale used to develop the combined lookup tables used below			
+					
+						Release Period (1),(2)			
+WY		Release (cfs)	Beginning					End		
+AN, W	        900	        two weekends prior to Memorial Day weekend	June 15		
+BN		700	        two weekends prior to Memorial Day weekend	June 15		
+Dry, CD	        700 (3)		two weekends prior to Memorial Day weekend	June 15		
+					
+Timing												Location		
+Two non-consecutive weekend days (10 AM - 12 PM)						Devil's Nose Run whitewater pull-in		
+Three weekends of two consecutive days (6 days total) (10 AM - 2 PM)	                        Tiger Creek Dam pull-in		
+One weekend (10 AM - 2 PM)									Ponderosa Way Run pull-in		
+
+NOTES					
+(1) If Salt Springs begins to spill prior to completion of scheduled releases (such that releases of at least specified					
+above occur), no further releases are required for recreation					
+					
+(2) In the event the specified number of days, times, and runs are not achieved, the Licensee shall provide 1 weekend 					
+day of streamflow of at least 700 cfs between 10AM and 4 PM at the Electra Run whitewater boating put-in either 					
+in July, August, or September for each specified day not achieved.					
+					
+(3) If able to be provided without unacceptable environmental impact, these recreational flows replace the Dry and CD					
+Electra Run recreational flows defined below					
+									
+				...Release Period...			
+WY		Release (cfs)	Beginning	End		
+BN, AN, W	700		May 1		June 15		
+					
+Timing																Location		
+Average of three out of every four weekend days (10 AM - 4 PM)		Electra Run		
+					
+								Release Period			
+WY			Release (cfs)	Beginning	End		
+BN, AN, W	700				June 16		July 31		
+					
+Timing																Location		
+Average of two out of every four weekend days (10 AM - 4 PM)		Electra Run		
+					
+								Release Period			
+WY			Release (cfs)	Beginning	End		
+Dry, CD		700				May 15		June 30		
+					
+Timing																Location		
+Average of one out of every four weekend days (10 AM - 4 PM)		Electra Run			
+					
+								Release Period			
+WY			Release (cfs)	Beginning	End		
+Dry, CD		700				July		September		
+					
+Timing																Location		
+Minimum of 9 weekend days (10 AM - 4 PM)							Electra Run		
+ */
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! North Fork Mokelumne River below Salt Springs Dam !!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_NFM029_min     {select NFM029_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM029_pulse   {select NFM029_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM029_rec     {select NFM029_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok} !Devil's Nose Run put-in
+define minflow_C_NFM029 {value C_NFM029_min + C_NFM029_pulse + C_NFM029_rec}
+define minflow_C_NFM029_{alias minflow_C_NFM029 kind 'FLOW' units 'CFS'}
+
+goal setminflowNFM029    {C_NFM029_MIF < minflow_C_NFM029}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!North Fork Mokelumne River below Tiger Creek Afterbay !!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_NFM010_min     {select NFM010_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM010_pulse   {select NFM010_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM010_rec     {select NFM010_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok} !Tiger Creek put-in
+define minflow_C_NFM010 {value C_NFM010_min + C_NFM010_pulse + C_NFM010_rec}
+define minflow_C_NFM010_{alias minflow_C_NFM010 kind 'FLOW' units 'CFS'}
+
+goal setminflowNFM010    {C_NFM010_MIF < minflow_C_NFM010}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!North Fork Mokelumne River below Electra Diversion Dam !!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_NFM006_min     {select NFM006_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM006_pulse   {select NFM006_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_NFM006_rec     {select NFM006_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok} !Ponderosa Way put-in
+define minflow_C_NFM006 {value C_NFM006_min + C_NFM006_pulse + C_NFM006_rec}
+define minflow_C_NFM006_{alias minflow_C_NFM006 kind 'FLOW' units 'CFS'}
+
+goal setminflowNFM006    {C_NFM006_MIF < minflow_C_NFM006}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! Mokelumne River below Electra Powerhouse !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_MOK082_min     {select MOK082_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_MOK082_pulse   {select MOK082_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_MOK082_rec     {select MOK082_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok} !Electra put-in
+define minflow_C_MOK082 {value C_MOK082_min + C_MOK082_pulse + C_MOK082_rec}
+define minflow_C_MOK082_{alias minflow_C_MOK082 kind 'FLOW' units 'CFS'}
+
+goal setminflowMOK082   {C_MOK082_MIF < minflow_C_MOK082}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! Bear River below Lower Bear River Reservoir Dam !!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! For stream flows up to 20 cfs the point of compliance is USGS gauge 11315900, located approx. 200 ft below Lower Bear Dam.
+! For stream flows above 20 cfs the point of compliance is USGS gauge 11316000, located approx. 3.75 miles below Lower Bear Dam.
+! To simplify the model, as no accretions are represented along the Bear River, the point of compliance is assumed to be USGS gauge 11316000
+! located below the Bear River Diversion Dam.
+
+define C_BRV002_min     {select BRV002_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_BRV002_pulse   {select BRV002_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_BRV002_rec     {select BRV002_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define minflow_C_BRV002 {value C_BRV002_min + C_BRV002_pulse + C_BRV002_rec}
+define minflow_C_BRV002_{alias minflow_C_BRV002 kind 'FLOW' units 'CFS'}
+
+goal setminflowBRV002   {C_BRV002_MIF < minflow_C_BRV002}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! Cole Creek below Bear River Tunnel Diversion !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_COL002_min     {select COL002_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_COL002_pulse   {select COL002_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_COL002_rec     {select COL002_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define minflow_C_COL002 {value C_COL002_min + C_COL002_pulse + C_COL002_rec}
+define minflow_C_COL002_{alias minflow_C_COL002 kind 'FLOW' units 'CFS'}
+
+goal setminflowCOL002   {C_COL002_MIF < minflow_C_COL002}
+goal setminflowCOL001   {C_COL001 > C_COL002_MIF} !Prevent minimum flow being diverted into Tiger Creek Powerhouse Conduit
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! Tiger Creek below Tiger Creek Regulator Dam !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define C_TGC002_min     {select TGC002_min   from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_TGC002_pulse   {select TGC002_pulse from Mok_P137Flow where month=month, wyt=wyt_NForkMok}
+define C_TGC002_rec     {select TGC002_rec   from Mok_P137Flow where month=month, wyt=wyt_NForkMok} 
+define minflow_C_TGC002 {value C_TGC002_min + C_TGC002_pulse + C_TGC002_rec}
+define minflow_C_TGC002_{alias minflow_C_TGC002 kind 'FLOW' units 'CFS'}
+
+goal setminflowTGC002   {C_TGC002_MIF < minflow_C_TGC002}
+
+
+
+
+
+

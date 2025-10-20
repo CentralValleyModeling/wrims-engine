@@ -1,0 +1,343 @@
+
+!This file calculates SWP delivery for output analysis.
+
+!1. Feather River Area water rights deliveries
+!2. Feather River Service Area deliveries
+!3. Table A deliveries
+!4. Article 21 interruptable deliveries
+
+!********************************************************************************
+/*!Feather River Area water rights deliveries - not used in CACMPv9A
+define swp_WR_Feath  {alias D6_PWR
+                 + D202_PWR
+                 + D7A_PWR
+                 + D7B_PWR
+                 + D206B_PWR
+                 + D206C_PWR kind 'swp_delivery' units 'cfs'} !total
+*/
+!Feather River Service Area Contractor deliveries - not used in CACMPv9A
+define swp_FRSA      {alias D_THRMA_JBC000
+                 + D_THRMA_RVC000
+                 + D_THRMA_WEC000
+                 + D_FTR039_SEC009
+                 + D_FTR021_16_SA
+                 + D_FTR018_15S_SA
+                 + D_FTR018_16_SA
+                 + D_FTR014_16_SA  kind 'swp_delivery' units 'cfs'} !total
+
+!Table A deliveries
+
+!Feather River
+define swp_TA_Butte  {alias D_THRMF_11_NU1_PMI  kind 'swp_delivery' units 'cfs'} !County of Butte
+!define swp_TA_Yuba   {alias swp_perdel_yuba*CL1mon_WTPCYC_16_PU*taf_cfs kind 'swp_delivery' units 'cfs'} !City of Yuba City D_WTPCYC_16_PU 
+define swp_TA_Yuba   {alias D_WTPCYC_16_PU_SWP_PMI kind 'swp_delivery' units 'cfs'} !City of Yuba City D_WTPCYC_16_PU 
+define swp_TA_Feath  {alias swp_TA_Butte + swp_TA_Yuba kind 'swp_delivery' units 'cfs'} !sub-total
+
+!North Bay
+define swp_TA_Napa   {alias D_BKR004_NBA009_NAPA_PMI kind 'swp_delivery' units 'cfs'} !Napa County FC&WCD
+define swp_TA_Solano {alias D_BKR004_NBA009_SCWA_PMI kind 'swp_delivery' units 'cfs'} !Solano County WA
+define swp_TA_NBay   {alias swp_TA_Napa + swp_TA_Solano kind 'swp_delivery' units 'cfs'} !sub-total
+
+!South Bay
+define swp_TA_ACFC {alias D_SBA009_ACFC_PMI + D_SBA020_ACFC_PMI kind 'swp_delivery' units 'cfs'} !Alameda County FC&WCD, Zone 7
+define swp_TA_ACWD {alias D_SBA029_ACWD_PMI kind 'swp_delivery' units 'cfs'} !Alameda County WD
+define swp_TA_SCV  {alias D_SBA036_SCVWD_PMI kind 'swp_delivery' units 'cfs'} !Santa Clara Valley WD
+define swp_TA_SBay {alias swp_TA_ACFC + swp_TA_ACWD + swp_TA_SCV kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Bay Area
+define swp_TA_BayArea {alias swp_TA_SBay + swp_TA_NBay kind 'swp_delivery' units 'cfs'} !sub-total
+
+!San Joaquin Valley Agriculture
+define swp_TA_Oak    {alias D_CAA046_71_PA7_pag kind 'swp_delivery' units 'cfs'} !Oak Flat WD
+define swp_TA_Kings  {alias D_CAA181_KINGS_PAG kind 'swp_delivery' units 'cfs'} !County of Kings
+define swp_TA_Dudley {alias D_CAA184_DUDLEY_PAG kind 'swp_delivery' units 'cfs'} !Dudley Ridge WD
+define swp_TA_CLWA1  {alias D_CSB009_CLRTA1_DDWD_PAG kind 'swp_delivery' units 'cfs'} !SANTA CLARITA WA
+define swp_TA_Empire {alias D_CAA173_EMPIRE_PAG kind 'swp_delivery' units 'cfs'} !Empire West Side ID
+define swp_TA_KernAg {alias D_CSB015_KERN_BMWD_PAG + D_CAA194_KERN_PAG + D_CAA242_Kern_PAG + D_CAA279_Kern_PAG kind 'swp_delivery' units 'cfs'} !Kern County WA
+define swp_TA_Tulare {alias D_CAA183_TULARE_PAG kind 'swp_delivery' units 'cfs'} !Tulare Lake Basin WSD
+define swp_TA_SJV_Ag {alias swp_TA_Oak    +
+                            swp_TA_Kings  +
+                            swp_TA_Dudley +
+                            swp_TA_CLWA1  +
+                            swp_TA_Empire +
+                            swp_TA_KernAg +
+                            swp_TA_Tulare kind 'swp_delivery' units 'cfs'} !sub-total
+
+!San Joaquin Valley M&I
+define swp_TA_KernMI {alias D_CAA194_KERNA_PMI kind 'swp_delivery' units 'cfs'}  !Kern County WA
+define swp_TA_SJV_MI {alias swp_TA_KernMI kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Total San Joaquin Valley
+define swp_TA_SJV {alias swp_TA_SJV_Ag + swp_TA_SJV_MI kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Central Coastal
+define swp_TA_SLO    {alias D_CSB038_OBISPO_PMI kind 'swp_delivery' units 'cfs'} !San Luis Obispo County FC&WCD
+define swp_TA_SB     {alias D_CSB103_BRBRA_PMI kind 'swp_delivery' units 'cfs'} !Santa Barbara County FC&WCD
+define swp_TA_CCoast {alias swp_TA_SLO + swp_TA_SB kind 'swp_delivery' units 'cfs'} !sub-total
+
+!South Coast
+define swp_TA_CLWA2 {alias D_WSB032_CLRTA2_PMI kind 'swp_delivery' units 'cfs'}    !SANTA CLARITA WA
+define swp_TA_MWD   {alias D_PRRIS_MWDSC_PMI + D_CAA194_KERNB_PMI + D_ESB413_MWDSC_PMI + D_WSB031_MWDSC_PMI + D_ESB433_MWDSC_PMI kind 'swp_delivery' units 'cfs'} !Metropolitan WDSC
+define swp_TA_SBV   {alias D_ESB414_BRDNO_PMI kind 'swp_delivery' units 'cfs'}    !San Bernadino Valley MWD
+define swp_TA_SGV   {alias D_ESB415_GABRL_PMI kind 'swp_delivery' units 'cfs'}    !San Gabriel Valley MWD
+define swp_TA_SGP   {alias D_ESB420_GRGNO_PMI kind 'swp_delivery' units 'cfs'}    !San Gorgonio Pass WA
+define swp_TA_VC    {alias D_PYRMD_VNTRA_PMI + D_CSTIC_VNTRA_PMI kind 'swp_delivery' units 'cfs'} !Ventura County FCD
+define swp_TA_SCoast {alias swp_TA_CLWA2  +
+                           swp_TA_MWD    +
+                           swp_TA_SBV    +
+                           swp_TA_SGV    +
+                           swp_TA_SGP    +
+                           swp_TA_VC kind 'swp_delivery' units 'cfs'}   !sub-total
+
+!South and Central Coast
+define swp_TA_SoCCst {alias swp_TA_CCoast + swp_TA_SCoast kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Other Southern California M&I
+define swp_TA_AVEK  {alias D_ESB324_AVEK_PMI kind 'swp_delivery' units 'cfs'}    !Antelope Valley-East Kern WA
+define swp_TA_CVWD  {alias D_ESB407_CCHLA_PMI kind 'swp_delivery' units 'cfs'}    !Coachella Valley WD
+define swp_TA_CLA   {alias D_SVRWD_CSTLN_PMI  kind 'swp_delivery' units 'cfs'}    !Crestline-Line Arrowhead WA
+define swp_TA_Desert{alias D_ESB408_DESRT_PMI kind 'swp_delivery' units 'cfs'}    !Desert WA
+define swp_TA_LCID  {alias D_ESB355_LROCK_PMI kind 'swp_delivery' units 'cfs'}    !Littlerock Creek ID
+define swp_TA_MWA   {alias D_ESB403_MOJVE_PMI kind 'swp_delivery' units 'cfs'}    !Mojave WA
+define swp_TA_PWD   {alias D_ESB347_PLMDL_PMI kind 'swp_delivery' units 'cfs'}    !Palmdale WD
+define swp_TA_Other {alias swp_TA_AVEK   +
+                           swp_TA_CVWD   +
+                           swp_TA_CLA    +
+                           swp_TA_Desert +
+                           swp_TA_LCID   +
+                           swp_TA_MWA    +
+                           swp_TA_PWD kind 'swp_delivery' units 'cfs'}   !sub-total
+
+!Southern California
+define swp_TA_SoCal {alias swp_TA_SCoast + swp_TA_Other kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Losses
+define swp_LOSS {alias D_BKR004_NBA009_NAPA_PLS   !North Bay Aqueduct
+                       +D_SBA042_SBALOS_PLS                  !South Bay Aqueduct
+                       -D_CAA005_CAALOS           !California Aquduct Reach 1
+                       -D_CAA006_CAALOS  
+                       -D_CAA009_CAALOS  
+                       -D_CAA012_CAALOS  
+                       -D_CAA024_CAALOS  
+                       -D_CAA046_CAALOS  
+                       -D_CAA051_CAALOS          !California Aquduct Reach 2A  
+                       -D_CAA066_CAALOS
+                       -D_CAA067_CAALOS
+                       -D_CAA069_CAALOS_SWP      !California Aquduct Reach 2B
+                       -D_CAA071_CAALOS_SWP
+                       -D_CAA087_CAALOS_SWP      !California Aqueduct/San Luis Canal Reach 3
+                       -D_CAA095_CAALOS_SWP
+                       -D_CAA109_CAALOS_SWP      !California Aqueduct/San Luis Canal Reach 4
+                       -D_CAA143_CAALOS_SWP      !California Aqueduct/San Luis Canal Reach 5
+                       -D_CAA155_CAALOS_SWP      !California Aqueduct/San Luis Canal Reach 6
+                       -D_CAA156_CAALOS_SWP
+                       -D_CAA165_CAALOS_SWP
+                       -D_CAA172_CAALOS_SWP      !California Aqueduct/San Luis Canal Reach 7
+                       +D_CAA220_CAALOS_PLS
+                       +D_CAA278_CAALOS_PLS
+                       +D_CAA280_CAALOS_PLS
+                       +D_ESB361_ESBLOS_PLS
+                       +D_ESB406_ESBLOS_PLS
+                       +D_ESB425_ESBLOS_PLS
+                       +D_WSB006_WSBLOS_PLS
+                       +D_WSB026_WSBLOS_PLS
+                       +D_WSB027_WSBLOS_PLS  kind 'swp_delivery' units 'cfs'}
+
+!Total
+define swp_TA_total {alias swp_TA_Feath  +
+                           swp_TA_NBay   +
+                           swp_TA_SBay   +
+                           swp_TA_SJV    +
+                           swp_TA_CCoast +
+                           swp_TA_SoCal  /*+
+                           swp_LOSS */     kind 'swp_delivery' units 'cfs'}
+
+!********************************************************************************
+!article 56 carryover deliveries (allocated in previous year)
+
+!Feather River
+define swp_CO_Butte  {alias 0. kind 'swp_delivery' units 'cfs'} !County of Butte
+define swp_CO_Yuba   {alias D_WTPCYC_16_PU_SWP_PCO kind 'swp_delivery' units 'cfs'} !City of Yuba City
+define swp_CO_Feath  {alias swp_CO_Butte + swp_CO_Yuba kind 'swp_delivery' units 'cfs'} !sub-total
+
+!North Bay
+define swp_CO_Napa   {alias D_BKR004_NBA009_NAPA_PCO kind 'swp_delivery' units 'cfs'} !Napa County FC&WCD
+define swp_CO_Solano {alias D_BKR004_NBA009_SCWA_PCO kind 'swp_delivery' units 'cfs'} !Solano County WA
+define swp_CO_NBay   {alias swp_CO_Napa + swp_CO_Solano kind 'swp_delivery' units 'cfs'} !sub-total
+
+!South Bay
+define swp_CO_ACFC {alias D_SBA009_ACFC_PCO + D_SBA020_ACFC_PCO kind 'swp_delivery' units 'cfs'} !Alameda County FC&WCD, Zone 7
+define swp_CO_ACWD {alias D_SBA029_ACWD_PCO kind 'swp_delivery' units 'cfs'} !Alameda County WD
+define swp_CO_SCV  {alias D_SBA036_SCVWD_PCO kind 'swp_delivery' units 'cfs'} !Santa Clara Valley WD
+define swp_CO_SBay {alias swp_CO_ACFC + swp_CO_ACWD + swp_CO_SCV kind 'swp_delivery' units 'cfs'} !sub-total
+
+!San Joaquin Valley
+define swp_CO_Oak    {alias D_CAA046_71_PA7_PCO kind 'swp_delivery' units 'cfs'} !Oak Flat WD
+define swp_CO_Kings  {alias D_CAA181_KINGS_PCO kind 'swp_delivery' units 'cfs'} !County of Kings
+define swp_CO_Dudley {alias D_CAA184_DUDLEY_PCO kind 'swp_delivery' units 'cfs'} !Dudley Ridge WD
+define swp_CO_CLWA1  {alias D_CSB009_CLRTA1_DDWD_PCO kind 'swp_delivery' units 'cfs'} !SANTA CLARITA WA
+define swp_CO_Empire {alias D_CAA173_EMPIRE_PCO kind 'swp_delivery' units 'cfs'} !Empire West Side ID
+define swp_CO_Kern   {alias D_CAA194_KERN_PCO + D_CAA242_Kern_PCO + D_CAA279_Kern_PCO + D_CSB015_KERN_BMWD_PCO kind 'swp_delivery' units 'cfs'} !Kern County WA
+define swp_CO_Tulare {alias D_CAA183_TULARE_PCO kind 'swp_delivery' units 'cfs'} !Tulare Lake Basin WSD
+define swp_CO_SJV    {alias swp_CO_Oak    +
+                            swp_CO_Kings  +
+                            swp_CO_Dudley +
+                            swp_CO_CLWA1  +
+                            swp_CO_Empire +
+                            swp_CO_Kern   +
+                            swp_CO_Tulare kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Central Coastal
+define swp_CO_SLO    {alias D_CSB038_OBISPO_PCO kind 'swp_delivery' units 'cfs'} !San Luis Obispo County FC&WCD
+define swp_CO_SB     {alias D_CSB103_BRBRA_PCO kind 'swp_delivery' units 'cfs'} !Santa Barbara County FC&WCD
+define swp_CO_CCoast {alias swp_CO_SLO + swp_CO_SB kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Southern California
+define swp_CO_AVEK  {alias D_ESB324_AVEK_PCO kind 'swp_delivery' units 'cfs'}    !Antelope Valley-East Kern WA
+define swp_CO_CLWA2 {alias D_WSB032_CLRTA2_PCO kind 'swp_delivery' units 'cfs'}    !SANTA CLARITA WA
+define swp_CO_CVWD  {alias D_ESB407_CCHLA_PCO kind 'swp_delivery' units 'cfs'}    !Coachella Valley WD
+define swp_CO_CLA   {alias D_SVRWD_CSTLN_PCO  kind 'swp_delivery' units 'cfs'}    !Crestline-Line Arrowhead WA
+define swp_CO_Desert{alias D_ESB408_DESRT_PCO kind 'swp_delivery' units 'cfs'}    !Desert WA
+define swp_CO_LCID  {alias D_ESB355_LROCK_PCO kind 'swp_delivery' units 'cfs'}    !Littlerock Creek ID
+define swp_CO_MWD   {alias D_PRRIS_MWDSC_PCO + D_ESB413_MWDSC_PCO + D_WSB031_MWDSC_PCO + D_ESB433_MWDSC_PCO kind 'swp_delivery' units 'cfs'} !Metropolitan WDSC
+define swp_CO_MWA   {alias D_ESB403_MOJVE_PCO kind 'swp_delivery' units 'cfs'}    !Mojave WA
+define swp_CO_PWD   {alias D_ESB347_PLMDL_PCO kind 'swp_delivery' units 'cfs'}    !Palmdale WD
+define swp_CO_SBV   {alias D_ESB414_BRDNO_PCO kind 'swp_delivery' units 'cfs'}    !San Bernadino Valley MWD
+define swp_CO_SGV   {alias D_ESB415_GABRL_PCO kind 'swp_delivery' units 'cfs'}    !San Gabriel Valley MWD
+define swp_CO_SGP   {alias D_ESB420_GRGNO_PCO kind 'swp_delivery' units 'cfs'}    !San Gorgonio Pass WA
+define swp_CO_VC    {alias D_PYRMD_VNTRA_PCO + D_CSTIC_VNTRA_PCO kind 'swp_delivery' units 'cfs'} !Ventura County FCD
+define swp_CO_SoCal {alias swp_CO_AVEK   +
+                           swp_CO_CLWA2  +
+                           swp_CO_CVWD   +
+                           swp_CO_CLA    +
+                           swp_CO_Desert +
+                           swp_CO_LCID   +
+                           swp_CO_MWD    +
+                           swp_CO_MWA    +
+                           swp_CO_PWD    +
+                           swp_CO_SBV    +
+                           swp_CO_SGV    +
+                           swp_CO_SGP    +
+                           swp_CO_VC kind 'swp_delivery' units 'cfs'}   !sub-total
+
+!Total
+define swp_CO_oth {alias swp_co_feath + swp_co_nbay + swp_co_sjv + swp_co_ccoast kind 'swp_delivery' units 'cfs'}
+define swp_CO_total    {STD kind 'swp_delivery' units 'cfs'}
+goal set_swp_CO_total {swp_CO_total = swp_CO_Feath  +
+                           swp_CO_NBay   +
+                           swp_CO_SBay   +
+                           swp_CO_SJV    +
+                           swp_CO_CCoast +
+                           swp_CO_SoCal}
+
+
+!********************************************************************************
+!Article 21 interruptable deliveries
+
+!Feather River
+define swp_IN_Butte  {alias 0. kind 'swp_delivery' units 'cfs'} !County of Butte
+define swp_IN_Yuba   {alias D_WTPCYC_16_PU_SWP_PIN kind 'swp_delivery' units 'cfs'} !City of Yuba City
+define swp_IN_Feath  {alias swp_IN_Butte + swp_IN_Yuba kind 'swp_delivery' units 'cfs'} !sub-total
+
+!North Bay
+define swp_IN_Napa   {alias D_BKR004_NBA009_NAPA_PIN kind 'swp_delivery' units 'cfs'} !Napa County FC&WCD
+define swp_IN_Solano {alias D_BKR004_NBA009_SCWA_PIN kind 'swp_delivery' units 'cfs'} !Solano County WA, Added Article 21 demand. 1/2/2020
+define swp_IN_NBay   {alias swp_IN_Napa + swp_IN_Solano kind 'swp_delivery' units 'cfs'} !sub-total
+
+!South Bay
+define swp_IN_ACFC {alias D_SBA009_ACFC_PIN kind 'swp_delivery' units 'cfs'} !Alameda County FC&WCD, Zone 7
+define swp_IN_ACWD {alias D_SBA029_ACWD_PIN kind 'swp_delivery' units 'cfs'} !Alameda County WD
+define swp_IN_SCV  {alias D_SBA036_SCVWD_PIN kind 'swp_delivery' units 'cfs'} !Santa Clara Valley WD
+define swp_IN_SBay {alias swp_IN_ACFC + swp_IN_ACWD + swp_IN_SCV kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Bay Area
+define swp_IN_BayArea {alias swp_IN_SBay + swp_IN_NBay kind 'swp_delivery' units 'cfs'} !sub-total
+
+!San Joaquin Valley
+define swp_IN_Oak    {alias D_CAA046_71_PA7_PIN kind 'swp_delivery' units 'cfs'} !Oak Flat WD
+define swp_IN_Kings  {alias D_CAA181_KINGS_PIN kind 'swp_delivery' units 'cfs'} !County of Kings, Add Article 21 demand. 1/2/2020
+define swp_IN_Dudley {alias D_CAA184_DUDLEY_PIN kind 'swp_delivery' units 'cfs'} !Dudley Ridge WD
+define swp_IN_CLWA1  {alias D_CSB009_CLRTA1_DDWD_PIN kind 'swp_delivery' units 'cfs'} !SANTA CLARITA WA
+define swp_IN_Empire {alias D_CAA173_EMPIRE_PIN kind 'swp_delivery' units 'cfs'} !Empire West Side ID
+define swp_IN_Kern   {alias D_CAA242_Kern_PIN kind 'swp_delivery' units 'cfs'} !Kern County WA
+define swp_IN_Tulare {alias D_CAA183_TULARE_PIN kind 'swp_delivery' units 'cfs'} !Tulare Lake Basin WSD
+define swp_IN_SJV    {alias swp_IN_Oak    +
+                            swp_IN_Kings  +
+                            swp_IN_Dudley +
+                            swp_IN_CLWA1  +
+                            swp_IN_Empire +
+                            swp_IN_Kern   +
+                            swp_IN_Tulare kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Central Coastal
+define swp_IN_SLO    {alias D_CSB038_OBISPO_PIN kind 'swp_delivery' units 'cfs'} !San Luis Obispo County FC&WCD
+define swp_IN_SB     {alias D_CSB103_BRBRA_PIN kind 'swp_delivery' units 'cfs'} !Santa Barbara County FC&WCD, Add Article 21 demand. 1/2/2020
+define swp_IN_CCoast {alias swp_IN_SLO + swp_IN_SB kind 'swp_delivery' units 'cfs'} !sub-total
+
+!South Coast
+define swp_IN_CLWA2 {alias 0. kind 'swp_delivery' units 'cfs'}    !Santa Clarita Valley Water Agency
+define swp_IN_MWD   {alias D_PRRIS_MWDSC_PIN + D_ESB413_MWDSC_PIN + D_WSB031_MWDSC_PIN + D_ESB433_MWDSC_PIN kind 'swp_delivery' units 'cfs'} !MetropoliINn WDSC
+define swp_IN_SBV   {alias D_ESB414_BRDNO_PIN kind 'swp_delivery' units 'cfs'}    !San Bernadino Valley MWD
+define swp_IN_SGV   {alias D_ESB415_GABRL_PIN kind 'swp_delivery' units 'cfs'}    !San Gabriel Valley MWD, Add Article 21 demand. 1/2/2020
+define swp_IN_SGP   {alias D_ESB420_GRGNO_PIN kind 'swp_delivery' units 'cfs'}    !San Gorgonio Pass WA
+define swp_IN_VC    {alias D_CSTIC_VNTRA_PIN kind 'swp_delivery' units 'cfs'} !Ventura County FCD, Add Article 21 demand. 1/2/2020
+define swp_IN_SCoast {alias swp_IN_CLWA2  +
+                           swp_IN_MWD    +
+                           swp_IN_SBV    +
+                           swp_IN_SGV    +
+                           swp_IN_SGP    +
+                           swp_IN_VC kind 'swp_delivery' units 'cfs'}   !sub-total
+
+!South and Central Coast
+define swp_IN_SoCCst {alias swp_IN_CCoast + swp_IN_SCoast kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Other Southern California M&I
+define swp_IN_AVEK  {alias D_ESB324_AVEK_PIN kind 'swp_delivery' units 'cfs'}    !Antelope Valley-East Kern WA
+define swp_IN_CVWD  {alias D_ESB407_CCHLA_PIN kind 'swp_delivery' units 'cfs'}    !Coachella Valley WD
+define swp_IN_CLA   {alias 0.  kind 'swp_delivery' units 'cfs'}    !Crestline-Line Arrowhead WA
+define swp_IN_Desert{alias D_ESB408_DESRT_PIN kind 'swp_delivery' units 'cfs'}    !Desert WA
+define swp_IN_LCID  {alias D_ESB355_LROCK_PIN kind 'swp_delivery' units 'cfs'}    !Littlerock Creek ID
+define swp_IN_MWA   {alias D_ESB403_MOJVE_PIN kind 'swp_delivery' units 'cfs'}    !Mojave WA
+define swp_IN_PWD   {alias D_ESB347_PLMDL_PIN kind 'swp_delivery' units 'cfs'}    !Palmdale WD
+define swp_IN_Other {alias swp_IN_AVEK   +
+                           swp_IN_CVWD   +
+                           swp_IN_CLA    +
+                           swp_IN_Desert +
+                           swp_IN_LCID   +
+                           swp_IN_MWA    +
+                           swp_IN_PWD kind 'swp_delivery' units 'cfs'}   !sub-total
+
+!Southern California
+define swp_IN_SoCal {alias swp_IN_SCoast + swp_IN_Other kind 'swp_delivery' units 'cfs'} !sub-total
+
+!Total
+define swp_IN_total {std kind 'swp_delivery' units 'cfs'}
+goal set_swp_IN_total {swp_IN_total =
+                           swp_IN_Feath  +
+                           swp_IN_NBay   +
+                           swp_IN_SBay   +
+                           swp_IN_SJV    +
+                           swp_IN_CCoast +
+                           swp_IN_SoCal }
+
+
+! Dynamic integer variable to determine if SWP IN is delivered SOD
+define int_SLUIS_SWP_FULL {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal SLUIS_SWP_FULL {S_SLUIS_SWP > int_SLUIS_SWP_FULL * S_SLUIS_SWPlevel5} ! S_SLUIS_SWPlevel5 around 1067 TAF
+
+!Define SWP Article 21 deliveries except from Feather and North Bay
+define SWP_IN_SOD {alias swp_IN_total -swp_IN_Feath - swp_IN_NBay kind 'swp_delivery' units 'cfs'}
+
+! Ensure that SWP SOD Article 21 is only delivered if SWP San Luis is full
+goal limitSOD_PIN_fullSLUIS_SWP {SWP_IN_SOD < int_SLUIS_SWP_FULL*10000}
+
+!Additional useful outputs
+define SWP_TA_SOD {alias swp_TA_total - swp_TA_Feath - swp_TA_NBay kind 'swp_delivery' units 'cfs'}
+define SWP_CO_SOD {alias swp_CO_total - swp_CO_Feath - swp_CO_NBay kind 'swp_delivery' units 'cfs'}
+
+define SWP_TA_FeathBasin {alias swp_TA_Butte + swp_TA_Feath + swp_TA_Yuba kind 'swp_delivery' units 'cfs'}
+define SWP_CO_FeathBasin {alias swp_CO_Butte + swp_CO_Feath + swp_CO_Yuba kind 'swp_delivery' units 'cfs'}
+define SWP_IN_FeathBasin {alias swp_IN_Butte + swp_IN_Feath + swp_IN_Yuba kind 'swp_delivery' units 'cfs'}
+
+define SWP_tot_FeathBasin {alias swp_TA_FeathBasin + swp_CO_FeathBasin + swp_IN_FeathBasin kind 'swp_delivery' units 'cfs'}
+

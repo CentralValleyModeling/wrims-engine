@@ -1,0 +1,71 @@
+! Export/Inflow Ratio Constraint.
+
+! e/i ratio:
+
+!define eiratio_Feb {value 0.45}	!add 8 river index range: 0.35 to 0.45
+!Use the table from CALSIM II for February
+!define eiratio_Feb {select  ratio from CAM_febeiratio where wateryear=wateryear}
+define(fm) eiratio_Feb {
+    case feb    {
+        condition mv($m) == FEB
+        select  ratio
+        from    febeiratio
+        given   JanEightRiver=EightRiver_Index_dv($m-1)/1000
+        use     linear}
+    case rest   {
+        condition always
+        value 0.}
+}
+! TFFIX: Get this working for forecasted Eight River Indexes used in CalSim 3.  Using table for now.
+
+define(fm) eiratio_fm{
+	case MarJun{condition mv($m) >= Mar .and. mv($m)<=Jun value 0.35}
+	case Feb{condition mv($m) == Feb value eiratio_Feb($m)}
+	case JulJan{condition always value 0.65}
+}
+
+! Write out EI ratio
+define(fm) eiratio_dv_fm {alias eiratio_fm($m) KIND 'EI-RATIO-STD' UNITS 'NONE'}
+
+! exports:
+define(fm) export_fm {std kind 'Flow' units 'TAF'}
+
+! inflows:
+define(fm) inflow_fm {std kind 'Flow' units 'TAF'}
+
+! set exports:
+goal(fm) set_export_fm {export_fm($m) = D33E_fm($m) + D33D_fm($m) + D33D_WHL_fm($m)}
+
+define(fm) export1_dv_fm {alias export_fm($m) kind 'FLOW' units 'TAF'}
+
+define(fm) export2_dv_fm {alias export_fm($m) + D33B_fm($m) kind 'FLOW' units 'TAF'}
+
+! inflows:
+goal(fm) set_inflow_fm {inflow_fm($m) = C31_fm($m) + I33A_fm($m) + I33B_fm($m)+ SacTreat_fm($m) }
+
+! set eiratio:
+goal(fm) set_eiratio_fm {export_fm($m) < eiratio_fm($m) * inflow_fm($m)}
+
+! allowable export:
+define(fm) EI_Max_fm {std kind 'Flow' units 'TAF'}
+
+! set allowable export:
+goal(fm) set_exp_allow_fm {EI_Max_fm($m) = eiratio_fm($m) * inflow_fm($m)}
+
+! if eiratio is in control, equally split water between Banks and Tracy up to Tracy's capacity. integers are used
+define(fm) EIabmax_fm {std kind 'FLOW' units 'TAF'}
+
+define(fm) EIblmax_fm {std kind 'FLOW' units 'TAF'}
+
+define(fm) EI_int_fm {INTEGER std kind 'INTEGER' units 'NONE'}
+
+goal(fm) force_EI_int_fm {EI_Max_fm($m) - export_fm($m) - 0.51 = EIabmax_fm($m) - EIblmax_fm($m)}
+
+goal(fm) force_at_fm {EIabmax_fm($m) < EI_int_fm($m) * 9999999.0}
+
+goal(fm) force_below_fm {EIblmax_fm($m) < 9999999.0 - EI_int_fm($m) * 9999999.0}
+
+goal(fm) Equal_split1_fm {lhs D33D_fm($m) - D33E_fm($m) rhs 999999. * EI_int_fm($m) lhs<rhs penalty 0. lhs>rhs penalty 700.}
+									    				   
+goal(fm) Equal_split2_fm {lhs D33E_fm($m) - D33D_fm($m) rhs 999999. * EI_int_fm($m) lhs<rhs penalty 0. lhs>rhs penalty 700.}
+

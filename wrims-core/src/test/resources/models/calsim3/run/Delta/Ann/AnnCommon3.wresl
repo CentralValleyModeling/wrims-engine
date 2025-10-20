@@ -1,0 +1,34 @@
+
+!*************************************************************************************************************
+! Estimates for San Joaquin River
+define C10MIN_ann_est {
+  case FebMarJun {
+    condition month == feb .or. month == mar .or. month == jun
+    value  VernMin_reqtobemet}
+  case April {
+    condition month == apr
+    value  VernMin_reqtobemet*14./30.}
+  case MayOnly {
+    condition month == may
+    value  VernMin_reqtobemet*16./31.}
+  case otherwise {
+    condition always
+    value  0. }
+}
+
+!define C10INSTREAM_ann_est {value OIDInstreamToBeMet*TAF_cfs}
+
+define C20MIN_ann_est {
+  case October {
+    condition month == oct
+    value       MercedRelease_Oct*TAF_cfs}
+  case otherwise {
+    condition always
+    value       0.}
+}
+
+define SJR_ann_est {value Vern_nomincycle6
+                          + C10MIN_ann_est
+!                          + C10INSTREAM_ann_est
+                          + C20MIN_ann_est}
+define SJR_ann_estdv {alias SJR_ann_est kind 'ANN-PARAMETER' units 'cfs'}

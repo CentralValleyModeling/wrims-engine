@@ -1,0 +1,37 @@
+! WheelCore.wresl - stuff that should always be there to support Wheeling logic
+! Set up variables to calculate the maximum flow that Tracy can pump due to 
+! channel capacity restrictions.
+
+define dmc_dels_blw_4200 {value D_DMC054_DMCLOS[SJRBASE] + D_DMC054_NMW004[SJRBASE]
+                              + D_DMC049_DMCLOS[SJRBASE] + D_DMC044_71_PA5[SJRBASE]
+                              + D_DMC044_DMCLOS[SJRBASE] + D_DMC044_71_PA4[SJRBASE]
+                              + D_DMC039_DMCLOS[SJRBASE] + D_DMC034_DMCLOS[SJRBASE]
+                              + D_DMC034_71_PA2[SJRBASE] + D_DMC034_WWW001[SJRBASE]
+                              + D_DMC034_71_PA3[SJRBASE] + D_DMC030_DMCLOS[SJRBASE]
+                              + D_DMC030_71_PA1[SJRBASE] + D_DMC024_DMCLOS[SJRBASE]
+                              + D_DMC021_DMCLOS[SJRBASE] + D_DMC021_50_PA1[SJRBASE]
+                              + D_DMC016_WTPJJO[SJRBASE] + D_DMC016_DMCLOS[SJRBASE]
+                              + D_DMC011_71_PA8[SJRBASE] + D_DMC011_DMCLOS[SJRBASE]}
+define dmc_dels_blw_4300 {value D_DMC034_DMCLOS[SJRBASE] + D_DMC034_71_PA2[SJRBASE]
+                              + D_DMC034_WWW001[SJRBASE] + D_DMC034_71_PA3[SJRBASE]
+                              + D_DMC030_DMCLOS[SJRBASE] + D_DMC030_71_PA1[SJRBASE]
+                              + D_DMC024_DMCLOS[SJRBASE] + D_DMC021_DMCLOS[SJRBASE]
+                              + D_DMC021_50_PA1[SJRBASE]  + D_DMC016_WTPJJO[SJRBASE]
+                              + D_DMC016_DMCLOS[SJRBASE] + D_DMC011_71_PA8[SJRBASE]
+                              + D_DMC011_DMCLOS[SJRBASE]}
+define dmc_dels_blw_4400 {value D_DMC021_DMCLOS[SJRBASE] + D_DMC021_50_PA1[SJRBASE]
+                              + D_DMC016_WTPJJO[SJRBASE] + D_DMC016_DMCLOS[SJRBASE]
+                              + D_DMC011_71_PA8[SJRBASE] + D_DMC011_DMCLOS[SJRBASE]}
+define dmc_dels_blw_4500 {value D_DMC016_WTPJJO[SJRBASE] + D_DMC016_DMCLOS[SJRBASE]
+                              + D_DMC011_71_PA8[SJRBASE] + D_DMC011_DMCLOS[SJRBASE]}
+
+define maxTracycalc1 {value min(TracyMaxAllow,
+                     4500+dmc_dels_blw_4500, 4400+dmc_dels_blw_4400,
+                     4300+dmc_dels_blw_4300, 4200+dmc_dels_blw_4200) }
+define Intertie_Cap {value 400.}                     
+define maxTracycalc {value min(maxTracycalc1 + Intertie_Cap, TracyMaxAllow)}
+define maxTracycalcDV {alias maxTracycalc Units 'cfs'}  ! For Output Only
+
+! SOD Flow Directions
+goal Wheeling3 {D_CAA238_CVPCV = C_CAA003_cvc}
+goal wheel_gw {D_CAA242_Kern_GWRECH_CVPB < C_CAA003_cvpwhl}

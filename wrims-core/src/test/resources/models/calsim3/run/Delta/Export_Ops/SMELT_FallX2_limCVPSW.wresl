@@ -1,0 +1,234 @@
+! SMELT_FallX2_LimCVPSW.wresl
+!
+! Fall X2 criteria is implemented in the UPSTREAM cycle.
+! Project operations to meet the criteria are computed without specific guidelines 
+! about whether the source of additional delta outflow comes from storage or export cuts.
+! In subsequent cycles, this file holds the SWP action to be the model's solution for that balance,
+! but the CVP action is examined to determine if the balance should shift either way.
+! This could call for relaxing export cuts and calling for more storage release if Shasta is
+! high and significant shortages are seen, or the opposite.  This logic should be flexible
+! wrt climate, sea level rise, and alternative regulatory criteria.
+
+
+define FWS_MaxExp_X2 {value 99999.}
+define FWS_MaxExpX2dv {alias FWS_MaxExp_X2 kind 'Export-Limit' units 'cfs'} !for output only
+
+! look back at the monthlyweighted solution to calculate what the required increase in DO was to meet Fall X2
+define FallX2_DOinc {
+    case AugSepWAN {condition month>=AUG .and. wyt_SAC<=2 value max(0., MRDO_X2nocap - NDOI[MONTHLYWEIGHTED])}  
+    case OctWAN    {condition month==OCT .and. wyt_SAC<=2 value max(0., MRDO_X2nocap - NDOI[MONTHLYWEIGHTED])}  
+    case otherwise {condition always value 0.}
+}
+
+! Calculate SWP export cuts and storage withdrawal increase to meet Fall X2 decided in UPSTREAM,
+! and hold that operation to fix SWP share of compliance.  
+define SWP_MaxExp_FX2 { !this is the max allowable SWP export under FallX2
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+          value  C_CAA003_SWP[UPSTREAM] }
+    case otherwise {condition always value 99999. }
+}
+
+define SWP_ExpCut_for_FX2 { ! this is how much SWP export got cut for the fall x2 action
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value C_CAA003_SWP[MONTHLYWEIGHTED]- C_CAA003_SWP[UPSTREAM] }
+    case otherwise {condition always value 0. }
+}
+
+define SWPDSforFX2 { ! this is how much was taken from storage for the fall x2 action
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value max(0., swpds[upstream] - swpds[monthlyweighted])}
+    case otherwise {condition always value 0. }
+}
+
+! hold exports to no more than the [upstream] value to preserve the fall x2 action in subsequent cycles
+goal holdSWPExpCut_for_FX2 {
+    lhs C_CAA003_SWP
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        rhs C_CAA003_SWP[UPSTREAM]
+        lhs<rhs penalty 0   }
+} 
+
+! Maintain SWP Oroville releases to support Fall X2.  Add'l releases in subsequent cycles 
+! are not constrained.  Goal would need revision if any other operation would need to back
+! water up in Aug-Oct under COA sharing specs.
+goal holdSWPDS_for_FX2 { 
+    lhs SWPDS
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        rhs SWPDS[UPSTREAM]
+        lhs<rhs penalty 5000
+        lhs>rhs penalty 0 }
+} 
+define SWP_MaxExp_FX2dv {alias SWP_MaxExp_FX2 kind 'FallX2' units 'cfs'} !for output only
+define SWP_ExpCut_for_FX2dv {alias SWP_ExpCut_for_FX2 kind 'FallX2' units 'cfs'} !for output only
+define SWPDSforFX2dv  {alias SWPDSforFX2    kind 'FallX2' units 'cfs'} !for output only
+
+! Determine the balance of CVP operations to meet Fall X2
+! Possibly shift to prioritize export cuts when possible to preserve NOD Storage
+! and favor Folsom storage withdrawal over Shasta.  
+! If NOD storage conditions are limited, cut exports as far as possible to avoid 
+! shortages and possibly relax outflow standard to avoid excessive storage drawdown
+define CVP_ExpRed_FX2 {
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value C_DMC003[MONTHLYWEIGHTED]-C_DMC003[UPSTREAM] }
+    case otherwise {condition always value 0. }
+}
+define CVPSW_for_FX2 {
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value  (SHADS[UPSTREAM] + FOLDS[UPSTREAM] + WHSSW[UPSTREAM])
+             - (SHADS[MONTHLYWEIGHTED] + FOLDS[MONTHLYWEIGHTED] + WHSSW[MONTHLYWEIGHTED])}
+    case otherwise {condition always value 0. }
+}
+define UnusedFS_for_FX2 {
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value  unused_fs[MONTHLYWEIGHTED] - unused_fs[UPSTREAM]}
+    case otherwise {condition always value 0. }
+}
+define CVP_ExpRed_FX2dv {alias CVP_ExpRed_FX2 kind 'FallX2' units 'cfs'} !for output only
+define CVPSW_for_FX2dv {alias CVPSW_for_FX2 kind 'FallX2' units 'cfs'} !for output only
+define UnusedFS_for_FX2dv {alias UnusedFS_for_FX2 kind 'FallX2' units 'cfs'} !for output only
+
+! do not allow shortages to be caused by export cuts for Fall X2
+goal limCVP_SOD_Shortage {
+    lhs Short_CVP_Tot_S 
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        rhs Short_CVP_Tot_S[monthlyweighted]
+        lhs<rhs penalty 0}
+}
+
+! What was the de-facto export operation in the upstream cycle?  How much more export could be cut?
+! Calculate if add'l water could be taken from CVPSL to support add'l export cuts
+define AddlCVPSLRelsLimit {
+    case AugX2 {
+        condition month==AUG .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        value max(0., S_SLUIS_CVP[UPSTREAM] - (S_SLUIS_CVP[MONTHLYWEIGHTED] - 0.33*(S_SLUIS_CVP[MONTHLYWEIGHTED] - S_SLUIS_CVP_DP)))}
+    case SepX2 {
+        condition month==SEP .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        value max(0., S_SLUIS_CVP[UPSTREAM] - (S_SLUIS_CVP[MONTHLYWEIGHTED] - 0.90*(S_SLUIS_CVP[MONTHLYWEIGHTED] - S_SLUIS_CVP_DP)))}
+    case OctX2 {
+        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1.
+        value S_SLUIS_CVP[UPSTREAM] - S_SLUIS_CVP_DP}
+    case otherwise {condition always value 0. }
+}
+! is there upstream control capacity to exchange export reduction for storage withdrawal?
+define CVP_upstrm_exc {value min(max(0.,S_SHSTAlevel5-S_SHSTA[UPSTREAM])*taf_cfs, C_SAC120_ADD[UPSTREAM], C_KSWCK_ADD[UPSTREAM]) 
+                           + min(max(0.,S_FOLSMlevel5-S_FOLSM[UPSTREAM])*taf_cfs, C_AMR004_ADD[UPSTREAM], C_NTOMA_ADD[UPSTREAM])}
+! calculate the potential for increase in export cut
+define CVP_FallX2_ExpCutInc {
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value min(max(0.,C_DMC003[UPSTREAM]-800.), AddlCVPSLRelsLimit*taf_cfs, CVP_upstrm_exc)}
+    case otherwise {condition always value 0. }
+}    
+! limit Jones to the upstream cycle result minus additional export cuts
+goal FallX2JonesLimit {
+    lhs C_DMC003
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        rhs C_DMC003[upstream] - CVP_FallX2_ExpCutInc
+        lhs<rhs penalty 0}  
+}
+
+! calculate the combined export reduction for the projects.
+! SWP portion was decided dynamically in upstream; 
+! CVP portion may be adjusted up to the point where shortages should be prevented
+! this is the cap on export reduction to be used in potential relaxation of X2 adherance
+define FallX2_ExpRedCap {
+    case FallX2Action {
+        condition FallX2_DOinc > 1.
+        value max(0., (C_CAA003_SWP[monthlyweighted] - C_CAA003_SWP[upstream]) 
+                    + (C_DMC003[monthlyweighted] - C_DMC003[upstream] + CVP_FallX2_ExpCutInc))}
+    case otherwise {condition always value 0. }
+}    
+! limit CVP contribution to Fall X2 to what could have come from export reduction
+! if Shasta storage condition is getting low
+!goal meetD407 {
+!    lhs D407 
+!    case Oct {
+!        condition month==OCT .and. wyt_SAC<=2 .and. FallX2_DOinc > 1. .and. S4[MONTHLYWEIGHTED]<2700.
+!        rhs min(mrdo_x2nocap, C406[monthlyweighted] + FallX2_ExpRedCap + SWPDSforFX2)
+!        rhs min(mrdo_x2nocap, D407[monthlyweighted] + C407_ANN[monthlyweighted] + FallX2_ExpRedCap)
+!        lhs<rhs penalty 0}
+!}
+
+! limit CVP wheeling operations
+goal lmtCVPwheelrels {
+    lhs C_CAA003_cvcrels + C_CAA003_whlrels 
+    case FallX2 {
+        condition FallX2_DOinc > 1.
+        rhs 0.
+        lhs<rhs penalty 0}
+}
+
+define AddlCVPSLRelsLimitdv {alias AddlCVPSLRelsLimit kind 'FallX2' units 'taf'} !for output only
+define CVP_FallX2_ExpCutIncdv {alias CVP_FallX2_ExpCutInc kind 'FallX2' units 'cfs'} !for output only
+define FallX2_DOincdv {alias FallX2_DOinc kind 'Export-Limit' units 'cfs'} !for output only
+define FallX2_ExpRedCapdv {alias FallX2_ExpRedCap kind 'Export-Limit' units 'cfs'} !for output only
+
+
+! Output variables to account for how CVP meets its fall X2 obligation - export reduction, 
+! storage withdrawal, or from a decrease in SWP export of unused federal share
+define CVPFallX2_ExpRedDV {std kind 'output-cfs' units 'cfs'}
+goal CalcCVPFallX2_ExpRedDV {
+    lhs CVPFallX2_ExpRedDV
+    case AugSepOctWAN {
+        condition FallX2_DOinc > 0.
+        rhs max(0.,C_DMC003[monthlyweighted]-C_DMC003[upstream]+CVP_FallX2_ExpCutInc)}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+define CVPFallX2_ExpRed2DV {std kind 'output-cfs' units 'cfs'}
+goal CalcCVPFallX2_ExpRed2DV {
+    lhs CVPFallX2_ExpRed2DV
+    case AugSepOctWAN {
+        condition FallX2_DOinc > 0.
+        rhs C_DMC003[monthlyweighted]-C_DMC003}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+
+define CVPFallX2_SWDV {std kind 'output-taf' units 'taf'}
+goal CalcCVPFallX2_SWDV {
+    lhs CVPFallX2_SWDV
+    case AugSepOctWAN {
+        condition FallX2_DOinc > 0.
+        rhs S_SHSTA[monthlyweighted]+S_FOLSM[monthlyweighted]+S_TRNTY[monthlyweighted]-S_SHSTA-S_FOLSM-S_TRNTY}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+define CVPFallX2_SWinitDV {std kind 'output-taf' units 'taf'}
+goal CalcCVPFallX2_SWinitDV {
+    lhs CVPFallX2_SWinitDV
+    case AugSepOctWAN {
+        condition FallX2_DOinc > 0. .and. (S_SHSTA[monthlyweighted]+S_FOLSM[monthlyweighted]+S_TRNTY[monthlyweighted]-S_SHSTA[upstream]-S_FOLSM[upstream]-S_TRNTY[upstream] > 0.) ! For CC run, 11/2023
+        rhs S_SHSTA[monthlyweighted]+S_FOLSM[monthlyweighted]+S_TRNTY[monthlyweighted]-S_SHSTA[upstream]-S_FOLSM[upstream]-S_TRNTY[upstream]}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+define CVPFallX2_UnusedFSDV {std kind 'output-cfs' units 'cfs'}
+goal CalcCVPFallX2_UnusedFSDV {
+    lhs CVPFallX2_UnusedFSDV
+    case AugSepOctWAN {
+        condition FallX2_DOinc > 0.
+        rhs max(0., C_CAA003_exp2[monthlyweighted]-C_CAA003_exp2[upstream])}
+    case otherwise {
+        condition always
+        rhs 0.}
+}
+
+!one more output variable for total export reduction
+define FallX2_ExpReddv {alias CVPFallX2_ExpRed2DV + SWP_ExpCut_for_FX2 kind 'Export-Limit' units 'cfs'} !for output only
+
+

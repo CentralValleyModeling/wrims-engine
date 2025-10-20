@@ -1,0 +1,54 @@
+
+define fm {
+	case OctToDec{
+		condition month<=3
+       		value 3-month
+       	}
+       	case JanToSep{
+		condition month>3
+			value 15-month
+	}
+}
+
+define fm_dv{std kind 'count' units 'none'}
+goal setfm_dv{fm_dv=fm}
+
+define(fm) mv{
+	Case Sep{
+		condition (month+$m)/12.0==int((month+$m)/12.0)
+		value 12
+	}
+	Case OctToAug{
+		condition always
+		value (month+$m)-int((month+$m)/12.0)*12
+	}
+}
+
+define monthFromJan{
+	case JanSep{
+		condition month>=4
+		value Jan-month
+	}	
+	case OctDec{
+		condition always
+		value Jan-month-12
+	}
+}
+
+define(fm) wy{
+	value int((month+$m-1)/12.)+wateryear
+}
+
+define SQKS {alias 0.0 kind 'CHANNEL' units 'TAF'}
+define SQOR {alias 0.0 kind 'CHANNEL' units 'TAF'}
+define SQFW {alias 0.0 kind 'RIVER-SPILLS' units 'TAF'}
+define SQFP {alias 0.0 kind 'CHANNEL' units 'TAF'} 
+define SQSW {alias 0.0 kind 'RIVER-SPILLS' units 'TAF'}
+define SQNB {alias 0.0 kind 'CHANNEL' units 'TAF'}
+define C_NTOMA	{std kind 'CHANNEL' units 'CFS'} 
+
+define ihs{value Oct-Month-12}
+define ihe{value Apr-Month}
+define ihs1{value Oct-month}
+define ihs2{value Jan-month}
+define ihe1{value SEP-month}

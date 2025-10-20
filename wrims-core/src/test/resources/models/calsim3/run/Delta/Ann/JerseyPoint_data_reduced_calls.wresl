@@ -1,0 +1,52 @@
+/*
+ 
+References data from cycle MONTHLYWEIGHTED to reduce ANN function calls to reduce runtime.
+
+See the *_data.wresl file for how these parameters are calculated.
+
+*/
+
+!****************************************************************************************
+
+! calculate previous month's value of salinity
+define JP_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define JP_EC_Month_sv {value JP_EC_Month[monthlyweighted]}
+goal setJP_EC_MON {JP_EC_Month = JP_EC_Month_sv}
+
+!get ANN_EC for 2 month earlier 4/14/2005
+define JP_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define JP_EC_Month_smooth_sv {value JP_EC_MonthDSM2[monthlyweighted]}
+goal setJP_EC_DSM2 {JP_EC_MonthDSM2 = JP_EC_Month_smooth_sv}
+
+! calculate the maximum 14 day running average
+define JP_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+define JP_EC_Max14Day_sv {value JP_EC_Max14Day[monthlyweighted]}
+goal setJP_EC_14Ave {JP_EC_Max14Day = JP_EC_Max14Day_sv}
+
+!get ANN_EC for 2 month earlier
+define JP_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+define JP_EC_Max14day_smooth_sv {value JP_EC_Max14_DSM2[monthlyweighted]}
+goal setJP_EC_DSM2_2 {JP_EC_Max14_DSM2 = JP_EC_Max14day_smooth_sv}
+
+!****************************************************************************************
+
+! define the EC standard for Jersey Point (millimhos/cm)
+define JP_EC_STD {std kind 'SALINITY' units 'UMHOS/CM'}
+define JP_EC_STD_sv {value JP_EC_STD[monthlyweighted]}
+goal JPECstandout {JP_EC_STD = JP_EC_STD_sv}
+
+!****************************************************************************************
+
+!get slope and intercept for constraint exp<=m*sac+b
+define JP_m {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define JP_b {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+define JP_m_sv {value JP_m[monthlyweighted]}
+define JP_b_sv {value JP_b[monthlyweighted]}
+goal setJP_m {JP_m = JP_m_sv}
+goal setJP_b {JP_b = JP_b_sv}
+
+!****************************************************************************************
+!Get the required Sac flow for ZERO exports
+define JP_Sac_ZeroExp {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define JP_Sac_ZeroExp_sv2 {value JP_Sac_ZeroExp[monthlyweighted]}
+goal setJP_Sac_ZeroExp {JP_Sac_ZeroExp = JP_Sac_ZeroExp_sv2}

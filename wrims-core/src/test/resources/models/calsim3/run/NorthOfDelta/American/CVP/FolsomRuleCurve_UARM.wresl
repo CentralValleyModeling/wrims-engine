@@ -1,0 +1,194 @@
+!***************************************************************************************************************************************
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+!
+!    The CalSim 3 is free software: !<license>
+!
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+!
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!****************************************************************************************************************************************
+
+! Define estimate of storage releases - for now timeseries data from a previous run
+!define MFPForecastRelease  {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+!define UARPForecastRelease {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+!define P184ForecastRelease {timeseries kind 'STORAGE-FORECAST' units 'TAF'}
+
+!define UNIMP_SRBB {timeseries kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define UNIMP_OROV {timeseries kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define UNIMP_YUBA {timeseries kind 'FLOW-UNIMPAIRED' units 'TAF'}
+
+! Define initial value of Folsom level 3
+define OctMarRunoffEst {  !Oct-Mar Sac Valley runoff
+		value (sum(i=Oct-month,Mar-month,1) UNIMP_SRBB(i)+ UNIMP_OROV(i)+ UNIMP_FOLS(i)+ UNIMP_YUBA(i))
+		}
+define OctMarRunoffEstUW_dv {alias OctMarRunoffEst kind 'DEBUG' units 'TAF'}  
+
+
+define S_FOLSMlevel3init {
+    case OctthruMar {
+        condition range(month,OCT,MAR) .and. OctMarRunoffEst/1000.0 > 14.33 !25% Exceedence level for Oct-Mar 40-30-30 Runoff !in MAF
+        value 300.0 }
+    case Other {
+        condition always
+        value 400.0 }
+}
+define S_FOLSMlevel3initUWdv {alias S_FOLSMlevel3init kind 'DEBUG' units 'TAF'}
+
+! Define unimpiared inflow to Folsom Lake
+define FolsomFNF {value (I_ALD002 + I_ALD004 + I_ALOHA  + I_BSH003 + I_CAPLS  + I_DCC010 + I_FOLSM + I_FRMDW  + I_GERLE  + I_HHOLE  + I_ICEHS  + I_LKVLY  + I_LNG012 + I_LOONL  + I_LRB004 + I_MFA001 
+                 + I_MFA036 + I_NFA016 + I_NFA022 + I_NFA054 + I_NLC003 + I_NMA003 + I_NNA013 + I_PLC007 + I_PLM001 + I_PYR001 + I_RCK001 + I_RUB002     + I_MFA023 + I_MFA025 + I_RUB047 + I_SFA030
+                 + I_SFA040 + I_SFA066 + I_SFA076 + I_SFR006 + I_SILVR  + I_SLC003 + I_SLF009     + I_SLV006 + I_SLV015 + I_STMPY  + I_UNVLY  + I_WBR001 + CT_FAIROAKS_SV)*cfs_taf}  
+
+define FolsomFNFSum {sum(i=0,SEP-month,1)
+                    (I_ALD002(i) + I_ALD004(i) + I_ALOHA(i)  + I_BSH003(i) + I_CAPLS(i)  + I_DCC010(i) + I_FOLSM(i) + I_FRMDW(i)  + I_GERLE(i)  + I_HHOLE(i)  + I_ICEHS(i)  + I_LKVLY(i)  + I_LNG012(i) + I_LOONL(i)  + I_LRB004(i) + I_MFA001(i) 
+                   + I_MFA036(i) + I_NFA016(i) + I_NFA022(i) + I_NFA054(i) + I_NLC003(i) + I_NMA003(i) + I_NNA013(i) + I_PLC007(i) + I_PLM001(i) + I_PYR001(i) + I_RCK001(i) + I_RUB002(i)     + I_MFA023(i) + I_MFA025(i) + I_RUB047(i) + I_SFA030(i)
+                   + I_SFA040(i) + I_SFA066(i) + I_SFA076(i) + I_SFR006(i) + I_SILVR(i)  + I_SLC003(i) + I_SLF009(i) + I_SLV006(i) + I_SLV015(i) + I_STMPY(i)  + I_UNVLY(i)  + I_WBR001(i) + CT_FAIROAKS_SV)*cfs_taf(i)}
+
+! Define current storage
+define UAStorage       {value S_ALOHA(-1) + S_CAPLS(-1)+ S_FRMDW(-1) + S_GERLE(-1) + S_HHOLE(-1) + S_ICEHS(-1) /* + S_LKVLY(-1)*/ + S_LOONL(-1) + S_SILVR(-1) + S_STMPY(-1) + S_UNVLY(-1)}
+
+! Define target carryover storage target
+define UAStorageTarget {value min(S_LOONL(-1)+S_ICEHS(-1)+S_UNVLY(-1),200.) + min(S_FRMDW(-1)+S_HHOLE(-1),190.) + min(S_STMPY(-1),15.) + 0. + min(S_CAPLS(-1),16.) + min(S_SILVR(-1),4.)}
+
+! Define esimate of current month evaporation
+define UAEvapEst {value (A_ALOHAlast*ER_ALOHA + A_CAPLSlast*ER_CAPLS + A_FRMDWlast*ER_FRMDW + A_GERLElast*ER_GERLE + A_HHOLElast*ER_HHOLE + A_ICEHSlast*ER_ICEHS + /*A_LKVLYlast*ER_LKVLY*/ + A_LOONLlast*ER_LOONL + A_SILVRlast*ER_SILVR + A_STMPYlast*ER_STMPY + A_UNVLYlast*ER_UNVLY)/12000.}
+
+define UAEvapEstSum {case FirstYear {condition wateryear == BgnWY value 0.0}
+    	          case Other     {condition always 
+                  sum(i=-12,-month,1) (E_ALOHA(i) + E_CAPLS(i) + E_FRMDW(i) + E_GERLE(i) + E_HHOLE(i) + E_ICEHS(i) /*+ E_LKVLY(i)*/ + E_LOONL(i) + E_SILVR(i) + E_STMPY(i) + E_UNVLY(i))*cfs_taf(i)}}
+
+! Define estimate of imports and exports
+define UAImportEst    {case FirstYear {condition wateryear == BgnWY value 0.0}
+    	            case Other     {condition always value (C_MRM001(-12) + C_STH007(-12) + D_ECHOL_ELC001(-12))*cfs_taf(-12)}}
+
+define UAExportEst   {case FirstYear {condition wateryear == BgnWY value 0.0}
+    	            case Other     {condition always value (/*D_NNA013_LVC001(-12) +*/ D_PLC007_GDD010(-12) + D_EDC014_JNKSN(-12) + D_EDC021_WTPRS1(-12) + D_NFA016_ABT002(-12))*cfs_taf(-12)}}
+
+define UAImportEstSum {case FirstYear {condition wateryear == BgnWY value 0.0}
+    	            case Other     {condition always 
+                    sum(i=-12,-month,1) (C_MRM001(i) + C_STH007(i) + D_ECHOL_ELC001(i))*cfs_taf(i)}}
+
+define UAExportEstSum {case FirstYear {condition wateryear == BgnWY value 0.0}
+    	            case Other     {condition always 
+                    sum(i=-12,-month,1) (/*D_NNA013_LVC001(i) +*/ D_PLC007_GDD010(i) + D_EDC014_JNKSN(i) + D_EDC021_WTPRS1(i) + D_NFA016_ABT002(i))*cfs_taf(i)}}
+                    
+                    
+!Defining remaining Water Forum mitgation months
+define WFMitigation    {value WFMitRel*cfs_taf}
+define WFMitigationSum {case MMay      {condition month == May value WFMitRel*cfs_taf*143*1.983/1000.}
+                        case June      {condition month == Jun value WFMitRel*cfs_taf*122*1.983/1000.}
+                        case July      {condition month == Jul value WFMitRel*cfs_taf* 92*1.983/1000.}
+                        case August    {condition month == Aug value WFMitRel*cfs_taf* 61*1.983/1000.}
+                        case September {condition month == Sep value WFMitRel*cfs_taf* 30*1.983/1000.}
+                        case Otherwise {condition always value 0.}}
+
+define FolsomInflowEst         {value FolsomFNF + MFPForecastRelease + UARPForecastRelease + P184ForecastRelease + WFMitigation - UAEvapEst + UAImportEst - UAExportEst}
+define FolsomInflowEst_dv      {alias FolsomInflowEst kind 'INFLOW-FORECAST' UNITS 'TAF'}
+define FolsomInflowEstSum      {value FolsomFNFSum + UAStorage - UAStorageTarget + WFMitigationSum - UAEvapEstSum + UAImportEstSum - UAExportEstSum}
+define FolsomInflowEstSum_dv   {alias FolsomInflowEstSum kind 'INFLOW-FORECAST' UNITS 'TAF'}
+
+
+! Compare water availability to demand
+define FolDivMax1  {case div_by_zero {condition SumUD_26S_PU3_sv < .0001 value 1.} case otherwise  {condition always value min(1.,WRann_FOLSM_26S_PU3/SumUD_26S_PU3_sv)}} ! California Parks and Recreation
+define FolDivMax2  {case div_by_zero {condition Sumud_ELDID_NU3_sv < .0001 value 1.} case otherwise  {condition always value min(1.,(WRann_FOLSM_WTPEDH + CLann_FOLSM_WTPEDH*perdel_cvpmi_sys)/Sumud_ELDID_NU3_sv)}}     ! El Dorado Irrigation District
+define FolDivMax3  {case div_by_zero {condition sumUD_26S_NU4_sv < .0001 value 1.} case otherwise  {condition always value min(1.,WRann_FOLSM_26S_NU4/sumUD_26S_NU4_sv)}}                                              ! Aerojet
+define FolDivMax4  {case div_by_zero {condition sumUD_26N_NU2_sv < .0001 value 1.} case otherwise  {condition always value min(1.,min(WRAnn_AMR017_WTPBJM,WFann_AMR017_WTPBJM)/sumUD_26N_NU2_sv)}}                     ! Carmichael Water District
+define FolDivMax5  {case div_by_zero {condition SumUD_26S_PU1_sv < .0001 value 1.} case otherwise  {condition always value min(1.,min(WRann_FOLSM_WTPFOL + CLann_FOLSM_WTPFOL*perdel_cvpmi_sys, WFann_FOLSM_WTPFOL)/SumUD_26S_PU1_sv)}}    ! City of Folsom, Folsom Prison
+define FolDivMax6  {case div_by_zero {condition SumUD_26S_PU2_sv < .0001 value 1.} case otherwise  {condition always value min(1., WRann_WTPCOL_26S_PU2/SumUD_26S_PU2_sv)}}                                             ! Golden State Water Company
+define FolDivMax7  {case div_by_zero {condition SumUD_24_NU2_sv < .0001 value 1.} case otherwise  {condition always value min(1.,WFann_NFA016_ABT002/SumUD_24_NU2_sv)}}                                               ! Placer County Water Agency
+define FolDivMax8  {case div_by_zero {condition SumUD_26N_PU1_sv < .0001 value 1.} case otherwise  {condition always value min(1.,min(WFann_FOLSM_WTPRSV,MFPann_FOLSM_WTPRSV + CLann_FOLSM_WTPRSV*perdel_cvpmi_sys)/SumUD_26N_PU1_sv)}} ! City of Roseville
+define FolDivMax9  {case div_by_zero {condition SumUD_60N_PU_sv < .0001 value 1.} case otherwise  {condition always value min(1.,min(WFann_FSC025_60N_PU, WRann_FSC025_60N_PU + CLann_FSC025_60N_PU*perdel_cvpmi_sys)/SumUD_60N_PU_sv)}}    ! Sacramento Municipal Utility District
+define FolDivMax10 {case div_by_zero {condition SumUD_26N_NU1_sv < .0001 value 1.} case otherwise {condition always value min(1.,MFPSSann_FOLSM_WTPSJP/SumUD_26N_NU1_sv)}}            ! Sacramento Suburban Water District
+define FolDivMax11 {case div_by_zero {condition (SumUD_26N_PU2_sv + SumUD_26N_PU3_sv) < .0001 value 1.} case otherwise {condition always value min(1.,min(MFPSJann_FOLSM_WTPSJP + WRann_FOLSM_WTPSJP + CLann_FOLSM_WTPSJP*perdel_cvpmi_sys, WFann_FOLSM_WTPSJP_SJ)/(SumUD_26N_PU2_sv + SumUD_26N_PU3_sv))}} ! San Juan Water District
+
+! Total monthly diversions from Folsom and Natomas
+define FolDivEst1  {value UD_26S_PU3*cfs_taf*FolDivMax1}
+define FolDivEst2  {value UD_ELDID_NU3*cfs_taf*FolDivMax2}
+define FolDivEst3  {value UD_26S_NU4*cfs_taf*FolDivMax3}
+define FolDivEst4  {value UD_26N_NU2*cfs_taf*FolDivMax4}
+define FolDivEst5  {value UD_26S_PU1*cfs_taf*FolDivMax5}
+define FolDivEst6  {value UD_26S_PU2*cfs_taf*FolDivMax6}
+define FolDivEst7  {value UD_24_NU2*cfs_taf *FolDivMax7}
+define FolDivEst8  {value UD_26N_PU1*cfs_taf*FolDivMax8}
+define FolDivEst9  {value UD_60N_PU *cfs_taf*FolDivMax9}
+define FolDivEst10 {value UD_26N_NU1*cfs_taf*FolDivMax10}
+define FolDivEst11 {value (UD_26N_PU2+UD_26N_PU3)*cfs_taf*FolDivMax11}
+
+! Remaining estimated Folsom diversions through September
+define FolDivEst {value FolDivEst1                               
+                         + FolDivEst2                               
+                         + FolDivEst3                               
+                         + FolDivEst4                               
+                         + FolDivEst5                               
+                         + FolDivEst6                               
+                         + FolDivEst7                               
+                         + FolDivEst8                               
+                         + FolDivEst9                               
+                         + FolDivEst10                              
+                         + FolDivEst11}    
+
+define FolDivEstSum1  {sum(i=0,SEP-month,1) UD_26S_PU3(i)*cfs_taf(i)*FolDivMax1}
+define FolDivEstSum2  {sum(i=0,SEP-month,1) UD_ELDID_NU3(i)*cfs_taf(i)*FolDivMax2}
+define FolDivEstSum3  {sum(i=0,SEP-month,1) UD_26S_NU4(i)*cfs_taf(i)*FolDivMax3}
+define FolDivEstSum4  {sum(i=0,SEP-month,1) UD_26N_NU2(i)*cfs_taf(i)*FolDivMax4}
+define FolDivEstSum5  {sum(i=0,SEP-month,1) UD_26S_PU1(i)*cfs_taf(i)*FolDivMax5}
+define FolDivEstSum6  {sum(i=0,SEP-month,1) UD_26S_PU2(i)*cfs_taf(i)*FolDivMax6}
+define FolDivEstSum7  {sum(i=0,SEP-month,1) UD_24_NU2(i)*cfs_taf(i) *FolDivMax7}
+define FolDivEstSum8  {sum(i=0,SEP-month,1) UD_26N_PU1(i)*cfs_taf(i)*FolDivMax8}
+define FolDivEstSum9  {sum(i=0,SEP-month,1) UD_60N_PU(i) *cfs_taf(i)*FolDivMax9}
+define FolDivEstSum10 {sum(i=0,SEP-month,1) UD_26N_NU1(i)*cfs_taf(i)*FolDivMax10}
+define FolDivEstSum11 {Sum(i=0,SEP-month,1) (UD_26N_PU2(i)+UD_26N_PU3(i))*cfs_taf(i)*FolDivMax11}
+
+! Remaining estimated Folsom diversions through September
+define FolDivEstSum {value FolDivEstSum1                               
+                         + FolDivEstSum2                               
+                         + FolDivEstSum3                               
+                         + FolDivEstSum4                               
+                         + FolDivEstSum5                               
+                         + FolDivEstSum6                               
+                         + FolDivEstSum7                               
+                         + FolDivEstSum8                               
+                         + FolDivEstSum9                               
+                         + FolDivEstSum10                              
+                         + FolDivEstSum11}    
+														
+define FolDivEstSumUARM_dv {alias FolDivEstSum kind 'DIVERSION-FORECAST' units 'TAF'}
+
+!!!!!!!!!! Defining Folsom operating rules and targets !!!!!!!!!!
+
+define FolSupEst   {value max(0.0,FolsomInflowEstSum - FolDivEstSum + S_FOLSM(-1) - S_FOLSMlevel3init)}
+define FolSupEstdv {alias FolSupEst kind 'FORECAST' units 'TAF'}
+
+!define FolFlowTarg {value min((FolSupEst/cfs_taf)/(Sep-month+1.),5000.)}
+define FolFlowTarg   {value (FolSupEst/cfs_taf)/(Sep-month+1.) }
+define FolFlowTargdv {alias FolFlowTarg kind 'FORECAST' units 'TAF'}
+
+define FolRuleCalc {
+     case JunthruSep {
+          condition month >= may .and. month <= sep
+          value     FolsomInflowEst - FolDivEst + S_FOLSM(-1) - FolFlowTarg*cfs_taf }
+     case Other {
+          condition always
+          value     S_FOLSMlevel3init}}
+          
+define FolRuleCalcdv {alias FolRuleCalc kind 'RULE' units 'TAF'}
+
+
+!define S_FOLSMlevel4    {case NovMar {condition range(month,nov,mar) value S_FOLSMlevel5} 
+!                         case April  {condition month == APR value S_FOLSMlevel6 - 175.6} !792.} Changed since 792 puts this above level 5, now same as level 5 
+!                         case MMay   {condition month == MAY value S_FOLSMlevel6}  !967}  Changed since 967 puts this above level 5, now same as level 5 
+!                         case otherwise   {condition always value 592.}}
+!                         
+!define S_FOLSMlevel4dv {alias S_FOLSMlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_FOLSMlevel3adj   {value min(max(FolRuleCalc,S_FOLSMlevel2),S_FOLSMlevel4)}
+define S_FOLSMlevel3adjdv {alias S_FOLSMlevel3adj kind 'STORAGE-LEVEL' units 'TAF'}
+
+goal S_FOLSMZone3 {S_FOLSM_3 < max(S_FOLSMlevel3adj - S_FOLSMlevel2,0.)}
+goal S_FOLSMZone4 {S_FOLSM_4 < max(S_FOLSMlevel4 - S_FOLSMlevel3adj,0.)}
+goal S_FOLSMZone5 {S_FOLSM_5 < max(S_FOLSMlevel5 - S_FOLSMlevel4,0.)}
+goal S_FOLSMZone6 {S_FOLSM_6 < max(S_FOLSMlevel6 - S_FOLSMlevel5,0.)}

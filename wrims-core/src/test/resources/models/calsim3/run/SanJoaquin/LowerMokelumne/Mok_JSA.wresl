@@ -1,0 +1,55 @@
+! Mok_Flows.wresl
+! implements the joint settlement agreement for flows on the Mokelumne River
+! below Camanche Reservoir and below Woodbridge
+
+define minflow_C_CMCHE    {select minCamanche   from Mok_JSAFlow where month=month, wyt=wyt_MokJSA}
+define minflow_Woodbridge {select minWoodbridge from Mok_JSAFlow where month=month, wyt=wyt_MokJSA}
+
+define minflow_C_CMCHEdv    {alias minflow_C_CMCHE  kind 'FLOW-RQMNT' units 'cfs'}
+define minflow_Woodbridgedv {alias minflow_Woodbridge  kind 'FLOW-RQMNT' units 'cfs'}
+
+/*
+For the combined months of April, May, and June, during Normal, Above Normal, and Below Normal water year types,
+additional releases of up to 200 cfs are required depending on the combined Pardee and Camanche storage relative 
+to the maximum allowable for the end of the prior month.
+
+Below Maximum Allowable Storage (BMAS) = Top of Conservation - EOM storage for the prior month
+
+BMAS < 10 TAF, 200 cfs
+10 TAF <= BMAS < 20 TAF, 150 cfs
+20 TAF <= BMAS < 30 TAF, 100 cfs
+30 TAF <= BMAS < 40 TAF,  50 cfs
+*/
+
+define BMAS { 
+	Case NotAprJun {condition month <=6 .or. month >=10
+		value 0.}
+	Case otherwise {condition always
+		value (S_PARDElevel5 + S_CMCHElevel5 - EBMUDFldSpcReq_NonTransDV(-1)) - (S_PARDE(-1) + S_CMCHE(-1))}}
+
+define BMASdv {alias BMAS  kind 'STORAGE' units 'taf'}		
+
+
+define AddFlowReq {
+        Case DryOrCrit {condition wyt_MokJSA >= 3
+                value 0.}
+	Case NotAprJun {condition month <=6 .or. month >=10
+		value 0.}
+	Case BMAS1 {condition BMAS < 10.
+		value 200.}
+	Case BMAS2 {condition BMAS < 20.
+		value 150.}
+	Case BMAS3 {condition BMAS < 30.
+		value 100.}
+	Case BMAS4 {condition BMAS < 40.
+		value  50.}
+	Case otherwise {condition always
+		value 0.}}
+		
+define AddFlowReqdv {alias AddFlowReq  kind 'FLOW' units 'cfs'}
+
+goal setCamancheMin   {C_CMCHE_MIF < minflow_C_CMCHE + AddFlowReq}
+!goal setCamancheMin   {C_CMCHE_MIF < minflow_C_CMCHE} !for debugging purposes
+goal setNSJWCDMin     {C_MOK050_MIF < minflow_Woodbridge}
+goal setWoodbridgeMin {C_MOK034_MIF < minflow_Woodbridge}
+

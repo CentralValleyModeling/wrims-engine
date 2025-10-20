@@ -1,0 +1,71 @@
+! TUCP_Actions.wresl
+
+! when Sac Index conditions and/or Shasta storage levels portend an extremely dry year,
+! implement a trigger to relax criteria that drive releases from storage for Delta flow and water quality
+! Feb-Apr - If X2 is relaxed in February it can't be instigated in the next month
+! In May, if extreme year indicators have cleared away, go ahead and implement X2 in May and June
+! but if ongoing relaxations are warranted, set the TUCP trigger through Sept.
+
+! TUCP's are triggered by a combination of extreme conditions.  This is achieved by checking 
+! Shasta and SacIndex individually and also by checking the sum, so that if one is not too bad
+! but the other is extra extreme, it will trigger the action.
+define LowSacIndexFlag {
+    case February   { condition month==FEB .and. SacIndex<5300. value 1.}
+    case March      { condition month==MAR .and. SacIndex<5300. value 1.}
+    case April      { condition month==APR .and. SacIndex<5300. value 1.}
+    case May        { condition month==MAY .and. SacIndex<5300. value 1.}
+    case otherwise  { condition always value 0.}
+}
+define LowShastaFlag {
+    case February   { condition month==FEB .and. S_SHSTA(-1)<2200. value 1.}
+    case March      { condition month==MAR .and. S_SHSTA(-1)<2200. value 1.}
+    case April      { condition month==APR .and. S_SHSTA(-1)<2300. value 1.}
+    case May        { condition month==MAY .and. S_SHSTA(-1)<3000. value 1.}
+    case otherwise  { condition always value 0.}
+}
+define LowShastaSacInd {
+    case February   { condition month==FEB .and. SacIndex+S_SHSTA(-1)<7200. value 1.}
+    case March      { condition month==MAR .and. SacIndex+S_SHSTA(-1)<7200. value 1.}
+    case April      { condition month==APR .and. SacIndex+S_SHSTA(-1)<7200. value 1.}
+    case May        { condition month==MAY .and. SacIndex+S_SHSTA(-1)<7200. value 1.}
+    case otherwise  { condition always value 0.}
+}
+
+define TUCP_trigger_DV {std kind 'trigger' units 'none'}
+define TUCP_trigger {
+    case OctJan_OFF {condition month<FEB .or. simulateTUCP < 0.5
+    	value 0.
+    }
+    case FebruaryTrigger {
+        condition month==FEB .and. LowSacIndexFlag+LowShastaFlag+LowShastaSacInd>1.5
+        value 1.}
+    case MarchTrigger {
+        condition month==MAR .and. LowSacIndexFlag+LowShastaFlag+LowShastaSacInd>1.5
+        value 1.}
+    case MarchContinue {
+        condition month==MAR
+        value max(TUCP_trigger_DV(-1), 0.)}
+    case AprilTrigger {
+        condition month==APR .and. LowSacIndexFlag+LowShastaFlag+LowShastaSacInd>1.5
+        value 1.}
+    case AprilContinue {
+        condition month==APR
+        value max(TUCP_trigger_DV(-1), 0.)}
+    case May {
+        condition month==MAY .and. LowSacIndexFlag+LowShastaFlag+LowShastaSacInd>1.5
+        value 1.}
+    case JuneSept {
+        condition month>MAY 
+        value TUCP_trigger_DV(-1)}
+    case otherwise {condition always value 0.}
+}
+goal setTUCP_trigger {TUCP_trigger_DV = TUCP_trigger}
+
+! Relax Ag Jersey Point WQ EC stds by factor
+define JP_wq_CritRelaxFac      {value 1.25} 
+
+! TUCP: 1/19/16 summary of '14-'15 Emmaton electric conductivity (EC) compliance location 
+! was moved to Threemile Slough for June to Aug 15.  (~4 km east)
+! Assume equivalent to applying a factor to the WQ EC standard
+define EM_wq_CritRelaxFac      {value 1.25}  
+

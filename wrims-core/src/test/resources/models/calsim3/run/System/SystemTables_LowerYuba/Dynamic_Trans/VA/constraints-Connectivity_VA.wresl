@@ -1,0 +1,35 @@
+/*
+Constraints-connectivity_VA.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!North Yuba
+goal continuityNBLDB_VA    {I_NBLDB + C_NFY017 + C_CMT000 - D_NBLDB_CGT005_VA - C_NBLDB_VA - E_NBLDB_VA  = S_NBLDB_VA * taf_cfs - S_NBLDB_VA(-1) * taf_cfs + 0. }! New Bullards Bar Reservoir 
+goal continuityNFY002_VA   {C_NBLDB_VA - C_NFY002_VA = 0.}
+
+!Yuba River
+goal continuityYUB039_VA   {C_NFY002_VA + C_MFY005 - C_YUB039_VA = 0. }! Confluence: Middle Fork Yuba
+goal continuityYUB034_VA   {C_YUB039_VA + C_CGT006_VA - C_YUB034_VA = 0.}
+goal continuityYUB030_VA   {C_YUB034_VA + C_SFY007 - C_YUB030_VA = 0. }! Confluence: South Fork Yuba
+goal continuityENGLB_VA   {I_ENGLB + C_YUB030_VA + CT_Smartville - C_ENGLB_VA - E_ENGLB	= S_ENGLB * taf_cfs - S_ENGLB(-1) * taf_cfs + 0. }! Englebright Reservoir 
+goal continuityYUB024_VA   {C_ENGLB_VA - C_YUB024_VA = 0. }! Smartsville gage (USGS ####), flow requirement
+goal continuityYUB023_VA   {C_DER001 + C_YUB024_VA - C_YUB023_VA = 0. }! Confluence: Deere Creek
+goal continuityYUB022_VA   {C_YUB023_VA - C_YUB022_VA = 0.} ! Yuba River at Smartville gage (discontinued)
+goal continuityYUB014_VA   {C_YUB022_VA + C_FDC006 + R_RFS14_YUB014_VA - C_YUB014_VA = 0. }! Confluence: French Dry Creek
+goal continuityYUB013_VA   {C_YUB014_VA - D_YUB013_14_NA_VA - C_YUB013_VA = 0. }! BVID Pipeline Canal Diversion
+goal continuityYUB011_VA   {C_YUB013_VA /*+ SG349_YUB011_60*/ + SR_14_YUB011 - D_YUB011_15N_NA2_VA - D_YUB011_15S_NA2_VA - C_YUB011_VA   = 0. }! Degeurre Dam & diversions for N. and S. Canals
+goal continuityYUB006_VA   {C_YUB011_VA /*+ SG350_YUB006_60*/ - C_YUB006_VA = 0. }! Marysville gage (USGS ####), flow requirement
+goal continuityYUB003_VA   {C_YUB006_VA - D_YUB003_15N_NU - C_YUB003_VA = 0. }! Diversion for Marysville's Lake Ellis (presumed)
+
+!Colgate Tunnel
+goal continuityCGT005_VA   {D_NBLDB_CGT005_VA /*- D_CGT005_14_NA*/ - C_CGT005_VA = 0.} !Colgate diversion abandoned long ago
+goal continuityCGT006_VA   {C_CGT005_VA - C_CGT006_VA = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS14_VA    {R_14_NA_RFS14_VA - R_RFS14_YUB014_VA - R_RFS14_JCK002 = 0. }
+

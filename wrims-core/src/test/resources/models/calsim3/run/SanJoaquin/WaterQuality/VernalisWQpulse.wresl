@@ -1,0 +1,48 @@
+
+!@jmg 2018-03-07 - revised Vernalis water quality regression based on 
+!                  Dec 2017 Dan Broman draft memo  vvvv
+define C_SJR070Diff {value C_SJR070[SJR_PULSE]-C_SJR096[SJR_PULSE] -C_TUO017[SJR_PULSE]+ D_SJR082_SJRRrecap[SJR_PULSE] + D_SJR070_SJRRrecap[SJR_PULSE] + D_SJR070_SJRRremove[SJR_PULSE]}
+
+define EC_SJR070woNMpulse {value max (0., regEC_intercept_SJR070*
+			exp(C_BCK024[SJR_PULSE] * regEC_C_BCK024_SJR070) *
+			exp(C_MCD005[SJR_PULSE] * regEC_C_MCD005_SJR070) * 
+			exp(C_MSN005[SJR_PULSE] * regEC_C_MSN005_SJR070) *
+			exp(C_SJR096[SJR_PULSE] * regEC_C_SJR096_SJR070) *
+			exp(C_TUO017[SJR_PULSE] * regEC_C_TUO017_SJR070) *
+			exp(C_SJR070Diff * regEC_SJR070Diff)
+			)
+			}
+! ---- end revised Vernalis water quality regression ^^^^
+
+define NewMelonAssumedEC {value 100.}  !@jmg 2018-03-07 - assuming 100 uS/cm EC of New Melones release water - needed for calculating release requirement
+define NewMelonAssumedECDV       {alias NewMelonAssumedEC   kind 'EC-debug' units 'umhos/cm'}
+			
+define WQ_pulse_def {
+    case AprMay {
+        condition EC_SJR070woNMpulse > VernWQstd .and. month >= apr .and. month <= may
+       !value (VernWQstd - EC_SJR070woNMpulse)/(regEC_C_SJR070_SJR070 + regEC_C_STS048_SJR070 + regEC_C_STS017_SJR070)}
+	   value (C_SJR070[SJR_PULSE]*(VernWQstd-EC_SJR070woNMpulse))/(NewMelonAssumedEC-VernWQstd) }
+    case otherwise {
+        condition   always
+        value       0. }
+        }
+
+define WQ_reduced_pulse_def {
+    case Apr {                                                                                                   
+        condition   month == apr                                                                                 
+        value       max (0., min ( (remWQrelCap(-1) * TAF_cfs - C_MELONwq[SJR_WQ1]*14./30.), WQ_pulse_def )) }   
+    case may {                                                                                                   
+        condition   month == may                                                                                 
+        value       max (0., min ( (remWQrelCap(-1) * TAF_cfs - C_MELONwq[SJR_WQ1]*15./31.), WQ_pulse_def )) }   
+     case otherwise {
+          condition always
+          value          0. }
+        }
+
+!goal capC_MELONwqcycle4 { C_MELONWQ < WQ_reduced_pulse_def }
+goal capC_MELONwqcycle4 { C_MELONWQ < 0.}  !@jmg 2017.11.06 - turning off New Melones WQ release
+goal maintainC_MELONm2cycle4 { C_MELONm = C_MELONm[SJR_PULSE]  }
+
+define ECVernwoNMpulseDV       {alias EC_SJR070woNMpulse   kind 'EC-debug' units 'umhos/cm'}
+define WQ_pulse_defdv          {alias WQ_pulse_def         kind 'flow-deficiency' units 'cfs' }
+define WQ_reduced_pulse_defdv  {alias WQ_reduced_pulse_def kind 'flow-deficiency' units 'cfs' }

@@ -1,0 +1,490 @@
+/*
+    ARTIFICIAL NEURAL NETWORK IMPLEMENTATION - CONTRA COSTA-ROCK SLOUGH CORRELATION
+*/
+
+
+! calculate previous month's value of salinity (using ann directly)
+define RS_EC_Month_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),12,(wateryear-1))}
+  case others {
+    condition always
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),(month-1),wateryear)}
+}
+
+
+!get ANN_EC for 2 month earlier
+define RS_EC_Month_smooth_sv {
+  case October {
+    condition  month == Oct
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),11,(wateryear-1))}
+
+  case November {
+    condition  month == Nov
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),(month-2),wateryear)}
+}
+
+define RS_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setRS_EC_DSM2 {RS_EC_MonthDSM2 = RS_EC_Month_smooth_sv}
+
+! This is DWR's equation used previously
+!define RS_CL_Month_sv {value 0.268*RS_EC_Month_sv - 23.6}
+
+! This is CCWD's first approximation (Matt Moses, July 2006)
+! Use Maximum of the following two equations:
+!   Cl = 0.285*EC - 50    (this is the 'seawater' line)
+!   Cl = 0.15*EC - 12      (this is the 'ag. drainage' line)
+! These two equations intercept at Cl=30.222... and EC=281.481481481...
+define RS_CL_Month_sv {value max(0.285*RS_EC_Month_sv - 50.,
+                                 0.150*RS_EC_Month_sv - 12.,0.0)}
+
+define RS_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_CL_Month {std kind 'SALINITY' units 'MG/L'}
+goal setRS_EC_MON {RS_EC_Month = RS_EC_Month_sv}
+goal setRS_CL_Month {RS_CL_Month = RS_CL_Month_sv}
+
+! calculate the maximum 14 day running average (using ann directly)
+define RS_EC_Max14Day_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(max_14day_running_ave),12,(wateryear-1))}
+  case others {
+    condition always
+      value  AnnEC(C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(max_14day_running_ave),(month-1),wateryear)}
+}
+
+! This is DWR's equation used previously
+!define RS_CL_Max14Day_sv {value 0.268*RS_EC_Max14Day_sv - 23.6}
+
+! This is CCWD's first approximation (Matt Moses, July 2006)
+! Use Maximum of the following two equations:
+!   Cl = 0.285*EC - 50    (this is the 'seawater' line)
+!   Cl = 0.15*EC - 12      (this is the 'ag. drainage' line)
+! These two equations intercept at Cl=30.222... and EC=281.481481481...
+define RS_CL_Max14Day_sv {value max(0.285*RS_EC_Max14Day_sv - 50.,
+                                    0.150*RS_EC_Max14Day_sv - 12.,0.0)}
+
+define RS_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+define RS_CL_Max14Day {std kind 'SALINITY' units 'MG/L'}
+goal setRS_EC_14Ave {RS_EC_Max14Day = RS_EC_Max14Day_sv}
+goal setRS_CL_Max14Day {RS_CL_Max14Day = RS_CL_Max14Day_sv}
+
+! Additional equations for Banks and Tracy PP water qualities
+! Compute salinity Tracy and Banks (Source: P. Hutton/C. Wang FDM analysis)
+define BanksEC_Max14Day {std kind 'SALINITY-APPROX' units 'UMHOS/CM'}
+define BanksEC_Max14Day_sv {value RS_CL_Max14Day_sv * 1.9818 + 218.1084}  ! This equation reflects WQ at Banks
+goal setBanksEC_Max14Day {BanksEC_Max14Day = BanksEC_Max14Day_sv}
+
+define TracyEC_Max14Day {std kind 'SALINITY-APPROX' units 'UMHOS/CM'}
+define TracyEC_Max14Day_sv {value RS_CL_Max14Day_sv * 1.6225 + 303.3852} ! ! This equation reflects WQ at Tracy
+goal setTracyEC_Max14Day {TracyEC_Max14Day = TracyEC_Max14Day_sv}
+
+!get ANN_EC for 2 month earlier
+define RS_EC_Max14day_smooth_sv {
+  case October {
+    condition  month == Oct
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(max_14day_running_ave),11,(wateryear-1))}
+
+  case November {
+    condition  month == Nov
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(max_14day_running_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC_matchDSM2(
+             C_SAC041(-7),C_SAC041(-6), C_SAC041(-5),C_SAC041(-4),C_SAC041(-3),C_SAC041(-2),C_SAC041(-1),
+               EXP_TD(-6),EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),
+               C_SJR070(-7),C_SJR070(-6),C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),
+               DXC(-6),DXC(-5),DXC(-4),DXC(-3),DXC(-2),
+               net_DICU(-6),net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),
+               sac_oth(-6),sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),
+               exp_oth(-6),exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),
+               SMSCG_OP(-6),SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(max_14day_running_ave),(month-2),wateryear)}
+}
+
+define RS_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setRS_EC_DSM2_2 {RS_EC_Max14_DSM2 = RS_EC_Max14day_smooth_sv}
+
+!****************************************************************************************
+
+! define the CL standard for Contra Costa Canal
+define RS_CL_STD_sv {select CLstandard1
+                     from   salinity_std_rsl
+                     where  month=month,wyt=wyt_ann}
+define RS_CL_STD {std kind 'SALINITY' units 'MG/L'}
+goal setRS_CL_STD {RS_CL_STD = RS_CL_STD_sv}
+
+! This is DWR's equation used previously
+!define RS_EC_STD_sv {value (RS_CL_STD_sv + 23.6)/0.268 }
+
+! This is CCWD's first approximation (Matt Moses, July 2006)
+! Use Maximum of the following two equations:
+!   Cl = 0.285*EC - 50    (this is the 'seawater' line)
+!   Cl = 0.15*EC - 12      (this is the 'ag. drainage' line)
+! These two equations intercept at Cl=30.222... and EC=281.481481481...
+define RS_EC_STD_sv {
+    case low {
+    condition RS_CL_STD_sv <= 30.222
+    value (RS_CL_STD_sv + 12)/0.15}
+    case high {
+    condition always
+    value (RS_CL_STD_sv + 50)/0.285}
+}
+
+define RS_EC_STD {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setRS_EC_STD {RS_EC_STD = RS_EC_STD_sv}
+
+!sometimes used for #2&3 if #1 is infeasible (always try to meet the 225 mg/l std)
+! This is DWR's equation used previously
+!define RS_EC_STD_225 {value (225. + 23.6)/0.268}
+! This is CCWD's first approximation (Matt Moses, July 2006) - see notes above
+define RS_EC_STD_225 {value (225. + 50)/0.285}
+
+!*************************************************************************************************************
+!**************   Partition linearization into 3 segments   *****************************
+!*************************************************************************************************************
+
+!get the slope (m) and intercept (b) for the 3-piece linearization.
+!each constraint is in the form Exports <= m * SacFlow + b
+
+!*****Linearization #1***************************************************************
+define RS_b_1_sv {
+  value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth(-1),sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth(-1),exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_1_lo,line_RS_1_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,1)
+}
+define RS_m_1_sv {
+  case reducecalls {
+    condition  RS_b_1_sv >= 999990.
+    value 0.}
+  case call {
+    condition always
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_1_lo,line_RS_1_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,1)}
+}
+define RS_m_1 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_1 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+goal setRS_m_1 {RS_m_1 = RS_m_1_sv}
+goal setRS_b_1 {RS_b_1 = RS_b_1_sv}
+
+!*****Linearization #2***************************************************************
+define RS_b_2_sv {
+  case line1infeas {
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_225,line_RS_2_lo,line_RS_2_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,2)}
+  case call {
+    condition always
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_2_lo,line_RS_2_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,2)}
+}
+define RS_m_2_sv {
+  case reducecalls {
+    condition  RS_b_2_sv >= 999990.
+    value 0.}
+  case line1infeas {
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_225,line_RS_2_lo,line_RS_2_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,2)}
+  case call {
+    condition always
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_2_lo,line_RS_2_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,2)}
+}
+define RS_m_2 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_2 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+goal setRS_m_2 {RS_m_2 = RS_m_2_sv}
+goal setRS_b_2 {RS_b_2 = RS_b_2_sv}
+
+!*****Linearization #3***************************************************************
+define RS_b_3_sv {
+  case Linear1And2Fail {
+    condition RS_b_2_sv == 999998.0 .and. RS_b_1_sv == 999998.0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,4)}
+  case line1infeas {
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_225,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,3)}
+  case call {
+    condition always
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(intercept),int(ann_type),month,wateryear,3)}
+}
+define RS_m_3_sv {
+  case reducecalls {
+    condition  RS_b_3_sv >= 999990.
+    value 0.}
+  case call {
+    condition RS_b_2_sv == 999998.0 .and. RS_b_1_sv == 999998.0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,4)}
+  case line1infeas {
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_225,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,3)}
+  case final {
+    condition always
+    value  AnnLineGen(C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+                    EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+                    C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),C_SJR070(-1),SJR_ann_est,
+                    DXC(-4),DXC(-3),DXC(-2),DXC(-1),DXC_est,
+                    net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),net_delta_cu,
+                    sac_oth(-4),sac_oth(-3),sac_oth(-2), sac_oth(-1), sac_oth_est,
+                    exp_oth(-4),exp_oth(-3),exp_oth(-2), exp_oth(-1), exp_oth_est,
+                    SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),SMSCG_OPSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    RS_EC_STD_sv,line_RS_3_lo,line_RS_3_hi,
+                    int(RS),int(slope),int(ann_type),month,wateryear,3)}
+}
+define RS_m_3 {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define RS_b_3 {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+goal setRS_m_3 {RS_m_3 = RS_m_3_sv}
+goal setRS_b_3 {RS_b_3 = RS_b_3_sv}
+
+!********************************************************************
+!Get the required Sac flow for ZERO exports
+define RS_Sac_ZeroExp_sv1 {
+  case LowCL {
+    condition C_SAC041_ANN(-1) >= 40000.
+    value  0.}
+  case NoSalinityControlPossible{
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition RS_m_1_sv <= 0.0
+    value 0.}
+  case LargeNegInt{
+    condition RS_b_1_sv < -10000.0
+    value 0.}  
+  case control{
+    condition always
+    value -RS_b_1_sv/RS_m_1_sv}
+}
+define RS_Sac_ZeroExp_sv2 {value max(0.0,RS_Sac_ZeroExp_sv1)}
+define RS_Sac_ZeroExp {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+goal setRS_Sac_ZeroExp {RS_Sac_ZeroExp = RS_Sac_ZeroExp_sv2}
+
+!**************** Shengjun: save the ANN EC with the estimated sa flow and export 3/28/2006
+/*
+define RS_EC_Month_est {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041_ANN(-5),C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),SJR_ann_estdv(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC_estdv(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth_est_(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth_est_(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC(C_SAC041_ANN(-5),C_SAC041_ANN(-4),C_SAC041_ANN(-3),C_SAC041_ANN(-2),C_SAC041_ANN(-1),
+               EXP_TD(-5),EXP_TD(-4),EXP_TD(-3),EXP_TD(-2),EXP_TD(-1),
+               C_SJR070(-5),C_SJR070(-4),C_SJR070(-3),C_SJR070(-2),SJR_ann_estdv(-1),
+               DXC(-5),DXC(-4),DXC(-3),DXC(-2),DXC_estdv(-1),
+               net_DICU(-5),net_DICU(-4),net_DICU(-3),net_DICU(-2),net_DICU(-1),
+               sac_oth(-5),sac_oth(-4),sac_oth(-3),sac_oth(-2),sac_oth_est_(-1),
+               exp_oth(-5),exp_oth(-4),exp_oth(-3),exp_oth(-2),exp_oth_est_(-1),
+               SMSCG_OP(-5),SMSCG_OP(-4),SMSCG_OP(-3),SMSCG_OP(-2),SMSCG_OP(-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(RS),int(monthly_ave),(month-1),wateryear)}
+}
+
+define RS_EC_Month_est_ { alias RS_EC_Month_est kind 'SALINITY' units 'UMHOS/CM'}
+*/

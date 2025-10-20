@@ -1,0 +1,21 @@
+/*
+CalSim 3.0
+PutahSouthCanal.wresl
+Edited A Draper, Stantec, September 22, 2021
+*/
+
+!All code relating to Solano County Water Agency (SCWA) and operation of Putah South Canal is located here
+
+define ALLOC_SID   {
+	case FirstYear {condition wateryear == BgnWY .and. month <=MAR  value 1.00}
+	case AprilHi   {condition month == APR .and. S_BRYSA(-1) >800.   value 1.00}
+	case AprilMid  {condition month == APR .and. S_BRYSA(-1) >550.   value 0.95}
+	case AprilLow  {condition month == APR .and. S_BRYSA(-1) >400.   value 0.90}
+	case April     {condition month == APR                           value 1.00}
+	case otherwise {condition always value Alloc_SID_dv(-1)}}
+
+goal setalloc_SID_dv {alloc_SID_dv = alloc_SID}
+
+
+
+

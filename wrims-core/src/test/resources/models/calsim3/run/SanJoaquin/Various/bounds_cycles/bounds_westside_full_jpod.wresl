@@ -1,0 +1,218 @@
+! bounds_westside_full_jpod.wresl
+
+! fix westside system operations for the CVP in full-system cycles 
+! key points are dmc flow to mendota pool, dmc spills to wasteways, 
+! and sack dam delivery.  The rest of it should fall into place
+! given weights and forcings.
+! Added additional fixing of other locations to weighted averages of WQ1 and WQ2 cycles. Helps prevent CVP SOD shortages -TF 050720
+
+define DMCfix_penalty {
+    case relax {
+        condition month>JUN .and. tucp_trigger>.5 
+        value 0}
+    case otherwise {
+        condition always
+        value 0}
+}
+
+!DMC116 flows can adjust in this cycle in order to allow for JPOD to meet shortages off Mendota Pool 
+!Keep an eye on this since it has the potential to pull water in if shortages happen for reasons other than dead pool in CVP San Luis
+goal fixC_DMC116_1 { 
+    lhs C_DMC116 
+    case shortages {
+        condition short_cvp_tot_mpsd[WHEELCVC] > 0.1  !Use 0.1 in case of rounding error
+        rhs C_DMC116[WHEELCVC] + short_cvp_tot_mpsd[WHEELCVC]
+        lhs<rhs penalty 0
+        lhs>rhs penalty 999999 
+        }
+    case otherwise {
+        condition always 
+        rhs C_DMC116[WHEELCVC]
+        lhs<rhs penalty DMCfix_penalty
+        lhs>rhs penalty 999999 }
+}
+
+!Need to also ensure the DMC flow only increases due to JPOD
+goal fixC_DMC116_2 { 
+    lhs C_DMC116 
+    case shortages {
+        condition short_cvp_tot_mpsd[WHEELCVC] > 0.1  !Use 0.1 in case of rounding error
+        rhs C_DMC116[WHEELCVC] + C_CAA003_CVPWHL
+        lhs<rhs penalty 0 
+        lhs>rhs penalty 999999 
+        }
+    case otherwise {
+        condition always 
+        rhs C_DMC116[WHEELCVC]
+        lhs<rhs penalty DMCfix_penalty
+        lhs>rhs penalty 999999 }
+}
+
+define C_MDOTAFIX {
+    case April {
+        condition   month == apr
+        value       C_MDOTA[SJR_WQ1] * 14./30. + C_MDOTA[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       C_MDOTA[SJR_WQ2] * 15./31. + C_MDOTA[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       C_MDOTA[SJR_WQ1] }
+        }
+
+goal fixC_MDOTA { 
+    lhs C_MDOTA 
+    rhs C_MDOTAFIX
+    lhs<rhs penalty DMCfix_penalty
+    lhs>rhs penalty 999999
+}
+
+define C_SJR205FIX {
+    case April {
+        condition   month == apr
+        value       C_SJR205[SJR_WQ1] * 14./30. + C_SJR205[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       C_SJR205[SJR_WQ2] * 15./31. + C_SJR205[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       C_SJR205[SJR_WQ1] }
+        }
+
+goal fixC_SJR205 { 
+    lhs C_SJR205 
+    rhs C_SJR205FIX
+    lhs<rhs penalty 999999
+    lhs>rhs penalty 999999
+}
+
+define D_SJR205_SJR201FIX {
+    case April {
+        condition   month == apr
+        value       D_SJR205_SJR201[SJR_WQ1] * 14./30. + D_SJR205_SJR201[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       D_SJR205_SJR201[SJR_WQ2] * 15./31. + D_SJR205_SJR201[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       D_SJR205_SJR201[SJR_WQ1] }
+        }
+
+goal fixD_SJR205_SJR201 { 
+    lhs D_SJR205_SJR201 
+    rhs D_SJR205_SJR201FIX
+    lhs<rhs penalty 9999999
+    lhs>rhs penalty 9999999
+}
+
+define D_SJR180_ARY010FIX {
+    case April {
+        condition   month == apr
+        value       D_SJR180_ARY010[SJR_WQ1] * 14./30. + D_SJR180_ARY010[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       D_SJR180_ARY010[SJR_WQ2] * 15./31. + D_SJR180_ARY010[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       D_SJR180_ARY010[SJR_WQ1] }
+        }
+
+!To track impact on shortages
+define mp_deliveries {alias D_MDOTA_64_XA 
+                          + D_MDOTA_73_XA 
+                          + D_MDOTA_90_PA1 
+                          + D_MDOTA_91_PA 
+                          + D_MDOTA_91_PR 
+                          + D_MDOTA_XCC010 kind 'water-balance' units 'cfs'}
+
+define mp_deliveries_prcyc {value D_MDOTA_64_XA[WHEELCVC] 
+                          + D_MDOTA_73_XA[WHEELCVC] 
+                          + D_MDOTA_90_PA1[WHEELCVC] 
+                          + D_MDOTA_91_PA[WHEELCVC] 
+                          + D_MDOTA_91_PR[WHEELCVC] 
+                          + D_MDOTA_XCC010[WHEELCVC] }
+
+! for output
+define mpsddelivery_increase_jpod {alias D_SJR180_ARY010 + mp_deliveries - D_SJR180_ARY010[WHEELCVC] - mp_deliveries_prcyc kind 'water-balance' units 'cfs'}
+define mpsdshortage_reduced_jpod {alias short_cvp_tot_mpsd - short_cvp_tot_mpsd[WHEELCVC] kind 'water-balance' units 'cfs'}
+
+!Make sure that any reduced shortages from the last cycle continue
+goal fixmp_deliveries {mp_deliveries > mp_deliveries_prcyc} 
+!goal fixD_SJR180_ARY010 {D_SJR180_ARY010 > D_SJR180_ARY010[WHEELCVC]}
+goal fixD_SJR180_ARY010 {lhs D_SJR180_ARY010 rhs D_SJR180_ARY010[WHEELCVC] 
+                         lhs<rhs penalty 999999 lhs>rhs penalty 0} !zrc@20210125 to avoid infeasible solution 
+
+goal fixC_SJR180 {C_SJR180 = C_SJR180[WHEELCVC]} 
+
+define D_DMC054_NMW004FIX {
+    case April {
+        condition   month == apr
+        value       D_DMC054_NMW004[SJR_WQ1] * 14./30. + D_DMC054_NMW004[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       D_DMC054_NMW004[SJR_WQ2] * 15./31. + D_DMC054_NMW004[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       D_DMC054_NMW004[SJR_WQ1] }
+        }
+
+goal fixD_DMC054_NMW004 { 
+    lhs D_DMC054_NMW004  
+    rhs D_DMC054_NMW004FIX
+    lhs<rhs penalty DMCfix_penalty
+    lhs>rhs penalty 999999}
+
+define D_DMC076_XCC043FIX {
+    case April {
+        condition   month == apr
+        value       D_DMC076_XCC043[SJR_WQ1] * 14./30. + D_DMC076_XCC043[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       D_DMC076_XCC043[SJR_WQ2] * 15./31. + D_DMC076_XCC043[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       D_DMC076_XCC043[SJR_WQ1] }
+        }
+
+goal fixD_DMC076_XCC043 { 
+    lhs D_DMC076_XCC043  
+    rhs D_DMC076_XCC043FIX
+    lhs<rhs penalty DMCfix_penalty
+    lhs>rhs penalty 999999}
+
+define D_DMC111_FBW001FIX {
+    case April {
+        condition   month == apr
+        value       D_DMC111_FBW001[SJR_WQ1] * 14./30. + D_DMC111_FBW001[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       D_DMC111_FBW001[SJR_WQ2] * 15./31. + D_DMC111_FBW001[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       D_DMC111_FBW001[SJR_WQ1] }
+        }
+
+goal fixD_DMC111_FBW001 { 
+    lhs D_DMC111_FBW001  
+    rhs D_DMC111_FBW001FIX
+    lhs<rhs penalty DMCfix_penalty
+    lhs>rhs penalty 999999}
+
+define CT_Stevinsonfix {
+    case April {
+        condition   month == apr
+        value       CT_Stevinson[SJR_WQ1] * 14./30. + CT_Stevinson[SJR_WQ2] * 16./30. }
+    case May {
+        condition   month == may
+        value       CT_Stevinson[SJR_WQ2] * 15./31. + CT_Stevinson[SJR_WQ1] * 16./31. }
+    case otherwise {
+        condition   always
+        value       CT_Stevinson[SJR_WQ1] }
+        }
+
+goal fixCT_Stevinson {  !Fixing this closure term to prior cycles, not doing this tends to cause shortages for CVP SOD contractors
+    lhs CT_Stevinson
+    rhs CT_Stevinsonfix
+    lhs<rhs penalty 999999
+    lhs>rhs penalty 999999}
+

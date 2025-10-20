@@ -1,0 +1,146 @@
+/*
+File determines CVP SOD delivery target based Water Supply, D1641 and Export Limits and Supply Limits
+*/
+
+define perdv_cvpag_s { std kind 'percent-delivery' units 'none'}
+define perdv_cvpmi_s { std kind 'percent-delivery' units 'none'}
+define perdv_cvpex_s { std kind 'percent-delivery' units 'none'}
+define perdv_cvprf_s { std kind 'percent-delivery' units 'none'}
+
+define SACIND {value SacIndex/1000.0} !SacIndex dynamically calculated using forecasted flows from Cam.dll
+
+! Estimate Export Capability for use in determining delivery target limitations
+define estCVPExpThruAug {
+    case March { condition month==MAR select MarAug from EstExpCVP given index=SACIND use linear}
+    case April { condition month==APR select AprAug from EstExpCVP given index=SACIND use linear}
+    case May   { condition month==MAY select MayAug from EstExpCVP given index=SACIND use linear}
+    case otherwise {condition always value 0.}
+}
+define estCVPExpThruAugdv {alias estCVPExpThruAug kind 'EXP-CAPACITY' units 'TAF'}
+
+define factCVP_MarAug {select factor from ExportEstimate_CVP where month = Mar}
+define factCVP_AprAug {select factor from ExportEstimate_CVP where month = Apr}
+define factCVP_MayAug {select factor from ExportEstimate_CVP where month = May}
+
+define buffCVP_MarAug {select buffer from ExportEstimate_CVP where month = Mar}
+define buffCVP_AprAug {select buffer from ExportEstimate_CVP where month = Apr}
+define buffCVP_MayAug {select buffer from ExportEstimate_CVP where month = May}
+
+define HighCVPSLmod {
+    case HighMaySLUISCVP {
+        condition month==MAY .and. S_SLUIS_CVP(-1)>772.
+        value 90.}
+    case otherwise {
+        condition always 
+        value 0.}
+}
+! Estimate Export Capability for use in determining delivery target limitations
+define CVPDelCapEst {
+    case MarAprMay {
+        condition month>=MAR .and. month<=MAY
+        value estCVPExpThruAug
+            + S_SLUIS_CVP(-1) - S_SLUIS_CVP_DP + jbypass_del + AnnualBanksCVP + HighCVPSLmod}
+    case otherwise {
+        condition always
+        value 0.0 }
+    }
+define CVPDelCapEstdv {alias CVPDelCapEst kind 'DELIV-CAPACITY' units 'TAF'}
+
+define AnnDelCapEst {
+    case March {
+        condition month==MAR
+        value CVPDelCapEst/factCVP_MarAug }
+    case April {
+        condition month == APR
+        value CVPDelCapEst/factCVP_AprAug }
+    case May {
+        condition month == MAY
+        value CVPDelCapEst/factCVP_MayAug }
+    case otherwise {
+        condition always
+        value 0.0 }
+    }
+define AnnDelCapEstdv {alias AnnDelCapEst kind 'DELIV-CAPACITY' units 'TAF'}
+
+define del_first_cvp_s {
+  case MarMay {
+    condition month >= MAR .and. month <= MAY
+    value AnnDelCapEst }
+  case other {
+    condition always
+    value 0.}
+}
+
+define deltar_cvps1dv {alias del_first_cvp_s kind 'DEL-TARGET' units 'TAF'}
+
+! Moved this logic from delcar_cvp_sys.wresl because Stage 1 transfers should not increase NOD allocations LGB
+define CVP_Targ {select CVP_Phase8 from WTS_Stage1_Targets where year=transfersyear}
+define SaltCostFact_stg1 {select ItemValue from WTS_JobControl where Item=11.}
+define del_second_cvp_s {value min(del_first_cvp_s + CVP_Targ*(1.-SaltCostFact_stg1), anncvpCL_tot_s)} ! Added logic to include Stage 1 Transfers in the delivery target LGB
+define deltar_cvps2dv {alias del_second_cvp_s kind 'DEL-TARGET' units 'TAF'}
+
+define deltar_cvp_sdv {std kind 'DEL-TARGET' units 'taf'}
+
+define del_third_cvp_s {
+  case initialdel {
+    condition month <= FEB .and. wateryear == BgnWY
+    value anncvpCL_tot_s }
+  case march_april {
+    condition month >= MAR .and. month <=MAY
+    value del_second_cvp_s }
+  case other {
+    condition always
+    value deltar_cvp_sdv(-1) }
+}
+
+define deltar_cvp_s {value min(del_third_cvp_s, anncvpCL_tot_s) }
+
+goal save_deltar_cvp_s {deltar_cvp_sdv = deltar_cvp_s}
+
+! logic for allocation influence under integrated operations 
+! (temperance flat - cross valley conveyance)
+! this has no bearing on normal operations
+define CVPDelCapEst_io {
+    case March {
+        condition month>=MAR .and. month <= MAY
+        value CVPDelCapEst + min(SIO_CVP(-1),max_return_cvp)}
+    case otherwise {
+        condition always
+        value 0.0 }
+    }
+define CVPDelCapEstiodv {alias CVPDelCapEst_io kind 'DELIV-CAPACITY' units 'TAF'}
+
+define AnnDelCapEst_io {
+    case March {
+        condition month==MAR
+        value CVPDelCapEst_io/factCVP_MarAug }
+    case April {
+        condition month == APR
+        value CVPDelCapEst_io/factCVP_AprAug }
+    case May {
+        condition month == MAY
+        value CVPDelCapEst_io/factCVP_MayAug }
+    case otherwise {
+        condition always
+        value 0.0 }
+    }
+define AnnDelCapEstiodv {alias AnnDelCapEst_io kind 'DELIV-CAPACITY' units 'TAF'}
+
+define del_first_cvp_s_io {
+  case MarMay {
+    condition month >= MAR .and. month <= MAY
+    value AnnDelCapEst_io }
+  case other {
+    condition always
+    value 0.}
+}
+
+define deltar_cvps1iodv {alias del_first_cvp_s_io kind 'DEL-TARGET' units 'TAF'}
+define del_second_cvp_s_io {value min(del_first_cvp_s_io + CVP_Targ*(1.-SaltCostFact_stg1), anncvpCL_tot_s)}
+define deltar_cvps2iodv {alias del_second_cvp_s_io kind 'DEL-TARGET' units 'TAF'}
+define est_cvp_conv_use_s {value 0.} ! max(0.,min(del_second_cvp_s_io - del_second_cvp_s, max_return_cvp))}
+define est_cvp_conv_use {value 0.} ! max(est_cvp_conv_use_s,est_cvp_conv_use_sys)}
+define est_cvp_ioret_ {alias 0.} ! est_cvp_conv_use kind 'estimated-transfer' units 'taf'}
+define max_return_swp2 {value 0.} ! max(0., max_return_swp - est_cvp_conv_use)}
+
+        

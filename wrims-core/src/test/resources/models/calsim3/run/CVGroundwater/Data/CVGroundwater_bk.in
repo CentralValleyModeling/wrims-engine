@@ -1,0 +1,112 @@
+C*****************************************************************************
+C
+C                            MAIN INPUT FILE
+C            for CalSim - IWFM (groundwater component) Linkage
+C                             
+C*****************************************************************************
+C                            File Description
+C
+C  *Listed below are all input and output file names used when running the
+C   linkage.  
+C
+C  *Each file name has a maximum length of 500 characters
+C
+C  *If a file does not exist for a project, leave the filename blank. 
+C   For example, if specific wells are not modeled in the project, the file name and
+C   description columns for unit 5 will appear as:
+C
+C   FILE NAME                                      UNIT DESCRIPTION
+C                                                  / 5: WELL DATA FILE (INPUT, OPTIONAL)
+C-----------------------------------------------------------------------------
+C   FILE NAME                                      UNIT DESCRIPTION
+C-----------------------------------------------------------------------------
+ CVelement.dat                                     / 1: ELEMENT CONFIGURATION FILE (INPUT, REQUIRED)
+ CVnode.dat                                        / 2: NODE X-Y COORDINATE FILE (INPUT, REQUIRED)
+ CVstrat.dat                                       / 3: STRATIGRAPHIC DATA FILE (INPUT, REQUIRED)
+ CVrivers.dat                                      / 4: STREAM GEOMETRIC DATA FILE (INPUT, REQUIRED)
+                                                   / 5: WELL DATA FILE (INPUT, OPTIONAL)
+ CVElementsToCalsimRegions_20190927.dat                   / 6: GROUNDWATER ELEMENTS FOR EACH CALSIM REGION DATA FILE (INPUT, REQUIRED) CVElementsToCalsimRegions_Tulare85
+ CVparam.dat                                       / 7: PARAMETER DATA FILE (INPUT, REQUIRED)
+                                                   / 8: AQUIFER PARAMETER OVER-WRITE DATA FILE (INPUT, OPTIONAL) 
+ CVbound_NoInsideConstHD0ft0n.dat                              / 9: BOUNDARY CONDITIONS DATA FILE (INPUT, REQUIRED)
+                                                   /10: TIME SERIES BOUNDARY CONDITIONS (INPUT, OPTIONAL)
+Restart\CVInitial_Restart_SEP1921.dat                /6: INITIAL CONDITIONS DATA FILE (INPUT, REQUIRED)
+                                                   /12: PRECIPITATION DATA FILE (INPUT, OPTIONAL)
+ CVPuSp_Modified_v20191002.dat                               /13: PUMPING SPECIFICATION DATA FILE (INPUT, REQUIRED)
+ CVtiledrn_CapDeltaGWTable.dat                             /14: TILE DRAINS PARAMETER DATA FILE (INPUT, OPTIONAL)
+                                                   /15: EVAPOTRANSPIRATION DATA FILE (INPUT,OPTIONAL)
+ CVPrint.dat                                       /16: GROUNDWATER HYDROGRAPH PRINT CONTROL FILE (INPUT, OPTIONAL)
+ CVGroundwaterOut.dss                              /17: GROUNDWATER HEADS AT ALL NODES (OUTPUT, OPTIONAL)
+ CVGroundwaterOut.dss                              /18: GROUNDWATER PUMPING AT ALL ELEMENTS (OUTPUT,OPTIONAL)
+ CVGroundwaterOut.dss                              /19: DEEP PERCOLATION AT ALL ELEMENTS (OUTPUT, OPTIONAL)
+ CVGroundwaterOut.dss                              /20: GROUNDWATER STORAGE (OUTPUT, OPTIONAL)
+ CVGroundwaterBudget.dss                           /21: GROUNDWATER BUDGET AT EACH WBA (OUTPUT, OPTIONAL)
+C***********************************************************************************
+C                     Processing, Output and Debugging Options
+C
+C   The following lists the options for detailed output and debugging.
+C   KDEB;    Enter 1 - to print aquifer parameter data
+C            Enter 0 - otherwise
+C   KSWBA;   Enter 1 - to print groundwater storage (if file is defined above) at CalSim regions
+C            Enter 0 - to print groundwater storage (if file is defined above) at IWFM elements
+C   KOMP;    Enter 1 - parallel processing
+C            Enter 0 - no parallel processing
+C   CACHE;   Cache size in terms of number of values stored for time series data output
+C
+C-----------------------------------------------------------------------------------
+C   VALUE                       DESCRIPTION
+C-------------------------------------------------------------------------------
+      1                         / KDEB
+      1                         / KSWBA
+      0                         / KOMP
+      500000                    / CACHE
+C*****************************************************************************
+C                  Unit Specifications for Output
+C
+C    FACTLTOU; Factor to convert simulation unit of length to specified output unit of length
+C    UNITLTOU; The output unit of length (maximum of 10 characters)
+C    FACTVLOU; Factor to convert simulation unit of volume to specified output unit of volume
+C    UNITVLOU; The output unit of volume (maximum of 10 characters)
+C
+C-----------------------------------------------------------------------------
+C   VALUE                       DESCRIPTION
+C-----------------------------------------------------------------------------
+     1.0                        /FACTLTOU
+     FEET                       /UNITLTOU
+     0.000022957                /FACTVLOU
+     AC.FT.                     /UNITVLOU
+C*******************************************************************************
+C                           Solution Scheme Control
+C
+C   The following lists the solution scheme control parameters used in groundwater 
+C   simulation
+C
+C   MSOLVE  ; Matrix solution method
+C               1 = SOR method
+C               2 = Generalized preconditioned conjugate method
+C   RELAX   ; Relaxation parameter for SOR (value should be between 1.0 and 2.0)
+C   MXITER  ; Maximum number of iterations for the solution of system of equations
+C   STOPC   ; Convergence criteria for groundwater head difference; [L]
+C   MXITERSM ; Maximum number of iterations for the simulation of unsaturated zone moisture
+C   STOPCSM  ; Convergence criteria for the unsaturated zone moisture difference
+C
+C-------------------------------------------------------------------------------
+C   VALUE                       DESCRIPTION
+C-------------------------------------------------------------------------------
+    2                           / MSOLVE
+    1.02                        / RELAX
+    1550000                     / MXITER
+    0.001                       / STOPC
+    200                         / MXITERSM
+    0.0001                      / STOPCSM
+C*******************************************************************************
+C                           Modeled CalSim and C2VSIM Regions
+C
+C   NREGCS; Number of regions modeled in CalSim 
+C   NREGGW; Number of regions modeled in C2VSIM
+C   
+C-------------------------------------------------------------------------------
+C   VALUE                       DESCRIPTION
+C-----------------------------------------------------------------------------
+     66                         / NREGCS  (41 WBAs + 37 C2VSIM elements that are outside CalSim but receive deep perc + 449 Tulare Elements)
+     21                         / NREGGW

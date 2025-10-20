@@ -1,0 +1,41 @@
+/*
+CALSIM 3 SYSTEM FILE
+SYSTEM_DELTA.WRESL
+
+! THIS FILE CONTAINS THE NAMES OF ALL INCLUDE FILES FOR THE SYSTEM DESCRIPTION
+! FOR THE SACRAMENTO VALLEY AS UPDATED FOR CALSIM 3
+
+*/
+
+include 'systemtables_Delta\arcs-Channels.wresl'
+include 'systemtables_Delta\arcs-Diversions.wresl'
+include 'systemtables_Delta\arcs-Inflows.wresl'
+include 'systemtables_Delta\arcs-Reservoirs.wresl'
+include 'systemtables_Delta\arcs-Returns.wresl'
+include 'systemtables_Delta\arcs-Seepage.wresl'
+include 'systemtables_Delta\arcs-PreOperations.wresl'
+
+include 'systemtables_Delta\constraints-Deliveries.wresl'
+include 'systemtables_Delta\constraints-Connectivity.wresl'
+include 'systemtables_Delta\constraints-Returns.wresl'
+include 'systemtables_Delta\constraints-Runoff.wresl'
+!zrc@ include 'systemtables_Delta\constraints-PreOperations.wresl'
+
+
+define C_SAC041_ANN {std kind 'FLOW-ANN' units 'CFS'}
+define C_SAC041_WQ {std kind 'FLOW-WQ' units 'CFS'}
+goal C_SAC041tot {C_SAC041 = C_SAC041_ANN + C_SAC041_WQ}
+
+define C_CSL005_ANN {std kind 'FLOW-ANN' units 'CFS'}
+goal C_CSL005tot {C_CSL005 = C_CSL005_ANN}
+
+define C_SACtot_ANN {std kind 'FLOW-ANN' units 'CFS'}
+goal setC_SACtot_ANN {C_SACtot_ANN = C_SAC041_ANN + C_CSL005_ANN}
+
+goal setC_SAC041_WQ {C_SAC041_WQ = 0.0} ! Remove this goal if NODOS activated
+
+
+
+
+
+

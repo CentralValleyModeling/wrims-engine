@@ -1,0 +1,86 @@
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 10      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 10_NA
+!======================================================================
+! gross surface water diversions
+!zrc@ goal setDG_10_NA    {DG_10_NA = D_MIO023_10_NA  /* + D_BTC043_10_NA */} !Butte Creek not simulated in this cycle +D_BTC043_10_NA  
+! net surface delivery = surface diversion - conveyance losses
+!zrc@ goal setDN_10_NA    {DN_10_NA = DG_10_NA - DL_10_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+!zrc@ goal meetAW_10_NA   {AW_10_NA + RP_10_NA = DN_10_NA + GP_10_NA + RU_10_NA } ! + SHRTG_10_NA }
+
+!Add code for sharing of water supplies from West Branch Feather River and Butte Creek
+! Placeholder - assume used equally
+!zrc@ goal setDG_10_NA_2 {D_MIO023_10_NA < 0.5 * DG_10_NA}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 12      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!======================================================================
+! 12_NU1
+!======================================================================
+! CalWater Oroville is no longer supplied from the Miocene Canal
+goal setDG_12_NU1   {D_MIO023_12_NU1 = 0.}
+
+!goal setDG_12_NU1   {DG_12_NU1 = D_MIO023_12_NU1 /* + D_THRMF_12_NU1 */} !Thermalito Forebay not simulated in this cycle
+! net surface delivery = surface diversion - conveyance losses
+!goal setDN_12_NU1   {DN_12_NU1 = DG_12_NU1 - DL_12_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+!goal setUD_12_NU1   {UD_12_NU1 = DN_12_NU1 + GP_12_NU1 } ! + SHRTG_12_NU1 }
+
+!goal set_DG_12_NU1 {D_MIO023_12_NU1 < 0.5*UD_12_NU1}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 13      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 13_NA
+!======================================================================
+! gross surface water diversions
+goal setDG_13_NA    {DG_13_NA = D_OWC000_13_NA + D_MNRRH_13_NA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NA    {DN_13_NA = DG_13_NA - DL_13_NA}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_13_NA   {AW_13_NA + RP_13_NA = DN_13_NA + GP_13_NA + RU_13_NA } ! + SHRTG_13_NA }
+
+!Add code for sharing of water supplies from Forbestown Ditch and Miners Ranch Canal
+! Placeholder - assume used equally
+goal setDG_13_NA_2 {D_OWC000_13_NA = 0.5 * DG_13_NA}
+
+!======================================================================
+! 13_NU1
+!======================================================================
+goal setDG_13_NU1   {DG_13_NU1 = D_WTPMNR_13_NU1 + D_OROVL_13_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NU1   {DN_13_NU1 = DG_13_NU1 - DL_13_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_13_NU1   {UD_13_NU1 = DN_13_NU1 + GP_13_NU1 } ! + SHRTG_13_NU1 }
+
+goal set_D_OROVL_13_NU1 {D_OROVL_13_NU1 - DL_OROVL_13_NU1 < UD_13_NU1 * 0.19} !Factor estimated from historical diversions (5.7 TAF/yr)), demand (6.0 TAF/yr) and 80% diversion loss.
+
+!======================================================================
+! 13_NU2
+!======================================================================
+goal setDG_13_NU2   {DG_13_NU2 = D_MNRRH_13_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_13_NU2   {DN_13_NU2 = DG_13_NU2 - DL_13_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_13_NU2   {UD_13_NU2 = DN_13_NU2 + GP_13_NU2 } ! + SHRTG_13_NU2 }

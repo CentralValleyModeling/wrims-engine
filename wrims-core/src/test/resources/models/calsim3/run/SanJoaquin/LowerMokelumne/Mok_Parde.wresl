@@ -1,0 +1,175 @@
+! Mok_PARDEE.wresl
+
+!******************************************************************************
+! Pardee Reservoir Operations
+!******************************************************************************
+
+/*
+- Primary water supply objective is to store water for delivery through the Mokelumne Aqueduct to EBMUD.
+
+- Secondary objective to maintain elevation for gravity flow through aqueduct to minimize pumping costs.
+
+- Maximize power production by operating at or above 550 feet (also accounts for ability to make deliveries to Jackson Valley WD.
+
+- Maintain stratification in Camanche Reservoirs
+*/
+
+!******************************************************************************
+! Avoid Stratification May through October
+!******************************************************************************
+define C_PARDE_THRML {lower unbounded kind 'FLOW' units 'CFS' }
+define C_PARDE_OTHER {std kind 'FLOW' units 'CFS' }
+
+goal setC_PARDE {C_PARDE = C_PARDE_THRML + C_PARDE_OTHER}
+
+
+/*!forecasting necessary releases to maintain 180.41 TAF of reserved flood space in Pardee and Camanche by end of October
+!forecast necessary volume to release (180.41 + V_UpstreamPardeeInflow - V_CurrentAggregateFloodSpace), divide into six months
+
+define UpstreamPardeeOpFlow {timeseries kind 'CHANNEL' units 'CFS'} !Upper Mokelumne operations upstream of Pardee
+define UpstreamPardeeOpFlowMayOct { !assumed foresight of operations upstream of Pardee
+	case May {condition month == May sum(i=0,5,1) UpstreamPardeeOpFlow(i) * cfs_taf(i)}
+	case Otherwise {condition always value 0.}}
+
+define NecessaryFloodSpaceReleaseForecast {
+	case FirstOct {
+		condition month == OCT .and. wateryear == BgnWY
+		value 0.}
+	case NovApr {
+		condition range(month,Nov,Apr)
+		value 0.}
+	case May {
+		condition month == MAY
+		value max(0,S_PARDE(-1)+S_CMCHE(-1)+UpstreamPardeeOpFlow-457.59/6.) !457.59 = 638 (combined L4 Oct storage) - 180.41  (required flood space)
+	}
+	case JunSep {
+		condition month >= JUN
+		value MokFCForecastStorage(-1)
+	}
+	case Oct {
+		condition month == OCT
+		value MokFCForecastStorage(-1)
+	}
+}
+define MokFCForecastStorage {std kind 'rule_curve' units 'TAF'}
+goal setMokFCForecastStorage {MokFCForecastStorage = NecessaryFloodSpaceReleaseForecast}
+
+define FloodSpaceForecastRelease {
+	case FirstOct {
+		condition month == OCT .and. wateryear == BgnWY
+		value 0.}
+	case NovApr {
+		condition range(month,Nov,Apr)
+		value 0.}
+	case MaySep {
+		condition range(month,May,Sep)
+		value NecessaryFloodSpaceReleaseForecast/6. * taf_cfs}
+	case OCT {
+		condition month == OCT
+		value NecessaryFloodSpaceReleaseForecast/6. * taf_cfs}
+}
+define MokFCForecastRelease {alias FloodSpaceForecastRelease kind 'rule_curve' units 'CFS'}*/
+
+define minflow_WoodbridgeMayOct { !values are minflow requirements aggregated from May-Oct based on water year
+	case WYT1 {condition wyt_MokJSA == 1 value 47.01}
+	case WYT2 {condition wyt_MokJSA == 2 value 34.00}
+	case WYT3 {condition wyt_MokJSA == 3 value 18.98}
+	case WYT4 {condition wyt_MokJSA == 4 value 7.38}
+}
+
+define AWR_60N_NA5_MayOct {
+	case NotEndWY {condition wateryear < EndWY
+		sum(i=0,5,1) AWR_60N_NA5(i) * cfs_taf(i)}
+	case EndWY {condition wateryear == EndWY
+		value 0.793}
+}
+define AWO_60N_NA5_MayOct {
+	case NotEndWY {condition wateryear < EndWY
+		sum(i=0,5,1) AWO_60N_NA5(i) * cfs_taf(i)}
+	case EndWY {condition wateryear == EndWY
+		value 184.933}
+}
+define AWR_60N_NA4_MayOct {
+	case NotEndWY {condition wateryear < EndWY
+		sum(i=0,5,1) AWR_60N_NA4(i) * cfs_taf(i)}
+	case EndWY {condition wateryear == EndWY
+		value 0.}
+}
+define AWO_60N_NA4_MayOct {
+	case NotEndWY {condition wateryear < EndWY
+		sum(i=0,5,1) AWO_60N_NA4(i) * cfs_taf(i)}
+	case EndWY {condition wateryear == EndWY
+		value 85.027}
+}
+define CMCHE_Forecastdv {std kind 'FLOW' units 'TAF'}
+define CMCHE_Forecast {
+         case FirstMonth {
+	 	condition month == OCT .AND. wateryear == BgnWY
+	        Value 0.}
+         case May {
+         	condition month == MAY
+         	Value
+	       /*FloodSpaceForecastRelease +*/
+	        minflow_WoodbridgeMayOct
+	        + 15                      !North San Joaquin WCD rights are junior to EBMUD
+                + AnnAlloc60N_NA4 * 0.975 !Woodbridge ID demand Apr-Sep based on average of 1922-2015
+                + AnnAlloc60N_NU1 * 0.690 !City of Lodi demand Apr-Sep
+                + AnnAlloc60N_NU1 * 0.867 !City of Stockton demand Apr-Sep
+                + AnnAlloc60N_NA5 * 0.965 !Riparian Diversions Apr-Sep based on average of 1922-2015
+                + 6/12*(56+64*min(1,max(0,(annPardeeFNF-600)/600))) }
+	  case otherwise {
+	        condition always
+	        Value CMCHE_Forecastdv(-1)}}
+	        
+goal setCMCHE_Forecastdv {CMCHE_Forecastdv = CMCHE_Forecast}	        
+	        
+	        
+define StratFlag {
+	case MaySep	{condition month >= MAY value 1.0}
+	case October	{condition month < NOV value 1.0}
+	case Otherwise	{condition always value 0.0}}
+
+
+define PardeeTarget {select target from Mok_PardeeTargets where month = month}
+goal setPardeeStorage {S_PARDE < PardeeTarget}
+
+define ThrmlReleaseTarget {value max(0.,(1.38/6.)*CMCHE_Forecast - (1.55/6.)*S_CMCHE(prevApr) + 173.960/6.)}
+
+!Define running stratification release deficit
+define MOK_PrevStratDeficit {lower unbounded upper unbounded kind 'FLOW' units 'TAF' }
+
+define PrevStratDeficit {
+    case FirstWY   {condition wateryear == BgnWY .and. month==OCT value 0.}
+    case NovMay    {condition month >= NOV .and. month <= MAY value 0.}
+    case JunOct    {condition always
+                   value MOK_PrevStratDeficit(-1)
+                   + ThrmlReleaseTarget - C_PARDE(-1)*cfs_taf
+                   + 1.38*(C_CMCHE(-1)*cfs_taf - CMCHE_Forecast/6.)}}
+    			
+goal setPrevStratDeficit {MOK_PrevStratDeficit = PrevStratDeficit}
+
+
+goal setThrmlStrat1 {C_PARDE_THRML*cfs_taf < max(0,(ThrmlReleaseTarget + PrevStratDeficit))*StratFlag}
+
+!goal setThrmlStrat1 {C_PARDE_THRML*cfs_taf < ((1.38)*C_CMCHE*cfs_taf - (1.55/6.)*S_CMCHE(prevApr) + 173.960/6. + PrevStratDeficit)*StratFlag}
+
+
+define debugThermal {alias (ThrmlReleaseTarget + PrevStratDeficit)*StratFlag kind 'DEBUG' units 'TAF'}
+
+goal setThrmlStrat2 {C_PARDE_THRML*cfs_taf < (max(0,S_PARDE(-1) - 100 - EBMUD_PerDel * UD_EBMUD*cfs_taf))*StratFlag}
+define debugThermal2                         {alias S_PARDE(-1) - 100 - EBMUD_PerDel * UD_EBMUD*cfs_taf kind 'DEBUG' units 'TAF'}
+
+/*
+goal setThrmlStrat1 {
+        lhs C_PARDE_THRML*cfs_taf 
+            Case lowAprilStorage{
+    		condition	S_CMCHE(prevApr) <= 9999. !173.960/1.55
+                rhs             1.38 * C_CMCHE*cfs_taf*StratFlag - 1.55*S_CMCHE(prevApr)*StratFlag/6. + 173.960*StratFlag/6.
+		lhs>rhs     penalty 9999
+                lhs<rhs     penalty 9999}
+            Case HighAprilStorage{
+		condition	always
+		rhs             0.
+		lhs>rhs     penalty 9999
+                lhs<rhs     penalty 9999}}
+ */               

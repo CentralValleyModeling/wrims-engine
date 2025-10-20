@@ -1,0 +1,37 @@
+! bounds_cycle_sjr_wq1.wresl
+! Edward Chang
+! 6/28/2000
+! Joint Model
+! This file bounds within the San Joaquin basin for cycle 2 only (San Joaquin River System)
+! Revised by C. Hsu, 5/3/03, USBR, for review and documentation project
+!###################################################################################################
+/*
+This code bounds decision variables for cycle 2 only
+*/
+
+! The only increase to Vernalis should be from the release for WQ
+goal VernalisIncrease { C_SJR070 < C_SJR070[SJRBASE_GW4] + C_MELONWQ + C_MELONDO +
+(D_SJR096_SJRRrecap[SJRBASE_GW4] + D_SJR082_SJRRrecap[SJRBASE_GW4] + D_SJR070_SJRRrecap[SJRBASE_GW4]  + D_SJR070_SJRRremove[SJRBASE_GW4]
+- D_SJR096_SJRRrecap - D_SJR082_SJRRrecap - D_SJR070_SJRRrecap - D_SJR070_SJRRremove) 	!since recapture can go down between SJRBASE_GW4 and SJR_WQ1 due to a better estimate of SJRR flows reaching the Merced, need to allow Vernalis flows to adjust
++ (D_MLRTN_MDC_215 + D_MLRTN_MDC_F + D_MLRTN_MDC_16B - D_MLRTN_MDC_215[SJRBASE_GW4] - D_MLRTN_MDC_F[SJRBASE_GW4] - D_MLRTN_MDC_16B[SJRBASE_GW4])
+}
+! payback of VAMP debt - should always be zero
+goal setD_OAK020_61_NA2 {D_OAK020_61_NA2 = 0.}          
+! February Thru June 1995 WQCP Vernalis Minflow release
+goal setC_MELONmincycle2 { C_MELONmin = 0. }         
+! October Merced Releases
+goal setC_MCLREMINcycle2 { C_MCLREMIN = 0. }         
+
+/*
+Tuolumne River FERC minimum flows
+*/
+! Bounds Tuolumne minflow in cycle 2 
+goal boundC_TUO054cycle2 { C_TUO054_mif < C_TUO054_mif[SJRBASE_GW4] }      
+
+/*
+Stanislaus River F & W minimum flows and excess arcs
+*/
+! Stanislaus River F & W minimum flows
+goal boundC_STS059mifcycle2 { C_STS059_mif < C_STS059_mif[SJRBASE_GW4] }
+goal boundC_STS059excacycle2 { C_STS059_exc_a = C_STS059_exc_a[SJRBASE_GW4] }
+

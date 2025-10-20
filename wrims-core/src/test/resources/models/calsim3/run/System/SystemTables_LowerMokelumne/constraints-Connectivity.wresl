@@ -1,0 +1,88 @@
+/*
+ASSURE CONTINUITY IN SURFACE WATER NETWORK
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cosumnes River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityJNKSN        {I_JNKSN + D_CMP014_JNKSN  - D_JNKSN_WTPEID - E_JNKSN - C_JNKSN  = S_JNKSN*taf_cfs - S_JNKSN(-1)*taf_cfs}! Jenkinson Lake
+!goal continuityCMP014       {I_CMP014 - D_CMP014_JNKSN - C_CMP014 = 0.}! Camp Creek Tunnel diversion dam
+goal continuityCMP005       {C_CMP014 + C_JNKSN - C_CMP005= 0.}! Confluence of Sly Park Creek and Camp Creek
+goal continuityCMP001       {I_CMP001 + C_CMP005 - C_CMP001= 0.}! USGS 11333000 Camp Creek near Somerset
+goal continuityNFC020       {C_CMP001 - C_NCM020 = 0.}! Confluence of Camp Creek and North Fork Cosumnes River
+goal continuityCSM051       {C_NCM020 - C_CSM051 = 0.}! Confluence of North Fork and Middle and South Forks Cosumnes River
+
+goal continuityCSM035       {I_CSM035 + C_CSM051 - C_CSM035 = 0.}! DWR B1-1150 Cosumnes R at Michigan Bar
+goal continuityCSM033       {C_CSM035 + SG188_CSM033_29 - D_CSM033_RNCHO - C_CSM033 = 0.}!
+goal continuityRNCHO        {D_CSM033_RNCHO - E_RNCHO - D_RNCHO_60N_NU2 = S_RNCHO*taf_cfs - S_RNCHO(-1)*taf_cfs} !Represents three local reservoirs (Lakes Calero, Chesbro, Clementia) used to distribute water to Rancho Murieta
+goal continuityCSM026       {C_CSM033 + SG189_CSM026_29 - C_CSM026 = 0.}!
+goal continuityCSM021       {C_CSM026 + SG190_CSM021_29 - C_CSM021 = 0.}!
+goal continuityCSM016       {C_CSM021 + SG191_CSM016_29 - C_CSM016 = 0.}!
+goal continuityCSM011       {C_CSM016 + SG192_CSM011_29 + C_DEE020 - C_CSM011= 0.}!USGS 11336000 Cosumnes R. Nr McConnell
+goal continuityCSM005       {C_CSM011 + SG193_CSM005_29 + SG194_CSM005_29 + R_60N_NA2_CSM005 - C_CSM005 = 0.}!
+goal continuityCSM001       {C_CSM005 + C_DSC008 - C_CSM001 = 0.}!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deer Creek (Eastside Streams - trib to Cosumnes River       !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDEE023       {I_DEE023 - C_DEE023 = 0.}
+goal continuityDEE020       {C_DEE023 + R_EDWWTP_DEE020 - C_DEE020 = 0.}
+
+goal continuityEDWWTP       {R_ELDID_NU3_EDWWTP - D_EDWWTP_ELDID_NU3 - R_EDWWTP_DEE020 = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Dry and Sutter Creeks - Eastside trib to Mokelumne       !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDSC035       {I_DSC035 + SG182_DSC035_28 - C_DSC035 = 0.}!
+goal continuityDSC028       {C_DSC035 + SG183_DSC028_28 - C_DSC028 = 0.}!
+goal continuityDSC026       {C_DSC028 + C_AMADR + R_60N_NA1_DSC026 - C_DSC026= 0.}!
+goal continuityDSC023       {C_DSC026 + SG184_DSC023_28 - C_DSC023 = 0.}!USGS 11328000 DSC Creek nr Lone
+goal continuityDSC016       {C_DSC023 + SG185_DSC016_28 - C_DSC016 = 0.}!
+goal continuityDSC012       {C_DSC016 - C_DSC012 = 0.}!USGS 1139500 DSC Creek nr Galt
+goal continuityDSC008       {C_DSC012 + SG186_DSC008_28 + SG187_DSC008_28 - C_DSC008 = 0.}!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Folsom South Canal       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Routing akong the Folsom South Canal is part of the Sacramento valley code
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Jackson Creek       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityAMADR        {I_AMADR + D_PARDE_AMADR + SG_AMADR510 - D_AMADR_60N_NA1 - C_AMADR = S_AMADR*taf_cfs - S_AMADR(-1)*taf_cfs }!Evaporation not yet implemented
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mokelumne River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityPARDE    {C_MOK079 + I_PARDE + CT_PARDE_SV + SG173_MOK078_27 - D_PARDE_AMADR - D_PARDE_MAQ001 - C_PARDE - E_PARDE  = S_PARDE*taf_cfs - S_PARDE(-1)*taf_cfs} !zrc@ 7/20/2020 - SL_PARDE
+goal continuityCMCHE    {I_CMCHE + SG175_CMCHE_27 + SG174_CMCHE_27 + C_PARDE - C_CMCHE - E_CMCHE = S_CMCHE*taf_cfs - S_CMCHE(-1)*taf_cfs}    !zrc@ 7/20/2020 - SL_CMCHE
+goal continuityMOK057   {C_CMCHE - C_MOK057 = 0.}!USGS 11323500 Mokelumne R. blw Camanche Dam
+goal continuityMOK055   {C_MOK057 + SG176_MOK055_27 - C_MOK055 = 0.}!
+goal continuityMOK050   {C_MOK055 + SG177_MOK050_27 - D_MOK050_60N_NA3 - D_MOK050_60N_NA5 - C_MOK050 = 0.}!!Riparian diversions, North San Joaquin WCD diversion
+goal continuityMOK044   {C_MOK050 + SG178_MOK044_27 - C_MOK044 = 0.}
+goal continuityMOK039   {C_MOK044 - D_MOK039_60N_NA5 - C_MOK039 = 0.}!Riparian diversions
+goal continuityMOK035   {C_MOK039 + SG179_MOK035_27 + SR_60N_MOK035 - D_MOK035_60N_NA4 - D_MOK035_60N_NU1 - D_MOK035_WTPDWS - C_MOK035 = 0.}!Woodbridge Diversion Dam
+goal continuityMOK034   {C_MOK035 - C_MOK034 = 0.}!USGS 11322500 Mokelumne R. at Woodbridge
+goal continuityMOK033   {C_MOK034 - D_MOK033_60N_NA5 - C_MOK033 = 0.}!Riparian diversions
+goal continuityMOK028   {C_MOK033 + SG180_MOK028_27 + R_60N_NA5_MOK028 - C_MOK028 = 0.}
+goal continuityMOK022   {C_MOK028 + SG181_MOK022_27 + SG195_MOK022_27 - C_MOK022 = 0.}
+goal continuityMOK019   {C_MOK022 + R_26S_NA_MOK019 + SG196_MOK019_30 + SR_60N_MOK019 + C_CSM001 - C_MOK019 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mokelumne Aqueduct   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMAQ001  {D_PARDE_MAQ001 - C_MAQ001 = 0.}! Diversion from Pardee
+goal continuityMAQ012  {C_MAQ001 + D_FSC027_MAQ012 - C_MAQ012 = 0.}! Inflow from Folsom South Canal
+goal continuityMAQ057  {C_MAQ012 - D_MAQ057_LVP007 - D_MAQ057_EBMUD - D_MAQ057_EBTML = 0.}! Connections to East Bay terminal reservoirs and Los Vaqueros Pipeline
+goal continuityEBTML   {I_EBTML + D_MAQ057_EBTML - D_EBTML_EBMUD - D_EBTML_EBLOS = S_EBTML*taf_cfs - S_EBTML(-1)*taf_cfs }!
+
+
+

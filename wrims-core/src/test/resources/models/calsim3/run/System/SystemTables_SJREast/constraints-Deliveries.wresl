@@ -1,0 +1,533 @@
+/*
+ASSURE CONTINUITY IN DELIVERY ARCS
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60S     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 60S_NA1 - Ag
+!==============================
+! No surface water delivery
+goal meetAW_60S_NA1      {AW_60S_NA1 = GP_60S_NA1}
+
+
+!==============================
+! 60S_NA2 - Ag
+!==============================
+! No surface water delivery
+goal meetAW_60S_NA2      {AW_60S_NA2 = GP_60S_NA2}
+
+
+!==============================
+! 60S_PA1 - Stockton East WD - Ag
+!============================== 
+goal setDG_60S_PA1       {DG_60S_PA1 = D_CLV026_60S_PA1 + D_LJC022_60S_PA1}
+goal setDN_60S_PA1       {DN_60S_PA1 = DG_60S_PA1 - DL_60S_PA1}
+goal meetGPmin_60S_PA1   {GP_60S_PA1 > min((AWO_60S_PA1+AWR_60S_PA1),GPmin_60S_PA1)}
+goal meetAW_60S_PA1      {AW_60S_PA1 + RP_60S_PA1 = DN_60S_PA1 + GP_60S_PA1 + RU_60S_PA1}
+
+
+!==============================
+! 60S_PA2 - CSJWCD - Ag
+!============================== 
+goal setDG_60S_PA2        {DG_60S_PA2 = D_LJC010_60S_PA2}
+goal setDN_60S_PA2        {DN_60S_PA2 = DG_60S_PA2 - DL_60S_PA2}
+!goal setGPmin_60S_PA2     {GP_60S_PA2 > min((AWO_60S_PA2+AWR_60S_PA2),GPmin_60S_PA2)}
+goal meetAW_60S_PA2       {AW_60S_PA2 + RP_60S_PA2 = DN_60S_PA2 + GP_60S_PA2 + RU_60S_PA2}
+
+
+!==============================
+! 60S_NU1 - City of Stockton via SEWD - M&I 
+!============================== 
+goal setDG_60S_NU1a       {DG_60S_NU1 = D_WTPWDH_60S_NU1 + D_WTPDWS_60S_NU1}
+goal setDG_60S_NU1b       {DG_60S_NU1 = D_WTPWDH_60S_NU1 + D_SJR028_WTPDWS + D_MOK035_WTPDWS}
+goal setDG_60S_NU1       {DG_60S_NU1 = D_WTPWDH_60S_NU1 + D_WTPDWS_60S_NU1}
+goal setDN_60S_NU1       {DN_60S_NU1 = DG_60S_NU1 - DL_60S_NU1}
+goal meetGPmin_60S_NU1   {GP_60S_NU1 > min(UD_60S_NU1,GPmin_60S_NU1)}
+goal meetUD_60S_NU1      {UD_60S_NU1 = DN_60S_NU1 + GP_60S_NU1}
+
+
+!==============================
+! 60S_NU2 - Small communities
+!==============================
+! No surface water delivery
+! goal meetUD_60S_NU2      {UD_60S_NU2 = GP_60S_NU2}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 61      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 61_PA1 - Oakdale ID, North of Stanislaus River - Ag 
+!==============================
+! gross surface water diversions
+goal setDG_61_PA1         {DG_61_PA1 = D_SSJ004_61_PA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_SSJ004_61_PA1   {DN_SSJ004_61_PA1 =  D_SSJ004_61_PA1 - DL_61_PA1}
+goal setDN_61_PA1         {DN_61_PA1       = DG_61_PA1       - DL_61_PA1}
+ 
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_PA1        {AW_61_PA1 + RP_61_PA1 = DN_61_PA1 + GP_61_PA1 + RU_61_PA1}
+
+
+!==============================
+! 61_PA2 - Oakdale ID, South of Stanislaus River - Ag
+!==============================
+! gross surface water diversions
+goal setDG_61_PA2         {DG_61_PA2        = D_OAK020_61_PA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_OAK020_61_PA2  {DN_OAK020_61_PA2 =  D_OAK020_61_PA2 - DL_OAK020_61_PA2}
+goal setDN_61_PA2         {DN_61_PA2        = DG_61_PA2        - DL_61_PA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_PA2        {AW_61_PA2 + RP_61_PA2 = DN_61_PA2 + GP_61_PA2 + RU_61_PA2}
+
+!==============================
+! 61_PA3 - South San Joaquin ID - Ag 
+!==============================
+! gross surface water diversions
+goal setDG_61_PA3         {DG_61_PA3 = D_WDWRD_61_PA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_WDWRD_61_PA3   {DN_WDWRD_61_PA3 =  D_WDWRD_61_PA3 - DL_61_PA1}
+goal setDN_61_PA3         {DN_61_PA3       = DG_61_PA3       - DL_61_PA3}
+ 
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_PA3        {AW_61_PA3 + RP_61_PA3 = DN_61_PA3 + GP_61_PA3 + RU_61_PA3}
+
+
+
+!==============================
+! 61_NA1 - East of Modesto ID and Oakdale ID - Ag
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal meetAW_61_NA1        {AW_61_NA1 = GP_61_NA1}
+
+
+!==============================
+! 61_NA2 - Modesto ID - Ag
+!==============================
+! gross surface water diversions
+goal setDG_61_NA2         {DG_61_NA2        = D_RFS61B_61_NA2 + D_MDSTO_61_NA2 + D_OAK020_61_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_RFS61B_61_NA2  {DN_RFS61B_61_NA2 =  D_RFS61B_61_NA2 - DL_RFS61B_61_NA2}
+goal setDN_MDSTO_61_NA2   {DN_MDSTO_61_NA2  =  D_MDSTO_61_NA2  - DL_MDSTO_61_NA2}
+goal setDN_OAK020_61_NA2  {DN_OAK020_61_NA2 =  D_OAK020_61_NA2 - DL_OAK020_61_NA2}
+goal setDN_61_NA2         {DN_61_NA2        = DG_61_NA2        - DL_61_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_NA2        {AW_61_NA2 + RP_61_NA2 = DN_61_NA2 + GP_61_NA2 + RU_61_NA2}
+
+
+!==============================
+! 61_NA3 - Tuolumne River Diversions (north bank) - Riparian Ag
+!============================== 
+! gross surface water diversions
+goal setDG_61_NA3         {DG_61_NA3        = D_TUO047_61_NA3 + D_TUO015_61_NA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_TUO047_61_NA3  {DN_TUO047_61_NA3 =  D_TUO047_61_NA3 - DL_TUO047_61_NA3}
+goal setDN_TUO015_61_NA3  {DN_TUO015_61_NA3 =  D_TUO015_61_NA3 - DL_TUO015_61_NA3}
+goal setDN_61_NA3         {DN_61_NA3        = DG_61_NA3        - DL_61_NA3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_NA3        {AW_61_NA3 + RP_61_NA3 = DN_61_NA3 + GP_61_NA3 + RU_61_NA3}
+
+
+!==============================
+! 61_NA4 - Stanislaus River Diversions - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_61_NA4         {DG_61_NA4        = D_STS030_61_NA4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_STS030_61_NA4  {DN_STS030_61_NA4 =  D_STS030_61_NA4 - DL_STS030_61_NA4}
+goal setDN_61_NA4         {DN_61_NA4        = DG_61_NA4        - DL_61_NA4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_NA4        {AW_61_NA4 + RP_61_NA4 = DN_61_NA4 + GP_61_NA4 + RU_61_NA4}
+
+
+!==============================
+! 61_NA5 - East Bank of SJR, Tuolumne to Stanislaus - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_61_NA5         {DG_61_NA5        = D_RFS61D_61_NA5 + D_SJR081_61_NA5}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_RFS61D_61_NA5  {DN_RFS61D_61_NA5 =  D_RFS61D_61_NA5 - DL_RFS61D_61_NA5}
+goal setDN_SJR081_61_NA5  {DN_SJR081_61_NA5 =  D_SJR081_61_NA5 - DL_SJR081_61_NA5}
+goal setDN_61_NA5         {DN_61_NA5        = DG_61_NA5        - DL_61_NA5}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_NA5        {AW_61_NA5 + RP_61_NA5 = DN_61_NA5 + GP_61_NA5 + RU_61_NA5}
+
+
+!==============================
+! 61_NA6 - East Bank of SJR, Downstream of Stanislaus - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_61_NA6         {DG_61_NA6        = D_STS004_61_NA6}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_STS004_61_NA6  {DN_STS004_61_NA6 =  D_STS004_61_NA6 - DL_STS004_61_NA6}
+goal setDN_61_NA6         {DN_61_NA6        = DG_61_NA6        - DL_61_NA6}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_61_NA6        {AW_61_NA6 + RP_61_NA6 = DN_61_NA6 + GP_61_NA6 + RU_61_NA6}
+
+
+!==============================
+! 61_NU1 - City of Modesto - M&I
+!==============================
+! gross surface water diversions
+goal setDG_61_NU1         {DG_61_NU1        = D_WTPMOD_61_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_WTPMOD_61_NU1  {DN_WTPMOD_61_NU1 =  D_WTPMOD_61_NU1 - DL_WTPMOD_61_NU1}
+goal setDN_61_NU1         {DN_61_NU1        = DG_61_NU1        - DL_61_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetUD_61_NU1        {UD_61_NU1 = DN_61_NU1 + GP_61_NU1}
+
+
+!==============================
+! 61_NU2 - Cities of Lathrop, Manteca & Escalon - M&I
+!==============================
+! gross surface water diversions
+goal setDG_61_NU2         {DG_61_NU2        = D_WTPDGT_61_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_WTPDGT_61_NU2  {DN_WTPDGT_61_NU2 =  D_WTPDGT_61_NU2 - DL_WTPDGT_61_NU2}
+goal setDN_61_NU2         {DN_61_NU2        = DG_61_NU2        - DL_61_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetUD_61_NU2        {UD_61_NU2 = DN_61_NU2 + GP_61_NU2}
+
+
+!==============================
+! 61_NU3 - Oakdale, Ripon, Riverbank & Small Communities - M&I
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_61_NU3         {UD_61_NU3 = GP_61_NU3}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 62      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 62_NA1 - East of Turlock, DAU 209 - Ag
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal meetAW_62_NA1        {AW_62_NA1 = GP_62_NA1}
+
+
+!==============================
+! 62_NA2 - Merced River Diversions (north bank) - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_62_NA2         {DG_62_NA2        = D_MCD050_62_NA2}
+! net surface delivery = surface diversion - conveyance losses - operational spills
+goal setDN_MCD050_62_NA2  {DN_MCD050_62_NA2 =  D_MCD050_62_NA2 - DL_MCD050_62_NA2}
+goal setDN_62_NA2         {DN_62_NA2        = DG_62_NA2        - DL_62_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_62_NA2        {AW_62_NA2 + RP_62_NA2 = DN_62_NA2 + GP_62_NA2 + RU_62_NA2}
+
+
+!==============================
+! 62_NA3 - Turlock ID - Ag
+!==============================
+! gross surface water diversions
+goal setDG_62_NA3         {DG_62_NA3       = D_TRLCK_62_NA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_TRLCK_62_NA3   {DN_TRLCK_62_NA3 =  D_TRLCK_62_NA3 - DL_TRLCK_62_NA3}
+goal setDN_62_NA3         {DN_62_NA3       = DG_62_NA3       - DL_62_NA3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_62_NA3        {AW_62_NA3 + RP_62_NA3 = DN_62_NA3 + GP_62_NA3 + RU_62_NA3}
+
+
+
+!==============================
+! 62_NA4 - Tuolumne River Diversions (south bank) - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_62_NA4         {DG_62_NA4 = D_TUO047_62_NA4 + D_TUO015_62_NA4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_TUO047_62_NA4  {DN_TUO047_62_NA4 = D_TUO047_62_NA4 - DL_TUO047_62_NA4}
+goal setDN_TUO017_62_NA4  {DN_TUO015_62_NA4 = D_TUO015_62_NA4 - DL_TUO015_62_NA4}
+goal setDN_62_NA4         {DN_62_NA4        = DG_62_NA4       - DL_62_NA4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_62_NA4        {AW_62_NA4 + RP_62_NA4 = DN_62_NA4 + GP_62_NA4 + RU_62_NA4}
+
+
+!==============================
+! 62_NA5 - East Bank of SJR, Merced to Tuolumne - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_62_NA5         {DG_62_NA5 = D_SJR114_62_NA5}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_SJR114_62_NA5  {DN_SJR114_62_NA5 = D_SJR114_62_NA5 - DL_SJR114_62_NA5}
+goal setDN_62_NA5         {DN_62_NA5        = DG_62_NA5       - DL_62_NA5}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_62_NA5        {AW_62_NA5 + RP_62_NA5 = DN_62_NA5 + GP_62_NA5 + RU_62_NA5}
+ 
+
+!==============================
+! 62_NA6 - Merced ID (north of Merced River) - Ag
+!==============================
+! gross surface water diversions
+goal setDG_62_NA6         {DG_62_NA6 = D_MCD055_62_NA6}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_MCD055_62_NA6  {DN_MCD055_62_NA6 = D_MCD055_62_NA6 - DL_MCD055_62_NA6}
+goal setDN_62_NA6         {DN_62_NA6        = DG_62_NA6       - DL_62_NA6}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_62_NA6        {AW_62_NA6 + RP_62_NA6 = DN_62_NA6 + GP_62_NA6 + RU_62_NA6}
+
+
+!==============================
+! 62_NU - Cities of Turlock, Ceres, Dehli, Hilmer, Hughson, Keyes, Denair & Small Communities - M&I
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_62_NU          {UD_62_NU = GP_62_NU}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 63      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 63_PR1 - Arena Plains Unit of Merced NWR - Refuge
+!==============================
+! gross surface water diversions
+goal setDG_63_PR1         {DG_63_PR1        = D_ESC005_63_PR1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_ESC000_63_PR1  {DN_ESC000_63_PR1 =  D_ESC005_63_PR1 - DL_ESC000_63_PR1}
+goal setDN_63_PR1         {DN_63_PR1        = DG_63_PR1        - DL_63_PR1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_PR1        {AW_63_PR1 + RP_63_PR1 = DN_63_PR1 + GP_63_PR1 + RU_63_PR1}
+! RF pond storage
+/*goal setTWS_63_PR1_PERMA {TWS_63_PR1_PERMA = max(0.,TWS_63_PR1_PERMA(-1)
+                                           + (AWW_63_PR1_PERMA + PR_63_PR1_PERMA)*cfs_taf
+                                           - (ET_63_PR1_PERMA  + DP_63_PR1_PERMA + SR_63_PR1_PERMA + TW_63_PR1_PERMA)*cfs_taf) }
+
+goal setTWS_63_PR1_SEMIP {TWS_63_PR1_SEMIP = max(0.,TWS_63_PR1_SEMIP(-1)
+                                           + (AWW_63_PR1_SEMIP + PR_63_PR1_SEMIP)*cfs_taf
+                                           - (ET_63_PR1_SEMIP  + DP_63_PR1_SEMIP + SR_63_PR1_SEMIP + TW_63_PR1_SEMIP)*cfs_taf) }
+
+goal setTWS_63_PR1_SEASO {TWS_63_PR1_SEASO = max(0.,TWS_63_PR1_SEASO(-1)
+                                           + (AWW_63_PR1_SEASO + PR_63_PR1_SEASO)*cfs_taf
+                                           - (ET_63_PR1_SEASO  + DP_63_PR1_SEASO + SR_63_PR1_SEASO + TW_63_PR1_SEASO)*cfs_taf) } 
+*/
+!==============================
+! 63_PR2 - Merced and Lone Tree Units of Merced NWR - Refuge
+!==============================
+! gross surface water diversions
+goal setDG_63_PR2         {DG_63_PR2        = D_DED010_63_PR2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_DED010_63_PR2  {DN_DED010_63_PR2 =  D_DED010_63_PR2 - DL_DED010_63_PR2}
+goal setDN_63_PR2         {DN_63_PR2        = DG_63_PR2        - DL_63_PR2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_PR2        {AW_63_PR2 + RP_63_PR2 = DN_63_PR2 + GP_63_PR2 + RU_63_PR2}
+! RF pond storage
+/*goal setTWS_63_PR2_PERMA {TWS_63_PR2_PERMA = max(0.,TWS_63_PR2_PERMA(-1)
+                                           + (AWW_63_PR2_PERMA + PR_63_PR2_PERMA)*cfs_taf
+                                           - (ET_63_PR2_PERMA  + DP_63_PR2_PERMA + SR_63_PR2_PERMA + TW_63_PR2_PERMA)*cfs_taf) }
+
+goal setTWS_63_PR2_SEMIP {TWS_63_PR2_SEMIP = max(0.,TWS_63_PR2_SEMIP(-1)
+                                           + (AWW_63_PR2_SEMIP + PR_63_PR2_SEMIP)*cfs_taf
+                                           - (ET_63_PR2_SEMIP  + DP_63_PR2_SEMIP + SR_63_PR2_SEMIP + TW_63_PR2_SEMIP)*cfs_taf) }
+
+goal setTWS_63_PR2_SEASO {TWS_63_PR2_SEASO = max(0.,TWS_63_PR2_SEASO(-1)
+                                           + (AWW_63_PR2_SEASO + PR_63_PR2_SEASO)*cfs_taf
+                                           - (ET_63_PR2_SEASO  + DP_63_PR2_SEASO + SR_63_PR2_SEASO + TW_63_PR2_SEASO)*cfs_taf) } 
+*/
+!==============================
+! 63_PR3 - East Bear Unit of San Luis NWR - Refuge
+!==============================
+! gross surface water diversions
+goal setDG_63_PR3         {DG_63_PR3        = D_EBP048_63_PR3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_EBP048_63_PR3  {DN_EBP048_63_PR3 =  D_EBP048_63_PR3 - DL_EBP048_63_PR3}
+goal setDN_63_PR3         {DN_63_PR3        = DG_63_PR3        - DL_63_PR3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_PR3        {AW_63_PR3 + RP_63_PR3 = DN_63_PR3 + GP_63_PR3 + RU_63_PR3}
+! RF pond storage
+/*goal setTWS_63_PR3_PERMA {TWS_63_PR3_PERMA = max(0.,TWS_63_PR3_PERMA(-1)
+                                           + (AWW_63_PR3_PERMA + PR_63_PR3_PERMA)*cfs_taf
+                                           - (ET_63_PR3_PERMA  + DP_63_PR3_PERMA + SR_63_PR3_PERMA + TW_63_PR3_PERMA)*cfs_taf) }
+
+goal setTWS_63_PR3_SEMIP {TWS_63_PR3_SEMIP = max(0.,TWS_63_PR3_SEMIP(-1)
+                                           + (AWW_63_PR3_SEMIP + PR_63_PR3_SEMIP)*cfs_taf
+                                           - (ET_63_PR3_SEMIP  + DP_63_PR3_SEMIP + SR_63_PR3_SEMIP + TW_63_PR3_SEMIP)*cfs_taf) }
+
+goal setTWS_63_PR3_SEASO {TWS_63_PR3_SEASO = max(0.,TWS_63_PR3_SEASO(-1)
+                                           + (AWW_63_PR3_SEASO + PR_63_PR3_SEASO)*cfs_taf
+                                           - (ET_63_PR3_SEASO  + DP_63_PR3_SEASO + SR_63_PR3_SEASO + TW_63_PR3_SEASO)*cfs_taf) } 
+*/
+!==============================
+! 63_NA1 - East of Merced ID, DAU 211 - Ag
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal meetAW_63_NA1        {AW_63_NA1 = GP_63_NA1}
+
+
+!==============================
+! 63_NA2 - Merced River Diversions (south bank) - Riparian Ag
+!==============================
+! gross surface water diversions
+goal setDG_63_NA2         {DG_63_NA2        = D_MCD042_63_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_MCD042_63_NA2  {DN_MCD042_63_NA2 =  D_MCD042_63_NA2 - DL_MCD042_63_NA2}
+goal setDN_63_NA2         {DN_63_NA2        = DG_63_NA2        - DL_63_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_NA2        {AW_63_NA2 + RP_63_NA2 = DN_63_NA2 + GP_63_NA2 + RU_63_NA2}
+
+
+!==============================
+! 63_NA3 - Merced ID (south of Merced River) - Ag
+!==============================
+! gross surface water diversions
+goal setDG_63_NA3         {DG_63_NA3        = D_MID021_63_NA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_MID021_63_NA3  {DN_MID021_63_NA3 =  D_MID021_63_NA3 - DL_MID021_63_NA3}
+goal setDN_63_NA3         {DN_63_NA3        = DG_63_NA3        - DL_63_NA3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_NA3        {AW_63_NA3 + RP_63_NA3 = DN_63_NA3 + GP_63_NA3 + RU_63_NA3}
+
+
+!==============================
+! 63_NA4 - West of Merced ID and Non District Areas in DAU 210 & 212 - Ag
+!==============================
+! gross surface water diversions
+goal setDG_63_NA4         {DG_63_NA4         = D_MCD002_63_NA4 + D_MCD021_63_NA4 + D_MID021_63_NA4 + D_ESC020_63_NA4}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_MCD002_63_NA4  {DN_MCD002_63_NA4 =  D_MCD002_63_NA4 - DL_MCD002_63_NA4}
+goal setDN_MCD021_63_NA4  {DN_MCD021_63_NA4 =  D_MCD021_63_NA4 - DL_MCD021_63_NA4}
+goal setDN_MID021_63_NA4  {DN_MID021_63_NA4 =  D_MID021_63_NA4 - DL_MID021_63_NA4}
+goal setDN_ESC020_63_NA4  {DN_ESC020_63_NA4 =  D_ESC020_63_NA4 - DL_ESC020_63_NA4}
+goal setDN_63_NA4         {DN_63_NA4        = DG_63_NA4        - DL_63_NA4}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_NA4        {AW_63_NA4 + RP_63_NA4 = DN_63_NA4 + GP_63_NA4 + RU_63_NA4}
+
+!==============================
+! 63_NA5 - El Nido Irrigation District
+!==============================
+! gross surface water diversions
+goal setDG_63_NA5         {DG_63_NA5        = D_DED025_63_NA5 + D_MPS020_63_NA5}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_DED025_63_NA5  {DN_DED025_63_NA5 =  D_DED025_63_NA5 - DL_DED025_63_NA5}
+goal setDN_MPS020_63_NA5  {DN_MPS020_63_NA5 =  D_MPS020_63_NA5 - DL_MPS020_63_NA5}
+goal setDN_63_NA5         {DN_63_NA5        = DG_63_NA5        - DL_63_NA5}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_63_NA5        {AW_63_NA5 + RP_63_NA5 = DN_63_NA5 + GP_63_NA5 + RU_63_NA5}
+!==============================
+! 63_NU - Cities of Merced, Atwater, Livingston, Winton, Planada, LeGrande & Small Communities - M&I
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setUD_63_NU          {UD_63_NU = GP_63_NU}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 64      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 64_PA1 - Madera ID - Ag
+!==============================
+! FIXED DIVERSION -- 
+! NOTE: for now push all water down MDC006, no diversion from MDC032 
+!       (change later when we have info on split between MDC006/MDC032 diversions @ 64_PA1)
+! goal setD_MDC032_64_PA1   {D_MDC032_64_PA1  = 0.0}
+! gross surface water diversions
+goal setDG_64_PA1         {DG_64_PA1 = D_FRS036_64_PA1 + D_MDC006_64_PA1 + D_MDC032_64_PA1 + D_DBC014_64_PA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_FRS036_64_PA1  {DN_FRS036_64_PA1 = D_FRS036_64_PA1 - DL_FRS036_64_PA1}
+goal setDN_MDC006_64_PA1  {DN_MDC006_64_PA1 = D_MDC006_64_PA1 - DL_MDC006_64_PA1}
+goal setDN_MDC032_64_PA1  {DN_MDC032_64_PA1 = D_MDC032_64_PA1 - DL_MDC032_64_PA1}
+goal setDN_DBC014_64_PA1  {DN_DBC014_64_PA1 = D_DBC014_64_PA1 - DL_DBC014_64_PA1}
+goal setDN_64_PA1         {DN_64_PA1        = DG_64_PA1       - DL_64_PA1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_64_PA1        {AW_64_PA1 + RP_64_PA1 = DN_64_PA1 + GP_64_PA1 + RU_64_PA1}
+
+
+!==============================
+! 64_PA2 - Chowchilla ID - Ag
+!==============================
+! gross surface water diversions
+goal setDG_64_PA2         {DG_64_PA2 = D_CHW017_64_PA2 + D_ASL013_64_PA2 + D_BRS018_64_PA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_CHS017_64_PA2  {DN_CHW017_64_PA2 = D_CHW017_64_PA2 - DL_CHW017_64_PA2}
+goal setDN_ASL013_64_PA2  {DN_ASL013_64_PA2 = D_ASL013_64_PA2 - DL_ASL013_64_PA2}
+goal setDN_BRS018_64_PA2  {DN_BRS018_64_PA2 = D_BRS018_64_PA2 - DL_BRS018_64_PA2}
+goal setDN_64_PA2         {DN_64_PA2        = DG_64_PA2       - DL_64_PA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_64_PA2        {AW_64_PA2 + RP_64_PA2 = DN_64_PA2 + GP_64_PA2 + RU_64_PA2}
+
+
+!==============================
+! 64_PA3 - Gravelly Ford and Root Creek Water Districts - Ag
+!==============================
+! FIXED DIVERSION -- 
+! NOTE: this connection is not yet implemented...set to zero for now.
+goal setD_MDC006_64_PA3   {D_MDC006_64_PA3  = 0.0}
+! gross surface water diversions
+goal setDG_64_PA3         {DG_64_PA3 = D_SJR227_64_PA3 + D_MDC006_64_PA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_SJR227_64_PA3  {DN_SJR227_64_PA3 = D_SJR227_64_PA3 - DL_SJR227_64_PA3}
+goal setDN_MDC006_64_PA3  {DN_MDC006_64_PA3 = D_MDC006_64_PA3 - DL_MDC006_64_PA3}
+goal setDN_64_PA3         {DN_64_PA3        = DG_64_PA3       - DL_64_PA3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_64_PA3        {AW_64_PA3 + RP_64_PA3 = DN_64_PA3 + GP_64_PA3 + RU_64_PA3}
+
+
+!==============================
+! 64_XA - Columbia Canal Co. (Exchange Contractor) - Ag
+!==============================
+! gross surface water diversions
+goal setDG_64_XA          {DG_64_XA = D_MDOTA_64_XA}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_MDOTA_64_XA    {DN_MDOTA_64_XA = D_MDOTA_64_XA - DL_MDOTA_64_XA}
+goal setDN_64_XA          {DN_64_XA       = DG_64_XA      - DL_64_XA}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal meetAW_64_XA         {AW_64_XA + RP_64_XA = DN_64_XA + GP_64_XA + RU_64_XA}
+
+
+!==============================
+! 64_NA1 - East of Madera ID and Non District DAU 213 - Ag
+!==============================
+! No surface water delivery
+! Total Applied Water = groundwater pumping
+goal setDG_64_NA1         {DG_64_NA1 = 0.0}
+goal setDN_64_NA1         {DN_64_NA1 = 0.0}
+goal meetAW_64_NA1        {AW_64_NA1 = GP_64_NA1 } 
+
+
+!==============================
+! 64_NA2 - West of Madera ID and Chowchilla ID - Ag
+!==============================
+! gross surface water diversions
+goal setDG_64_NA2         {DG_64_NA2 = D_RFS64_64_NA2 + D_EBP016_64_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_RFS64_64_NA2   {DN_RFS64_64_NA2  = D_RFS64_64_NA2  - DL_RFS64_64_NA2}
+goal setDN_EBP016_64_NA2  {DN_EBP016_64_NA2 = D_EBP016_64_NA2 - DL_EBP016_64_NA2}
+goal setDN_64_NA2         {DN_64_NA2        = DG_64_NA2       - DL_64_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping
+!@jmg 2017.05.10 - not sure why deliveries to 64_NA2 are being limited
+!                  by the contract limit for 64_XA (Exchange Contractors)
+!                 from system schematic, deliveries to 64_NA2 are from 
+!                 a portion of Chowchilla WD (64_PA2) and aggreg EBP return
+!                  flows - I don't see the connection to Columbia Canal Co
+!                  Exchange Contractors.
+!                  - Changing to be consistent with other non-project 'meetAW'
+!                    lines:
+!--ORIG--goal meetAW_64_NA2        {CLM_64_XA*taf_cfs*perdel_cvpex_s + RP_64_NA2 = DN_64_NA2 + GP_64_NA2 + RU_64_NA2}
+goal meetAW_64_NA2   {AW_64_NA2 + RP_64_NA2 = DN_64_NA2 + GP_64_NA2 + RU_64_NA2}
+
+!==============================
+! 64_NU - Cities of Madera, Chowchilla, Madera Acres & Small Communities - M&I
+!==============================
+! No surface water delivery
+!goal setDG_64_NU          {DG_64_NU = 0.0}
+!goal setDN_64_NU          {DN_64_NU = 0.0}
+goal meetUD_64_NU         {UD_64_NU = GP_64_NU } 
+
+!goal setDD_SJR026_SJRE   {DD_SJR026_SJRE < DD_SJR_East}

@@ -1,0 +1,116 @@
+! R.Wilbur & S. Wu 5/10/05
+
+!*****Linearization #1***************************************************************
+goal meetRS_1 {
+  lhs EXP_TD + D408_P
+  case LowCL{
+    condition C_SAC041_ANN(-1) >=40000.
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case LowCL2{
+    condition RS_EC_Month_sv <=50 .and. C_SAC041_ANN(-1) >=25000.
+    rhs 999999.
+    lhs<rhs penalty 0}*/
+  /*case FebCritRelax{
+    condition month==FEB .and. wyt_SAC==Critical .and. abs(RS_m_1_sv) >= 1.5
+    rhs 999999.
+    lhs<rhs penalty 0}*/
+  /*case CritRelax{
+    condition wyt_SAC==Critical .and. RS_m_1_sv >= 1.0
+    rhs 999999.
+    lhs<rhs penalty 0}*/
+  case NoSalinityControlPossible{
+    condition abs(RS_m_1_sv) <= 0.001 .and. int(RS_b_1_sv) == 0
+    rhs 999999
+    lhs<rhs penalty 0}
+  case NegSlope{
+    condition RS_m_1_sv <= 0.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case HighCost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    rhs ExportCap
+    lhs<rhs penalty 0}*/
+  case LargeNegInt{
+    condition RS_b_1_sv < -10000.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  case Normal {
+    condition always
+    rhs RS_m_1_sv*C_SACtot_ANN + RS_b_1_sv
+    lhs<rhs penalty 0}
+}
+
+!*****Linearization #2***************************************************************
+goal meetRS_2 {
+  lhs EXP_TD + D408_P
+  case LowCL{
+    condition C_SAC041_ANN(-1) >=40000.
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case LowCL2{
+    condition RS_EC_Month_sv <=50 .and. C_SAC041_ANN(-1) >=25000.
+    rhs 999999.
+    lhs<rhs penalty 0}*/
+  case NoSalinityControlPossible{
+    condition abs(RS_m_2_sv) <= 0.001 .and. int(RS_b_2_sv) == 0
+    rhs ExportCap
+    lhs<rhs penalty 0}
+  case NegSlope{
+    condition RS_m_2_sv <= 0.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case HighCost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    rhs ExportCap
+    lhs<rhs penalty 0}*/
+  case LargeNegInt{
+    condition RS_b_2_sv < -10000.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  case NegCarriage{
+    condition RS_m_2_sv >= 1.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  case Normal {
+    condition always
+    rhs RS_m_2_sv*C_SACtot_ANN + RS_b_2_sv
+    lhs<rhs penalty 0}
+}
+
+!*****Linearization #3***************************************************************
+goal meetRS_3 {
+  lhs EXP_TD + D408_P
+  case LowCL{
+    condition C_SAC041_ANN(-1) >=40000.
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case LowCL2{
+    condition RS_EC_Month_sv <=50 .and. C_SAC041_ANN(-1) >=25000.
+    rhs 999999.
+    lhs<rhs penalty 0}*/
+  case NoSalinityControlPossible{
+    condition abs(RS_m_3_sv) <= 0.001 .and. int(RS_b_3_sv) == 0
+    rhs ExportCap
+    lhs<rhs penalty 0}
+  case NegSlope{
+    condition RS_m_3_sv <= 0.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  /*case HighCost{
+    condition RS_Sac_ZeroExp_sv2 >= ANNcap
+    rhs ExportCap
+    lhs<rhs penalty 0}*/
+  case LargeNegInt{
+    condition RS_b_3_sv < -10000.0
+    rhs 999999.
+    lhs<rhs penalty 0}  
+  case NegCarriage{
+    condition RS_m_3_sv >= 1.0
+    rhs 999999.
+    lhs<rhs penalty 0}
+  case Normal {
+    condition always
+    rhs RS_m_3_sv*C_SACtot_ANN + RS_b_3_sv
+    lhs<rhs penalty 0}
+}

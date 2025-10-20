@@ -1,0 +1,45 @@
+! Code by E. Reyes as of 04/24/01
+
+
+! This file sets the delivery allocation for Feather River Settlement Contracts.  These contracts include
+! Joint Boatd WD, Western Canal WD, Oswald WD, Garden Highway Mutual WC, Tudor Mutual WC, Plumas Mutual WC,
+! and Feather WD.  The allocations are 100% unless Feather River "Drought" conditions occur.  In a Feather
+! River "Drought" year, allocations are reduced to 50%.  Feather River "Drought" years are years when the
+! Feaher Index for yeartype is equal to 1.
+
+!Data for 6 years prior to 1922, 20220920
+!define PERDV_SWP_FSC {std kind 'PERCENT-DELIVERY' units 'NONE'} !Defined in Init File, modify for changing climate scenarios or PA, 
+!i.e., for PA for Year 2023, 1921 will be 2022, 1920 will be 2021, and so on.
+
+
+define perdel_swp_fsc {           
+	case fixIrrigSeasonAlloc {
+            condition    range(month,may,mar)
+            value        perdv_swp_fsc(-1)}
+  
+/*	case firstseven_normal {
+            condition    wateryear <= 1928 .and. WYT_FEATHER == 0
+            value        1.0}
+			
+	case firstseven_dry {
+            condition    wateryear <= 1928 .and. WYT_FEATHER == 1
+            value        0.5}
+*/
+	case sevenyears {
+            condition    (sum(i=1,7,1) perdv_swp_fsc(-12*i)) <6.4 ! Per TF Stantec, NOsorio 02/2024
+            !condition    wateryear > 1928 .and. (sum(i=1,7,1) perdv_swp_fsc(-12*i)) <6.5
+            value        1.0}
+
+	case Drought {
+            condition    wyt_FEATHER == 1
+            value        0.50}
+            
+	case Normal {
+            condition    always
+            value        1.00}
+       }
+       
+!define perdv_swp_fsc  {alias perdel_swp_fsc  kind 'percent-delivery' units 'none'}
+       
+goal setperdv_swp_fsc  {perdv_swp_fsc = perdel_swp_fsc }            
+            

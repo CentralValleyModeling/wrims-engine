@@ -1,0 +1,457 @@
+!CVP_SOD_DemTotals.wresl
+
+!*****************************************************************************************
+! Calculate projected demands and delivery targets for use in determining San Luis Rule Curve
+! and in distributing seasonal limits to Exchange Contractors
+!*****************************************************************************************
+
+! April-October Delivery Requirements - identical values computed April through the following March, used Apr-Oct to possibly limit Exch delivery given seasonal maximum
+/*
+define AODR_64_XA  {
+    case lastyear {condition wateryear==EndWY 
+                    value (min(CLM_64_XA_apr, (AWR_64_XA(7-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(7-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(7-month) )
+                         + min(CLM_64_XA_may, (AWR_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(8-month) )
+                         + min(CLM_64_XA_jun, (AWR_64_XA(9-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(9-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(9-month) )
+                         + min(CLM_64_XA_jul, (AWR_64_XA(10-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(10-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(10-month))
+                         + min(CLM_64_XA_aug, (AWR_64_XA(11-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(11-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(11-month))
+                         + min(CLM_64_XA_sep, (AWR_64_XA(12-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(12-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(12-month))
+                         + min(CLM_64_XA_oct, (AWR_64_XA(1-month)* (1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(1-month)* (1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(1-month)))
+                         / (1 - EVF_MDOTA_64_XA     - DPF_MDOTA_64_XA    - LFF_MDOTA_64_XA    - OSF_MDOTA_64_XA   )}
+    case otherwise {condition always
+                    value (min(CLM_64_XA_apr, (AWR_64_XA(7-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(7-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(7-month) )
+                         + min(CLM_64_XA_may, (AWR_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(8-month) )
+                         + min(CLM_64_XA_jun, (AWR_64_XA(9-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(9-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(9-month) )
+                         + min(CLM_64_XA_jul, (AWR_64_XA(10-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(10-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(10-month))
+                         + min(CLM_64_XA_aug, (AWR_64_XA(11-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(11-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(11-month))
+                         + min(CLM_64_XA_sep, (AWR_64_XA(12-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(12-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(12-month))
+                         + min(CLM_64_XA_oct, (AWR_64_XA(13-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(13-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(13-month)))
+                         / (1 - EVF_MDOTA_64_XA     - DPF_MDOTA_64_XA    - LFF_MDOTA_64_XA    - OSF_MDOTA_64_XA   )}
+}
+define AODR_72_XA1  {value (min(CLM_72_XA1_apr, (AWR_72_XA1(7-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(7-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(7-month) )
+                          + min(CLM_72_XA1_may, (AWR_72_XA1(8-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(8-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(8-month) )
+                          + min(CLM_72_XA1_jun, (AWR_72_XA1(9-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(9-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(9-month) )
+                          + min(CLM_72_XA1_jul, (AWR_72_XA1(10-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(10-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(10-month))
+                          + min(CLM_72_XA1_aug, (AWR_72_XA1(11-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(11-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(11-month))
+                          + min(CLM_72_XA1_sep, (AWR_72_XA1(12-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(12-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(12-month))
+                          + min(CLM_72_XA1_oct, (AWR_72_XA1(13-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(13-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(13-month)))
+                          / (1 - EVF_ARY010_72_XA1     - DPF_ARY010_72_XA1    - LFF_ARY010_72_XA1    - OSF_ARY010_72_XA1   )}
+
+define AODR_72_XA2  {value (min(CLM_72_XA2_apr, (AWR_72_XA2(7-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(7-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(7-month) )
+                          + min(CLM_72_XA2_may, (AWR_72_XA2(8-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(8-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(8-month) )
+                          + min(CLM_72_XA2_jun, (AWR_72_XA2(9-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(9-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(9-month) )
+                          + min(CLM_72_XA2_jul, (AWR_72_XA2(10-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(10-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(10-month))
+                          + min(CLM_72_XA2_aug, (AWR_72_XA2(11-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(11-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(11-month))
+                          + min(CLM_72_XA2_sep, (AWR_72_XA2(12-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(12-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(12-month))
+                          + min(CLM_72_XA2_oct, (AWR_72_XA2(13-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(13-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(13-month)))
+                          / (1 - EVF_XCC010_72_XA2     - DPF_XCC010_72_XA2    - LFF_XCC010_72_XA2    - OSF_XCC010_72_XA2   )}
+
+define AODR_72_XA3  {value (min(CLM_72_XA3_apr, (AWR_72_XA3(7-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(7-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(7-month) )
+                          + min(CLM_72_XA3_may, (AWR_72_XA3(8-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(8-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(8-month) )
+                          + min(CLM_72_XA3_jun, (AWR_72_XA3(9-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(9-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(9-month) )
+                          + min(CLM_72_XA3_jul, (AWR_72_XA3(10-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(10-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(10-month))
+                          + min(CLM_72_XA3_aug, (AWR_72_XA3(11-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(11-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(11-month))
+                          + min(CLM_72_XA3_sep, (AWR_72_XA3(12-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(12-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(12-month))
+                          + min(CLM_72_XA3_oct, (AWR_72_XA3(13-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(13-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(13-month)))
+                          / (1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   )}
+
+define AODR_73_XA  {value ( min(CLM_73_XA_apr, (AWR_73_XA(7-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(7-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(7-month) )
+                          + min(CLM_73_XA_may, (AWR_73_XA(8-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(8-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(8-month) )
+                          + min(CLM_73_XA_jun, (AWR_73_XA(9-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(9-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(9-month) )
+                          + min(CLM_73_XA_jul, (AWR_73_XA(10-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(10-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(10-month))
+                          + min(CLM_73_XA_aug, (AWR_73_XA(11-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(11-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(11-month))
+                          + min(CLM_73_XA_sep, (AWR_73_XA(12-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(12-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(12-month))
+                          + min(CLM_73_XA_oct, (AWR_73_XA(13-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(13-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(13-month)))
+                          / (1 - EVF_MDOTA_73_XA     - DPF_MDOTA_73_XA    - LFF_MDOTA_73_XA    - OSF_MDOTA_73_XA   )} ! note: factors for DMC111_73_XA3 are the same
+
+define totalAODR {value AODR_64_XA + AODR_72_XA1 + AODR_72_XA2 + AODR_72_XA3 + AODR_73_XA}
+define pct64_xa_aproct  {value aodr_64_xa/totalAODR}
+define pct72_xa1_aproct {value aodr_72_xa1/totalAODR}
+define pct72_xa2_aproct {value aodr_72_xa2/totalAODR}
+define pct72_xa3_aproct {value aodr_72_xa3/totalAODR}
+define pct73_xa_aproct  {value aodr_73_xa/totalAODR}
+
+
+! JanFebMarNovDec Delivery Requirement - identical values computed January through the following December, 
+! used JanFebMarNovDec to possibly ration delivery given seasonal 121 taf maximum, which is re-set each January
+! In January, month=4, so the indices are 0, 1, 2, 10, 11; and so on
+
+define JFMND_64_XA  {value (min(CLM_64_XA_jan, (AWR_64_XA(4-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(4-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(4-month) )
+                          + min(CLM_64_XA_feb, (AWR_64_XA(5-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(5-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(5-month) )
+                          + min(CLM_64_XA_mar, (AWR_64_XA(6-month) *(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(6-month) *(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(6-month) )
+                          + min(CLM_64_XA_nov, (AWR_64_XA(14-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(14-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(14-month))
+                          + min(CLM_64_XA_dec, (AWR_64_XA(15-month)*(1 - RUFR_64_XA  + RPF_64_XA) + AWO_64_XA(15-month)*(1 - RUFR_64_XA  + RPF_64_XA)) * cfs_taf(15-month)))
+                          / (1 - EVF_MDOTA_64_XA     - DPF_MDOTA_64_XA    - LFF_MDOTA_64_XA    - OSF_MDOTA_64_XA   )}
+
+define JFMND_72_XA1  {value (min(CLM_72_XA1_jan, (AWR_72_XA1(4-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(4-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(4-month) )
+                           + min(CLM_72_XA1_feb, (AWR_72_XA1(5-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(5-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(5-month) )
+                           + min(CLM_72_XA1_mar, (AWR_72_XA1(6-month) *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(6-month) *(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(6-month) )
+                           + min(CLM_72_XA1_nov, (AWR_72_XA1(14-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(14-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(14-month))
+                           + min(CLM_72_XA1_dec, (AWR_72_XA1(15-month)*(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1(15-month)*(1 - RUFR_72_XA1  + RPF_72_XA1)) * cfs_taf(15-month)))
+                           / (1 - EVF_ARY010_72_XA1     - DPF_ARY010_72_XA1    - LFF_ARY010_72_XA1    - OSF_ARY010_72_XA1   )}
+
+define JFMND_72_XA2  {value (min(CLM_72_XA2_jan, (AWR_72_XA2(4-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(4-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(4-month) )
+                           + min(CLM_72_XA2_feb, (AWR_72_XA2(5-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(5-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(5-month) )
+                           + min(CLM_72_XA2_mar, (AWR_72_XA2(6-month) *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(6-month) *(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(6-month) )
+                           + min(CLM_72_XA2_nov, (AWR_72_XA2(14-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(14-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(14-month))
+                           + min(CLM_72_XA2_dec, (AWR_72_XA2(15-month)*(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2(15-month)*(1 - RUFR_72_XA2  + RPF_72_XA2)) * cfs_taf(15-month)))
+                           / (1 - EVF_XCC010_72_XA2     - DPF_XCC010_72_XA2    - LFF_XCC010_72_XA2    - OSF_XCC010_72_XA2   )}
+
+define JFMND_72_XA3  {value (min(CLM_72_XA3_jan, (AWR_72_XA3(4-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(4-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(4-month) )
+                           + min(CLM_72_XA3_feb, (AWR_72_XA3(5-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(5-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(5-month) )
+                           + min(CLM_72_XA3_mar, (AWR_72_XA3(6-month) *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(6-month) *(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(6-month) )
+                           + min(CLM_72_XA3_nov, (AWR_72_XA3(14-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(14-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(14-month))
+                           + min(CLM_72_XA3_dec, (AWR_72_XA3(15-month)*(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3(15-month)*(1 - RUFR_72_XA3  + RPF_72_XA3)) * cfs_taf(15-month)))
+                           / (1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   )}
+
+define JFMND_73_XA  {value (min(CLM_73_XA_jan, (AWR_73_XA(4-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(4-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(4-month) )
+                          + min(CLM_73_XA_feb, (AWR_73_XA(5-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(5-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(5-month) )
+                          + min(CLM_73_XA_mar, (AWR_73_XA(6-month) *(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(6-month) *(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(6-month) )
+                          + min(CLM_73_XA_nov, (AWR_73_XA(14-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(14-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(14-month))
+                          + min(CLM_73_XA_dec, (AWR_73_XA(15-month)*(1 - RUFR_73_XA  + RPF_73_XA) + AWO_73_XA(15-month)*(1 - RUFR_73_XA  + RPF_73_XA)) * cfs_taf(15-month)))
+                          / (1 - EVF_MDOTA_73_XA     - DPF_MDOTA_73_XA    - LFF_MDOTA_73_XA    - OSF_MDOTA_73_XA   )} ! note: factors for DMC111_73_XA3 are the same
+
+define totalJFMND {value JFMND_64_XA + JFMND_72_XA1 + JFMND_72_XA2 + JFMND_72_XA3 + JFMND_73_XA}
+define pct64_xa_JFMND  {value JFMND_64_xa/totalJFMND}
+define pct72_xa1_JFMND {value JFMND_72_xa1/totalJFMND}
+define pct72_xa2_JFMND {value JFMND_72_xa2/totalJFMND}
+define pct72_xa3_JFMND {value JFMND_72_xa3/totalJFMND}
+define pct73_xa_JFMND  {value JFMND_73_xa/totalJFMND}
+*/
+
+!*********  May Demand Calculations  *************************************************
+! Ag contractor demands
+define DR_50_PA1_may      {value  max(0.0,min(perdel_cvpag_s*CLM_50_PA1_may, ((AWR_50_PA1(8-month)*(1 - RUFR_50_PA1 + RPF_50_PA1) + AWO_50_PA1(8-month)*(1 - RUFO_50_PA1 + RPF_50_PA1))*cfs_taf(8-month)) /(1 - EVF_DMC021_50_PA1 - DPF_DMC021_50_PA1 - LFF_DMC021_50_PA1 - OSF_DMC021_50_PA1 )))}
+define DR_71_PA1_may      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA1_may, ((AWR_71_PA1(8-month)*(1 - RUFR_71_PA1 + RPF_71_PA1) + AWO_71_PA1(8-month)*(1 - RUFO_71_PA1 + RPF_71_PA1))*cfs_taf(8-month)) /(1 - EVF_DMC030_71_PA1 - DPF_DMC030_71_PA1 - LFF_DMC030_71_PA1 - OSF_DMC030_71_PA1 )))}
+define DR_71_PA2_may      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA2_may, ((AWR_71_PA2(8-month)*(1 - RUFR_71_PA2 + RPF_71_PA2) + AWO_71_PA2(8-month)*(1 - RUFO_71_PA2 + RPF_71_PA2))*cfs_taf(8-month)) /(1 - EVF_DMC034_71_PA2 - DPF_DMC034_71_PA2 - LFF_DMC034_71_PA2 - OSF_DMC034_71_PA2 )))}
+define DR_71_PA3_may      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA3_may, ((AWR_71_PA3(8-month)*(1 - RUFR_71_PA3 + RPF_71_PA3) + AWO_71_PA5(8-month)*(1 - RUFO_71_PA5 + RPF_71_PA3))*cfs_taf(8-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5 )))}
+define DR_71_PA4a_may     {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA4a_may,((AWR_71_PA4(8-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(8-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(8-month)) /(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA4b_may     {value  max(0.0,MIN(perdel_cvpex_s*CLM_71_PA4b_may,((AWR_71_PA4(8-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(8-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(8-month)) /(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA5_may      {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA5_may, ((AWR_71_PA5(8-month)*(1 - RUFR_71_PA5 + RPF_71_PA5) + AWO_71_PA5(8-month)*(1 - RUFO_71_PA5 + RPF_71_PA5))*cfs_taf(8-month)) /(1 - EVF_DMC044_71_PA5   - DPF_DMC044_71_PA5  - LFF_DMC044_71_PA5  - OSF_DMC044_71_PA5 )))}
+define DR_71_PA6_may      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA6_may, ((AWR_71_PA6(8-month)*(1 - RUFR_71_PA6 + RPF_71_PA6) + AWO_71_PA6(8-month)*(1 - RUFO_71_PA6 + RPF_71_PA6))*cfs_taf(8-month)) /(1 - EVF_DMC064_71_PA6 - DPF_DMC064_71_PA6 - LFF_DMC064_71_PA6 - OSF_DMC064_71_PA6 )))}
+define DR_71_PA8_may      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA8_may, ((AWR_71_PA8(8-month)*(1 - RUFR_71_PA8 + RPF_71_PA8) + AWO_71_PA8(8-month)*(1 - RUFO_71_PA8 + RPF_71_PA8))*cfs_taf(8-month)) /(1 - EVF_DMC011_71_PA8 - DPF_DMC011_71_PA8 - LFF_DMC011_71_PA8 - OSF_DMC011_71_PA8 )))}
+define DR_72_PA_may       {value  max(0.0,min(perdel_cvpag_s*CLM_72_PA_may,  ((AWR_72_PA(8-month) *(1 - RUFR_72_PA  + RPF_72_PA)  + AWO_72_PA(8-month) *(1 - RUFO_72_PA  + RPF_72_PA)) *cfs_taf(8-month)) /(1 - EVF_XCC025_72_PA  - DPF_XCC025_72_PA  - LFF_XCC025_72_PA  - OSF_XCC025_72_PA  )))}
+define DR_73_PA1_may      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA1_may, ((AWR_73_PA1(8-month)*(1 - RUFR_73_PA1 + RPF_73_PA1) + AWO_73_PA1(8-month)*(1 - RUFO_73_PA1 + RPF_73_PA1))*cfs_taf(8-month)) /(1 - EVF_DMC070_73_PA1 - DPF_DMC070_73_PA1 - LFF_DMC070_73_PA1 - OSF_DMC070_73_PA1 )))}
+define DR_73_PA2_may      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA2_may, ((AWR_73_PA2(8-month)*(1 - RUFR_73_PA2 + RPF_73_PA2) + AWO_73_PA2(8-month)*(1 - RUFO_73_PA2 + RPF_73_PA2))*cfs_taf(8-month)) /(1 - EVF_DMC105_73_PA2 - DPF_DMC105_73_PA2 - LFF_DMC105_73_PA2 - OSF_DMC105_73_PA2 )))}
+define DR_73_PA3_may      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA3_may, ((AWR_73_PA3(8-month)*(1 - RUFR_73_PA3 + RPF_73_PA3) + AWO_73_PA3(8-month)*(1 - RUFO_73_PA3 + RPF_73_PA3))*cfs_taf(8-month)) /(1 - EVF_DMC091_73_PA3 - DPF_DMC091_73_PA3 - LFF_DMC091_73_PA3 - OSF_DMC091_73_PA3 )))}
+define DR_90_PA1_may      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA1_may, ((AWR_90_PA1(8-month)*(1 - RUFR_90_PA1 + RPF_90_PA1) + AWO_90_PA1(8-month)*(1 - RUFO_90_PA1 + RPF_90_PA1))*cfs_taf(8-month)) /(1 - EVF_CAA143_90_PA1 - DPF_CAA143_90_PA1 - LFF_CAA143_90_PA1 - OSF_CAA143_90_PA1 )))}
+define DR_90_PA2_may      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA2_may, ((AWR_90_PA2(8-month)*(1 - RUFR_90_PA2 + RPF_90_PA2) + AWO_90_PA2(8-month)*(1 - RUFO_90_PA2 + RPF_90_PA2))*cfs_taf(8-month)) /(1 - EVF_CAA143_90_PA2 - DPF_CAA143_90_PA2 - LFF_CAA143_90_PA2 - OSF_CAA143_90_PA2 )))}
+define DR_91_PA_may       {value  max(0.0,min(perdel_cvpag_s*CLM_91_PA_may,  ((AWR_91_PA(8-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(8-month) *(1 - RUFO_91_PA  + RPF_91_PA)) *cfs_taf(8-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA   )))}
+define DR_91_WR_may       {value  max(0.0,min(               WRM_91_PA_may,  ((AWR_91_PA(8-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(8-month) *(1 - RUFO_91_PA  + RPF_91_PA)) *cfs_taf(8-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA   )))}
+define DR_SFLPE_PA_may    {value perdel_cvpag_s*CLM_SFLPE_PA_may}
+! M&I demands
+define DR_50_PUa_may       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUa_may, UD_50_PU(8-month)*cfs_taf(8-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_50_PUc_may       {value  max(0.0,min(perdel_cvpag_s*CLM_50_PUc_may, UD_50_PU(8-month)*cfs_taf(8-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))} !Assignment from BCID and WSID to City of Tracy has ag allocation
+define DR_71_PU1_may       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU1_may, UD_71_PU1(8-month)*cfs_taf(8-month) /(1 + EF_CAA012_71_PU1 + SF_CAA012_71_PU1  )))}
+define DR_71_PU2_may       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU2_may, UD_71_PU2(8-month)*cfs_taf(8-month) /(1 + EF_CAA066_71_PU2 + SF_CAA066_71_PU2  )))}
+define DR_90_PUa_may       {value  max(0.0,min(perdel_cvpmi_s*CLM_90_PUa_may, (UD_90_PUa_ann/UD_90_PU_ann)*UD_90_PU(8-month)*cfs_taf(8-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_90_PUb_may       {value  max(0.0,min(               CLM_90_PUb_may, (UD_90_PUb_ann/UD_90_PU_ann)*UD_90_PU(8-month)*cfs_taf(8-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_SFLPE_PU_may     {value perdel_cvpmi_s*CLM_SCVWD_PU_may + perdel_cvpmi_s*CLM_SBCWD_PU_may }
+! Exchange contractor demands
+define DR_64_XA_may       {value  max(0.0,min(perdel_cvpex_s*CLM_64_XA_may,  ((AWR_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA)  + AWO_64_XA(8-month) *(1 - RUFR_64_XA  + RPF_64_XA))  *cfs_taf(8-month)) /(1 - EVF_MDOTA_64_XA     - DPF_MDOTA_64_XA    - LFF_MDOTA_64_XA    - OSF_MDOTA_64_XA   )))}
+define DR_72_XA1_may      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA1_may, ((AWR_72_XA1(8-month)*(1 - RUFR_72_XA1 + RPF_72_XA1) + AWO_72_XA1(8-month)*(1 - RUFR_72_XA1 + RPF_72_XA1)) *cfs_taf(8-month)) /(1 - EVF_ARY010_72_XA1   - DPF_ARY010_72_XA1  - LFF_ARY010_72_XA1  - OSF_ARY010_72_XA1 )))}
+define DR_72_XA2_may      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA2_may, ((AWR_72_XA2(8-month)*(1 - RUFR_72_XA2 + RPF_72_XA2) + AWO_72_XA2(8-month)*(1 - RUFR_72_XA2 + RPF_72_XA2)) *cfs_taf(8-month)) /(1 - EVF_XCC010_72_XA2   - DPF_XCC010_72_XA2  - LFF_XCC010_72_XA2  - OSF_XCC010_72_XA2 )))}
+define DR_72_XA3_may      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA3_may, ((AWR_72_XA3(8-month)*(1 - RUFR_72_XA3 + RPF_72_XA3) + AWO_72_XA3(8-month)*(1 - RUFR_72_XA3 + RPF_72_XA3)) *cfs_taf(8-month)) /(1 - EVF_XCC054_72_XA3   - DPF_XCC054_72_XA3  - LFF_XCC054_72_XA3  - OSF_XCC054_72_XA3 )))}
+define DR_73_XA_may       {value  max(0.0,min(perdel_cvpex_s*CLM_73_XA_may,  ((AWR_73_XA(8-month) *(1 - RUFR_73_XA  + RPF_73_XA)  + AWO_73_XA(8-month) *(1 - RUFR_73_XA  + RPF_73_XA))  *cfs_taf(8-month)) /(1 - EVF_MDOTA_73_XA     - DPF_MDOTA_73_XA    - LFF_MDOTA_73_XA    - OSF_MDOTA_73_XA   )))}
+! Refuge demands
+define DR_72_PR1_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR1_may/(1-CLF_72_PR1), ((AWR_72_PR1(8-month)*(1- RUFR_72_PR1 + RPF_72_PR1) + AWO_72_PR1(8-month)*(1- RUFO_72_PR1 + RPF_72_PR1) + AWW_72_PR1(8-month)*(1- RUFW_72_PR1 + RPF_72_PR1))*cfs_taf(8-month)) /(1-CLF_72_PR1)))}
+define DR_72_PR2_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR2_may/(1-CLF_72_PR2), ((AWR_72_PR2(8-month)*(1- RUFR_72_PR2 + RPF_72_PR2) + AWO_72_PR2(8-month)*(1- RUFO_72_PR2 + RPF_72_PR2) + AWW_72_PR2(8-month)*(1- RUFW_72_PR2 + RPF_72_PR2))*cfs_taf(8-month)) /(1-CLF_72_PR2)))}
+define DR_72_PR3_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR3_may/(1-CLF_72_PR3), ((AWR_72_PR3(8-month)*(1- RUFR_72_PR3 + RPF_72_PR3) + AWO_72_PR3(8-month)*(1- RUFO_72_PR3 + RPF_72_PR3) + AWW_72_PR3(8-month)*(1- RUFW_72_PR3 + RPF_72_PR3))*cfs_taf(8-month)) /(1-CLF_72_PR3)))}
+define DR_72_PR4_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR4_may/(1-CLF_72_PR4), ((AWR_72_PR4(8-month)*(1- RUFR_72_PR4 + RPF_72_PR4) + AWO_72_PR4(8-month)*(1- RUFO_72_PR4 + RPF_72_PR4) + AWW_72_PR4(8-month)*(1- RUFW_72_PR4 + RPF_72_PR4))*cfs_taf(8-month)) /(1-CLF_72_PR4)))}
+define DR_72_PR5_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR5_may/(1-CLF_72_PR5), ((AWR_72_PR5(8-month)*(1- RUFR_72_PR5 + RPF_72_PR5) + AWO_72_PR5(8-month)*(1- RUFO_72_PR5 + RPF_72_PR5) + AWW_72_PR5(8-month)*(1- RUFW_72_PR5 + RPF_72_PR5))*cfs_taf(8-month)) /(1-CLF_72_PR5)))}
+define DR_72_PR6_may       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR6_may/(1-CLF_72_PR6), ((AWR_72_PR6(8-month)*(1- RUFR_72_PR6 + RPF_72_PR6) + AWO_72_PR6(8-month)*(1- RUFO_72_PR6 + RPF_72_PR6) + AWW_72_PR6(8-month)*(1- RUFW_72_PR6 + RPF_72_PR6))*cfs_taf(8-month)) /(1-CLF_72_PR6)))}
+define DR_91_PR_may        {value  max(0.0,min(perdel_cvprf_s*CLM_91_PR_may /(1-CLF_91_PR),  ((AWR_91_PR(8-month) *(1- RUFR_91_PR  + RPF_91_PR)  + AWO_91_PR(8-month) *(1- RUFO_91_PR  + RPF_91_PR)  + AWW_91_PR(8-month) *(1- RUFW_91_PR  + RPF_91_PR)) *cfs_taf(8-month)) /(1-CLF_91_PR) ))}
+define DR_D_CAA239_CVPRF_PRF_may     {value perdel_cvprf_s*CLM_D_CAA239_CVPRF_PRF_may/(1-0.25)}!Assume 25% conveyance loss
+! CVP losses 
+define DR_CVPSOD_Losses_may {value SG_R3_CVP(8-month)*cfs_taf(8-month)
+                                 + SG_R4_CVP(8-month)*cfs_taf(8-month)
+                                 + SG_R5_CVP(8-month)*cfs_taf(8-month)
+                                 + SG_R6_CVP(8-month)*cfs_taf(8-month)
+                                 + SG_R7_CVP(8-month)*cfs_taf(8-month)
+                                 + SG_DMC_UPPER(8-month)*cfs_taf(8-month)
+                                 + SG_DMC_LOWER(8-month)*cfs_taf(8-month)}
+
+! note that exchange contractor, refuge, and loss delivery requirement definitions were moved to BaseCVPDemTotals.wresl for June, July, and August
+!*********  June Demand Calculations  *************************************************
+! Ag contractor demands
+define DR_50_PA1_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_50_PA1_jun, ((AWR_50_PA1(9-month)*(1 - RUFR_50_PA1 + RPF_50_PA1) + AWO_50_PA1(9-month)*(1 - RUFO_50_PA1+ RPF_50_PA1))*cfs_taf(9-month)) /(1 - EVF_DMC021_50_PA1 - DPF_DMC021_50_PA1 - LFF_DMC021_50_PA1 - OSF_DMC021_50_PA1)))}
+define DR_71_PA1_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA1_jun, ((AWR_71_PA1(9-month)*(1 - RUFR_71_PA1 + RPF_71_PA1) + AWO_71_PA1(9-month)*(1 - RUFO_71_PA1+ RPF_71_PA1))*cfs_taf(9-month)) /(1 - EVF_DMC030_71_PA1 - DPF_DMC030_71_PA1 - LFF_DMC030_71_PA1 - OSF_DMC030_71_PA1)))}
+define DR_71_PA2_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA2_jun, ((AWR_71_PA2(9-month)*(1 - RUFR_71_PA2 + RPF_71_PA2) + AWO_71_PA2(9-month)*(1 - RUFO_71_PA2+ RPF_71_PA2))*cfs_taf(9-month)) /(1 - EVF_DMC034_71_PA2 - DPF_DMC034_71_PA2 - LFF_DMC034_71_PA2 - OSF_DMC034_71_PA2)))}
+define DR_71_PA3_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA3_jun, ((AWR_71_PA3(9-month)*(1 - RUFR_71_PA3 + RPF_71_PA3) + AWO_71_PA5(9-month)*(1 - RUFO_71_PA5+ RPF_71_PA3))*cfs_taf(9-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA4a_jun     {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA4a_jun,((AWR_71_PA4(9-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(9-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(9-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA4b_jun     {value  max(0.0,MIN(perdel_cvpex_s*CLM_71_PA4b_jun,((AWR_71_PA4(9-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(9-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(9-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA5_jun      {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA5_jun, ((AWR_71_PA5(9-month)*(1 - RUFR_71_PA5 + RPF_71_PA5) + AWO_71_PA5(9-month)*(1 - RUFO_71_PA5 + RPF_71_PA5))*cfs_taf(9-month))/(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA6_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA6_jun, ((AWR_71_PA6(9-month)*(1 - RUFR_71_PA6 + RPF_71_PA6) + AWO_71_PA6(9-month)*(1 - RUFO_71_PA6 + RPF_71_PA6))*cfs_taf(9-month))/(1 - EVF_DMC064_71_PA6 - DPF_DMC064_71_PA6 - LFF_DMC064_71_PA6 - OSF_DMC064_71_PA6)))}
+define DR_71_PA8_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA8_jun, ((AWR_71_PA8(9-month)*(1 - RUFR_71_PA8 + RPF_71_PA8) + AWO_71_PA8(9-month)*(1 - RUFO_71_PA8+ RPF_71_PA8))*cfs_taf(9-month)) /(1 - EVF_DMC011_71_PA8 - DPF_DMC011_71_PA8 - LFF_DMC011_71_PA8 - OSF_DMC011_71_PA8)))}
+define DR_72_PA_jun       {value  max(0.0,min(perdel_cvpag_s*CLM_72_PA_jun,  ((AWR_72_PA(9-month) *(1 - RUFR_72_PA  + RPF_72_PA)  + AWO_72_PA(9-month) *(1 - RUFO_72_PA + RPF_72_PA)) *cfs_taf(9-month)) /(1 - EVF_XCC025_72_PA  - DPF_XCC025_72_PA  - LFF_XCC025_72_PA  - OSF_XCC025_72_PA )))}
+define DR_73_PA1_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA1_jun, ((AWR_73_PA1(9-month)*(1 - RUFR_73_PA1 + RPF_73_PA1) + AWO_73_PA1(9-month)*(1 - RUFO_73_PA1+ RPF_73_PA1))*cfs_taf(9-month)) /(1 - EVF_DMC070_73_PA1 - DPF_DMC070_73_PA1 - LFF_DMC070_73_PA1 - OSF_DMC070_73_PA1)))}
+define DR_73_PA2_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA2_jun, ((AWR_73_PA2(9-month)*(1 - RUFR_73_PA2 + RPF_73_PA2) + AWO_73_PA2(9-month)*(1 - RUFO_73_PA2+ RPF_73_PA2))*cfs_taf(9-month)) /(1 - EVF_DMC105_73_PA2 - DPF_DMC105_73_PA2 - LFF_DMC105_73_PA2 - OSF_DMC105_73_PA2)))}
+define DR_73_PA3_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA3_jun, ((AWR_73_PA3(9-month)*(1 - RUFR_73_PA3 + RPF_73_PA3) + AWO_73_PA3(9-month)*(1 - RUFO_73_PA3+ RPF_73_PA3))*cfs_taf(9-month)) /(1 - EVF_DMC091_73_PA3 - DPF_DMC091_73_PA3 - LFF_DMC091_73_PA3 - OSF_DMC091_73_PA3)))}
+define DR_90_PA1_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA1_jun, ((AWR_90_PA1(9-month)*(1 - RUFR_90_PA1 + RPF_90_PA1) + AWO_90_PA1(9-month)*(1 - RUFO_90_PA1+ RPF_90_PA1))*cfs_taf(9-month)) /(1 - EVF_CAA143_90_PA1 - DPF_CAA143_90_PA1 - LFF_CAA143_90_PA1 - OSF_CAA143_90_PA1)))}
+define DR_90_PA2_jun      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA2_jun, ((AWR_90_PA2(9-month)*(1 - RUFR_90_PA2 + RPF_90_PA2) + AWO_90_PA2(9-month)*(1 - RUFO_90_PA2+ RPF_90_PA2))*cfs_taf(9-month)) /(1 - EVF_CAA143_90_PA2 - DPF_CAA143_90_PA2 - LFF_CAA143_90_PA2 - OSF_CAA143_90_PA2)))}
+define DR_91_PA_jun       {value  max(0.0,min(perdel_cvpag_s*CLM_91_PA_jun,  ((AWR_91_PA(9-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(9-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(9-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA)))}
+define DR_91_WR_jun       {value  max(0.0,min(               WRM_91_PA_jun,  ((AWR_91_PA(9-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(9-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(9-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA)))}
+define DR_SFLPE_PA_jun    {value perdel_cvpag_s*CLM_SFLPE_PA_jun}
+! M&I demands
+define DR_50_PUa_jun       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUa_jun, UD_50_PU(9-month)*cfs_taf(9-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_50_PUc_jun       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUc_jun, UD_50_PU(9-month)*cfs_taf(9-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_71_PU1_jun       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU1_jun, UD_71_PU1(9-month)*cfs_taf(9-month) /(1 + EF_CAA012_71_PU1 + SF_CAA012_71_PU1  )))}
+define DR_71_PU2_jun       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU2_jun, UD_71_PU2(9-month)*cfs_taf(9-month) /(1 + EF_CAA066_71_PU2 + SF_CAA066_71_PU2  )))}
+define DR_90_PUa_jun       {value  max(0.0,min(perdel_cvpmi_s*CLM_90_PUa_jun, (UD_90_PUa_ann/UD_90_PU_ann)*UD_90_PU(9-month)*cfs_taf(9-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_90_PUb_jun       {value  max(0.0,min(               CLM_90_PUb_jun, (UD_90_PUb_ann/UD_90_PU_ann)*UD_90_PU(9-month)*cfs_taf(9-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_SFLPE_PU_jun     {value perdel_cvpmi_s*CLM_SCVWD_PU_jun + perdel_cvpmi_s*CLM_SBCWD_PU_jun }
+
+! note that exchange contractor, refuge, and loss delivery requirement definitions were moved to BaseCVPDemTotals.wresl for June, July, and August
+!*********  July Demand Calculations  *************************************************
+! Ag contractor demands
+define DR_50_PA1_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_50_PA1_jul, ((AWR_50_PA1(10-month)*(1 - RUFR_50_PA1 + RPF_50_PA1) + AWO_50_PA1(10-month)*(1 - RUFO_50_PA1+ RPF_50_PA1))*cfs_taf(10-month)) /(1 - EVF_DMC021_50_PA1 - DPF_DMC021_50_PA1 - LFF_DMC021_50_PA1 - OSF_DMC021_50_PA1)))}
+define DR_71_PA1_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA1_jul, ((AWR_71_PA1(10-month)*(1 - RUFR_71_PA1 + RPF_71_PA1) + AWO_71_PA1(10-month)*(1 - RUFO_71_PA1+ RPF_71_PA1))*cfs_taf(10-month)) /(1 - EVF_DMC030_71_PA1 - DPF_DMC030_71_PA1 - LFF_DMC030_71_PA1 - OSF_DMC030_71_PA1)))}
+define DR_71_PA2_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA2_jul, ((AWR_71_PA2(10-month)*(1 - RUFR_71_PA2 + RPF_71_PA2) + AWO_71_PA2(10-month)*(1 - RUFO_71_PA2+ RPF_71_PA2))*cfs_taf(10-month)) /(1 - EVF_DMC034_71_PA2 - DPF_DMC034_71_PA2 - LFF_DMC034_71_PA2 - OSF_DMC034_71_PA2)))}
+define DR_71_PA3_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA3_jul, ((AWR_71_PA3(10-month)*(1 - RUFR_71_PA3 + RPF_71_PA3) + AWO_71_PA5(10-month)*(1 - RUFO_71_PA5+ RPF_71_PA3))*cfs_taf(10-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA4a_jul     {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA4a_jul,((AWR_71_PA4(10-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(10-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(10-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA4b_jul     {value  max(0.0,MIN(perdel_cvpex_s*CLM_71_PA4b_jul,((AWR_71_PA4(10-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(10-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(10-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA5_jul      {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA5_jul, ((AWR_71_PA5(10-month)*(1 - RUFR_71_PA5 + RPF_71_PA5) + AWO_71_PA5(10-month)*(1 - RUFO_71_PA5 + RPF_71_PA5))*cfs_taf(10-month))/(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA6_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA6_jul, ((AWR_71_PA6(10-month)*(1 - RUFR_71_PA6 + RPF_71_PA6) + AWO_71_PA6(10-month)*(1 - RUFO_71_PA6+ RPF_71_PA6))*cfs_taf(10-month)) /(1 - EVF_DMC064_71_PA6 - DPF_DMC064_71_PA6 - LFF_DMC064_71_PA6 - OSF_DMC064_71_PA6)))}
+define DR_71_PA8_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA8_jul, ((AWR_71_PA8(10-month)*(1 - RUFR_71_PA8 + RPF_71_PA8) + AWO_71_PA8(10-month)*(1 - RUFO_71_PA8+ RPF_71_PA8))*cfs_taf(10-month)) /(1 - EVF_DMC011_71_PA8 - DPF_DMC011_71_PA8 - LFF_DMC011_71_PA8 - OSF_DMC011_71_PA8)))}
+define DR_72_PA_jul       {value  max(0.0,min(perdel_cvpag_s*CLM_72_PA_jul,  ((AWR_72_PA(10-month) *(1 - RUFR_72_PA  + RPF_72_PA)  + AWO_72_PA(10-month) *(1 - RUFO_72_PA + RPF_72_PA)) *cfs_taf(10-month)) /(1 - EVF_XCC025_72_PA  - DPF_XCC025_72_PA  - LFF_XCC025_72_PA  - OSF_XCC025_72_PA )))}
+define DR_73_PA1_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA1_jul, ((AWR_73_PA1(10-month)*(1 - RUFR_73_PA1 + RPF_73_PA1) + AWO_73_PA1(10-month)*(1 - RUFO_73_PA1+ RPF_73_PA1))*cfs_taf(10-month)) /(1 - EVF_DMC070_73_PA1 - DPF_DMC070_73_PA1 - LFF_DMC070_73_PA1 - OSF_DMC070_73_PA1)))}
+define DR_73_PA2_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA2_jul, ((AWR_73_PA2(10-month)*(1 - RUFR_73_PA2 + RPF_73_PA2) + AWO_73_PA2(10-month)*(1 - RUFO_73_PA2+ RPF_73_PA2))*cfs_taf(10-month)) /(1 - EVF_DMC105_73_PA2 - DPF_DMC105_73_PA2 - LFF_DMC105_73_PA2 - OSF_DMC105_73_PA2)))}
+define DR_73_PA3_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA3_jul, ((AWR_73_PA3(10-month)*(1 - RUFR_73_PA3 + RPF_73_PA3) + AWO_73_PA3(10-month)*(1 - RUFO_73_PA3+ RPF_73_PA3))*cfs_taf(10-month)) /(1 - EVF_DMC091_73_PA3 - DPF_DMC091_73_PA3 - LFF_DMC091_73_PA3 - OSF_DMC091_73_PA3)))}
+define DR_90_PA1_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA1_jul, ((AWR_90_PA1(10-month)*(1 - RUFR_90_PA1 + RPF_90_PA1) + AWO_90_PA1(10-month)*(1 - RUFO_90_PA1+ RPF_90_PA1))*cfs_taf(10-month)) /(1 - EVF_CAA143_90_PA1 - DPF_CAA143_90_PA1 - LFF_CAA143_90_PA1 - OSF_CAA143_90_PA1)))}
+define DR_90_PA2_jul      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA2_jul, ((AWR_90_PA2(10-month)*(1 - RUFR_90_PA2 + RPF_90_PA2) + AWO_90_PA2(10-month)*(1 - RUFO_90_PA2+ RPF_90_PA2))*cfs_taf(10-month)) /(1 - EVF_CAA143_90_PA2 - DPF_CAA143_90_PA2 - LFF_CAA143_90_PA2 - OSF_CAA143_90_PA2)))}
+define DR_91_PA_jul       {value  max(0.0,min(perdel_cvpag_s*CLM_91_PA_jul,  ((AWR_91_PA(10-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(10-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(10-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_91_WR_jul       {value  max(0.0,min(               WRM_91_PA_jul,  ((AWR_91_PA(10-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(10-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(10-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_SFLPE_PA_jul    {value perdel_cvpag_s*CLM_SFLPE_PA_jul/(1-0.05)}!Assume 5% conveyance loss
+
+! M&I demands
+define DR_50_PUa_jul       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUa_jul, UD_50_PU(10-month)*cfs_taf(10-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_50_PUc_jul       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUc_jul, UD_50_PU(10-month)*cfs_taf(10-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_71_PU1_jul       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU1_jul, UD_71_PU1(10-month)*cfs_taf(10-month) /(1 + EF_CAA012_71_PU1 + SF_CAA012_71_PU1  )))}
+define DR_71_PU2_jul       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU2_jul, UD_71_PU2(10-month)*cfs_taf(10-month) /(1 + EF_CAA066_71_PU2 + SF_CAA066_71_PU2  )))}
+define DR_90_PUa_jul       {value  max(0.0,min(perdel_cvpmi_s*CLM_90_PUa_jul, (UD_90_PUa_ann/UD_90_PU_ann)*UD_90_PU(10-month)*cfs_taf(10-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_90_PUb_jul       {value  max(0.0,min(               CLM_90_PUb_jul, (UD_90_PUb_ann/UD_90_PU_ann)*UD_90_PU(10-month)*cfs_taf(10-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_SFLPE_PU_jul     {value perdel_cvpmi_s*CLM_SCVWD_PU_jul + perdel_cvpmi_s*CLM_SBCWD_PU_jul }
+
+
+! note that exchange contractor, refuge, and loss delivery requirement definitions were moved to BaseCVPDemTotals.wresl for June, July, and August
+!*********  August Demand Calculations  *************************************************
+! Ag contractor demands
+define DR_50_PA1_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_50_PA1_aug, ((AWR_50_PA1(11-month)*(1 - RUFR_50_PA1 + RPF_50_PA1) + AWO_50_PA1(11-month)*(1 - RUFO_50_PA1+ RPF_50_PA1))*cfs_taf(11-month)) /(1 - EVF_DMC021_50_PA1 - DPF_DMC021_50_PA1 - LFF_DMC021_50_PA1 - OSF_DMC021_50_PA1)))}
+define DR_71_PA1_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA1_aug, ((AWR_71_PA1(11-month)*(1 - RUFR_71_PA1 + RPF_71_PA1) + AWO_71_PA1(11-month)*(1 - RUFO_71_PA1+ RPF_71_PA1))*cfs_taf(11-month)) /(1 - EVF_DMC030_71_PA1 - DPF_DMC030_71_PA1 - LFF_DMC030_71_PA1 - OSF_DMC030_71_PA1)))}
+define DR_71_PA2_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA2_aug, ((AWR_71_PA2(11-month)*(1 - RUFR_71_PA2 + RPF_71_PA2) + AWO_71_PA2(11-month)*(1 - RUFO_71_PA2+ RPF_71_PA2))*cfs_taf(11-month)) /(1 - EVF_DMC034_71_PA2 - DPF_DMC034_71_PA2 - LFF_DMC034_71_PA2 - OSF_DMC034_71_PA2)))}
+define DR_71_PA3_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA3_aug, ((AWR_71_PA3(11-month)*(1 - RUFR_71_PA3 + RPF_71_PA3) + AWO_71_PA5(11-month)*(1 - RUFO_71_PA5+ RPF_71_PA3))*cfs_taf(11-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA4a_aug     {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA4a_aug,((AWR_71_PA4(11-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(11-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(11-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA4b_aug     {value  max(0.0,MIN(perdel_cvpex_s*CLM_71_PA4b_aug,((AWR_71_PA4(11-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(11-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(11-month))/(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA5_aug      {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA5_aug, ((AWR_71_PA5(11-month)*(1 - RUFR_71_PA5 + RPF_71_PA5) + AWO_71_PA5(11-month)*(1 - RUFO_71_PA5 + RPF_71_PA5))*cfs_taf(11-month))/(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA6_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA6_aug, ((AWR_71_PA6(11-month)*(1 - RUFR_71_PA6 + RPF_71_PA6) + AWO_71_PA6(11-month)*(1 - RUFO_71_PA6+ RPF_71_PA6))*cfs_taf(11-month)) /(1 - EVF_DMC064_71_PA6 - DPF_DMC064_71_PA6 - LFF_DMC064_71_PA6 - OSF_DMC064_71_PA6)))}
+define DR_71_PA8_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA8_aug, ((AWR_71_PA8(11-month)*(1 - RUFR_71_PA8 + RPF_71_PA8) + AWO_71_PA8(11-month)*(1 - RUFO_71_PA8+ RPF_71_PA8))*cfs_taf(11-month)) /(1 - EVF_DMC011_71_PA8 - DPF_DMC011_71_PA8 - LFF_DMC011_71_PA8 - OSF_DMC011_71_PA8)))}
+define DR_72_PA_aug       {value  max(0.0,min(perdel_cvpag_s*CLM_72_PA_aug,  ((AWR_72_PA(11-month) *(1 - RUFR_72_PA  + RPF_72_PA)  + AWO_72_PA(11-month) *(1 - RUFO_72_PA + RPF_72_PA)) *cfs_taf(11-month)) /(1 - EVF_XCC025_72_PA  - DPF_XCC025_72_PA  - LFF_XCC025_72_PA  - OSF_XCC025_72_PA )))}
+define DR_73_PA1_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA1_aug, ((AWR_73_PA1(11-month)*(1 - RUFR_73_PA1 + RPF_73_PA1) + AWO_73_PA1(11-month)*(1 - RUFO_73_PA1+ RPF_73_PA1))*cfs_taf(11-month)) /(1 - EVF_DMC070_73_PA1 - DPF_DMC070_73_PA1 - LFF_DMC070_73_PA1 - OSF_DMC070_73_PA1)))}
+define DR_73_PA2_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA2_aug, ((AWR_73_PA2(11-month)*(1 - RUFR_73_PA2 + RPF_73_PA2) + AWO_73_PA2(11-month)*(1 - RUFO_73_PA2+ RPF_73_PA2))*cfs_taf(11-month)) /(1 - EVF_DMC105_73_PA2 - DPF_DMC105_73_PA2 - LFF_DMC105_73_PA2 - OSF_DMC105_73_PA2)))}
+define DR_73_PA3_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA3_aug, ((AWR_73_PA3(11-month)*(1 - RUFR_73_PA3 + RPF_73_PA3) + AWO_73_PA3(11-month)*(1 - RUFO_73_PA3+ RPF_73_PA3))*cfs_taf(11-month)) /(1 - EVF_DMC091_73_PA3 - DPF_DMC091_73_PA3 - LFF_DMC091_73_PA3 - OSF_DMC091_73_PA3)))}
+define DR_90_PA1_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA1_aug, ((AWR_90_PA1(11-month)*(1 - RUFR_90_PA1 + RPF_90_PA1) + AWO_90_PA1(11-month)*(1 - RUFO_90_PA1+ RPF_90_PA1))*cfs_taf(11-month)) /(1 - EVF_CAA143_90_PA1 - DPF_CAA143_90_PA1 - LFF_CAA143_90_PA1 - OSF_CAA143_90_PA1)))}
+define DR_90_PA2_aug      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA2_aug, ((AWR_90_PA2(11-month)*(1 - RUFR_90_PA2 + RPF_90_PA2) + AWO_90_PA2(11-month)*(1 - RUFO_90_PA2+ RPF_90_PA2))*cfs_taf(11-month)) /(1 - EVF_CAA143_90_PA2 - DPF_CAA143_90_PA2 - LFF_CAA143_90_PA2 - OSF_CAA143_90_PA2)))}
+define DR_91_PA_aug       {value  max(0.0,min(perdel_cvpag_s*CLM_91_PA_aug,  ((AWR_91_PA(11-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(11-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(11-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_91_WR_aug       {value  max(0.0,min(               WRM_91_PA_aug,  ((AWR_91_PA(11-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(11-month) *(1 - RUFO_91_PA + RPF_91_PA)) *cfs_taf(11-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_SFLPE_PA_aug    {value perdel_cvpag_s*CLM_SFLPE_PA_aug}
+! M&I demands
+define DR_50_PUa_aug       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUa_aug, UD_50_PU(11-month)*cfs_taf(11-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_50_PUc_aug       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUc_aug, UD_50_PU(11-month)*cfs_taf(11-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_71_PU1_aug       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU1_aug, UD_71_PU1(11-month)*cfs_taf(11-month) /(1 + EF_CAA012_71_PU1 + SF_CAA012_71_PU1  )))}
+define DR_71_PU2_aug       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU2_aug, UD_71_PU2(11-month)*cfs_taf(11-month) /(1 + EF_CAA066_71_PU2 + SF_CAA066_71_PU2  )))}
+define DR_90_PUa_aug       {value  max(0.0,min(perdel_cvpmi_s*CLM_90_PUa_aug, (UD_90_PUa_ann/UD_90_PU_ann)*UD_90_PU(11-month)*cfs_taf(11-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_90_PUb_aug       {value  max(0.0,min(               CLM_90_PUb_aug, (UD_90_PUb_ann/UD_90_PU_ann)*UD_90_PU(11-month)*cfs_taf(11-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_SFLPE_PU_aug     {value perdel_cvpmi_s*CLM_SCVWD_PU_aug + perdel_cvpmi_s*CLM_SBCWD_PU_aug }
+
+! note that exchange contractor, refuge, and loss delivery requirement definitions were moved to BaseCVPDemTotals.wresl for June, July, and August
+
+!*********  September Demand Calculations  *************************************************
+! Ag contractor demands
+define DR_50_PA1_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_50_PA1_sep, ((AWR_50_PA1(12-month)*(1 - RUFR_50_PA1 + RPF_50_PA1) + AWO_50_PA1(12-month)*(1 - RUFO_50_PA1 + RPF_50_PA1))*cfs_taf(12-month)) /(1 - EVF_DMC021_50_PA1 - DPF_DMC021_50_PA1 - LFF_DMC021_50_PA1 - OSF_DMC021_50_PA1)))}
+define DR_71_PA1_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA1_sep, ((AWR_71_PA1(12-month)*(1 - RUFR_71_PA1 + RPF_71_PA1) + AWO_71_PA1(12-month)*(1 - RUFO_71_PA1 + RPF_71_PA1))*cfs_taf(12-month)) /(1 - EVF_DMC030_71_PA1 - DPF_DMC030_71_PA1 - LFF_DMC030_71_PA1 - OSF_DMC030_71_PA1)))}
+define DR_71_PA2_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA2_sep, ((AWR_71_PA2(12-month)*(1 - RUFR_71_PA2 + RPF_71_PA2) + AWO_71_PA2(12-month)*(1 - RUFO_71_PA2 + RPF_71_PA2))*cfs_taf(12-month)) /(1 - EVF_DMC034_71_PA2 - DPF_DMC034_71_PA2 - LFF_DMC034_71_PA2 - OSF_DMC034_71_PA2)))}
+define DR_71_PA3_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA3_sep, ((AWR_71_PA3(12-month)*(1 - RUFR_71_PA3 + RPF_71_PA3) + AWO_71_PA5(12-month)*(1 - RUFO_71_PA5 + RPF_71_PA3))*cfs_taf(12-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5)))}
+define DR_71_PA4a_sep     {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA4a_sep,((AWR_71_PA4(12-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(12-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(12-month)) /(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA4b_sep     {value  max(0.0,MIN(perdel_cvpex_s*CLM_71_PA4b_sep,((AWR_71_PA4(12-month)*(1 - RUFR_71_PA4 + RPF_71_PA4) + AWO_71_PA4(12-month)*(1 - RUFO_71_PA4 + RPF_71_PA4))*cfs_taf(12-month)) /(1 - EVF_DMC044_71_PA4 - DPF_DMC044_71_PA4 - LFF_DMC044_71_PA4 - OSF_DMC044_71_PA4)))}
+define DR_71_PA5_sep      {value  max(0.0,MIN(perdel_cvpag_s*CLM_71_PA5_sep, ((AWR_71_PA5(12-month)*(1 - RUFR_71_PA5 + RPF_71_PA5) + AWO_71_PA5(12-month)*(1 - RUFO_71_PA5 + RPF_71_PA5))*cfs_taf(12-month)) /(1 - EVF_DMC044_71_PA5 - DPF_DMC044_71_PA5 - LFF_DMC044_71_PA5 - OSF_DMC044_71_PA5 )))}
+define DR_71_PA6_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA6_sep, ((AWR_71_PA6(12-month)*(1 - RUFR_71_PA6 + RPF_71_PA6) + AWO_71_PA6(12-month)*(1 - RUFO_71_PA6 + RPF_71_PA6))*cfs_taf(12-month)) /(1 - EVF_DMC064_71_PA6 - DPF_DMC064_71_PA6 - LFF_DMC064_71_PA6 - OSF_DMC064_71_PA6)))}
+define DR_71_PA8_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_71_PA8_sep, ((AWR_71_PA8(12-month)*(1 - RUFR_71_PA8 + RPF_71_PA8) + AWO_71_PA8(12-month)*(1 - RUFO_71_PA8 + RPF_71_PA8))*cfs_taf(12-month)) /(1 - EVF_DMC011_71_PA8 - DPF_DMC011_71_PA8 - LFF_DMC011_71_PA8 - OSF_DMC011_71_PA8)))}
+define DR_72_PA_sep       {value  max(0.0,min(perdel_cvpag_s*CLM_72_PA_sep,  ((AWR_72_PA(12-month) *(1 - RUFR_72_PA  + RPF_72_PA)  + AWO_72_PA(12-month) *(1 - RUFO_72_PA  + RPF_72_PA)) *cfs_taf(12-month)) /(1 - EVF_XCC025_72_PA  - DPF_XCC025_72_PA  - LFF_XCC025_72_PA  - OSF_XCC025_72_PA )))}
+define DR_73_PA1_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA1_sep, ((AWR_73_PA1(12-month)*(1 - RUFR_73_PA1 + RPF_73_PA1) + AWO_73_PA1(12-month)*(1 - RUFO_73_PA1 + RPF_73_PA1))*cfs_taf(12-month)) /(1 - EVF_DMC070_73_PA1 - DPF_DMC070_73_PA1 - LFF_DMC070_73_PA1 - OSF_DMC070_73_PA1)))}
+define DR_73_PA2_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA2_sep, ((AWR_73_PA2(12-month)*(1 - RUFR_73_PA2 + RPF_73_PA2) + AWO_73_PA2(12-month)*(1 - RUFO_73_PA2 + RPF_73_PA2))*cfs_taf(12-month)) /(1 - EVF_DMC105_73_PA2 - DPF_DMC105_73_PA2 - LFF_DMC105_73_PA2 - OSF_DMC105_73_PA2)))}
+define DR_73_PA3_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_73_PA3_sep, ((AWR_73_PA3(12-month)*(1 - RUFR_73_PA3 + RPF_73_PA3) + AWO_73_PA3(12-month)*(1 - RUFO_73_PA3 + RPF_73_PA3))*cfs_taf(12-month)) /(1 - EVF_DMC091_73_PA3 - DPF_DMC091_73_PA3 - LFF_DMC091_73_PA3 - OSF_DMC091_73_PA3)))}
+define DR_90_PA1_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA1_sep, ((AWR_90_PA1(12-month)*(1 - RUFR_90_PA1 + RPF_90_PA1) + AWO_90_PA1(12-month)*(1 - RUFO_90_PA1 + RPF_90_PA1))*cfs_taf(12-month)) /(1 - EVF_CAA143_90_PA1 - DPF_CAA143_90_PA1 - LFF_CAA143_90_PA1 - OSF_CAA143_90_PA1)))}
+define DR_90_PA2_sep      {value  max(0.0,min(perdel_cvpag_s*CLM_90_PA2_sep, ((AWR_90_PA2(12-month)*(1 - RUFR_90_PA2 + RPF_90_PA2) + AWO_90_PA2(12-month)*(1 - RUFO_90_PA2 + RPF_90_PA2))*cfs_taf(12-month)) /(1 - EVF_CAA143_90_PA2 - DPF_CAA143_90_PA2 - LFF_CAA143_90_PA2 - OSF_CAA143_90_PA2)))}
+define DR_91_PA_sep       {value  max(0.0,min(perdel_cvpag_s*CLM_91_PA_sep,  ((AWR_91_PA(12-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(12-month) *(1 - RUFO_91_PA  + RPF_91_PA)) *cfs_taf(12-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_91_WR_sep       {value  max(0.0,min(               WRM_91_PA_sep,  ((AWR_91_PA(12-month) *(1 - RUFR_91_PA  + RPF_91_PA)  + AWO_91_PA(12-month) *(1 - RUFO_91_PA  + RPF_91_PA)) *cfs_taf(12-month)) /(1 - EVF_MDOTA_91_PA   - DPF_MDOTA_91_PA   - LFF_MDOTA_91_PA   - OSF_MDOTA_91_PA  )))}
+define DR_SFLPE_PA_sep    {value perdel_cvpag_s*CLM_SFLPE_PA_sep}
+! M&I demands
+define DR_50_PUa_sep       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUa_sep, UD_50_PU(12-month)*cfs_taf(12-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_50_PUc_sep       {value  max(0.0,min(perdel_cvpmi_s*CLM_50_PUc_sep, UD_50_PU(12-month)*cfs_taf(12-month)  /(1 + EF_JJO_50_PU     + SF_JJO_50_PU      )))}
+define DR_71_PU1_sep       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU1_sep, UD_71_PU1(12-month)*cfs_taf(12-month) /(1 + EF_CAA012_71_PU1 + SF_CAA012_71_PU1  )))}
+define DR_71_PU2_sep       {value  max(0.0,min(perdel_cvpmi_s*CLM_71_PU2_sep, UD_71_PU2(12-month)*cfs_taf(12-month) /(1 + EF_CAA066_71_PU2 + SF_CAA066_71_PU2  )))}
+define DR_90_PUa_sep       {value  max(0.0,min(perdel_cvpmi_s*CLM_90_PUa_sep, (UD_90_PUa_ann/UD_90_PU_ann)*UD_90_PU(12-month)*cfs_taf(12-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_90_PUb_sep       {value  max(0.0,min(               CLM_90_PUb_sep, (UD_90_PUb_ann/UD_90_PU_ann)*UD_90_PU(12-month)*cfs_taf(12-month)  /(1 + EF_CAA143_90_PU  + SF_CAA143_90_PU   )))}
+define DR_SFLPE_PU_sep     {value perdel_cvpmi_s*CLM_SCVWD_PU_sep + perdel_cvpmi_s*CLM_SBCWD_PU_sep }
+
+! Exchange contractor demands
+define DR_64_XA_sep       {value  max(0.0,min(perdel_cvpex_s*CLM_64_XA_sep,  ((AWR_64_XA(12-month) *(1 - RUFR_64_XA  + RPF_64_XA)  + AWO_64_XA(12-month) *(1 - RUFR_64_XA  + RPF_64_XA))  *cfs_taf(12-month)) /(1 - EVF_MDOTA_64_XA     - DPF_MDOTA_64_XA    - LFF_MDOTA_64_XA    - OSF_MDOTA_64_XA   )))}
+define DR_72_XA1_sep      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA1_sep, ((AWR_72_XA1(12-month)*(1 - RUFR_72_XA1 + RPF_72_XA1) + AWO_72_XA1(12-month)*(1 - RUFR_72_XA1 + RPF_72_XA1)) *cfs_taf(12-month)) /(1 - EVF_ARY010_72_XA1   - DPF_ARY010_72_XA1  - LFF_ARY010_72_XA1  - OSF_ARY010_72_XA1 )))}
+define DR_72_XA2_sep      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA2_sep, ((AWR_72_XA2(12-month)*(1 - RUFR_72_XA2 + RPF_72_XA2) + AWO_72_XA2(12-month)*(1 - RUFR_72_XA2 + RPF_72_XA2)) *cfs_taf(12-month)) /(1 - EVF_XCC010_72_XA2   - DPF_XCC010_72_XA2  - LFF_XCC010_72_XA2  - OSF_XCC010_72_XA2 )))}
+define DR_72_XA3_sep      {value  max(0.0,min(perdel_cvpex_s*CLM_72_XA3_sep, ((AWR_72_XA3(12-month)*(1 - RUFR_72_XA3 + RPF_72_XA3) + AWO_72_XA3(12-month)*(1 - RUFR_72_XA3 + RPF_72_XA3)) *cfs_taf(12-month)) /(1 - EVF_XCC054_72_XA3   - DPF_XCC054_72_XA3  - LFF_XCC054_72_XA3  - OSF_XCC054_72_XA3 )))}
+define DR_73_XA_sep       {value  max(0.0,min(perdel_cvpex_s*CLM_73_XA_sep,  ((AWR_73_XA(12-month) *(1 - RUFR_73_XA  + RPF_73_XA)  + AWO_73_XA(12-month) *(1 - RUFR_73_XA  + RPF_73_XA))  *cfs_taf(12-month)) /(1 - EVF_MDOTA_73_XA     - DPF_MDOTA_73_XA    - LFF_MDOTA_73_XA    - OSF_MDOTA_73_XA   )))}
+! Refuge demands
+define DR_72_PR1_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR1_sep/(1-CLF_72_PR1), ((AWR_72_PR1(12-month)*(1- RUFR_72_PR1 + RPF_72_PR1) + AWO_72_PR1(12-month)*(1- RUFO_72_PR1 + RPF_72_PR1) + AWW_72_PR1(12-month)*(1- RUFW_72_PR1 + RPF_72_PR1))*cfs_taf(12-month)) /(1-CLF_72_PR1)))}
+define DR_72_PR2_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR2_sep/(1-CLF_72_PR2), ((AWR_72_PR2(12-month)*(1- RUFR_72_PR2 + RPF_72_PR2) + AWO_72_PR2(12-month)*(1- RUFO_72_PR2 + RPF_72_PR2) + AWW_72_PR2(12-month)*(1- RUFW_72_PR2 + RPF_72_PR2))*cfs_taf(12-month)) /(1-CLF_72_PR2)))}
+define DR_72_PR3_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR3_sep/(1-CLF_72_PR3), ((AWR_72_PR3(12-month)*(1- RUFR_72_PR3 + RPF_72_PR3) + AWO_72_PR3(12-month)*(1- RUFO_72_PR3 + RPF_72_PR3) + AWW_72_PR3(12-month)*(1- RUFW_72_PR3 + RPF_72_PR3))*cfs_taf(12-month)) /(1-CLF_72_PR3)))}
+define DR_72_PR4_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR4_sep/(1-CLF_72_PR4), ((AWR_72_PR4(12-month)*(1- RUFR_72_PR4 + RPF_72_PR4) + AWO_72_PR4(12-month)*(1- RUFO_72_PR4 + RPF_72_PR4) + AWW_72_PR4(12-month)*(1- RUFW_72_PR4 + RPF_72_PR4))*cfs_taf(12-month)) /(1-CLF_72_PR4)))}
+define DR_72_PR5_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR5_sep/(1-CLF_72_PR5), ((AWR_72_PR5(12-month)*(1- RUFR_72_PR5 + RPF_72_PR5) + AWO_72_PR5(12-month)*(1- RUFO_72_PR5 + RPF_72_PR5) + AWW_72_PR5(12-month)*(1- RUFW_72_PR5 + RPF_72_PR5))*cfs_taf(12-month)) /(1-CLF_72_PR5)))}
+define DR_72_PR6_sep       {value  max(0.0,min(perdel_cvprf_s*CLM_72_PR6_sep/(1-CLF_72_PR6), ((AWR_72_PR6(12-month)*(1- RUFR_72_PR6 + RPF_72_PR6) + AWO_72_PR6(12-month)*(1- RUFO_72_PR6 + RPF_72_PR6) + AWW_72_PR6(12-month)*(1- RUFW_72_PR6 + RPF_72_PR6))*cfs_taf(12-month)) /(1-CLF_72_PR6)))}
+define DR_91_PR_sep        {value  max(0.0,min(perdel_cvprf_s*CLM_91_PR_sep /(1-CLF_91_PR),  ((AWR_91_PR(12-month) *(1- RUFR_91_PR  + RPF_91_PR)  + AWO_91_PR(12-month) *(1- RUFO_91_PR  + RPF_91_PR)  + AWW_91_PR(12-month) *(1- RUFW_91_PR  + RPF_91_PR)) *cfs_taf(12-month)) /(1-CLF_91_PR) ))}
+define DR_D_CAA239_CVPRF_PRF_sep     {value perdel_cvprf_s*CLM_D_CAA239_CVPRF_PRF_sep/(1-0.25)}!Assume 25% conveyance loss
+! CVP losses 
+define DR_CVPSOD_Losses_sep {value SG_R3_CVP(12-month)*cfs_taf(12-month)
+                                 + SG_R4_CVP(12-month)*cfs_taf(12-month)
+                                 + SG_R5_CVP(12-month)*cfs_taf(12-month)
+                                 + SG_R6_CVP(12-month)*cfs_taf(12-month)
+                                 + SG_R7_CVP(12-month)*cfs_taf(12-month)
+                                 + SG_DMC_UPPER(12-month)*cfs_taf(12-month)
+                                 + SG_DMC_LOWER(12-month)*cfs_taf(12-month)}
+
+
+
+!*********  Final demand projections for each month  *************************************************
+! cvp demands after cuts for use with determining the cvp rule curve
+! note that the exchange and refuge totals for jun, jul, aug are now defined in BaseCVPDemTotals.wresl
+define cvpagdemfinal_may {value   DR_50_PA1_may + DR_71_PA1_may + DR_71_PA2_may + DR_71_PA3_may + DR_71_PA4a_may + DR_71_PA4b_may + DR_71_PA5_may + DR_71_PA6_may  
+                                  + DR_71_PA8_may + DR_72_PA_may  + DR_73_PA1_may + DR_73_PA2_may + DR_73_PA3_may + DR_90_PA1_may  
+                                  + DR_90_PA2_may + DR_91_PA_may  + DR_91_WR_may  + DR_SFLPE_PA_may}
+define cvpmidemfinal_may {value   DR_50_PUa_may + DR_50_PUc_may + DR_71_PU1_may + DR_71_PU2_may  + DR_90_PUa_may + DR_90_PUb_may + DR_SFLPE_PU_may}
+define cvpexdemfinal_may {value   DR_64_XA_may  + DR_72_XA1_may + DR_72_XA2_may + DR_72_XA3_may + DR_73_XA_may }
+define cvpprdemfinal_may {value   DR_72_PR1_may + DR_72_PR2_may + DR_72_PR3_may + DR_72_PR4_may + DR_72_PR5_may + DR_72_PR6_may + DR_91_PR_may + DR_D_CAA239_CVPRF_PRF_may }
+!*****************************************************************************************************
+define cvpagdemfinal_jun {value   DR_50_PA1_jun + DR_71_PA1_jun + DR_71_PA2_jun + DR_71_PA3_jun + DR_71_PA4a_jun + DR_71_PA4b_jun + DR_71_PA5_jun + DR_71_PA6_jun  
+                                  + DR_71_PA8_jun + DR_72_PA_jun  + DR_73_PA1_jun + DR_73_PA2_jun + DR_73_PA3_jun + DR_90_PA1_jun  
+                                  + DR_90_PA2_jun + DR_91_PA_jun  + DR_91_WR_jun  + DR_SFLPE_PA_jun}
+define cvpmidemfinal_jun {value   DR_50_PUa_jun + DR_50_PUc_jun + DR_71_PU1_jun + DR_71_PU2_jun  + DR_90_PUa_jun + DR_90_PUb_jun + DR_SFLPE_PU_jun}
+!*****************************************************************************************************
+define cvpagdemfinal_jul {value   DR_50_PA1_jul + DR_71_PA1_jul + DR_71_PA2_jul + DR_71_PA3_jul + DR_71_PA4a_jul + DR_71_PA4b_jul + DR_71_PA5_jul + DR_71_PA6_jul  
+                                  + DR_71_PA8_jul + DR_72_PA_jul  + DR_73_PA1_jul + DR_73_PA2_jul + DR_73_PA3_jul + DR_90_PA1_jul  
+                                  + DR_90_PA2_jul + DR_91_PA_jul  + DR_91_WR_jul  + DR_SFLPE_PA_jul}
+define cvpmidemfinal_jul {value   DR_50_PUa_jul + DR_50_PUc_jul + DR_71_PU1_jul + DR_71_PU2_jul  + DR_90_PUa_jul + DR_90_PUb_jul + DR_SFLPE_PU_jul}
+!*****************************************************************************************************
+define cvpagdemfinal_aug {value   DR_50_PA1_aug + DR_71_PA1_aug + DR_71_PA2_aug + DR_71_PA3_aug + DR_71_PA4a_aug + DR_71_PA4b_aug + DR_71_PA5_aug + DR_71_PA6_aug  
+                                  + DR_71_PA8_aug + DR_72_PA_aug  + DR_73_PA1_aug + DR_73_PA2_aug + DR_73_PA3_aug + DR_90_PA1_aug  
+                                  + DR_90_PA2_aug + DR_91_PA_aug  + DR_91_WR_aug  + DR_SFLPE_PA_aug}
+define cvpmidemfinal_aug {value   DR_50_PUa_aug + DR_50_PUc_aug + DR_71_PU1_aug + DR_71_PU2_aug  + DR_90_PUa_aug + DR_90_PUb_aug + DR_SFLPE_PU_aug}
+!*****************************************************************************************************
+define cvpagdemfinal_sep {value   DR_50_PA1_sep + DR_71_PA1_sep + DR_71_PA2_sep + DR_71_PA3_sep + DR_71_PA4a_sep + DR_71_PA4b_sep + DR_71_PA5_sep + DR_71_PA6_sep  
+                                  + DR_71_PA8_sep + DR_72_PA_sep  + DR_73_PA1_sep + DR_73_PA2_sep + DR_73_PA3_sep + DR_90_PA1_sep  
+                                  + DR_90_PA2_sep + DR_91_PA_sep  + DR_91_WR_sep  + DR_SFLPE_PA_sep}
+define cvpmidemfinal_sep {value   DR_50_PUa_sep + DR_50_PUc_sep + DR_71_PU1_sep + DR_71_PU2_sep  + DR_90_PUa_sep + DR_90_PUb_sep + DR_SFLPE_PU_sep}
+define cvpexdemfinal_sep {value   DR_64_XA_sep  + DR_72_XA1_sep + DR_72_XA2_sep + DR_72_XA3_sep + DR_73_XA_sep} 
+define cvpprdemfinal_sep {value   + DR_72_PR1_sep + DR_72_PR2_sep + DR_72_PR3_sep + DR_72_PR4_sep + DR_72_PR5_sep + DR_72_PR6_sep + DR_91_PR_sep + DR_D_CAA239_CVPRF_PRF_sep }
+!*****************************************************************************************************
+
+! Use these values create demand assessments for use in setting rule curve 
+! Total SOD Demand through August
+define CVPSODDemThruAug {
+    case May {
+        condition month==MAY
+        value cvpagdemfinal_may + cvpagdemfinal_jun + cvpagdemfinal_jul + cvpagdemfinal_aug 
+            + cvpmidemfinal_may + cvpmidemfinal_jun + cvpmidemfinal_jul + cvpmidemfinal_aug
+            + cvpexdemfinal_may + cvpexdemfinal_jun + cvpexdemfinal_jul + cvpexdemfinal_aug
+            + cvpprdemfinal_may + cvpprdemfinal_jun + cvpprdemfinal_jul + cvpprdemfinal_aug
+            + DR_CVPSOD_Losses_may + DR_CVPSOD_Losses_jun + DR_CVPSOD_Losses_jul + DR_CVPSOD_Losses_aug}
+    case June {
+        condition month==JUN
+        value cvpagdemfinal_jun + cvpagdemfinal_jul + cvpagdemfinal_aug 
+            + cvpmidemfinal_jun + cvpmidemfinal_jul + cvpmidemfinal_aug
+            + cvpexdemfinal_jun + cvpexdemfinal_jul + cvpexdemfinal_aug
+            + cvpprdemfinal_jun + cvpprdemfinal_jul + cvpprdemfinal_aug
+            + DR_CVPSOD_Losses_jun + DR_CVPSOD_Losses_jul + DR_CVPSOD_Losses_aug}
+    case July {
+        condition month==JUL
+        value cvpagdemfinal_jul + cvpagdemfinal_aug 
+            + cvpmidemfinal_jul + cvpmidemfinal_aug
+            + cvpexdemfinal_jul + cvpexdemfinal_aug
+            + cvpprdemfinal_jul + cvpprdemfinal_aug
+            + DR_CVPSOD_Losses_jul + DR_CVPSOD_Losses_aug}
+    case August {
+        condition month==AUG
+        value cvpagdemfinal_aug 
+            + cvpmidemfinal_aug
+            + cvpexdemfinal_aug
+            + cvpprdemfinal_aug
+            + DR_CVPSOD_Losses_aug}
+    case otherwise {
+        condition always
+        value 0.}
+}
+define CVPSODDemThruAugDV {alias CVPSODDemThruAug kind 'rulecv-calc' units 'taf'}
+
+! CVP SOD demand this month
+define CVPSODDem {
+    case May    { condition month==MAY value cvpagdemfinal_may + cvpmidemfinal_may + cvpexdemfinal_may + cvpprdemfinal_may + DR_CVPSOD_Losses_may}
+    case June   { condition month==JUN value cvpagdemfinal_jun + cvpmidemfinal_jun + cvpexdemfinal_jun + cvpprdemfinal_jun + DR_CVPSOD_Losses_jun}
+    case July   { condition month==JUL value cvpagdemfinal_jul + cvpmidemfinal_jul + cvpexdemfinal_jul + cvpprdemfinal_jul + DR_CVPSOD_Losses_jul}
+    case August { condition month==AUG value cvpagdemfinal_aug + cvpmidemfinal_aug + cvpexdemfinal_aug + cvpprdemfinal_aug + DR_CVPSOD_Losses_aug}
+    case Sept   { condition month==SEP value cvpagdemfinal_sep + cvpmidemfinal_sep + cvpexdemfinal_sep + cvpprdemfinal_sep + DR_CVPSOD_Losses_sep}
+    case otherwise {
+        condition always
+        value 0.}
+}
+define PctSODDem {
+    case zero {
+        condition CVPSODDemThruAug < .001
+        value 0. }
+    case MaySep {
+        condition month>=MAY
+        value CVPSODDem/CVPSODDemThruAug }
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+! calculate the portion of the remaining demand that must come from exports,
+! given existing resources in San Luis
+define CVPReqExpThruAug {
+    case MayToSep {
+        condition   month>=MAY
+        value       max(0.,CVPSODDemThruAug + 90. - S_SLUIS_CVP(-1))   }
+    case otherwise {
+        condition   always
+        value       0.  }
+}
+define CVPReqExpThruAugDV {alias CVPReqExpThruAug kind 'rulecv-calc' units 'taf'}
+
+! Distribute the seasonal export need by the % of remaining demand that is this month 
+! Limited to Jones Capacity 
+define CVPReqExp {
+    case MayToSep{
+        condition   month>=MAY .and. month<=AUG
+        value       min(4600.*cfs_taf, CVPReqExpThruAug * PctSODDem)  }
+    case otherwise {
+        condition   always
+        value       0.  }
+}
+
+! Subtract the target export from the total monthly demand to calculate how much
+! needs to come from CVPSL this month.  This will be used to calculate rule curve.
+define TargetCVPSLwdwl {
+    case May {
+        condition   month>=MAY
+        value       max(0.,CVPSODDem - CVPReqExp) }
+    case otherwise {
+        condition   always
+        value       0.  }
+}
+define TargetCVPSLwdwlDV {alias TargetCVPSLwdwl kind 'rulecv-calc' units 'taf'}
+
+
+ 
+ 
+ 
+ 
+
+
+

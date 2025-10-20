@@ -1,0 +1,756 @@
+! water year type definitions
+
+! Ryan Wilbur 8-5-03
+
+!************************************************************************************************
+
+! Shasta criteria designates as critical if: 
+!   a. current year natural inflow to shasta reservoir is equal to or less than 3.2 MAF;
+!   b. deficiencies for current and previous year below 4 MAF is greater than 800 TAF;
+! Forecasts are based on median exceedence level (50%)
+
+!actual inflow:
+!define I3_known {timeseries 'I4' kind 'FLOW-INFLOW' units 'TAF'}
+
+!forecasted inflow:
+!define I3Jan50 {timeseries 'SHA_Jan_50' kind 'FLOW' units 'TAF'}
+!define I3Feb50 {timeseries 'SHA_Feb_50' kind 'FLOW' units 'TAF'}
+!define I3Mar50 {timeseries 'SHA_Mar_50' kind 'FLOW' units 'TAF'}
+!define I3Apr50 {timeseries 'SHA_Apr_50' kind 'FLOW' units 'TAF'}
+!define I3May50 {timeseries 'SHA_May_50' kind 'FLOW' units 'TAF'}
+!define I3Jun50 {timeseries 'SHA_Jun_50' kind 'FLOW' units 'TAF'}
+
+!set monthly flows
+define I3_Jan50 {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,253)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_SHAS(PrevJan)
+	}
+}
+define I3_Feb50 {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,254)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_SHAS(PrevFeb)
+	}
+}
+define I3_Mar50 {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,255)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_SHAS(PrevMar)
+	}
+}
+define I3_Apr50 {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,256)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_SHAS(PrevApr)
+	}
+}
+define I3_May50 {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,257)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_SHAS(PrevMay)
+	}
+}
+define I3_Jun50 {value HYDROFORECAST(0,258)}
+define I3_Jul50 {value HYDROFORECAST(0,259)}
+define I3_Aug50 {value HYDROFORECAST(0,260)}
+define I3_Sep50 {value HYDROFORECAST(0,261)}
+define I3_Oct50 {value HYDROFORECAST(0,262)}
+define I3_Nov50 {value HYDROFORECAST(0,263)}
+define I3_Dec50 {value HYDROFORECAST(0,264)}
+
+!annual total for current year
+define I3sum {value I3_Jan50 +
+            I3_Feb50 +
+            I3_Mar50 +
+            I3_Apr50 +
+            I3_May50 +
+            I3_Jun50 +
+            I3_Jul50 +
+            I3_Aug50 +
+            I3_Sep50 +
+            I3_Oct50 +
+            I3_Nov50 +
+            I3_Dec50}
+define I3_50sum {alias I3sum kind 'FLOW' units 'TAF'}
+
+!annual total for last year
+define I3_lastyr{
+  case a{
+    condition wateryear == 1922 .or. wateryear == 2003
+    value 4001.}
+  case b{
+    condition always
+    value QSH_1_1 +
+          QSH_1_2 +
+          QSH_1_3 +
+          QSH_1_4 +
+          QSH_1_5 +
+          QSH_1_6 +
+          QSH_1_7 +
+          QSH_1_8 +
+          QSH_1_9 +
+          QSH_1_10 +
+          QSH_1_11 +
+          QSH_1_12}
+}          
+define I3_50sum_prv {alias I3_lastyr kind 'FLOW' units 'TAF'}
+
+!deficiency total when current and last year are below 4MAF
+define I3_2yr_low {
+  case a{
+    condition I3sum <= 4000. .and. I3_lastyr <= 4000.
+    value 8000. - I3sum - I3_lastyr}
+  case b{
+    condition always
+    value 0.}
+}
+
+!if criteria is met =1; if not met =0
+define ShastaCriteriaMet {
+  case a{
+    condition I3sum <= 3200. .or. I3_2yr_low >= 800.
+    value 1.}
+  case b{
+    condition always
+    value 0}
+}
+define ShaCrit {alias ShastaCriteriaMet kind 'none' units 'none'}
+
+!************************************************************************************************
+
+! Oroville criteria designates a "drought" if:
+!   a. unimpaired apr-jul oroville inflow is less than 600 TAF;
+!   b. deficiencies for current and previous year(s) below 2.5 MAF is greater than 400 TAF;
+! Forecasts are based on median exceedence level (50%)
+
+/*!if criteria is met =1; if not met =0
+define OrovilleDrought {select FEATHERindex from wytypes where wateryear=wateryear}
+define OroDrght {alias OrovilleDrought kind 'none' units 'none'}*/
+
+!actual inflow:
+!define I4_known {timeseries 'I6' kind 'FLOW-INFLOW' units 'TAF'}
+
+!forecasted inflow:
+!define I4Jan50 {timeseries 'ORO_Jan_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define I4Feb50 {timeseries 'ORO_Feb_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define I4Mar50 {timeseries 'ORO_Mar_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define I4Apr50 {timeseries 'ORO_Apr_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define I4May50 {timeseries 'ORO_May_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define I4Jun50 {timeseries 'ORO_Jun_50' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+
+!set monthly flows
+define I4_Jan50 {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,217)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_OROV(PrevJan)
+	}
+}
+define I4_Feb50 {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,218)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_OROV(PrevFeb)
+	}
+}
+define I4_Mar50 {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,219)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_OROV(PrevMar)
+	}
+}
+define I4_Apr50 {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,220)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_OROV(PrevApr)
+	}
+}
+define I4_May50 {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,221)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_OROV(PrevMay)
+	}
+}
+define I4_Jun50 {value HYDROFORECAST(0,222)}
+define I4_Jul50 {value HYDROFORECAST(0,223)}
+define I4_Aug50 {value HYDROFORECAST(0,224)}
+define I4_Sep50 {value HYDROFORECAST(0,225)}
+define I4_Oct50 {value HYDROFORECAST(0,226)}
+define I4_Nov50 {value HYDROFORECAST(0,227)}
+define I4_Dec50 {value HYDROFORECAST(0,228)}
+
+!annual total for current year
+define I4sum {value I4_Jan50 +
+            I4_Feb50 +
+            I4_Mar50 +
+            I4_Apr50 +
+            I4_May50 +
+            I4_Jun50 +
+            I4_Jul50 +
+            I4_Aug50 +
+            I4_Sep50 +
+            I4_Oct50 +
+            I4_Nov50 +
+            I4_Dec50}
+define I4_50sum {alias I4sum kind 'FLOW' units 'TAF'}
+
+!apr-jul total
+define I4_apr_jul {value I4_Apr50 + I4_May50 + I4_Jun50 + I4_Jul50}
+define I4_50apr_jul {alias I4_apr_jul kind 'FLOW' units 'TAF'}
+
+!annual total for last year
+define I4_lastyr{
+  case a{
+    condition wateryear == 1922 .or. wateryear == 2003
+    value 4001.}
+  case b{
+    condition always
+    value QOR_1_1 +
+          QOR_1_2 +
+          QOR_1_3 +
+          QOR_1_4 +
+          QOR_1_5 +
+          QOR_1_6 +
+          QOR_1_7 +
+          QOR_1_8 +
+          QOR_1_9 +
+          QOR_1_10 +
+          QOR_1_11 +
+          QOR_1_12}
+}          
+define I4_50sum_prv {alias I4_lastyr kind 'FLOW' units 'TAF'}
+
+!deficiency total when current and last year are below 2.5MAF
+define I4_2yr_low {
+  case a{
+    condition I4sum <= 2500. .and. I4_lastyr <= 2500.
+    value 5000. - I4sum - I4_lastyr}
+  case b{
+    condition always
+    value 0.}
+}
+
+!if criteria is met =1; if not met =0
+define OrovilleDrought {
+  case a{
+    condition I4_apr_jul <= 600. .or. I4_2yr_low >= 400.
+    value 1.}
+  case b{
+    condition always
+    value 0}
+}
+define OroDrght {alias OrovilleDrought kind 'none' units 'none'}
+
+!************************************************************************************************
+
+!40-30-30 Sac Valley Index
+! Index = 0.4*Apr_Jul + 0.3*Oct_Mar + 0.3*Prv_Year_Index (MAF)
+! runoff is unimpaired total of: Sac River at Bend Bridge (Red Bluff)
+!                                Oroville Reservoir inflow
+!                                Folsom Lake inflow
+!                                Yuba River near Smartville
+! maximum previous year index total of 10 MAF
+
+!unimpaired Oroville inflow:
+!define Feath {timeseries 'I6' kind 'FLOW-INFLOW' units 'TAF'}
+!define Feath_Jan {timeseries 'ORO_Jan_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Feath_Feb {timeseries 'ORO_Feb_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Feath_Mar {timeseries 'ORO_Mar_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Feath_Apr {timeseries 'ORO_Apr_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Feath_May {timeseries 'ORO_May_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Feath_Jun {timeseries 'ORO_Jun_50' kind 'FLOW-UNIMPAIRED' units 'TAF'} !only 50% available
+define F_Oct {value QOR_1_10}
+define F_Nov {value QOR_1_11}
+define F_Dec {value QOR_1_12}
+define F_Jan {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,109)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_OROV(PrevJan)
+	}
+}
+define F_Feb {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,110)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_OROV(PrevFeb)
+	}
+}
+define F_Mar {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,111)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_OROV(PrevMar)
+	}
+}
+define F_Apr {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,112)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_OROV(PrevApr)
+	}
+}
+define F_May {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,113)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_OROV(PrevMay)
+	}
+}
+define F_Jun {value HYDROFORECAST(0,114)}
+define F_Jul {value HYDROFORECAST(0,115)}
+
+define Feath_Oct_Mar {value F_Oct/1000. + F_Nov/1000. + F_Dec/1000. + F_Jan/1000. + F_Feb/1000. + F_Mar/1000.}
+define Feath_Apr_Jul {value F_Apr/1000. + F_May/1000. + F_Jun/1000. + F_Jul/1000.}
+
+!unimpaired Yuba flow:
+!define Yuba {timeseries 'I211' kind 'FLOW-INFLOW' units 'CFS' convert 'TAF'}
+!define Yunmp_Jan {timeseries 'YUB_Jan_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Yunmp_Feb {timeseries 'YUB_Feb_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Yunmp_Mar {timeseries 'YUB_Mar_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Yunmp_Apr {timeseries 'YUB_Apr_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Yunmp_May {timeseries 'YUB_May_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Yunmp_Jun {timeseries 'YUB_Jun_50' kind 'FLOW-UNIMPAIRED' units 'TAF'} !only 50% available
+define Y_Oct {value QYU_1_10}
+define Y_Nov {value QYU_1_11}
+define Y_Dec {value QYU_1_12}
+define Y_Jan {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,133)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_YUBA(PrevJan)
+	}
+}
+define Y_Feb {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,134)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_YUBA(PrevFeb)
+	}
+}
+define Y_Mar {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,135)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_YUBA(PrevMar)
+	}
+}
+define Y_Apr {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,136)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_YUBA(PrevApr)
+	}
+}
+define Y_May {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,137)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_YUBA(PrevMay)
+	}
+}
+define Y_Jun {value HYDROFORECAST(0,138)}
+define Y_Jul {value HYDROFORECAST(0,139)}
+
+define Yuba_Oct_Mar {value Y_Oct/1000. + Y_Nov/1000. + Y_Dec/1000. + Y_Jan/1000. + Y_Feb/1000. + Y_Mar/1000.}
+define Yuba_Apr_Jul {value Y_Apr/1000. + Y_May/1000. + Y_Jun/1000. + Y_Jul/1000.}
+
+!unimpaired Folsom inflow:
+!define Amer {timeseries 'I8' kind 'FLOW-INFLOW' units 'CFS' convert 'TAF'}
+!define Amer_Jan {timeseries 'FOL_Jan_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Amer_Feb {timeseries 'FOL_Feb_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Amer_Mar {timeseries 'FOL_Mar_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Amer_Apr {timeseries 'FOL_Apr_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Amer_May {timeseries 'FOL_May_90' kind 'FLOW-UNIMPAIRED' units 'TAF'}
+!define Amer_Jun {timeseries 'FOL_Jun_50' kind 'FLOW-UNIMPAIRED' units 'TAF'} !only 50% available
+define Am_Oct {value QFO_1_10}
+define Am_Nov {value QFO_1_11}
+define Am_Dec {value QFO_1_12}
+define Am_Jan {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,121)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_FOLS(PrevJan)
+	}
+}
+define Am_Feb {
+		case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,122)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_FOLS(PrevFeb)
+	}
+}
+define Am_Mar {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,123)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_FOLS(PrevMar)
+	}
+}
+define Am_Apr {
+		case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,124)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_FOLS(PrevApr)
+	}
+}
+define Am_May {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,125)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_FOLS(PrevMay)
+	}
+}
+define Am_Jun {value HYDROFORECAST(0,126)}
+define Am_Jul {value HYDROFORECAST(0,127)}
+
+define Amer_Oct_Mar {value Am_Oct/1000. + Am_Nov/1000. + Am_Dec/1000. + Am_Jan/1000. + Am_Feb/1000. + Am_Mar/1000.}
+define Amer_Apr_Jul {value Am_Apr/1000. + Am_May/1000. + Am_Jun/1000. + Am_Jul/1000.}
+
+!unimpaired Sac River flow at Bend Bridge near Red Bluff:
+! sum of unimpaired Shasta inflow + unimpaired Whiskeytown inflow + dsa 58 contribution
+
+!unimpaired Shasta inflow:
+!define Sac {timeseries 'I4' kind 'FLOW-INFLOW' units 'TAF'}
+!define Sac_Jan {timeseries 'SHA_Jan_90' kind 'FLOW' units 'TAF'}
+!define Sac_Feb {timeseries 'SHA_Feb_90' kind 'FLOW' units 'TAF'}
+!define Sac_Mar {timeseries 'SHA_Mar_90' kind 'FLOW' units 'TAF'}
+!define Sac_Apr {timeseries 'SHA_Apr_90' kind 'FLOW' units 'TAF'}
+!define Sac_May {timeseries 'SHA_May_50' kind 'FLOW' units 'TAF'} !only 50% available
+!define Sac_Jun {timeseries 'SHA_Jun_50' kind 'FLOW' units 'TAF'} !only 50% available
+define S_Oct {value QBD_1_10}
+define S_Nov {value QBD_1_11}
+define S_Dec {value QBD_1_12}
+define S_Jan {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,157)
+	}
+	case afterJan{
+		condition always
+		value UNIMP_SRBB(PrevJan)
+	}
+}
+define S_Feb {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,158)
+	}
+	case afterFeb{
+		condition always
+		value UNIMP_SRBB(PrevFeb)
+	}
+}
+define S_Mar {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,159)
+	}
+	case afterMar{
+		condition always
+		value UNIMP_SRBB(PrevMar)
+	}
+}
+define S_Apr {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,160)
+	}
+	case afterApr{
+		condition always
+		value UNIMP_SRBB(PrevApr)
+	}
+}
+define S_May {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,161)
+	}
+	case afterMay{
+		condition always
+		value UNIMP_SRBB(PrevMay)
+	}
+}
+define S_Jun {value HYDROFORECAST(0,162)}
+define S_Jul {value HYDROFORECAST(0,163)}
+
+define Sac_Oct_Mar {value S_Oct/1000. + S_Nov/1000. + S_Dec/1000. + S_Jan/1000. + S_Feb/1000. + S_Mar/1000.}
+define Sac_Apr_Jul {value S_Apr/1000. + S_May/1000. + S_Jun/1000. + S_Jul/1000.}
+
+!unimpaired Whiskeytown inflow:
+define Wky {timeseries 'I_WKYTN' kind 'INFLOW' units 'TAF'}
+!define Wky_Jan {timeseries 'WKY_Jan_90' kind 'FLOW' units 'TAF'}
+!define Wky_Feb {timeseries 'WKY_Feb_90' kind 'FLOW' units 'TAF'}
+!define Wky_Mar {timeseries 'WKY_Mar_90' kind 'FLOW' units 'TAF'}
+!define Wky_Apr {timeseries 'WKY_Apr_90' kind 'FLOW' units 'TAF'}
+!define Wky_May {timeseries 'WKY_May_50' kind 'FLOW' units 'TAF'} !only 50% available
+!define Wky_Jun {timeseries 'WKY_Jun_50' kind 'FLOW' units 'TAF'} !only 50% available
+define W_Oct {value Wky(1-month)}
+define W_Nov {value Wky(2-month)}
+define W_Dec {value Wky(3-month)}
+
+define W_Jan {value HYDROFORECAST(0,193)}
+define W_Feb {value HYDROFORECAST(0,194)}
+define W_Mar {value HYDROFORECAST(0,195)}
+define W_Apr {value HYDROFORECAST(0,196)}
+define W_May {value HYDROFORECAST(0,197)}
+
+/*
+define W_Jan {
+	case beforeJan{
+		condition month<=Jan
+		value HYDROFORECAST(0,193)
+	}
+	case afterJan{
+		condition always
+		value Unimp_WHIS(PrevJan)
+	}
+}
+define W_Feb {
+	case beforeFeb{
+		condition month<=Feb
+		value HYDROFORECAST(0,194)
+	}
+	case afterFeb{
+		condition always
+		value Unimp_WHIS(PrevFeb)
+	}
+}
+define W_Mar {
+	case beforeMar{
+		condition month<=Mar
+		value HYDROFORECAST(0,195)
+	}
+	case afterMar{
+		condition always
+		value Unimp_WHIS(PrevMar)
+	}
+}
+define W_Apr {
+	case beforeApr{
+		condition month<=Apr
+		value HYDROFORECAST(0,196)
+	}
+	case afterApr{
+		condition always
+		value Unimp_WHIS(PrevApr)
+	}
+}
+define W_May {
+	case beforeMay{
+		condition month<=May
+		value HYDROFORECAST(0,197)
+	}
+	case afterMay{
+		condition always
+		value Unimp_WHIS(PrevMay)
+	}
+}*/
+define W_Jun {value HYDROFORECAST(0,198)}
+define W_Jul {value HYDROFORECAST(0,199)}
+
+define Wky_Oct_Mar {value W_Oct/1000. + W_Nov/1000. + W_Dec/1000. + W_Jan/1000. + W_Feb/1000. + W_Mar/1000.}
+define Wky_Apr_Jul {value W_Apr/1000. + W_May/1000. + W_Jun/1000. + W_Jul/1000.}
+
+!dsa 58 contribution:
+define DSA58_Oct_Mar {value 1543./1000.}
+define DSA58_Apr_Jul {value  435./1000.}
+
+! previous year's actual sac valley index, maximum of 10 MAF:
+define SVI_prv_yr {select sac from CAM_SVI where wy=wateryear}
+define SVI_prv    {value min(10.,SVI_prv_yr)}
+
+! current year's forecasted sac valley index:
+define SVI_Oct_Mar {value Feath_Oct_Mar + Yuba_Oct_Mar + Amer_Oct_Mar + Sac_Oct_Mar + Wky_Oct_Mar + DSA58_Oct_Mar}
+define SVI_Apr_Jul {value Feath_Apr_Jul + Yuba_Apr_Jul + Amer_Apr_Jul + Sac_Apr_Jul + Wky_Apr_Jul + DSA58_Apr_Jul}
+define SVI {value 0.4*SVI_Apr_Jul + 0.3*SVI_Oct_Mar + 0.3*SVI_prv}
+define SVIfrcst {alias SVI kind 'INDEX' units 'MAF'}
+
+
+!define SVI {select SVI from DCO_SVI where month=month,exc=exc}
+!define SVIfrcst {alias SVI kind 'INDEX' units 'MAF'}
+
+! forecasted water year type :
+define WYT {
+  case critical{
+    condition SVI<=5.4
+    value 5}
+  case dry{
+    condition SVI<=6.5
+    value 4}
+  case belownormal{
+    condition SVI<=7.8
+    value 3}
+  case abovenormal{
+    condition SVI<=9.2
+    value 2}
+  case wet{
+    condition always
+    value 1}
+}
+define WYTfrcst {alias WYT kind 'INDEX' units 'none'}
+
+!************************************************************************************************
+
+! Eight River Index
+
+! Sum of Sacramento River unimpaired flows:
+!   - Sacramento River flow at Bend Bridge, near Red Bluff; 
+!   - Feather River, total inflow to Oroville Reservoir; 
+!   - Yuba River flow at Smartville; 
+!   - American River, total inflow to Folsom Reservoir; 
+! and sum of San Joaguin River unimpaired flows:
+!   - Stanislaus River, total inflow to New Melones Reservoir; 
+!   - Tuolumne River, total inflow to Don Pedro Reservoir; 
+!   - Merced River, total inflow to Exchequer Reservoir; 
+!   - San Joaquin River, total inflow to Millerton Lake.
+
+/*
+define(fm) RI_fm{
+	case Jan{condition mv($m) == Jan value F_Jan + Y_Jan + Am_Jan + S_Jan + I33B($m)}
+	case Feb{condition mv($m) == Feb value F_Feb + Y_Feb + Am_Feb + S_Feb + I33B($m)}	
+	case Mar{condition mv($m) == Mar value F_Mar + Y_Mar + Am_Mar + S_Mar + I33B($m)}
+	case Apr{condition mv($m) == Apr value F_Apr + Y_Apr + Am_Apr + S_Apr + I33B($m)}	
+	case May{condition mv($m) == May value F_May + Y_May + Am_May + S_May + I33B($m)}
+	case AfterJun{condition mv($m) >= Jun value F_Jun + Y_Jun + Am_Jun + S_Jun + I33B($m)}
+}
+*/
+
+define I33B_Jan {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 4,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 4,LOC=1}}
+define I33B_Feb {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 5,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 5,LOC=1}}
+define I33B_Mar {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 6,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 6,LOC=1}}
+define I33B_Apr {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 7,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 7,LOC=1}}
+define I33B_May {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 8,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 8,LOC=1}}
+define I33B_Jun {case a{condition month>=JAN .and. month<=MAY select per90 from CAM_SJRES where month= 9,LOC=1}case b{condition always select per90 from CAM_SJRES where month= 9,LOC=1}}
+
+define RI_Jan {value F_Jan + Y_Jan + Am_Jan + S_Jan + I33B_Jan}
+define RI_Feb {value F_Feb + Y_Feb + Am_Feb + S_Feb + I33B_Feb}
+define RI_Mar {value F_Mar + Y_Mar + Am_Mar + S_Mar + I33B_Mar}
+define RI_Apr {value F_Apr + Y_Apr + Am_Apr + S_Apr + I33B_Apr}
+define RI_May {value F_May + Y_May + Am_May + S_May + I33B_May}
+define RI_Jun {value F_Jun + Y_Jun + Am_Jun + S_Jun + I33B_Jun}
+
+! the 60-20-20 index for San Joaquin basin
+define wyt_SJR_CAM {
+    !case SuperWetOCTtoJAN {
+    !     condition  month >= OCT .and. month <= JAN .and. (wateryear - 1 == 1938 .or. wateryear - 1 == 1969 .or. wateryear - 1 == 1982 .or. wateryear - 1 == 1983 .or. wateryear - 1 == 2006)
+ 	!	 value 0. }
+     case SuperWetrest {
+         condition  wateryear == 1938 .or. wateryear == 1969 .or. wateryear == 1982 .or. wateryear == 1983 .or. wateryear == 2006
+		 value 0. }
+     case rest {
+     	 condition always
+		 value wyt_SJR_forFAM}
+}
+
+define wyt_SJR_CAM_dv {alias wyt_SJR_CAM kind 'wytype' units 'none'}
+
+!SJR flows moved to WYT_Forecasted_CAMDLL because of dependence on WYT variable               
+! san joaquin river:
+! average flows by month and perfect foresight SJR wy type (with Super-Wet category added)
+define(fm) I33B_fm {
+	case SW {
+	condition wyt_SJR_CAM == 0
+	select SW from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+	case W {
+	condition wyt_SJR_CAM == 1
+	select W from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+	case AN {
+	condition wyt_SJR_CAM == 2
+	select AN from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+	case BN {
+	condition wyt_SJR_CAM == 3
+	select BN from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+	case D {
+	condition wyt_SJR_CAM == 4
+	select D from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+	case C {
+	condition wyt_SJR_CAM == 5
+	select C from CAM_SJR_MONTHWYTYPE where month=mv($m) }
+}
+
+define(fm) I33B_fm_dv{alias I33B_fm($m) kind 'forecasted-inflow' units 'taf'}

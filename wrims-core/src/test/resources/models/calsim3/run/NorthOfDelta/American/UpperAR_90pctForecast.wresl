@@ -1,0 +1,454 @@
+/*
+Program:	Folsom Storage Forecasting
+Description:	The purpose of this module is to calculate 90% exceedance Folsom Reservoir inflows for October through December for use as inputs for the following files:
+			FMStandard.wresl
+
+This module assumes 1987 conditions and dry year flow requirements are generally representative of 90% exceedance inflows based on review of several available climate change scenarios
+*/
+!---------- Folsom Reservoir Inflows ---------- 
+define I_FOLSM_fcst1 {timeseries 'I_FOLSM' kind 'INFLOW' units 'TAF'} !Local inflow to Folsom Reservoir
+define CT_FAIROAKS_fcst1 {timeseries 'CT_FAIROAKS_SV' kind 'CLOSURE-TERM' units 'TAF'} !Local inflow to Folsom Reservoir
+
+define I_90pct_yr {value 1987}
+define I_90pct_Oct {value (I_90pct_yr - wateryear + 1)*12 + (Oct - month)}
+define I_90pct_Nov {value (I_90pct_yr - wateryear + 1)*12 + (Nov - month)}
+define I_90pct_Dec {value (I_90pct_yr - wateryear + 1)*12 + (Dec - month)}
+
+define Fcst_90pct {value 0.}  ! 1=use "Dry" year designation; 0=use year type based on simulation
+
+!-----------------------------------------
+!------PCWA Middle Fork Project-----------
+!-----------------------------------------
+!****************************************************************************
+!**************Duncan Creek below Duncan Creek Diversion Dam ****************
+!****************************************************************************
+Define MIF_MFP_DCC008_Oct_90pct_Fcst1 {select Dry from MIF_MFP where month =1, identifier = 1 }
+Define MIF_MFP_DCC008_Nov_90pct_Fcst1 {select Dry from MIF_MFP where month =2, identifier = 1 }
+Define MIF_MFP_DCC008_Dec_90pct_Fcst1 {select Dry from MIF_MFP where month =3, identifier = 1 }
+
+Define MIF_MFP_DCC008_Oct_90pct_fcst {value min((Fcst_90pct*MIF_MFP_DCC008_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_DCC008_Oct_fcst1), I_DCC010_fcst(I_90pct_Oct))}
+Define MIF_MFP_DCC008_Nov_90pct_fcst {value min((Fcst_90pct*MIF_MFP_DCC008_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_DCC008_Nov_fcst1), I_DCC010_fcst(I_90pct_Nov))}
+Define MIF_MFP_DCC008_Dec_90pct_fcst {value min((Fcst_90pct*MIF_MFP_DCC008_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_DCC008_Dec_fcst1), I_DCC010_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!*******Middle Fork American River below French Meadows Reservoir Dam *******
+!****************************************************************************
+Define MIF_MFP_MFA047_Oct_90pct_Fcst1 {select Dry from MIF_MFP where month =1, identifier = 2 }
+Define MIF_MFP_MFA047_Nov_90pct_Fcst1 {select Dry from MIF_MFP where month =2, identifier = 2 }
+Define MIF_MFP_MFA047_Dec_90pct_Fcst1 {select Dry from MIF_MFP where month =3, identifier = 2 }
+
+Define MIF_MFP_MFA047_Oct_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA047_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA047_Oct_Fcst}
+Define MIF_MFP_MFA047_Nov_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA047_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA047_Nov_Fcst}
+Define MIF_MFP_MFA047_Dec_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA047_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA047_Dec_Fcst}
+
+!****************************************************************************
+!*************Middle Fork American River below Interbay Dam******************
+!**************************************************************************** 
+Define MIF_MFP_MFA035_Oct_90pct_Fcst1 {select Dry from MIF_MFP where month =1, identifier = 3 }
+Define MIF_MFP_MFA035_Nov_90pct_Fcst1 {select Dry from MIF_MFP where month =2, identifier = 3 }
+Define MIF_MFP_MFA035_Dec_90pct_Fcst1 {select Dry from MIF_MFP where month =3, identifier = 3 }
+
+Define MIF_MFP_MFA035_Oct_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA035_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA035_Oct_Fcst}
+Define MIF_MFP_MFA035_Nov_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA035_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA035_Nov_Fcst}
+Define MIF_MFP_MFA035_Dec_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA035_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA035_Dec_Fcst}
+
+!****************************************************************************
+!**************Rubicon River below Hell Hole Reservoir Dam*******************
+!****************************************************************************
+Define MIF_MFP_RUB031_Oct_90pct_Fcst1 {select Dry from MIF_MFP where month =1, identifier = 4 }
+Define MIF_MFP_RUB031_Nov_90pct_Fcst1 {select Dry from MIF_MFP where month =2, identifier = 4 }
+Define MIF_MFP_RUB031_Dec_90pct_Fcst1 {select Dry from MIF_MFP where month =3, identifier = 4 }
+
+Define MIF_MFP_RUB031_Oct_90pct_Fcst {value Fcst_90pct*MIF_MFP_RUB031_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_RUB031_Oct_Fcst}
+Define MIF_MFP_RUB031_Nov_90pct_Fcst {value Fcst_90pct*MIF_MFP_RUB031_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_RUB031_Nov_Fcst}
+Define MIF_MFP_RUB031_Dec_90pct_Fcst {value Fcst_90pct*MIF_MFP_RUB031_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_RUB031_Dec_Fcst}
+
+!****************************************************************************
+!**North Fork Long Canyon Creek Below North Fork Long Canyon Diversion Dam***
+!****************************************************************************
+Define MIF_MFP_NLC002_Oct_90pct_fcst1 {select Dry from MIF_MFP where month =1, identifier = 5} 
+Define MIF_MFP_NLC002_Nov_90pct_fcst1 {select Dry from MIF_MFP where month =2, identifier = 5} 
+Define MIF_MFP_NLC002_Dec_90pct_fcst1 {select Dry from MIF_MFP where month =3, identifier = 5} 
+
+Define MIF_MFP_NLC002_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_NLC002_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_NLC002_Oct_Fcst, I_NLC003_fcst(I_90pct_Oct))}
+Define MIF_MFP_NLC002_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_NLC002_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_NLC002_Nov_Fcst, I_NLC003_fcst(I_90pct_Nov))}
+Define MIF_MFP_NLC002_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_NLC002_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_NLC002_Dec_Fcst, I_NLC003_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!**South Fork Long Canyon Creek Below South Fork Long Canyon Diversion Dam **
+!****************************************************************************
+Define MIF_MFP_SLC002_Oct_90pct_fcst1 {select Dry from MIF_MFP where month =1, identifier = 6} 
+Define MIF_MFP_SLC002_Nov_90pct_fcst1 {select Dry from MIF_MFP where month =2, identifier = 6} 
+Define MIF_MFP_SLC002_Dec_90pct_fcst1 {select Dry from MIF_MFP where month =3, identifier = 6} 
+
+Define MIF_MFP_SLC002_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_SLC002_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_SLC002_Oct_Fcst, I_SLC003_fcst(I_90pct_Oct))}
+Define MIF_MFP_SLC002_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_SLC002_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_SLC002_Nov_Fcst, I_SLC003_fcst(I_90pct_Nov))}
+Define MIF_MFP_SLC002_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_MFP_SLC002_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_SLC002_Dec_Fcst, I_SLC003_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!*************Middle Fork American River below Ralston Afterbay Dam**********
+!****************************************************************************
+Define MIF_MFP_MFA025_Oct_Fcst {value 3. }
+Define MIF_MFP_MFA025_Nov_Fcst {value 3. }
+Define MIF_MFP_MFA025_Dec_Fcst {value 3. }
+
+!****************************************************************************
+!******************Middle Fork American River below Oxbow Powerhouse ********
+!****************************************************************************
+Define MIF_MFP_MFA023_Oct_90pct_Fcst1 {select Dry from MIF_MFP where month =1, identifier = 7 }
+Define MIF_MFP_MFA023_Nov_90pct_Fcst1 {select Dry from MIF_MFP where month =2, identifier = 7 }
+Define MIF_MFP_MFA023_Dec_90pct_Fcst1 {select Dry from MIF_MFP where month =3, identifier = 7 }
+
+Define MIF_MFP_MFA023_Oct_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA023_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA023_Oct_Fcst}
+Define MIF_MFP_MFA023_Nov_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA023_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA023_Nov_Fcst}
+Define MIF_MFP_MFA023_Dec_90pct_Fcst {value Fcst_90pct*MIF_MFP_MFA023_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_MFP_MFA023_Dec_Fcst}
+
+!-----------------------------------------
+!---SMUD Upper American River Project-----
+!-----------------------------------------
+!****************************************************************************
+!*****************Rubicon River below Rubicon Reservoir Dam******************
+!****************************************************************************
+Define MIF_UARP_RUB044_Oct_90pct_fcst1 {select Dry from UARPmif_RUB044 where month = 1}
+Define MIF_UARP_RUB044_Nov_90pct_fcst1 {select Dry from UARPmif_RUB044 where month = 2}
+Define MIF_UARP_RUB044_Dec_90pct_fcst1 {select Dry from UARPmif_RUB044 where month = 3}
+
+Define MIF_UARP_RUB044_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_RUB044_Oct_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_RUB044_Oct_Fcst, I_Rub047_fcst(I_90pct_Oct))}
+Define MIF_UARP_RUB044_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_RUB044_Nov_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_RUB044_Nov_Fcst, I_Rub047_fcst(I_90pct_Nov))}
+Define MIF_UARP_RUB044_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_RUB044_Dec_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_RUB044_Dec_Fcst, I_Rub047_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!*************Little Rubicon River below Buck Island Reservoir Dam***********
+!****************************************************************************
+Define MIF_UARP_LRB003_Oct_90pct_fcst1 {select Dry from UARPmif_LRB003 where month = 1}
+Define MIF_UARP_LRB003_Nov_90pct_fcst1 {select Dry from UARPmif_LRB003 where month = 2}
+Define MIF_UARP_LRB003_Dec_90pct_fcst1 {select Dry from UARPmif_LRB003 where month = 3}
+
+Define MIF_UARP_LRB003_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_LRB003_Oct_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_LRB003_Oct_Fcst, I_LRB004_fcst(I_90pct_Oct))}
+Define MIF_UARP_LRB003_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_LRB003_Nov_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_LRB003_Nov_Fcst, I_LRB004_fcst(I_90pct_Nov))}
+Define MIF_UARP_LRB003_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_UARP_LRB003_Dec_90pct_fcst1+(1-Fcst_90pct)*MIF_UARP_LRB003_Dec_Fcst, I_LRB004_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!*******************Gerle Creek below Loon Lake Reservoir Dam****************
+!****************************************************************************
+Define MIF_UARP_GRL010_Oct_90pct_Fcst1 {select Dry from UARPmif_GRL010 where month =1 }
+Define MIF_UARP_GRL010_Nov_90pct_Fcst1 {select Dry from UARPmif_GRL010 where month =2 }
+Define MIF_UARP_GRL010_Dec_90pct_Fcst1 {select Dry from UARPmif_GRL010 where month =3 }
+
+Define MIF_UARP_GRL010_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL010_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL010_Oct_Fcst}
+Define MIF_UARP_GRL010_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL010_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL010_Nov_Fcst}
+Define MIF_UARP_GRL010_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL010_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL010_Dec_Fcst}
+
+!****************************************************************************
+!****************Gerle Creek below Gerle Creek Reservoir Dam*****************
+!****************************************************************************
+Define MIF_UARP_GRL001_Oct_90pct_Fcst1 {select Dry from UARPmif_GRL001 where month =1 }
+Define MIF_UARP_GRL001_Nov_90pct_Fcst1 {select Dry from UARPmif_GRL001 where month =2 }
+Define MIF_UARP_GRL001_Dec_90pct_Fcst1 {select Dry from UARPmif_GRL001 where month =3 }
+
+Define MIF_UARP_GRL001_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL001_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL001_Oct_Fcst}
+Define MIF_UARP_GRL001_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL001_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL001_Nov_Fcst}
+Define MIF_UARP_GRL001_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_GRL001_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_GRL001_Dec_Fcst}
+
+!****************************************************************************
+!***********South Fork Rubicon River below Robbs Peak Reservoir Dam**********
+!****************************************************************************
+Define MIF_UARP_SFR006_Oct_90pct_Fcst1 {select Dry from UARPmif_SFR006 where month =1 }
+Define MIF_UARP_SFR006_Nov_90pct_Fcst1 {select Dry from UARPmif_SFR006 where month =2 }
+Define MIF_UARP_SFR006_Dec_90pct_Fcst1 {select Dry from UARPmif_SFR006 where month =3 }
+
+Define MIF_UARP_SFR006_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFR006_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFR006_Oct_Fcst}
+Define MIF_UARP_SFR006_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFR006_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFR006_Nov_Fcst}
+Define MIF_UARP_SFR006_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFR006_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFR006_Dec_Fcst}
+
+!****************************************************************************
+!***********South Fork Silver Creek below Ice House Reservoir Dam************
+!****************************************************************************
+Define MIF_UARP_SSV013_Oct_90pct_Fcst1 {select Dry from UARPmif_SSV013 where month =1 }
+Define MIF_UARP_SSV013_Nov_90pct_Fcst1 {select Dry from UARPmif_SSV013 where month =2 }
+Define MIF_UARP_SSV013_Dec_90pct_Fcst1 {select Dry from UARPmif_SSV013 where month =3 }
+
+Define MIF_UARP_SSV013_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_SSV013_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SSV013_Oct_Fcst}
+Define MIF_UARP_SSV013_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_SSV013_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SSV013_Nov_Fcst}
+Define MIF_UARP_SSV013_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_SSV013_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SSV013_Dec_Fcst}
+
+!****************************************************************************
+!*****************Silver Creek below Junction Reservoir Dam******************
+!****************************************************************************
+Define MIF_UARP_SLV014_Oct_90pct_Fcst1 {select Dry from UARPmif_SLV014 where month =1 }
+Define MIF_UARP_SLV014_Nov_90pct_Fcst1 {select Dry from UARPmif_SLV014 where month =2 }
+Define MIF_UARP_SLV014_Dec_90pct_Fcst1 {select Dry from UARPmif_SLV014 where month =3 }
+
+Define MIF_UARP_SLV014_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV014_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV014_Oct_Fcst}
+Define MIF_UARP_SLV014_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV014_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV014_Nov_Fcst}
+Define MIF_UARP_SLV014_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV014_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV014_Dec_Fcst}
+
+!****************************************************************************
+!*****************Silver Creek below Camino Reservoir Dam******************
+!****************************************************************************
+Define MIF_UARP_SLV005_Oct_90pct_Fcst1 {select Dry from UARPmif_SLV005 where month =1 }
+Define MIF_UARP_SLV005_Nov_90pct_Fcst1 {select Dry from UARPmif_SLV005 where month =2 }
+Define MIF_UARP_SLV005_Dec_90pct_Fcst1 {select Dry from UARPmif_SLV005 where month =3 }
+
+Define MIF_UARP_SLV005_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV005_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV005_Oct_Fcst}
+Define MIF_UARP_SLV005_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV005_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV005_Nov_Fcst}
+Define MIF_UARP_SLV005_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_SLV005_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SLV005_Dec_Fcst}
+
+!****************************************************************************
+!*******************Brush Creek below Brush Creek Reservoir Dam**************
+!****************************************************************************
+Define MIF_UARP_BSH002_Oct_90pct_fcst {value min(MIF_UARP_BSH002_Oct_Fcst1, I_BSH003_fcst(I_90pct_Oct))}
+Define MIF_UARP_BSH002_Nov_90pct_fcst {value min(MIF_UARP_BSH002_Nov_Fcst1, I_BSH003_fcst(I_90pct_Nov))}
+Define MIF_UARP_BSH002_Dec_90pct_fcst {value min(MIF_UARP_BSH002_Dec_Fcst1, I_BSH003_fcst(I_90pct_Dec))} 
+
+!****************************************************************************
+!**********South Fork American River below Slab Creek Reservoir Dam**********
+!****************************************************************************
+Define MIF_UARP_SFA039_Oct_90pct_Fcst1 {select Dry from UARPmif_SFA039 where month =1 }
+Define MIF_UARP_SFA039_Nov_90pct_Fcst1 {select Dry from UARPmif_SFA039 where month =2 }
+Define MIF_UARP_SFA039_Dec_90pct_Fcst1 {select Dry from UARPmif_SFA039 where month =3 }
+
+Define MIF_UARP_SFA039_Oct_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFA039_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFA039_Oct_Fcst}
+Define MIF_UARP_SFA039_Nov_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFA039_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFA039_Nov_Fcst}
+Define MIF_UARP_SFA039_Dec_90pct_Fcst {value Fcst_90pct*MIF_UARP_SFA039_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_UARP_SFA039_Dec_Fcst}
+
+!****************************************************************************
+!A portion of Georgetown Divide PUD releases from Pilot Creek flow into the Rubicon
+!Pilot Creek in the Section of Stream Downstream of the Pilot Creek Diversion Dam
+!****************************************************************************
+Define MIF_GDPUD_PLC006_Oct_90pct_Fcst1 {value min(4.,max(2.,I_STMPY_fcst(I_90pct_Oct)))}
+Define MIF_GDPUD_PLC006_Nov_90pct_Fcst1 {value min(4.,max(2.,I_STMPY_fcst(I_90pct_Nov)))}
+Define MIF_GDPUD_PLC006_Dec_90pct_Fcst1 {value min(4.,max(2.,I_STMPY_fcst(I_90pct_Dec)))}
+
+Define MIF_GDPUD_PLC006_Oct_90pct_Fcst {value Fcst_90pct*2. +(1-Fcst_90pct)*MIF_GDPUD_PLC006_Oct_90pct_Fcst1 }
+Define MIF_GDPUD_PLC006_Nov_90pct_Fcst {value Fcst_90pct*2. +(1-Fcst_90pct)*MIF_GDPUD_PLC006_Nov_90pct_Fcst1  }
+Define MIF_GDPUD_PLC006_Dec_90pct_Fcst {value Fcst_90pct*2. +(1-Fcst_90pct)*MIF_GDPUD_PLC006_Dec_90pct_Fcst1  }
+
+!-----------------------------------------
+!---------EID Project 184 Operations------
+!-----------------------------------------
+!****************************************************************************
+!**********************Pyramid Creek below Lake Aloha Dam********************
+!****************************************************************************
+Define MIF_EID_PYR001_Oct_90pct_Fcst1 {select Dry from MIF_EID where month = 1, identifier = 2 }
+Define MIF_EID_PYR001_Nov_90pct_Fcst1 {select Dry from MIF_EID where month = 2, identifier = 2 }
+Define MIF_EID_PYR001_Dec_90pct_Fcst1 {select Dry from MIF_EID where month = 3, identifier = 2 }
+
+Define MIF_EID_PYR001_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_EID_PYR001_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_PYR001_Oct_Fcst, I_ALOHA_fcst(I_90pct_Oct))}
+Define MIF_EID_PYR001_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_EID_PYR001_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_PYR001_Nov_Fcst, I_ALOHA_fcst(I_90pct_Nov))}
+Define MIF_EID_PYR001_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_EID_PYR001_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_PYR001_Dec_Fcst, I_ALOHA_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!**********************Caples Creek below Caples Lake Dam********************
+!****************************************************************************
+Define MIF_EID_CPC008_Oct_90pct_Fcst1 {select Dry from MIF_EID where month = 1, identifier = 3 }
+Define MIF_EID_CPC008_Nov_90pct_Fcst1 {select Dry from MIF_EID where month = 2, identifier = 3 }
+Define MIF_EID_CPC008_Dec_90pct_Fcst1 {select Dry from MIF_EID where month = 3, identifier = 3 }
+
+Define MIF_EID_CPC008_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_EID_CPC008_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_CPC008_Oct_Fcst, I_CAPLS_fcst(I_90pct_Oct))}
+Define MIF_EID_CPC008_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_EID_CPC008_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_CPC008_Nov_Fcst, I_CAPLS_fcst(I_90pct_Nov))}
+Define MIF_EID_CPC008_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_EID_CPC008_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_CPC008_Dec_Fcst, I_CAPLS_fcst(I_90pct_Dec))}
+
+!****************************************************************************
+!***************Silver Fork American below Oyster Creek **************
+!****************************************************************************
+Define MIF_EID_SLF014_Oct_90pct_Fcst1 {select Dry from MIF_EID where month =1, identifier = 4 }
+Define MIF_EID_SLF014_Nov_90pct_Fcst1 {select Dry from MIF_EID where month =2, identifier = 4 }
+Define MIF_EID_SLF014_Dec_90pct_Fcst1 {select Dry from MIF_EID where month =3, identifier = 4 }
+
+Define MIF_EID_SLF014_Oct_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF014_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF014_Oct_Fcst}
+Define MIF_EID_SLF014_Nov_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF014_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF014_Nov_Fcst}
+Define MIF_EID_SLF014_Dec_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF014_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF014_Dec_Fcst}
+
+!****************************************************************************
+!*************Silver Fork American below Sherman Diversion Dam***************
+!****************************************************************************
+Define MIF_EID_SLF009_Oct_90pct_Fcst1 {select Dry from MIF_EID where month =1, identifier = 8 }
+Define MIF_EID_SLF009_Nov_90pct_Fcst1 {select Dry from MIF_EID where month =2, identifier = 8 }
+Define MIF_EID_SLF009_Dec_90pct_Fcst1 {select Dry from MIF_EID where month =3, identifier = 8 }
+
+Define MIF_EID_SLF009_Oct_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF009_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF009_Oct_Fcst}
+Define MIF_EID_SLF009_Nov_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF009_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF009_Nov_Fcst}
+Define MIF_EID_SLF009_Dec_90pct_Fcst {value Fcst_90pct*MIF_EID_SLF009_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SLF009_Dec_Fcst}
+
+!****************************************************************************
+!*****************South Fork American River below Forni Creek****************
+!****************************************************************************
+Define MIF_EID_SFA076_Oct_90pct_Fcst1 {select Dry from MIF_EID where month =1, identifier = 7 }
+Define MIF_EID_SFA076_Nov_90pct_Fcst1 {select Dry from MIF_EID where month =2, identifier = 7 }
+Define MIF_EID_SFA076_Dec_90pct_Fcst1 {select Dry from MIF_EID where month =3, identifier = 7 }
+
+Define MIF_EID_SFA076_Oct_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA076_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA076_Oct_Fcst}
+Define MIF_EID_SFA076_Nov_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA076_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA076_Nov_Fcst}
+Define MIF_EID_SFA076_Dec_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA076_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA076_Dec_Fcst}
+
+!****************************************************************************
+!*************South Fork American River below Kyburz Diversion Dam***********
+!****************************************************************************
+Define MIF_EID_SFA065_Oct_90pct_Fcst1 {select Dry from MIF_EID where month =1, identifier = 5 }
+Define MIF_EID_SFA065_Nov_90pct_Fcst1 {select Dry from MIF_EID where month =2, identifier = 5 }
+Define MIF_EID_SFA065_Dec_90pct_Fcst1 {select Dry from MIF_EID where month =3, identifier = 5 }
+
+Define MIF_EID_SFA065_Oct_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA065_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA065_Oct_Fcst}
+Define MIF_EID_SFA065_Nov_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA065_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA065_Nov_Fcst}
+Define MIF_EID_SFA065_Dec_90pct_Fcst {value Fcst_90pct*MIF_EID_SFA065_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_SFA065_Dec_Fcst}
+
+!****************************************************************************
+!******************************Alder Creek***********************************
+!****************************************************************************
+Define MIF_EID_ALD001_Oct_90pct_Fcst1 {select Dry from MIF_EID where month =1, identifier = 6 }
+Define MIF_EID_ALD001_Nov_90pct_Fcst1 {select Dry from MIF_EID where month =2, identifier = 6 }
+Define MIF_EID_ALD001_Dec_90pct_Fcst1 {select Dry from MIF_EID where month =3, identifier = 6 }
+
+Define MIF_EID_ALD001_Oct_90pct_Fcst {value min(Fcst_90pct*MIF_EID_ALD001_Oct_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_ALD001_Oct_Fcst, I_ALD002_fcst(I_90pct_Oct))}
+Define MIF_EID_ALD001_Nov_90pct_Fcst {value min(Fcst_90pct*MIF_EID_ALD001_Nov_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_ALD001_Nov_Fcst, I_ALD002_fcst(I_90pct_Nov))}
+Define MIF_EID_ALD001_Dec_90pct_Fcst {value min(Fcst_90pct*MIF_EID_ALD001_Dec_90pct_Fcst1+(1-Fcst_90pct)*MIF_EID_ALD001_Dec_Fcst, I_ALD002_fcst(I_90pct_Dec))}
+
+!*********************************************************************************
+!***************Aggregate accretions in case of storage operations****************
+!*********************************************************************************
+Define MFP_Acc_Oct_90pct_Fcst 	{value I_MFA036_fcst(I_90pct_Oct) + I_MFA025_fcst(I_90pct_Oct) + I_NMA003_fcst(I_90pct_Oct) + I_MFA023_fcst(I_90pct_Oct) + I_MFA001_fcst(I_90pct_Oct) + I_RUB002_fcst(I_90pct_Oct) + I_LNG012_fcst(I_90pct_Oct) + I_NFA022_fcst(I_90pct_Oct) + I_NFA054_fcst(I_90pct_Oct)}
+Define MFP_Acc_Nov_90pct_Fcst 	{value I_MFA036_fcst(I_90pct_Nov) + I_MFA025_fcst(I_90pct_Nov) + I_NMA003_fcst(I_90pct_Nov) + I_MFA023_fcst(I_90pct_Nov) + I_MFA001_fcst(I_90pct_Nov) + I_RUB002_fcst(I_90pct_Nov) + I_LNG012_fcst(I_90pct_Nov) + I_NFA022_fcst(I_90pct_Nov) + I_NFA054_fcst(I_90pct_Nov)}
+Define MFP_Acc_Dec_90pct_Fcst 	{value I_MFA036_fcst(I_90pct_Dec) + I_MFA025_fcst(I_90pct_Dec) + I_NMA003_fcst(I_90pct_Dec) + I_MFA023_fcst(I_90pct_Dec) + I_MFA001_fcst(I_90pct_Dec) + I_RUB002_fcst(I_90pct_Dec) + I_LNG012_fcst(I_90pct_Dec) + I_NFA022_fcst(I_90pct_Dec) + I_NFA054_fcst(I_90pct_Dec)}
+
+define UARP_Acc_Oct_90pct_Fcst	{value I_SLF009_fcst(I_90pct_Oct) + I_SFA076_fcst(I_90pct_Oct) + I_SLV015_fcst(I_90pct_Oct) + I_SLV006_fcst(I_90pct_Oct) + I_BSH003_fcst(I_90pct_Oct) + I_SFA040_fcst(I_90pct_Oct) + I_RCK001_fcst(I_90pct_Oct) + I_SFA030_fcst(I_90pct_Oct) + I_WBR001_fcst(I_90pct_Oct)}
+define UARP_Acc_Nov_90pct_Fcst	{value I_SLF009_fcst(I_90pct_Nov) + I_SFA076_fcst(I_90pct_Nov) + I_SLV015_fcst(I_90pct_Nov) + I_SLV006_fcst(I_90pct_Nov) + I_BSH003_fcst(I_90pct_Nov) + I_SFA040_fcst(I_90pct_Nov) + I_RCK001_fcst(I_90pct_Nov) + I_SFA030_fcst(I_90pct_Nov) + I_WBR001_fcst(I_90pct_Nov)}
+define UARP_Acc_Dec_90pct_Fcst	{value I_SLF009_fcst(I_90pct_Dec) + I_SFA076_fcst(I_90pct_Dec) + I_SLV015_fcst(I_90pct_Dec) + I_SLV006_fcst(I_90pct_Dec) + I_BSH003_fcst(I_90pct_Dec) + I_SFA040_fcst(I_90pct_Dec) + I_RCK001_fcst(I_90pct_Dec) + I_SFA030_fcst(I_90pct_Dec) + I_WBR001_fcst(I_90pct_Dec)}
+
+!*********************************************************************************
+!************Aggregate minimum flows and local flows from upstream****************
+!*********************************************************************************
+
+!Compute forecasted minimum contribution from Rubicon River above Long Canyon Creek
+Define MIF_RUB005_Oct_90pct_Fcst {value MIF_MFP_RUB031_Oct_90pct_Fcst + MIF_UARP_SFR006_Oct_90pct_Fcst + MIF_UARP_GRL001_Oct_90pct_Fcst + MIF_GDPUD_PLC006_Oct_90pct_Fcst }
+Define MIF_RUB005_Nov_90pct_Fcst {value MIF_MFP_RUB031_Nov_90pct_Fcst + MIF_UARP_SFR006_Nov_90pct_Fcst + MIF_UARP_GRL001_Nov_90pct_Fcst + MIF_GDPUD_PLC006_Nov_90pct_Fcst }
+Define MIF_RUB005_Dec_90pct_Fcst {value MIF_MFP_RUB031_Dec_90pct_Fcst + MIF_UARP_SFR006_Dec_90pct_Fcst + MIF_UARP_GRL001_Dec_90pct_Fcst + MIF_GDPUD_PLC006_Dec_90pct_Fcst }
+
+!Compute forecasted minimum contribution from Long Canyon Creek
+Define MIF_LNG012_Oct_90pct_Fcst {value MIF_MFP_NLC002_Oct_90pct_Fcst + MIF_MFP_SLC002_Oct_90pct_Fcst + I_LNG012_fcst(I_90pct_Oct) }
+Define MIF_LNG012_Nov_90pct_Fcst {value MIF_MFP_NLC002_Nov_90pct_Fcst + MIF_MFP_SLC002_Nov_90pct_Fcst + I_LNG012_fcst(I_90pct_Nov) }
+Define MIF_LNG012_Dec_90pct_Fcst {value MIF_MFP_NLC002_Dec_90pct_Fcst + MIF_MFP_SLC002_Dec_90pct_Fcst + I_LNG012_fcst(I_90pct_Dec) }
+
+!Compute minimum flow on Middle Fork above confluence with Rubicon.  
+Define MIF_MFP_CUM_MFA025_Oct_90pct_Fcst {value max(MIF_MFP_MFA025_Oct_Fcst, MIF_MFP_DCC008_Oct_90pct_Fcst + MIF_MFP_MFA047_Oct_90pct_Fcst + I_MFA036_fcst(I_90pct_Oct))
+												+ MIF_RUB005_Oct_90pct_Fcst + MIF_LNG012_Oct_90pct_Fcst + I_RUB002_fcst(I_90pct_Oct) + I_MFA025_fcst(I_90pct_Oct)}					
+Define MIF_MFP_CUM_MFA025_Nov_90pct_Fcst {value max(MIF_MFP_MFA025_Nov_Fcst, MIF_MFP_DCC008_Nov_90pct_Fcst + MIF_MFP_MFA047_Nov_90pct_Fcst + I_MFA036_fcst(I_90pct_Nov)) 
+												+ MIF_RUB005_Nov_90pct_Fcst + MIF_LNG012_Nov_90pct_Fcst + I_RUB002_fcst(I_90pct_Nov) + I_MFA025_fcst(I_90pct_Nov)}					
+Define MIF_MFP_CUM_MFA025_Dec_90pct_Fcst {value max(MIF_MFP_MFA025_Dec_Fcst, MIF_MFP_DCC008_Dec_90pct_Fcst + MIF_MFP_MFA047_Dec_90pct_Fcst + I_MFA036_fcst(I_90pct_Dec)) 
+												+ MIF_RUB005_Dec_90pct_Fcst + MIF_LNG012_Dec_90pct_Fcst + I_RUB002_fcst(I_90pct_Dec) + I_MFA025_fcst(I_90pct_Dec)}					
+
+Define MIF_MFP_CUM_MFA025_Oct_90pct_Fcst_DV {alias MIF_MFP_CUM_MFA025_Oct_90pct_Fcst kind 'debug' units 'cfs'}
+Define MIF_MFP_CUM_MFA025_Nov_90pct_Fcst_DV {alias MIF_MFP_CUM_MFA025_Nov_90pct_Fcst kind 'debug' units 'cfs'}
+Define MIF_MFP_CUM_MFA025_Dec_90pct_Fcst_DV {alias MIF_MFP_CUM_MFA025_Dec_90pct_Fcst kind 'debug' units 'cfs'}
+
+!Compute minimum flow on Middle Fork near Foresthill
+Define MIF_MFP_MFA001_Oct_90pct_Fcst {value max(MIF_MFP_MFA023_Oct_90pct_Fcst, MIF_MFP_CUM_MFA025_Oct_90pct_Fcst + I_NMA003_fcst(I_90pct_Oct) + I_MFA023_fcst(I_90pct_Oct)) + I_MFA001_fcst(I_90pct_Oct) }
+Define MIF_MFP_MFA001_Nov_90pct_Fcst {value max(MIF_MFP_MFA023_Nov_90pct_Fcst, MIF_MFP_CUM_MFA025_Nov_90pct_Fcst + I_NMA003_fcst(I_90pct_Nov) + I_MFA023_fcst(I_90pct_Nov)) + I_MFA001_fcst(I_90pct_Nov) }
+Define MIF_MFP_MFA001_Dec_90pct_Fcst {value max(MIF_MFP_MFA023_Dec_90pct_Fcst, MIF_MFP_CUM_MFA025_Dec_90pct_Fcst + I_NMA003_fcst(I_90pct_Dec) + I_MFA023_fcst(I_90pct_Dec)) + I_MFA001_fcst(I_90pct_Dec) }
+
+!Determine flow below American River Pumpstation based on accumulated minimum flows and local flows upstream,
+!maximum PCWA Diversion from ARPS of 200 cfs_taf and minimum flow requirement downstream from ARPS (75 cfs)
+Define MIF_MFP_NFA016_Oct_90pct_Fcst {value max(75., MIF_MFP_MFA001_Oct_90pct_Fcst + I_NFA022_fcst(I_90pct_Oct) - PCWA_Div_Oct_FCST)}
+Define MIF_MFP_NFA016_Nov_90pct_Fcst {value max(75., MIF_MFP_MFA001_Nov_90pct_Fcst + I_NFA022_fcst(I_90pct_Nov) - PCWA_Div_Nov_FCST)}
+Define MIF_MFP_NFA016_Dec_90pct_Fcst {value max(75., MIF_MFP_MFA001_Dec_90pct_Fcst + I_NFA022_fcst(I_90pct_Dec) - PCWA_Div_Dec_FCST)}
+
+Define MIF_MFP_NFA016_Oct_90pct_Fcst_DV {alias MIF_MFP_NFA016_Oct_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MIF_MFP_NFA016_Nov_90pct_Fcst_DV {alias MIF_MFP_NFA016_Nov_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MIF_MFP_NFA016_Dec_90pct_Fcst_DV {alias MIF_MFP_NFA016_Dec_90pct_Fcst kind 'Debug' units 'cfs'}
+
+!Compute forecasted minimum contribution from South Fork above Kyburz
+define MIF_EID_SFA067_Oct_90pct_Fcst {value max(MIF_EID_SLF009_Oct_90pct_Fcst, MIF_EID_SLF014_Oct_90pct_Fcst + MIF_EID_CPC008_Oct_90pct_Fcst + I_SLF009_fcst(I_90pct_Oct)) 
+										+ max(MIF_EID_SFA076_Oct_90pct_Fcst, MIF_EID_PYR001_Oct_90pct_Fcst + I_SFA076_fcst(I_90pct_Oct))}	
+define MIF_EID_SFA067_Nov_90pct_Fcst {value max(MIF_EID_SLF009_Nov_90pct_Fcst, MIF_EID_SLF014_Nov_90pct_Fcst + MIF_EID_CPC008_Nov_90pct_Fcst + I_SLF009_fcst(I_90pct_Nov)) 
+										+ max(MIF_EID_SFA076_Nov_90pct_Fcst, MIF_EID_PYR001_Nov_90pct_Fcst + I_SFA076_fcst(I_90pct_Nov))}	
+define MIF_EID_SFA067_Dec_90pct_Fcst {value max(MIF_EID_SLF009_Dec_90pct_Fcst, MIF_EID_SLF014_Dec_90pct_Fcst + MIF_EID_CPC008_Dec_90pct_Fcst + I_SLF009_fcst(I_90pct_Dec)) 
+										+ max(MIF_EID_SFA076_Dec_90pct_Fcst, MIF_EID_PYR001_Dec_90pct_Fcst + I_SFA076_fcst(I_90pct_Dec))}	
+
+!Compute forecasted minimum contribution from South Fork above Silver Creek
+define MIF_EID_SFA059_Oct_90pct_Fcst {value min(MIF_EID_SFA065_Oct_90pct_Fcst, MIF_EID_SFA067_Oct_90pct_Fcst + I_SFA066_fcst(I_90pct_Oct)) + MIF_EID_ALD001_Oct_90pct_Fcst + I_PLM001_fcst(I_90pct_Oct)}
+define MIF_EID_SFA059_Nov_90pct_Fcst {value min(MIF_EID_SFA065_Nov_90pct_Fcst, MIF_EID_SFA067_Nov_90pct_Fcst + I_SFA066_fcst(I_90pct_Nov)) + MIF_EID_ALD001_Nov_90pct_Fcst + I_PLM001_fcst(I_90pct_Nov)}
+define MIF_EID_SFA059_Dec_90pct_Fcst {value min(MIF_EID_SFA065_Dec_90pct_Fcst, MIF_EID_SFA067_Dec_90pct_Fcst + I_SFA066_fcst(I_90pct_Dec)) + MIF_EID_ALD001_Dec_90pct_Fcst + I_PLM001_fcst(I_90pct_Dec)}
+
+!Compute forecasted flow on South Fork near Camino
+define MIF_SFA039_Oct_90pct_Fcst {value min(MIF_UARP_SFA039_Oct_90pct_Fcst, MIF_EID_SFA059_Oct_90pct_Fcst + MIF_UARP_SLV005_Oct_90pct_Fcst + MIF_UARP_BSH002_Oct_90pct_Fcst + I_SFA040_fcst(I_90pct_Oct))}
+define MIF_SFA039_Nov_90pct_Fcst {value min(MIF_UARP_SFA039_Nov_90pct_Fcst, MIF_EID_SFA059_Nov_90pct_Fcst + MIF_UARP_SLV005_Nov_90pct_Fcst + MIF_UARP_BSH002_Nov_90pct_Fcst + I_SFA040_fcst(I_90pct_Nov))}
+define MIF_SFA039_Dec_90pct_Fcst {value min(MIF_UARP_SFA039_Dec_90pct_Fcst, MIF_EID_SFA059_Dec_90pct_Fcst + MIF_UARP_SLV005_Dec_90pct_Fcst + MIF_UARP_BSH002_Dec_90pct_Fcst + I_SFA040_fcst(I_90pct_Dec))}
+
+define MIF_SFA039_Oct_90pct_Fcst_DV {alias MIF_SFA039_Oct_90pct_Fcst kind 'debug' units 'cfs'}
+define MIF_SFA039_Nov_90pct_Fcst_DV {alias MIF_SFA039_Nov_90pct_Fcst kind 'debug' units 'cfs'}
+define MIF_SFA039_Dec_90pct_Fcst_DV {alias MIF_SFA039_Dec_90pct_Fcst kind 'debug' units 'cfs'}
+
+!Computed forecasted flow on South Fork above Folsom Reservoir
+Define MIF_SFA011_Oct_90pct_Fcst {value MIF_SFA039_Oct_90pct_Fcst + I_RCK001_fcst(I_90pct_Oct) + I_SFA030_fcst(I_90pct_Oct) + I_WBR001_fcst(I_90pct_Oct) }
+Define MIF_SFA011_Nov_90pct_Fcst {value MIF_SFA039_Nov_90pct_Fcst + I_RCK001_fcst(I_90pct_Nov) + I_SFA030_fcst(I_90pct_Nov) + I_WBR001_fcst(I_90pct_Nov) }
+Define MIF_SFA011_Dec_90pct_Fcst {value MIF_SFA039_Dec_90pct_Fcst + I_RCK001_fcst(I_90pct_Dec) + I_SFA030_fcst(I_90pct_Dec) + I_WBR001_fcst(I_90pct_Dec) }
+
+Define MIF_SFA011_Oct_90pct_Fcst_DV {alias MIF_SFA011_Oct_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MIF_SFA011_Nov_90pct_Fcst_DV {alias MIF_SFA011_Nov_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MIF_SFA011_Dec_90pct_Fcst_DV {alias MIF_SFA011_Dec_90pct_Fcst kind 'Debug' units 'cfs'}
+
+!*********************************************************************************
+!****************Aggregate storage releases and accretions************************
+!*********************************************************************************
+!Assume storage releases are made evenly across the November and December
+!olivia update with similar structure as Upper AR NF
+Define MFP_Stor_NFA016_Oct_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep	{condition month >= 9 	value max(75., (MFP_Res_Release_Fcst/(12 - month +3))*taf_cfs(Oct + 12 -month) + MFP_Acc_Oct_90pct_Fcst - PCWA_Div_Oct_FCST*taf_cfs(Oct +12-month))}
+	case Oct 	{condition month == 1 	value max(75., (MFP_Res_Release_Fcst/3.)*taf_cfs + MFP_Acc_Oct_90pct_Fcst - PCWA_Div_Oct_FCST*taf_cfs)}
+	case other	{condition always	    value 0.}
+}
+Define MFP_Stor_NFA016_Nov_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep	{condition month >= 9 	value max(75., (MFP_Res_Release_Fcst/(12-month +3))*taf_cfs(Nov+12-month) + MFP_Acc_Nov_90pct_Fcst - PCWA_Div_Nov_FCST*taf_cfs(Nov+12-month))}
+	case Oct	{condition month == 1	value max(75., (MFP_Res_Release_Fcst/(Nov-month +1))*taf_cfs(Nov-month) 	+ MFP_Acc_Nov_90pct_Fcst - PCWA_Div_Nov_FCST*taf_cfs(Nov-month))}
+	case Nov 	{condition month == 2		value max(75., (MFP_Res_Release_Fcst/2.*taf_cfs 							+ MFP_Acc_Nov_90pct_Fcst - PCWA_Div_Nov_FCST*taf_cfs))}
+	case other	{condition always	    value 0.}
+}
+Define MFP_Stor_NFA016_Dec_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep	{condition month >= 9 	value max(75., (MFP_Res_Release_Fcst/(12-month +3))*taf_cfs(Dec+12-month) + MFP_Acc_Dec_90pct_Fcst - PCWA_Div_Dec_FCST*taf_cfs(Dec+12-month))}
+	case OctNov	{condition month <= 2	value max(75., (MFP_Res_Release_Fcst/(Dec-month +1))*taf_cfs(Dec-month) 	+ MFP_Acc_Dec_90pct_Fcst - PCWA_Div_Dec_FCST*taf_cfs(Dec-month))}
+	case Dec 	{condition month == 3	value max(75., (MFP_Res_Release_Fcst*taf_cfs								+ MFP_Acc_Dec_90pct_Fcst - PCWA_Div_Dec_FCST*taf_cfs))}
+	case other	{condition always	    value 0.}
+}
+
+Define MFP_Stor_NFA016_Oct_90pct_Fcst_DV {alias MFP_Stor_NFA016_Oct_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MFP_Stor_NFA016_Nov_90pct_Fcst_DV {alias MFP_Stor_NFA016_Nov_90pct_Fcst kind 'Debug' units 'cfs'}
+Define MFP_Stor_NFA016_Dec_90pct_Fcst_DV {alias MFP_Stor_NFA016_Dec_90pct_Fcst kind 'Debug' units 'cfs'}
+
+Define UARP_Stor_SFA011_Oct_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep {condition month >=9	value (UARP_Res_Release_Fcst/(12-month +3))*taf_cfs(Oct+12-month) 	+ UARP_Acc_Oct_90pct_Fcst}
+	case Oct	{condition month == 1 	value (UARP_Res_Release_Fcst/3)*taf_cfs + UARP_Acc_Oct_90pct_Fcst}
+	case other	{condition always	    value 0.}
+}
+Define UARP_Stor_SFA011_Nov_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep {condition month >=9	value (UARP_Res_Release_Fcst/(12-month +3))*taf_cfs(Nov+12-month) 	+ UARP_Acc_Nov_90pct_Fcst}
+	case Oct	{condition month ==1	value (UARP_Res_Release_Fcst/(Nov-Month +1))*taf_cfs(Nov-month) 	+ UARP_Acc_Nov_90pct_Fcst}
+	case Nov	{condition month ==2	value (UARP_Res_Release_Fcst/2)*taf_cfs 							+ UARP_Acc_Nov_90pct_Fcst}
+	case other	{condition always	    value 0.}
+}
+Define UARP_Stor_SFA011_Dec_90pct_Fcst {
+	case LastYr	{condition wateryear == EndWY	value 0. }
+	case JunSep {condition month >=9	value (UARP_Res_Release_Fcst/(12-month +3))*taf_cfs(Dec+12-month)   + UARP_Acc_Dec_90pct_Fcst}
+	case OctNov	{condition month <=2	value (UARP_Res_Release_Fcst/(Dec-Month +1))*taf_cfs(Dec-month) 	+ UARP_Acc_Dec_90pct_Fcst}
+	case Dec	{condition month ==3	value (UARP_Res_Release_Fcst)*taf_cfs 								+ UARP_Acc_Dec_90pct_Fcst}
+	case other	{condition always	    value 0.}
+}
+
+Define UARP_Stor_SFA011_Oct_90pct_Fcst_DV {alias UARP_Stor_SFA011_Oct_90pct_Fcst kind 'Debug' units 'cfs'}
+Define UARP_Stor_SFA011_Nov_90pct_Fcst_DV {alias UARP_Stor_SFA011_Nov_90pct_Fcst kind 'Debug' units 'cfs'}
+Define UARP_Stor_SFA011_Dec_90pct_Fcst_DV {alias UARP_Stor_SFA011_Dec_90pct_Fcst kind 'Debug' units 'cfs'}
+
+!**************************************************************************************
+!***Accumulated 90% exceedance October-December inflow forecast to Folsom Reservoir***
+!**************************************************************************************
+Define FOL_Oct_90pct_Fcst {value (max(MFP_Stor_NFA016_Oct_90pct_Fcst, MIF_MFP_NFA016_Oct_90pct_Fcst) + max(MIF_SFA011_Oct_90pct_Fcst, UARP_Stor_SFA011_Oct_90pct_Fcst) + I_FOLSM_fcst1(I_90pct_Oct) + CT_FAIROAKS_fcst1(I_90pct_Oct))*cfs_taf(Oct+12-month) }
+Define FOL_Nov_90pct_Fcst {value (max(MFP_Stor_NFA016_Nov_90pct_Fcst, MIF_MFP_NFA016_Nov_90pct_Fcst) + max(MIF_SFA011_Nov_90pct_Fcst, UARP_Stor_SFA011_Nov_90pct_Fcst) + I_FOLSM_fcst1(I_90pct_Nov) + CT_FAIROAKS_fcst1(I_90pct_Nov))*cfs_taf(Nov+12-month) }
+Define FOL_Dec_90pct_Fcst {value (max(MFP_Stor_NFA016_Dec_90pct_Fcst, MIF_MFP_NFA016_Dec_90pct_Fcst) + max(MIF_SFA011_Dec_90pct_Fcst, UARP_Stor_SFA011_Dec_90pct_Fcst) + I_FOLSM_fcst1(I_90pct_Dec) + CT_FAIROAKS_fcst1(I_90pct_Dec))*cfs_taf(Dec+12-month) }
+
+Define FOL_Oct_90pct_Fcst_DV {alias FOL_Oct_90pct_Fcst kind 'Forecast' units 'taf'}
+Define FOL_Nov_90pct_Fcst_DV {alias FOL_Nov_90pct_Fcst kind 'Forecast' units 'taf'}
+Define FOL_Dec_90pct_Fcst_DV {alias FOL_Dec_90pct_Fcst kind 'Forecast' units 'taf'}

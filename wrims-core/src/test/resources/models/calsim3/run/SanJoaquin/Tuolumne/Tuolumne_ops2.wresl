@@ -1,0 +1,133 @@
+! Tuolumne_dems.wresl
+! Deliveries and operations for Tuolumne River demands.
+
+/*
+This file determines surface water diversions from the Tuolumne River.  
+Main water users incorporated in this file are Modesto Irrigation District 
+and Turlock Irrigation District.
+
+Water supply availability based on New Don Pedro storage and forecasted
+inflows, and considering minimum flow requirement needs, is used to determine 
+allocations to irrigation district deliveries.  Diversions are made in 
+concert with minimum groundwater pumping assumptions.  
+
+Revised by: R. Field, USBR, 09/25/03
+Purpose: Indclude addtional M&I, groundwater and M&I return flow arcs.
+Revised by: T. Crawford, USBR, 03/10/03
+Purpose: Review and comment code
+Revised by: C. Olson for Calsim-III 4/22/07
+*/
+
+!############################################################################
+
+! Retrieve FERC min flows from predefined timeseries (excludes Apr-May pulse)
+define FERCBASE {timeseries kind 'flow-min-required' units 'CFS' }
+
+! In April, forecast Apr-July inflow to New Don Pedro Reservoir
+define TuolAprJulForc_1 {
+    case April {
+        condition month==apr
+        sum(i=0,3,1) I_PEDRO(i)*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value 0. }
+    }
+
+define TuolAprJulForc {
+    case April {
+        condition month==apr
+        value TuolAprJulForc_1 + S_PEDRO(-1) }
+    case otherwise {
+        condition always
+        value 0. }
+    }
+
+/*
+Surface water allocation (as a percent of demand); 
+based on New Don Pedro water supply - a function of a table lookup
+ForInf      NDP_WS
+0           .50
+1400        .50
+1600        .85
+2000        .85
+2001        1.0
+9999        1.0
+*/
+! Decision variable for New Don Pedro Water Supply
+define NDP_WSdv {std kind 'WATER-SUPPLY' units 'none'}
+define NDP_WS {
+    case firstyear {
+        condition wateryear == BgnWY .and. month<=mar
+        value 1. }
+    case Normal {
+        condition month==apr
+        select NDP_WS from TuolAllocNormal given ForInf=TuolAprJulForc use linear }
+    case otherwise {
+        condition always
+        value NDP_WSdv(-1) }
+}
+! Set New Don Pedro water supply equal to the decision variable
+goal setNDP_WSdv {NDP_WSdv = NDP_WS}
+
+
+/*
+*******************************Turlock ID************************************
+Surface water diversions from Turlock Lake to Turlock ID is 0 if demand is 0;
+otherwise the surface water delivery is limited to a % of the applied water demand 
+*/
+define TotLossFactor_62_NA3 {value EVF_TRLCK_62_NA3 + DPF_TRLCK_62_NA3 + LFF_TRLCK_62_NA3 + OSF_TRLCK_62_NA3}
+goal limitD_TRLCK_62_NA3  { D_TRLCK_62_NA3 < max(0.0, 
+                                                 NDP_WS*(AWO_62_NA3+AWR_62_NA3)*(1.0+TotLossFactor_62_NA3)
+                                                 - GPmin_62_NA3_D - GPmin_62_NA3_P) }
+define limit_TRLCK_A {alias max(0.0,NDP_WS*(AWO_62_NA3+AWR_62_NA3)*(1.0+TotLossFactor_62_NA3)
+                                    -GPmin_62_NA3_D-GPmin_62_NA3_P) kind 'DELIVERY-LIMIT' units 'CFS'}
+                                    
+                                    
+/*
+*******************************Modesto ID************************************
+Surface water diversions from Modesto Lake to Modesto ID is 0 if AW is 0;
+otherwise the surface water delivery is limited to a percentage (based on NDP supply)
+of the applied water plus operations spills plus diversion losses, minus that
+which has been otherwise satisfied by minimum ground water pumping.  Surface
+sources from the Stanislaus side have higher weights and will be used before
+Tuolumne surface water deliveries.
+*/
+
+define DFo_61_NA2  {value ((1 + RPF_61_NA2 )*(1 - GPmin_61_NA2_D - GPmin_61_NA2_P)- RUFo_61_NA2)/(1 - EVF_WDWRD_61_NA2  - DPF_WDWRD_61_NA2  - LFF_WDWRD_61_NA2  - OSF_WDWRD_61_PA2)}
+define DFr_61_NA2  {value ((1 + RPF_61_NA2 )*(1 - GPmin_61_NA2_D - GPmin_61_NA2_P)- RUFr_61_NA2)/(1 - EVF_WDWRD_61_NA2  - DPF_WDWRD_61_NA2  - LFF_WDWRD_61_NA2  - OSF_WDWRD_61_PA2)}
+
+define annSWDEM_MID_dv       {std kind 'annual-demand' units 'taf'}   
+define annSWDEM_MID {
+    case oct {
+        condition month == oct
+        sum(i=0,11,1) AWo_61_NA2(i)*DFo_61_NA2*cfs_taf(i) + AWr_61_NA2(i)*DFr_61_NA2*cfs_taf(i) 
+        }
+    case otherwise {
+        condition   always
+        value annSWDEMMID_dv (-1) }
+        }     
+goal set_annSWDem_MID {annSWDEMMID_dv  = annSWDEMMID}
+
+!goal limitD_MDSTO_61_NA2 { D_MDSTO_61_NA2 < max( 0.0, 
+!                                                 NDP_WS*(AWO_61_NA2+AWR_61_NA2)*(1.0+TotLossFactor_61_NA2)
+!                                                 ! - D_RFS61B_61_NA2 ! Returns from OID to 61_NA2 -- TODO -- Can't include DV in max()
+!                                                 - GPmin_61_NA2_D - GPmin_61_NA2_P ) }
+
+define Dem_SWDEMMID        {value  AWo_61_NA2*DFo_61_NA2*cfs_taf + AWr_61_NA2*DFr_61_NA2*cfs_taf}
+goal limitD_MDSTO_61_NA2 {D_MDSTO_61_NA2 < NDP_WS*(Dem_SWDEMMID/annSWDEMMID)*taf_cfs }
+define DLT_MDSTO_61_NA2 {alias NDP_WS*(Dem_SWDEMMID/annSWDEMMID)*taf_cfs   kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!Define monthly annual river demand for Modesto ID
+
+define limit_MDSTO_A {alias max(0.0,NDP_WS*(AWO_61_NA2+AWR_61_NA2)*(1.0+TotLossFactor_61_NA2)
+                                    !-D_RFS61B_61_NA2 ! Returns from OID to 61_NA2 
+                                    -GPmin_61_NA2_D-GPmin_61_NA2_P) kind 'DELIVERY-LIMIT' units 'CFS'}
+
+/*
+Other Tuolumne Basin Deliveries - controlled by code in constraints-Deliveries.wresl
+62_NA1 - Non-District East Demands - gw only
+62_NA4 - Riparian demand - limits set up in system files
+61_NA3 - Riparian demand - limits set up in system files
+61_NU1 - delivery from Modesto Lake is constrained by limits set up in system files
+*/
+

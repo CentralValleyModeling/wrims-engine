@@ -1,0 +1,97 @@
+!SMSCG_Operation_NOD.wresl
+
+!DCR turned off D1641 SMSCG re-op representation in CalSim.
+!Here it is turned back on and re-op is dependent on X2 location.
+
+define(fm) SMSCG_OpFlag_EX_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_EX_Count_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_EX {
+	case October {
+		condition	mv($m) == Oct .and. X2_LAST($m) > 88
+		value		1.
+	}
+	case November {
+		condition	mv($m) == Nov .and. X2_LAST($m) > 88
+		value		1.
+	}
+	case December {
+		condition	mv($m) == Dec .and. X2_LAST($m) > 84
+		value		1.
+	}
+	case January {
+		condition	mv($m) == Jan .and. X2_LAST($m) > 82
+		value		1.
+	}
+	case February {
+		condition	mv($m) == Feb .and. X2_LAST($m) > 71
+		value		1.
+	}
+	case March {
+		condition	mv($m) == Mar .and. X2_LAST($m) > 71
+		value		1.
+	}
+	case April {
+		condition	mv($m) == Apr .and. X2_LAST($m) > 73
+		value		1.
+	}
+	case May {
+		condition	mv($m) == May .and. X2_LAST($m) > 73
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+goal(fm) setSMSCGOpFlagEXDV { SMSCG_OpFlag_EX_DV($m) = SMSCG_OpFlag_EX($m) }
+
+define(fm) SMSCG_OpFlag_EX_Count {
+	case reset {
+		condition mv($m) == JUN
+		value 0. }
+	case currentmonth{
+		condition $m==0
+		value SMSCG_OpFlag_EX_Count_DV(-1) + SMSCG_OpFlag_EX }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_EX_Count($m-1) + SMSCG_OpFlag_EX($m) }
+}
+goal(fm) setSMSCGOpFlagEXCountDV { SMSCG_OpFlag_EX_Count_DV($m) = SMSCG_OpFlag_EX_Count($m) }
+
+
+!******************************************************************************
+
+define(fm) SMSCG_OpFlag_Count_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_Count {
+	case reset {
+		condition SMSCG_OpFlag_EX($m) < 1.
+		value 0. }
+	case currentmonth {
+		condition $m==0
+		value SMSCG_OpFlag_Count_DV(-1) + SMSCG_OpFlag_EX }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_Count($m-1) + SMSCG_OpFlag_EX($m) }
+}
+goal(fm) setSMSCGOpFlagCountDV { SMSCG_OpFlag_Count_DV($m) = SMSCG_OpFlag_Count($m) }
+
+! first two months of continuous operation adjust for 500 cfs then drop to 200 cfs for each additional month; if interrupted, start again with 500 cfs
+define(fm) SMSCG_NDO_adj { 
+    case exclude_ANNschedule {
+	    condition mv($m) <= FEB
+        value 0. }                      ! don't use an adjustment in months where ANN training already included SMSCG Ops
+    case OpFlagCount_low {
+	    condition SMSCG_OpFlag_Count($m) <= 2.
+        value SMSCG_OpFlag_EX($m) * 500. }  ! assume SMSCG Ops has a salinity effect equivalent to a change in NDO of 500 CFS
+    case OpFlagCount_high {
+	    condition SMSCG_OpFlag_Count($m) >= 3.
+        value SMSCG_OpFlag_EX($m) * 500. }  ! assume SMSCG Ops has a salinity effect equivalent to a change in NDO of 200 CFS
+}
+
+define(fm) SMSCG_NDO_adj_taf {std kind 'FLOW-DELIVERY' units 'taf'} !SMSCG Ops NDO cost associated with salinity effect
+goal(fm) setSMSCGOper { SMSCG_NDO_adj_taf($m) = SMSCG_NDO_adj($m)*cfs_taf($m)}
+
+define(fm) SMSCG_EX_PA_NDO_adj_taf {std kind 'FLOW-DELIVERY' units 'taf'} !SMSCG Ops NDO cost associated with salinity effect
+goal(fm) setSMSCGOper_Ex_PA { SMSCG_EX_PA_NDO_adj_taf($m) = SMSCG_NDO_adj_taf($m)}
+
+

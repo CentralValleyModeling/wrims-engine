@@ -1,0 +1,169 @@
+/*
+define REST_REQ_NP {timeseries kind 'release-hydrograph' units 'taf'} !April release corresponds to Apr1-Apr14
+define REST_REQ_P {timeseries kind 'release-hydrograph' units 'taf'} !April release corresponds to Apr15-Apr30
+define REST_RCH_NP {timeseries kind 'rest_flow' units 'cfs'} 
+define REST_RCH_P {timeseries kind 'rest_flow' units 'cfs'} */
+define SJRR_min_taf {select release from SJRR_base where month=month}
+define SJRR_min {value SJRR_min_taf*taf_cfs}
+
+!Dynamic SJRRP_Flow
+!Based on Restoration Flow Guidance (RFG) 2.1
+
+!Calculate Annual UIF at Friant on the Water Year
+define SJRRP_UIF_ANN_DV {std kind 'FLOW-UNIMPAIRED' units 'TAF'}
+define SJRRP_UIF_ANN {
+    case October { 
+        condition month == OCT
+        sum(i=0,11,1) UNIMP_SJ(i)}
+    case Otherwise {
+        condition always
+        value SJRRP_UIF_ANN_DV(-1) } 
+    }
+    
+goal setSJRRP_UIF_ANN_DV { SJRRP_UIF_ANN_DV = SJRRP_UIF_ANN }
+    
+!Set SJRR WYT (based on Water Year UIF, but applied the Restoration Year Mar-Feb)
+define WYT_SJRRP_DV {std kind 'INDEX' units 'NONE'}
+define WYT_SJRRP_1 {
+    case W {
+        condition SJRRP_UIF_ANN > 2499.9
+        value 1 }
+    case NW {
+        condition SJRRP_UIF_ANN > 1449.9
+        value 2 }
+    case ND {
+        condition SJRRP_UIF_ANN > 929.9
+        value 3 }
+    case D {
+        condition SJRRP_UIF_ANN > 669.9
+        value 4 }
+    case CH {
+        condition SJRRP_UIF_ANN > 399.9
+        value 5 }
+    case CL {
+        condition always
+        value 6 }
+    }
+    
+define WYT_SJRR {
+    case FirstYr {
+            condition wateryear == 1922 .and. month <= FEB
+                value 2 }              !Currently based of off Hist
+    case Mar {
+        condition month == MAR
+        value WYT_SJRRP_1 }
+    case otherwise {
+        condition always
+        value WYT_SJRRP_DV(-1) }
+    }
+    
+goal setWYT_SJRRP_DV { WYT_SJRRP_DV = WYT_SJRR }
+
+!The Water Year UIF, applied through the Restoration Year
+define SJRR_RestYr_UIF_Ann {std kind 'FLOW-UNIMPAIRED' units 'TAF'}
+define SJRR_RestYr_UIF_Ann_ {
+    case FirstYr {
+        condition wateryear == 1922 .and. month <= FEB
+        value 2355.1 }          !Currently based of off Hist
+    case Mar {
+        condition month == Mar
+        value SJRRP_UIF_ANN }
+    case otherwise {
+        condition always
+        value SJRR_RestYr_UIF_Ann(-1) }
+    }
+goal setSJRR_RestYr_UIF_Ann {SJRR_RestYr_UIF_Ann = SJRR_RestYr_UIF_Ann_}
+        
+    
+!Calculate Annual Volume of SJRRP at Friant Dam
+define SJRRP_ann {select SJRRP from SJRRP_ann given UIF = SJRR_RestYr_UIF_Ann_ use linear}
+define SJRRP_ann_DV {alias SJRRP_ann kind 'release-volume' units 'taf'}
+        
+!Monthly flow 
+!Per the RFG, leap years result in additional flow to keep the same cfs on the additional day
+define REST_REQ_NP_cfs {select NP from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month}
+define REST_REQ_NP{
+    case APRIL {
+        condition month == APR
+        value REST_REQ_NP_cfs * cfs_TAF * 14./30. }
+    case otherwise {
+        condition always
+        value REST_REQ_NP_cfs * cfs_TAF }
+    }
+define rest_req_np_ {alias REST_REQ_NP kind 'release-hydrograph' units 'taf'}
+
+define REST_REQ_P_cfs  {select P from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month}
+define REST_REQ_P {
+    case APRIL {
+        condition month == APR
+        value REST_REQ_P_cfs * cfs_TAF * 16./30. }
+    case otherwise {
+        condition always
+        value REST_REQ_P_cfs * cfs_TAF }
+        }
+define REST_REQ_P_ {alias REST_REQ_P kind 'release-hydrograph' units 'taf'}
+
+define MLRTN_rel {
+    case April {
+        condition   month == apr
+        value       (rest_req_np + rest_req_p)*taf_cfs    }
+    case otherwise {
+        condition   always
+        value       rest_req_np*taf_cfs    }
+}
+
+!Restoration Reach flow per RFG2.1
+define REST_RCH_NP {select RCH_NP from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month}
+define REST_RCH_P  {select RCH_P  from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month}
+
+
+define REST_RCH_NP_ {alias REST_RCH_NP kind 'rest_flow' units 'cfs'}
+define REST_RCH_P_  {alias REST_RCH_P  kind 'rest_flow' units 'cfs'}
+
+
+
+
+define MLRTN_rel_jun1 {
+    case FebthruSep {
+        condition   month >= feb .and. month <= jun
+        select thruJun from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month }
+    case otherwise  {
+        condition   always
+        value 0.0 } }
+
+define MLRTN_rel_sep1 {
+    case MarthruSep {
+        condition   month >= mar .and. month <= sep
+        select thruSept from SJRRP given ann = SJRR_RestYr_UIF_Ann_ use linear where mon=month }
+    case otherwise  {
+        condition   always
+        value 0.0 } }
+
+!Purpose of the second method of estimating releases below is to take into account the fact that releases may need to be greater
+!than the required releases above due to losses between Millerton and the restoration reach.  See comments in table for more information
+!TF Stantec 032423
+
+define MLRTN_rel_jun2 {
+    case FebthruSep {
+        condition   month >= feb .and. month <= jun
+        select thruJune from Mlrtn_rel_est where mon=month,wytype=ROUND(wyt_sjrr)}
+    case otherwise  {
+        condition   always
+        value 0.0 } }
+
+define MLRTN_rel_sep2 {
+    case MarthruSep {
+        condition   month >= mar .and. month <= sep
+        select thruSept from Mlrtn_rel_est where mon=month, wytype=ROUND(wyt_sjrr)}
+    case otherwise  {
+        condition   always
+        value 0.0 } }
+
+!Take the max of the two release calculations
+define MLRTN_rel_jun {value max(MLRTN_rel_jun1, MLRTN_rel_jun2)}
+define MLRTN_rel_sep {value max(MLRTN_rel_sep1, MLRTN_rel_sep2)}
+        
+define MLRTN_rel_jun_ {alias MLRTN_rel_jun kind 'restoration-sum' units 'taf'}
+define MLRTN_rel_sep_ {alias MLRTN_rel_sep kind 'restoration-sum' units 'taf'}
+
+        

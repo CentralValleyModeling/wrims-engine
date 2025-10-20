@@ -1,0 +1,49 @@
+/*
+File Name: arcs-inflows.wresl
+Lower Yuba River System File
+
+Purpose:
+Define inflow arcs and rainfall-runoff arcs
+
+Naming takes the following form:
+I_{DESTINATION NODE}    - boundary inflow from rim watershed
+SR_{WBA}            - aggregated precipitation runoff from specific WBA 
+
+*/
+define CTNEG {value 88888}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! SURFACE RUNOFF FROM WBAs !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define SR_14    {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+
+define SR_14_YUB011     {std kind 'SURFACE-RUNOFF' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! BOUNDARY INFLOWS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!! French Dry Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define I_MERLC  {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'}
+
+
+!!! Yuba River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define I_NBLDB  {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! Inflow to New Bullards Bar Reservoir
+define I_ENGLB  {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! Inflow to Englebright Reservoir
+define I_SLT009 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! Slate Creek
+define I_OGN005 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! Oregon Creek
+define I_NFY029 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! North Fork Yuba River
+define I_MFY013 {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} ! Middle Fork Yuba River
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! CLOSURE TERMS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define CT_Smartville_SV  {timeseries kind 'CLOSURE-TERM' units 'TAF' convert 'CFS'}
+define CT_Smartville     {lower unbounded upper unbounded kind 'CLOSURE-TERM' units 'CFS'}
+
+goal setPostiveCT_Smartville     {lhs CT_Smartville case postive  {condition CT_Smartville_SV >= 0 rhs CT_Smartville_SV}}
+goal setNegativeCT_Smartville    {lhs CT_Smartville case negative {condition CT_Smartville_SV < 0 rhs CT_Smartville_SV lhs>rhs penalty CTNEG lhs<rhs constrain}}
+goal setNonpositiveCT_Smartville {lhs CT_Smartville case negative {condition CT_Smartville_SV < 0 rhs 0                lhs>rhs constrain lhs<rhs  penalty 0}}
+

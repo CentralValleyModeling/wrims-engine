@@ -1,0 +1,54 @@
+
+!friant_code.wresl
+
+define FK_cap_head      {value 5000.0 }
+define Madera_cap_head  {value 1250.0 }
+define FK_fl_cap        {value 1200.0 }
+define Madera_fl_cap    {value 200.0 }
+
+define Madera_loss  {select Madera_inc from Friant_canal_losses where month = month }
+define FK_loss      {select FK_inc     from Friant_canal_losses where month = month }
+
+define Pct_C1_FK        {select FK      from Friant_Allocation where item = 1 }
+define Pct_C1_Madera    {select Madera  from Friant_Allocation where item = 1 }
+define Pct_C2_FK        {select FK      from Friant_Allocation where item = 2 }
+define Pct_C2_Madera    {select Madera  from Friant_Allocation where item = 2 }
+
+goal set_ann_C1_alloc { ann_C1_alloc = Class1_delivered + Class1_alloc}
+
+define Ann_FK_C1        {value (Class1_alloc + Class1_delivered) *  Pct_C1_FK / 100. }
+define Ann_Madera_C1    {value (Class1_alloc + Class1_delivered) *  Pct_C1_Madera / 100. }
+define Ann_FK_C2        {value (class2_alloc + Class2_delivered) *  Pct_C2_FK / 100. }
+define Ann_Madera_C2    {value (Class2_alloc + Class2_delivered) *  Pct_C2_Madera / 100. } 
+
+define Ann_FK_tot  { value Ann_FK_C1 + Ann_FK_C2 }
+define Ann_Madera_tot { value Ann_Madera_C1 + Ann_Madera_C2 }
+define Ann_Fr_tot { value Ann_FK_tot + Ann_Madera_tot }
+
+!Total delivery pattern and class1 delivery pattern
+define FK_tot_pct {select percent from FK_delivery_total given delivery = Ann_Fr_tot use minimum where month = month }
+define FK_C1_pct  {select percent from FK_delivery_class1 given delivery = Ann_Fr_tot use minimum where month = month }
+define Madera_tot_pct {select percent from Madera_delivery_total given delivery = Ann_Fr_tot use minimum where month = month }
+define Madera_C1_pct {select percent from Madera_delivery_class1 given delivery = Ann_Fr_tot use minimum where month = month }
+
+! define total percentage delivered to date and remaining pct to be delivered
+/*define sum_Mad_tot_pct_ {
+define sum_Mad_C1_pct_ {
+define rem_Mad_tot_pct_ {
+define rem_Mad_C1_pct_ {*/
+
+define Mad_C1_frc     { value min(1.,Madera_C1_pct/rem_Mad_C1_pct_)}
+define Mad_tot_frc    { value min(1.,Madera_tot_pct/rem_Mad_tot_pct_)}
+define FK_C1_del      { value (FK_C1_pct / 100.) * Ann_FK_C1 }
+define Madera_C1_del  { value (Madera_C1_pct / 100.) * Ann_Madera_C1 }
+define FK_tot_del     { value (FK_tot_pct / 100.) * Ann_FK_tot }
+define Madera_tot_del { value (Madera_tot_pct / 100.) * Ann_Madera_tot }
+define FK_C2_del      { value max(0.,FK_tot_del - FK_C1_del) }
+define Madera_C2_del  { value max(0., Madera_tot_del - Madera_C1_del) }
+define tot_del        { value Madera_tot_del + FK_tot_del }
+goal set_tot_C1_del   {tot_C1_del = Madera_C1_del + FK_C1_del }
+goal set_tot_C2_del   {tot_C2_del = Madera_C2_del + FK_C2_del }
+
+! Define estimate of delivery (initial demand estimate + canal loss)
+define D_MLRTN_FRK_ini { value FK_C1_del + FK_C2_del + FK_loss }
+define D_MLRTN_MDC_ini { value Madera_C1_del + Madera_C2_del + Madera_loss }

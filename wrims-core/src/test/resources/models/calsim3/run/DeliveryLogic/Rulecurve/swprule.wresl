@@ -1,0 +1,245 @@
+!WRESL statements for SWP San Luis Rule Curve
+!
+!This code calculates the target storage level for San Luis reservoir
+!******************************************************************************************
+define SWPRULECV { std kind 'rulecurve' units 'TAF' }   !Decision variable of SWP San Luis rule curve
+
+define SWP_Rule_DelTar {
+  select  RuleCurve
+  from    SWPrule_deltar
+  given   deltar = swp_allocation_final
+  use     linear}
+define swp_rule_1 {alias SWP_Rule_DelTar units 'NONE'}
+
+define SWP_Rule_Cap_Oroville {    !!!!THIS IS COMMENTED OUT IN RULE CURVE CALC. DO WE NEED IT?
+  select  RuleCurve_Cap
+  from    SWPrule_cap_Oroville
+  given   oroville = S_OROVL(-1)-S_OROVL_WTS(-1)
+  use     linear}
+define SWP_rule_Cap {alias SWP_Rule_Cap_Oroville units 'NONE'}
+
+!Remaining SWP SL evaporation, canal losses, and demands through December
+define remain_evap {select rem_evap from swprulecv_params where month = month}
+define remain_loss {select rem_loss from swprulecv_params where month = month}
+
+define remain_evapDV {alias remain_evap kind 'rulecv-calc' units 'taf'}
+define remain_lossDV {alias remain_loss kind 'rulecv-calc' units 'taf'}
+
+define remainDem_SOD {
+	case apr {
+	condition month==apr
+		value swpremdemfinal_apr
+	}
+	case may {
+	condition month==may
+		value swpremdemfinal_may
+	}
+	case jun {
+	condition month==jun
+		value swpremdemfinal_jun
+	}
+	case jul {
+	condition month==jul
+		value swpremdemfinal_jul
+	}
+	case aug {
+	condition month==aug
+		value swpremdemfinal_aug
+	}
+	case sep {
+	condition month==sep
+		value swpremdemfinal_sep
+	}
+	case oct {
+	condition month==oct
+		value swpremdemfinal_oct
+	}
+	case nov {
+	condition month==nov
+		value swpremdemfinal_nov
+	}
+	case dec {
+	condition month==dec
+		value swpremdemfinal_dec
+	}
+	case otherwise {  !Value not needed outside Apr-Dec
+	condition always
+		value 0.
+	}
+}
+
+define remainDem_SODDV {alias remainDem_SOD kind 'rulecv-calc' units 'taf'}
+
+!Exports needed to meet demands through Dec
+define Required_Exports_NowtoDec {
+	case AprToDec {
+		condition	range(month,apr,dec)
+		value 		max(0.,remainDem_SOD + remain_evap + remain_loss + max(110., carryover_final + S_SLUIS_SWP_DP) - S_SLUIS_SWP(-1))
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define Required_Exports_NowtoDecDV {alias Required_Exports_NowtoDec kind 'rulecv-calc' units 'taf'}
+
+define remain_months {
+	case JanToSep {
+		condition range(month,jan,sep)
+		value	15. - month + 1.
+	}
+	case OctToDec {
+		condition	always
+		value		3. - month + 1.
+	}
+}
+
+!demand for month
+define Dem_SOD {
+	case apr {
+	condition month==apr
+		value swpdemfinal_apr
+	}
+	case may {
+	condition month==may
+		value swpdemfinal_may
+	}
+	case jun {
+	condition month==jun
+		value swpdemfinal_jun
+	}
+	case jul {
+	condition month==jul
+		value swpdemfinal_jul
+	}
+	case aug {
+	condition month==aug
+		value swpdemfinal_aug
+	}
+	case sep {
+	condition month==sep
+		value swpdemfinal_sep
+	}
+	case oct {
+	condition month==oct
+		value swpdemfinal_oct
+	}
+	case nov {
+	condition month==nov
+		value swpdemfinal_nov
+	}
+	case dec {
+	condition month==dec
+		value swpdemfinal_dec
+	}
+	case otherwise {  !Value not needed outside Apr-Dec
+	condition always
+		value 0.
+	}
+}
+
+define Dem_SODDV {alias Dem_SOD kind 'rulecv-calc' units 'taf'}
+
+!Estimate of required exports for month
+define Required_Exports {
+	case AprToSep{
+		condition	range(month,apr,sep)
+		value		max(0.,Required_Exports_NowtoDec  - 27.)/(remain_months - 1.5)   !27 TAF is H&S over 1.5 months Oct to Nov
+	}
+	case October {
+		condition	month == oct
+		value		max(0.,Required_Exports_NowtoDec - 18.)/(remain_months - 1.)
+	}
+	case NovToDec {
+		condition	range(month,nov,dec)
+		value		Required_Exports_NowtoDec/remain_months
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define Required_ExportsDV {alias Required_Exports kind 'rulecv-calc' units 'taf'}
+
+!define dem_pat {select demand from swp_rulecv_dem_pattern given percent=swp_demprofile use linear where month=month}
+!define rem_dem_pat {select rem_dem from swp_rulecv_dem_pattern given percent=swp_demprofile use linear where month=month}
+define loss_rc {select loss from swprulecv_params where month = month}
+define evap_rc {select evap from swprulecv_params where month = month}
+
+define loss_rcDV {alias loss_rc kind 'rulecv-calc' units 'taf'}
+define evap_rcDV {alias evap_rc kind 'rulecv-calc' units 'taf'}
+
+!Estimate of monthly change in SWP San Luis
+define change_SL {
+	case AprDec {
+		condition	range(month,apr,dec)
+		value		Required_Exports - Dem_SOD - loss_rc - evap_rc  !same computation as below just done a little differently
+!		value		Required_Exports - remainDem_SOD*dem_pat/rem_dem_pat - loss_rc - evap_rc
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define change_SLDV {alias change_SL kind 'rulecv-calc' units 'taf'}
+
+!Balance San Luis and Oroville storage using available supply above the end of September target
+define Oro_SL_coeff {value max(0,min(1, (S_OROVL(-1) - OroSepTarg)/max(1, 3000 - OroSepTarg)))}
+define Oro_SL_coeff_ {alias Oro_SL_coeff kind 'balance-coefficient' units 'none'}
+
+define ruleadjfactor {
+	case July {
+	condition month == Jul .and. wyt_SAC < 2.5
+		value 0.8 }
+	case August {
+	condition month == Aug .and. wyt_SAC < 2.5
+		value 0.85 }
+	case September {
+	condition month == Sep .and. wyt_SAC < 2.5
+		value 1 }
+	case July {
+	condition month == Jul
+		value 0.8 }
+	case August {
+	condition month == Aug
+		value 0.85 }
+	case September {
+	condition month == Sep
+		value 1. }
+	case otherwise {
+	condition always
+		value 1.}
+}
+
+define ORO_based_SL_RC {value 110. + ruleadjfactor * Oro_SL_coeff*(S_SLUIS_SWPlevel5 - 110.) }
+define ORO_based_SL_RCDV {alias ORO_based_SL_RC kind 'rulecv-calc' units 'taf'}
+
+!calculate the actual rule curve.     !Changes in values for the IF operations
+define SWPRULEcalc {
+     case AprToSep {
+          condition range(month,apr,sep)
+          value max(S_SLUIS_SWP(-1) + change_SL, ORO_based_SL_RC)}
+     case OctToDec {
+          condition range(month,oct,dec)
+          value S_SLUIS_SWP(-1) + change_SL}
+     case JanToMar {
+          condition range(month,jan,mar)
+          value     month/6. * SWP_Rule_DelTar}
+}
+
+define swprulecalcDV {alias swprulecalc kind 'rulecv-calc' units 'taf'}
+
+!
+define SWPRuleCalc1 {
+  case octdec {
+    condition month>=oct .and. month<=dec
+    value max(S_SLUIS_SWPlevel2,min(SWPRuleCalc,S_SLUIS_SWPlevel4))}
+  case other {
+    condition always
+    value max(S_SLUIS_SWPlevel2,min(SWPRuleCalc,S_SLUIS_SWPlevel4))}
+!    value max(S_SLUIS_SWPlevel2,min(SWPRuleCalc,SWP_Rule_Cap_Oroville,S_SLUIS_SWPlevel4))}
+}
+goal setSWPRULECV { SWPRULECV = SWPRULEcalc1 }

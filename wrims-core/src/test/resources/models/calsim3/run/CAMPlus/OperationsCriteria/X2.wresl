@@ -1,0 +1,26 @@
+! coefficients used in K-M equation
+define a_x2_coef {value 122.2}
+define b_x2_coef {value 0.3278}
+define c_x2_coef {value 17.65}
+
+define(fm) X2_last {
+	case currentmonth{
+		condition $m==0
+		value a_x2_coef + b_x2_coef*X2_prv(-1) - c_x2_coef*LOG10(NDOI(-1))
+	}
+	case other{
+		condition always
+		value a_x2_coef + b_x2_coef*X2_last($m-1) - c_x2_coef*LOG10(C33_fm[CAM1]($m-1)*taf_cfs($m-1))
+	}
+}
+
+define(fm) X2_last_mod{value X2_last($m)}
+define(fm) x2_mod_est{
+	case currentmonth{
+		condition $m==0
+		value a_x2_coef + b_x2_coef*X2_last - c_x2_coef*LOG10(C33_fm[CAM1]*taf_cfs)}
+	case other{
+		condition always
+		value a_x2_coef + b_x2_coef*x2_mod_est($m-1) - c_x2_coef*LOG10(C33_fm[CAM1]($m-1)*taf_cfs($m-1))
+	}
+}

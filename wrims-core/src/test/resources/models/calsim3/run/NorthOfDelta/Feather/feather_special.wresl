@@ -1,0 +1,374 @@
+! Code by E.Reyes as of 3/8/01
+! Modified by D. Easton 12/04/00
+
+!!! Special Feather River Fish Criteria for Oct 15 - Nov 30 @ CP058
+
+/*
+Criteria being modeled:
+
+If during the period of October 15 thru November 30, the flow in the Feather River at C.P. 058 is greater than
+2500 cfs (except for flood release purposes), then the flow at C.P. 058 may not be less than 500 cfs below the
+existing flow until after March 30.
+
+
+How the Criteria is modeled:
+
+The criteria only applies to a part of the month of October, so the trigger flow of 2500 cfs is flow weighted for
+the entire month.  To compensate for the other half of the month that has no trigger, the trigger applied to the
+entire month of October may be greater than 2500 cfs.  The triggers for October and November can be set in
+'featherfish058.table'.
+
+When the trigger is exceeded, a "price" must be paid (a minflow thru March as opposed to no minflow if the trigger
+is not exceeded).  To avoid paying this price, releases for exports should be reduced to get below the trigger.
+Releases to meet in-basin uses however, should never be reduced to get below the trigger.
+
+If releases for flood control are made then no minimum flow is applied.
+*/
+
+
+
+
+!      In October and November, try to keep flow at CP058 < trigger otherwise pay the price
+!      of a minflow(=OCT flow or NOV flow - 500cfs) through March.  Do this by reducing releases for exports if necessary.
+!      If trigger is exceeded because of flood spills then no minflow is applied.
+
+
+!Example:       month   FTR059 flow scenario        minflow
+!       OCT     BELOW TRIGGER                     0 CFS =>  CHECK TO SEE WHAT HAPPENS NOVEMBER
+!       OCT     ABOVE TRIGGER DUE TO FLOOD        0 CFS =>  CHECK TO SEE WHAT HAPPENS NOVEMBER
+!       OCT     ABOVE TRIGGER                     FTR059 FLOW - 500 CFS  (NOV - MARCH)
+!       NOV     BELOW TRIGGER                     0 CFS
+!       NOV     ABOVE TRIGGER DUE TO FLOOD        0 CFS
+!       NOV     ABOVE TRIGGER                     FTR059 FLOW - 500 CFS  (DEC - MARCH)
+
+
+define oct_trigger_cfs {
+        select    target
+        from      featherfish_058
+        where   month = OCT}
+
+define nov_trigger_cfs {
+        select    target
+        from      featherfish_058
+        where   month = NOV}
+
+define MF_FTR059 {
+  case October {
+    condition month == OCT
+    value   0
+  }
+  case November1 {
+    condition   month == NOV .AND.
+        int(C_FTR059(prevOCT)) <= oct_trigger_cfs
+    value   0
+  }
+  case November2 {
+    condition month == NOV .AND.
+        S_OROVL(prevOCT)-S_OROVL_WTS(prevOCT)+1>= S_OROVLlevel5(prevOCT)
+    value   0
+  }
+  case November3 {
+    condition month == NOV .and. C_CAA003_exp1(prevOCT) <= 300.1
+    value  0
+  }
+  case November4 {
+    condition month == NOV
+    value   C_FTR059(prevOCT) - 500
+  }
+  case DecemberToMarch1 {
+    condition month >= DEC .AND. month <= MAR .AND.
+        int(C_FTR059(prevOCT)) > oct_trigger_cfs .AND. 
+        S_OROVL(prevOCT)-S_OROVL_WTS(prevOCT)+1 < S_OROVLlevel5(prevOCT) .AND.
+        int(C_FTR059(prevNOV)) > nov_trigger_cfs .AND.
+        S_OROVL(prevNOV)-S_OROVL_WTS(prevNOV)+1 < S_OROVLlevel5(prevNOV) .AND.
+        C_CAA003_exp1(prevOCT) > 300.1 .AND. C_CAA003_exp1(prevNOV) > 300.1
+    value   max(C_FTR059(prevOCT) - 500, C_FTR059(prevNOV) - 500)
+  }
+  case DecemberToMarch2 {
+    condition month >= DEC .AND. month <= MAR .AND.
+    int(C_FTR059(prevOCT)) > oct_trigger_cfs .AND. C_CAA003_exp1(prevOct) > 300.1 .and.
+    S_OROVL(prevOCT)-S_OROVL_WTS(prevOCT)+1 < S_OROVLlevel5(prevOCT)
+    value   C_FTR059(prevOCT) - 500
+  }
+  case DecemberToMarch3 {
+    condition month >= DEC .AND. month <= MAR .AND.
+    int(C_FTR059(prevNOV)) > nov_trigger_cfs .AND. C_CAA003_exp1(prevNov) > 300.1 .and.
+  S_OROVL(prevNOV)-S_OROVL_WTS(prevNOV)+1 < S_OROVLlevel5(prevNOV)
+    value   C_FTR059(prevNOV) - 500
+  }
+  case otherwise {
+    condition always
+    value   0
+  }
+}
+
+!Ensure that the state can release sufficient water to meet it's IBU obligations and H&S
+
+define C_CAA003_0 {upper 300 kind 'flow-delivery' units 'cfs'}
+define C_CAA003_1 {std kind 'flow-delivery' units 'cfs'}
+goal split_C_CAA003_EXP1 {C_CAA003_Exp1 = C_CAA003_0 + C_CAA003_1}
+
+define int_HandS {integer std kind 'INTEGER' units 'none'}
+goal boundN_C_CAA003_0 {C_CAA003_0 > int_HandS * 300}
+goal boundN_C_CAA003_1 {C_CAA003_1 < int_HandS * 99999}
+
+goal fixINT_HandS {lhs int_HandS case DECtoSEP {condition month>=DEC rhs 1}}
+
+goal avoidTrigger {
+  lhs C_FTR059
+  case October {
+    condition month == OCT
+    rhs   oct_trigger_cfs + 99999 - 99999*int_HandS     !oct_trigger_cfs=4000 
+    lhs>rhs   penalty 4600
+    lhs<rhs   penalty 0
+  }
+  case November {
+    condition month == NOV
+    rhs   max(nov_trigger_cfs, MF_FTR059 + 500) + 99999 - 99999*int_HandS !nov_trigger_cfs = 2500
+    lhs>rhs   penalty 4600
+    lhs<rhs   penalty 0
+  }
+}
+
+!Limit Oroville release to be limited to 10,000 cfs Jul-Sep for the protection of Orchards downstream.
+goal OroRelJulSep {
+    lhs C_FTR059
+    case JulSep {
+      condition month>=JUL .and. month<=SEP
+      rhs       10000.
+      lhs>rhs   penalty 9990
+      lhs<rhs   penalty 0 }
+}
+
+
+! I spoke with Aaron Miller, who consulted with John Leahigh, and he clarified what the operations
+! for minimum flows along the Feather River should be.  Aaron informed me that the 2800 cfs criteria
+! at the mouth and the Sunset Pumps criteria were meant to increase the river stage to assist diverters
+! with their pumping heads.  This criteria was added at the time we were doing modeling for the FERC Relicensing.
+! Since that time, DWR’s legal department argued that DWR was not responsible for maintaining stage,
+! only flow volumes or rates.  Aaron said they no longer operate to the 2800 cfs criteria at the mouth nor to any 
+! stage criteria at the Sunset Pumps.  They do however operate to the DFG minimum flow which is intended to be 
+! adhered to for the entire river reach from below Thermalito to the mouth.  He said that they are aware of the
+! Sunset Pump diversion and generally add additional flow to the DFG requirement to comply just below the Sunset
+! Pumps.  For CalSim 3.0, we should have three locations for compliance with the DFG minimum: below Thermalito,
+! below the Sunset Pumps, and at the mouth.  This should closely mimic the actual operations. E. Reyes 2/17/2011
+
+!The following code for a 2800 cfs target at mouth is no longer applicable:
+!DWR maintains flow at the "Mouth of Feather River" based on requirements of diversion pumping facilities.
+!Their flow target depends on upstream Yuba and Oroville inflow, the DWR/DFG agreed flow target above Verona,
+!and a 2800 cfs flow rate related to pumping facility requirements.
+
+/*define frsa_alloc {
+  case Drought {
+    condition     wyt_FEATHER == 1
+    value        0.50*(CLmon_FTR039_11_SA4 + CLmon_JBC008_11_SA4 + CLmon_WEC005 + CLmon_JBC004_11_SA3 + CLmon_RVC005_11_SA2PR2)*taf_cfs}
+  case Normal {
+    condition    always
+    value        1.00*(CLmon_FTR039_11_SA4 + CLmon_JBC008_11_SA4 + CLmon_WEC005 + CLmon_JBC004_11_SA3 + CLmon_RVC005_11_SA2PR2)*taf_cfs}
+}
+
+define yuba_alloc {value YCWA_Alloc(-1)*(CLmon_YUB013_14_NA + CLmon_YUB011_15N_NA2 + CLmon_YUB011_15S_NA2 + CLmon_YUB003_15N_NU)*taf_cfs}
+
+define minflowFeaMouth {
+    case DiversionSeason {
+        condition month>=APR .and. month<=SEP
+        value     max(min(2800.,I_DER001 + I_ENGLB +I_NBLDB + I_SLT009 + I_OGN005 + I_NFY029 + I_MFY013 + I_SFY007 - yuba_alloc + I_OROVL + CT_OROVILLE + I_RVPHB + I_WBF030 + I_WBF015 + I_WBF006 + I_NFF027 + I_MFF019 + I_SFF008 + I_SFF011 + I_LGRSV + I_SLYCK - frsa_alloc),minflowFeather) }
+    case other {
+        condition always
+        value     minflowFeather }
+}*/
+
+define minflowFeather {timeseries kind 'FLOW-MIN-REQUIRED' units 'CFS'}
+
+define minflow_C_FTR068 {select minflow from minflow where C_arc=200,month=month}
+goal mnflw_C_FTR068 {C_FTR068_MIF < minflow_C_FTR068}
+goal minflow_C_FTR059 {C_FTR059_MIF < max(MF_FTR059,minflowFeather)} ! below Thermalito return
+goal minflow_C_FTR039 {C_FTR039_MIF < minflowFeather} ! below Sunset Pumps
+goal minflow_C_FTR003 {C_FTR003_MIF < minflowFeather} ! at the mouth
+
+! Oroville would be operated only to satify minimum instream and delta conditions if less than 1.0 MAF - Aaron Miller 5/21/08
+define C_OROVL_IBU {std kind 'flow-channel' units 'cfs'}  !Weight with -3000 to replace commented out constraint oro_releases.
+define C_OROVL_EXP {std kind 'flow-channel' units 'cfs'}
+goal split_C_OROVL {C_OROVL = C_OROVL_IBU + C_OROVL_EXP}
+
+define TotalInflowOROVL   {value I_OROVL + CT_OROVILLE_SV + C_FTR074_SV2}
+define TotalInflowOROVLdv {alias TotalInflowOROVL kind 'Inflow' units 'cfs'}
+
+!For July-Sept for a CAM run, replace 1600 with the CAM forecast of Oroville storage computed back in May
+!This is to try to hit 1600 target in September more precisely -TF 101823
+define S_OROVL_final_CAM_frcst_init {
+	case inJuly {
+	condition month == Jul
+		value S_OROVL_final_CAM_frcst_July_dv(prevMay)}
+	case inAug {
+	condition month == Aug
+		value S_OROVL_final_CAM_frcst_Aug_dv(prevMay)}
+	case inSept {
+	condition month == Sep
+		value S_OROVL_final_CAM_frcst_Sept_dv(prevMay)}
+	case otherwise {
+	condition always
+		value 0.}
+}
+
+define S_OROVL_final_CAM_frcst {value max(1600., S_OROVL_final_CAM_frcst_init)}
+
+define C_OROVL_EXP_max_ {
+	case UpperFeatherCAMJune {
+	     condition simulateUpperFeather == 1 .and. simulateCAM > 0.5 .and. range(month,jul,sep) 
+	     value max(0., C_FTR074[UPPERFEATHER] + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - S_OROVL_final_CAM_frcst - DrainTar_buffer)*taf_cfs)}
+	case otherwiseCAMJune {
+             condition simulateCAM > 0.5 .and. range(month,jul,sep)
+             value max(0., C_FTR074_SV + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - S_OROVL_final_CAM_frcst - DrainTar_buffer)*taf_cfs)}
+	case UpperFeather {
+	     condition simulateUpperFeather == 1
+	     value max(0., C_FTR074[UPPERFEATHER] + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 1600. - DrainTar_buffer)*taf_cfs)}
+	case otherwise {
+             condition always
+             value max(0., C_FTR074_SV + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 1600. - DrainTar_buffer)*taf_cfs)}}
+
+goal lim_C_OROVL_EXP {C_OROVL_EXP < C_OROVL_EXP_max_}
+
+define C_OROVL_EXP_max {alias C_OROVL_EXP_max_ kind 'upper-bound' units 'cfs'}
+
+/*
+goal oro_releases {
+    lhs C_OROVL
+    case low_storage {
+        condition S_OROVL(-1) < 1000. + DrainTar_buffer
+            rhs MF_FTR059
+            lhs>rhs penalty 3000.
+            lhs<rhs penalty 0 }
+    case norm_storage {
+        condition always
+            rhs MF_FTR059
+            lhs>rhs penalty 0
+            lhs<rhs penalty 0 }}
+*/
+
+! Oroville would have physical contraints when reaching lower elevations - Aaron Miller 5/21/08
+! oro<1250 TAF units 2,4,6 are lost
+! oro<850 TAF units 1,3,5 are lost
+! 05/17/2019. Updated river valve release capacity from 1500 cfs to 4000 cfs; based on input from B Giorgi (O&M).
+define C_OROVL_valve {upper 4000 kind 'flow-channel' units 'cfs'}
+define C_OROVL_PP135 {upper 7200 kind 'flow-channel' units 'cfs'}
+define C_OROVL_Rem {std kind 'flow-channel' units 'cfs'}
+goal split_C_OROVL2 {C_OROVL = C_OROVL_valve + C_OROVL_PP135 + C_OROVL_Rem}
+
+define C_OROVL_Rem_max_ {
+	case UpperFeather {
+	     condition simulateUpperFeather == 1
+	     value max(0., C_FTR074[UPPERFEATHER] + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 1250.)*taf_cfs)}
+	case otherwise {
+             condition   always
+             value max(0., C_FTR074_SV + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 1250.)*taf_cfs)}}
+
+define C_OROVL_PP135_max_ {
+	case UpperFeather {
+	  condition simulateUpperFeather == 1
+	     value max(0., C_FTR074[UPPERFEATHER] + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 850.)*taf_cfs)}
+	case otherwise {
+        condition   always
+        value max(0., C_FTR074_SV + I_OROVL + CT_OROVILLE_SV + (S_OROVL(-1) - 850.)*taf_cfs)}}
+        
+goal lim_C_OROVL_Rem {C_OROVL_Rem < C_OROVL_Rem_max_}
+!goal lim_C_OROVL_PP135 {C_OROVL_PP135 < C_OROVL_PP135_max_}
+goal lim_C_OROVL_PP135 {
+    lhs C_OROVL_PP135
+    rhs C_OROVL_PP135_max_
+    lhs<rhs penalty 0
+    lhs>rhs penalty 99999}        
+        
+define C_OROVL_Rem_max   {alias C_OROVL_Rem_max_ kind 'upper-bound' units 'cfs'}
+define C_OROVL_PP135_max {alias C_OROVL_PP135_max_ kind 'upper-bound' units 'cfs'}
+
+/*
+goal river_valve_flow {
+    lhs C_OROVL
+    case river_valve_only {
+    condition S_OROVL(-1) < 850. ! lose units 1,3,5 at 850 TAF only river valve can move water @ 1500 cfs (safe capacity)
+        rhs 1500.
+        lhs>rhs penalty 1000000
+        lhs<rhs penalty 0 }
+    case units_1_3_5_rv {       ! lose units 2,4,6 at 1250 TAF at this elevation.  Units 1,3,5 + river valve = 8700 max
+        condition S_OROVL(-1) < 1250.
+            rhs 8700.
+        lhs>rhs constrain
+        lhs<rhs penalty 0 }
+    case full_hyatt_available {
+    condition always
+        rhs 17000.
+        lhs>rhs penalty 0
+        lhs<rhs penalty 0 }
+}*/
+
+! Idy Lui, 5/20/19. FRSA Winter Water Allocation. Moved this from systemtable_sac\constraints-deliveries.wresl
+!Based on recommendation from Aaron Miller (O&M) and Ming-Yen Tu (O&M).
+!Winter water allocations are made in full unless...
+!	(1) Oroville EOS storage is below 900 TAF, then 0% allocation
+!	(2) Oroville EOS storage is above 900 TAF but not enough to meet full 100% winter water allocation
+!	    In this case, winter water allocations are scaled based on previous month storage above 900 TAF, 
+!		current month's inflow and current month's winter water demand.
+!	(3) Protect C_FTR059_MIF (C203 MIF in CSII) releases in additional to 900 TAF storage threshold.
+!		MF_FTR059 = redd dewatering protection
+!		minflowFeather = DFG/DWR Feather R MIF Agreement between Thermalito Complex and Verona
+
+
+define decomp_FRSAdemand { 
+case decomp { condition month>=Oct .and. month<=Jan
+			value (AWR_11_SA1 + AWR_11_SA2 + AWR_11_SA3 + AWR_11_SA4)*cfs_TAF}
+case nondecomp {condition always value 0.0}
+}
+
+define decomp_FRSAdemanddv {alias decomp_FRSAdemand kind 'decomp-demand' units 'taf'}
+
+define decomp_allocdv {std kind 'decomp-alloc' units 'none'}
+
+define decomp_alloc {
+	case Oro_high {
+		condition decomp_FRSAdemand > 0. .and. (s_orovl(-1) + (TotalInflowOROVL*cfs_TAF) - (max(MF_FTR059,minflowFeather)*cfs_TAF)) > 900.
+			value min ((s_orovl(-1) - 900. + (TotalInflowOROVL*cfs_TAF) - (max(MF_FTR059,minflowFeather)*cfs_TAF))/decomp_FRSAdemand, 1.)	}
+	case Oro_cutoff {
+		condition decomp_FRSAdemand > 0.
+			value 0.0	}
+	case nondecomp {
+		condition always
+			value 1.	}
+}
+
+goal setdecomp_allocdv {decomp_allocdv = decomp_alloc}
+
+! Rice Decomp relase water in Feb even no decomp delivery, so need to calculate the percentage of rice return flow for Feb when decomp delivery is zero. 
+! Oct to Jan, percentage of rice return flow is same as decomp delivery allocation 
+define decomp_return_perdv {std kind 'decomp-alloc' units 'none'}
+
+define decomp_allocdem_FEB {
+    case February {
+        condition month==FEB
+        value decomp_FRSAdemanddv(-1)*decomp_allocdv(-1)+decomp_FRSAdemanddv(-2)*decomp_allocdv(-2)+decomp_FRSAdemanddv(-3)*decomp_allocdv(-3)+decomp_FRSAdemanddv(-4)*decomp_allocdv(-4)}
+    case other {
+        condition always
+        value 0.0   }
+}
+
+define decomp_dem_FEB {
+    case February {
+        condition month==FEB
+        value decomp_FRSAdemanddv(-1)+decomp_FRSAdemanddv(-2)+decomp_FRSAdemanddv(-3)+decomp_FRSAdemanddv(-4)}
+    case other {
+        condition always
+        value 1.0   }
+}
+
+define decomp_return_per {
+    case February {
+        condition month==FEB
+        value decomp_allocdem_FEB/decomp_dem_FEB}
+    case other {
+        condition always
+        value decomp_alloc }
+} 
+
+goal setdecomp_return_perdv {decomp_return_perdv = decomp_return_per}
+	
+	

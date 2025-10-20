@@ -1,0 +1,125 @@
+/*
+File Name: Yuba_MinFlows_D1644.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Defines minimum instream flow requirements for D1644 Interim (Yuba_MinFlowCrit= 2)
+
+
+*/
+
+!**********************************************************        
+!Calculation of D1644 Yuba River Index
+
+define OctMarFlow {
+	case APR {
+		condition month == APR
+		sum(i=-6,-1,1) UNIMP_YUBA(i) }
+	case Rest { 
+		condition always
+		value 0 }
+	}
+
+define AprJulFlow {
+	case APR {
+		condition month == APR
+		sum(i=0,3,1) UNIMP_YUBA(i) }
+	case Rest { 
+		condition always
+		value 0 }
+	}
+
+define Index_D1644 {
+	case APR {
+		condition month == APR
+		value 0.2*min(1400.,Index_D1644dv(-1))+0.3*OctMarFlow+0.5*AprJulFlow }
+	case Rest { 
+		condition always
+		value Index_D1644dv(-1) }
+	}
+
+define Index_D1644dv {alias Index_D1644 kind 'INDEX' units 'TAF'}	
+
+!**********************************************************        
+!Calculation of D1644 Year Type
+
+define YrType_D1644 {
+	case Wet {
+		condition Index_D1644 >=1230
+		value 1}
+	case AN {
+		condition Index_D1644 >=990
+		value 2}
+	case BN {
+		condition Index_D1644 >=790
+		value 3}
+	case Dry {
+		condition Index_D1644 >=630
+		value 4}
+	case Crit {
+		condition Index_D1644 >=540
+		value 5}
+	case otherwise {
+		condition always
+		value 6}
+	}
+ 
+ define YrType_D1644dv {alias YrType_D1644 kind 'INDEX' units 'NONE'}	
+ 
+!**********************************************************   
+!Marysville- MINFLOWDEFINITION
+
+define MF_YUB006_D1644 {
+ 	case Wet {
+		condition YrType_D1644 == 1
+		select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case AN {
+		condition YrType_D1644 == 2
+		select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case BN {
+		condition YrType_D1644 == 3
+		select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case Dry {
+		condition YrType_D1644 == 4
+		select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case ModCrit {
+		condition YrType_D1644 == 5 .AND. S_NBLDB_D1644(PREVSEP) < 450.
+		select ModCrit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case Crit {
+		condition YrType_D1644 == 5
+		select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	case ECrit {
+		condition YrType_D1644 == 6
+		select ECrit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=month}
+	}
+
+define MF_YUB006_D1644dv {alias MF_YUB006_D1644 kind 'FLOW-MIN-INSTREAM' units 'CFS'}          	
+goal meetYUB006_D1644min {C_YUB006_MIF_D1644 < MF_YUB006_D1644}
+
+if simulateVA_Yub < 0.5 {
+define MF_YUB006_VA {value 0.0}}
+
+!**********************************************************   
+!Smartsville- MINFLOWDEFINITION
+define MF_YUB024_D1644 {
+ 	case Wet {
+		condition YrType_D1644 == 1
+		select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	case AN {
+		condition YrType_D1644 == 2
+		select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	case BN {
+		condition YrType_D1644 == 3
+		select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	case Dry {
+		condition YrType_D1644 == 4
+		select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	case Crit {
+		condition YrType_D1644 == 5
+		select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	case ECrit {
+		condition YrType_D1644 == 6
+		select ECrit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=month}
+	}
+
+define MF_YUB024_D1644dv {alias MF_YUB024_D1644 kind 'FLOW-MIN-INSTREAM' units 'CFS'}  
+goal meetYUB024_D1644min {C_YUB024_MIF_D1644 < MF_YUB024_D1644} 

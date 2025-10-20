@@ -1,0 +1,20 @@
+define S422_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S422 {std kind 'STORAGE' units 'TAF'} !Los Vaqueros
+goal storagE422 {S422=S422_1}
+define F422 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E422 {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A422 {std kind 'SURFACE-AREA' units 'ACRES'}
+!define ER_S422 {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define ER_S422 {			!units inch/day
+    select ET
+    from   LV_evaporation
+    where  month = month
+    }
+define A422last {select area from res_info given storage=1000*S422(-1) use linear where res_num=422}
+define A422forward {select area from res_info given storage=1050*S422(-1) use linear where res_num=422}
+define A422back {select area from res_info given storage=950*S422(-1) use linear where res_num=422}
+define coefev422 {value (A422forward - A422back)/(100*max(0.01,S422(-1)))}
+goal area422 {A422=A422last+1000*coefev422*S422-1000*coefev422*S422(-1)}
+goal evap422 {E422*cfs_af=(ER_S422/24)*A422last+(ER_S422/24)*A422}
+define relcap422 {select discharge from res_info given storage=1000*S422(-1) use linear where res_num=422}
+goal maxreleasE422 {C422<relcap422}

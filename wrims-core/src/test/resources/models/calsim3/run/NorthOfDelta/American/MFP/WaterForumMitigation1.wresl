@@ -1,0 +1,366 @@
+!Water Forum Mitigation Water Operations
+!Derya Sumer 7/12/2006
+!M. Bachman 03/2018
+
+/* !CH logic
+! Calculate amount to be released for mitigation. Mitigation water released between March and September.
+! Daily release = 47 TAF/214days between Mar and Sep*1000 AF/TAF*1/1.983471099 CFS/AF = 110.73 CFS / day
+! Interpolate mitigation release : 0 TAF if UIFR_MarNov = 950 TAF, 47 TAF if UIFR_MarNov <= 400 TAF*/
+
+! ********************ARPS Pumping Estimate*******************
+! Used to calculated the mitigation water released from May-Sept
+! ARPS estimation for mitigation water calculation
+! ARPS estimation in May = (known Oct-Apr) + projected May-Sept 
+
+!In May, sum up the known deliveries from ARPS from Oct-Apr
+define ARPS_SumOctApr {std kind 'ARPS' units 'TAF'}
+define ARPS_SumOctApr_sv {
+	case FirstYear {  
+         condition month == Oct .and. wateryear==BgnWY
+         value 10.}
+	case MonthMay{
+		condition month==may
+		sum(i=-1,-7,-1) D_NFA016_ABT002(i)*cfs_taf(i)}
+	case Otherwise{
+		condition always
+		value ARPS_SumOctApr(-1)}	
+}
+goal setARPS_SumOctApr_dv {ARPS_SumOctApr=ARPS_SumOctApr_sv}
+
+!Groundwater Pumping to ARPS-eligible (i.e. Z5 and Lower Z1) demand units
+define Sum_GP_LZ1_Z5 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'}
+define Sum_GP_LZ1_Z5_sv{
+	case MonthOct{    /* Assume minimum groundwater pumping*/
+		condition month==oct
+		value 
+		   GPmin_24_NA2 * (sum(i=0,11,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2))
+         + GPmin_24_NA3 * (sum(i=0,11,1) 2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3))
+         + GPmin_24_NU2 * (sum(i=0,11,1) UD_24_NU2(i)*cfs_taf(i))}
+	case otherwise {
+        condition always
+        value Sum_GP_LZ1_Z5(-1) }}
+goal setSum_GP_LZ1_Z5 {Sum_GP_LZ1_Z5 = Sum_GP_LZ1_Z5_sv}
+
+! Estimated ARPS_MaySep = (Total PCWA Z1+Z5 Demands) - (PGE PCWA allocation) - (Min Groundwater pumping) - (Vol. ARPS already delivered Oct-Apr)
+
+!****************************************************
+! THIS CODE IS A REPEAT OF THAT IN YUBA-BEAR MODULE
+!****************************************************
+! Limit PCWA Zone 1 and 5 deliveries based on PG&E WY Allocation
+! Define annual volume of water that may be diverted i.e. the supply
+define CLann_PCWA_1_5 {value 104.}	!TAF
+
+define SumUD_AW_PCWA_1_5 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} ! Annual demand
+define SumUD_AW_PCWA_1_5_sv {
+    case oct{
+    condition month == oct
+        sum(i=0,11,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2) + 2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3) + UD_24_NU1(i)*cfs_taf(i) + UD_24_NU2(i)*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value SumUD_AW_PCWA_1_5(-1) }}
+
+goal setSumUD_AW_PCWA_1_5 {SumUD_AW_PCWA_1_5=SumUD_AW_PCWA_1_5_sv}
+
+!*************************************************************
+
+define ARPS_MaySeptEst {value SumUD_AW_PCWA_1_5_sv -(CLann_PCWA_1_5*PGE_WY_Allocation) - Sum_GP_LZ1_Z5_sv - ARPS_SumOctApr_sv }
+
+define ARPS_Estimate {std kind 'ANNUAL-ARPS-ESTIMATE' units 'TAF'}
+define ARPS_Estimate_sv{
+		case FirstYear {  
+         condition month == Oct .and. wateryear==BgnWY
+         value WFann_NFA016_ABT002}
+	case MonthMay{ 
+		condition month==may
+		value min(WFann_NFA016_ABT002,ARPS_SumOctApr_sv + max(0,ARPS_MaySeptEst))} 
+	case otherwise {
+        condition always
+        value ARPS_Estimate(-1) }}
+goal setARPS_Estimate {ARPS_Estimate = ARPS_Estimate_sv}
+
+! ************************Mitigation logic***************************
+! ARPS historical pumping volumes:
+! According to Tony Firenzi of PCWA, 2013 should be the "normal year."  2013 was nearly 11 TAF, and the average 2011-2013 was 13,752 TAF. 
+
+define PCWA_ARPS_deliveryEstimate { 
+	case Existing {condition LODflag==0. value 14.0}
+	case Buildout {condition LODflag==1. value 70.5}}!value max(14.0,ARPS_Estimate_sv)}} ! In future conditions, use an estimate based on logic above.
+define Roseville_driestyrdeliveries {							!Sum UD_26N_PU1 for annual demand, correct for minimum gw factor
+	case Existing {condition LODflag==0. value UD_26N_PU1_ANN*(1.- GPMIN_26N_PU1)}  
+	case Buildout {condition LODflag==1. value UD_26N_PU1_ANN*(1.- GPMIN_26N_PU1)}} !from WFA; TAF
+
+define AnnualMitigationWater {value min(27., PCWA_ARPS_deliveryEstimate - 8.5) + min(20., Roseville_driestyrdeliveries - 19.8)} 	!TAF
+define DailyMitigationWater {value AnnualMitigationWater / 143. * 1000. * (1./1.983471099)} !214 - 61 = 143 days (no more March and April)
+
+
+
+define WFMitRel{
+ 	case mitigation{
+		condition range(month,May,Sep) .and. UIFR_MarNov < 950. .and. UIFR_MarNov>=400.
+		value (DailyMitigationWater) - (UIFR_MarNov - 400.) / (950. - 400.) * (DailyMitigationWater)
+		}
+	case below_400{
+		condition range(month,May,Sep) .and. UIFR_MarNov <400.
+		value DailyMitigationWater
+		}
+	case no_mitigation {
+		condition always
+		value 0.
+		}
+	}
+
+define WFMitReldv {std kind 'FLOW' units 'CFS'}
+goal outputWFMit { WFmitReldv=WFMitRel}
+
+define WFMitRel_ann{
+ 	case mitigation{
+		condition  UIFR_MarNov < 950. .and. UIFR_MarNov>=400.
+		value AnnualMitigationWater*(1. - (UIFR_MarNov - 400.) / (950. - 400.))
+		}
+	case below_400{
+		condition  UIFR_MarNov <400.
+		value AnnualMitigationWater
+		}
+	case no_mitigation {
+		condition always
+		value 0.
+		}
+	}
+
+! Determine if it's a mitigation year
+ define MitYr{
+	case mitigation{
+		condition UIFR_MarNov < 950
+		value wateryear
+		}
+	case no_mitigation {
+		condition always
+		value 0.
+		}
+	}
+
+define MitYrdv {std kind 'FLAG' units 'NONE'}
+goal outputMitYr { MitYrdv=MitYr}
+
+define MFPpow_HHOLE_release {
+	case FirstMonth {
+		condition wateryear==BgnWY .and. month<MAY
+		value 0. 
+		}
+	case JunSep {
+		condition range(month,Jun,SEP)
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_SystemDem-MFPForecast_HHOLEEvap-(150.-WFMitRel_ann)) / (16. - month))
+	}
+	case MOct {
+		condition month == Oct
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_SystemDem-MFPForecast_HHOLEEvap-(150.-WFMitRel_ann)) / (4. - month))
+	}
+		case NovDec {
+		condition range(month,Nov,DEC)
+		value max(0,(S_HHOLE(-1)+S_FRMDW(-1)+MFPForecast_TotalSystemInflow-MFPForecast_MIF_MFP_RUB031-MFPForecast_MIF_MFP_MFA047-MFPForecast_HHOLEEvap-(150.-WFMitRel_ann)) / (4. - month)) !In Nov and Dec no water demand is considered
+	}
+	case Otherwise {
+		condition always
+		value 0.
+	}
+}
+
+!**************************Recovery Logic****************************
+! Determine if it's a recovery year
+define RecovYrdv {std kind 'FLAG' units 'NONE'}
+define RecovYr{
+	case first_month{
+		condition month==Oct .and. wateryear==BgnWY
+		value 0.
+		}
+	case recovery_1{
+		condition range(month,Oct,Feb) .and. MitYrdv(-1)>0 .and. wateryear == MitYrdv(-1)+1
+		value 1.
+		}
+	case recovery{
+		condition range(month,Oct,Feb) .and. RecovYrdv(-1)>0
+		value 1.
+		}
+	case no_recovery {
+		condition always
+		value 0.
+		}
+	}
+
+goal outputRecovYr { RecovYrdv=RecovYr}
+
+! Recovery allowed after Folsom starts spilling. Spilling = Folsom Zone 4 is full.
+! Determine if Folsom is spilling:
+! Check if  S958_4(-1) == (S958level4(-1) - S958level3(-1)
+define FOL_spilldv {std kind 'FLAG' units 'NONE'}
+define FOL_spill{
+	case first_month{
+		condition month==Oct .and. wateryear==BgnWY
+		value 0.
+		}
+	case spill_MitYr{
+		condition MitYr>0 .and. range(month,Oct,Feb) .and. S_FOLSM_4(-1)==(S_FOLSMlevel4(-1) - S_FOLSMlevel3adjdv(-1))
+		value 1.
+		}
+	case afterspill_MitYr{
+		condition MitYr >0 .and. range (month,Oct,Feb) .and. FOL_spilldv(-1)==1.
+		value 1.
+		}
+	case spill{
+		condition MitYr==0 .and. S_FOLSM_4(-1)==(S_FOLSMlevel4(-1) - S_FOLSMlevel3adjdv(-1))
+		value 1.
+		}
+	case afterspill{
+		condition MitYr==0 .and. FOL_spilldv(-1)==1.
+		value 1.
+		}
+	case no_spill{
+		condition always
+		value 0.
+		}
+	}
+
+goal setFOL_spilldv {FOL_spilldv=FOL_spill}
+
+
+! Adjust Hell Hole power release.  Increase release if mitigation water is released, decrease if it is being recovered.
+! Calculate released mitigation water to date.
+define releaseddv {std kind 'FLOW' units 'TAF'}
+define released{
+	case firstmonth{
+		condition month==Oct
+		value WFMitRel*cfs_taf
+		}
+	case other{
+		condition always !range(month,Oct,Feb)
+		value releaseddv(-1)+WFMitRel*cfs_taf
+		}
+	}
+
+goal SetReleaseddv {releaseddv=released}
+
+
+! Recovery is performed by reducing the power release by half until all mitigation water is recovered.
+! Recovery can only occur when during a recovery year and when Folsom Reservoir is spilling
+! Record all water recovered
+define recovereddv {std kind 'FLOW' units 'TAF'}
+define recovered{
+	case firstmonth {
+		condition month==Oct .and. wateryear==BgnWY
+		value RecovYr * FOL_spill * MFPpow_release/2.
+		}
+	case recovery {
+		condition /*range(month,Oct,Feb) .and.*/ deficitdv(-1)>0
+		value recovereddv(-1) + FOL_spill * MFPpow_release/2.
+		}
+	case other {
+		condition always
+		value 0.
+		}
+	}
+
+goal SetRecovereddv { recovereddv=recovered}
+
+define deficitdv {std kind 'FLOW' units 'TAF'}
+define deficit{
+	case firstmonth {
+		condition month==Oct .and. wateryear==BgnWY 
+		value released-recovered
+		}
+	case other{
+		condition always
+		value max((deficitdv(-1)*FOL_spilldv(-1) + max((released-releaseddv(-1)),0.)-max((recovered-recovereddv(-1)),0.)),0.)
+		}
+	 }
+
+goal Setdeficitdv {deficitdv=deficit}
+
+!Check to see if recovery is active
+/*define recovery{
+	case first_day{
+	condition day==01 .and. month==Oct .and. wateryear==1922
+	value 1.}
+	case inactive {
+	condition recovered-recovereddv(-1)>0.
+	value 0.}
+	case active{
+	condition always
+	value 1.}
+	}
+ */
+
+
+! Adjust Hell Hole power release as base power release + mitigation release + recovery release
+! Note that these three variables are not active at the same time
+define HH_pow_rel{
+	case firstmonth {
+		condition month==Oct .and. wateryear==BgnWY
+		value (MFPpow_release + (released - recovered))*taf_cfs
+		}
+	case other{
+		condition always
+		value (MFPpow_release - max(recovered-recovereddv(-1),0.))*taf_cfs
+		}
+	}
+	
+define WFMitRel_rsd {std kind 'RESIDUAL' units 'CFS'}
+goal setWFMitRel_rsd {lhs WFMitRel_rsd
+					  rhs 0	
+					  lhs>rhs penalty 999999
+					  lhs<rhs penalty 999999}
+
+
+goal setD_HHOLE_MFT003_POW {D_HHOLE_MFT003_POW < HH_pow_rel }
+goal setD_HHOLE_MFT003_MIT {D_HHOLE_MFT003_MIT = WFMitRel - WFMitRel_rsd}
+
+
+define S_HHOLElevel5 {case FirstYear {condition wateryear == BgnWY value S_HHOLElevel6}
+	case Otherwise {condition always value S_HHOLElevel6-(deficitdv(prevSep)-deficitdv(prevSep)*FOL_spilldv(-1))}
+}
+! Set Hell Hole Level 4  !PK 03122020
+define FRM_ReleaseTarget{case JanMay{condition range(month, Jan, May) value FRM_PowerReleaseTarget_JanMay}
+						 case JunDec{condition range(month, Jun, Sep) .or. range(month, Oct, Dec) value MFPpow_FRMDW_release}
+}
+define debug_Outflow{value max((MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf,75*cfs_taf+WFmon_NFA016_ABT002,(MFPmon_FOLSM_WTPRSV+MFPSJmon_FOLSM_WTPSJP+MFPSSmon_FOLSM_WTPSJP+WFmon_NFA016_ABT002))}
+define HH_Inflow{value I_Hhole*cfs_taf + LittleRubicon_min_flow1 + Rubicon_min_flow+ FRM_ReleaseTarget}!
+define S_HHOLElevel4init {
+		case FirstMonth {
+		condition wateryear==BgnWY .and. month==Oct
+		value 100. 
+		}
+	case JulSep    {condition range(month,Jul,Sep) 										
+	                value min(S_HHOLElevel4dv(-1),max(100- WFMitRel_ann, max(S_HHOLElevel3, S_HHOLE(-1)+HH_Inflow- MFPpow_HHOLE_release-max((MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf,75*cfs_taf+WFmon_NFA016_ABT002,(MFPmon_FOLSM_WTPRSV+MFPSJmon_FOLSM_WTPSJP+MFPSSmon_FOLSM_WTPSJP+WFmon_NFA016_ABT002))
+	                	-AHHOLElast*ER_HHOLE/12000.		!max((MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf,75+WFmon_NFA016_ABT002*taf_cfs*cfs_taf,(D_FOLSM_WTPRSV_MFP+D_FOLSM_WTPSJP_MFP+WFmon_NFA016_ABT002*taf_cfs)*cfs_taf)
+	                )))
+	}
+	case MonOct    {condition month == Oct										
+	                value min(S_HHOLElevel4dv(-1),max(100- WFMitRel_ann, max(S_HHOLElevel3, S_HHOLE(-1)+HH_Inflow- MFPpow_HHOLE_release-max((MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf,75*cfs_taf+WFmon_NFA016_ABT002,(MFPmon_FOLSM_WTPRSV+MFPSJmon_FOLSM_WTPSJP+MFPSSmon_FOLSM_WTPSJP+WFmon_NFA016_ABT002))
+	                	-AHHOLElast*ER_HHOLE/12000.		!max((MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf,75+WFmon_NFA016_ABT002*taf_cfs*cfs_taf,(D_FOLSM_WTPRSV_MFP+D_FOLSM_WTPSJP_MFP+WFmon_NFA016_ABT002*taf_cfs)*cfs_taf)
+	                )))
+	}
+	case JunorNov    {condition  month == Nov .or. month == Jun			! Period of Direct Diversion is Nov 1 - July 1							
+	                value min(S_HHOLElevel4dv(-1),max(100- WFMitRel_ann, max(S_HHOLElevel3, S_HHOLE(-1)+HH_Inflow- MFPpow_HHOLE_release-(MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf-AHHOLElast*ER_HHOLE/12000.)))
+	}
+	case JanApr   {condition range(month,Jan,Apr)
+	               value max(S_HHOLElevel4dv(-1),max(S_HHOLElevel3,S_HHOLE(-1)+HH_Inflow - HH_PowerReleaseTarget_JanMay-(MIF_MFP_RUB031 + MIF_MFP_buffer)*cfs_taf-AHHOLElast*ER_HHOLE/12000.))
+	}
+	case MMay	  {condition month == May
+					value S_HHOLElevel5
+	}
+	Case MonthDec {condition month == Dec
+		           value 100. - WFMitRel_ann
+    }
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+define S_HHOLElevel4{value min(S_HHOLElevel5,S_HHOLElevel4init)}
+goal SetHHOLElevel4  {S_HHOLE_4 < max (S_HHOLElevel4-S_HHOLElevel3,0.)}
+define MFPpow_HHOLE_release_dv	{alias MFPpow_HHOLE_release kind 'DEBUG' UNITS 'TAF'}
+define HH_PowerReleaseTarget_JanMay_dv{alias HH_PowerReleaseTarget_JanMay kind 'DEBUG' UNITS 'TAF'}
+
+!Adjust HH max. storage limit according to the released/recovered mitigation water.
+goal Set951level5 {S_HHOLE_5 < max (S_HHOLElevel5-S_HHOLElevel4,0.)}
+define S_HHOLElevel5dv {alias S_HHOLElevel5}
+

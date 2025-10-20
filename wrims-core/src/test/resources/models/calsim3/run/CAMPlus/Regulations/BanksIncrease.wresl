@@ -1,0 +1,14 @@
+! SWP is allowed to increase Banks PP by 1/3 of San Joaquin River, up to 8500cfs, during the 
+! December-March period if SJR is above 1000cfs.  December is not included due to unreliable 
+! forecasts in December.
+! Ryan Wilbur 8-1-03
+
+define(fm) BanksInc_fm {case increase{condition mv($m)>=Jan .and. mv($m)<=Mar .and. I33B_fm($m) > 1000*cfs_taf($m) value I33B_fm($m)/3} case noincrease{condition always value 0}}
+
+!goal setBanks_Jan {D33D_Jan < 6680*cfs_taf( 4-month)+BanksInc_Jan}
+!goal setBanks_Feb {D33D_Feb < 6680*cfs_taf( 5-month)+BanksInc_Feb}
+!goal setBanks_Mar {D33D_Mar < 6680*cfs_taf( 6-month)+BanksInc_Mar}
+
+!define D33D_Max_Jan {alias 6680*cfs_taf( 4-month)+BanksInc_Jan kind 'FLOW' units 'TAF'}
+!define D33D_Max_Feb {alias 6680*cfs_taf( 5-month)+BanksInc_Feb kind 'FLOW' units 'TAF'}
+!define D33D_Max_Mar {alias 6680*cfs_taf( 6-month)+BanksInc_Mar kind 'FLOW' units 'TAF'}

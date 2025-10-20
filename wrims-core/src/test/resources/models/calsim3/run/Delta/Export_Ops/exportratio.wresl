@@ -1,0 +1,43 @@
+! Export-Inflow Ratio restriction on exports
+! E. Reyes 6/26/98
+! A. Munevar 11/15/99
+
+! Delta Export defined as in D1641 Description for Export Ratio
+!define ExportActualTD {alias C_DMC000_TD+C_CAA003_TD+D408_P KIND 'EXPORT-PRJ' units 'CFS'  }
+define ExportActualTD {alias C_DMC000_TD       !Clifton Court Forebay
+                            +C_CAA003_TD       !Tracy Pumping Plant
+                            +D_OMR027_SJRRrecap !SJRRP recapture in Delta
+                            +D_OMR028_SRSC     !SRSC land fallowing transfer
+                            +D408_P            !LVE Partner Diversion
+                             KIND 'EXPORT-PRJ' units 'CFS'  }
+define ExportActualIF {alias C_DMC000_IF+C_CAA003_IF KIND 'EXPORT-PRJ' units 'CFS'  }
+
+! Delta Inflow defined as NDOI Delta Inflow
+! Computed in NDOI.wresl
+
+! EI allowable export variable - MAXIMUM ALLOWABLE EXPORT due to EXPORT RATIO
+define EiExpCtrl {std kind 'EXPORT-CTRL-EI' units 'CFS'}
+
+! EI Ratio dependent on month
+define ExpRatio {
+    case feb    {
+        condition month == FEB
+        select  ratio
+        from    febeiratio
+        given   JanEightRiver=EightRiver_Index_dv(-1)/1000
+        use     linear}
+    case rest   {
+        condition always
+          select    ratio
+          from      eiratio
+          where     month=month}
+}
+
+! Write out EI ratio
+define ExpRatio_ {alias ExpRatio KIND 'EI-RATIO-STD' UNITS 'NONE'}
+
+! Compute exports allowable by the EI ratio
+goal find_max_export {EiExpCtrl = ExpRatio*DeltaInflowforNDOI}
+
+! Restrict exports to be less than that allowable by EI ratio
+goal export_comply { ExportActualTD + ExportActualIF < EiExpCtrl }

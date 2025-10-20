@@ -1,0 +1,153 @@
+! ExchContractLimits.wresl
+
+/* implements delivery limits to exchange contractors according to the table below
+   Limits are specified for both individual months and the period of Apr-Oct and JanFebMarNovDec
+   Monthly limits are not adhered to in real life, so they are not activated here.  
+   Seasonal limits are handled by assessing seasonal demands for each demand unit and pro-rating
+   delivery limits accordingly.
+   
+ExchContractLimits
+Month   Critical NonCrit    
+1       29       38       Oct
+2       25       25       Nov
+3       15       15       Dec
+4       15       15       Jan
+5       30       30       Feb
+6       85       85       Mar
+7       81       112      Apr
+8       99       125      May
+9       102      136      Jun
+10      107      142      Jul
+11      97       138      Aug
+12      55       81       Sept
+13      650      840      Total
+14      121      121      Nov-Mar
+15      529      719      Apr-Oct
+
+! Limit diversion from MDOTA to 64_XA based on contract limit
+goal limitD_MDOTA_64_XA    {D_MDOTA_64_XA < CLM_64_XA * taf_cfs * perdel_cvpex_s }
+! Firebaugh Exchange Contractors
+goal limit_D_73_XA   {D_MDOTA_73_XA + D_DMC111_73_XA < CLM_73_XA * taf_cfs * perdel_cvpex_s  }
+! San Luis Canal Co Exchange Contractors
+goal limit_D_ARY010_72_XA1  {D_ARY010_72_XA1 < CLM_72_XA1 * taf_cfs * perdel_cvpex_s }
+! Central California ID South Exchange Contractors
+goal limit_D_XCC010_72_XA2  {D_XCC010_72_XA2 < CLM_72_XA2 * taf_cfs * perdel_cvpex_s }
+! Central California ID North Exchange Contractors
+goal limit_D_XCC054_72_XA3  {D_XCC054_72_XA3 < CLM_72_XA3 * taf_cfs * perdel_cvpex_s }
+*/
+
+define ExchMonLimit {
+    case ShastaCritical {
+        condition wyt_SHASTA_CVP==4
+        select Critical from ExchContractLimits where row=month}
+    case otherwise {
+        condition always 
+        select NonCrit from ExchContractLimits where row=month}
+}
+
+define RemAprOctLimit_DV {std kind 'Contract-Volume' units 'taf'}
+define RemAprOctLimit {
+    case FirstMonth {
+        condition month<APR .and. wateryear==BgnWY
+        value 999.} ! no limit in first three months
+    case AprilCritical {
+        condition month==APR .and. wyt_SHASTA_CVP==4
+        select Critical from ExchContractLimits where row=15}
+    case AprilNonCritical {
+        condition month==APR 
+        select NonCrit from ExchContractLimits where row=15}
+    case MayOct {
+        condition month>APR .or. month<DEC 
+        value max(0., RemAprOctLimit_DV(-1) - (d_mdota_64_xa(-1) + d_ary010_72_xa1(-1)
+                                                 + d_xcc010_72_xa2(-1) + d_xcc054_72_xa3(-1) 
+                                                 + d_mdota_73_xa(-1) + D_DMC111_73_XA(-1))*cfs_taf(-1)) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+goal setRemAprOctLimit_DV {RemAprOctLimit_DV = RemAprOctLimit}
+
+! The JanFebMarNovDec account is initialized in January.  "Remaining" available is calculated
+! from the previous month's account minus the previous month's delivery.  In April, it is
+! updated based on the March delivery, and then it stays static until December, when the 
+! November delivery is subtracted from the amount left after March.
+define RemJFMNDLimit_DV {std kind 'Contract-Volume' units 'taf'}
+define RemJFMNDLimit {
+    case FirstMonth {
+        condition month<JAN .and. wateryear==BgnWY
+        value 999.} ! 
+    case January {
+        condition month==JAN
+        value 121. }
+    case FebApr { 
+        condition month>=FEB .and. month<=APR 
+        value max(0., RemJFMNDLimit_DV(-1) - (d_mdota_64_xa(-1) + d_ary010_72_xa1(-1)
+                                                 + d_xcc010_72_xa2(-1) + d_xcc054_72_xa3(-1) 
+                                                 + d_mdota_73_xa(-1) + D_DMC111_73_XA(-1))*cfs_taf(-1)) }
+    case MayNov {
+        condition month>APR .or. month<DEC 
+        value RemJFMNDLimit_DV(-1) }
+    case December {
+        condition month==DEC 
+        value max(0., RemJFMNDLimit_DV(-1)- (d_mdota_64_xa(-1) + d_ary010_72_xa1(-1)
+                                                 + d_xcc010_72_xa2(-1) + d_xcc054_72_xa3(-1) 
+                                                 + d_mdota_73_xa(-1) + D_DMC111_73_XA(-1))*cfs_taf(-1)) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+goal setRemJFMNDLimit_DV {RemJFMNDLimit_DV = RemJFMNDLimit}
+
+! Monthly overall exchange contractor limits are not commonly used in actual practice
+!goal ExchTotalDivMonLmt {d_mdota_64_xa + d_ary010_72_xa1 + d_xcc010_72_xa2 + d_xcc054_72_xa3
+!                         + d_mdota_73_xa + D_DMC111_73_XA < ExchMonLimit*taf_cfs}
+
+! Limit total delivery to the remaining seasonal limit
+goal ExchTotalDivSeasLmt {
+    lhs d_mdota_64_xa + d_ary010_72_xa1 + d_xcc010_72_xa2 + d_xcc054_72_xa3 + d_mdota_73_xa + D_DMC111_73_XA 
+    case NovMar {
+        condition month>=NOV .and. month<=MAR
+        rhs RemJFMNDLimit*taf_cfs
+        lhs<rhs penalty 0}
+    case AprOct {
+        condition month>=APR .or. month==OCT
+        rhs RemAprOctLimit*taf_cfs
+        lhs<rhs penalty 0}
+}
+
+! aliases for debugging and qaqc
+define Total_XA_TgtDel  {alias min(CLM_64_XA_apr*taf_cfs,  (AWR_64_XA  *(1 - RUFR_64_XA   + RPF_64_XA)  + AWO_64_XA  *(1 - RUFR_64_XA   + RPF_64_XA ))/(1 - EVF_MDOTA_64_XA       - DPF_MDOTA_64_XA      - LFF_MDOTA_64_XA      - OSF_MDOTA_64_XA     ))
+                             + min(CLM_72_XA1_apr*taf_cfs, (AWR_72_XA1 *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1 *(1 - RUFR_72_XA1  + RPF_72_XA1))/(1 - EVF_ARY010_72_XA1     - DPF_ARY010_72_XA1    - LFF_ARY010_72_XA1    - OSF_ARY010_72_XA1   ))
+                             + min(CLM_72_XA2_apr*taf_cfs, (AWR_72_XA2 *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2 *(1 - RUFR_72_XA2  + RPF_72_XA2))/(1 - EVF_XCC010_72_XA2     - DPF_XCC010_72_XA2    - LFF_XCC010_72_XA2    - OSF_XCC010_72_XA2   ))
+                             + min(CLM_72_XA3_apr*taf_cfs, (AWR_72_XA3 *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3 *(1 - RUFR_72_XA3  + RPF_72_XA3))/(1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   ))
+                             + min(CLM_73_XA_apr*taf_cfs,  (AWR_73_XA  *(1 - RUFR_73_XA   + RPF_73_XA)  + AWO_73_XA  *(1 - RUFR_73_XA   + RPF_73_XA ))/(1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   ))
+                             kind 'Exch-Lim-CFS' units 'cfs'}
+
+define Total_XA_TgtDel_taf {alias Total_XA_TgtDel*cfs_taf kind 'Exch-Lim-TAF' units 'taf'}
+
+define tgt_64xa   {alias min(CLM_64_XA_apr*taf_cfs,  (AWR_64_XA  *(1 - RUFR_64_XA   + RPF_64_XA)  + AWO_64_XA  *(1 - RUFR_64_XA   + RPF_64_XA ))/ (1 - EVF_MDOTA_64_XA       - DPF_MDOTA_64_XA      - LFF_MDOTA_64_XA      - OSF_MDOTA_64_XA     )) kind 'Exch-Lim-CFS' units 'cfs'}
+define tgt_72xa1  {alias min(CLM_72_XA1_apr*taf_cfs, (AWR_72_XA1 *(1 - RUFR_72_XA1  + RPF_72_XA1) + AWO_72_XA1 *(1 - RUFR_72_XA1  + RPF_72_XA1))/ (1 - EVF_ARY010_72_XA1     - DPF_ARY010_72_XA1    - LFF_ARY010_72_XA1    - OSF_ARY010_72_XA1   )) kind 'Exch-Lim-CFS' units 'cfs'}
+define tgt_72xa2  {alias min(CLM_72_XA2_apr*taf_cfs, (AWR_72_XA2 *(1 - RUFR_72_XA2  + RPF_72_XA2) + AWO_72_XA2 *(1 - RUFR_72_XA2  + RPF_72_XA2))/ (1 - EVF_XCC010_72_XA2     - DPF_XCC010_72_XA2    - LFF_XCC010_72_XA2    - OSF_XCC010_72_XA2   )) kind 'Exch-Lim-CFS' units 'cfs'}
+define tgt_72xa3  {alias min(CLM_72_XA3_apr*taf_cfs, (AWR_72_XA3 *(1 - RUFR_72_XA3  + RPF_72_XA3) + AWO_72_XA3 *(1 - RUFR_72_XA3  + RPF_72_XA3))/ (1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   )) kind 'Exch-Lim-CFS' units 'cfs'}
+define tgt_73xa   {alias min(CLM_73_XA_apr*taf_cfs,  (AWR_73_XA  *(1 - RUFR_73_XA   + RPF_73_XA)  + AWO_73_XA  *(1 - RUFR_73_XA   + RPF_73_XA ))/ (1 - EVF_XCC054_72_XA3     - DPF_XCC054_72_XA3    - LFF_XCC054_72_XA3    - OSF_XCC054_72_XA3   )) kind 'Exch-Lim-CFS' units 'cfs'}
+
+define Total_XA_Temp {alias d_mdota_64_xa + d_ary010_72_xa1 + d_xcc010_72_xa2 + d_xcc054_72_xa3 + d_mdota_73_xa + D_DMC111_73_XA kind 'Exch-Lim-CFS' units 'cfs'}
+define Total_XA_Temp_taf {alias Total_XA_Temp*cfs_taf  kind 'Exch-Lim-TAF' units 'taf'}
+
+define lim_D_64_XA   {alias CLM_64_XA * taf_cfs * perdel_cvpex_s  kind 'Exch-Lim-CFS' units 'cfs'}
+define lim_D_73_XA   {alias CLM_73_XA * taf_cfs * perdel_cvpex_s  kind 'Exch-Lim-CFS' units 'cfs'}
+define lim_D_72_XA1  {alias CLM_72_XA1 * taf_cfs * perdel_cvpex_s kind 'Exch-Lim-CFS' units 'cfs'}
+define lim_D_72_XA2  {alias CLM_72_XA2 * taf_cfs * perdel_cvpex_s kind 'Exch-Lim-CFS' units 'cfs'}
+define lim_D_72_XA3  {alias CLM_72_XA3 * taf_cfs * perdel_cvpex_s kind 'Exch-Lim-CFS' units 'cfs'}
+
+
+
+
+
+
+
+
+
+
+
+

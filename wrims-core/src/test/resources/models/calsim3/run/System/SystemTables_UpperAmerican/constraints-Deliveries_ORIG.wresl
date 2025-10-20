@@ -1,0 +1,91 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+! Set deliveries to future demand area to zero
+goal setDG_ELDID_NA1zero  {DG_ELDID_NA1 = 0.}
+goal setDG_ELDID_NA2zero  {DG_ELDID_NA2 = 0.}
+goal setDG_ELDID_NA3zero  {DG_ELDID_NA3 = 0.}
+
+goal setDG_EDCOCA_NU1zero  {DG_EDCOCA_NU1 = 0.}
+goal setDG_EDCOCA_NU2zero  {DG_EDCOCA_NU2 = 0.}
+goal setDG_EDCOCA_NU3zero  {DG_EDCOCA_NU3 = 0.}
+goal setDG_EDCOCA_NA1zero  {DG_EDCOCA_NA1 = 0.}
+goal setDG_EDCOCA_NA2zero  {DG_EDCOCA_NA2 = 0.}
+goal setDG_EDCOCA_NA3zero  {DG_EDCOCA_NA3 = 0.}
+
+!======================================================================
+! El Dorado Irrigation District
+!======================================================================
+! EID Eastern Water Supply Region
+!Urban
+goal setDG_ELDID_NU1  {DG_ELDID_NU1 = D_WTPRS1_ELDID_NU1 + D_WTPRSA_ELDID_NU1}
+goal setDN_ELDID_NU1  {DN_ELDID_NU1 = DG_ELDID_NU1 - DL_ELDID_NU1} 
+goal setELDID_NU1     {UD_ELDID_NU1 = DN_ELDID_NU1 /*+ GP_ELDID_NU1*/ + SHRTG_ELDID_NU1}
+!Ag
+goal setDG_ELDID_NA1  {DG_ELDID_NA1 = D_JNKSN_ELDID_NA1 + D_EDC021_ELDID_NA1} !EID Eastern Ag Demands can be served by Jenkinson and Forebay
+goal setDN_ELDID_NA1  {DN_ELDID_NA1 = DG_ELDID_NA1 - DL_ELDID_NA1}
+goal setELDID_NA1     {AW_ELDID_NA1 = DN_ELDID_NA1 /*+ GP_ELDID_NA1*/ + SHRTG_ELDID_NA1}
+
+! EID Western Water Supply Region
+!Urban
+goal setDG_ELDID_NU2  {DG_ELDID_NU2 = D_WTPRS1_ELDID_NU2 + D_WTPRSA_ELDID_NU2 + D_WRT000_ELDID_NU2} !Includes proposed White Rock Tunnel
+goal setDN_ELDID_NU2  {DN_ELDID_NU2 = DG_ELDID_NU2 - DL_ELDID_NU2}
+goal setELDID_NU2     {UD_ELDID_NU2 = DN_ELDID_NU2 /*+ GP_ELDID_NU2*/ + SHRTG_ELDID_NU2}
+!Ag
+goal setDG_ELDID_NA2  {DG_ELDID_NA2 = D_JNKSN_ELDID_NA2 + D_EDC021_ELDID_NA2 + D_WRT000_ELDID_NA2} ! EID Western Ag Demands can be served by Jenkinson, Forebay and Whiterock
+goal setDN_ELDID_NA2  {DN_ELDID_NA2 = DG_ELDID_NA2 - DL_ELDID_NA2}
+goal setELDID_NA2     {AW_ELDID_NA2 = DN_ELDID_NA2 /*+ GP_ELDID_NA2*/ + SHRTG_ELDID_NA2}
+
+!======================================================================
+! Georgetown Divide PUD
+!======================================================================
+!Urban
+goal setDG_GDPUD_NU  {DG_GDPUD_NU = D_WTPWAL_GDPUD_NU}
+goal setDN_GDPUD_NU  {DN_GDPUD_NU = DG_GDPUD_NU - DL_GDPUD_NU}
+goal setGDPUD_NU     {UD_GDPUD_NU = DN_GDPUD_NU /*+ GP_GDPUD_NU*/ + SHRTG_GDPUD_NU}
+!Ag
+goal setDG_GDPUD_NA  {DG_GDPUD_NA = D_GDD010_GDPUD_NA}
+goal setDN_GDPUD_NA  {DN_GDPUD_NA = DG_GDPUD_NA - DL_GDPUD_NA}
+goal setGDPUD_NA     {AW_GDPUD_NA = DN_GDPUD_NA /*+ GP_GDPUD_NA*/ + SHRTG_GDPUD_NA}
+
+!======================================================================
+! El Dorado County Other County Areas (OCA)
+!======================================================================
+goal setDG_EDCOCA_NU1  {DG_EDCOCA_NU1 = D_FOLSM_EDCOCA_NU1 + D_WRT000_EDCOCA_NU1 + D_JNKSN_EDCOCA_NU1 + D_EDC021_EDCOCA_NU1}
+goal setDN_EDCOCA_NU1  {DN_EDCOCA_NU1 = DG_EDCOCA_NU1 - DL_EDCOCA_NU1}
+goal setEDCOCA_NU1     {UD_EDCOCA_NU1 = DN_EDCOCA_NU1 /*+ GP_EDCOCA_NU1*/ + SHRTG_EDCOCA_NU1}
+
+goal setDG_EDCOCA_NA1  {DG_EDCOCA_NA1 = D_FOLSM_EDCOCA_NA1 + D_WRT000_EDCOCA_NA1 + D_JNKSN_EDCOCA_NA1 + D_EDC021_EDCOCA_NA1}
+goal setDN_EDCOCA_NA1  {DN_EDCOCA_NA1 = DG_EDCOCA_NA1 - DL_EDCOCA_NA1}
+goal setEDCOCA_NA1     {AW_EDCOCA_NA1 = DN_EDCOCA_NA1 /*+ GP_EDCOCA_NA3*/ + SHRTG_EDCOCA_NA1}
+
+goal setDG_EDCOCA_NU3  {DG_EDCOCA_NU3 = D_WRT000_EDCOCA_NU3 + D_JNKSN_EDCOCA_NU3 + D_EDC021_EDCOCA_NU3}
+goal setDN_EDCOCA_NU3  {DN_EDCOCA_NU3 = DG_EDCOCA_NU3 - DL_EDCOCA_NU3}
+goal setEDCOCA_NU3     {UD_EDCOCA_NU3 = DN_EDCOCA_NU3 /*+ GP_EDCOCA_NU3*/ + SHRTG_EDCOCA_NU3}
+
+goal setDG_EDCOCA_NA3  {DG_EDCOCA_NA3 = D_WRT000_EDCOCA_NA3 + D_JNKSN_EDCOCA_NA3 + D_EDC021_EDCOCA_NA3}
+goal setDN_EDCOCA_NA3  {DN_EDCOCA_NA3 = DG_EDCOCA_NA3 - DL_EDCOCA_NA3}
+goal setEDCOCA_NA3     {AW_EDCOCA_NA3 = DN_EDCOCA_NA3 /*+ GP_EDCOCA_NA3*/ + SHRTG_EDCOCA_NA3}

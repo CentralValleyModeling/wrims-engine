@@ -1,0 +1,44 @@
+! Phoenix Project minimum flow requirement
+! Chakri 02/26/08
+! Bridget Childs 01/13/2023
+! *********************************************************************************
+! FERC Project No. 1061: Phoenix Project (September 30, 1992):
+! Article 404. The Licensee shall release from the 
+! Phoenix Project, into the South Fork Stanislaus River, a minimum
+! flow of 2 cubic feet per second (cfs), as measured immediately
+! downstream of the diversion, or inflow to the project reservoir,
+! whichever is less, for the protection and enhancement of fish and
+! wildlife resources in the bypassed reach of the South Fork
+! Stanislaus River.
+
+! South Fork Stanislaus River d/s of Lyons Dam (C_LYONS)
+define LYONS_MIF {value 2.} ! Changed from 2.6 
+goal SetC_LYONS_MIF {C_LYONS_MIF +C_LYONS_SHTG = LYONS_MIF}
+
+
+! Establishing target discharge from Lyons Reservoir using South Fork Natural Inflow 
+! Not included as part of the FERC License
+
+define C_LYONS_ADD1 {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+define C_LYONS_ADD2 {std kind 'FLOW-SPILL-POWER' units 'CFS'}
+
+define C_LYONS_TARG {std kind 'FLOW' units 'CFS'}
+
+define SF_Inflow {value I_PCRST + I_SFS033 + I_SFS030 + I_LYONS }
+define C_LYONS_TARGetflow {
+	case deC_RLIEFjul {
+		condition    month >= dec .and. month <= jul
+		select       C_LYONS_TARGet
+		from         Stanislaus_LYONS_TARGetflow
+		given        SF_Inflow = SF_Inflow
+		use          linear
+		where        Mon = month }
+	case other {
+		condition    always
+		value        LYONS_MIF }
+		    }
+		    
+goal setC_LYONS_TARG  {C_LYONS_TARG < max(C_LYONS_TARGetflow, LYONS_MIF)}
+goal set2C_LYONS_TARG {C_LYONS_TARG < C_LYONS_MIF + C_LYONS_ADD1}
+goal setC_LYONS       {C_LYONS = C_LYONS_TARG + C_LYONS_ADD2}
+

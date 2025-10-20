@@ -1,0 +1,96 @@
+! This file defines reoperation variables and arc-splits for wheeling, transfers, etc.
+! this has been reorganized by location
+! Other variables may be defined elsewhere (channel-table, NOD_Storage_Transfer, etc)
+
+! Whiskeytown
+define C_WKYTN_m {std kind 'FLOW' UNITS 'CFS'}
+define C_WKYTN_whlcv {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define C_WKYTN_whljp {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+goal ClrcrkWhl { C_WKYTN = C_WKYTN_m + C_WKYTN_whlcv + C_WKYTN_whljp}
+
+define D_WKYTN_m {std kind 'FLOW' UNITS 'CFS'}
+define D_WKYTN_whlcv {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define D_WKYTN_whljp {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+goal SprcrkWhl { D_WKYTN_SPT003 = D_WKYTN_m + D_WKYTN_whlcv + D_WKYTN_whljp }
+
+! Shasta/Keswick
+define C_KSWCK_m {std kind 'FLOW' UNITS 'CFS'}
+define C_KSWCK_whlcv {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define C_KSWCK_whljp {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define C_KSWCK_SWP {std kind 'FLOW-CHANNEL' units 'CFS'}
+goal setC_KSWCK_SWP {C_KSWCK_SWP = 0.0}
+define C_KSWCK_WTS {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+define C_KSWCK_WTS_STG1_SWP {STD KIND 'FLOW-CHANNEL' UNITS 'CFS'}
+define C_KSWCK_S32SWP {std kind 'FLOW-CHANNEL' units 'CFS'}   ! NODOS related
+goal setC_KSWCK_S32SWP {C_KSWCK_S32SWP = 0.0}
+define C_KSWCK_S32OTH {std kind 'FLOW-CHANNEL' units 'CFS'}   ! NODOS related
+goal setC_KSWCK_S32OTH {C_KSWCK_S32OTH = 0.0}
+goal wheeling1a {D_WKYTN_whlcv < C_KSWCK_whlcv}
+goal wheeling1b {D_WKYTN_whljp < C_KSWCK_whljp}
+goal ShastaWhl { C_KSWCK = C_KSWCK_m + C_KSWCK_whlcv + C_KSWCK_whljp + C_KSWCK_SWP + C_KSWCK_WTS + C_KSWCK_S32SWP + C_KSWCK_S32OTH}
+
+goal split_C_KSWCK_WTS {C_KSWCK_WTS = C_KSWCK_WTS_STG1_SWP}
+goal setC_KSWCK_WTS {C_KSWCK_WTS = 0} ! Shasta/Keswick not involved in Yuba transfers (EIR/EIS LYRA 2007)
+goal SetI_SHSTA_WTS {I_SHSTA_WTS = 0} ! Shasta/Keswick not involved in Yuba transfers (EIR/EIS LYRA 2007)
+
+
+! Folsom/Nimbus
+define C_NTOMA_m {std kind 'FLOW' UNITS 'CFS'}
+define C_NTOMA_whlcv {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define C_NTOMA_whljp {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+goal FolsomWhl { C_NTOMA = C_NTOMA_m + C_NTOMA_whlcv + C_NTOMA_whljp}
+
+! NODOS
+!define C32   {std kind 'FLOW' UNITS 'CFS'}
+define C32_m {std kind 'FLOW' UNITS 'CFS'}
+define C32_whlcv {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+define C32_whljp {std kind 'FLOW-WHEEL' UNITS 'CFS'}
+goal NODOSCVPWhl { C32 = C32_m + C32_whlcv + C32_whljp }
+
+! Oroville
+!define C_OROVL_m {std kind 'FLOW' UNITS 'CFS'}
+!define C_OROVL_WTS {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+!define C_OROVL_WTS_STG1_SWP {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+!goal OroWhl   {C_OROVL = C_OROVL_m + C_OROVL_WTS}
+
+!goal split_C_OROVL_WTS {C_OROVL_WTS = C_OROVL_WTS_STG1_SWP}
+
+! Feather COA Adjustment
+define C_FTR059_m {std kind 'FLOW' UNITS 'CFS'}
+define C_FTR059_WTS {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+define C_FTR059_WTS_STG1_SWP {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+goal OroWhl   {C_FTR059 = C_FTR059_m + C_FTR059_WTS}
+
+goal split_C_FTR059_WTS {C_FTR059_WTS = C_FTR059_WTS_STG1_SWP}
+
+! Inflow components
+define C_SAC041_reop {std kind 'FLOW-REOP-ADJ' units 'cfs'}
+define C_SAC041_whlcv {std kind 'FLOW-REOP-ADJ' units 'cfs'}
+define C_SAC041_whljp {std kind 'FLOW-REOP-ADJ' units 'cfs'}
+define C_SAC041_WTS {std kind 'FLOW-REOP-ADJ' units 'cfs'}
+goal splitC_SAC041_reop {C_SAC041_reop = C_SAC041_whlcv + C_SAC041_whljp + C_SAC041_WTS}
+
+! Outflow required (per ANN) in excess of NDOI_MIN
+define NDOI_ADD_whlcv {std kind 'FLOW-CHANNEL' units 'CFS'}
+define NDOI_ADD_whljp {std kind 'FLOW-CHANNEL' units 'CFS'}
+define NDOI_ADD_WTS {std kind 'flow-channel' units 'cfs'}
+
+!******************************************************************************
+!  Delta Flow Accounting Components D418_WTS, D419_WTS and C407_WTS
+! Tracy PP
+define C_DMC000_WTS_Stg1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+goal split_C_DMC000_WTS { C_DMC000_WTS = C_DMC000_WTS_Stg1}
+! Banks PP
+define C_CAA003_WTS_Stg1 {std kind 'FLOW-DELIVERY' UNITS 'CFS'}
+goal split_C_CAA003_WTS { C_CAA003_WTS = C_CAA003_WTS_Stg1}
+! Incremental Outflow Adjustment
+define NDOI_ADD_WTS_Stg1 {std kind 'FLOW-CHANNEL' UNITS 'CFS'}
+goal split_NDOI_ADD_WTS { NDOI_ADD_WTS = NDOI_ADD_WTS_Stg1}
+
+! REOP Balance Error terms
+define C_SAC041_WHLCV_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define C_SAC041_WHLJP_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define C_SAC041_WTS_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define Reop_Rel_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define ReopSurp_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+

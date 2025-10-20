@@ -1,0 +1,153 @@
+! SacRiverIndex.wresl
+! Sac River Index January forcaste is used to lookup MRR flow requirement for American River
+
+define C_BB_OctMar_75Exc{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_SRBB(i))+(sum(i=0, Mar-month, 1) BB_fm[UPPERAMERICAN](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_SRBB(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define C_BB_OctMar_75Exc_dv{alias C_BB_OctMar_75Exc kind 'index' units 'taf'}
+
+define C_BB_AprSep_75Exc{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Sep-month, 1) BB_fm[UPPERAMERICAN](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_SRBB(-1) + (sum(i=0, Sep-month, 1) BB_fm[UPPERAMERICAN](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define C_BB_AprSep_75Exc_dv{alias C_BB_AprSep_75Exc kind 'index' units 'taf'}
+
+
+define i_Orovl_OctMar_75Exc{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_OROV(i))+(sum(i=0, Mar-month, 1) I_Orovl_fm[UPPERAMERICAN](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_OROV(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Orovl_OctMar_75Exc_dv{alias i_Orovl_OctMar_75Exc kind 'index' units 'taf'}
+
+define i_Orovl_AprSep_75Exc{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Sep-month, 1) I_Orovl_fm[UPPERAMERICAN](i)
+	}
+	case MonthMay{
+		condition month==May 
+		value UNIMP_OROV(-1) + (sum(i=0, Sep-month, 1) I_Orovl_fm[UPPERAMERICAN](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Orovl_AprSep_75Exc_dv{alias i_Orovl_AprSep_75Exc kind 'index' units 'taf'}
+
+
+define i_Folsm_OctMar_75Exc{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_FOLS(i))+(sum(i=0, Mar-month, 1) I_Folsm_fm[UPPERAMERICAN](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_FOLS(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define i_Folsm_OctMar_75Exc_dv{alias i_Folsm_OctMar_75Exc kind 'index' units 'taf'}
+
+define i_Folsm_AprSep_75Exc{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Sep-month, 1) I_Folsm_fm[UPPERAMERICAN](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_FOLS(-1) + (sum(i=0, Sep-month, 1) I_Folsm_fm[UPPERAMERICAN](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define i_Folsm_AprSep_75Exc_dv{alias i_Folsm_AprSep_75Exc kind 'index' units 'taf'}
+
+
+define yuba_OctMar_75Exc{
+	case JanMar{
+		condition month>=Jan .and. month<=mar
+		value (sum(i=Oct-month, -1, 1) UNIMP_YUBA(i))+(sum(i=0, Mar-month, 1) yuba_fm[UPPERAMERICAN](i))
+	}
+	case AprMay{
+		condition month>=Apr .and. month<=may
+		value (sum(i=Oct-month, mar-month, 1) UNIMP_YUBA(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define yuba_OctMar_75Exc_dv{alias yuba_OctMar_75Exc kind 'index' units 'taf'}
+
+define yuba_AprSep_75Exc{
+	case JanApr{
+		condition month>=Jan .and. month<=Apr
+		sum(i=Apr-month, Sep-month, 1) yuba_fm[UPPERAMERICAN](i)
+	}
+	case MonthMay{
+		condition month==May
+		value UNIMP_YUBA(-1) + (sum(i=0, Sep-month, 1) yuba_fm[UPPERAMERICAN](i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define yuba_AprSep_75Exc_dv{alias yuba_AprSep_75Exc kind 'index' units 'taf'}
+
+define SacRiverIndex_75EXC_Prev{value SacRiverIndex_75EXC_dv(prevMay)}
+
+define SacRiverIndex_75EXC{ 
+    case OCTtoDec {
+         condition  month >= OCT .and. month <= Dec 
+         value SacRiverIndex_75EXC_dv(prevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value SacRiverIndex_75EXC_dv(prevMay)
+         }
+    case rest {
+         condition  always
+	 value (C_BB_AprSep_75EXC+i_Orovl_AprSep_75EXC+i_Folsm_AprSep_75EXC+yuba_AprSep_75EXC)+(C_BB_OctMar_75EXC+i_Orovl_OctMar_75EXC+i_Folsm_OctMar_75EXC+yuba_OctMar_75EXC)
+	}
+}
+define SacRiverIndex_75EXC_dv{alias SacRiverIndex_75EXC kind 'index' units 'taf'}
+
+

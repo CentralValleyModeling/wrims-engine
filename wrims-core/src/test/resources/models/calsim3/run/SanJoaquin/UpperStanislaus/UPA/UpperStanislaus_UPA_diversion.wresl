@@ -1,0 +1,158 @@
+! Historical diversion constraints
+! Chakri Malakpet 03/04/08
+!*********************************************************************************
+! Implements use of historical diversion records to constrain model.
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Utica Canal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+define D_CVT005_UTC000_DEM {timeseries kind 'FLOW-HISTORICAL' units 'CFS'}
+define D_CVT005_UTC000_target { !units of AF 
+	case le100 {
+	     condition    frcst_nmi_may <= 100
+	     select       Dry_1
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case ScenarioA {
+	     condition    frcst_nmi_may > 100 .and. frcst_nmi_may <= 140
+	     select       Dry_2
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case ScenarioB {
+	     condition    frcst_nmi_may > 140 .and. frcst_nmi_may <= 320
+	     select       Dry_3
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case ScenarioC {
+	     condition    frcst_nmi_may > 320 .and. frcst_nmi_may <= 400
+	     select       Dry_4
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case ScenarioD {
+	     condition    frcst_nmi_may > 400 .and. frcst_nmi_may <= 500
+	     select       Dry_5
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case ScenarioE {
+	     condition    frcst_nmi_may > 500
+	     select       Wet
+	     from         Stanislaus_upa_diversion
+	     where        Mon = month }
+	case other {
+	     condition always
+	     value 0 }
+		}
+
+!Reducing the total diversion by the amount of turnback
+define D_CVT005_UTC000_cfs {
+	case Wet {
+	     condition    frcst_nmi_may > 500 .and. month >= oct .and. month <= mar
+	     value        max((D_CVT005_UTC000_target - 500)*af_cfs - I_MIL003,0.) }
+	case Normal {
+	     condition    frcst_nmi_may > 400 .and. frcst_nmi_may <= 500 .and. month >=oct .and. month <= mar
+	     value	  max((D_CVT005_UTC000_target - 200)*af_cfs - I_MIL003,0.) }
+	case Dry {
+	     condition    frcst_nmi_may <= 400
+	     value        max(D_CVT005_UTC000_target*af_cfs - I_MIL003,0.) } !Subtract I_MIL003 from total to obtain D_COL009_MIL003
+	case other {
+	     condition    always
+	     value        max(D_CVT005_UTC000_target*af_cfs - I_MIL003,0.) }
+		    }
+
+!define D_COL009_UTC000_cfsdv {std kind 'DIVERSION' units 'CFS'}
+!goal chkD_COL009_UTC000_cfsdv {D_COL009_UTC000_cfsdv = D_COL009_UTC000_cfs}
+
+
+goal D_COL009_MIL003_net {D_CVT005_UTC000 < D_CVT005_UTC000_cfs}
+ */
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! CACWD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! constrained by predefined SV timeseries 
+
+define D_UTC000_CACWD_DEM {timeseries kind 'FLOW-HISTORICAL' units 'CFS'}
+goal setD_UTC000_CACWD_DEM {D_UTC000_CACWD < D_UTC000_CACWD_DEM}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! UTICA  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Assumed annual Demand of 2 TAF
+! Monthly pattern (%) = ( Oct, 8,  Nov, 5,  Dec, 4,  Jan, 4,  Feb, 4,  Mar, 4,  Apr, 6,  May, 9,  Jun, 12,  Jul, 16,  Aug, 15,  Sep, 13 
+! Using monthly pattern from City of Angels (2013 City of Angels Water Master Plan) 
+
+
+define D_UTC014_UTICA_DEM { !units CFS 
+	case october  {condition month == oct
+		value 2.6}
+	case november {condition month == nov
+		value 1.7} 
+	case december {condition month == dec
+		value 1.3}
+	case january  {condition month == jan
+		value 1.3}
+	case february {condition month == feb
+		value 1.4}
+	case march    {condition month == mar
+		value 1.3}
+	case april    {condition month == apr
+		value 2.}
+	case mmay     {condition month == may
+		value 2.9}
+	case june     {condition month == jun
+		value 4.}
+	case july     {condition month == jul
+		value 5.2}
+	case august   {condition month == aug
+		value 4.9}
+	case sept     {condition month == sep
+		value 4.4}}
+			
+goal setD_UTC014_UTICA_DEM {D_UTC014_UTICA < D_UTC014_UTICA_DEM}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! ANGLS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Angel Canal was added and diversion to City of Angels (D_ANG015_UPANG) was changed to D_ANC000_ANGLS
+!define D_ANG015_UPANG_DEM {timeseries kind 'FLOW-HISTORICAL' units 'CFS'}
+!goal setD_ANG015_UPANG_DEM {D_ANG015_UPANG < D_ANG015_UPANG_DEM}
+
+! Assumed annual Demand of 2 TAF
+! Monthly pattern (%) = ( Oct, 8,  Nov, 5,  Dec, 4,  Jan, 4,  Feb, 4,  Mar, 4,  Apr, 6,  May, 9,  Jun, 12,  Jul, 16,  Aug, 15,  Sep, 13 
+! Using monthly pattern from City of Angels (2013 City of Angels Water Master Plan)
+
+define D_ANC000_ANGLS_DEM { !units CFS 
+	case october  {condition month == oct
+		value 2.6}
+	case november {condition month == nov
+		value 1.7} 
+	case december {condition month == dec
+		value 1.3}
+	case january  {condition month == jan
+		value 1.3}
+	case february {condition month == feb
+		value 1.4}
+	case march    {condition month == mar
+		value 1.3}
+	case april    {condition month == apr
+		value 2.}
+	case mmay     {condition month == may
+		value 2.9}
+	case june     {condition month == jun
+		value 4.}
+	case july     {condition month == jul
+		value 5.2}
+	case august   {condition month == aug
+		value 4.9}
+	case sept     {condition month == sep
+		value 4.4}}
+			
+goal setD_ANC000_ANGLS_DEM {D_ANC000_ANGLS < D_ANC000_ANGLS_DEM}
+
+
+
+
+
+

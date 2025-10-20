@@ -1,0 +1,108 @@
+/*
+File Name: constraints-WUfactors.wresl
+CalSim 3.0 System File
+
+Purpose:
+Apply water use factors
+ 
+Naming takes the following form:
+ EL_{source prefix}_{demand unit} - evaporative loss (non-recoverable)
+ PL_{source prefix}_{demand unit} - percolation loss (to groundwater)
+ RL_{source prefix}_{demand unit} - return flow loss (seepage loss to canal toe drain, available for reuse)
+ SL_{source prefix}_{demand unit} - spill loss (canal spill to main drain, not available for reuse)
+  
+ DL_{source prefix}_{demand unit} - total conveyance loss  associated with diversion (EL + PL + RL + SL)
+ DL_{demand unit}             	  - total conveyance loss  associated with demand unit from multiple diversion arcs
+ DLF_{demand unit}				  - total delivery loss fraction
+  
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 24_NA1
+!==============================
+goal setEV_24_NA1   {EV_24_NA1 = D_CBC001_24_NA1 * EVF_CBC001_24_NA1 + D_WSE004_24_NA1 * EVF_WSE004_24_NA1 + D_ABN024_24_NA1 * EVF_ABN024_24_NA1} 
+goal setDP_24_NA1   {DP_24_NA1 = D_CBC001_24_NA1 * DPF_CBC001_24_NA1 + D_WSE004_24_NA1 * DPF_WSE004_24_NA1 + D_ABN024_24_NA1 * DPF_ABN024_24_NA1} 
+goal setLF_24_NA1   {LF_24_NA1 = D_CBC001_24_NA1 * LFF_CBC001_24_NA1 + D_WSE004_24_NA1 * LFF_WSE004_24_NA1 + D_ABN024_24_NA1 * LFF_ABN024_24_NA1} 
+goal setOS_24_NA1   {OS_24_NA1 = D_CBC001_24_NA1 * OSF_CBC001_24_NA1 + D_WSE004_24_NA1 * OSF_WSE004_24_NA1 + D_ABN024_24_NA1 * OSF_ABN024_24_NA1} 
+goal setDL_24_NA1   {DL_24_NA1 = EV_24_NA1  + DP_24_NA1  + LF_24_NA1 + OS_24_NA1}
+define DLF_24_NA1 {value EVF_CBC001_24_NA1 + DPF_CBC001_24_NA1 + LFF_CBC001_24_NA1 + OSF_CBC001_24_NA1}
+! reuse, missing NA1 time series in SV file
+goal setRU_24_NA1  {RU_24_NA1 = min(TW_24_NA1, RUFR_24_NA1*AWR_24_NA1 + RUFO_24_NA1*AWO_24_NA1)} 
+goal setAW_24_NA1   {AW_24_NA1 = AWR_24_NA1 + AWO_24_NA1} 
+! riparian loss
+goal setRP_24_NA1   {RP_24_NA1 = AW_24_NA1 * RPF_24_NA1} 
+
+!==============================
+! 24_NA2
+!==============================
+goal setEV_24_NA2   {EV_24_NA2 = D_ABN010_24_NA2 * EVF_ABN010_24_NA2} 
+goal setDP_24_NA2   {DP_24_NA2 = D_ABN010_24_NA2 * DPF_ABN010_24_NA2} 
+goal setLF_24_NA2   {LF_24_NA2 = D_ABN010_24_NA2 * LFF_ABN010_24_NA2} 
+goal setOS_24_NA2   {OS_24_NA2 = D_ABN010_24_NA2 * OSF_ABN010_24_NA2} 
+goal setDL_24_NA2   {DL_24_NA2 = EV_24_NA2  + DP_24_NA2  + LF_24_NA2 + OS_24_NA2}
+! reuse
+goal setRU_24_NA2  {RU_24_NA2 = min(TW_24_NA2, RUFR_24_NA2*AWR_24_NA2 + RUFO_24_NA2*AWO_24_NA2)} 
+goal setAW_24_NA2   {AW_24_NA2 = AWR_24_NA2 + AWO_24_NA2} 
+! riparian loss
+goal setRP_24_NA2   {RP_24_NA2 = AW_24_NA2 * RPF_24_NA2} 
+
+!==============================
+! 24_NA3
+!==============================
+goal setEV_24_NA3   {EV_24_NA3 = D_STH003_24_NA3 * EVF_STH003_24_NA3 + D_LBC049_24_NA3 * EVF_LBC049_24_NA3 + D_STH005_24_NA3 * EVF_STH005_24_NA3 + D_WSE006_24_NA3 * EVF_WSE006_24_NA3} 
+goal setDP_24_NA3   {DP_24_NA3 = D_STH003_24_NA3 * DPF_STH003_24_NA3 + D_LBC049_24_NA3 * DPF_LBC049_24_NA3 + D_STH005_24_NA3 * DPF_STH005_24_NA3 + D_WSE006_24_NA3 * DPF_WSE006_24_NA3} 
+goal setLF_24_NA3   {LF_24_NA3 = D_STH003_24_NA3 * LFF_STH003_24_NA3 + D_LBC049_24_NA3 * LFF_LBC049_24_NA3 + D_STH005_24_NA3 * LFF_STH005_24_NA3 + D_WSE006_24_NA3 * LFF_WSE006_24_NA3} 
+goal setOS_24_NA3   {OS_24_NA3 = D_STH003_24_NA3 * OSF_STH003_24_NA3 + D_LBC049_24_NA3 * OSF_LBC049_24_NA3 + D_STH005_24_NA3 * OSF_STH005_24_NA3 + D_WSE006_24_NA3 * OSF_WSE006_24_NA3} 
+goal setDL_24_NA3   {DL_24_NA3 = EV_24_NA3  + DP_24_NA3  + LF_24_NA3 + OS_24_NA3}
+!define DLF_24_NA3   {value EVF_STH003_24_NA3 + DPF_STH003_24_NA3 + LFF_STH003_24_NA3 + OSF_STH003_24_NA3}
+! reuse
+goal setRU_24_NA3   {RU_24_NA3 = 2.5*min(TW_24_NA3, RUFR_24_NA3*AWR_24_NA3 + RUFO_24_NA3*AWO_24_NA3)} ! Scale by 2.5 because of error in land use
+goal setAW_24_NA3   {AW_24_NA3 = 2.5*(AWR_24_NA3 + AWO_24_NA3)}  ! Scale by 2.5 because of error in land use
+! riparian loss
+goal setRP_24_NA3   {RP_24_NA3 = AW_24_NA3 * RPF_24_NA3}
+
+!==============================
+! 24_NU2
+!==============================
+goal setEL_WTPFSS_24_NU2 {EL_WTPFSS_24_NU2 = D_WTPFSS_24_NU2  * EF_WTPFSS_24_NU2}
+goal setSL_WTPFSS_24_NU2 {SL_WTPFSS_24_NU2 = D_WTPFSS_24_NU2  * SF_WTPFSS_24_NU2}
+goal setDL_WTPFSS_24_NU2 {DL_WTPFSS_24_NU2 = EL_WTPFSS_24_NU2 + SL_WTPFSS_24_NU2}
+
+goal setDL_24_NU2        {DL_24_NU2 = DL_WTPFSS_24_NU2}
+define DLF_24_NU2	 {value EF_WTPFSS_24_NU2 + SF_WTPFSS_24_NU2}
+
+!==============================
+! 24_NU1
+!==============================
+goal setEL_WTPBWM_24_NU1 {EL_WTPBWM_24_NU1 = D_WTPBWM_24_NU1  * EF_WTPBWM_24_NU1}
+goal setSL_WTPBWM_24_NU1 {SL_WTPBWM_24_NU1 = D_WTPBWM_24_NU1  * SF_WTPBWM_24_NU1}
+goal setDL_WTPBWM_24_NU1 {DL_WTPBWM_24_NU1 = EL_WTPBWM_24_NU1 + SL_WTPBWM_24_NU1}
+
+goal setEL_WTPAUB_24_NU1 {EL_WTPAUB_24_NU1 = D_WTPAUB_24_NU1  * EF_WTPAUB_24_NU1}
+goal setSL_WTPAUB_24_NU1 {SL_WTPAUB_24_NU1 = D_WTPAUB_24_NU1  * SF_WTPAUB_24_NU1}
+goal setDL_WTPAUB_24_NU1 {DL_WTPAUB_24_NU1 = EL_WTPAUB_24_NU1 + SL_WTPAUB_24_NU1}
+
+goal setDL_24_NU1    {DL_24_NU1 = DL_WTPBWM_24_NU1 + DL_WTPAUB_24_NU1}
+define DLF_24_NU1	 {value EF_WTPBWM_24_NU1 + SF_WTPBWM_24_NU1}
+
+!==============================
+! 24_NU3
+!==============================
+goal setEL_WSE004_24_NU3 {EL_WSE004_24_NU3 = D_WSE004_24_NU3  *  EF_WSE004_24_NU3}
+goal setSL_WSE004_24_NU3 {SL_WSE004_24_NU3 = D_WSE004_24_NU3  *  SF_WSE004_24_NU3}
+goal setDL_WSE004_24_NU3 {DL_WSE004_24_NU3 = EL_WSE004_24_NU3 +  SL_WSE004_24_NU3}
+
+goal setDL_24_NU3    {DL_24_NU3 = DL_WSE004_24_NU3}
+define DLF_24_NU3	 {value EF_WSE004_24_NU3 + SF_WSE004_24_NU3}
+
+!==============================
+! PCWA3
+!==============================
+goal setDL_LBC010_PCWA3 {DL_LBC010_PCWA3 = 0.0}
+
+goal setDL_PCWA3     {DL_PCWA3 = DL_LBC010_PCWA3}
+define DLF_PCWA3	 {value 0.0}

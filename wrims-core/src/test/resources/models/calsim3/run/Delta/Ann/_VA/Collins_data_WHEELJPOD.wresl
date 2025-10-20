@@ -1,0 +1,264 @@
+! R.Wilbur & S. Wu 5/10/05
+/*
+
+ARTIFICIAL NEURAL NETWORK IMPLEMENTATION - COLLINSVILLE
+
+Collinsville salinity standard:
+month       ECstandard
+1           19.0
+2           15.5
+3           15.5
+4           12.5
+5            8.0
+6            8.0
+7           11.0
+8           11.0
+
+*/
+
+!*************************************************************************************************************
+
+! calculate previous month's value of salinity
+define CO_EC_Month_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+               C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),
+               net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),
+               sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),sac_oth[WHEELJPOD](-1),
+               exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),exp_oth[WHEELJPOD](-1),
+               VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(monthly_ave),12,(wateryear-1))}
+  case others {
+    condition always
+      value  AnnEC(C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+               C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),
+               net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),
+               sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),sac_oth[WHEELJPOD](-1),
+               exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),exp_oth[WHEELJPOD](-1),
+               VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(monthly_ave),(month-1),wateryear)}
+}
+define CO_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setCO_EC_MON {CO_EC_Month = CO_EC_Month_sv}
+
+!get ANN_EC for 2 month earlier 4/14/2005
+define CO_EC_Month_smooth_sv {
+  case October {
+    condition  month == Oct
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(monthly_ave),11,(wateryear-1))}
+
+  case November {
+    condition  month == Nov
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(monthly_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(monthly_ave),(month-2),wateryear)}
+}
+
+define CO_EC_MonthDSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setCO_EC_DSM2 {CO_EC_MonthDSM2 = CO_EC_Month_smooth_sv}
+
+! calculate the maximum 14 day running average
+define CO_EC_Max14Day_sv {
+  case lastWaterYear {
+    condition  month == Oct
+      value  AnnEC(C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+               C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),
+               net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),
+               sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),sac_oth[WHEELJPOD](-1),
+               exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),exp_oth[WHEELJPOD](-1),
+               VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(max_14day_running_ave),12,(wateryear-1))}
+  case others {
+    condition always
+      value  AnnEC(C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+               C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),
+               net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),
+               sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),sac_oth[WHEELJPOD](-1),
+               exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),exp_oth[WHEELJPOD](-1),
+               VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),
+               int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(max_14day_running_ave),(month-1),wateryear)}
+}
+
+define CO_EC_Max14Day {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setCO_EC_14Ave {CO_EC_Max14Day = CO_EC_Max14Day_sv}
+
+!get ANN_EC for 2 month earlier
+define CO_EC_Max14day_smooth_sv {
+  case October {
+    condition  month == Oct
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(max_14day_running_ave),11,(wateryear-1))}
+
+  case November {
+    condition  month == Nov
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(max_14day_running_ave),12,(wateryear-1))}
+
+  case others {
+    condition always
+      value  AnnEC_matchDSM2(
+             C_SAC041[WHEELJPOD](-7),C_SAC041[WHEELJPOD](-6), C_SAC041[WHEELJPOD](-5),C_SAC041[WHEELJPOD](-4),C_SAC041[WHEELJPOD](-3),C_SAC041[WHEELJPOD](-2),C_SAC041[WHEELJPOD](-1),
+               EXP_TD[WHEELJPOD](-6),EXP_TD[WHEELJPOD](-5),EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),
+               C_SJR070[WHEELJPOD](-7),C_SJR070[WHEELJPOD](-6),C_SJR070[WHEELJPOD](-5),C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),
+               DXC[WHEELJPOD](-6),DXC[WHEELJPOD](-5),DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),
+               net_DICU[WHEELJPOD](-6),net_DICU[WHEELJPOD](-5),net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),
+               sac_oth[WHEELJPOD](-6),sac_oth[WHEELJPOD](-5),sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),
+               exp_oth[WHEELJPOD](-6),exp_oth[WHEELJPOD](-5),exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),
+               VERNWQFINAL[WHEELJPOD](-6),VERNWQFINAL[WHEELJPOD](-5),VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),
+               int(daysindv(-7)),int(daysindv(-6)),int(daysindv(-5)),int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),
+               int(CO),int(max_14day_running_ave),(month-2),wateryear)}
+}
+
+define CO_EC_Max14_DSM2 {std kind 'SALINITY' units 'UMHOS/CM'}
+goal setCO_EC_DSM2_2 {CO_EC_Max14_DSM2 = CO_EC_Max14day_smooth_sv}
+
+!****************************************************************************************
+
+! define the EC standard for Collinsville (millimhos/cm)      
+define CO_EC_STD_lookup {
+  case OctMay {  
+    condition  month >=OCT .and. month <=MAY   
+    select     ECstandard1    
+    from       salinity_std_col
+    where      month=month}
+  case NoStandard {
+    condition  always
+    value  99.0}
+}								      
+     
+define CO_EC_STD_sv { value CO_EC_STD_lookup * 1000.0 }
+define CO_EC_STD {std kind 'SALINITY' units 'UMHOS/CM'}
+goal COECstandout {CO_EC_STD = CO_EC_STD_sv}
+
+!****************************************************************************************
+!get slope and intercept for constraint exp<=m*sac+b
+
+define CO_b_sv {
+  case control{
+    condition month >= Oct .and. month <= May
+    value  AnnLineGen(C_SAC041_ANN[WHEELJPOD](-4),C_SAC041_ANN[WHEELJPOD](-3),C_SAC041_ANN[WHEELJPOD](-2),C_SAC041_ANN[WHEELJPOD](-1),
+                    EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+                    C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),SJR_ann_est,
+                    DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),DXC_est,
+                    net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),net_delta_cu,
+                    sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2),sac_oth[WHEELJPOD](-1),sac_oth_est,
+                    exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2),exp_oth[WHEELJPOD](-1),exp_oth_est,
+                    VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),VernWQfinalSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    CO_EC_STD_sv,line_CO_lo,line_CO_hi,
+                    int(CO),int(intercept),int(monthly_ave),month,wateryear,4)}
+  case other {
+    condition  always
+    value 999999.}
+}
+define CO_m_sv {
+  case reducecalls {
+    condition  CO_b_sv >= 999990.
+    value 0.}
+  case control{
+    condition month >= Oct .and. month <= May
+    value  AnnLineGen(C_SAC041_ANN[WHEELJPOD](-4),C_SAC041_ANN[WHEELJPOD](-3),C_SAC041_ANN[WHEELJPOD](-2),C_SAC041_ANN[WHEELJPOD](-1),
+                    EXP_TD[WHEELJPOD](-4),EXP_TD[WHEELJPOD](-3),EXP_TD[WHEELJPOD](-2),EXP_TD[WHEELJPOD](-1),
+                    C_SJR070[WHEELJPOD](-4),C_SJR070[WHEELJPOD](-3),C_SJR070[WHEELJPOD](-2),C_SJR070[WHEELJPOD](-1),SJR_ann_est,
+                    DXC[WHEELJPOD](-4),DXC[WHEELJPOD](-3),DXC[WHEELJPOD](-2),DXC[WHEELJPOD](-1),DXC_est,
+                    net_DICU[WHEELJPOD](-4),net_DICU[WHEELJPOD](-3),net_DICU[WHEELJPOD](-2),net_DICU[WHEELJPOD](-1),net_delta_cu,
+                    sac_oth[WHEELJPOD](-4),sac_oth[WHEELJPOD](-3),sac_oth[WHEELJPOD](-2), sac_oth[WHEELJPOD](-1), sac_oth_est,
+                    exp_oth[WHEELJPOD](-4),exp_oth[WHEELJPOD](-3),exp_oth[WHEELJPOD](-2), exp_oth[WHEELJPOD](-1), exp_oth_est,
+                    VERNWQFINAL[WHEELJPOD](-4),VERNWQFINAL[WHEELJPOD](-3),VERNWQFINAL[WHEELJPOD](-2),VERNWQFINAL[WHEELJPOD](-1),VernWQfinalSV,
+                    int(daysindv(-4)),int(daysindv(-3)),int(daysindv(-2)),int(daysindv(-1)),daysin,
+                    CO_EC_STD_sv,line_CO_lo,line_CO_hi,
+                    int(CO),int(slope),int(monthly_ave),month,wateryear,4)}
+  case other {
+    condition  always
+    value 0.}
+}
+define CO_m {lower unbounded upper unbounded kind 'SLOPE' units 'NONE'}
+define CO_b {lower unbounded upper unbounded kind 'INTERCEPT' units 'NONE'}
+goal setCO_m {CO_m = CO_m_sv}
+goal setCO_b {CO_b = CO_b_sv}
+
+!********************************************************************
+!Get the required Sac flow for ZERO exports
+define CO_Sac_ZeroExp_sv1 {
+  case NoSalinityControlPossible{
+    condition abs(CO_m_sv) <= 0.001 .and. int(CO_b_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition CO_m_sv <= 0.0
+    value 0.}
+  case NegCarriage{
+    condition CO_m_sv >= 1.0
+    value 0.}
+  case control{
+    condition month >= Oct .and. month <= May
+    value -CO_b_sv/CO_m_sv}
+  case other {
+    condition  always
+    value 0.}
+}
+define CO_Sac_ZeroExp_sv2 {value max(0.0,CO_Sac_ZeroExp_sv1)}
+define CO_Sac_ZeroExp {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+goal setCO_Sac_ZeroExp {CO_Sac_ZeroExp = CO_Sac_ZeroExp_sv2}

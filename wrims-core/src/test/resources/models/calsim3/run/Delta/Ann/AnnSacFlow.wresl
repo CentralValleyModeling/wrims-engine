@@ -1,0 +1,36 @@
+
+!required sac flow for estimated exports considering all ann stations:
+define AnnSacReq_max {value max(0.0,RSReqSac,JPReqSac,EMReqSac,COReqSac)}
+define AnnSacReqmax {alias AnnSacReq_max kind 'FLOW' units 'CFS'}
+
+define AnnSacReq {value min(AnnSacReq_max,EstTotExpTD/0.65+7000.)}
+define AnnSacReqdv {alias AnnSacReq kind 'FLOW' units 'CFS'}
+
+!split Sac flow at Hood:
+define C_SAC041_mif {std kind 'FLOW-MIN-INSTREAM' units 'cfs'}
+!define C_SAC041_reop {std kind 'FLOW-REOP-ADJ' units 'cfs'}
+define C_SAC041_ADD {std kind 'FLOW-ADDITIONAL-INSTREAM' units 'cfs'}
+
+!split Cache Slough flow at mile 5:
+define C_CSL005_mif {std kind 'FLOW-MIN-INSTREAM' units 'cfs'}
+define C_CSL005_ADD {std kind 'FLOW-ADDITIONAL-INSTREAM' units 'cfs'}
+
+goal SAC041_ANNtotal {C_SAC041_ANN = C_SAC041_mif + C_SAC041_reop + C_SAC041_ADD}
+goal CSL005_ANNtotal {C_CSL005_ANN = C_CSL005_mif + C_CSL005_ADD}
+
+!goal SACtotHood {C_SAC041_ANN = C_SAC041}
+!goal setAnnSacFlow {C_SAC041_mif + C_CSL005_mif  < AnnSacReq}
+! The Hood "MIF's" is turned off all months except for Jun, July, and Aug.
+!  when there often is a WQ cost to convey storage release across the delta.  
+
+goal JulyWQcost {
+	lhs C_SAC041_mif + C_CSL005_mif
+	case JunJulyAug {
+		condition month==JUN .or. month==JUL .or. month==AUG
+		rhs AnnSacReq
+		lhs<rhs penalty 0. }
+		case otherwise {
+		condition always
+		rhs 0.
+		lhs<rhs penalty 0. }
+}

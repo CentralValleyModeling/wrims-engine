@@ -1,0 +1,49 @@
+! SYSTEM_Mokelumne.WRESL
+! THIS FILE CONTAINS THE NAMES OF ALL INCLUDE FILES FOR THE SYSTEM DESCRIPTION
+
+
+
+/*
+These files are for the Mokelumne River watershed, including the Cosumnes River
+Jenkinson Lake is simulated as part of the American River module
+*/
+
+!*******ARCS******* 
+ include 'SystemTables_LowerMokelumne\arcs-Inflows.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-MinFlows.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-Channels.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-Deliveries.wresl'
+!include 'SystemTables_LowerMokelumne\arcs-Contracts.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-Diversions.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-PreOperations.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-Reservoirs.wresl'
+ !include[local] 'SystemTables_Mokelumne\arcs-Reservoirs2.wresl' !Need to define Salt Springs and Lower Bear for flood control
+ include 'SystemTables_LowerMokelumne\arcs-Returns.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-Seepage.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-GWpumping.wresl' 
+ include 'SystemTables_LowerMokelumne\arcs-WUFactors.wresl'
+ include 'SystemTables_LowerMokelumne\arcs-TileDrain.wresl'
+
+!****CONSTRAINTS****         
+include 'SystemTables_LowerMokelumne\constraints-Connectivity.wresl'
+include 'SystemTables_LowerMokelumne\constraints-Deliveries.wresl' 
+include 'SystemTables_LowerMokelumne\constraints-MinFlows.wresl'
+include 'SystemTables_LowerMokelumne\constraints-PreOperations.wresl' !Needs CVP M&I allocation
+include 'SystemTables_LowerMokelumne\constraints-Reservoirs.wresl'
+include 'SystemTables_LowerMokelumne\constraints-Returns.wresl'
+include 'SystemTables_LowerMokelumne\constraints-Runoff.wresl'
+include 'SystemTables_LowerMokelumne\constraints-DeepPercolation.wresl'
+include 'SystemTables_LowerMokelumne\constraints-WUFactors.wresl'
+include 'SystemTables_LowerMokelumne\constraints-gwpumping.wresl'
+!include 'SystemTables_LowerMokelumne\constraints-Seepage-StandAlone.wresl'
+
+
+!@jmg 2017.06.28 - testing out moving calls to constraints-Seepage and GW cycle
+!                   updates to the main file; doing so makes this consistent with
+!                   the process used in the SJR basin
+!@jmg 2017.06.27 commenting out--> include 'SystemTables_Mokelumne\constraints-Seepage-zero.wresl' 
+!@jmg 2017.06.27 - replacing with following line:
+!include 'SystemTables_Mokelumne\constraints-Seepage.wresl' 
+! note deep percolation constraints are handled in SJREAST folder
+
+!INCLUDE 'SystemTables_LowerMokelumne\constraints-FloodSpill.wresl'   !@zrc 6/11/2018

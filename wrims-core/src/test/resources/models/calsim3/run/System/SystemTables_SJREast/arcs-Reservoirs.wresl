@@ -1,0 +1,486 @@
+/*
+ STORAGE CONTINUITY
+ 
+ 
+ 
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Melones Reservoir    !!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_MELONlevel1 {value 80}
+define S_MELON_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MELONlevel2 {select target from res_level where res_num=10,level=2,month=month}
+define S_MELON_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+!!!New Melones Flood Control
+define S_Melon_Target {select target from res_level where res_num=10,level=4,month=month}		! Target levels for storage in New Melones Dam including flood control and discretionary power releases
+
+define Melon_FloodCurve {case mJulAug {condition month == Jul value 2420.}	! Variable to define New Melones Flood Control Diagram (Excluding conditional Storage)
+						 case otherwise{condition always value S_Melon_Target}	
+}
+define Tulloch_FloodCurve {select target from res_level where res_num=76,level=4,month=month}	! Tulloch Flood Control Diagram 
+!Maximum flow at Orange Blossom 3500 cfs, changed to 4000 cfs by consulting with Reclamation
+define Req_CombinedStorage {case LastYear {condition wateryear == EndWY .and. month == Sep value 2420.} 
+	case otherwise {condition always value min(2487. - max(0., (C_STS072_SV(1) + I_TULOC(1)-4000.)*cfs_taf(1)),Melon_FloodCurve + Tulloch_FloodCurve)}
+}
+define Melon_FloodCurve_Dv {alias Melon_FloodCurve kind 'DEBUG' units 'TAF'}
+define Tulloch_FloodCurve_Dv {alias Tulloch_FloodCurve kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorage_Dv {alias Req_CombinedStorage kind 'DEBUG' units 'TAF'}
+
+! Used FloodCurve1 (2,3,4) and Req_CombinedStorage1 (2,3,4) is the forecasting logic is to replicate the real-time conditional storage operations.
+! As per discussions with Reclamation, the conditional flood space operations are dependent on real-time snow-pack and several other factors that are not modeled in CalSim.
+! We applied the forecasting logic using perfect foresight to avoid large monthly fluctuations in conditional storage that can lead to more than 4000 cfs flows downstream. The 4000 cfs flow limitation is used to avoid downstream damage. 
+define Melon_FloodCurve1 {case mJul {condition month+1 == Jul value 2420.}
+						  case OctAug {condition month >= Oct .and. month <= Aug select target from res_level where res_num=10,level=4,month=month+1}
+						  case mSep {condition month == Sep select target from res_level where res_num=10,level=4,month=Oct}
+}
+define Tulloch_FloodCurve1 {case OctAug {condition month >= Oct .and. month <= Aug select target from res_level where res_num=76,level=4,month=month+1}
+						   case mSep {condition month == Sep select target from res_level where res_num=76,level=4,month=Oct}
+}
+define Req_CombinedStorage1 {case MarJun {condition month >= Mar .and. month <= Jun value min(2487. - max(0., (C_STS072_SV(2) + I_TULOC(2)-4000.)*cfs_taf(2)),Melon_FloodCurve1+Tulloch_FloodCurve1)}
+							 case Otherwise {condition always value 0.}
+}
+define Melon_FloodCurve1_Dv {alias Melon_FloodCurve1 kind 'DEBUG' units 'TAF'}
+define Tulloch_FloodCurve1_Dv {alias Tulloch_FloodCurve1 kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorage1_Dv {alias Req_CombinedStorage1 kind 'DEBUG' units 'TAF'}
+
+define Melon_FloodCurve2 {case mJul {condition month+2 == Jul value 2420.}
+					       case OctJul {condition month >= Oct .and. month <= Jul select target from res_level where res_num=10,level=4,month=month+2}
+						  case AugSep {condition month >= Aug .and. month <= Sep select target from res_level where res_num=10,level=4,month=Oct+(month - Aug)}
+}
+define Tulloch_FloodCurve2 {case OctAug {condition month >= Oct .and. month <= Jul select target from res_level where res_num=76,level=4,month=month+2}
+						   case AugSep {condition month >= Aug .and. month <= Sep select target from res_level where res_num=76,level=4,month=Oct+(month - Aug)}
+}
+define Req_CombinedStorage2 {case MarMay {condition month >= Mar .and. month <= May value min(2487. - max(0., (C_STS072_SV(3) + I_TULOC(3)-4000.)*cfs_taf(3)),Melon_FloodCurve2+Tulloch_FloodCurve2)}
+							 case Otherwise {condition always value 0.}
+}
+define Melon_FloodCurve2_Dv {alias Melon_FloodCurve2 kind 'DEBUG' units 'TAF'}
+define Tulloch_FloodCurve2_Dv {alias Tulloch_FloodCurve2 kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorage2_Dv {alias Req_CombinedStorage2 kind 'DEBUG' units 'TAF'}
+
+define Melon_FloodCurve3 {case mJul {condition month+3 == Jul value 2420.}
+					      case OctJun {condition month >= Oct .and. month <= Jun select target from res_level where res_num=10,level=4,month=month+3}
+						  case JulSep {condition month >= Jul .and. month <= Sep select target from res_level where res_num=10,level=4,month=Oct+(month - Jul)}
+}
+define Tulloch_FloodCurve3 {case OctJun {condition month >= Oct .and. month <= Jun select target from res_level where res_num=76,level=4,month=month+3}
+						   case JulSep {condition month >= Jul .and. month <= Sep select target from res_level where res_num=76,level=4,month=Oct+(month - Jul)}
+}				      
+define Req_CombinedStorage3 {case MarApr {condition month >= Mar .and. month <= Apr value min(2487. - max(0., (C_STS072_SV(4) + I_TULOC(4)-4000.)*cfs_taf(4)),Melon_FloodCurve3+Tulloch_FloodCurve3)}
+							 case Otherwise {condition always value 0.}
+}
+define Melon_FloodCurve3_Dv {alias Melon_FloodCurve3 kind 'DEBUG' units 'TAF'}
+define Tulloch_FloodCurve3_Dv {alias Tulloch_FloodCurve3 kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorage3_Dv {alias Req_CombinedStorage3 kind 'DEBUG' units 'TAF'}
+
+define Melon_FloodCurve4 {case mJul {condition month+4 == Jul value 2420.}
+					      case OctMay {condition month >= Oct .and. month <= May select target from res_level where res_num=10,level=4,month=month+4}
+						  case JunSep {condition month >= Jun .and. month <= Sep select target from res_level where res_num=10,level=4,month=Oct+(month - Jun)}
+}
+define Tulloch_FloodCurve4 {case OctMay {condition month >= Oct .and. month <= May select target from res_level where res_num=76,level=4,month=month+4}
+						   case JunSep {condition month >= Jun .and. month <= Sep select target from res_level where res_num=76,level=4,month=Oct+(month - Jun)}
+}				      
+define Req_CombinedStorage4 {case mMar {condition month == Mar value min(2487. - max(0., (C_STS072_SV(5) + I_TULOC(5)-4000.)*cfs_taf(5)),Melon_FloodCurve4+Tulloch_FloodCurve4)}			
+							 case Otherwise {condition always value 0.}			
+}
+define Melon_FloodCurve4_Dv {alias Melon_FloodCurve4 kind 'DEBUG' units 'TAF'}
+define Tulloch_FloodCurve4_Dv {alias Tulloch_FloodCurve4 kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorage4_Dv {alias Req_CombinedStorage4 kind 'DEBUG' units 'TAF'}
+
+define Melon_ConditionalFC {case mMar {condition month == Mar value 1970.}		!Conditional Flood Control Space according to Flood Control Diagram
+							case mApr {condition month == Apr value 1970.}
+							case mMay {condition month == May value 1970.}
+							case mJun {condition month == Jun value 2192.}
+							case otherwise {condition always value Melon_FloodCurve}
+							
+}
+define Req_CombinedStorageMin {case mMar {condition month == Mar value min(Req_CombinedStorage,Req_CombinedStorage1,Req_CombinedStorage2,Req_CombinedStorage3,Req_CombinedStorage4)}  !Forecast to avoid fluctuations in Flood Control Level
+							   case mApr {condition month == Apr value min(Req_CombinedStorage,Req_CombinedStorage1,Req_CombinedStorage2,Req_CombinedStorage3)}
+							   case mMay {condition month == May value min(Req_CombinedStorage,Req_CombinedStorage1,Req_CombinedStorage2)}
+							   case mJun {condition month == Jun value min(Req_CombinedStorage,Req_CombinedStorage1)}
+							   case otherwise {condition always value Req_CombinedStorage}
+}
+define Melon_ConditionalFC_Dv {alias Melon_ConditionalFC kind 'DEBUG' units 'TAF'}
+define Req_CombinedStorageMin_Dv {alias Req_CombinedStorageMin kind 'DEBUG' units 'TAF'}
+
+define S_MELONlevel4 {case mMarJul {condition month >= Mar .and. month <= Jul value max(Req_CombinedStorageMin - Tulloch_FloodCurve, Melon_ConditionalFC)}			!Define Flood Control Level for New Melones based on combined flood control requirement and Tulloch Flood Curve
+			   case otherwise {condition always value S_Melon_Target}
+}
+define S_MELONlevel3 {value S_MELONlevel4}					! Set level 3 equal to level 4
+define S_MELONlevel4dv {alias S_MELONlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_MELONlevel3dv {alias S_MELONlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+!define S_MELONlevel3 {select target from res_level where res_num=10,level=3,month=month}
+define S_MELON_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_MELONlevel4 {select target from res_level where res_num=10,level=4,month=month}
+define S_MELON_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define S_MELONlevel5 {value 2420}
+define S_MELON_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MELON {std kind 'STORAGE' units 'TAF'} !New Melones Reservoir
+define E_MELON {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_MELON {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_MELON {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_MELONlast {select area from res_info given storage=1000*S_MELON(-1) use linear where res_num=10}
+define A_MELONforward {select area from res_info given storage=1050*S_MELON(-1) use linear where res_num=10}
+define A_MELONback {select area from res_info given storage=950*S_MELON(-1) use linear where res_num=10}
+define coefev_MELON {value (A_MELONforward - A_MELONback)/(100*max(0.01,S_MELON(-1)))}
+define relcap_MELON {select discharge from res_info given storage=1000*S_MELON(-1) use linear where res_num=10}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Millerton Lake, Friant Dam !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE -- 
+! S_MLRTNlevel4 is dynamic, defined in SanJoaquin/Friant/friant_adj_fld_spc.wresl
+define S_MLRTNlevel1 {value 135}
+define S_MLRTN_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+! SEE friant_adj_fld_spc.wresl -- define S_MLRTNlevel2 {value 200}
+define S_MLRTN_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+! SEE friant_adj_fld_spc.wresl -- define S_MLRTNlevel3 {value 225}
+define S_MLRTN_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MLRTN_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MLRTNlevel5 {value 524.}
+define S_MLRTN_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MLRTN {std kind 'STORAGE' units 'TAF'} !Millerton Lake
+define E_MLRTN {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_MLRTN {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_MLRTN {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_MLRTNlast {select area from res_info given storage=1000*S_MLRTN(-1) use linear where res_num=18}
+define A_MLRTNforward {select area from res_info given storage=1050*S_MLRTN(-1) use linear where res_num=18}
+define A_MLRTNback {select area from res_info given storage=950*S_MLRTN(-1) use linear where res_num=18}
+define coefev_MLRTN {value (A_MLRTNforward - A_MLRTNback)/(100*max(0.01,S_MLRTN(-1)))}
+define relcap_MLRTN {select discharge from res_info given storage=1000*S_MLRTN(-1) use linear where res_num=18}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake McClure, Exchequer Dam!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_MCLRElevel1 {value 3}
+define S_MCLRE_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MCLRElevel2 {value 115}
+define S_MCLRE_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MCLRElevel3 {value 300}
+define S_MCLRE_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_MCLRElevel4 {select target from res_level where res_num=20,level=4,month=month}
+define S_MCLRE_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MCLRElevel5 {value 1024}
+define S_MCLRE_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MCLRE {std kind 'STORAGE' units 'TAF'} !Lake McClure
+define E_MCLRE {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_MCLRE {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_MCLRE {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_MCLRElast {select area from res_info given storage=1000*S_MCLRE(-1) use linear where res_num=20}
+define A_MCLREforward {select area from res_info given storage=1050*S_MCLRE(-1) use linear where res_num=20}
+define A_MCLREback {select area from res_info given storage=950*S_MCLRE(-1) use linear where res_num=20}
+define coefev_MCLRE {value (A_MCLREforward - A_MCLREback)/(100*max(0.01,S_MCLRE(-1)))}
+define relcap_MCLRE {select discharge from res_info given storage=1000*S_MCLRE(-1) use linear where res_num=20}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Hensley Lake                 !!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_HNSLYlevel1 {value 5}
+define S_HNSLY_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_HNSLYlevel2 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HNSLYlevel2 {std kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HNSLYlevel2_temp {case DRY {
+			   	condition wyt_SAC == 4 .or. wyt_SAC == 5
+			   	value 7.}
+			   case other {
+			   	condition always
+			   	value 15.}
+}
+goal setS_HNSLYlevel2 {S_HNSLYlevel2 = S_HNSLYlevel2_temp}
+define S_HNSLY_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HNSLYlevel3 {value 25}
+define S_HNSLY_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+!!! Hensley level4 flood control
+/* Precipitation Stations
+Site			Lat			Long			CDEC ID		Source
+Bunning Ranch	37.367800°	-119.890000°	BNR			US Army Corps of Engineers
+Magoon			37.489400°	-119.812500°	MGN			US Army Corps of Engineers
+Oakhurst		37.344700°	-119.675800°	OKH			US Army Corps of Engineers
+Westfall		37.449400°	-119.649700°	WST			US Army Corps of Engineers
+Hidden Dam		37.200000°	-119.917000°	HID			US Army Corps of Engineers
+ */
+! Input PRISM precipitation data
+define PP_BNR {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_MGN {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_OKH {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_WST {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_HID {timeseries kind 'PRECIP' units 'INCHES'}
+
+! BNAP = 26.4
+! Total = 156
+! Basin P = 26.4/156*(Precipitation at Bunning Ranch + Precipitation at Magoon + Precipitation at Oakhurst + Precipitation at Westfall + Precipitation at Hidden dam)
+define PP_HNSLY {value (PP_BNR+PP_MGN+PP_OKH+PP_WST+PP_HID)*26.4/156.}
+
+! Multiplier for daily geometric progression with 3 percent reduction
+define Multiplier1_HNSLY	{value pow(0.97,(daysin))}
+define Multiplier2_HNSLY	{value ((pow(0.97,daysin)-1)/(-0.03))/daysin}
+
+define PAR_HNSLYdv {std kind 'PRECIPITATION' units 'INCHES'}
+
+! Calculation of precipitation parameter defined in Flood Control Diagram
+define PAR_HNSLY {case mOct {condition month == Oct value PP_HNSLY*Multiplier2_HNSLY}
+				  case Otherwise {condition always value PAR_HNSLYdv(-1)*Multiplier1_HNSLY + PP_HNSLY*Multiplier2_HNSLY}}
+
+! Gross Flood Control Storage Requirement
+define FC_HNSLY_RES {case LessThan2 {condition PAR_HNSLY <= 2. select FloodCurve from HNSLY_Gross_Res where month=month, PAR = 2.}	
+						  case Bet2_10 {condition PAR_HNSLY <= 10. select FloodCurve from HNSLY_Gross_Res given PAR = PAR_HNSLY use linear where month=month}
+						  case otherwise {condition always select FloodCurve from HNSLY_Gross_Res where month=month, PAR = 10.}}
+
+define S_HNSLY_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_HNSLYlevel5 {value 90}
+define S_HNSLYlevel4 {value max(0., S_HNSLYlevel5 - FC_HNSLY_RES)}
+define S_HNSLYlevel4dv {alias S_HNSLYlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_HNSLY_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define S_HNSLY {std kind 'STORAGE' units 'TAF'} !Hensley Lake
+define E_HNSLY {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_HNSLY {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_HNSLY {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_HNSLYlast {select area from res_info given storage=1000*S_HNSLY(-1) use linear where res_num=52}
+define A_HNSLYforward {select area from res_info given storage=1050*S_HNSLY(-1) use linear where res_num=52}
+define A_HNSLYback {select area from res_info given storage=950*S_HNSLY(-1) use linear where res_num=52}
+define coefev_HNSLY {value (A_HNSLYforward - A_HNSLYback)/(100*max(0.01,S_HNSLY(-1)))}
+define relcap_HNSLY {select discharge from res_info given storage=1000*S_HNSLY(-1) use linear where res_num=52}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Eastman Lake,                !!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_ESTMNlevel1 {value 10}
+define S_ESTMN_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_ESTMNlevel2 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_ESTMNlevel2 {value 20}
+define S_ESTMN_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ESTMNlevel3 {value 105}
+define S_ESTMN_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+!!!Eastman level4 flood control
+/* 
+Site			Lat			Long			CDEC ID			Source
+Buchanan Dam	37.213000°	-119.970000°	BUC				US Army Corps of Engineers
+*/
+define PP_BUC {timeseries kind 'PRECIP' units 'INCHES'}
+
+! BNAP = 28
+! Total = 155
+! Basin P = 26.4/156*(Precipitation at Bunning Ranch + Precipitation at Magoon + Precipitation at Oakhurst + Precipitation at Westfall + Precipitation at Buchanan Dam)
+define PP_ESTMN {value (PP_BNR+PP_MGN+PP_OKH+PP_WST+PP_BUC)*28./155.}
+! Multiplier for daily geometric progression with 3 percent reduction
+define Multiplier1_ESTMN	{value pow(0.97,(daysin))}
+define Multiplier2_ESTMN	{value ((pow(0.97,daysin)-1)/(-0.03))/daysin}
+! Calculation of precipitation parameter defined in Flood Control Diagram
+define PAR_ESTMNdv {std kind 'PRECIPITATION' units 'INCHES'}
+
+define PAR_ESTMN {case mOct {condition month == Oct value PP_ESTMN*Multiplier2_ESTMN}
+				  case Otherwise {condition always value PAR_ESTMNdv(-1)*Multiplier1_ESTMN + PP_ESTMN*Multiplier2_ESTMN}}
+! Gross Flood Control Storage Requirement
+define FC_ESTMN_RES {case LessThan2 {condition PAR_ESTMN <= 2. select FloodCurve from ESTMN_Gross_Res where month=month, PAR = 2.}	
+						  case Bet2_10 {condition PAR_ESTMN <= 10. select FloodCurve from ESTMN_Gross_Res given PAR = PAR_ESTMN use linear where month=month}
+						  case otherwise {condition always select FloodCurve from ESTMN_Gross_Res where month=month, PAR = 10.}}
+
+define S_ESTMN_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ESTMNlevel5 {value 150}
+define S_ESTMNlevel4 {value max(0., S_ESTMNlevel5 - FC_ESTMN_RES)}
+define S_ESTMNlevel4dv {alias S_ESTMNlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_ESTMN_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define S_ESTMN {std kind 'STORAGE' units 'TAF'} !Eastman Lake
+define E_ESTMN {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_ESTMN {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_ESTMN {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_ESTMNlast {select area from res_info given storage=1000*S_ESTMN(-1) use linear where res_num=53}
+define A_ESTMNforward {select area from res_info given storage=1050*S_ESTMN(-1) use linear where res_num=53}
+define A_ESTMNback {select area from res_info given storage=950*S_ESTMN(-1) use linear where res_num=53}
+define coefev_ESTMN {value (A_ESTMNforward - A_ESTMNback)/(100*max(0.01,S_ESTMN(-1)))}
+define relcap_ESTMN {select discharge from res_info given storage=1000*S_ESTMN(-1) use linear where res_num=53}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Woodward Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_WDWRDlevel1 {value 2}
+define S_WDWRD_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WDWRDlevel2 {value 21.1}
+define S_WDWRD_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WDWRDlevel3 {select target from res_level where res_num=75,level=3,month=month}
+define S_WDWRD_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WDWRDlevel4 {value 34}
+define S_WDWRD_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_WDWRD {std kind 'STORAGE' units 'TAF'} !Woodward Reservoir
+define E_WDWRD {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_WDWRD {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_WDWRD {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_WDWRDlast {select area from res_info given storage=1000*S_WDWRD(-1) use linear where res_num=75}
+define A_WDWRDforward {select area from res_info given storage=1050*S_WDWRD(-1) use linear where res_num=75}
+define A_WDWRDback {select area from res_info given storage=950*S_WDWRD(-1) use linear where res_num=75}
+define coefev_WDWRD  {                                          !Jay Wang 8/7/2019 (idea from Richard Chen)
+	case NEARZERO { condition S_WDWRD(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=75}	 
+	case Otherwise { condition always 
+                value (A_WDWRDforward - A_WDWRDback)/(100*max(0.01,S_WDWRD(-1)))}
+        }
+!define coefev_WDWRD {value (A_WDWRDforward - A_WDWRDback)/(100*max(0.01,S_WDWRD(-1)))}
+define relcap_WDWRD {select discharge from res_info given storage=1000*S_WDWRD(-1) use linear where res_num=75}
+
+! define S_WDWRDlevel1_ {alias S_WDWRDlevel1 kind 'reservoir-level' units 'TAF'}
+! define S_WDWRDlevel2_ {alias S_WDWRDlevel2 kind 'reservoir-level' units 'TAF'}
+! define S_WDWRDlevel3_ {alias S_WDWRDlevel3 kind 'reservoir-level' units 'TAF'}
+! define S_WDWRDlevel4_ {alias S_WDWRDlevel4 kind 'reservoir-level' units 'TAF'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Tulloch Reservoir !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!The Tulloch Project includes:  (1) the 1,260-acre Tulloch reservoir, with a gross storage capacity of 66,968 acre-feet at a normal maximum elevation of 510 feet (USGS datum)
+!and a usable storage capacity of 52,139 acre-feet; (2) the Tulloch dam, a 200-foot-high, 1,600-foot-long concrete gravity dam with a 325-foot-long spillway controlled by seven
+!40-foot by 30-foot radial gates and two 66-inch-diameter low-level outlets; (3) two 114-inch-diameter, 157-foot-long riveted steel penstocks embedded in concrete with a total
+!maximum hydraulic capacity of 1,780 cubic feet per second (cfs); (4) the Tulloch powerhouse, a 100-foot by 52-foot concrete structure; (6) two generating units with a total
+!capacity of 17.1 MW, each driven by a vertical-axis Francis turbine with a total maximum hydraulic capacity of 1,800 cfs; (7) the Tulloch switchyard; and (8) other appurtenant facilities.
+
+!An agreement between Reclamation and Tri-Dam, dated August 30, 1988, drives the operation of the Tulloch Project so that Reclamation can meet its downstream flow requirements.
+!The Tulloch Project operates primarily in a run-!of-the-river mode, with inflow to and releases from the project controlled by Reclamation. As a result, seasonal operation is
+!limited to maintaining a maximum reservoir level of 509.5 feet between March 20 and November 1, and a level of 501.5 feet between November 2 and March 19.  Operational demands
+!imposed by Reclamation generally allow Tulloch reservoir to remain at full or nearly full pool for much of the year, although substantial drawdowns have occasionally occurred.
+
+!There appears to be some discrepancy between the flood control diagram that allows a max elevation of 510.0 ft (66.968 TAF) and the Reclamation agreement that specifies 509.5 ft (66.344 TAF)
+
+define S_TULOClevel1 {value 11}
+define S_TULOC_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TULOClevel2 {value 20}
+define S_TULOC_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TULOClevel3 {select target from res_level where res_num=76,level=3,month=month}
+define S_TULOC_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TULOClevel4 {select target from res_level where res_num=76,level=4,month=month}
+define S_TULOC_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TULOClevel5 {value 67}
+define S_TULOC_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TULOC {std kind 'STORAGE' units 'TAF'} !Tulloch Reservoir
+define E_TULOC {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_TULOC {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_TULOC {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_TULOClast {select area from res_info given storage=1000*S_TULOC(-1) use linear where res_num=76}
+define A_TULOCforward {select area from res_info given storage=1050*S_TULOC(-1) use linear where res_num=76}
+define A_TULOCback {select area from res_info given storage=950*S_TULOC(-1) use linear where res_num=76}
+!define coefev_TULOC {value (A_TULOCforward - A_TULOCback)/(100*max(0.01,S_TULOC(-1)))}
+define coefev_TULOC  {                                          !Jay Wang 8/7/2019 (idea from Richard Chen)
+	case NEARZERO { condition S_TULOC(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=76}	 
+	case Otherwise { condition always 
+                value (A_TULOCforward - A_TULOCback)/(100*max(0.01,S_TULOC(-1)))}
+        }
+define relcap_TULOC {select discharge from res_info given storage=1000*S_TULOC(-1) use linear where res_num=76}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Modesto Lake        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_MDSTOlevel1 {value 2}
+define S_MDSTO_1 {std kind 'STORAGE-ZONE' units 'TAF'}  
+define S_MDSTOlevel2 {value 15}
+define S_MDSTO_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MDSTOlevel3 {select target from res_level where res_num=78,level=3,month=month}
+define S_MDSTO_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MDSTOlevel4 {value 30}
+define S_MDSTO_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_MDSTO {std kind 'STORAGE' units 'TAF'} !Modesto Lake
+define E_MDSTO {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_MDSTO {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_MDSTO {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_MDSTOlast {select area from res_info given storage=1000*S_MDSTO(-1) use linear where res_num=78}
+define A_MDSTOforward {select area from res_info given storage=1050*S_MDSTO(-1) use linear where res_num=78}
+define A_MDSTOback {select area from res_info given storage=950*S_MDSTO(-1) use linear where res_num=78}
+!define coefev_MDSTO {value (A_MDSTOforward - A_MDSTOback)/(100*max(0.01,S_MDSTO(-1)))}
+define coefev_MDSTO  {                                          !Jay Wang 8/7/2019 (idea from Richard Chen)
+	case NEARZERO { condition S_MDSTO(-1) <= 0.001  !20,000
+		select coefev from res_info given storage=1 use minimum where res_num=78}	 
+	case Otherwise { condition always 
+                value (A_MDSTOforward - A_MDSTOback)/(100*max(0.01,S_MDSTO(-1)))}
+        }
+!define relcap_MDSTO {select discharge from res_info given storage=1000*S_MDSTO(-1) use linear where res_num=78}
+
+! Estimate volume of seepage from Modesto Reservoir using lookup table
+define SG_MDSTO_seep { select seep_78 from seep_rates where month=month}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Turlock Lake        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_TRLCKlevel1 {value 2}
+define S_TRLCK_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRLCKlevel2 {value 11}
+define S_TRLCK_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRLCKlevel3 {select target from res_level where res_num=79,level=3,month=month}
+define S_TRLCK_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRLCKlevel4 {value 50}
+define S_TRLCK_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_TRLCK {std kind 'STORAGE' units 'TAF'} !Turlock Lake
+define E_TRLCK {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_TRLCK {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_TRLCK {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_TRLCKlast {select area from res_info given storage=1000*S_TRLCK(-1) use linear where res_num=79}
+define A_TRLCKforward {select area from res_info given storage=1050*S_TRLCK(-1) use linear where res_num=79}
+define A_TRLCKback {select area from res_info given storage=950*S_TRLCK(-1) use linear where res_num=79}
+!define coefev_TRLCK {value (A_TRLCKforward - A_TRLCKback)/(100*max(0.01,S_TRLCK(-1)))}
+define coefev_TRLCK  {
+	case NEARZERO { condition S_TRLCK(-1) <= 0.001  !1,472
+		select coefev from res_info given storage=1 use minimum where res_num=79}	 
+	case Otherwise { condition always 
+                value (A_TRLCKforward - A_TRLCKback)/(100*max(0.01,S_TRLCK(-1)))}
+        }
+define relcap_TRLCK {select discharge from res_info given storage=1000*S_TRLCK(-1) use linear where res_num=79}
+
+! Estimate volume of seepage from Turlock Reservoir using lookup table
+define SG_TRLCK_seep { select seep_79 from seep_rates where month=month}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Don Pedro Reservoir      !!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_PEDROlevel1 {value 100}
+define S_PEDRO_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PEDROlevel2 {value 309}
+define S_PEDRO_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PEDROlevel3 {select target from res_level where res_num=81,level=3,month=month}
+define S_PEDRO_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PEDROlevel4 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_PEDRO_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PEDROlevel5 {value 2030}
+define S_PEDRO_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PEDRO {std kind 'STORAGE' units 'TAF'} !New Don Pedro Reservoir
+define E_PEDRO {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_PEDRO {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_PEDRO {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_PEDROlast {select area from res_info given storage=1000*S_PEDRO(-1) use linear where res_num=81}
+define A_PEDROforward {select area from res_info given storage=1050*S_PEDRO(-1) use linear where res_num=81}
+define A_PEDROback {select area from res_info given storage=950*S_PEDRO(-1) use linear where res_num=81}
+!define coefev_PEDRO {value (A_PEDROforward - A_PEDROback)/(100*max(0.01,S_PEDRO(-1)))}
+define coefev_PEDRO  {                                          !Z.Q. Richard Chen 8/21/2019 
+	case NEARZERO { condition S_PEDRO(-1) <= 0.001
+		select coefev from res_info given storage=1 use minimum where res_num=81}	 
+	case Otherwise { condition always 
+                value (A_PEDROforward - A_PEDROback)/(100*max(0.01,S_PEDRO(-1)))} 
+        }        
+define relcap_PEDRO {select discharge from res_info given storage=1000*S_PEDRO(-1) use linear where res_num=81}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Hogan Reservoir      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_NHGANlevel1 {value 17.5}
+define S_NHGAN_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NHGANlevel2 {select target from res_level where res_num=92,level=2,month=month}
+define S_NHGAN_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NHGANlevel3 {value 150}
+define S_NHGAN_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+!define S_NHGANlevel4 {timeseries kind 'STORAGE-LEVEL' units 'TAF'}
+define S_NHGAN_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NHGANlevel5 {value 325}
+define S_NHGAN_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_NHGAN {std kind 'STORAGE' units 'TAF'} !New Hogan Reservoir
+define E_NHGAN {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_NHGAN {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_NHGAN {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_NHGANlast {select area from res_info given storage=1000*S_NHGAN(-1) use linear where res_num=92}
+define A_NHGANforward {select area from res_info given storage=1050*S_NHGAN(-1) use linear where res_num=92}
+define A_NHGANback {select area from res_info given storage=950*S_NHGAN(-1) use linear where res_num=92}
+define coefev_NHGAN {value (A_NHGANforward - A_NHGANback)/(100*max(0.01,S_NHGAN(-1)))}
+define relcap_NHGAN {select discharge from res_info given storage=1000*S_NHGAN(-1) use linear where res_num=92}
+
+

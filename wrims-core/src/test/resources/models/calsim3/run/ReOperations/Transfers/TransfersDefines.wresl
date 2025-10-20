@@ -1,0 +1,34 @@
+! TransfersDefines.wresl
+!
+!******************************************************************************
+! Supply Aquisition in each Region.
+! Yuba River
+define WTS_YubaGW_1  {std kind 'TRANSFER-SUPPLY' units 'CFS'} !Intermediate calc variable
+define WTS_YubaSW_1  {std kind 'TRANSFER-SUPPLY' units 'CFS'} !Intermediate calc variable
+define WTS_YubaGW  {std kind 'TRANSFER-SUPPLY' units 'CFS'}
+define WTS_YubaSW  {std kind 'TRANSFER-SUPPLY' units 'CFS'}
+define WTS_Yuba  {std kind 'TRANSFER-SUPPLY' units 'CFS'}
+
+! Unmet Attempt to Aquire Supply in each Region - nonzero values here are due to inconsistent assumptions abount pattern or quantity
+define WTS_YubaGWShort {std kind 'TRANSFER-SUPPLYSHORTAGE' units 'CFS'}
+define WTS_YubaSWShort {std kind 'TRANSFER-SUPPLYSHORTAGE' units 'CFS'}
+define WTS_YubaShort {std kind 'TRANSFER-SUPPLYSHORTAGE' units 'CFS'}
+
+!******************************************************************************
+! WTS Storage Errors - Positive is storage overrun
+define WTS_Str_Err_stg1 {upper unbounded kind 'STORAGE-ERROR' UNITS 'CFS'}
+!define WTS_Str_Err_stg2 {upper unbounded kind 'STORAGE-ERROR' UNITS 'CFS'}
+define WTS_Str_Err {lower unbounded upper unbounded kind 'STORAGE-ERROR' UNITS 'CFS'}
+goal Split_WTS_StorageErr {WTS_Str_Err = WTS_Str_Err_Stg1}! + WTS_Str_Err_Stg2}
+!******************************************************************************
+! WTS Balance Errors - Positive is supply overrun/Negative is supply shortfall in the WTS Routing
+define WTS_Bal_Err_stg1 {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define WTS_Bal_Err_stg2 {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+define WTS_Bal_Err {lower unbounded upper unbounded kind 'BALANCE-ERROR' UNITS 'CFS'}
+goal Split_WTS_BalanceErr {WTS_Bal_Err = WTS_Bal_Err_Stg1 + WTS_Bal_Err_Stg2}
+!******************************************************************************
+! WTS Spills
+define WTS_Spill_stg1 {std kind 'SPILL' UNITS 'CFS'}
+define WTS_Spill_stg2 {std kind 'SPILL' UNITS 'CFS'}
+define WTS_Spill {std kind 'SPILL' UNITS 'CFS'}
+goal Split_WTS_Spill {WTS_Spill = WTS_Spill_Stg1 + WTS_Spill_Stg2}

@@ -1,0 +1,54 @@
+! TUCP_ExpLimit.wresl
+
+
+! If TUCP's are engaged and it's after January, limit exports to 1500 cfs if 
+! -- delta outflow is not 7100 cfs or greater in the X2 months 
+! -- delta outflow is not 4000 cfs if SacIndex<8.1 in May and June, per D1641 page 185 footnote [10]
+
+define ExpLimitThreshold {
+    case LowSacIndex {condition month>=MAY .and. month<=JUN .and. SacIndex<8100. value 4000.}
+    case otherwise   {condition always value 7100. }
+}
+define PreSetupExcess {
+    case ThruJune {
+        condition month<=JUN
+        value max(0., NDOI[PRESETUP] - ExpLimitThreshold)}
+    case otherwise {
+        condition always
+        value 99999. }
+}
+
+define CVP_upstrm_pre {value min(max(0.,s_shstalevel5-s_shsta[PRESETUP])*taf_cfs,c_sac120_add[PRESETUP], c_kswck_add[PRESETUP]) 
+                           + min(max(0.,s_folsmlevel5-s_folsm[PRESETUP])*taf_cfs,c_amr004_add[PRESETUP], c_ntoma_add[PRESETUP])}
+
+define FebJun_TUCP_ExpLim {value max(1500., max(0.,ExportActualTD[PRESETUP]-(ExpLimitThreshold-NDOI[PRESETUP])))}
+
+goal TUCP_Export_Limit {
+    lhs ExportActualTD 
+    case TUCPsFebJun {
+        condition tucp_trigger>.5 .and. month>JAN .and. month<JUL .and. PreSetupExcess<1.
+        rhs max(1500., max(0.,ExportActualTD[PRESETUP]-(ExpLimitThreshold-NDOI[PRESETUP])))
+        lhs<rhs penalty 0.}
+}  
+
+! If TUCP's are engaged and reduced NDOI standards are controlling while upstream
+! operations control reservoir releases, cut exports to meet original NDOI level,
+! down to 1500 cfs. Valid after the X2 season has passed.
+define PreSetupNDOIShort {
+    case JulSep {
+        condition month>JUN .and. tucp_trigger>.5 .and. (NDOI[PRESETUP] - NDOreqflowstd_orig)<1.
+        value max(0.,NDOreqflowstd_orig-NDOI[PRESETUP]) }
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+define JulSep_TUCP_ExpLim {value max(1500., ExportActualTD[PRESETUP] - PreSetupNDOIShort - 500.)}
+
+goal TUCP_Summer_ExpLim {
+    lhs ExportActualTD 
+    case TUCPsJulSep {
+        condition month>JUN .and. tucp_trigger>.5 .and. (NDOI[PRESETUP] - NDOreqflowstd_orig)<1.
+        rhs max(1500., ExportActualTD[PRESETUP] - PreSetupNDOIShort - 500.)  ! 500cfs used as a buffer for NDOI_ADD_ANN that might be involved in months like this
+        lhs<rhs penalty 0.}
+}  

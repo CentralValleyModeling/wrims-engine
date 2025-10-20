@@ -1,0 +1,1321 @@
+! CVP NOD shortage calculations, revised July 2020 by Tom FitzHugh Stantec
+!
+! Approach is to compute the minimum of the surface water demand (total demand - minimum GW pumping) and
+! the CVP contract * allocation. If deliveries are less than that minimum then the difference is the shortage.
+! One complication is that some of the WBAs also receive deliveries under separate water rights
+! In some cases the water right is a separate delivery arc.  In this case the water right delivery is subtracted from 
+! surface water demand calculation (using the prior cycle value).
+! In other cases a delivery is capped by the CVP contract amount * allocation + the water right, so there is no
+! separate delivery of water right water.  Water meeting this water right is calculated as the delivery (from prior cycle) - 
+! contract * allocation.  This is subtracted from the surface water demand used to calculate the CVP contract shortage. 
+
+! ************ Ag shortages ***********************
+! -----> 02_PA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_02_PA {value ((AWR_02_PA + AWO_02_PA) * (1 + RPF_02_PA)  !!Applied water demand + Riparian ET
+                           - min(TW_02_PA, RUFR_02_PA*AWR_02_PA + RUFO_02_PA*AWO_02_PA) !Reuse
+                           - (AWR_02_PA *(1 + RPF_02_PA - RUFR_02_PA) + AWO_02_PA *(1 + RPF_02_PA - RUFO_02_PA))* GPmin_02_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_WTPCSD_02_PA + DPF_WTPCSD_02_PA + LFF_WTPCSD_02_PA + OSF_WTPCSD_02_PA) - 1))} !Last line accounts for loss
+define CLdem_02_PA {value CLmon_WTPCSD_02_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_02_PA {value min(SWdem_02_PA,CLdem_02_PA)}   !Surface water delivery target
+
+define  X_WTPCSD_02_PA  {alias SWdeltarget_02_PA - D_WTPCSD_02_PA + Buy_WTPCSD_02_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_02_PAdv {alias SWdem_02_PA kind 'SW-demand' units 'cfs'}
+define CLdem_02_PAdv {alias CLdem_02_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_02_PAdv {alias SWdeltarget_02_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 03_PA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_03_PA {value ((AWR_03_PA + AWO_03_PA) * (1 + RPF_03_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_03_PA, RUFR_03_PA*AWR_03_PA + RUFO_03_PA*AWO_03_PA) !Reuse
+                        - (AWR_03_PA *(1 + RPF_03_PA - RUFR_03_PA) + AWO_03_PA *(1 + RPF_03_PA - RUFO_03_PA))* GPmin_03_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC294_03_PA + DPF_SAC294_03_PA + LFF_SAC294_03_PA + OSF_SAC294_03_PA) - 1))} !Last line accounts for loss
+define CLdem_03_PA {value CLmon_SAC294_03_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_03_PA {value min(SWdem_03_PA,CLdem_03_PA)}   !Surface water delivery target
+
+define  X_SAC294_03_PA  {alias SWdeltarget_03_PA - D_SAC294_03_PA + Buy_SAC294_03_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_03_PAdv {alias SWdem_03_PA kind 'SW-demand' units 'cfs'}
+define CLdem_03_PAdv {alias CLdem_03_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_03_PAdv {alias SWdeltarget_03_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 04_PA1
+! Demand for surface water assuming minimum GW pumping
+define SWdem_04_PA1 {value ((AWR_04_PA1 + AWO_04_PA1) * (1 + RPF_04_PA1)  !!Applied water demand + Riparian ET
+                        - min(TW_04_PA1, RUFR_04_PA1*AWR_04_PA1 + RUFO_04_PA1*AWO_04_PA1) !Reuse
+                        - (AWR_04_PA1 *(1 + RPF_04_PA1 - RUFR_04_PA1) + AWO_04_PA1 *(1 + RPF_04_PA1 - RUFO_04_PA1))* GPmin_04_PA1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_CCL005_04_PA1 + DPF_CCL005_04_PA1 + LFF_CCL005_04_PA1 + OSF_CCL005_04_PA1) - 1))} !Last line accounts for loss
+define CLdem_04_PA1 {value CLmon_CCL005_04_PA1 * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_04_PA1 {value min(SWdem_04_PA1,CLdem_04_PA1)}   !Surface water delivery target
+
+define  X_CCL005_04_PA1  {alias SWdeltarget_04_PA1 - D_CCL005_04_PA1 + Buy_CCL005_04_PA1*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_04_PA1dv {alias SWdem_04_PA1 kind 'SW-demand' units 'cfs'}
+define CLdem_04_PA1dv {alias CLdem_04_PA1 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_04_PA1dv {alias SWdeltarget_04_PA1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 04_PA2
+! Demand for surface water assuming minimum GW pumping
+define SWdem_04_PA2 {value ((AWR_04_PA2 + AWO_04_PA2) * (1 + RPF_04_PA2)  !!Applied water demand + Riparian ET
+                        - min(TW_04_PA2, RUFR_04_PA2*AWR_04_PA2 + RUFO_04_PA2*AWO_04_PA2) !Reuse
+                        - (AWR_04_PA2 *(1 + RPF_04_PA2 - RUFR_04_PA2) + AWO_04_PA2 *(1 + RPF_04_PA2 - RUFO_04_PA2))* GPmin_04_PA2) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_TCC022_04_PA2 + DPF_TCC022_04_PA2 + LFF_TCC022_04_PA2 + OSF_TCC022_04_PA2) - 1))} !Last line accounts for loss
+define CLdem_04_PA2 {value CLmon_TCC022_04_PA2 * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_04_PA2 {value min(SWdem_04_PA2,CLdem_04_PA2)}   !Surface water delivery target
+
+define  X_TCC022_04_PA2  {alias SWdeltarget_04_PA2 - D_TCC022_04_PA2 + Buy_TCC022_04_PA2*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_04_PA2dv {alias SWdem_04_PA2 kind 'SW-demand' units 'cfs'}
+define CLdem_04_PA2dv {alias CLdem_04_PA2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_04_PA2dv {alias SWdeltarget_04_PA2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 07N_PA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_07N_PA {value ((AWR_07N_PA + AWO_07N_PA) * (1 + RPF_07N_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_07N_PA, RUFR_07N_PA*AWR_07N_PA + RUFO_07N_PA*AWO_07N_PA) !Reuse
+                        - (AWR_07N_PA *(1 + RPF_07N_PA - RUFR_07N_PA) + AWO_07N_PA *(1 + RPF_07N_PA - RUFO_07N_PA))* GPmin_07N_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_TCC036_07N_PA + DPF_TCC036_07N_PA + LFF_TCC036_07N_PA + OSF_TCC036_07N_PA) - 1))} !Last line accounts for loss
+define CLdem_07N_PA {value CLmon_TCC036_07N_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_07N_PA {value min(SWdem_07N_PA,CLdem_07N_PA)}   !Surface water delivery target
+
+define  X_TCC036_07N_PA  {alias SWdeltarget_07N_PA - D_TCC036_07N_PA + Buy_TCC036_07N_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_07N_PAdv {alias SWdem_07N_PA kind 'SW-demand' units 'cfs'}
+define CLdem_07N_PAdv {alias CLdem_07N_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_07N_PAdv {alias SWdeltarget_07N_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 07S_PA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_07S_PA {value ((AWR_07S_PA + AWO_07S_PA) * (1 + RPF_07S_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_07S_PA, RUFR_07S_PA*AWR_07S_PA + RUFO_07S_PA*AWO_07S_PA) !Reuse
+                        - (AWR_07S_PA *(1 + RPF_07S_PA - RUFR_07S_PA) + AWO_07S_PA *(1 + RPF_07S_PA - RUFO_07S_PA))* GPmin_07S_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_TCC081_07S_PA + DPF_TCC081_07S_PA + LFF_TCC081_07S_PA + OSF_TCC081_07S_PA) - 1))} !Last line accounts for loss
+define CLdem_07S_PA {value (CLmon_TCC111_07S_PA + CLmon_TCC081_07S_PA) * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_07S_PA {value min(SWdem_07S_PA,CLdem_07S_PA)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_07S_PA  {alias SWdeltarget_07S_PA - D_TCC081_07S_PA - D_TCC111_07S_PA + Buy_TCC081_07S_PA*taf_cfs + Buy_TCC111_07S_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_TCC081_07S_PA  {alias X_Total_07S_PA * ((CLmon_TCC111_07S_PA) / (CLmon_TCC111_07S_PA + CLmon_TCC081_07S_PA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_TCC111_07S_PA  {alias X_Total_07S_PA * ((CLmon_TCC081_07S_PA) / (CLmon_TCC111_07S_PA + CLmon_TCC081_07S_PA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_07S_PAdv {alias SWdem_07S_PA kind 'SW-demand' units 'cfs'}
+define CLdem_07S_PAdv {alias CLdem_07S_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_07S_PAdv {alias SWdeltarget_07S_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08N_PA         
+! Demand for surface water assuming minimum GW pumping  
+define SWdem_08N_PA {value ((AWR_08N_PA + AWO_08N_PA + AWW_08N_PA) * (1 + RPF_08N_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_08N_PA, RUFR_08N_PA*AWR_08N_PA + RUFO_08N_PA*AWO_08N_PA + RUFW_08N_PA*AWW_08N_PA) !Reuse
+                        - (AWR_08N_PA *(1 + RPF_08N_PA - RUFR_08N_PA) + AWO_08N_PA *(1 + RPF_08N_PA - RUFO_08N_PA) + AWW_08N_PA *(1 + RPF_08N_PA - RUFW_08N_PA)) 
+                            * GPmin_08N_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_CBD049_08N_PA + DPF_CBD049_08N_PA + LFF_CBD049_08N_PA + OSF_CBD049_08N_PA) - 1))} !Last line accounts for loss
+define CLdem_08N_PA {value CLmon_CBD049_08N_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_08N_PA {value min(SWdem_08N_PA,CLdem_08N_PA)}   !Surface water delivery target
+
+define  X_CBD049_08N_PA  {alias SWdeltarget_08N_PA - D_CBD049_08N_PA + Buy_CBD049_08N_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08N_PAdv {alias SWdem_08N_PA kind 'SW-demand' units 'cfs'}
+define CLdem_08N_PAdv {alias CLdem_08N_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08N_PAdv {alias SWdeltarget_08N_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08S_PA         Removed from shortage calculations since Reclamation does not have a reliable way to get water there
+! Demand for surface water assuming minimum GW pumping  
+! Demand is also meet through a non-CVP contract (D_GCC065_08S_PA) so that is taken into account here
+define SWdem_08S_PA {value ((AWR_08S_PA + AWO_08S_PA + AWW_08S_PA) * (1 + RPF_08S_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_08S_PA, RUFR_08S_PA*AWR_08S_PA + RUFO_08S_PA*AWO_08S_PA + RUFW_08S_PA*AWW_08S_PA) !Reuse
+                        - (AWR_08S_PA *(1 + RPF_08S_PA - RUFR_08S_PA) + AWO_08S_PA *(1 + RPF_08S_PA - RUFO_08S_PA) + AWW_08S_PA *(1 + RPF_08S_PA - RUFW_08S_PA)) 
+                            * GPmin_08S_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_CBD028_08S_PA + DPF_CBD028_08S_PA + LFF_CBD028_08S_PA + OSF_CBD028_08S_PA) - 1))} !Last line accounts for loss
+define CLdem_08S_PA {value CLmon_CBD028_08S_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_08S_PA {value min(SWdem_08S_PA - D_GCC065_08S_PA[-1],CLdem_08S_PA)}   !Surface water delivery target
+
+define  X_CBD028_08S_PA  {alias SWdeltarget_08S_PA - D_CBD028_08S_PA + Buy_CBD028_08S_PA*taf_cfs  kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08S_PAdv {alias SWdem_08S_PA kind 'SW-demand' units 'cfs'}
+define CLdem_08S_PAdv {alias CLdem_08S_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08S_PAdv {alias SWdeltarget_08S_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 16_PA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_16_PA {value ((AWR_16_PA + AWO_16_PA) * (1 + RPF_16_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_16_PA, RUFR_16_PA*AWR_16_PA + RUFO_16_PA*AWO_16_PA) !Reuse
+                        - (AWR_16_PA *(1 + RPF_16_PA - RUFR_16_PA) + AWO_16_PA *(1 + RPF_16_PA - RUFO_16_PA))* GPmin_16_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_FTR021_16_PA + DPF_FTR021_16_PA + LFF_FTR021_16_PA + OSF_FTR021_16_PA) - 1))} !Last line accounts for loss
+define CLdem_16_PA {value CLmon_FTR021_16_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_16_PA {value min(SWdem_16_PA,CLdem_16_PA)}   !Surface water delivery target
+
+define  X_FTR021_16_PA  {alias SWdeltarget_16_PA - D_FTR021_16_PA kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_16_PAdv {alias SWdem_16_PA kind 'SW-demand' units 'cfs'}
+define CLdem_16_PAdv {alias CLdem_16_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_16_PAdv {alias SWdeltarget_16_PA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 21_PA      Removed from shortage calculations since Reclamation does not have a reliable way to get water there
+! Demand for surface water assuming minimum GW pumping
+define SWdem_21_PA {value ((AWR_21_PA + AWO_21_PA + AWW_21_PA) * (1 + RPF_21_PA)  !!Applied water demand + Riparian ET
+                        - min(TW_21_PA, RUFR_21_PA*AWR_21_PA + RUFO_21_PA*AWO_21_PA + RUFW_21_PA*AWW_21_PA) !Reuse
+                        - (AWR_21_PA *(1 + RPF_21_PA - RUFR_21_PA) + AWO_21_PA *(1 + RPF_21_PA - RUFO_21_PA) + AWW_21_PA *(1 + RPF_21_PA - RUFW_21_PA)) 
+                            * GPmin_21_PA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_KLR005_21_PA + DPF_KLR005_21_PA + LFF_KLR005_21_PA + OSF_KLR005_21_PA) - 1))} !Last line accounts for loss
+define CLdem_21_PA {value CLmon_KLR005_21_PA * taf_cfs*perdel_cvpag_sys }  !Contract allocation
+define SWdeltarget_21_PA {value min(SWdem_21_PA,CLdem_21_PA)}   !Surface water delivery target
+
+define  X_KLR005_21_PA  {alias SWdeltarget_21_PA - D_KLR005_21_PA + Buy_KLR005_21_PA*taf_cfs kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_21_PAdv {alias SWdem_21_PA kind 'SW-demand' units 'cfs'}
+define CLdem_21_PAdv {alias CLdem_21_PA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_21_PAdv {alias SWdeltarget_21_PA kind 'SW-delivery-target' units 'cfs'}
+
+!Total for Ag
+define short_cvp_pag_n {alias  X_WTPCSD_02_PA +  X_SAC294_03_PA +  X_CCL005_04_PA1 +  X_TCC022_04_PA2 
+                            +  X_TCC036_07N_PA +  X_TCC081_07S_PA +  X_TCC111_07S_PA 
+                            + /*X_CBD049_08N_PA + X_CBD028_08S_PA + */X_FTR021_16_PA /* + X_KLR005_21_PA*/ 
+                            kind 'delivery-shortage-cvp' units 'cfs'}
+
+
+define del_cvp_pag_n {alias D_WTPCSD_02_PA + D_SAC294_03_PA + D_CCL005_04_PA1 + D_TCC022_04_PA2 
+                          + D_TCC036_07N_PA + D_TCC081_07S_PA + D_TCC111_07S_PA + D_CBD028_08S_PA + D_CBD049_08N_PA 
+                          + D_FTR021_16_PA + D_KLR005_21_PA 
+                          kind 'delivery-cvp' units 'cfs'}
+
+
+! *********** M&I shortages ****************
+! -----> 02_PU
+!NOTES: D_WTPCSD_02_PU is limited to CVP contract + a water right
+define SWdem_02_PU {value UD_02_PU * (1-GPmin_02_PU)/(1 - EF_WTPCSD_02_PU - SF_WTPCSD_02_PU) } !Surface water delivery assuming minimum GW pumping
+define CLdem_02_PU {value (CLmon_WTPCSD_02_PU + CLmon_WKYTN_02_PU) * taf_cfs*perdel_cvpmi_sys }  !Contract allocation
+
+!Since D_WTPCSD_02_PU also can take water right water in addition to CVP contract water, calculate how much water is taken above the contract limit
+!Need to remove this from the SW demand to compute how much of that demand needs to be met with contract water, and also removed from delivery when computing shortage
+define WRassume_02_PU {value max(0.,D_WTPCSD_02_PU[-1] - CLmon_WTPCSD_02_PU * taf_cfs*perdel_cvpmi_sys)} 
+
+define SWdeltarget_02_PU {value min(SWdem_02_PU - WRassume_02_PU,CLdem_02_PU)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_02_PU  {alias SWdeltarget_02_PU - (D_WTPCSD_02_PU - WRassume_02_PU) - D_WKYTN_02_PU kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_02_PUdv {alias SWdem_02_PU kind 'SW-demand' units 'cfs'}
+define CLdem_02_PUdv {alias CLdem_02_PU kind 'CL-demand' units 'cfs'}
+define WRassume_02_PUdv {alias WRassume_02_PU kind 'WR-delivery' units 'cfs'}
+define SWdeltarget_02_PUdv {alias SWdeltarget_02_PU kind 'SW-delivery-target' units 'cfs'}
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_WTPCSD_02_PU  {alias X_Total_02_PU * ((CLmon_WTPCSD_02_PU) / (CLmon_WKYTN_02_PU + CLmon_WTPCSD_02_PU + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_WKYTN_02_PU  {alias X_Total_02_PU * ((CLmon_WKYTN_02_PU) / (CLmon_WKYTN_02_PU + CLmon_WTPCSD_02_PU + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+! -----> 03_PU1
+define SWdem_03_PU1 {value UD_03_PU1 * (1-GPmin_03_PU1)/(1 - EF_WTPJMS_03_PU1 - SF_WTPJMS_03_PU1) } !Surface water delivery assuming minimum GW pumping
+define CLdem_03_PU1 {value CLmon_SHSTA_03_PU1 * taf_cfs*perdel_cvpmi_sys }  !Contract allocation
+define SWdeltarget_03_PU1 {value min(SWdem_03_PU1,CLdem_03_PU1)}   !Surface water delivery target
+
+define  X_SHSTA_03_PU1  {alias SWdeltarget_03_PU1 - D_WTPJMS_03_PU1 kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_03_PU1dv {alias SWdem_03_PU1 kind 'SW-demand' units 'cfs'}
+define CLdem_03_PU1dv {alias CLdem_03_PU1 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_03_PU1dv {alias SWdeltarget_03_PU1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 03_PU2
+define SWdem_03_PU2 {value UD_03_PU2 * (1-GPmin_03_PU2)/(1 - EF_WTPBLV_03_PU2 - SF_WTPBLV_03_PU2) } !Surface water delivery assuming minimum GW pumping
+define CLdem_03_PU2 {value CLmon_WTPBLV_03_PU2 * taf_cfs*perdel_cvpmi_sys }  !Contract allocation
+define SWdeltarget_03_PU2 {value min(SWdem_03_PU2,CLdem_03_PU2)}   !Surface water delivery target
+
+define  X_WTPBLV_03_PU2  {alias SWdeltarget_03_PU2 - D_WTPBLV_03_PU2 kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_03_PU2dv {alias SWdem_03_PU2 kind 'SW-demand' units 'cfs'}
+define CLdem_03_PU2dv {alias CLdem_03_PU2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_03_PU2dv {alias SWdeltarget_03_PU2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 03_PU3
+!define SWdem_03_PU3 {value UD_03_PU3 * (1-GPmin_03_PU3)/(1 - EF_WTPBUK_03_PU3 - SF_WTPBUK_03_PU3) } !Surface water delivery assuming minimum GW pumping
+!define CLdem_03_PU3 {value CLmon_WTPBUK_03_PU3 * taf_cfs*perdel_cvpmi_sys }  !Contract allocation
+!define SWdeltarget_03_PU3 {value min(SWdem_03_PU3,CLdem_03_PU3)}   !Surface water delivery target
+
+!define  X_WTPBUK_03_SU  {alias SWdeltarget_03_SU - D_WTPBUK_03_SU kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+!define SWdem_03_PU3dv {alias SWdem_03_PU3 kind 'SW-demand' units 'cfs'}
+!define CLdem_03_PU3dv {alias CLdem_03_PU3 kind 'CL-demand' units 'cfs'}
+!define SWdeltarget_03_PU3dv {alias SWdeltarget_03_PU3 kind 'SW-delivery-target' units 'cfs'}
+
+! Placeholders for nine CVP MI contractors with mixed diversion of CVP and Water Forum water - CVP shortage assumed to be zero. 
+!define  X_CL2_FOLSM  {alias CL2_FOLSM - CL2_FOLSM kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_SJWD_S  {alias CL2_SJWD_S - CL2_SJWD_S kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_ELDOR  {alias CL2_ELDOR - CL2_ELDOR kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_ROSEV  {alias CL2_ROSEV - CL2_ROSEV kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_CAREC  {alias CL2_CAREC - CL2_CAREC kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_SMUD  {alias CL2_SMUD - CL2_SMUD kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_PCWA_S  {alias CL2_PCWA_S - CL2_PCWA_S kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_SCWA  {alias CL2_SCWA - CL2_SCWA kind 'delivery-shortage' units 'cfs'}
+!define  X_CL2_PCWA_A  {alias CL2_PCWA_A - CL2_PCWA_A kind 'delivery-shortage' units 'cfs'}
+
+!Totals for M&I
+define short_cvp_pmi_n {alias  X_WTPCSD_02_PU +  X_WKYTN_02_PU +  X_SHSTA_03_PU1 +  X_WTPBLV_03_PU2 
+                             /*+ X_CL2_FOLSM +  X_CL2_SJWD_S +  X_CL2_ELDOR +  X_CL2_ROSEV + X_CL2_CAREC +  X_CL2_SMUD 
+                             +  X_CL2_PCWA_S +  X_CL2_SCWA +  X_CL2_PCWA_A */ 
+                             kind 'delivery-shortage-cvp' units 'cfs'}
+
+! Include placeholders for nine CVP MI contractors with mixed diversion of CVP and Water Forum water - CVP delivery assumes zero shortage
+define del_cvp_pmi_n {alias (D_WTPCSD_02_PU - WRassume_02_PU) + D_WKYTN_02_PU + D_WTPJMS_03_PU1 + D_WTPBLV_03_PU2 
+                           /*+ CL2_FOLSM + CL2_SJWD_S + CL2_ELDOR + CL2_ROSEV + CL2_CAREC + CL2_SMUD 
+                           + CL2_PCWA_S + CL2_SCWA + CL2_PCWA_A*/ 
+                           kind 'delivery-cvp' units 'cfs'}
+
+define del_cvp_pmi_n_wamer {alias del_cvp_pmi_n + D_FOLSM_PCWA_CVP   + D_FOLSM_WTPEDH_CVP + D_FOLSM_WTPFOL_CVP+
+                                                  D_FOLSM_WTPRSV_CVP + D_FOLSM_WTPSJP_CVP + D_FPT013_FSC013 + 
+                                                  D_FPT013_WTPVNY_CVP + D_WTPSAC_26S_PU4_CVP + D_FSC025_60N_PU_CVP + 
+                                                  D_NFA016_WTPWAL_CVP[UPPERAMERICAN] + D_FOLSM_EDCOCA_CVP
+
+                                                  kind 'delivery-cvp' units 'cfs'}
+
+define del_total_amer {alias D_NFA016_WTPWAL[UPPERAMERICAN] + D_NFA016_ABT002 + D_FOLSM_PCWA_CVP + D_FOLSM_WTPEDH + 
+                                                              D_FOLSM_WTPFOL + D_FOLSM_WTPRSV + D_FOLSM_WTPSJP + 
+                                                              D_FOLSM_26S_PU3 + D_FOLSM_26S_NU4 + D_FOLSM_EDCOCA + D_NTOMA_FSC003 + 
+                                                              D_AMR007_WTPFBN + D_AMR017_WTPBJM 
+                                                              kind 'delivery-cvp' units 'cfs'}
+
+!*************** Settlement contractor shortages **************
+! Settlement contractor deliveries occur in April-October and non-project water right diversions occur at same diversion arc in November-March
+! -----> 02_SU
+define SWdem_02_SU {value UD_02_SU * (1-GPmin_02_SU)/(1 - EF_WTPFTH_02_SU - SF_WTPFTH_02_SU)} !Surface water delivery assuming minimum GW pumping
+define CLdem_02_SU {value CLmon_WTPFTH_02_SU * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_02_SU {value min(SWdem_02_SU,CLdem_02_SU)}   !Surface water delivery target
+
+define  X_WTPFTH_02_SU {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_WTPFTH_02_SU  {
+    lhs  X_WTPFTH_02_SU
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_02_SU - D_WTPFTH_02_SU}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }   
+define  Xnm_WTPFTH_02_SU {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_WTPFTH_02_SU  {
+    lhs  Xnm_WTPFTH_02_SU
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_02_SU - D_WTPFTH_02_SU}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }   
+
+!aliases for debugging
+define SWdem_02_SUdv {alias SWdem_02_SU kind 'SW-demand' units 'cfs'}
+define CLdem_02_SUdv {alias CLdem_02_SU kind 'CL-demand' units 'cfs'}
+define SWdeltarget_02_SUdv {alias SWdeltarget_02_SU kind 'SW-delivery-target' units 'cfs'}
+    
+! -----> 02_SA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_02_SA {value ((AWR_02_SA + AWO_02_SA) * (1 + RPF_02_SA)  !!Applied water demand + Riparian ET
+                        - min(TW_02_SA, RUFR_02_SA*AWR_02_SA + RUFO_02_SA*AWO_02_SA) !Reuse
+                        - (AWR_02_SA *(1 + RPF_02_SA - RUFR_02_SA) + AWO_02_SA *(1 + RPF_02_SA - RUFO_02_SA)) 
+                            * GPmin_02_SA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC296_02_SA + DPF_SAC296_02_SA + LFF_SAC296_02_SA + OSF_SAC296_02_SA) - 1))} !Last line accounts for loss
+define CLdem_02_SA {value CLmon_SAC296_02_SA * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_02_SA {value min(SWdem_02_SA,CLdem_02_SA)}   !Surface water delivery target
+
+define  X_SAC296_02_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_SAC296_02_SA  {
+    lhs  X_SAC296_02_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_02_SA - D_SAC296_02_SA } 
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_SAC296_02_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_SAC296_02_SA  {
+    lhs  Xnm_SAC296_02_SA
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_02_SA - D_SAC296_02_SA } 
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_02_SAdv {alias SWdem_02_SA kind 'SW-demand' units 'cfs'}
+define CLdem_02_SAdv {alias CLdem_02_SA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_02_SAdv {alias SWdeltarget_02_SA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 03_SU
+define SWdem_03_SU {value UD_03_SU * (1-GPmin_03_SU)/(1 - EF_WTPFTH_03_SU - SF_WTPFTH_03_SU - EF_WTPBUK_03_SU - SF_WTPBUK_03_SU) } !Surface water delivery assuming minimum GW pumping
+define CLdem_03_SU {value CLmon_WTPFTH_03_SU * taf_cfs*perdel_cvpsc_sys  + CLmon_WTPBUK_03_SU * taf_cfs*perdel_cvpsc_sys}  !Contract allocation
+define SWdeltarget_03_SU {value min(SWdem_03_SU,CLdem_03_SU)}   !Surface water delivery target
+
+define  X_Total_03_SU {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_03_SU  {
+    lhs  X_Total_03_SU
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_03_SU - D_WTPFTH_03_SU - D_WTPBUK_03_SU }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define  Xnm_Total_03_SU {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_03_SU  {
+    lhs  Xnm_Total_03_SU
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_03_SU - D_WTPFTH_03_SU - D_WTPBUK_03_SU }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_03_SUdv {alias SWdem_03_SU kind 'SW-demand' units 'cfs'}
+define CLdem_03_SUdv {alias CLdem_03_SU kind 'CL-demand' units 'cfs'}
+define SWdeltarget_03_SUdv {alias SWdeltarget_03_SU kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 03_SA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_03_SA {value ((AWR_03_SA + AWO_03_SA) * (1 + RPF_03_SA)  !!Applied water demand + Riparian ET
+                        - min(TW_03_SA, RUFR_03_SA*AWR_03_SA + RUFO_03_SA*AWO_03_SA) !Reuse
+                        - (AWR_03_SA *(1 + RPF_03_SA - RUFR_03_SA) + AWO_03_SA *(1 + RPF_03_SA - RUFO_03_SA)) 
+                            * GPmin_03_SA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC289_03_SA + DPF_SAC289_03_SA + LFF_SAC289_03_SA + OSF_SAC289_03_SA) - 1))} !Last line accounts for loss
+define CLdem_03_SA {value CLmon_SAC289_03_SA * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_03_SA {value min(SWdem_03_SA,CLdem_03_SA)}   !Surface water delivery target
+
+define  X_SAC289_03_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_SAC289_03_SA  {
+    lhs  X_SAC289_03_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_03_SA - D_SAC289_03_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_SAC289_03_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_SAC289_03_SA  {
+    lhs  Xnm_SAC289_03_SA
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_03_SA - D_SAC289_03_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_03_SAdv {alias SWdem_03_SA kind 'SW-demand' units 'cfs'}
+define CLdem_03_SAdv {alias CLdem_03_SA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_03_SAdv {alias SWdeltarget_03_SA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08N_SA1
+! Demand is also meet through a water right (D_CBD049_08N_SA1) so that is taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08N_SA1 {value ((AWR_08N_SA1 + AWO_08N_SA1 + AWW_08N_SA1) * (1 + RPF_08N_SA1)  !!Applied water demand + Riparian ET
+                        - min(TW_08N_SA1, RUFR_08N_SA1*AWR_08N_SA1 + RUFO_08N_SA1*AWO_08N_SA1 + RUFW_08N_SA1*AWW_08N_SA1) !Reuse
+                        - (AWR_08N_SA1 *(1 + RPF_08N_SA1 - RUFR_08N_SA1) + AWO_08N_SA1 *(1 + RPF_08N_SA1 - RUFO_08N_SA1) + AWW_08N_SA1 *(1 + RPF_08N_SA1 - RUFW_08N_SA1)) 
+                            * GPmin_08N_SA1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC178_08N_SA1 + DPF_SAC178_08N_SA1 + LFF_SAC178_08N_SA1 + OSF_SAC178_08N_SA1) - 1))} !Last line accounts for loss
+define CLdem_08N_SA1 {value (CLmon_SAC178_08N_SA1 + CLmon_SAC159_08N_SA1) * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+
+!Since D_SAC178_08N_SA1 and D_SAC159_08N_SA1 also can take water right water in addition to CVP contract water, calculate how much water is taken above the contract limit
+!Need to remove this from the SW demand to compute how much of that demand needs to be met with contract water, and also removed from delivery when computing shortage
+define WRassume_08N_SA1 {value max(0.,(D_SAC178_08N_SA1[-1] + D_SAC159_08N_SA1[-1]) - CLdem_08N_SA1)} 
+
+define SWdeltarget_08N_SA1 {value min(SWdem_08N_SA1 - D_CBD049_08N_SA1[-1] - WRassume_08N_SA1, CLdem_08N_SA1)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_08N_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_08N_SA1  {
+    lhs  X_Total_08N_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_08N_SA1 - (D_SAC178_08N_SA1 + D_SAC159_08N_SA1 - WRassume_08N_SA1)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_Total_08N_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_08N_SA1  {
+    lhs  Xnm_Total_08N_SA1
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_08N_SA1 - (D_SAC178_08N_SA1 + D_SAC159_08N_SA1 - WRassume_08N_SA1)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_SAC178_08N_SA1  {alias X_Total_08N_SA1 * ((CLmon_SAC178_08N_SA1) / (CLmon_SAC178_08N_SA1 + CLmon_SAC159_08N_SA1 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC159_08N_SA1  {alias X_Total_08N_SA1 * ((CLmon_SAC159_08N_SA1) / (CLmon_SAC178_08N_SA1 + CLmon_SAC159_08N_SA1 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08N_SA1dv {alias SWdem_08N_SA1 kind 'SW-demand' units 'cfs'}
+define CLdem_08N_SA1dv {alias CLdem_08N_SA1 kind 'CL-demand' units 'cfs'}
+define WRassume_08N_SA1dv {alias WRassume_08N_SA1 kind 'WR-delivery' units 'cfs'}
+define SWdeltarget_08N_SA1dv {alias SWdeltarget_08N_SA1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08N_SA2
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08N_SA2 {value ((AWR_08N_SA2*RiceFact_08N_SA2  + AWO_08N_SA2 + AWW_08N_SA2) * (1 + RPF_08N_SA2)  !!Applied water demand + Riparian ET
+                        - min(TW_08N_SA2, RUFR_08N_SA2*AWR_08N_SA2*RiceFact_08N_SA2  + RUFO_08N_SA2*AWO_08N_SA2 + RUFW_08N_SA2*AWW_08N_SA2) !Reuse
+                        - (AWR_08N_SA2*RiceFact_08N_SA2  *(1 + RPF_08N_SA2 - RUFR_08N_SA2) + AWO_08N_SA2 *(1 + RPF_08N_SA2 - RUFO_08N_SA2) + AWW_08N_SA2 *(1 + RPF_08N_SA2 - RUFW_08N_SA2)) 
+                            * GPmin_08N_SA2) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_GCC027_08N_SA2 + DPF_GCC027_08N_SA2 + LFF_GCC027_08N_SA2 + OSF_GCC027_08N_SA2) - 1))} !Last line accounts for loss
+define CLdem_08N_SA2 {value CLmon_GCC027_08N_SA2 * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_08N_SA2 {value min(SWdem_08N_SA2,CLdem_08N_SA2)}   !Surface water delivery target   
+
+define  X_GCC027_08N_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_GCC027_08N_SA2  {
+    lhs  X_GCC027_08N_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_08N_SA2 - D_GCC027_08N_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_GCC027_08N_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_GCC027_08N_SA2  {
+    lhs  Xnm_GCC027_08N_SA2
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_08N_SA2 - D_GCC027_08N_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_08N_SA2dv {alias SWdem_08N_SA2 kind 'SW-demand' units 'cfs'}
+define CLdem_08N_SA2dv {alias CLdem_08N_SA2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08N_SA2dv {alias SWdeltarget_08N_SA2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08S_SA1
+! Demand is also meet through a water right (D_CBD041_08S_SA1) so that is taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08S_SA1 {value ((AWR_08S_SA1 + AWO_08S_SA1 + AWW_08S_SA1) * (1 + RPF_08S_SA1)  !!Applied water demand + Riparian ET
+                        - min(TW_08S_SA1, RUFR_08S_SA1*AWR_08S_SA1 + RUFO_08S_SA1*AWO_08S_SA1 + RUFW_08S_SA1*AWW_08S_SA1) !Reuse
+                        - (AWR_08S_SA1 *(1 + RPF_08S_SA1 - RUFR_08S_SA1) + AWO_08S_SA1 *(1 + RPF_08S_SA1 - RUFO_08S_SA1) + AWW_08S_SA1 *(1 + RPF_08S_SA1 - RUFW_08S_SA1)) 
+                            * GPmin_08S_SA1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC159_08S_SA1 + DPF_SAC159_08S_SA1 + LFF_SAC159_08S_SA1 + OSF_SAC159_08S_SA1) - 1))} !Last line accounts for loss
+define CLdem_08S_SA1 {value CLmon_SAC159_08S_SA1 * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_08S_SA1 {value min(SWdem_08S_SA1- D_CBD041_08S_SA1[-1],CLdem_08S_SA1)}   !Surface water delivery target   
+
+define  X_SAC159_08S_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_SAC159_08S_SA1  {
+    lhs  X_SAC159_08S_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_08S_SA1 - D_SAC159_08S_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_SAC159_08S_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_SAC159_08S_SA1  {
+    lhs  Xnm_SAC159_08S_SA1
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_08S_SA1 - D_SAC159_08S_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_08S_SA1dv {alias SWdem_08S_SA1 kind 'SW-demand' units 'cfs'}
+define CLdem_08S_SA1dv {alias CLdem_08S_SA1 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08S_SA1dv {alias SWdeltarget_08S_SA1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08S_SA2
+! Demand is also meet through a water right (D_CBD041_08S_SA2) so that is taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08S_SA2 {value ((AWR_08S_SA2*RiceFact_08S_SA2  + AWO_08S_SA2 + AWW_08S_SA2) * (1 + RPF_08S_SA2)  !!Applied water demand + Riparian ET
+                        - min(TW_08S_SA2, RUFR_08S_SA2*AWR_08S_SA2*RiceFact_08S_SA2  + RUFO_08S_SA2*AWO_08S_SA2 + RUFW_08S_SA2*AWW_08S_SA2) !Reuse
+                        - (AWR_08S_SA2*RiceFact_08S_SA2  *(1 + RPF_08S_SA2 - RUFR_08S_SA2) + AWO_08S_SA2 *(1 + RPF_08S_SA2 - RUFO_08S_SA2) + AWW_08S_SA2 *(1 + RPF_08S_SA2 - RUFW_08S_SA2)) 
+                            * GPmin_08S_SA2) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_GCC056_08S_SA2 + DPF_GCC056_08S_SA2 + LFF_GCC056_08S_SA2 + OSF_GCC056_08S_SA2) - 1))} !Last line accounts for loss
+define CLdem_08S_SA2 {value CLmon_GCC056_08S_SA2 * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_08S_SA2 {value min(SWdem_08S_SA2 - D_CBD041_08S_SA2[-1],CLdem_08S_SA2)}   !Surface water delivery target   
+
+define  X_GCC056_08S_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_GCC056_08S_SA2  {
+    lhs  X_GCC056_08S_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_08S_SA2 - D_GCC056_08S_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_GCC056_08S_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_GCC056_08S_SA2  {
+    lhs  Xnm_GCC056_08S_SA2
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_08S_SA2 - D_GCC056_08S_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_08S_SA2dv {alias SWdem_08S_SA2 kind 'SW-demand' units 'cfs'}
+define CLdem_08S_SA2dv {alias CLdem_08S_SA2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08S_SA2dv {alias SWdeltarget_08S_SA2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08S_SA3
+! Demand is also meet through a water right (D_CBD028_08S_SA3) so that is taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08S_SA3 {value ((AWR_08S_SA3 + AWO_08S_SA3) * (1 + RPF_08S_SA3)  !!Applied water demand + Riparian ET
+                        - min(TW_08S_SA3, RUFR_08S_SA3*AWR_08S_SA3 + RUFO_08S_SA3*AWO_08S_SA3) !Reuse
+                        - (AWR_08S_SA3 *(1 + RPF_08S_SA3 - RUFR_08S_SA3) + AWO_08S_SA3 *(1 + RPF_08S_SA3 - RUFO_08S_SA3)) 
+                            * GPmin_08S_SA3) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC121_08S_SA3 +DPF_SAC121_08S_SA3 + LFF_SAC121_08S_SA3 + OSF_SAC121_08S_SA3) - 1))} !Last line accounts for loss
+define CLdem_08S_SA3 {value (CLmon_SAC121_08S_SA3 + CLmon_SAC109_08S_SA3) * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+
+!Since D_SAC178_08N_SA1 and D_SAC159_08N_SA1 also can take water right water in addition to CVP contract water, calculate how much water is taken above the contract limit
+!Need to remove this from the SW demand to compute how much of that demand needs to be met with contract water, and also removed from delivery when computing shortage
+define WRassume_08S_SA3 {value max(0.,((D_SAC121_08S_SA3[-1] - CLmon_SAC121_08S_SA3 * taf_cfs*perdel_cvpsc_sys) 
+    + (D_SAC109_08S_SA3[-1] - CLmon_SAC109_08S_SA3 * taf_cfs*perdel_cvpsc_sys)))} 
+
+define SWdeltarget_08S_SA3 {value min(SWdem_08S_SA3 - D_CBD028_08S_SA3[-1] - WRassume_08S_SA3, CLdem_08S_SA3)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_08S_SA3 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_08S_SA3  {
+    lhs  X_Total_08S_SA3
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_08S_SA3 - (D_SAC121_08S_SA3 + D_SAC109_08S_SA3 - WRassume_08S_SA3)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_Total_08S_SA3 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_08S_SA3  {
+    lhs  Xnm_Total_08S_SA3
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_08S_SA3 - (D_SAC121_08S_SA3 + D_SAC109_08S_SA3 - WRassume_08S_SA3)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_SAC121_08S_SA3  {alias X_Total_08S_SA3 * ((CLmon_SAC121_08S_SA3) / (CLmon_SAC121_08S_SA3 + CLmon_SAC109_08S_SA3 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC109_08S_SA3  {alias X_Total_08S_SA3 * ((CLmon_SAC109_08S_SA3) / (CLmon_SAC121_08S_SA3 + CLmon_SAC109_08S_SA3 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08S_SA3dv {alias SWdem_08S_SA3 kind 'SW-demand' units 'cfs'}
+define CLdem_08S_SA3dv {alias CLdem_08S_SA3 kind 'CL-demand' units 'cfs'}
+define WRassume_08S_SA3dv {alias WRassume_08S_SA3 kind 'WR-delivery' units 'cfs'}
+define SWdeltarget_08S_SA3dv {alias SWdeltarget_08S_SA3 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 09_SA1
+! Demand is also meet through two water right (D_ESL008_09_SA1 + D_LCC029_09_SA1) so those are taken into account here
+! Demand for surface water assuming minimum GW pumping
+! NOTES: D_MTC000_09_SA1 is limited to CVP contract + a water right
+define SWdem_09_SA1 {value ((AWR_09_SA1 + AWO_09_SA1) * (1 + RPF_09_SA1)  !!Applied water demand + Riparian ET
+                        - min(TW_09_SA1, RUFR_09_SA1*AWR_09_SA1 + RUFO_09_SA1*AWO_09_SA1) !Reuse
+                        - (AWR_09_SA1 *(1 + RPF_09_SA1 - RUFR_09_SA1) + AWO_09_SA1 *(1 + RPF_09_SA1 - RUFO_09_SA1)) 
+                            * GPmin_09_SA1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_MTC000_09_SA1 + DPF_MTC000_09_SA1 + LFF_MTC000_09_SA1 + OSF_MTC000_09_SA1) - 1))} !Last line accounts for loss
+define CLdem_09_SA1 {value CLmon_MTC000_09_SA1 * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+
+!Since D_MTC000_09_SA1 also can take water right water in addition to CVP contract water, calculate how much water is taken above the contract limit
+!Need to remove this from the SW demand to compute how much of that demand needs to be met with contract water, and also removed from delivery when computing shortage
+define WRassume_09_SA1 {value max(0.,(D_MTC000_09_SA1[-1] - CLdem_09_SA1))} 
+
+define SWdeltarget_09_SA1 {value min(SWdem_09_SA1 - D_ESL008_09_SA1[-1] - D_LCC029_09_SA1[-1] - WRassume_09_SA1,CLdem_09_SA1)}   !Surface water delivery target   
+
+define  X_MTC000_09_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_MTC000_09_SA1  {
+    lhs  X_MTC000_09_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_09_SA1 - (D_MTC000_09_SA1 -  WRassume_09_SA1)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_MTC000_09_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_MTC000_09_SA1  {
+    lhs  Xnm_MTC000_09_SA1
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_09_SA1 - (D_MTC000_09_SA1 -  WRassume_09_SA1)}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_09_SA1dv {alias SWdem_09_SA1 kind 'SW-demand' units 'cfs'}
+define CLdem_09_SA1dv {alias CLdem_09_SA1 kind 'CL-demand' units 'cfs'}
+define WRassume_09_SA1dv {alias WRassume_09_SA1 kind 'WR-delivery' units 'cfs'}
+define SWdeltarget_09_SA1dv {alias SWdeltarget_09_SA1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 09_SA2
+! Demand is also meet through a water right (D_BTC012_09_SA2) so that is taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_09_SA2 {value ((AWR_09_SA2 + AWO_09_SA2 + AWW_09_SA2) * (1 + RPF_09_SA2)  !!Applied water demand + Riparian ET
+                        - min(TW_09_SA2, RUFR_09_SA2*AWR_09_SA2 + RUFO_09_SA2*AWO_09_SA2 + RUFW_09_SA2*AWW_09_SA2) !Reuse
+                        - (AWR_09_SA2 *(1 + RPF_09_SA2 - RUFR_09_SA2) + AWO_09_SA2 *(1 + RPF_09_SA2 - RUFO_09_SA2) + AWW_09_SA2 *(1 + RPF_09_SA2 - RUFW_09_SA2)) 
+                            * GPmin_09_SA2) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC162_09_SA2 + DPF_SAC162_09_SA2 + LFF_SAC162_09_SA2 + OSF_SAC162_09_SA2) - 1))} !Last line accounts for loss
+define CLdem_09_SA2 {value CLmon_SAC162_09_SA2 * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_09_SA2 {value min(SWdem_09_SA2 - D_BTC012_09_SA2[-1],CLdem_09_SA2)}   !Surface water delivery target   
+
+define  X_SAC162_09_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_SAC162_09_SA2  {
+    lhs  X_SAC162_09_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_09_SA2 - D_SAC162_09_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_SAC162_09_SA2 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_SAC162_09_SA2  {
+    lhs  Xnm_SAC162_09_SA2
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_09_SA2 - D_SAC162_09_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_09_SA2dv {alias SWdem_09_SA2 kind 'SW-demand' units 'cfs'}
+define CLdem_09_SA2dv {alias CLdem_09_SA2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_09_SA2dv {alias SWdeltarget_09_SA2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 18_SA
+! Demand for surface water assuming minimum GW pumping
+define SWdem_18_SA {value ((AWR_18_SA + AWO_18_SA) * (1 + RPF_18_SA)  !!Applied water demand + Riparian ET
+                        - min(TW_18_SA, RUFR_18_SA*AWR_18_SA + RUFO_18_SA*AWO_18_SA) !Reuse
+                        - (AWR_18_SA *(1 + RPF_18_SA - RUFR_18_SA) + AWO_18_SA *(1 + RPF_18_SA - RUFO_18_SA)) 
+                            * GPmin_18_SA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC136_18_SA + DPF_SAC136_18_SA + LFF_SAC136_18_SA + OSF_SAC136_18_SA) - 1))} !Last line accounts for loss
+define CLdem_18_SA {value CLmon_SAC136_18_SA * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_18_SA {value min(SWdem_18_SA,CLdem_18_SA)}   !Surface water delivery target   
+
+define  X_SAC136_18_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_SAC136_18_SA  {
+    lhs  X_SAC136_18_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_18_SA - D_SAC136_18_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_SAC136_18_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_SAC136_18_SA  {
+    lhs  Xnm_SAC136_18_SA
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_18_SA - D_SAC136_18_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!aliases for debugging
+define SWdem_18_SAdv {alias SWdem_18_SA kind 'SW-demand' units 'cfs'}
+define CLdem_18_SAdv {alias CLdem_18_SA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_18_SAdv {alias SWdeltarget_18_SA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 19_SA
+! Demand is also meet through a water right (D_SAC109_19_SA) so this are taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_19_SA {value ((AWR_19_SA + AWO_19_SA) * (1 + RPF_19_SA)  !!Applied water demand + Riparian ET
+                        - min(TW_19_SA, RUFR_19_SA*AWR_19_SA + RUFO_19_SA*AWO_19_SA) !Reuse
+                        - (AWR_19_SA *(1 + RPF_19_SA - RUFR_19_SA) + AWO_19_SA *(1 + RPF_19_SA - RUFO_19_SA)) 
+                            * GPmin_19_SA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC122_19_SA + DPF_SAC122_19_SA + LFF_SAC122_19_SA + OSF_SAC122_19_SA) - 1))} !Last line accounts for loss
+define CLdem_19_SA {value (CLmon_SAC122_19_SA + CLmon_SAC115_19_SA + CLmon_SAC099_19_SA + CLmon_SAC091_19_SA) * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_19_SA {value min(SWdem_19_SA - D_SAC109_19_SA[-1],CLdem_19_SA)}   !Surface water delivery target
+
+!Since there are four deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_19_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_19_SA  {
+    lhs  X_Total_19_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_19_SA - D_SAC122_19_SA - D_SAC115_19_SA - D_SAC099_19_SA - D_SAC091_19_SA}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_Total_19_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_19_SA  {
+    lhs  Xnm_Total_19_SA
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_19_SA - D_SAC122_19_SA - D_SAC115_19_SA - D_SAC099_19_SA - D_SAC091_19_SA}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define CLmon_total_19_SA {value CLmon_SAC122_19_SA + CLmon_SAC115_19_SA + CLmon_SAC099_19_SA + CLmon_SAC091_19_SA}
+
+define  X_SAC122_19_SA  {alias X_Total_19_SA * ((CLmon_SAC122_19_SA) / (CLmon_total_19_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC115_19_SA  {alias X_Total_19_SA * ((CLmon_SAC115_19_SA) / (CLmon_total_19_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC099_19_SA  {alias X_Total_19_SA * ((CLmon_SAC099_19_SA) / (CLmon_total_19_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC091_19_SA  {alias X_Total_19_SA * ((CLmon_SAC091_19_SA) / (CLmon_total_19_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_19_SAdv {alias SWdem_19_SA kind 'SW-demand' units 'cfs'}
+define CLdem_19_SAdv {alias CLdem_19_SA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_19_SAdv {alias SWdeltarget_19_SA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 21_SA
+! Demand is also meet through a water right (D_YBP023_21_SA) so this are taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_21_SA {value ((AWR_21_SA + AWO_21_SA) * (1 + RPF_21_SA)  !!Applied water demand + Riparian ET
+                        - min(TW_21_SA, RUFR_21_SA*AWR_21_SA + RUFO_21_SA*AWO_21_SA) !Reuse
+                        - (AWR_21_SA *(1 + RPF_21_SA - RUFR_21_SA) + AWO_21_SA *(1 + RPF_21_SA - RUFO_21_SA)) 
+                            * GPmin_21_SA) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC083_21_SA + DPF_SAC083_21_SA + LFF_SAC083_21_SA + OSF_SAC083_21_SA) - 1))} !Last line accounts for loss
+define CLdem_21_SA {value (CLmon_SAC083_21_SA + CLmon_SAC074_21_SA) * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_21_SA {value min(SWdem_21_SA - D_YBP023_21_SA[-1],CLdem_21_SA)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_21_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_21_SA  {
+    lhs  X_Total_21_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_21_SA - D_SAC083_21_SA - D_SAC074_21_SA}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_Total_21_SA {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_21_SA  {
+    lhs  Xnm_Total_21_SA
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_21_SA - D_SAC083_21_SA - D_SAC074_21_SA}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_SAC083_21_SA  {alias X_Total_21_SA * ((CLmon_SAC083_21_SA) / (CLmon_SAC083_21_SA + CLmon_SAC074_21_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC074_21_SA  {alias X_Total_21_SA * ((CLmon_SAC074_21_SA) / (CLmon_SAC083_21_SA + CLmon_SAC074_21_SA + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_21_SAdv {alias SWdem_21_SA kind 'SW-demand' units 'cfs'}
+define CLdem_21_SAdv {alias CLdem_21_SA kind 'CL-demand' units 'cfs'}
+define SWdeltarget_21_SAdv {alias SWdeltarget_21_SA kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 22_SA1
+! Demand is also meet through a water right (D_CRC002_22_SA1) so this are taken into account here
+! Demand for surface water assuming minimum GW pumping
+define SWdem_22_SA1 {value ((AWR_22_SA1 + AWO_22_SA1) * (1 + RPF_22_SA1)  !!Applied water demand + Riparian ET
+                        - min(TW_22_SA1, RUFR_22_SA1*AWR_22_SA1 + RUFO_22_SA1*AWO_22_SA1) !Reuse
+                        - (AWR_22_SA1 *(1 + RPF_22_SA1 - RUFR_22_SA1) + AWO_22_SA1 *(1 + RPF_22_SA1 - RUFO_22_SA1)) 
+                            * GPmin_22_SA1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_SAC082_22_SA1 + DPF_SAC082_22_SA1 + LFF_SAC082_22_SA1 + OSF_SAC082_22_SA1) - 1))} !Last line accounts for loss
+define CLdem_22_SA1 {value (CLmon_SAC082_22_SA1 + CLmon_SAC078_22_SA1) * taf_cfs*perdel_cvpsc_sys }  !Contract allocation
+define SWdeltarget_22_SA1 {value min(SWdem_22_SA1 - D_CRC002_22_SA1[-1],CLdem_22_SA1)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_22_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short1_Total_22_SA1  {
+    lhs  X_Total_22_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs SWdeltarget_22_SA1 - D_SAC082_22_SA1 - D_SAC078_22_SA1}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+define  Xnm_Total_22_SA1 {lower unbounded upper unbounded kind 'delivery-shortage' units 'cfs'}
+goal short2_Total_22_SA1  {
+    lhs  Xnm_Total_22_SA1
+    case NovMar {
+    condition month >= NOV .and. month <= MAR
+    rhs SWdem_22_SA1 - D_SAC082_22_SA1 - D_SAC078_22_SA1}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_SAC082_22_SA1  {alias X_Total_22_SA1 * ((CLmon_SAC082_22_SA1) / (CLmon_SAC082_22_SA1 + CLmon_SAC078_22_SA1 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_SAC078_22_SA1  {alias X_Total_22_SA1 * ((CLmon_SAC078_22_SA1) / (CLmon_SAC082_22_SA1 + CLmon_SAC078_22_SA1 + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_22_SA1dv {alias SWdem_22_SA1 kind 'SW-demand' units 'cfs'}
+define CLdem_22_SA1dv {alias CLdem_22_SA1 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_22_SA1dv {alias SWdeltarget_22_SA1 kind 'SW-delivery-target' units 'cfs'}
+
+define short_cvp_psc_n {alias  X_WTPFTH_02_SU   +  X_SAC296_02_SA   +  X_Total_03_SU    +  X_SAC289_03_SA 
+                            +  X_SAC178_08N_SA1 +  X_GCC027_08N_SA2 +  X_SAC159_08S_SA1 +  X_GCC056_08S_SA2 +  X_SAC121_08S_SA3 +  X_SAC109_08S_SA3 
+                            +  X_MTC000_09_SA1  +  X_SAC162_09_SA2  +  X_SAC136_18_SA   +  X_SAC122_19_SA   +  X_SAC115_19_SA   +  X_SAC099_19_SA  + X_SAC091_19_SA 
+                            +  X_SAC083_21_SA   +  X_SAC074_21_SA   +  X_SAC082_22_SA1  +  X_SAC078_22_SA1 
+                            kind 'delivery-shortage-cvp' units 'cfs'}
+define short_tot_psc_n {alias  Xnm_WTPFTH_02_SU   + Xnm_SAC296_02_SA   + Xnm_Total_03_SU    + Xnm_SAC289_03_SA  + Xnm_Total_08N_SA1
+                             + Xnm_GCC027_08N_SA2 + Xnm_SAC159_08S_SA1 + Xnm_GCC056_08S_SA2  + Xnm_Total_08S_SA3 + Xnm_MTC000_09_SA1
+                             + Xnm_SAC162_09_SA2  + Xnm_SAC136_18_SA   + Xnm_Total_19_SA     + Xnm_Total_21_SA   + Xnm_Total_22_SA1
+                            kind 'delivery-shortage-tot' units 'cfs'}
+
+
+! Settlement contractor deliveries occur in April-October and non-project water right diversions occur at same diversion arc in November-March
+define Z_WTPFTH_02_SU {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_WTPFTH_02_SU  {
+    lhs Z_WTPFTH_02_SU
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_WTPFTH_02_SU }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }   
+
+define Z_SAC296_02_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC296_02_SA  {
+    lhs Z_SAC296_02_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC296_02_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_Total_03_SU {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_WTPFTH_03_SU  {
+    lhs Z_Total_03_SU
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_WTPFTH_03_SU + D_WTPBUK_03_SU}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+    
+define Z_SAC289_03_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC289_03_SA  {
+    lhs Z_SAC289_03_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC289_03_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!CVP contract water delivery only computed in total for 8N SA1 since there is no explicit splitting of water right component between the two surface water deliveries
+/*define Z_SAC178_08N_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC178_08N_SA1  {
+    lhs Z_SAC178_08N_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC178_08N_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC159_08N_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC159_08N_SA1  {
+    lhs Z_SAC159_08N_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC159_08N_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+*/
+! Need to remove water right water for total delivery
+define Z_TOTAL_08N_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_TOTAL_08N_SA1 {
+    lhs Z_TOTAL_08N_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC178_08N_SA1 + D_SAC159_08N_SA1 - WRassume_08N_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+    
+define Z_GCC027_08N_SA2 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_GCC027_08N_SA2  {
+    lhs Z_GCC027_08N_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_GCC027_08N_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC159_08S_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC159_08S_SA1  {
+    lhs Z_SAC159_08S_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC159_08S_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_GCC056_08S_SA2 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_GCC056_08S_SA2  {
+    lhs Z_GCC056_08S_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_GCC056_08S_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+!CVP contract water delivery only computed in total for 8S SA3 since there is no explicit splitting of water right component between the two surface water deliveries
+/*define Z_SAC121_08S_SA3 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC121_08S_SA3  {
+    lhs Z_SAC121_08S_SA3
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC121_08S_SA3 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC109_08S_SA3 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC109_08S_SA3  {
+    lhs Z_SAC109_08S_SA3
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC109_08S_SA3 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+*/
+! Need to remove water right water for total delivery
+define Z_TOTAL_08S_SA3 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_TOTAL_08S_SA3 {
+    lhs Z_TOTAL_08S_SA3
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC121_08S_SA3 + D_SAC109_08S_SA3 - WRassume_08S_SA3 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_MTC000_09_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_MTC000_09_SA1  {
+    lhs Z_MTC000_09_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_MTC000_09_SA1 - WRassume_09_SA1}
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC162_09_SA2 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC162_09_SA2  {
+    lhs Z_SAC162_09_SA2
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC162_09_SA2 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC136_18_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC136_18_SA  {
+    lhs Z_SAC136_18_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC136_18_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC122_19_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC122_19_SA  {
+    lhs Z_SAC122_19_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC122_19_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC115_19_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC115_19_SA  {
+    lhs Z_SAC115_19_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC115_19_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+    
+define Z_SAC099_19_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC099_19_SA  {
+    lhs Z_SAC099_19_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC099_19_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC091_19_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC091_19_SA  {
+    lhs Z_SAC091_19_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC091_19_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC083_21_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC083_21_SA  {
+    lhs Z_SAC083_21_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC083_21_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC074_21_SA {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC074_21_SA  {
+    lhs Z_SAC074_21_SA
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC074_21_SA }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC082_22_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC082_22_SA1  {
+    lhs Z_SAC082_22_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC082_22_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define Z_SAC078_22_SA1 {lower unbounded upper unbounded kind 'delivery-cvp' units 'cfs'}
+goal del_SAC078_22_SA1  {
+    lhs Z_SAC078_22_SA1
+    case APR_OCT {
+    condition month == OCT .or. month >= APR .and. month <= SEP
+    rhs D_SAC078_22_SA1 }
+    
+    case otherwise {
+    condition always
+    rhs 0. }
+    }
+
+define del_cvp_psc_n {alias Z_WTPFTH_02_SU  + Z_SAC296_02_SA   + Z_Total_03_SU    + Z_SAC289_03_SA  
+                          + Z_TOTAL_08N_SA1 + Z_GCC027_08N_SA2 + Z_SAC159_08S_SA1 + Z_GCC056_08S_SA2 + Z_TOTAL_08S_SA3 
+                          + Z_MTC000_09_SA1 + Z_SAC162_09_SA2  
+                          + Z_SAC136_18_SA  + Z_SAC122_19_SA   + Z_SAC115_19_SA   + Z_SAC099_19_SA   + Z_SAC091_19_SA 
+                          + Z_SAC083_21_SA  + Z_SAC074_21_SA   + Z_SAC082_22_SA1  + Z_SAC078_22_SA1 
+                          kind 'delivery-cvp' units 'cfs'}
+
+define del_tot_psc_n {alias D_WTPFTH_02_SU + D_SAC296_02_SA + D_WTPFTH_03_SU + D_WTPBUK_03_SU + D_SAC289_03_SA + D_SAC178_08N_SA1 + D_SAC159_08N_SA1 + D_GCC027_08N_SA2        
+                          + D_SAC159_08S_SA1 + D_GCC056_08S_SA2 + D_SAC121_08S_SA3 + D_SAC109_08S_SA3 + D_MTC000_09_SA1 + D_SAC162_09_SA2     
+                          + D_SAC136_18_SA + D_SAC122_19_SA + D_SAC115_19_SA + D_SAC099_19_SA + D_SAC091_19_SA + D_SAC083_21_SA      
+                          + D_SAC074_21_SA + D_SAC082_22_SA1 + D_SAC078_22_SA1     
+                          kind 'delivery-tot' units 'cfs'}
+
+
+! *********** Refuge shortages **************
+! -----> 08N_PR1
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08N_PR1 {value ((AWR_08N_PR1 + AWO_08N_PR1 + AWW_08N_PR1) * (1 + RPF_08N_PR1)  !!Applied water demand + Riparian ET
+                        - min(TW_08N_PR1, RUFR_08N_PR1*AWR_08N_PR1 + RUFO_08N_PR1*AWO_08N_PR1 + RUFW_08N_PR1*AWW_08N_PR1) !Reuse
+                        - (AWR_08N_PR1 *(1 + RPF_08N_PR1 - RUFR_08N_PR1) + AWO_08N_PR1 *(1 + RPF_08N_PR1 - RUFO_08N_PR1) + AWW_08N_PR1 *(1 + RPF_08N_PR1 - RUFW_08N_PR1)) 
+                            * GPmin_08N_PR1) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_GCC027_08N_PR1 + DPF_GCC027_08N_PR1 + LFF_GCC027_08N_PR1 + OSF_GCC027_08N_PR1) - 1))} !Last line accounts for loss
+define CLdem_08N_PR1 {value CLmon_GCC027_08N_PR1 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC027_08N_PR1  - DPF_GCC027_08N_PR1 - LFF_GCC027_08N_PR1 - OSF_GCC027_08N_PR1) }  !Contract allocation
+define SWdeltarget_08N_PR1 {value min(SWdem_08N_PR1,CLdem_08N_PR1)}   !Surface water delivery target
+
+define  X_GCC027_08N_PR1  {alias SWdeltarget_08N_PR1 - D_GCC027_08N_PR1 kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08N_PR1dv {alias SWdem_08N_PR1 kind 'SW-demand' units 'cfs'}
+define CLdem_08N_PR1dv {alias CLdem_08N_PR1 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08N_PR1dv {alias SWdeltarget_08N_PR1 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08N_PR2
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08N_PR2 {value ((AWR_08N_PR2 + AWO_08N_PR2 + AWW_08N_PR2) * (1 + RPF_08N_PR2)  !!Applied water demand + Riparian ET
+                        - min(TW_08N_PR2, RUFR_08N_PR2*AWR_08N_PR2 + RUFO_08N_PR2*AWO_08N_PR2 + RUFW_08N_PR2*AWW_08N_PR2) !Reuse
+                        - (AWR_08N_PR2 *(1 + RPF_08N_PR2 - RUFR_08N_PR2) + AWO_08N_PR2 *(1 + RPF_08N_PR2 - RUFO_08N_PR2) + AWW_08N_PR2 *(1 + RPF_08N_PR2 - RUFW_08N_PR2)) 
+                            * GPmin_08N_PR2) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_GCC039_08N_PR2 + DPF_GCC039_08N_PR2 + LFF_GCC039_08N_PR2 + OSF_GCC039_08N_PR2) - 1))} !Last line accounts for loss
+define CLdem_08N_PR2 {value CLmon_GCC039_08N_PR2 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC039_08N_PR2  - DPF_GCC039_08N_PR2 - LFF_GCC039_08N_PR2 - OSF_GCC039_08N_PR2) }  !Contract allocation
+define SWdeltarget_08N_PR2 {value min(SWdem_08N_PR2,CLdem_08N_PR2)}   !Surface water delivery target
+
+define  X_GCC039_08N_PR2  {alias SWdeltarget_08N_PR2 - D_GCC039_08N_PR2 kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08N_PR2dv {alias SWdem_08N_PR2 kind 'SW-demand' units 'cfs'}
+define CLdem_08N_PR2dv {alias CLdem_08N_PR2 kind 'CL-demand' units 'cfs'}
+define SWdeltarget_08N_PR2dv {alias SWdeltarget_08N_PR2 kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 08S_PR
+!NOTES: D_CBD037_08S_PR is limited to CVP contract + a water right
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08S_PR {value ((AWR_08S_PR + AWO_08S_PR + AWW_08S_PR) * (1 + RPF_08S_PR)  !!Applied water demand + Riparian ET
+                        - min(TW_08S_PR, RUFR_08S_PR*AWR_08S_PR + RUFO_08S_PR*AWO_08S_PR + RUFW_08S_PR*AWW_08S_PR) !Reuse
+                        - (AWR_08S_PR *(1 + RPF_08S_PR - RUFR_08S_PR) + AWO_08S_PR *(1 + RPF_08S_PR - RUFO_08S_PR) + AWW_08S_PR *(1 + RPF_08S_PR - RUFW_08S_PR)) 
+                            * GPmin_08S_PR) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_CBD037_08S_PR + DPF_CBD037_08S_PR + LFF_CBD037_08S_PR + OSF_CBD037_08S_PR) - 1))} !Last line accounts for loss
+define CLdem_08S_PR {value CLmon_CBD037_08S_PR *taf_cfs* perdel_cvprf_sys + 
+                           CLmon_GCC056_08S_PR *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC056_08S_PR   - DPF_GCC056_08S_PR  - LFF_GCC056_08S_PR  - OSF_GCC056_08S_PR) }  !Contract allocation
+                           
+!Since D_CBD037_08S_PR also can take water right water in addition to CVP contract water, calculate how much water is taken above the contract limit
+!Need to remove this from the SW demand to compute how much of that demand needs to be met with contract water, and also removed from delivery when computing shortage
+define WRassume_08S_PR {value max(0.,D_CBD037_08S_PR[-1] - CLmon_CBD037_08S_PR * taf_cfs*perdel_cvprf_sys)} 
+
+define SWdeltarget_08S_PR {value min(SWdem_08S_PR - WRassume_08S_PR,CLdem_08S_PR)}   !Surface water delivery target
+
+!Since there are two deliveries in this demand unit, compute overall shortage and then split between the two deliveries in proportion to the contract allocations
+define  X_Total_08S_PR  {alias SWdeltarget_08S_PR - D_GCC056_08S_PR - (D_CBD037_08S_PR - WRassume_08S_PR) kind 'delivery-shortage' units 'cfs'}
+
+! Added 0.00001 in denominator to prevent divide by zero errors
+define  X_GCC056_08S_PR  {alias X_Total_08S_PR * ((CLmon_GCC056_08S_PR) / (CLmon_GCC056_08S_PR + CLmon_CBD037_08S_PR + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+define  X_CBD037_08S_PR  {alias X_Total_08S_PR * ((CLmon_CBD037_08S_PR) / (CLmon_GCC056_08S_PR + CLmon_CBD037_08S_PR + 0.00001)) kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_08S_PRdv {alias SWdem_08S_PR kind 'SW-demand' units 'cfs'}
+define CLdem_08S_PRdv {alias CLdem_08S_PR kind 'CL-demand' units 'cfs'}
+define WRassume_08S_PRdv {alias WRassume_08S_PR kind 'WR-delivery' units 'cfs'}
+define SWdeltarget_08S_PRdv {alias SWdeltarget_08S_PR kind 'SW-delivery-target' units 'cfs'}
+
+! -----> 09_PR
+! Demand for surface water assuming minimum GW pumping
+define SWdem_09_PR {value ((AWR_09_PR + AWO_09_PR + AWW_09_PR) * (1 + RPF_09_PR)  !!Applied water demand + Riparian ET
+                        - min(TW_09_PR, RUFR_09_PR*AWR_09_PR + RUFO_09_PR*AWO_09_PR + RUFW_09_PR*AWW_09_PR) !Reuse
+                        - (AWR_09_PR *(1 + RPF_09_PR - RUFR_09_PR) + AWO_09_PR *(1 + RPF_09_PR - RUFO_09_PR) + AWW_09_PR *(1 + RPF_09_PR - RUFW_09_PR)) 
+                            * GPmin_09_PR) !Minimum GW pumping
+                        * (1 + 1/(1/(EVF_MTC000_09_PR + DPF_MTC000_09_PR + LFF_MTC000_09_PR + OSF_MTC000_09_PR) - 1))} !Last line accounts for loss
+define CLdem_09_PR {value CLmon_MTC000_09_PR * taf_cfs*perdel_cvprf_sys }  !Contract allocation
+define SWdeltarget_09_PR {value min(SWdem_09_PR,CLdem_09_PR)}   !Surface water delivery target
+
+define  X_MTC000_09_PR   {alias SWdeltarget_09_PR - D_MTC000_09_PR kind 'delivery-shortage' units 'cfs'}
+
+!aliases for debugging
+define SWdem_09_PRdv {alias SWdem_09_PR kind 'SW-demand' units 'cfs'}
+define CLdem_09_PRdv {alias CLdem_09_PR kind 'CL-demand' units 'cfs'}
+define SWdeltarget_09_PRdv {alias SWdeltarget_09_PR kind 'SW-delivery-target' units 'cfs'}
+
+define short_cvp_prf_n {alias  X_GCC027_08N_PR1 +  X_GCC039_08N_PR2 +  X_GCC056_08S_PR +  X_CBD037_08S_PR /*+ X_WEC005_11_PR + X_RVC005_11_PR*/ +  X_MTC000_09_PR kind 'delivery-shortage-cvp' units 'cfs'}
+
+define del_cvp_prf_n {alias D_GCC027_08N_PR1 + D_GCC039_08N_PR2 + D_GCC056_08S_PR + (D_CBD037_08S_PR - WRassume_08S_PR)/*+ D_WEC005_11_PR + D_RVC005_11_PR*/ + D_MTC000_09_PR kind 'delivery-cvp' units 'cfs'}
+
+
+! TOTAL CVP North (non-Water Forum)
+ define short_cvp_tot_n {alias short_cvp_pag_n + short_cvp_pmi_n + short_cvp_psc_n + short_cvp_prf_n kind 'delivery-shortage-cvp' units 'cfs'}
+ define del_cvp_total_n {alias del_cvp_pag_n + del_cvp_pmi_n + del_cvp_psc_n + del_cvp_prf_n kind 'delivery-cvp' units 'cfs'}

@@ -1,0 +1,439 @@
+!EID Operating Rules
+!M.Bachman 2/2018
+
+! Reservoir operations for Project 184 reservoirs are primarily driven by the FERC license
+! issued for Project 184-065, specifically Appendix A
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Caples Lake !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Level 2 - defined as the minimum FERC minimum operating pool
+! Condition 52 of the FERC license states that the minimum operating pool is 10,000 AF,
+! but that "model results to date indicate that necessary storage may be as high as
+! 13,000 acre-feet on November 30."
+! 13 TAF was chosen as a conservative minimum pool, as well as to maintain consistency
+! with Upper American River operations in ECorp's OASIS model
+
+define S_CAPLSlevel2 {value 13.}
+goal set_S_CAPLSlevel2 {S_CAPLS_2 < max(S_CAPLSlevel2-S_CAPLSlevel1,0.)}
+
+!Level 3 - defined as the minimum FERC target levels
+define S_CAPLSlevel3 {
+	case Wet {
+		condition range(month,Jun,Sep) .and. WY_EID==1
+		select target from American_ResLevel
+		where month=month, ResNum=963.1
+	}
+	case AN {
+		condition range(month,Jun,Sep) .and. WY_EID==2
+		select target from American_ResLevel
+		where month=month, ResNum=963.2
+	}
+	case BN {
+		condition range(month,Jun,Sep) .and. WY_EID==3
+		select target from American_ResLevel
+		where month=month, ResNum=963.3
+	}
+	case Dry {
+		condition range(month,Jun,Sep) .and. WY_EID==4
+		select target from American_ResLevel
+		where month=month, ResNum=963.4
+	}
+	case Crit {
+		condition range(month,Jun,Sep) .and. WY_EID==5
+		select target from American_ResLevel
+		where month=month, ResNum=963.5
+	}
+	case Otherwise {
+		condition always
+		value S_CAPLSlevel2
+	}
+}
+goal set_S_CAPLSlevel3 {S_CAPLS_3 < max (S_CAPLSlevel3-S_CAPLSlevel2,0.)}
+
+!Level 4
+define S_CAPLSlevel4 {value S_CAPLSlevel5} ! No flood space requirement
+goal set_S_CAPLSlevel4 {S_CAPLS_4 < max (S_CAPLSlevel4-S_CAPLSlevel3,0.)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Lake Aloha !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Level 5
+define OutletClosed {
+	case DryWY{
+		condition month>=Mar .and. WY_EID>=3
+		value 1.
+	}
+	case WetWY{
+		condition month>=Apr .and. WY_EID<3 !check years
+		value 1.
+	}
+	case Oct{
+		condition month==Oct
+		value 1.
+	}
+	case otherwise{
+		condition always
+		value 0.
+	}
+}
+define S_ALOHAlevel5 {value 5.063*OutletClosed}
+
+! Level 3 - defined as the minimum FERC target levels (Condition 52)
+! Have to define L3 before L2 because L2 setup needs L3 defined first
+! Condition 52 of the FERC license states that The licensee shall operate Lake Aloha in 
+! such a manner as to comply with the End-of-Month Lake Level Operational Requirements 
+! established in California State Water Resources Control Board Decision 1635 as modified 
+! by Order WR 2001-22.
+! Order WR 2007-0013 supersedes WR 2001-22, and defines minimum storage targets in stage
+! elevations. Assumed five feet of deadpool storage (i.e. elevation of 5 in WR 2007-0013
+! is equal to the lowest elevation in American_ResInfo.table)
+
+
+!Level 2
+!Outlet closed on Mar 1 in dry and critical WYs; Apr 1 in all other WYs
+define AlohaDeadpool_el {select elevation from American_ResInfo given storage=0. use linear where ResNum=13} !assume that elevation corresponding to S=0 in American_ResInfo is deadpool elevation
+define AlohaEmpty_el {value AlohaDeadpool_el - 5.}
+
+define S_ALOHAlevel2_af {
+	case HoldWater{ !try to fill reservoir for summer hold
+		condition range(month,Mar,Jun)
+		value S_ALOHAlevel5*1000.
+	}
+	/*case JunWet {
+		condition month==Jun .and. WY_EID==1
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 14.3) use linear !i.e. 14.3 ft. of stage height is WR 2007-0013 requirement
+		where ResNum=13
+	}
+	case JunAN {
+		condition month==Jun .and. WY_EID==2
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 17.2) use linear where ResNum=13
+	}
+	case JunBN {
+		condition month==Jun .and. WY_EID==3
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 18.2) use linear where ResNum=13
+	}
+	case JunDry {
+		condition month==Jun .and. WY_EID==4
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 18.1) use linear where ResNum=13
+	}
+	case JunCrit {
+		condition month==Jun .and. WY_EID==5
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 16.2) use linear where ResNum=13
+	}*/
+	case JulWet {
+		condition month==Jul .and. WY_EID==1
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 14.6) use linear where ResNum=13
+	}
+	case JulAN {
+		condition month==Jul .and. WY_EID==2
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 16.6) use linear where ResNum=13
+	}
+	case JulBN {
+		condition month==Jul .and. WY_EID==3
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 15.3) use linear where ResNum=13
+	}
+	case JulDry {
+		condition month==Jul .and. WY_EID==4
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 10.1) use linear where ResNum=13
+	}
+	case JulCrit {
+		condition month==Jul .and. WY_EID==5
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 5.0) use linear where ResNum=13
+	}
+	case AugWet {
+		condition month==Aug .and. WY_EID==1
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 8.4) use linear where ResNum=13
+	}
+	case AugAN {
+		condition month==Aug .and. WY_EID==2
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 7.3) use linear where ResNum=13
+	}
+	case AugBN {
+		condition month==Aug .and. WY_EID==3
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 5.2) use linear where ResNum=13
+	}
+	case AugDry {
+		condition month==Aug .and. WY_EID==4
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 5.0) use linear where ResNum=13
+	}
+	case AugCrit {
+		condition month==Aug .and. WY_EID==5
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 5.0) use linear where ResNum=13
+	}
+	case Sept {
+		condition month==Sep
+		select storage from American_ResInfo
+		given elevation=(AlohaEmpty_el + 5.0) use linear where ResNum=13
+	}
+	case Otherwise{
+		condition always
+		value S_ALOHAlevel1*1000.
+	}
+}
+
+define S_ALOHAlevel2 {value S_ALOHAlevel2_af/1000.}
+goal set_S_ALOHAlevel2 {S_ALOHA_2 < max(S_ALOHAlevel2-S_ALOHAlevel1,0.)}
+
+define S_ALOHAlevel4   {value S_ALOHAlevel5} !No flood control space
+goal set_S_ALOHAlevel4 {S_ALOHA_4 < max (S_ALOHAlevel4-S_ALOHAlevel3,0.)}
+
+!Level 3 - storage above level 3 released for hydropower generation
+define S_ALOHAlevel3 {
+	case  HoldWater{condition range(month,Mar,Jun) value S_ALOHAlevel4}
+        case        Jul{condition month == JUL value max(3.6, S_ALOHAlevel2)}
+        case        Aug{condition month == AUG value max(1.7, S_ALOHAlevel2)}
+        case        Sep{condition month == SEP value max(0.4, S_ALOHAlevel2)}
+        case otherwise {condition always value S_ALOHAlevel2}}
+
+goal set_S_ALOHAlevel3 {S_ALOHA_3 < max (S_ALOHAlevel3-S_ALOHAlevel2,0.)}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Silver Lake !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Level 2 - defined as the minimum FERC target requirements (Condition 52)
+! Minimum operating targets defined by FERC for Silver Lake include:
+! No discretionary releases prior to September 15 (modeled as prior to month of September)
+! 12 foot minimum stage required on September 30
+! 7.4 foot stage required on November 1 (modeled as end of October)
+! Minimum operating targets defined by Amador Settlement Agreement for Silver Lake include:
+! Keep reservoir as full as possible from May-September 15 (modeled as May-Aug)
+
+define Silver_base_el {select elevation from American_ResInfo given storage=0. use linear where ResNum=11}
+
+define S_SILVRlevel2_af { !!!!! Need to add in logic for no discretionary releases prior to Labor Day (i.e. Sep) !!!!!
+	case OctStage {
+		condition month==Oct
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 7.4) use linear where ResNum=11
+	}
+	case MayAug {
+		condition range(month,May,Aug)
+		value S_SILVRlevel5*1000 !because all other levels are being converted to TAF from AF
+	}
+	case SepStage {
+		condition month==Sep
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 12.0) use linear where ResNum=11
+	}
+	case Otherwise {
+		condition always
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 7.4) use linear where ResNum=11
+	}
+}
+define S_SILVRlevel2 {value S_SILVRlevel2_af/1000.}
+goal set_S_SILVRlevel2 {S_SILVR_2 < max(S_SILVRlevel2-S_SILVRlevel1,0.)}
+
+! Level 3 - defined as discretionary releases
+! EID has also agreed to "work in good faith and employ best efforts to" operate Silver Lake
+! according to the Settlement Agreement with the League to Save Sierra Lakes, 
+! which aims to achieve a September 30 stage level of:
+!		14.4 feet		in Wet, Above Normal years
+!		13.0 feet		in all other years
+! as well as October 15 stage levels (modeled as Oct 30) of:
+!		11.0 feet		in Wet, Above Normal years
+!		10.3 feet		in all other years	
+
+define S_SILVRlevel3_af { 
+	case SepStage_WetAN {
+		condition month==Sep .and. WY_EID<3
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 14.4) use linear where ResNum=11
+	}
+	case SepStage_other {
+		condition month==Sep .and. WY_EID>=3
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 13.0) use linear where ResNum=11
+	}
+	Case OctStage_WetAN {
+		condition month==Oct .and. WY_EID<3
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 11.0) use linear where ResNum=11
+	}
+	case OctStage_other {
+		condition month==Oct .and. WY_EID>=3
+		select storage from American_ResInfo
+		given elevation=(Silver_base_el + 10.3) use linear where ResNum=11
+	}
+	case Otherwise {
+		condition always
+		value S_SILVRlevel5*1000
+	}
+}
+define S_SILVRlevel3 {value S_SILVRlevel3_af/1000.}
+goal set_S_SILVRlevel3 {S_SILVR_3 < max(S_SILVRlevel3-S_SILVRlevel2,0.)}
+
+!Level 4 No flood space requirement - level 5 changes to simulate flashboard removal.
+define S_SILVRlevel4 {value S_SILVRlevel5}
+goal set_S_SILVRlevel4 {S_SILVR_4 < max (S_SILVRlevel4-S_SILVRlevel3,0.)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Echo Lake !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! FERC requirement is to keep waterway between Upper Echo and Lower Echo Lakes
+! navigable between July 1 and Labor Day of each year (i.e. keep lake full)
+! OASIS model uses % of average SWE as a trigger for flashboard placement - 
+! in lieu of having that, will use El Dorado water index as hydrologic trigger, with same
+! % triggers as that of SWE; namely start filling Echo Lake:
+!		Mar		El Dorado WY < 20% avg (i.e. critical)
+!		Apr		El Dorado WY < 55% avg (i.e. dry)
+!		May		El Dorado WY < 125% avg (i.e. wet)
+!		Jun		All other years
+! Must still meet minimum flow requirements
+
+!Level 5
+define S_ECHOLlevel5 {
+	case Flashboard_CritMar {
+		condition month==Mar .and. amr_aprjul_pct<20.
+		value 1.943
+	}
+	case Flashboard_DryApr {
+		condition month==Apr .and. amr_aprjul_pct<55.
+		value 1.943
+	}
+	case Flashboard_WetMay {
+		condition month==May 
+		value 1.943
+	}
+	case Flashboard_Summer {
+		condition range(month,Jun,Aug)
+		!condition range(month,May,Sep)
+		value 1.943
+	}
+	case Flashboard_September { !232 AF = average (1922-2015) end of Sep storage in OASIS
+		condition month==Sep
+		value 0.232
+	}
+	case Flashboard_October { !215 AF = average (1922-2015) end of Sep storage in OASIS
+		condition month==Oct
+		value 0.215
+	}
+	case NoFlashboard {
+		condition always
+		value S_ECHOLlevel1
+	}
+}
+define S_ECHOlevel5_DV {alias S_ECHOLlevel5 kind 'STORAGE-LEVEL' units 'CFS'}
+goal set_S_ECHOLlevel5 {S_ECHOL_5 < max(S_ECHOLlevel5-S_ECHOLlevel4,0.)}
+
+
+/*case wet{
+		condition amr_aprjul_pct > 125.
+		value 1
+		}
+	case above_normal{
+		condition amr_aprjul_pct >= 100.
+		value 2
+		}
+	case below_normal{
+		condition amr_aprjul_pct >= 75.
+		value 3
+		}
+	case dry{
+		condition amr_aprjul_pct >= 50.
+		value 4
+		}
+	case critical{
+		condition always
+		value 5
+		}*/
+
+!Level 3 - not needed
+define S_ECHOLlevel3 {value S_ECHOLlevel5}
+goal set_S_ECHOLlevel3 {S_ECHOL_3 < max (S_ECHOLlevel3-S_ECHOLlevel2,0.)}
+
+!Level 4 - not needed
+define S_ECHOLlevel4 {value S_ECHOLlevel5}
+goal set_S_ECHOLlevel4 {S_ECHOL_4 < max (S_ECHOLlevel4-S_ECHOLlevel3,0.)}
+
+!Level 2
+define S_ECHOLlevel2 {
+	case Summer{
+		condition range(month,Nov,Aug)
+		value S_ECHOLlevel5
+	}
+	case September{ !10 weeks between Labor Day and November 15; trying to force a smooth drawdown - 60% of storage by end of September
+		condition month==Sep
+		value S_ECHOLlevel5*0.6
+	}
+	case October{ !10 weeks between Labor Day and November 15; trying to force a smooth drawdown - 20% of storage by end of October
+		condition month==Oct
+		value S_ECHOLlevel5*0.2
+	}
+}
+goal set_S_ECHOLlevel2 {S_ECHOL_2 < max (S_ECHOLlevel2-S_ECHOLlevel1,0.)}
+
+! Echo Lake Conduit
+! Head-dependent conduit release capacity
+! Conduit valve is opened after Labor Day and closed when the water surface elvetaion drops below the conduit invert
+! or November 16th, whichever is first.
+
+
+define EchoConduitValve {
+	case ValveOpen {
+		condition month == Sep .or. month == Oct value 1.}
+	case Flashboard_DryApr {
+		condition month == Nov value 0.5}
+	case otherwise {
+	        condition always value 0.}}
+	        
+define EchoConduitCapacity {! Very rough approximation of head-dependent capacity
+	case HiStorage {
+		condition S_ECHOL(-1) > 0.8 value 26.}
+	case otherwise {
+	        condition always value (S_ECHOL(-1)/0.8)*26.}}
+
+goal setD_ECHOL_ELC001 {D_ECHOL_ELC001 < EchoConduitCapacity*EchoConduitValve}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Debugging !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_CAPLSlevel1dv {alias S_CAPLSlevel1 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_CAPLSlevel2dv {alias S_CAPLSlevel2 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_CAPLSlevel3dv {alias S_CAPLSlevel3 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_CAPLSlevel4dv {alias S_CAPLSlevel4 kind 'STORAGE-LEVEL' units 'TAF'}
+define S_CAPLSlevel5dv {alias S_CAPLSlevel5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+define S_ALOHAlevel1dv {alias S_ALOHAlevel1 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ALOHAlevel2dv {alias S_ALOHAlevel2 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ALOHAlevel3dv {alias S_ALOHAlevel3 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ALOHAlevel4dv {alias S_ALOHAlevel4 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ALOHAlevel5dv {alias S_ALOHAlevel5 KIND 'STORAGE-LEVEL' units 'TAF'}
+
+define S_SILVRlevel1dv {alias S_SILVRlevel1 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_SILVRlevel2dv {alias S_SILVRlevel2 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_SILVRlevel3dv {alias S_SILVRlevel3 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_SILVRlevel4dv {alias S_SILVRlevel4 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_SILVRlevel5dv {alias S_SILVRlevel5 KIND 'STORAGE-LEVEL' units 'TAF'}
+
+define S_ECHOLlevel1dv {alias S_ECHOLlevel1 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ECHOLlevel2dv {alias S_ECHOLlevel2 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ECHOLlevel3dv {alias S_ECHOLlevel3 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ECHOLlevel4dv {alias S_ECHOLlevel4 KIND 'STORAGE-LEVEL' units 'TAF'}
+define S_ECHOLlevel5dv {alias S_ECHOLlevel5 KIND 'STORAGE-LEVEL' units 'TAF'}

@@ -1,0 +1,91 @@
+!TrinityIndex.wresl
+
+define I_TRNTY {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !TRINITY R. INFLOW TO CLAIR ENGLE LAKE
+
+define I1_Annual1{
+	case JanMay{
+		condition month>=Jan .and. month<=May
+		sum(i=Oct-month, 0, 1) I_TRNTY(i)*cfs_taf(i)
+	}
+	case JunSep{
+		condition month>=Jun .and. month<=Sep
+		sum(i=Oct-month, 0, 1) I_TRNTY(i)*cfs_taf(i)
+	}
+	case OctSep{
+		condition always
+		value 0.0
+	}
+}
+define I1_Annual1_dv{alias I1_Annual1 kind 'index' units 'taf'}
+
+define I1_annual2{
+	case JanMay{
+		condition month>=Jan .and. month<=May
+		sum(i=1, Sep-month, 1) i1_fm(i)
+	}
+	case JunAug{
+		condition month>=Jun .and. month<=Aug
+		sum(i=1, Sep-month, 1) I_TRNTY(i)*cfs_taf(i)
+	}
+	case Sep{
+		condition month==Sep
+		value 0.0
+	}
+	case OctDec{
+		condition always
+		value 0.0
+	}
+}
+define I1_Annual2_dv{alias I1_Annual2 kind 'index' units 'taf'}
+
+define i1_annual{value i1_annual1+i1_annual2}
+define I1_annual_dv{alias I1_annual kind 'index' units 'taf'}
+
+define i1_annual_prev{sum(i=Oct-month-12, Sep-month-12, 1) I_TRNTY(i)*cfs_taf(i)}
+define I1_annual_prev_dv{alias I1_annual_prev kind 'index' units 'taf'}
+
+define wyt_Trinity_curr{
+	case wet{
+		condition i1_annual > 1758
+		value 1
+	}
+	case AN{
+		condition i1_annual > 1343
+		value 2
+	}
+	case BN{
+		condition i1_annual > 972
+		value 3
+	}
+	case Dry{
+		condition i1_annual > 667
+		value 4
+	}
+	case critical{
+		condition always
+		value 5
+	}
+}
+
+define wyt_Trinity_prev{
+	case wet{
+		condition i1_annual_prev > 1758
+		value 1
+	}
+	case AN{
+		condition i1_annual_prev > 1343
+		value 2
+	}
+	case BN{
+		condition i1_annual_prev > 972
+		value 3
+	}
+	case Dry{
+		condition i1_annual_prev > 667
+		value 4
+	}
+	case critical{
+		condition always
+		value 5
+	}
+}

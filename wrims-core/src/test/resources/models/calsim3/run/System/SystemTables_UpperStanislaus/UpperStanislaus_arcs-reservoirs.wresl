@@ -1,0 +1,196 @@
+!UpperStanislaus_arcs-reservoirs.wresl
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Combined Alpine, Union, and Utica Reservoirs    !!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_ALPNE_1     {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ALPNE_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ALPNE_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ALPNE_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_ALPNE_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define S_ALPNElevel1 {value 2.5}
+define S_ALPNElevel2 {
+	        case Oct {condition month == OCT value 5.01}
+			case Nov {condition month == NOV value 4.51}
+			case Dec {condition month == DEC value 4.83}
+			case Jan {condition month == JAN value 5.20}
+			case Feb {condition month == FEB value 5.93}
+			case Mar {condition month == MAR value 7.48}
+			case Apr {condition month == APR value 9.04}
+			case May {condition month == MAY value 9.55}
+			case Jun {condition month == JUN value 9.39}
+			case Jul {condition month == JUL value 8.59}
+			case Aug {condition month == AUG value 7.45}
+			case otherwise {condition always value 6.08}	}
+define S_ALPNElevel3 {value 9.55}
+define S_ALPNElevel4 {value 9.55}
+define S_ALPNElevel5 {value 9.55}
+
+goal setS_ALPNEZone1 {S_ALPNE_1 < S_ALPNElevel1}
+goal setS_ALPNEZone2 {S_ALPNE_2 < S_ALPNElevel2 - S_ALPNElevel1}
+goal setS_ALPNEZone3 {S_ALPNE_3 < S_ALPNElevel3 - S_ALPNElevel2}
+goal setS_ALPNEZone4 {S_ALPNE_4 < S_ALPNElevel4 - S_ALPNElevel3}
+goal setS_ALPNEZone5 {S_ALPNE_5 < S_ALPNElevel5 - S_ALPNElevel4}
+
+
+define S_ALPNE     {std kind 'STORAGE' units 'TAF'}
+goal storage_ALPNE {S_ALPNE = S_ALPNE_1 + S_ALPNE_2 + S_ALPNE_3 + S_ALPNE_4 + S_ALPNE_5}
+
+define E_ALPNE_SV {
+	        case Oct {condition month == OCT value 0.11}
+			case Nov {condition month == NOV value 0.04}
+			case Dec {condition month == DEC value 0.02}
+			case Jan {condition month == JAN value 0.02}
+			case Feb {condition month == FEB value 0.05}
+			case Mar {condition month == MAR value 0.08}
+			case Apr {condition month == APR value 0.14}
+			case May {condition month == MAY value 0.23}
+			case Jun {condition month == JUN value 0.31}
+			case Jul {condition month == JUL value 0.51}
+			case Aug {condition month == AUG value 0.39}
+			case otherwise {condition always value 0.26}	}
+				
+define E_ALPNE {std kind 'EVAPORATION' units 'CFS'}
+goal setE_ALPNE {E_ALPNE = E_ALPNE_sv*taf_cfs}	
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+define S_SPICElevel1 {value 5}
+define S_SPICE_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_SPICEZonE_SPICE {S_SPICE_1 < S_SPICElevel1}
+define S_SPICE_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SPICE_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SPICE_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SPICElevel5 {value 189}
+define S_SPICE_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_SPICE {std kind 'STORAGE' units 'TAF'} !New Spicer Meadow Reservoir
+goal storagE_SPICE {S_SPICE=S_SPICE_1+S_SPICE_2+S_SPICE_3+S_SPICE_4+S_SPICE_5}
+define F1 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_SPICE {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_SPICE {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_SPICE {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_SPICElast {select area from Stanislaus_res_info given storage=1000*S_SPICE(-1) use linear where res_num=1}
+define A_SPICEforward {select area from Stanislaus_res_info given storage=1050*S_SPICE(-1) use linear where res_num=1}
+define A_SPICEback {select area from Stanislaus_res_info given storage=950*S_SPICE(-1) use linear where res_num=1}
+define coefev1 {value (A_SPICEforward - A_SPICEback)/(100*max(0.01,S_SPICE(-1)))}
+goal areA_SPICE {A_SPICE=A_SPICElast+1000*coefev1*S_SPICE-1000*coefev1*S_SPICE(-1)}
+goal evap1 {E_SPICE*cfs_af=(ER_SPICE/24)*A_SPICElast+(ER_SPICE/24)*A_SPICE}
+define relcap1 {select discharge from Stanislaus_res_info given storage=1000*S_SPICE(-1) use linear where res_num=1}
+goal maxreleasE_SPICE {C_SPICE<relcap1}
+
+define S_RLIEFlevel1 {value 0.2}
+define S_RLIEF_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_RLIEFZonE_SPICE {S_RLIEF_1 < S_RLIEFlevel1}
+define S_RLIEF_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLIEF_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLIEF_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLIEFlevel5 {value 15.5}
+define S_RLIEF_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_RLIEF {std kind 'STORAGE' units 'TAF'} !Relief Reservoir
+goal storagE_RLIEF {S_RLIEF=S_RLIEF_1+S_RLIEF_2+S_RLIEF_3+S_RLIEF_4+S_RLIEF_5}
+define F2 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_RLIEF {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_RLIEF {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_RLIEF {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_RLIEFlast {select area from Stanislaus_res_info given storage=1000*S_RLIEF(-1) use linear where res_num=2}
+define A_RLIEFforward {select area from Stanislaus_res_info given storage=1050*S_RLIEF(-1) use linear where res_num=2}
+define A_RLIEFback {select area from Stanislaus_res_info given storage=950*S_RLIEF(-1) use linear where res_num=2}
+define coefev2 {value (A_RLIEFforward - A_RLIEFback)/(100*max(0.01,S_RLIEF(-1)))}
+goal areA_RLIEF {A_RLIEF=A_RLIEFlast+1000*coefev2*S_RLIEF-1000*coefev2*S_RLIEF(-1)}
+goal evap2 {E_RLIEF*cfs_af=(ER_RLIEF/24)*A_RLIEFlast+(ER_RLIEF/24)*A_RLIEF}
+define relcap2 {select discharge from Stanislaus_res_info given storage=1000*S_RLIEF(-1) use linear where res_num=2}
+goal maxreleasE_RLIEF {C_RLIEF<relcap2}
+
+define S_DONLLlevel1 {value 2.1}
+define S_DONLL_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_DONLLZonE_SPICE {S_DONLL_1 < S_DONLLlevel1}
+define S_DONLL_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_DONLL_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_DONLL_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_DONLLlevel5 {value 64.3}
+define S_DONLL_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_DONLL {std kind 'STORAGE' units 'TAF'} !Donnells Lake
+goal storagE_DONLL {S_DONLL=S_DONLL_1+S_DONLL_2+S_DONLL_3+S_DONLL_4+S_DONLL_5}
+define F3 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_DONLL {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_DONLL {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_DONLL {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_DONLLlast {select area from Stanislaus_res_info given storage=1000*S_DONLL(-1) use linear where res_num=3}
+define A_DONLLforward {select area from Stanislaus_res_info given storage=1050*S_DONLL(-1) use linear where res_num=3}
+define A_DONLLback {select area from Stanislaus_res_info given storage=950*S_DONLL(-1) use linear where res_num=3}
+define coefev3 {value (A_DONLLforward - A_DONLLback)/(100*max(0.01,S_DONLL(-1)))}
+goal areA_DONLL {A_DONLL=A_DONLLlast+1000*coefev3*S_DONLL-1000*coefev3*S_DONLL(-1)}
+goal evap3 {E_DONLL*cfs_af=(ER_DONLL/24)*A_DONLLlast+(ER_DONLL/24)*A_DONLL}
+define relcap3 {select discharge from Stanislaus_res_info given storage=1000*S_DONLL(-1) use linear where res_num=3}
+goal maxreleasE_DONLL {C_DONLL<relcap3}
+
+define S_BEARDlevel1 {value 20.4}
+define S_BEARD_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_BEARDZonE_SPICE {S_BEARD_1 < S_BEARDlevel1}
+define S_BEARD_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BEARD_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BEARD_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BEARDlevel5 {value 97.8}
+define S_BEARD_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_BEARD {std kind 'STORAGE' units 'TAF'} !Beardsley Lake
+goal storagE_BEARD {S_BEARD=S_BEARD_1+S_BEARD_2+S_BEARD_3+S_BEARD_4+S_BEARD_5}
+define F4 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_BEARD {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_BEARD {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_BEARD {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_BEARDlast {select area from Stanislaus_res_info given storage=1000*S_BEARD(-1) use linear where res_num=4}
+define A_BEARDforward {select area from Stanislaus_res_info given storage=1050*S_BEARD(-1) use linear where res_num=4}
+define A_BEARDback {select area from Stanislaus_res_info given storage=950*S_BEARD(-1) use linear where res_num=4}
+define coefev4 {value (A_BEARDforward - A_BEARDback)/(100*max(0.01,S_BEARD(-1)))}
+goal areA_BEARD {A_BEARD=A_BEARDlast+1000*coefev4*S_BEARD-1000*coefev4*S_BEARD(-1)}
+goal evap4 {E_BEARD*cfs_af=(ER_BEARD/24)*A_BEARDlast+(ER_BEARD/24)*A_BEARD}
+define relcap4 {select discharge from Stanislaus_res_info given storage=1000*S_BEARD(-1) use linear where res_num=4}
+goal maxreleasE_BEARD {C_BEARD<relcap4}
+
+define S_PCRSTlevel1 {value 0.3}
+define S_PCRST_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_PCRSTZonE_SPICE {S_PCRST_1 < S_PCRSTlevel1}
+define S_PCRST_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PCRST_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PCRST_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PCRSTlevel5 {value 18.312}
+define S_PCRST_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_PCRST {std kind 'STORAGE' units 'TAF'} !Pinecrest Lake
+goal storage_PCRST {S_PCRST=S_PCRST_1+S_PCRST_2+S_PCRST_3+S_PCRST_4+S_PCRST_5}
+define F5 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_PCRST {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_PCRST {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_PCRST {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_PCRSTlast {select area from Stanislaus_res_info given storage=1000*S_PCRST(-1) use linear where res_num=5}
+define A_PCRSTforward {select area from Stanislaus_res_info given storage=1050*S_PCRST(-1) use linear where res_num=5}
+define A_PCRSTback {select area from Stanislaus_res_info given storage=950*S_PCRST(-1) use linear where res_num=5}
+define coefev5 {value (A_PCRSTforward - A_PCRSTback)/(100*max(0.01,S_PCRST(-1)))}
+goal areA_PCRST {A_PCRST=A_PCRSTlast+1000*coefev5*S_PCRST-1000*coefev5*S_PCRST(-1)}
+goal evap5 {E_PCRST*cfs_af=(ER_PCRST/24)*A_PCRSTlast+(ER_PCRST/24)*A_PCRST}
+define relcap5 {select discharge from Stanislaus_res_info given storage=1000*S_PCRST(-1) use linear where res_num=5}
+goal maxrelease_PCRST {C_PCRST<relcap5}
+
+define S_LYONSlevel1 {value 0.001}
+define S_LYONS_1 {std kind 'STORAGE-ZONE' units 'TAF'}
+goal S_LYONSZonE_SPICE {S_LYONS_1 < S_LYONSlevel1}
+define S_LYONS_2 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LYONS_3 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LYONS_4 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LYONSlevel5 {value 5.5}
+define S_LYONS_5 {std kind 'STORAGE-ZONE' units 'TAF'}
+define S_LYONS {std kind 'STORAGE' units 'TAF'} !Lyons Reservoir
+goal storage5 {S_LYONS=S_LYONS_1+S_LYONS_2+S_LYONS_3+S_LYONS_4+S_LYONS_5}
+define F6 {std kind 'FLOW-SPILL-NON-RECOV' units 'CFS'}
+define E_LYONS {lower unbounded kind 'EVAPORATION' units 'CFS'}
+define A_LYONS {std kind 'SURFACE-AREA' units 'ACRES'}
+define ER_LYONS {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}
+define A_LYONSlast {select area from Stanislaus_res_info given storage=1000*S_LYONS(-1) use linear where res_num=6}
+define A_LYONSforward {select area from Stanislaus_res_info given storage=1050*S_LYONS(-1) use linear where res_num=6}
+define A_LYONSback {select area from Stanislaus_res_info given storage=950*S_LYONS(-1) use linear where res_num=6}
+define coefev6 {value (A_LYONSforward - A_LYONSback)/(100*max(0.01,S_LYONS(-1)))}
+goal areA_LYONS {A_LYONS=A_LYONSlast+1000*coefev6*S_LYONS-1000*coefev6*S_LYONS(-1)}
+goal evap6 {E_LYONS*cfs_af=(ER_LYONS/24)*A_LYONSlast+(ER_LYONS/24)*A_LYONS}
+define relcap6 {select discharge from Stanislaus_res_info given storage=1000*S_LYONS(-1) use linear where res_num=6}
+goal maxrelease6 {C_LYONS<relcap6}

@@ -1,0 +1,39 @@
+/*
+CALSIM 3.0 SYSTEM FILE
+CONSTARINTS-RETURNS.WRESL
+
+*/
+! Assume wastewater return flow is equal to 100% of indoor urban water use
+! Assume that in month of minimum water use, all water use is indoor
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Delta below San Joaquin River RM 28   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!define TD_SJR022_200 {value 0.}  !SR_60N_SJR022
+
+!===========================================================================
+! 50_PU - City of Tracy - M&I
+!===========================================================================
+define RFF_TCWWTP   {select RFFactor from WWTP_Factors where Plant = 68}
+define WW_50_PU {value RFF_TCWWTP * min(UD_50_PU(3-month),UD_50_PU(4-month),UD_50_PU(5-month),UD_50_PU(6-month))}
+goal setR_50_PU_TCWWTP {R_50_PU_TCWWTP = WW_50_PU}
+ 
+ 
+!===========================================================================
+! 50_PA2 - Byron Bethany ID
+!===========================================================================
+goal setR_50_PA2_OMR027 {R_50_PA2_OMR027 = DA_50_PA2}  !Return flow from BBID
+
+
+!===========================================================================
+! 60N_NA4 - Woodbridge ID
+!===========================================================================
+! See  constraints-preoperations
+
+
+!===========================================================================
+! 71_PA8 - Byron Bethany ID (Plainview ID)
+!===========================================================================
+! See  constraints-preoperations
+

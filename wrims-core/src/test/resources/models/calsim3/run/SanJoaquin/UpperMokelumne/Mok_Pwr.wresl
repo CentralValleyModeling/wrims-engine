@@ -1,0 +1,522 @@
+! Mok_Pwr.wresl
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!North Fork Mokelumne River!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+Maximize power production by minimizing risk of spills
+*/
+
+/*
+! Calculate forecasted inflow based on perfect foresight thru June
+define NFMRunoffJune {
+    case OctJun {
+        condition month >= FEB .and. month <= JUN
+        sum(i=0,jun-month,1) I_SLTSP(i)*cfs_taf(i)+I_COL003(i)*cfs_taf(i)+ I_UBEAR(i)*cfs_taf(i)+I_TGC003(i)*cfs_taf(i)+I_NFM010(i)*cfs_taf(i)}
+    case otherwise {
+        condition always
+        value 0.}
+} 
+
+define Mok_NFMRunoffJune {alias NFMRunoffJune kind 'FLOW' units 'TAF'}
+
+! Estimate minimum flows from Feb thru June in TAF
+define C_NFM010_minFeb    {select NFM010_min   from Mok_P137Flow where month=5, wyt=wyt_NForkMok}
+define C_NFM010_pulseFeb  {select NFM010_pulse from Mok_P137Flow where month=5, wyt=wyt_NForkMok}
+define C_NFM010_recFeb    {select NFM010_rec   from Mok_P137Flow where month=5, wyt=wyt_NForkMok} !Tiger Creek put-in
+define MinFlowRqmntFeb    {value C_NFM010_minFeb + C_NFM010_pulseFeb + C_NFM010_recFeb}
+
+define C_NFM010_minMar    {select NFM010_min   from Mok_P137Flow where month=6, wyt=wyt_NForkMok}
+define C_NFM010_pulseMar  {select NFM010_pulse from Mok_P137Flow where month=6, wyt=wyt_NForkMok}
+define C_NFM010_recMar    {select NFM010_rec   from Mok_P137Flow where month=6, wyt=wyt_NForkMok} !Tiger Creek put-in
+define MinFlowRqmntMar    {value C_NFM010_minMar + C_NFM010_pulseMar + C_NFM010_recMar}
+
+define C_NFM010_minApr    {select NFM010_min   from Mok_P137Flow where month=7, wyt=wyt_NForkMok}
+define C_NFM010_pulseApr  {select NFM010_pulse from Mok_P137Flow where month=7, wyt=wyt_NForkMok}
+define C_NFM010_recApr    {select NFM010_rec   from Mok_P137Flow where month=7, wyt=wyt_NForkMok} !Tiger Creek put-in
+define MinFlowRqmntApr    {value C_NFM010_minApr + C_NFM010_pulseApr + C_NFM010_recApr}
+
+define C_NFM010_minMay    {select NFM010_min   from Mok_P137Flow where month=8, wyt=wyt_NForkMok}
+define C_NFM010_pulseMay  {select NFM010_pulse from Mok_P137Flow where month=8, wyt=wyt_NForkMok}
+define C_NFM010_recMay    {select NFM010_rec   from Mok_P137Flow where month=8, wyt=wyt_NForkMok} !Tiger Creek put-in
+define MinFlowRqmntMay    {value C_NFM010_minMay + C_NFM010_pulseMay + C_NFM010_recMay}
+
+define C_NFM010_minJun    {select NFM010_min   from Mok_P137Flow where month=9, wyt=wyt_NForkMok}
+define C_NFM010_pulseJun  {select NFM010_pulse from Mok_P137Flow where month=9, wyt=wyt_NForkMok}
+define C_NFM010_recJun    {select NFM010_rec   from Mok_P137Flow where month=9, wyt=wyt_NForkMok} !Tiger Creek put-in
+define MinFlowRqmntJun    {value C_NFM010_minJun + C_NFM010_pulseJun + C_NFM010_recJun}
+
+
+define MinFlowRqmnt {
+    case Feb {
+        condition month == FEB
+        value MinFlowRqmntFeb*cfs_taf + MinFlowRqmntMar*cfs_taf(1) + MinFlowRqmntApr*cfs_taf(2) + MinFlowRqmntMay*cfs_taf(3) + MinFlowRqmntJun*cfs_taf(4)}
+    case Mar {
+        condition month == MAR
+        value MinFlowRqmntMar*cfs_taf + MinFlowRqmntApr*cfs_taf(1) + MinFlowRqmntMay*cfs_taf(2) + MinFlowRqmntJun*cfs_taf(3)}
+    case Apr {
+        condition month == APR
+        value MinFlowRqmntApr*cfs_taf + MinFlowRqmntMay*cfs_taf(1) + MinFlowRqmntJun*cfs_taf(2)}
+    case May {
+        condition month == MAY
+        value MinFlowRqmntMay*cfs_taf + MinFlowRqmntJun*cfs_taf(1)}
+    case Jun {
+        condition month == JUN
+        value MinFlowRqmntJun*cfs_taf}     
+    case otherwise {
+        condition always
+        value 0.}
+} 
+
+define Mok_MinFlowRqmnt {alias MinFlowRqmnt kind 'FLOW' units 'TAF'}
+
+define Dist_AWS_FebJun  {select AMDR_AWSFebJun  from Mok_demands where month=month}
+define Dist_CAWP_FebJun {select AMDR_CAWPFebJun from Mok_demands where month=month}
+define DeliveryRqmnt    {value AnnualAMADR_AWS*Dist_AWS_FebJun + AnnualAMADR_CAWP*Dist_CAWP_FebJun}
+
+define Mok_DeliveryRqmnt {alias DeliveryRqmnt kind 'FLOW' units 'TAF'}
+
+
+define SpillForecast {
+    case FebJun {condition month >= FEB .and. month <= JUN
+        !value max(0,NFMRunoffJune + S_UBEAR(-1) + S_LBEAR(-1) + S_SLTSP(-1) + S_BLUMD(-1) - 15.07 - S_SLTSPlevel5 - S_UBEARlevel5 - S_LBEARlevel5 - MinFlowRqmnt - DeliveryRqmnt )}
+         value max(0,NFMRunoffJune + S_UBEAR(-1) + S_LBEAR(-1) + S_SLTSP(-1) + S_BLUMD(-1) - S_SLTSPlevel5 - S_UBEARlevel5 - S_LBEARlevel5 - MinFlowRqmnt - DeliveryRqmnt )}
+    case otherwise {condition always value 0.}}
+
+define Mok_SpillForecast {alias SpillForecast kind 'FLOW' units 'TAF'}
+
+define CurrentWS {value S_LBEAR(-1)+S_SLTSP(-1)+I_SLTSP*cfs_taf+I_UBEAR*cfs_taf+I_NFM010*cfs_taf+I_TGC003*cfs_taf+I_COL003*cfs_taf
+	                    -S_SLTSPlevel2-S_LBEARlevel2+(S_UBEAR(-1)-S_UBEARlevel4)-demand_AMADR*cfs_taf
+} 
+define WaterForPower {value max(0.,CurrentWS-minflow_C_NFM010*cfs_taf)} !maximum discretionary release
+define Mok_WaterForPower {alias WaterForPower*taf_cfs kind 'FLOW' units 'TAF'}
+
+define MinPower1 { !Power generation to avoid spills
+    case FebJun {condition month >= FEB .and. month <= JUN
+        value min(1130*cfs_taf,SpillForecast/(Jul-month))*taf_cfs}
+    case otherwise {condition always value 0.}}
+    
+define Mok_MinPower1 {alias MinPower1 kind 'FLOW' units 'CFS'}
+
+define MinPower2 { !Minimum power generation target in cfs
+    case Oct {condition month == OCT value 0.}
+    case Nov {condition month == NOV value 0.}
+    case Dec {condition month == DEC value 0.}
+    case Jan {condition month == JAN value 0.}
+    case Feb {condition month == FEB value 0.}
+    case Mar {condition month == MAR value 0.}
+    case Apr {condition month == APR value 0.}
+    case May {condition month == MAY value 0.}
+    case Jun {condition month == JUN value 0.}
+    case Jul {condition month == JUL value 0.}
+    case Aug {condition month == AUG value 0.}
+    case otherwise {condition always value 0.}}
+
+! Flow through Electra Powerhouse
+
+!goal setElectraPower2   {C_ELT010_PWRMIN < max(0,max(MinPower1, MinPower2) - minflowLodi_Base_Net - minflowLodi_Aug1_Net - minflowLodi_Aug2_Net)}
+goal setElectraPower2   {C_ELT010_PWRMIN < max(MinPower1, MinPower2)}
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Spill Forecasting !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------------------------------------------------------------
+!Unimpaired inflows
+!-------------------------------------------------------------------------------------
+define SLTSPInflowJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_SLTSP(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define UBEARInflowJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_UBEAR(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define COL003InflowJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_COL003(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+	
+define PGEInflowJanMay {value SLTSPInflowJanMay + UBEARInflowJanMay + COL003InflowJanMay}
+	
+define NFM010InflowJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_NFM010(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+define TGC003InflowJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  I_TGC003(i)*cfs_taf(i)}
+	case Otherwise {condition always value 0.}
+	}
+
+define DownstreamInflowJanMay {value NFM010InflowJanMay + TGC003InflowJanMay}
+	
+!-------------------------------------------------------------------------------------
+!Reservoir Evaporation
+!-------------------------------------------------------------------------------------	
+define SLTSPEvapRateJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_SLTSP(i)}
+	case Otherwise {condition always value 0.}
+	}
+
+define UBEAREvapRateJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_UBEAR(i)}
+	case Otherwise {condition always value 0.}
+	}	
+	
+define LBEAREvapRateJanMay {
+	case JanMay    {condition range(month,Jan,May) sum(i=0,8-month,1)  ER_LBEAR(i)}
+	case Otherwise {condition always value 0.}
+	}	
+	
+define SLTSP_AreaLast  {select area from Mok_ResInfo given storage=1000*S_SLTSP(-1)   use linear where ResNum=6}
+define SLTSP_AreaMay   {select area from Mok_ResInfo given storage=1000*S_SLTSPlevel5 use linear where ResNum=6}
+
+define UBEAR_AreaLast  {select area from Mok_ResInfo given storage=1000*S_UBEAR(-1)   use linear where ResNum=4}
+define UBEAR_AreaMay   {select area from Mok_ResInfo given storage=1000*S_UBEARlevel5 use linear where ResNum=4}
+
+define LBEAR_AreaLast  {select area from Mok_ResInfo given storage=1000*S_LBEAR(-1)   use linear where ResNum=5}
+define LBEAR_AreaMay   {select area from Mok_ResInfo given storage=1000*S_LBEARlevel5 use linear where ResNum=5}
+
+define PGEEvapJanMay   {value SLTSPEvapRateJanMay*(SLTSP_AreaLast+SLTSP_AreaMay)/24000. + UBEAREvapRateJanMay*(UBEAR_AreaLast+UBEAR_AreaMay)/24000. + LBEAREvapRateJanMay*(LBEAR_AreaLast+LBEAR_AreaMay)/24000.}
+define PGEEvapJanMaydv {alias PGEEvapJanMay kind 'FORECAST' UNITS 'TAF'}
+
+	
+!-------------------------------------------------------------------------------------
+!Minimum flows
+!-------------------------------------------------------------------------------------
+define C_NFM029_minJan    {select NFM029_total   from Mok_P137Flow where month=4, wyt=wyt_NForkMok}
+define C_NFM029_minFeb    {select NFM029_total   from Mok_P137Flow where month=5, wyt=wyt_NForkMok}
+define C_NFM029_minMar    {select NFM029_total   from Mok_P137Flow where month=6, wyt=wyt_NForkMok}
+define C_NFM029_minApr    {select NFM029_total   from Mok_P137Flow where month=7, wyt=wyt_NForkMok}
+define C_NFM029_minMay    {select NFM029_total   from Mok_P137Flow where month=8, wyt=wyt_NForkMok}
+define C_NFM029_minJun    {select NFM029_total   from Mok_P137Flow where month=9, wyt=wyt_NForkMok}
+
+define C_COL002_minJan    {select COL002_min   from Mok_P137Flow where month=4, wyt=wyt_NForkMok}
+define C_COL002_minFeb    {select COL002_min   from Mok_P137Flow where month=5, wyt=wyt_NForkMok}
+define C_COL002_minMar    {select COL002_min   from Mok_P137Flow where month=6, wyt=wyt_NForkMok}
+define C_COL002_minApr    {select COL002_min   from Mok_P137Flow where month=7, wyt=wyt_NForkMok}
+define C_COL002_minMay    {select COL002_min   from Mok_P137Flow where month=8, wyt=wyt_NForkMok}
+define C_COL002_minJun    {select COL002_min   from Mok_P137Flow where month=9, wyt=wyt_NForkMok}
+
+define C_BRV002_minJan    {select BRV002_total   from Mok_P137Flow where month=4, wyt=wyt_NForkMok}
+define C_BRV002_minFeb    {select BRV002_total   from Mok_P137Flow where month=5, wyt=wyt_NForkMok}
+define C_BRV002_minMar    {select BRV002_total   from Mok_P137Flow where month=6, wyt=wyt_NForkMok}
+define C_BRV002_minApr    {select BRV002_total   from Mok_P137Flow where month=7, wyt=wyt_NForkMok}
+define C_BRV002_minMay    {select BRV002_total   from Mok_P137Flow where month=8, wyt=wyt_NForkMok}
+define C_BRV002_minJun    {select BRV002_total   from Mok_P137Flow where month=9, wyt=wyt_NForkMok}
+
+Define LodiJanReq {
+	case HiStorage {condition S_SLTSP(prevmay)+S_LBEAR(prevmay)>130.
+	                value 300.
+	                }
+	case Otherwise {condition always
+	                   value 200.
+	                }                
+}
+
+define Lodi_minJan    {value max(0., LodiJanReq -  C_NFM029_minJan -  C_COL002_minJan - C_BRV002_minJan - I_TGC003(4-month) - I_NFM010(4-month))}
+define Lodi_minFeb    {value max(0., 200. -  C_NFM029_minFeb -  C_COL002_minFeb - C_BRV002_minFeb - I_TGC003(5-month) - I_NFM010(5-month))}
+define Lodi_minMar    {value max(0., 200. -  C_NFM029_minMar -  C_COL002_minMar - C_BRV002_minMar - I_TGC003(6-month) - I_NFM010(6-month))}
+define Lodi_minApr    {value max(0., 200. -  C_NFM029_minApr -  C_COL002_minApr - C_BRV002_minApr - I_TGC003(7-month) - I_NFM010(7-month))}
+define Lodi_minMay    {value max(0., 300. -  C_NFM029_minMay -  C_COL002_minMay - C_BRV002_minMay - I_TGC003(8-month) - I_NFM010(8-month))}
+define Lodi_minJun    {value max(0., 300. -  C_NFM029_minJun -  C_COL002_minJun - C_BRV002_minJun - I_TGC003(9-month) - I_NFM010(9-month))}
+
+
+define MinFlowRqmnt1 {
+	case January {
+        condition month == JAN
+        value C_NFM029_minJan*cfs_taf + C_NFM029_minFeb*cfs_taf(1) + C_NFM029_minMar*cfs_taf(2) + C_NFM029_minApr*cfs_taf(3) + C_NFM029_minMay*cfs_taf(4)}
+    case Feb {
+        condition month == FEB
+        value C_NFM029_minFeb*cfs_taf + C_NFM029_minMar*cfs_taf(1) + C_NFM029_minApr*cfs_taf(2) + C_NFM029_minMay*cfs_taf(3)}
+    case Mar {
+        condition month == MAR
+        value C_NFM029_minMar*cfs_taf + C_NFM029_minApr*cfs_taf(1) + C_NFM029_minMay*cfs_taf(2)}
+    case Apr {
+        condition month == APR
+        value C_NFM029_minApr*cfs_taf + C_NFM029_minMay*cfs_taf(1)}
+    case May {
+        condition month == MAY
+        value C_NFM029_minMay*cfs_taf }
+    case Jun {
+        condition month == JUN
+        value 0.}     
+    case otherwise {
+        condition always
+        value 0.}
+} 
+
+define MinFlowRqmnt2 {
+	case Jan {
+        condition month == JAN
+        value C_COL002_minJan*cfs_taf + C_COL002_minFeb*cfs_taf(1) + C_COL002_minMar*cfs_taf(2) + C_COL002_minApr*cfs_taf(3) + C_COL002_minMay*cfs_taf(4)}
+    case Feb {
+        condition month == FEB
+        value C_COL002_minFeb*cfs_taf + C_COL002_minMar*cfs_taf(1) + C_COL002_minApr*cfs_taf(2) + C_COL002_minMay*cfs_taf(3)}
+    case Mar {
+        condition month == MAR
+        value C_COL002_minMar*cfs_taf + C_COL002_minApr*cfs_taf(1) + C_COL002_minMay*cfs_taf(2)}
+    case Apr {
+        condition month == APR
+        value C_COL002_minApr*cfs_taf + C_COL002_minMay*cfs_taf(1)}
+    case May {
+        condition month == MAY
+        value C_COL002_minMay*cfs_taf}
+    case Jun {
+        condition month == JUN
+        value 0.}     
+    case otherwise {
+        condition always
+        value 0.}
+} 
+
+define MinFlowRqmnt3 {
+    case Jan {
+        condition month == JAN
+        value C_BRV002_minJan*cfs_taf + C_BRV002_minFeb*cfs_taf(1) + C_BRV002_minMar*cfs_taf(2) + C_BRV002_minApr*cfs_taf(3) + C_BRV002_minMay*cfs_taf(4)}	
+    case Feb {
+        condition month == FEB
+        value C_BRV002_minFeb*cfs_taf + C_BRV002_minMar*cfs_taf(1) + C_BRV002_minApr*cfs_taf(2) + C_BRV002_minMay*cfs_taf(3)}
+    case Mar {
+        condition month == MAR
+        value C_BRV002_minMar*cfs_taf + C_BRV002_minApr*cfs_taf(1) + C_BRV002_minMay*cfs_taf(2)}
+    case Apr {
+        condition month == APR
+        value C_BRV002_minApr*cfs_taf + C_BRV002_minMay*cfs_taf(1)}
+    case May {
+        condition month == MAY
+        value C_BRV002_minMay*cfs_taf}
+    case Jun {
+        condition month == JUN
+        value 0.}     
+    case otherwise {
+        condition always
+        value 0.}
+} 
+
+define MinFlowRqmnt4 {
+    case Jan {
+        condition month == JAN
+        value Lodi_minJan*cfs_taf + Lodi_minFeb*cfs_taf(1) + Lodi_minMar*cfs_taf(2) + Lodi_minApr*cfs_taf(3) + Lodi_minMay*cfs_taf(4)}	
+    case Feb {
+        condition month == FEB
+        value Lodi_minFeb*cfs_taf + Lodi_minMar*cfs_taf(1) + Lodi_minApr*cfs_taf(2) + Lodi_minMay*cfs_taf(3)}
+    case Mar {
+        condition month == MAR
+        value Lodi_minMar*cfs_taf + Lodi_minApr*cfs_taf(1) + Lodi_minMay*cfs_taf(2)}
+    case Apr {
+        condition month == APR
+        value Lodi_minApr*cfs_taf + Lodi_minMay*cfs_taf(1)}
+    case May {
+        condition month == MAY
+        value Lodi_minMay*cfs_taf}
+    case Jun {
+        condition month == JUN
+        value 0.}     
+    case otherwise {
+        condition always
+        value 0.}
+} 
+define PGEMinFlowRqmnt   {value MinFlowRqmnt1 + MinFlowRqmnt2 + MinFlowRqmnt3 + MinFlowRqmnt4}
+define PGEMinFlowRqmntdv {alias PGEMinFlowRqmnt kind 'FLOW' units 'TAF'}
+
+
+!-------------------------------------------------------------------------------------
+!Net available water for power generation
+!-------------------------------------------------------------------------------------	
+define PGEAvailableWater   {value PGEInflowJanMay - PGEEvapJanMay - PGEMinFlowRqmnt}
+define PGEAvailableWaterdv {alias PGEAvailableWater kind 'FORECAST' UNITS 'TAF'}
+
+
+!-------------------------------------------------------------------------------------
+!Power Release Target
+!-------------------------------------------------------------------------------------
+define PGEPowerReleaseTarget {
+	case FebMay {condition range(month,Feb,May)
+		         value max(0,(PGEAvailableWater + PGEStorage(-1) - PGEStorage_level6)/(8-month+1))!In May level 5 = level 6
+		         }
+	case otherwise {condition always
+		         value 0.
+		         }
+	}
+define PGEPowerReleaseTargetdv {alias PGEPowerReleaseTarget kind 'FORECAST' UNITS 'TAF'}
+define PGEPowerReleaseTargetCFSdv {alias PGEPowerReleaseTarget*taf_cfs kind 'FORECAST' UNITS 'CFS'}
+	
+define PGENetInflow {value I_SLTSP*cfs_taf + I_UBEAR*cfs_taf + I_COL003*cfs_taf - A_SLTSPlast*ER_SLTSP/12000. - A_UBEARlast*ER_UBEAR/12000. - A_LBEARlast*ER_LBEAR/12000.}	
+
+define LodiRelease {value max(0., minflowLodi_Base_Net - minflow_C_NFM029 - minflow_C_BRV002 - minflow_C_COL002 - I_NFM010 - I_TGC003)*cfs_taf}
+
+
+!-------------------------------------------------------------------------------------
+!Drawdown Target
+!-------------------------------------------------------------------------------------
+define PGEDrawdown {
+    case FirstMonth    {condition wateryear == BgnWY .and. month == OCT
+	                value max(0,S_SLTSP(-1) + S_LBEAR(-1)-10.0)/(12-month+1)
+	                }
+	case JulSep    {condition range(month,Jul,Sep)
+	                value max(0,PGEStorage(-1)-100.0)/(12-month+1)
+	                }
+	case OctJan    {condition range(month,Oct,Jan)							!Drawing down the Reservoir from October to December to meet a January target of 35 TAF
+	                value max(0,PGEStorage(-1)-35.0)/(4-month+1)
+	                }               
+	case Otherwise {condition always
+		            value 0.
+	                }
+}
+
+!-------------------------------------------------------------------------------------
+!Level 4
+!-------------------------------------------------------------------------------------
+define PGEStorage_level4init {
+	case FirstMonth {condition wateryear == BgnWY .and. month == OCT
+	                value max(PGEStorage_level2, S_SLTSP(-1) + S_LBEAR(-1) - PGEDrawdown)
+	                }
+	case OctJan    {condition range(month,Oct,Jan)
+	                value max(PGEStorage_level2, PGEStorage(-1) - PGEDrawdown)
+	}
+	case FebApr   {condition range(month,Feb,Apr)
+	               value max(PGEStorage_level2, PGEStorage(-1) + PGENetInflow - PGEPowerReleaseTarget - minflow_C_NFM029*cfs_taf - minflow_C_BRV002*cfs_taf - minflow_C_COL002*cfs_taf - LodiRelease)
+	}
+	Case MonthMay {condition month == May
+		       value PGEStorage_level5
+    }
+	Case JunSep   {condition range(month,Jun,Sep)
+		       value max(PGEStorage_level2, PGEStorage(-1) - PGEDrawdown)
+	}
+	case Otherwise {!this case will never be used
+		condition always
+		value 0.
+	}	
+}
+
+define PGEDrawdowndv {alias PGEDrawdown kind 'flow' units 'TAF'}
+!define PGEStorage_level3 {case FebApr {condition month >= 5. .and. month <= 8. value min(PGEStorage_level4,max(PGEStorage_Level3Lodi,PGEStorage_level3init))}
+!						  case Otherwise {condition always value min(PGEStorage_level4,min(PGEStorage_Level3Lodi,PGEStorage_level3init))}
+!}
+define PGEStorage_Level4 {value min(PGEStorage_Level5 ,PGEStorage_level4init)}
+
+define PGEStorage_level3 {value min(PGEStorage_level4,PGEStorage_Level3Lodi)}
+
+
+
+define PGEStorage_Level3LodiDV{alias PGEStorage_Level3Lodi kind 'Storage' units 'TAF'}
+
+define PGEStorage_level4initDV{alias PGEStorage_level4init kind 'Storage' units 'TAF'}
+
+	
+goal setPGEStorage_1  {PGEStorage_1 < PGEStorage_Level1} 
+goal setPGEStorage_2  {PGEStorage_2 < PGEStorage_Level2-PGEStorage_Level1}
+goal setPGEStorage_3  {PGEStorage_3 < PGEStorage_Level3-PGEStorage_Level2} 
+goal setPGEStorage_4  {PGEStorage_4 < PGEStorage_Level4-PGEStorage_Level3} 
+goal setPGEStorage_5  {PGEStorage_5 < PGEStorage_Level5-PGEStorage_Level4}	
+goal setPGEStorage_6  {PGEStorage_6 < PGEStorage_Level6-PGEStorage_Level5}	
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!! Balance storage in PG&E reservoirs !!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*define ResBalancingFactor {
+    case Oct {
+         condition month == OCT
+         value 0.0615}
+    case Nov {
+         condition month == NOV
+         value 0.0614}
+    case Dec {
+        condition month == DEC
+        value 0.1115}       
+    case Jan {
+        condition month == JAN
+        value 0.0427}	
+    case Feb {
+        condition month == FEB
+        value 0.0060}
+    case Mar {
+        condition month == MAR
+        value -0.3}
+    case Apr {
+        condition month == APR
+        value -0.3303}
+    case May {
+        condition month == MAY
+        value -0.3693}
+    case Jun {
+        condition month == JUN
+        value -0.1846}
+    case Jul {
+        condition month == JUL
+        value -0.03900}	
+    case Aug {
+        condition month == AUG
+        value 0.0116}
+    case otherwise {
+        condition always
+        value 0.0527}
+} */
+
+define ResBalancingFactor {
+    case Oct {
+         condition month == OCT
+         value 0.0615}
+    case Nov {
+         condition month == NOV
+         value 0.0614}
+    case Dec {
+        condition month == DEC
+        value 0.1115}       
+    case Jan {
+        condition month == JAN
+        value 0.0427}	
+    case Feb {
+        condition month == FEB
+        value 0.0060}
+    case Mar {
+        condition month == MAR
+        value -0.1588}
+    case Apr {
+        condition month == APR
+        value -0.3303}
+    case May {
+        condition month == MAY
+        value -0.3693}
+    case Jun {
+        condition month == JUN
+        value -0.1846}
+    case Jul {
+        condition month == JUL
+        value -0.0390}	
+    case Aug {
+        condition month == AUG
+        value 0.0116}
+    case otherwise {
+        condition always
+        value 0.0527}
+}
+
+define PGEResBalance     {lower unbounded upper unbounded kind 'STORAGE' units 'TAF'}
+define PGEResBalancePos  {std kind 'STORAGE' units 'TAF'}   
+define PGEResBalanceNeg  {std kind 'STORAGE' units 'TAF'}
+define intPGEResBalance  {integer std kind 'INTEGER' units 'NONE'}
+
+goal setPGEResBalancePos {PGEResBalancePos < 99999 - intPGEResBalance*99999}
+goal setPGEResBalanceNeg {PGEResBalanceNeg < intPGEResBalance*99999}
+ 
+goal splitPGEResBalance {PGEResBalance = PGEResBalancePos - PGEResBalanceNeg}                                          
+!goal setPGEResBalance {PGEResBalance = S_SLTSP - S_SLTSPlevel4*(S_SLTSP+S_LBEAR+S_UBEAR)/(S_SLTSPlevel4+S_LBEARlevel4+S_UBEARlevel4)}
+goal setPGEResBalance {(1/(S_SLTSPlevel5-S_SLTSPlevel1)-1/(S_LBEARlevel5-S_LBEARlevel1))*PGEResBalance = (S_SLTSP/(S_SLTSPlevel5-S_SLTSPlevel1) - S_LBEAR/(S_LBEARlevel5-S_LBEARlevel1)- ResBalancingFactor)}
+
+/*define LBearStorageHist {case mMar{condition month == Mar value 17.47}		!Based on 20 year average historical Lower Bear Storages
+						 case mApr {condition month == Apr value 29.42}
+						 case mMay {condition month == May value 46.29}
+						 case mJun {condition month == Jun value 46.18}
+						 case otherwise {condition always value 0.}
+}
+goal setLBEARStorage {lhs S_LBEAR
+    rhs LBearStorageHist
+    lhs<rhs penalty 100.
+}*/
+
+!goal debugPGE {PGESTORAGE < 160}	

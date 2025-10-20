@@ -1,0 +1,206 @@
+! WATER YEAR TYPE DEFININITIONS
+! Code and tables by A. Munevar 7/8/98
+! American River D893 added by Dustin Jones 12/27/99
+
+! ================ INDICES AS DEFINED BY DWR (CHANGE IN FEB) =====================
+! the 40-30-30 index for Sacramento Basin
+define wyt_SAC {
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= JAN 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case rest {
+         condition  always
+         value round(WYT_SAC_Frcst)}
+}
+define wyt_SAC_{alias wyt_SAC kind 'wateryeartype' units 'none'}
+
+define prev_wyt_SAC {
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= JAN
+         value wyt_Sac_(PrevJan)}
+    case rest {
+         condition  always
+         value wyt_Sac_(PrevMay)}
+}
+
+
+! the 60-20-20 index for San Joaquin basin
+define wyt_SJR {
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= JAN 
+         value wyt_SJR_(PrevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_SJR_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value WYT_SJR_Frcst}
+}
+define wyt_SJR_{alias wyt_SJR kind 'wateryeartype' units 'none'}
+
+! Need to start in January for FAM
+define wyt_SJR_forFAM {
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= DEC
+         value wyt_SJR_(PrevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_SJR_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value WYT_SJR_Frcst_forFAM}
+}
+define wyt_SJR_forFAM_ {alias wyt_SJR_forFAM kind 'wateryeartype' units 'none'}
+
+define wyt_SJR_stan {
+    case OCTtoFeb {
+         condition  month >= OCT .and. month <= FEB
+         value wyt_SJR_(PrevMay)}
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_SJR_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value WYT_SJR_Frcst}
+}
+define wyt_SJR_stan_{alias wyt_SJR_stan kind 'wateryeartype' units 'none'}
+
+! the Feather Index for the Feather River Basin
+! "An unofficial forecast based on the most recent data available shall be sent to the Districts on or before April 1.
+! An official forecast shall be furnished to districts on or before April 10"
+define wyt_FEATHER {
+    case officialforecast {
+         condition  month==Apr
+         value WYT_FEATHER_Frcst}
+    case NotMay {
+         condition  always 
+         value wyt_FEATHER_(-1)
+         }
+}
+define wyt_FEATHER_{alias wyt_FEATHER kind 'wateryeartype' units 'none'}
+
+
+! ================ INDICES AS DEFINED BY CVP (CHANGE IN MAR) =====================
+! the 40-30-30 index for Sacramento Basin as defined by the CVP (changes in March)
+define wyt_SAC_cvp {
+    case OCTtoFeb {
+         condition  month >= OCT .and. month <= Feb 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value round(wyt_Sac_(PrevMay))
+         }
+    case rest {
+         condition  always
+         value round(WYT_SAC_Frcst)}
+}
+define wyt_SAC_cvp_{alias wyt_SAC_cvp kind 'wateryeartype' units 'none'} 
+
+! the 60-20-20 index for San Joaquin basin as defined by the CVP (changes in March)
+define wyt_SJR_cvp {
+    case OCTtoFeb {
+         condition  month >= OCT .and. month <= Feb 
+         value wyt_SJR_(PrevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_SJR_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value WYT_SJR_Frcst}
+}
+define wyt_SJR_cvp_{alias wyt_SJR_cvp kind 'wateryeartype' units 'none'}
+
+! the Shasta index as defined by the CVP (changes in March)
+define wyt_SHASTA_cvp {
+    case OCTtoFeb {
+         condition  month >= OCT .and. month <= Feb 
+         value round(wyt_SHASTA_cvp_(PrevMay))
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value round(wyt_SHASTA_cvp_(PrevMay))
+         }
+    case rest {
+         condition  always
+         value round(WYT_SHASTA_Frcst)}
+}
+define wyt_SHASTA_cvp_{alias wyt_SHASTA_cvp kind 'wateryeartype' units 'none'}
+
+! the American River D893 index as defined by the CVP (changes in March)
+define wyt_AMERd893_cvp {
+    case OCTtoFeb {
+         condition  month >= OCT .and. month <= Feb 
+         value wyt_AMERd893_cvp_(PrevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_AMERd893_cvp_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value WYT_AMERd893_Frcst}
+}
+define wyt_AMERd893_cvp_ {alias wyt_AMERd893_cvp kind 'wateryeartype' units 'none'}
+
+! the "User Defined Quasi Sac Basin 40-30-30 Index (of PROSIM/ECOSIM origin)
+! used to set minimum storage reserve levels in Folsom
+
+
+! ============================== YEAR TYPES ====================================
+! the following year type names can be used to represent the numbers found in the tables
+define Wet          {value 1}
+define AboveNormal  {value 2}
+define BelowNormal  {value 3}
+define Dry          {value 4}
+define Critical     {value 5}
+
+! the Trinity index   1=Very Wet, 2=Wet, 3=Normal, 4=Dry, 5=Critically Dry: Note: Index changes in Apr.
+define wyt_TRIN {
+    case MonthApril {
+         condition  month==Apr
+         value WYT_TRIN_Frcst}
+    case NotApril {
+         condition  always 
+         value wyt_TRIN_(-1)
+         }
+}
+define wyt_TRIN_{alias wyt_TRIN kind 'wateryeartype' units 'none'}
+
+! So first define the calendar year since deliveries are based on Jan-Dec year
+define calendaryear {
+    case JantoSep {
+        condition   month >= 4 .and. month <= 12
+        value       wateryear }
+    case OcttoDec {
+        condition   always
+        value       wateryear - 1 }
+}
+
+! Specific to NODOS project
+define wyt_NODOS {
+    case OCTtoMar {
+         condition  month >= OCT .and. month <= Mar 
+         value wyt_Sac_(PrevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value wyt_Sac_(PrevMay)
+         }
+    case rest {
+         condition  always
+         value round(WYT_SAC_Frcst)}
+}
+define wyt_NODOS_{alias wyt_NODOS kind 'wateryeartype' units 'none'}

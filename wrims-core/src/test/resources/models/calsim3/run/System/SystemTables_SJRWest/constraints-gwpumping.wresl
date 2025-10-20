@@ -1,0 +1,330 @@
+/*
+CALSIM III SYSTEM FILE
+CONSTRAINTS-GWPUMPING.WRESL
+
+
+NAMING TAKES THE FOLLOWING FORMS:
+
+/*
+ASSURE CONTINUITY IN DELIVERY ARCS
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 50      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!==============================
+! 50_PA1 - Banta Carbona ID/Westside ID - Ag
+!==============================
+goal setGPmin_50_PA1        {GP_50_PA1 > GPmin_50_PA1 * AWo_50_PA1 * (1+ RPF_50_PA1 - RUFo_50_PA1) + GPmin_50_PA1 * AWr_50_PA1 * (1+ RPF_50_PA1 - RUFr_50_PA1)}
+!goal setGPmax_50_PA1        {GP_50_PA1 < 0.001 + GPmax_50_PA1 * AWo_50_PA1 * (1+ RPF_50_PA1 - RUFo_50_PA1) + GPmax_50_PA1 * AWr_50_PA1 * (1+ RPF_50_PA1 - RUFr_50_PA1)}
+
+
+!==============================
+! 50_PU - City of Tracy - M&I
+!==============================
+goal setGPmin_50_PU        {GP_50_PU > GPmin_50_PU * UD_50_PU }
+!goal setGPmax_50_PU        {GP_50_PU < GPmax_50_PU * UD_50_PU }
+
+!==============================
+! 50_PA2 - Byron Bethany ID - part that is considered a Delta Consumptive Use (DCD model)
+!==============================
+define fgwwba50 {value  0.0} !fgwwba50 is a calibration factor to represent the portion of 
+                             !DCD groundwater supply that is from GW aquifer (is not from DCD subsurface storage)
+define GW_WBA50_DCD {timeseries kind 'GW-FLOW' units 'TAF' convert 'CFS'}
+goal set_GP_WBATotal_50  {GP_WBATotal_50 = fgwwba50*GW_WBA50_DCD} 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 71_PA1 - Hospital WD - Ag
+!==============================
+goal setGPmin_71_PA1        {GP_71_PA1 > GPmin_71_PA1 * AWo_71_PA1 * (1+ RPF_71_PA1 - RUFo_71_PA1) + GPmin_71_PA1 * AWr_71_PA1 * (1+ RPF_71_PA1 - RUFr_71_PA1)}
+!goal setGPmax_71_PA1        {GP_71_PA1 < 0.001 + GPmax_71_PA1 * AWo_71_PA1 * (1+ RPF_71_PA1 - RUFo_71_PA1) + GPmax_71_PA1 * AWr_71_PA1 * (1+ RPF_71_PA1 - RUFr_71_PA1)}
+
+!==============================
+! 71_PA2 - West Stanislaus ID - Ag
+!==============================
+goal setGPmin_71_PA2        {GP_71_PA2 > GPmin_71_PA2 * AWo_71_PA2 * (1+ RPF_71_PA2 - RUFo_71_PA2) + GPmin_71_PA2 * AWr_71_PA2 * (1+ RPF_71_PA2 - RUFr_71_PA2)}
+!goal setGPmax_71_PA2        {GP_71_PA2 < 0.001 + GPmax_71_PA2 * AWo_71_PA2 * (1+ RPF_71_PA2 - RUFo_71_PA2) + GPmax_71_PA2 * AWr_71_PA2 * (1+ RPF_71_PA2 - RUFr_71_PA2)}
+
+!==============================
+! 71_PA3 - Kern Canon WD - Ag
+!==============================
+goal setGPmin_71_PA3        {GP_71_PA3 > GPmin_71_PA3 * AWo_71_PA3 * (1+ RPF_71_PA3 - RUFo_71_PA3) + GPmin_71_PA3 * AWr_71_PA3 * (1+ RPF_71_PA3 - RUFr_71_PA3)}
+!goal setGPmax_71_PA3        {GP_71_PA3 < 0.001 + GPmax_71_PA3 * AWo_71_PA3 * (1+ RPF_71_PA3 - RUFo_71_PA3) + GPmax_71_PA3 * AWr_71_PA3 * (1+ RPF_71_PA3 - RUFr_71_PA3)}
+
+!==============================
+! 71_PA4 - Patterson ID - Ag
+!==============================
+goal setGPmin_71_PA4        {GP_71_PA4 > GPmin_71_PA4 * AWo_71_PA4 * (1+ RPF_71_PA4 - RUFo_71_PA4) + GPmin_71_PA4 * AWr_71_PA4 * (1+ RPF_71_PA4 - RUFr_71_PA4)}
+
+define GPmin_71_PA4dv {alias GPmin_71_PA4 * AWo_71_PA4 * (1+ RPF_71_PA4 - RUFo_71_PA4) + GPmin_71_PA4 * AWr_71_PA4 * (1+ RPF_71_PA4 - RUFr_71_PA4) kind 'GW-PUMPING'            units 'CFS'}
+
+
+!goal setGPmax_71_PA4        {GP_71_PA4 < 0.001 + GPmax_71_PA4 * AWo_71_PA4 * (1+ RPF_71_PA4 - RUFo_71_PA4) + GPmax_71_PA4 * AWr_71_PA4 * (1+ RPF_71_PA4 - RUFr_71_PA4)}
+
+!==============================
+! 71_PA5 - Del Puerto, Salado WD, Orestimba, Sunflower - Ag
+!==============================
+goal setGPmin_71_PA5        {GP_71_PA5 > GPmin_71_PA5 * AWo_71_PA5 * (1+ RPF_71_PA5 - RUFo_71_PA5) + GPmin_71_PA5 * AWr_71_PA5 * (1+ RPF_71_PA5 - RUFr_71_PA5)}
+!goal setGPmax_71_PA5        {GP_71_PA5 < 0.001 + GPmax_71_PA5 * AWo_71_PA5 * (1+ RPF_71_PA5 - RUFo_71_PA5) + GPmax_71_PA5 * AWr_71_PA5 * (1+ RPF_71_PA5 - RUFr_71_PA5)}
+
+!==============================
+! 71_PA6 - Davis, Foothill, Mestang, Qu9into, Romero, Centinella - Ag
+!==============================
+goal setGPmin_71_PA6        {GP_71_PA6 > GPmin_71_PA6 * AWo_71_PA6 * (1+ RPF_71_PA6 - RUFo_71_PA6) + GPmin_71_PA6 * AWr_71_PA6 * (1+ RPF_71_PA6 - RUFr_71_PA6)}
+!goal setGPmax_71_PA6        {GP_71_PA6 < 0.001 + GPmax_71_PA6 * AWo_71_PA6 * (1+ RPF_71_PA6 - RUFo_71_PA6) + GPmax_71_PA6 * AWr_71_PA6 * (1+ RPF_71_PA6 - RUFr_71_PA6)}
+
+!==============================
+! 71_PA8 - Byron-Bethany ID (portion formerly called Plainview) - Ag
+!==============================
+goal setGPmin_71_PA8        {GP_71_PA8 > GPmin_71_PA8 * AWo_71_PA8 * (1+ RPF_71_PA8 - RUFo_71_PA8) + GPmin_71_PA8 * AWr_71_PA8 * (1+ RPF_71_PA8 - RUFr_71_PA8)}
+!goal setGPmax_71_PA8        {GP_71_PA8 < 0.001 + GPmax_71_PA8 * AWo_71_PA8 * (1+ RPF_71_PA8 - RUFo_71_PA8) + GPmax_71_PA8 * AWr_71_PA8 * (1+ RPF_71_PA8 - RUFr_71_PA8)}
+
+!==============================
+! 71_PU1 - Musco Olive Products - M&I
+!==============================
+goal setGPmin_71_PU1        {GP_71_PU1 > GPmin_71_PU1 * UD_71_PU1}
+!goal setGPmax_71_PU1        {GP_71_PU1 < GPmax_71_PU1 * UD_71_PU1}
+
+!==============================
+! 71_PU2 - VA Cemetary - M&I
+!==============================
+goal setGPmin_71_PU2        {GP_71_PU2 > GPmin_71_PU2 * UD_71_PU2}
+!goal setGPmax_71_PU2        {GP_71_PU2 < GPmax_71_PU2 * UD_71_PU2}
+
+!==============================
+! 71_NA1 - Non-District - Riparian Ag
+!==============================
+goal setGPmin_71_NA1        {GP_71_NA1 > GPmin_71_NA1 * AWo_71_NA1 * (1+ RPF_71_NA1 - RUFo_71_NA1) + GPmin_71_NA1 * AWr_71_NA1 * (1+ RPF_71_NA1 - RUFr_71_NA1)}
+!goal setGPmax_71_NA1        {GP_71_NA1 < GPmax_71_NA1 * AWo_71_NA1 * (1+ RPF_71_NA1 - RUFo_71_NA1) + GPmax_71_NA1 * AWr_71_NA1 * (1+ RPF_71_NA1 - RUFr_71_NA1)}
+
+!==============================
+! 71_NA2 - El Solyo WD, Non-District Ag
+!==============================
+goal setGPmin_71_NA2        {GP_71_NA2 > GPmin_71_NA2 * AWo_71_NA2 * (1+ RPF_71_NA2 - RUFo_71_NA2) + GPmin_71_NA2 * AWr_71_NA2 * (1+ RPF_71_NA2 - RUFr_71_NA2)}
+!goal setGPmax_71_NA2        {GP_71_NA2 < GPmax_71_NA2 * AWo_71_NA2 * (1+ RPF_71_NA2 - RUFo_71_NA2) + GPmax_71_NA2 * AWr_71_NA2 * (1+ RPF_71_NA2 - RUFr_71_NA2)}
+
+!==============================
+! 71_NU - city of Patterson and small communities - M&I gw only
+!==============================
+
+goal set_GP_WBATotal_71  {GP_WBATotal_71
+                    - GP_71_NA1
+                    - GP_71_NA2
+                    - GP_71_PA1
+                    - GP_71_PA2
+                    - GP_71_PA3
+                    - GP_71_PA4
+                    - GP_71_PA5
+                    - GP_71_PA6 
+                    - GP_71_PA8
+                    - GP_71_NU
+                    - GP_71_PU1
+                    - GP_71_PU2 = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 72_NA1 - West Bank of SJR below Merced - Riparian Ag
+!==============================
+goal setGPmin_72_NA1        {GP_72_NA1 > GPmin_72_NA1 * AWo_72_NA1 * (1+ RPF_72_NA1 - RUFo_72_NA1) + GPmin_72_NA1 * AWr_72_NA1 * (1+ RPF_72_NA1 - RUFr_72_NA1)}
+!goal setGPmax_72_NA1        {GP_72_NA1 < GPmax_72_NA1 * AWo_72_NA1 * (1+ RPF_72_NA1 - RUFo_72_NA1) + GPmax_72_NA1 * AWr_72_NA1 * (1+ RPF_72_NA1 - RUFr_72_NA1)}
+
+!==============================
+! 72_NA2 - non-district ag - all gw
+!==============================
+
+!==============================
+! 72_PA - Laguna WD - Ag
+!==============================
+goal setGPmin_72_PA        {GP_72_PA > GPmin_72_PA * AWo_72_PA * (1+ RPF_72_PA - RUFo_72_PA) + GPmin_72_PA * AWr_72_PA * (1+ RPF_72_PA - RUFr_72_PA)}
+!goal setGPmax_72_PA        {GP_72_PA < 0.001 + GPmax_72_PA * AWo_72_PA * (1+ RPF_72_PA - RUFo_72_PA) + GPmax_72_PA * AWr_72_PA * (1+ RPF_72_PA - RUFr_72_PA)}
+
+
+!==============================
+! 72_XA1 - San Luis Canal Co Exchange Contractors - Ag
+!==============================
+goal setGPmin_72_XA1        {GP_72_XA1 > GPmin_72_XA1 * AWo_72_XA1 * (1+ RPF_72_XA1 - RUFo_72_XA1) + GPmin_72_XA1 * AWr_72_XA1 * (1+ RPF_72_XA1 - RUFr_72_XA1)}
+!goal setGPmax_72_XA1        {GP_72_XA1 < 0.001 + GPmax_72_XA1 * AWo_72_XA1 * (1+ RPF_72_XA1 - RUFo_72_XA1) + GPmax_72_XA1 * AWr_72_XA1 * (1+ RPF_72_XA1 - RUFr_72_XA1)}
+
+
+!==============================
+! 72_XA2 - Central California ID South Exchange Contractors - Ag
+!==============================
+goal setGPmin_72_XA2        {GP_72_XA2 > GPmin_72_XA2 * AWo_72_XA2 * (1+ RPF_72_XA2 - RUFo_72_XA2) + GPmin_72_XA2 * AWr_72_XA2 * (1+ RPF_72_XA2 - RUFr_72_XA2)}
+!goal setGPmax_72_XA2        {GP_72_XA2 < 0.001 + GPmax_72_XA2 * AWo_72_XA2 * (1+ RPF_72_XA2 - RUFo_72_XA2) + GPmax_72_XA2 * AWr_72_XA2 * (1+ RPF_72_XA2 - RUFr_72_XA2)}
+
+
+!==============================
+! 72_XA3 - Central California ID North Exchange Contractors - Ag
+!==============================
+goal setGPmin_72_XA3        {GP_72_XA3 > GPmin_72_XA3 * AWo_72_XA3 * (1+ RPF_72_XA3 - RUFo_72_XA3) + GPmin_72_XA3 * AWr_72_XA3 * (1+ RPF_72_XA3 - RUFr_72_XA3)}
+!goal setGPmax_72_XA3        {GP_72_XA3 < 0.001 + GPmax_72_XA3 * AWo_72_XA3 * (1+ RPF_72_XA3 - RUFo_72_XA3) + GPmax_72_XA3 * AWr_72_XA3 * (1+ RPF_72_XA3 - RUFr_72_XA3)}
+
+!==============================
+! 72_PR1 - Volta WA - Refuge
+!==============================
+goal setGPmin_72_PR1        {GP_72_PR1 > GPmin_72_PR1 * AWo_72_PR1 * (1+ RPF_72_PR1 - RUFo_72_PR1) + GPmin_72_PR1 * AWr_72_PR1 * (1+ RPF_72_PR1 - RUFr_72_PR1)}
+!goal setGPmax_72_PR1        {GP_72_PR1 < GPmax_72_PR1 * AWo_72_PR1 * (1+ RPF_72_PR1 - RUFo_72_PR1) + GPmax_72_PR1 * AWr_72_PR1 * (1+ RPF_72_PR1 - RUFr_72_PR1)}
+
+
+!==============================
+! 72_PR2 - Kesterson, Freitas, & Blue Goose units of San Luis NWR, China Island unit of North Grassland - Refuge
+!==============================
+goal setGPmin_72_PR2        {GP_72_PR2 > GPmin_72_PR2 * AWo_72_PR2 * (1+ RPF_72_PR2 - RUFo_72_PR2) + GPmin_72_PR2 * AWr_72_PR2 * (1+ RPF_72_PR2 - RUFr_72_PR2)}
+!goal setGPmax_72_PR2        {GP_72_PR2 < GPmax_72_PR2 * AWo_72_PR2 * (1+ RPF_72_PR2 - RUFo_72_PR2) + GPmax_72_PR2 * AWr_72_PR2 * (1+ RPF_72_PR2 - RUFr_72_PR2)}
+
+!==============================
+! 72_PR3 - West Bear Ck and San Luis units of San Luis NWR - Refuge
+!==============================
+goal setGPmin_72_PR3        {GP_72_PR3 > GPmin_72_PR3 * AWo_72_PR3 * (1+ RPF_72_PR3 - RUFo_72_PR3) + GPmin_72_PR3 * AWr_72_PR3 * (1+ RPF_72_PR3 - RUFr_72_PR3)}
+!goal setGPmax_72_PR3        {GP_72_PR3 < GPmax_72_PR3 * AWo_72_PR3 * (1+ RPF_72_PR3 - RUFo_72_PR3) + GPmax_72_PR3 * AWr_72_PR3 * (1+ RPF_72_PR3 - RUFr_72_PR3)}                                           
+
+!==============================
+! 72_PR4 - Los Banos WA, Salt Slouth and Gadwall units of North Grassland - Refuge
+!==============================
+goal setGPmin_72_PR4        {GP_72_PR4 > GPmin_72_PR4 * AWo_72_PR4 * (1+ RPF_72_PR4 - RUFo_72_PR4) + GPmin_72_PR4 * AWr_72_PR4 * (1+ RPF_72_PR4 - RUFr_72_PR4)}
+!goal setGPmax_72_PR4        {GP_72_PR4 < GPmax_72_PR4 * AWo_72_PR4 * (1+ RPF_72_PR4 - RUFo_72_PR4) + GPmax_72_PR4 * AWr_72_PR4 * (1+ RPF_72_PR4 - RUFr_72_PR4)}                                         
+
+
+!==============================
+! 72_PR5 - Grassland WD North - Refuge
+!==============================
+goal setGPmin_72_PR5        {GP_72_PR5 > GPmin_72_PR5 * AWo_72_PR5 * (1+ RPF_72_PR5 - RUFo_72_PR5) + GPmin_72_PR5 * AWr_72_PR5 * (1+ RPF_72_PR5 - RUFr_72_PR5)}
+!goal setGPmax_72_PR5        {GP_72_PR5 < GPmax_72_PR5 * AWo_72_PR5 * (1+ RPF_72_PR5 - RUFo_72_PR5) + GPmax_72_PR5 * AWr_72_PR5 * (1+ RPF_72_PR5 - RUFr_72_PR5)}
+
+!==============================
+! 72_PR6 - Grassland WD South - Refuge
+!==============================
+goal setGPmin_72_PR6        {GP_72_PR6 > GPmin_72_PR6 * AWo_72_PR6 * (1+ RPF_72_PR6 - RUFo_72_PR6) + GPmin_72_PR6 * AWr_72_PR6 * (1+ RPF_72_PR6 - RUFr_72_PR6)}
+!goal setGPmax_72_PR6        {GP_72_PR6 < GPmax_72_PR6 * AWo_72_PR6 * (1+ RPF_72_PR6 - RUFo_72_PR6) + GPmax_72_PR6 * AWr_72_PR6 * (1+ RPF_72_PR6 - RUFr_72_PR6)}
+
+!==============================
+! 72_NU - Gustine, Firebaugh, Los Banos, Newman, & small communities - M&I gw only
+!==============================
+
+!==============================
+! 72_PU - Dos Palos - M&I gw only
+!==============================
+
+goal set_GP_WBATotal_72  {GP_WBATotal_72
+                    - GP_72_NA1
+                    - GP_72_NA2
+                    - GP_72_PA
+                    - GP_72_XA1
+                    - GP_72_XA2
+                    - GP_72_XA3
+                    - GP_72_PR1
+                    - GP_72_PR2
+                    - GP_72_PR3
+                    - GP_72_PR4
+                    - GP_72_PR5
+                    - GP_72_PR6
+                    - GP_72_NU
+                    - GP_72_PU = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!==============================
+! 73_NA -- gw only
+!==============================
+
+!==============================
+! 73_PA1 - San Luis WD - Ag
+!==============================
+goal setGPmin_73_PA1        {GP_73_PA1 > GPmin_73_PA1 * AWo_73_PA1 * (1+ RPF_73_PA1 - RUFo_73_PA1) + GPmin_73_PA1 * AWr_73_PA1 * (1+ RPF_73_PA1 - RUFr_73_PA1)}
+!goal setGPmax_73_PA1        {GP_73_PA1 < 0.001 + GPmax_73_PA1 * AWo_73_PA1 * (1+ RPF_73_PA1 - RUFo_73_PA1) + GPmax_73_PA1 * AWr_73_PA1 * (1+ RPF_73_PA1 - RUFr_73_PA1)}
+
+!==============================
+! 73_PA2 - Eagle Field WD, Mercy Springs WD, Oro Loma WD - Ag
+!==============================
+goal setGPmin_73_PA2        {GP_73_PA2 > GPmin_73_PA2 * AWo_73_PA2 * (1+ RPF_73_PA2 - RUFo_73_PA2) + GPmin_73_PA2 * AWr_73_PA2 * (1+ RPF_73_PA2 - RUFr_73_PA2)}
+!goal setGPmax_73_PA2        {GP_73_PA2 < 0.001 + GPmax_73_PA2 * AWo_73_PA2 * (1+ RPF_73_PA2 - RUFo_73_PA2) + GPmax_73_PA2 * AWr_73_PA2 * (1+ RPF_73_PA2 - RUFr_73_PA2)}
+
+
+!==============================
+! 73_PA3 - San Luis WD (S), Pacheco WD, Panoche WD - Ag
+!==============================
+goal setGPmin_73_PA3        {GP_73_PA3 > GPmin_73_PA3 * AWo_73_PA3 * (1+ RPF_73_PA3 - RUFo_73_PA3) + GPmin_73_PA3 * AWr_73_PA3 * (1+ RPF_73_PA3 - RUFr_73_PA3)}
+!goal setGPmax_73_PA3        {GP_73_PA3 < 0.001 + GPmax_73_PA3 * AWo_73_PA3 * (1+ RPF_73_PA3 - RUFo_73_PA3) + GPmax_73_PA3 * AWr_73_PA3 * (1+ RPF_73_PA3 - RUFr_73_PA3)}
+
+
+!==============================
+! 73_XA - Firebaugh Canal Company - Ag
+!==============================
+goal setGPmin_73_XA        {GP_73_XA > GPmin_73_XA * AWo_73_XA * (1+ RPF_73_XA - RUFo_73_XA) + GPmin_73_XA * AWr_73_XA * (1+ RPF_73_XA - RUFr_73_XA)}
+!goal setGPmax_73_XA        {GP_73_XA < 0.001 + GPmax_73_XA * AWo_73_XA * (1+ RPF_73_XA - RUFo_73_XA) + GPmax_73_XA * AWr_73_XA * (1+ RPF_73_XA - RUFr_73_XA)}
+
+
+
+!==============================
+! 73_NU - small communities - M&I -- gw only
+!==============================
+
+goal set_GP_WBATotal_73  {GP_WBATotal_73
+                    - GP_73_NA
+                    - GP_73_PA1
+                    - GP_73_PA2
+                    - GP_73_PA3
+                    - GP_73_XA
+                    - GP_73_NU  = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 90_PA1 - Westlands WD I - Ag
+!==============================
+goal setGPmin_90_PA1        {GP_90_PA1 > GPmin_90_PA1 * AWo_90_PA1 * (1+ RPF_90_PA1 - RUFo_90_PA1) + GPmin_90_PA1 * AWr_90_PA1 * (1+ RPF_90_PA1 - RUFr_90_PA1)}
+!goal setGPmax_90_PA1        {GP_90_PA1 < 0.001 + GPmax_90_PA1 * AWo_90_PA1 * (1+ RPF_90_PA1 - RUFo_90_PA1) + GPmax_90_PA1 * AWr_90_PA1 * (1+ RPF_90_PA1 - RUFr_90_PA1)}
+
+!==============================
+! 90_PA2 - Westlands WD II - Ag
+!==============================
+goal setGPmin_90_PA2        {GP_90_PA2 > GPmin_90_PA2 * AWo_90_PA2 * (1+ RPF_90_PA2 - RUFo_90_PA2) + GPmin_90_PA2 * AWr_90_PA2 * (1+ RPF_90_PA2 - RUFr_90_PA2)}
+!goal setGPmax_90_PA2        {GP_90_PA2 < 0.001 + GPmax_90_PA2 * AWo_90_PA2 * (1+ RPF_90_PA2 - RUFo_90_PA2) + GPmax_90_PA2 * AWr_90_PA2 * (1+ RPF_90_PA2 - RUFr_90_PA2)}
+
+
+!==============================
+! 90_PU - Avenal Coalinga Huron - M&I
+!==============================
+goal setGPmin_90_PU        {GP_90_PU > GPmin_90_PU * UD_90_PU}
+!goal setGPmax_90_PU        {GP_90_PU < GPmax_90_PU * UD_90_PU}
+
+goal set_GP_WBATotal_90  {GP_WBATotal_90
+                    - GP_90_PA1
+                    - GP_90_PA2
+                    - GP_90_PU = 0. }
+                    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 91_PA - Mendota Pool Contractors - Ag
+!==============================
+goal setGPmin_91_PA        {GP_91_PA > GPmin_91_PA * AWo_91_PA * (1+ RPF_91_PA - RUFo_91_PA) + GPmin_91_PA * AWr_91_PA * (1+ RPF_91_PA - RUFr_91_PA)}
+!goal setGPmax_91_PA        {GP_91_PA < 0.001 + GPmax_91_PA * AWo_91_PA * (1+ RPF_91_PA - RUFo_91_PA) + GPmax_91_PA * AWr_91_PA * (1+ RPF_91_PA - RUFr_91_PA)}
+
+
+!==============================
+! 91_PR - Mendota WA - Refuge
+!==============================
+goal setGPmin_91_PR        {GP_91_PR > GPmin_91_PR * AWo_91_PR * (1+ RPF_91_PR - RUFo_91_PR) + GPmin_91_PR * AWr_91_PR * (1+ RPF_91_PR - RUFr_91_PR)}
+!goal setGPmax_91_PR        {GP_91_PR < GPmax_91_PR * AWo_91_PR * (1+ RPF_91_PR - RUFo_91_PR) + GPmax_91_PR * AWr_91_PR * (1+ RPF_91_PR - RUFr_91_PR)}
+ 
+goal set_GP_WBATotal_91  {GP_WBATotal_91
+                     - GP_91_PA 
+                    - GP_91_PR = 0. }

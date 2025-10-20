@@ -1,0 +1,315 @@
+/*
+File Name: constraints-deliveries.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in delivery arcs
+
+Naming takes the following form:
+
+*/
+
+! For managed wetlands constrain groundwater pumping to minimum specified amount
+! Demand may not be met in full due to contract limits
+! Urban demand are met in full and have first priority.
+
+!!!!!! Wolf Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! DC_NA3
+!======================================================================
+! gross surface water diversions
+goal setDG_NIDDC_NA3    {DG_NIDDC_NA3 = D_WLF013_NIDDC_NA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_NIDDC_NA3    {DN_NIDDC_NA3 = DG_NIDDC_NA3 - DL_NIDDC_NA3}
+goal setDL_NIDDC_NA3    {DL_NIDDC_NA3 = 0.}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_NIDDC_NA3   {DN_NIDDC_NA3 < AW_NIDDC_NA3}
+define SHRTG_NIDDC_NA3 {alias AW_NIDDC_NA3 - DN_NIDDC_NA3 kind 'delivery-shortage' units 'cfs'}
+
+goal limitDES_Spill		{D_DES006_WLF017 < max(0,AW_NIDDC_NA3 - I_WLF013 - WW_GRSVL - 0.0 * AW_NIDDC_NA1)}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Combie - Combie Phase I, II, and III      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Lake of the Pines Urban Demands
+goal   setD_CBC000_PINES	{D_CBC000_PINES < UD_PINES}
+define SHRTG_PINES	{alias UD_PINES - D_CBC000_PINES kind 'delivery-shortage' units 'cfs'}
+
+! Bear River Right Bank Ag Demands
+goal   setD_CBC000_NIDBR_NA	{D_CBC000_NIDBR_NA < AW_NIDBR_NA}
+define SHRTG_NIDBR_NA	{alias AW_NIDBR_NA - D_CBC000_NIDBR_NA kind 'delivery-shortage' units 'cfs'} 
+
+! Orr/Coon Creek
+!goal setD_CBC001_CCK036		{D_CBC001_CCK036 = 0}! < DMD_CBC001_CCK036_NID}	!BR319 !Set to zero since does not connect to any demand units
+define SHRTG_CCK036	{alias DMD_CBC001_CCK036_NID - D_CBC001_CCK036 kind 'delivery-shortage' units 'cfs'} 
+define demand_CBC001_CCK036_DV {alias DMD_CBC001_CCK036_NID  kind 'demand' units 'cfs'}
+! 
+!goal setD_CBC001_24_NA1		{D_CBC001_24_NA1 < DMD_CBC001_24_NA1_NID}	!BR301 - BR311 - BR303 - BR319
+!define SHRTG_CBC001_24_NA1	{alias DMD_CBC001_24_NA1_NID - D_CBC001_24_NA1 kind 'delivery-shortage' units 'cfs'} 
+!define demand_CBC001_24_NA1_DV {alias DMD_CBC001_24_NA1_NID  kind 'demand' units 'cfs'}
+
+!define SHRTG_CMBIE			{alias SHRTG_NIDBR_NA + SHRTG_PINES + SHRTG_CCK036 + SHRTG_CBC001_24_NA1 kind 'delivery-shortage' units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 23      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 23_NU
+!======================================================================
+! No surface water delivery
+
+!goal setUD_23_NU    {UD_23_NU = GP_23_NU } ! + SHRTG_23_NU }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 24      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!======================================================================
+! 24_NA1
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NA1   {DG_24_NA1 = D_CBC001_24_NA1 + D_WSE004_24_NA1 + D_ABN024_24_NA1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA1   {DN_24_NA1 = DG_24_NA1 - DL_24_NA1}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_24_NA1  {AW_24_NA1 + RP_24_NA1 = DN_24_NA1 + GP_24_NA1 + RU_24_NA1 } ! + SHRTG_24_NA1}
+!define SHRTG_24_NA1	{alias AW_24_NA1 + RP_24_NA1 - DN_24_NA1 - GP_24_NA1 - RU_24_NA1 kind 'delivery-shortage' units 'cfs'} 
+
+
+!goal setD_ABN024_24_NA1		{D_ABN024_24_NA1 < 89.0/100.0 * (D_WSE004_24_NA1 + D_ABN024_24_NA1)}
+
+goal setD_CYN009_LBC001		{D_CYN009_LBC001 < D_LBC038_WTPAUB}
+
+!======================================================================
+! 24_NA2
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NA2   {DG_24_NA2 = D_ABN010_24_NA2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA2   {DN_24_NA2 = DG_24_NA2 - DL_24_NA2}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_24_NA2  {AW_24_NA2 + AW_24_NA2_add + RP_24_NA2 = DN_24_NA2 + GP_24_NA2 + RU_24_NA2 } ! + SHRTG_24_NA2 }
+!define SHRTG_24_NA2	{alias AW_24_NA2 + RP_24_NA2 - DN_24_NA2 - GP_24_NA2 - RU_24_NA2 kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! 24_NA3
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NA3   {DG_24_NA3 = D_STH003_24_NA3 + D_STH005_24_NA3 + D_WSE006_24_NA3 + D_LBC049_24_NA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NA3   {DN_24_NA3 = DG_24_NA3 - DL_24_NA3}
+! Total Applied Water = net surface delivery + groundwater pumping + reuse
+goal meetAW_24_NA3  {AW_24_NA3 + AW_24_NA3_add + RP_24_NA3 = DN_24_NA3 + GP_24_NA3 + RU_24_NA3} ! + SHRTG_24_NA3 }
+!define SHRTG_24_NA3	{alias AW_24_NA3 + RP_24_NA3 - DN_24_NA3 - GP_24_NA3 - RU_24_NA3 kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! 24_NU2
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU2   {DG_24_NU2 = D_WTPFSS_24_NU2}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU2   {DN_24_NU2 = DG_24_NU2 - DL_24_NU2}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU2   {UD_24_NU2 + UD_24_NU2_add = DN_24_NU2 + GP_24_NU2 } ! + SHRTG_24_NU2 }
+!define SHRTG_24_NU2	{alias UD_24_NU2 - DN_24_NU2 - GP_24_NU2 kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! 24_NU1
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU1   {DG_24_NU1 = D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU1   {DN_24_NU1 = DG_24_NU1 - DL_24_NU1}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU1   {UD_24_NU1 = DN_24_NU1 + GP_24_NU1 } ! + SHRTG_24_NU1 }
+!define SHRTG_24_NU1	{alias UD_24_NU1 - DN_24_NU1 - GP_24_NU1 kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! 24_NU3
+!======================================================================
+! gross surface water diversions
+goal setDG_24_NU3   {DG_24_NU3 = D_WSE004_24_NU3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_24_NU3   {DN_24_NU3 = DG_24_NU3 - DL_24_NU3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_24_NU3   {UD_24_NU3 = DN_24_NU3 + GP_24_NU3 } ! + SHRTG_24_NU3 }
+!define SHRTG_24_NU3	{alias UD_24_NU3 - DN_24_NU3 - GP_24_NU3 kind 'delivery-shortage' units 'cfs'} 
+
+!======================================================================
+! PCWA3
+!======================================================================
+! gross surface water diversions
+goal setDG_PCWA3    {DG_PCWA3 = D_LBC010_PCWA3}
+! net surface delivery = surface diversion - conveyance losses
+goal setDN_PCWA3    {DN_PCWA3 = DG_PCWA3 - DL_PCWA3}
+! Total Applied Water = net surface delivery + groundwater pumping
+goal setUD_PCWA3    {UD_PCWA3 > DN_PCWA3 + GP_PCWA3 } ! + SHRTG_PCWA3 }
+define SHRTG_PCWA3	{alias UD_PCWA3 - DN_PCWA3 - GP_PCWA3 kind 'delivery-shortage' units 'cfs'} 
+
+!goal Limit_PCWA3_sources {D_LBR002_LBC001 - D_LBC001_LBCLOS + D_CYN009_LBC001 < D_LBC010_PCWA3}
+goal Limit_PCWA3_sources {D_LBR002_LBC001 - D_LBC001_LBCLOS < D_LBC010_PCWA3}
+
+! South Canal at Newcastle Powerhouse
+!goal setC_NewcastlePH		{C_STH007 < DMD_NEWCASTLE_PH}
+!define SHRTG_NewcastlePH	{alias DMD_NEWCASTLE_PH - C_STH007 kind 'delivery-shortage' units 'cfs'}
+!define demand_NewcastlePH_DV {alias DMD_NEWCASTLE_PH kind 'demand' units 'cfs'}
+
+! Abandoned Canals
+!goal setD_LBC030_BEC021		{D_LBC030_BEC021 = 0}	! Bowman Feeder Canal
+!goal setD_BEC021_LBC032		{D_BEC021_LBC032 = 0}	! Ragsdale Random Canal
+
+! Split diversions to the lower boardman canal based on historical flow data (YB-56 & YB-69)
+goal splitRagsdale		{D_BEC021_LBC032 = (9.7/(9.7 + 20.4))*(D_BEC021_LBC032 + D_WSE003_LBC040)}
+goal splitFiddlersGreen	{D_WSE003_LBC040 = (20.4/(9.7 + 20.4))*(D_BEC021_LBC032 + D_WSE003_LBC040)}
+
+! Split 24_NA3 based on historical data that are well correlated (YB-67 & YB-91). Further constrained by D_STH005_NA3 capacity (8 cfs)
+!goal splitD_STH005_24_NA3	{D_STH005_24_NA3 = (3.6/(3.6 + 32.4))*(D_STH005_24_NA3 + D_STH003_24_NA3)}
+!goal splitD_STH003_24_NA3	{D_STH003_24_NA3 = (32.4/(3.6 + 32.4))*(D_STH005_24_NA3 + D_STH003_24_NA3)}
+
+! Split 24_NU1 based on historical data from PCWA (1998-2017)
+! Bowman WTP
+goal splitD_WTPBWM_24_NU1 {
+	lhs D_WTPBWM_24_NU1
+		case Jan {
+			condition month==JAN
+			rhs 0.97*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Feb {
+			condition month==FEB
+			rhs 0.95*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Mar {
+			condition month==MAR
+			rhs 0.95*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Apr {
+			condition month==APR
+			rhs 0.82*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case May {
+			condition month==MAY
+			rhs 0.66*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Jun {
+			condition month==JUN
+			rhs 0.61*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Jul {
+			condition month==JUL
+			rhs 0.58*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Aug {
+			condition month==AUG
+			rhs 0.59*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Sep {
+			condition month==SEP
+			rhs 0.59*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Oct {
+			condition month==OCT
+			rhs 0.55*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Nov {
+			condition month==NOV
+			rhs 0.74*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+		case Dec {
+			condition month==DEC
+			rhs 0.93*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+						lhs<rhs penalty 10
+			lhs>rhs penalty 10}
+}
+! Auburn WTP
+goal splitD_WTPAUB_24_NU1 {
+	lhs D_WTPAUB_24_NU1
+		case Jan {
+			condition month==JAN
+			rhs 0.03*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Feb {
+			condition month==FEB
+			rhs 0.05*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Mar {
+			condition month==MAR
+			rhs 0.05*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Apr {
+			condition month==APR
+			rhs 0.18*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case May {
+			condition month==MAY
+			rhs 0.34*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Jun {
+			condition month==JUN
+			rhs 0.39*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Jul {
+			condition month==JUL
+			rhs 0.58*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Aug {
+			condition month==AUG
+			rhs 0.41*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Sep {
+			condition month==SEP
+			rhs 0.41*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Oct {
+			condition month==OCT
+			rhs 0.45*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Nov {
+			condition month==NOV
+			rhs 0.26*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+		case Dec {
+			condition month==DEC
+			rhs 0.07*(D_WTPBWM_24_NU1 + D_WTPAUB_24_NU1)
+			lhs<rhs penalty 0}
+}
+
+! Seasonal diversion capacity, including wintertime restrictions, and October/November canal outages (from YB/DS ops model)
+define D_BEC000_MAX_SV {case Oct {condition month == OCT value 258.0}  !cfs
+			case Nov {condition month == NOV value 180.0} ! 
+			case Dec {condition month == DEC value 435.0} ! 
+			case Jan {condition month == JAN value 400.0} ! 
+			case Feb {condition month == FEB value 400.0} ! 
+			case Mar {condition month == MAR value 400.0} ! 
+			case Apr {condition month == APR value 450.0} ! 
+			case May {condition month == MAY value 450.0} ! 
+			case Jun {condition month == JUN value 450.0} ! 
+			case Jul {condition month == JUL value 470.0} ! 
+			case Aug {condition month == AUG value 470.0} ! 
+			case otherwise {condition always value 470.0}} 
+goal set_D_BEC000_MAX	{D_BRR050_BEC000 < D_BEC000_MAX_SV}
+
+! Seasonal diversion capacity, up to 36 cfs, from October through June, otherwise 0 cfs
+define D_LVC_MAX_SV {case Oct {condition month == OCT value 36.0}  !cfs
+			case Nov {condition month == NOV value 36.0} ! 
+			case Dec {condition month == DEC value 36.0} ! 
+			case Jan {condition month == JAN value 36.0} ! 
+			case Feb {condition month == FEB value 36.0} ! 
+			case Mar {condition month == MAR value 36.0} ! 
+			case Apr {condition month == APR value 36.0} ! 
+			case May {condition month == MAY value 36.0} ! 
+			case Jun {condition month == JUN value 36.0} ! 
+			case Jul {condition month == JUL value 0.0} ! 
+			case Aug {condition month == AUG value 0.0} ! 
+			case otherwise {condition always value 0.0}} 
+goal set_D_NNA013_LVC001_MAX	{D_NNA013_LVC001 < D_LVC_MAX_SV}

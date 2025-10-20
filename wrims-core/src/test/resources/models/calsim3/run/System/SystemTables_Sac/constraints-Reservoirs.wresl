@@ -1,0 +1,274 @@
+/*
+File name: File Name: constraints-reservoirs.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Naming takes the following form:
+
+*/
+
+!@jmg 2017v13 - next 5 lines added from 5/31/2017 edits from Richard Chen (DWR)
+define ETPenalty {value 900000}
+!goal Evap_TRNTY {lhs E_TRNTY rhs (ER_TRNTY/24/cfs_af)*A_TRNTYlast+(ER_TRNTY/24/cfs_af)*A_TRNTY lhs<rhs penalty ETPenalty lhs>rhs constrain } 
+goal   setE_LWSTN {lhs E_LWSTN rhs (ER_LWSTN/12/cfs_af)*A_LWSTN lhs<rhs penalty ETPenalty lhs>rhs constrain } 
+goal   Evap_THRMF {lhs E_THRMF rhs (ER_THRMF/12/cfs_af)*A_THRMF lhs<rhs penalty ETPenalty lhs>rhs constrain }
+!goal   evap_ENGLB {lhs E_ENGLB rhs (ER_ENGLB/12/cfs_af)*A_ENGLB lhs<rhs penalty ETPenalty lhs>rhs constrain }  !Z.Q. Richard Chen 5/31/2017
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Claire Engle Lake, Trinity River    !!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_TRNTYZone1  {S_TRNTY_1 < S_TRNTYlevel1}
+goal   S_TRNTYZone2  {S_TRNTY_2 < S_TRNTYlevel2-S_TRNTYlevel1}
+goal   Storage_TRNTY {S_TRNTY=S_TRNTY_1+S_TRNTY_2+S_TRNTY_3+S_TRNTY_4+S_TRNTY_5}
+goal   Area_TRNTY    {A_TRNTY = A_TRNTYlast+1000*coefev_TRNTY*S_TRNTY-1000*coefev_TRNTY*S_TRNTY(-1)}
+goal   Evap_TRNTY    {E_TRNTY*cfs_af=(ER_TRNTY/24)*A_TRNTYlast+(ER_TRNTY/24)*A_TRNTY}
+!goal   MaxRel_TRNTY  {C_TRNTY < RelCap_TRNTY}  !@jmg DWR's 2017v13 split model has this line commented out; I'm doing so here for consistency
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lewiston Lake, Trinity River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   Storage_LWSTN {S_LWSTN = 14.0}
+!goal   setE_LWSTN    {E_LWSTN*cfs_af=(ER_LWSTN/12)*A_LWSTN} !@jmg 2017v13 - commenting out for consistency
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Whiskeytown Lake, Clear Creeek  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_WKYTNZone1  {S_WKYTN_1 < S_WKYTNlevel1}
+goal   S_WKYTNZone2  {S_WKYTN_2 < S_WKYTNlevel2-S_WKYTNlevel1}
+goal   S_WKYTNZone3  {S_WKYTN_3 < S_WKYTNlevel3-S_WKYTNlevel2}
+goal   S_WKYTNZone4  {S_WKYTN_4 < S_WKYTNlevel4-S_WKYTNlevel3}
+goal   S_WKYTNZone6  {S_WKYTN_5 < S_WKYTNlevel5-S_WKYTNlevel4}
+goal   Storage_WKYTN {S_WKYTN=S_WKYTN_1+S_WKYTN_2+S_WKYTN_3+S_WKYTN_4+S_WKYTN_5}
+goal   Area_WKYTN    {A_WKYTN=A_WKYTNlast+1000*Coefev_WKYTN*S_WKYTN-1000*coefev_WKYTN*S_WKYTN(-1)}
+goal   Evap_WKYTN    {E_WKYTN*cfs_af=(ER_WKYTN/24)*A_WKYTNlast+(ER_WKYTN/24)*A_WKYTN}
+!goal   MaxRel_WKYTN  {C_WKYTN<RelCap_WKYTN} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Shasta, Sacramento River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_SHSTAZone1  {S_SHSTA_1 < S_SHSTAlevel1}
+goal   S_SHSTAZone2  {S_SHSTA_2 < S_SHSTAlevel2-S_SHSTAlevel1}
+goal   StoragE_SHSTA {S_SHSTA=S_SHSTA_1+S_SHSTA_2+S_SHSTA_3+S_SHSTA_4+S_SHSTA_5+S_SHSTA_6}
+goal   Area_SHSTA    {A_SHSTA=A_SHSTAlast+1000*coefev_SHSTA*S_SHSTA-1000*coefev_SHSTA*S_SHSTA(-1)}
+goal   Evap_SHSTA    {E_SHSTA*cfs_af=(ER_SHSTA/24)*A_SHSTAlast+(ER_SHSTA/24)*A_SHSTA}
+!goal   MaxRel_SHSTA  {C_SHSTA<RelCap_SHSTA} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Keswick Reservoir, Sacramento River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_KSWCKZone1  {S_KSWCK_1 < S_KSWCKlevel1}
+goal   S_KSWCKZone2  {S_KSWCK_2 < S_KSWCKlevel2-S_KSWCKlevel1}
+goal   S_KSWCKZone4  {S_KSWCK_3 < S_KSWCKlevel3-S_KSWCKlevel2}
+goal   S_KSWCKZone5  {S_KSWCK_4 < S_KSWCKlevel4-S_KSWCKlevel3}
+goal   S_KSWCKZone6  {S_KSWCK_5 < S_KSWCKlevel5-S_KSWCKlevel4}
+goal   StoragE_KSWCK {S_KSWCK=S_KSWCK_1+S_KSWCK_2+S_KSWCK_3+S_KSWCK_4+S_KSWCK_5}
+goal   Area_KSWCK    {A_KSWCK=A_KSWCKlast+1000*coefev_KSWCK*S_KSWCK-1000*coefev_KSWCK*S_KSWCK(-1)}
+goal   Evap_KSWCK    {E_KSWCK*cfs_af=(ER_KSWCK/24)*A_KSWCKlast+(ER_KSWCK/24)*A_KSWCK}
+!goal   MaxRel_KSWCK  {C_KSWCK<RelCap_KSWCK} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Oroville, Feather River    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_OROVLZone1  {S_OROVL_1 < S_OROVLlevel1}
+goal   S_OROVLZone2  {S_OROVL_2 < S_OROVLlevel2-S_OROVLlevel1}
+goal   StoragE_OROVL {S_OROVL=S_OROVL_1+S_OROVL_2+S_OROVL_3+S_OROVL_4+S_OROVL_5+S_OROVL_6}
+goal   Area_OROVL    {A_OROVL=A_OROVLlast+1000*coefev_OROVL*S_OROVL-1000*coefev_OROVL*S_OROVL(-1)}
+goal   Evap_OROVL    {E_OROVL*cfs_af=(ER_OROVL/24)*A_OROVLlast+(ER_OROVL/24)*A_OROVL}
+!goal   MaxRel_OROVL  {C_OROVL<Relcap_OROVL} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Thermalito Forebay, Feather River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   Storage_THRMF {S_THRMF = 24.0}
+!goal   Evap_THRMF    {E_THRMF*cfs_af=(ER_THRMF/12)*A_THRMF} !@jmg 2017v13 - moved to logic at top of file
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Thermalito Afterbay, Feather River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal   S_THRMAZone1  {S_THRMA_1 < S_THRMAlevel1}
+goal   S_THRMAZone2  {S_THRMA_2 < S_THRMAlevel2-S_THRMAlevel1}
+goal   S_THRMAZone3  {S_THRMA_3 < S_THRMAlevel3-S_THRMAlevel2}
+goal   S_THRMAZone4  {S_THRMA_4 < S_THRMAlevel4-S_THRMAlevel3}
+goal   S_THRMAZone_5 {S_THRMA_5 < S_THRMAlevel5-S_THRMAlevel4}
+goal   Storage_THRMA {S_THRMA=S_THRMA_1+S_THRMA_2+S_THRMA_3+S_THRMA_4+S_THRMA_5}
+goal   Area_THRMA    {A_THRMA=A_THRMAlast+1000*coefev_THRMA*S_THRMA-1000*coefev_THRMA*S_THRMA(-1)}
+goal   Evap_THRMA    {E_THRMA*cfs_af=(ER_THRMA/24)*A_THRMAlast+(ER_THRMA/24)*A_THRMA}
+goal   MaxRel_THRMA  {C_THRMA<RelCap_THRMA}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! New Bullards Bar Reservoir, North Fork  Yuba River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal   S_NBLDBZone1  {S_NBLDB_1 < S_NBLDBlevel1}
+!goal   S_NBLDBZone2  {S_NBLDB_2 < S_NBLDBlevel2-S_NBLDBlevel1}
+!goal   S_NBLDBZone3  {S_NBLDB_3 < S_NBLDBlevel3-S_NBLDBlevel2}
+!goal   S_NBLDBZone4  {S_NBLDB_4 < S_NBLDBlevel4-S_NBLDBlevel3}
+!goal   S_NBLDBZone_5 {S_NBLDB_5 < S_NBLDBlevel5-S_NBLDBlevel4}
+!goal   S_NBLDBZone_6 {S_NBLDB_6 < S_NBLDBlevel6-S_NBLDBlevel5}
+!goal   Storage_NBLDB {S_NBLDB=S_NBLDB_1+S_NBLDB_2+S_NBLDB_3+S_NBLDB_4+S_NBLDB_5+S_NBLDB_6}
+!goal   Area_NBLDB    {A_NBLDB=A_NBLDBlast+1000*coefev_NBLDB*S_NBLDB-1000*coefev_NBLDB*S_NBLDB(-1)}
+!goal   Evap_NBLDB    {E_NBLDB*cfs_af=(ER_NBLDB/24)*A_NBLDBlast+(ER_NBLDB/24)*A_NBLDB}
+!goal   MaxRel_NBLDB  {C_NBLDB<RelCap_NBLDB} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lake Valley Reservoir, North Fork American River    !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal   Storage_LKVLY {S_LKVLY = 0.0}
+
+! Folsom
+goal   S_FOLSMZone1  {S_FOLSM_1 < S_FOLSMlevel1}
+goal   S_FOLSMZone2  {S_FOLSM_2 < S_FOLSMlevel2-S_FOLSMlevel1}
+goal   Storage_FOLSM {S_FOLSM=S_FOLSM_1+S_FOLSM_2+S_FOLSM_3+S_FOLSM_4+S_FOLSM_5+S_FOLSM_6}
+goal   Area_FOLSM    {A_FOLSM=A_FOLSMlast+1000*coefev_FOLSM*S_FOLSM-1000*coefev_FOLSM*S_FOLSM(-1)}
+goal   Evap_FOLSM    {E_FOLSM*cfs_af=(ER_FOLSM/24)*A_FOLSMlast+(ER_FOLSM/24)*A_FOLSM}
+!goal   MaxRel_FOLSM  {C_FOLSM<Relcap_FOLSM} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+! Natoma
+goal   S_NTOMAZone1  {S_NTOMA_1 < S_NTOMAlevel1}
+goal   S_NTOMAZone2  {S_NTOMA_2 < S_NTOMAlevel2-S_NTOMAlevel1}
+goal   S_NTOMAZone3  {S_NTOMA_3 < S_NTOMAlevel3-S_NTOMAlevel2}
+goal   S_NTOMAZone4  {S_NTOMA_4 < S_NTOMAlevel4-S_NTOMAlevel3}
+goal   S_NTOMAZone5  {S_NTOMA_5 < S_NTOMAlevel5-S_NTOMAlevel4}
+goal   Storage_NTOMA {S_NTOMA=S_NTOMA_1+S_NTOMA_2+S_NTOMA_3+S_NTOMA_4+S_NTOMA_5}
+goal   Area_NTOMA    {A_NTOMA=A_NTOMAlast+1000*coefev_NTOMA*S_NTOMA-1000*coefev_NTOMA*S_NTOMA(-1)}
+goal   Evap_NTOMA    {E_NTOMA*cfs_af=(ER_NTOMA/24)*A_NTOMAlast+(ER_NTOMA/24)*A_NTOMA}
+!goal   MaxRel_NTOMA  {C_NTOMA<RelCap_NTOMA}  !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+! East Park
+goal   S_EPARKZone1  {S_EPARK_1 < S_EPARKlevel1}
+goal   S_EPARKZone2  {S_EPARK_2 < S_EPARKlevel2-S_EPARKlevel1}
+goal   S_EPARKZone3  {S_EPARK_3 < S_EPARKlevel3-S_EPARKlevel2}
+goal   S_EPARKZone4  {S_EPARK_4 < S_EPARKlevel4-S_EPARKlevel3}
+goal   S_EPARKZone5  {S_EPARK_5 < S_EPARKlevel5-S_EPARKlevel4}
+goal   Storage_EPARK {S_EPARK=S_EPARK_1+S_EPARK_2+S_EPARK_3+S_EPARK_4+S_EPARK_5}
+goal   Area_EPARK    {A_EPARK=A_EPARKlast+1000*coefev_EPARK*S_EPARK-1000*coefev_EPARK*S_EPARK(-1)}
+goal   Evap_EPARK    {E_EPARK*cfs_af=(ER_EPARK/24)*A_EPARKlast+(ER_EPARK/24)*A_EPARK}
+!goal   MaxRel_EPARK  {C_EPARK<Relcap_EPARK}  !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+!Stony Gorge
+goal   S_SGRGEZone1  {S_SGRGE_1 < S_SGRGElevel1}
+goal   S_SGRGEZone2  {S_SGRGE_2 < S_SGRGElevel2-S_SGRGElevel1}
+goal   S_SGRGEZone3  {S_SGRGE_3 < S_SGRGElevel3-S_SGRGElevel2}
+goal   S_SGRGEZone4  {S_SGRGE_4 < S_SGRGElevel4-S_SGRGElevel3}
+goal   SGRGEZone5    {S_SGRGE_5 < S_SGRGElevel5-S_SGRGElevel4}
+goal   Storage_SGRGE {S_SGRGE=S_SGRGE_1+S_SGRGE_2+S_SGRGE_3+S_SGRGE_4+S_SGRGE_5}
+goal   Area_SGRGE    {A_SGRGE=A_SGRGElast+1000*coefev_SGRGE*S_SGRGE-1000*coefev_SGRGE*S_SGRGE(-1)}
+goal   Evap_SGRGE    {E_SGRGE*cfs_af=(ER_SGRGE/24)*A_SGRGElast+(ER_SGRGE/24)*A_SGRGE}
+!goal   MaxRel_SGRGE  {C_SGRGE<Relcap_SGRGE}  !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+! Black Butte
+goal   S_BLKBTZone1  {S_BLKBT_1 < S_BLKBTlevel1}
+goal   S_BLKBTZone2  {S_BLKBT_2 < S_BLKBTlevel2-S_BLKBTlevel1}
+goal   StoragE_BLKBT {S_BLKBT=S_BLKBT_1+S_BLKBT_2+S_BLKBT_3+S_BLKBT_4+S_BLKBT_5}
+goal   Area_BLKBT    {A_BLKBT=A_BLKBTlast+1000*coefev_BLKBT*S_BLKBT-1000*coefev_BLKBT*S_BLKBT(-1)}
+goal   Evap_BLKBT    {E_BLKBT*cfs_af=(ER_BLKBT/24)*A_BLKBTlast+(ER_BLKBT/24)*A_BLKBT}
+!goal   MaxRel_BLKBT  {C_BLKBT<Relcap_BLKBT}  !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+! Lake Berryessa
+goal   S_BRYSAZone1      {S_BRYSA_1 < S_BRYSAlevel1}
+goal   S_BRYSAZone2     {S_BRYSA_2 < S_BRYSAlevel2-S_BRYSAlevel1}
+goal S_BRYSAZone3   {S_BRYSA_3 < S_BRYSAlevel3 - S_BRYSAlevel2}
+goal S_BRYSAZone4   {S_BRYSA_4 < S_BRYSAlevel4 - S_BRYSAlevel3}
+goal S_BRYSAZone5   {S_BRYSA_5 < S_BRYSAlevel5 - S_BRYSAlevel4}
+goal   StoragE_BRYSA    {S_BRYSA=S_BRYSA_1+S_BRYSA_2+S_BRYSA_3+S_BRYSA_4+S_BRYSA_5}
+goal   Area_BRYSA       {A_BRYSA=A_BRYSAlast+1000*coefev_BRYSA*S_BRYSA-1000*coefev_BRYSA*S_BRYSA(-1)}
+goal   Evap_BRYSA       {E_BRYSA*cfs_af=(ER_BRYSA/24)*A_BRYSAlast+(ER_BRYSA/24)*A_BRYSA}
+goal   MaxRel_BRYSA     {C_BRYSA<Relcap_BRYSA}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Englebright Dam, Yuba River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!goal storage_ENGLB {S_ENGLB = 65.0}
+!goal evap_ENGLB    {E_ENGLB*cfs_af=(ER_ENGLB/12)*A_ENGLB}  !Z.Q. Richard Chen 4/5/2012 !@jmg 2017v13 - moved to logic at top of file
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Merle Collins Reservoir, Dry Creek      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal S_MERLCZone1   {S_MERLC_1 < S_MERLClevel1}
+!goal S_MERLCZone2   {S_MERLC_2 < S_MERLClevel2-S_MERLClevel1}
+!goal StoragE_MERLC  {S_MERLC=S_MERLC_1+S_MERLC_2}
+!goal Area_MERLC     {A_MERLC=A_MERLClast+1000*coefev_MERLC*S_MERLC-1000*coefev_MERLC*S_MERLC(-1)}
+!goal Evap_MERLC     {E_MERLC*cfs_af=(ER_MERLC/24)*A_MERLClast+(ER_MERLC/24)*A_MERLC}
+!goal MaxRel_MERLC   {C_MERLC<Relcap_MERLC}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bear River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal S_RLLNSZone1 {S_RLLNS_1 < S_RLLNSlevel1}
+!goal S_RLLNSZone2 {S_RLLNS_2 < S_RLLNSlevel2-S_RLLNSlevel1}
+!goal S_RLLNSZone3 {S_RLLNS_3 < S_RLLNSlevel3-S_RLLNSlevel2}
+!goal S_RLLNSZone4 {S_RLLNS_4 < S_RLLNSlevel4-S_RLLNSlevel3}
+!goal S_RLLNSZone5 {S_RLLNS_5 < S_RLLNSlevel5-S_RLLNSlevel4}
+!goal storage_RLLNS {S_RLLNS=S_RLLNS_1+S_RLLNS_2+S_RLLNS_3+S_RLLNS_4+S_RLLNS_5}
+!goal area_RLLNS {A_RLLNS=A_RLLNSlast+1000*coefev_RLLNS*S_RLLNS-1000*coefev_RLLNS*S_RLLNS(-1)}
+!goal evap_RLLNS {E_RLLNS*cfs_af=(ER_RLLNS/24)*A_RLLNSlast+(ER_RLLNS/24)*A_RLLNS}
+!goal maxrelease_RLLNS {C_RLLNS<relcap_RLLNS}
+
+/* 
+goal S_CMBIEZone1 {S_CMBIE_1 < S_CMBIElevel1}
+goal S_CMBIEZone2 {S_CMBIE_2 < S_CMBIElevel2-S_CMBIElevel1}
+goal S_CMBIEZone3 {S_CMBIE_3 < S_CMBIElevel3-S_CMBIElevel2}
+goal S_CMBIEZone4 {S_CMBIE_4 < S_CMBIElevel4-S_CMBIElevel3}
+goal S_CMBIEZone5 {S_CMBIE_5 < S_CMBIElevel5-S_CMBIElevel4}
+goal storage_CMBIE {S_CMBIE=S_CMBIE_1+S_CMBIE_2+S_CMBIE_3+S_CMBIE_4+S_CMBIE_5}
+goal area_CMBIE {A_CMBIE=A_CMBIElast+1000*coefev_CMBIE*S_CMBIE-1000*coefev_CMBIE*S_CMBIE(-1)}
+goal evap_CMBIE {E_CMBIE*cfs_af=(ER_CMBIE/24)*A_CMBIElast+(ER_CMBIE/24)*A_CMBIE}
+goal maxrelease_CMBIE {C_CMBIE<relcap_CMBIE}*/
+
+goal S_CMPFWZone1 {S_CMPFW_1 < S_CMPFWlevel1}
+goal S_CMPFWZone2 {S_CMPFW_2 < S_CMPFWlevel2-S_CMPFWlevel1}
+goal S_CMPFWZone3 {S_CMPFW_3 < S_CMPFWlevel3-S_CMPFWlevel2}
+goal S_CMPFWZone4 {S_CMPFW_4 < S_CMPFWlevel4-S_CMPFWlevel3}
+goal S_CMPFWZone5 {S_CMPFW_5 < S_CMPFWlevel5-S_CMPFWlevel4}
+goal storage_CMPFW {S_CMPFW=S_CMPFW_1+S_CMPFW_2+S_CMPFW_3+S_CMPFW_4+S_CMPFW_5}
+goal area_CMPFW {A_CMPFW=A_CMPFWlast+1000*coefev_CMPFW*S_CMPFW-1000*coefev_CMPFW*S_CMPFW(-1)}
+goal evap_CMPFW {E_CMPFW*cfs_af=(ER_CMPFW/24)*A_CMPFWlast+(ER_CMPFW/24)*A_CMPFW}
+goal maxrelease_CMPFW {C_CMPFW < relcap_CMPFW}
+
+
+! Clear Lake
+
+goal   S_CLRLKZone1      {S_CLRLK_1 < S_CLRLKlevel1}
+goal   S_CLRLKZone2     {S_CLRLK_2 < S_CLRLKlevel2-S_CLRLKlevel1}
+goal S_CLRLKZone3   {S_CLRLK_3 < S_CLRLKlevel3 - S_CLRLKlevel2}
+goal S_CLRLKZone4   {S_CLRLK_4 < S_CLRLKlevel4 - S_CLRLKlevel3}
+goal S_CLRLKZone5   {S_CLRLK_5 < S_CLRLKlevel5 - S_CLRLKlevel4}
+goal   Storage_CLRLK    {S_CLRLK=S_CLRLK_1+S_CLRLK_2+S_CLRLK_3+S_CLRLK_4+S_CLRLK_5}
+goal   Area_CLRLK       {A_CLRLK=A_CLRLKlast+1000*coefev_CLRLK*S_CLRLK-1000*coefev_CLRLK*S_CLRLK(-1)}
+goal   Evap_CLRLK       {E_CLRLK*cfs_af=(ER_CLRLK/24)*A_CLRLKlast+(ER_CLRLK/24)*A_CLRLK}
+!goal   MaxRel_CLRLK     {C_CLRLK<Relcap_CLRLK} !@jmg 2017v13 - moved to constraints-FloodSpill
+
+goal AdjStorage_CLRLK   {S_adjCLRLK=S_CLRLK - 842.0}
+
+! Indian Valley Reservoir
+goal   S_INDVLZone1      {S_INDVL_1 < S_INDVLlevel1}
+goal   S_INDVLZone2     {S_INDVL_2 < S_INDVLlevel2-S_INDVLlevel1}
+goal S_INDVLZone3   {S_INDVL_3 < S_INDVLlevel3 - S_INDVLlevel2}
+goal S_INDVLZone4   {S_INDVL_4 < S_INDVLlevel4 - S_INDVLlevel3}
+goal S_INDVLZone5   {S_INDVL_5 < S_INDVLlevel5 - S_INDVLlevel4}
+goal   StoragE_INDVL    {S_INDVL=S_INDVL_1+S_INDVL_2+S_INDVL_3+S_INDVL_4+S_INDVL_5}
+goal   Area_INDVL       {A_INDVL=A_INDVLlast+1000*coefev_INDVL*S_INDVL-1000*coefev_INDVL*S_INDVL(-1)}
+goal   Evap_INDVL       {E_INDVL*cfs_af=(ER_INDVL/24)*A_INDVLlast+(ER_INDVL/24)*A_INDVL}
+!goal   MaxRel_INDVL     {C_INDVL<Relcap_INDVL}  !@jmg 2017v13 - moved to constraints-FloodSpill
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Little Grass Valley, Sly Creek evaporation !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal area_LGRSV {A_LGRSV=A_LGRSVlast+1000*coefev_LGRSV*S_LGRSV-1000*coefev_LGRSV*S_LGRSV(-1)}
+!goal evap_LGRSV {E_LGRSV*cfs_af=(ER_LGRSV/24)*A_LGRSVlast+(ER_LGRSV/24)*A_LGRSV}
+
+!goal area_SLYCK {A_SLYCK=A_SLYCKlast+1000*coefev_SLYCK*S_SLYCK-1000*coefev_SLYCK*S_SLYCK(-1)}
+!goal evap_SLYCK {E_SLYCK*cfs_af=(ER_SLYCK/24)*A_SLYCKlast+(ER_SLYCK/24)*A_SLYCK}

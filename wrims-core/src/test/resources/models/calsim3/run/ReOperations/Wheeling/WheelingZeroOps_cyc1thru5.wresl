@@ -1,0 +1,27 @@
+! WheelingZeroOps_Cyc1thru5.wresl
+! This file handles cvp water in the caa in cycle 1
+! included locally in cycle 1 as the code is updated in later cycles for wheeling
+
+! zero out wheeling 
+goal ZeroWheelingCycle1_5 {C_CAA003_CVP = 0.0}
+
+! limit delivery from oneill forbay to the dmc to intertie and SL release
+goal ONFB1               { D_CAA069_DMC070 < C_SLUIS_CVP + C_CAA067_CVP}
+define ONFB1_limitval    { alias C_SLUIS_CVP+C_CAA067_CVP     kind 'TESTING' units 'CFS' }
+
+! limit CVP deliv to San Luis to be less than intertie and deliberate dmc diversion
+goal ONFB2               { D_CAA069_SLUIS_F < D_DMC070_CAA069 + C_CAA067_CVP}
+define ONFB2_limitval    { alias D_DMC070_CAA069+C_CAA067_CVP kind 'TESTING' units 'CFS' }
+
+! balance of cvp water in the caa
+! goal limit_caa_cvp       { C_CAA003_CVP      + D_DMC007_CAA009  + D_DMC070_CAA069 + C_SLUIS_CVP    ! CVP inflows to CAA
+!                          = D_CAA012_71_PU1   + D_CAA066_71_PU2                                     ! CVP deliv/loss from upper CAA
+!                          + D_CAA069_SLUIS_F  + D_CAA069_DMC070  + CVP_JUB_delivs  + C_CAA172_CVP}  ! CVP deliv/loss from ONFB, lower CAA
+
+
+!Temporary include if code from swp_dellogic.wresl - conveyance_limits.wresl
+!for handling joint use branch conveyance of CVP and SWP water.                                      
+define max_da            {select data from swp_limits where plant=2,month=month}
+goal max_da_swp          {C_CAA087_SWP < 0.542*max_da}
+goal max_da_cvp          {C_CAA087_CVP < 0.458*max_da}
+

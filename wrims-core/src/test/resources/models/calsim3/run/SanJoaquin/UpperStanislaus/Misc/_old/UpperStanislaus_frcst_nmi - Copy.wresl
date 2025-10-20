@@ -1,0 +1,99 @@
+! Defining New Melones forecast for apr to july.
+! Forecast value is updated every FEB
+
+define frcst_nmidv {std kind 'FLOW' units 'TAF'}
+
+define frcst_nmi {
+    case FEB {
+        condition     month == FEB
+        sum(i=Apr-month, Jul-month, 1) I_ST_fm_Med(i)}
+    case other {
+        condition     always
+        value         frcst_nmidv(-1) }
+    }
+
+goal setfrcst_nmidv {frcst_nmidv=frcst_nmi}
+
+define frcst_nmi_maydv {std kind 'FLOW' units 'TAF'}
+
+define frcst_nmi_may {
+    case may {
+        condition     month == may
+        value UNIMP_ST(-1)+(sum(i=0, Jul-month, 1) I_ST_fm_Med(i))}
+        case other {
+        condition     always
+        value         frcst_nmi_maydv(-1) }
+    }
+
+goal setfrcst_nmi_maydv {frcst_nmi_maydv=frcst_nmi_may}
+
+
+define frcst_nmi_mardv {std kind 'FLOW' units 'TAF'}
+
+define frcst_nmi_mar {
+    case mar {
+        condition     month == mar
+        sum(i=Apr-month, Jul-month, 1) I_ST_fm_Med(i)}
+        case other {
+        condition     always
+        value         frcst_nmi_mardv(-1) }
+    }
+
+goal setfrcst_nmi_mardv {frcst_nmi_mardv=frcst_nmi_mar}
+
+define frcst_nmi_aprdv {std kind 'FLOW' units 'TAF'}
+
+define frcst_nmi_apr {
+    case apr {
+        condition     month == apr
+        sum(i=Apr-month, Jul-month, 1) I_ST_fm_Med(i)}
+        case other {
+        condition     always
+        value         frcst_nmi_aprdv(-1) }
+    }
+
+goal setfrcst_nmi_aprdv {frcst_nmi_aprdv=frcst_nmi_apr}
+
+define  frcst_nmi_out{
+	case feb{
+		condition     month == Feb
+		value frcst_nmi
+	}
+	case mar{
+		condition     month == Mar
+		value frcst_nmi_mar
+	}
+	case apr{
+		condition     month == Apr
+		value frcst_nmi_apr
+	}
+	case may{
+		condition     month == May
+		value frcst_nmi_may
+	}
+	case other{
+		condition     always
+		value 0.
+	}
+}
+
+/*
+define frcst_nmi_SFdv {std kind 'FLOW' units 'TAF'}
+define frcst_nmi_SF {
+    case firstYear {
+        condition     wateryear == bgnWY .and. month == OCT
+        select        forecast
+        from          Stanislaus_frcst_nmi
+        where         wateryear=wateryear-1 }
+    case jan {
+        condition     month == jan
+            select        forecast
+            from          Stanislaus_frcst_nmi
+            where         wateryear = wateryear }
+        case other {
+        condition     always
+        value         frcst_nmi_SFdv(-1) }
+    }
+
+goal setfrcst_nmi_SFdv {frcst_nmi_SFdv=frcst_nmi_SF}
+*/

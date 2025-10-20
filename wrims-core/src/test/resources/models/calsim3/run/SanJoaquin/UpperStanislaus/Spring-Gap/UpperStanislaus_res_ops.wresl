@@ -1,0 +1,91 @@
+! Spring Gap-Stanislaus Operating Rules
+! Chakri 03/03/08
+
+! Relief Reservoir Level 2
+define S_RLIEFlevel2 {
+	select     S_RLIEF_level2
+	from       Stanislaus_relief_reslevel
+	where      Mon = month }
+goal Set2level2 {S_RLIEF_2 < max (S_RLIEFlevel2-S_RLIEFlevel1,0.)}
+
+define S_RLIEFlevel2dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_RLIEFlevel2 {S_RLIEFlevel2dv=S_RLIEFlevel2}
+
+
+!define S_RLIEFlevel2 {value S_RLIEFlevel1}
+!goal Set2level2 {S_RLIEF_2 < max (S_RLIEFlevel2-S_RLIEFlevel1,0.)}
+
+! Relief Reservoir Level 3
+define S_RLIEFlevel3 {
+	select     S_RLIEF_level3
+	from       Stanislaus_relief_reslevel
+	where      Mon = month }
+goal Set2level3 {S_RLIEF_3 < max (S_RLIEFlevel3-S_RLIEFlevel2,0.)}
+
+define S_RLIEFlevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_RLIEFlevel3 {S_RLIEFlevel3dv=S_RLIEFlevel3}
+
+! Relief Reservoir Level 4
+define S_RLIEFlevel4 {value S_RLIEFlevel5}
+goal Set2level4 {S_RLIEF_4 < max(S_RLIEFlevel4 - S_RLIEFlevel3,0.)}
+
+define S_RLIEFlevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_RLIEFlevel4 {S_RLIEFlevel4dv=S_RLIEFlevel4}
+
+! Relief Reservoir Level 5
+goal setS_RLIEFlevel5 {S_RLIEF_5 < max(S_RLIEFlevel5 - S_RLIEFlevel4,0.)}
+
+! Pinecrest Reservoir Level 3
+define watavb_pncrt {value S_PCRST(-1) + I_PCRST*cfs_taf}
+
+define Wa_prcstdv {std kind 'INFLOW' units 'TAF'}
+goal checkWA_pncst {Wa_prcstdv = watavb_pncrt}
+
+
+define S_PCRSTlevel3 {
+	select     S_PCRST_level3
+	from       Stanislaus_pinecrest_target
+	given      WaterAvb = watavb_pncrt
+	use        linear
+	where      Mon = month }
+
+define S_PCRSTlevel3dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_PCRSTlevel3 {S_PCRSTlevel3dv = S_PCRSTlevel3}
+
+! Pinecrest Reservoir Level 2 storage is based on FERC minimum pool requirement
+! Requirement is from June 1 - Sept 15 but historical data shows that storage drops below this level in almost all years after June.
+!define S_PCRSTelev2 {
+!	case may_jun {
+!		condition     month >= may .and. month <= jun
+!                value         5618. }
+!	case others {
+!		condition     always
+!		value         0 }
+!	}
+!define S_PCRSTlevel2af {
+!	select     storage
+!	from       Stanislaus_res_info
+!	given      elevation = S_PCRSTelev2
+!	use        linear
+!	where      res_num=5 } !gets S_PCRSTlevel2 from table in af
+define S_PCRSTlevel2 {
+	case may_jun {
+		condition     month >= may .and. month <= jun
+        	value         S_PCRSTlevel3 }
+	case other {
+		condition     always
+		value         S_PCRSTlevel1 }  ! Equal to the dead storage level
+	}
+
+goal Set5level2 {S_PCRST_2 < max (S_PCRSTlevel2-S_PCRSTlevel1,0.)}
+
+goal Set5level3 {S_PCRST_3 < max(S_PCRSTlevel3 - S_PCRSTlevel2,0.)}
+
+! Pinecrest Reservoir Level 4
+define S_PCRSTlevel4 {value S_PCRSTlevel5}
+goal Set5level4 {S_PCRST_4 < max(S_PCRSTlevel4 - S_PCRSTlevel3,0.)}
+
+define S_PCRSTlevel4dv {std kind 'STORAGE-ZONE' units 'TAF'}
+goal checkS_PCRSTlevel4 {S_PCRSTlevel4dv=S_PCRSTlevel4}
+
+goal setS_PCRSTlevel5 {S_PCRST_5 < max(S_PCRSTlevel5 - S_PCRSTlevel4,0.)}

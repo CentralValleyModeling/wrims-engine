@@ -1,0 +1,120 @@
+/*
+CALSIM 3.0 SYSTEM FILE
+ARCS-INFLOWS.WRESL
+
+NAMING TAKES THE FOLLOWING FORMS:
+
+I_{DESTINATION NODE}  - boundary inflow
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! BOUNDARY INFLOWS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!********************** WEST SIDE ***********************************************
+! Reservoir Inflows (alphabetically)
+define I_SLUIS        {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !SAN LUIS RESERVOIR
+define I_BANOS        {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !LOS BANOS RESERVOIR
+
+! Other Tributary Inflows (alphabetically)
+define I_ORT014       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !ORESTIMBA CREEK
+define I_GRZ012       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !GARZAS CREEK
+define I_DPC008       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !DEL PUERTO CREEK
+define I_SLO007       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !SALIDO CREEK
+define I_CHC000       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !CORRAL HOLLOW AMD MINOR CREEKS
+define I_CAP000       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !CAPITA CANYON
+define I_LPC007       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !LITTLE PANOCHE CREEK
+define I_ORG000       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !ORTIGALITA CREEK
+define I_QNT005       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !QUINTO CREEK
+define I_ING008       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !HOSPITAL AND INGRAM CREEKS    
+define I_CHW031       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !LOCAL INFLOW TO CHOWCHILLA AT CHW031
+define I_TUO054       {timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !LOCAL INFLOW TO TUOLUMNE AT TUO054  
+
+define I_MDOTA_WTS    {std kind 'FLOW-INFLOW' units 'CFS'} !Water Transfer from Mendota Pool
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! SURFACE RUNOFF FROM WBAs  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define SR_71          {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+define SR_72          {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+define SR_73          {timeseries kind 'SURFACE-RUNOFF' units 'TAF' convert 'CFS'}
+
+define SR_71_MSN004 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_OMR039 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_SJR117 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_SJR106 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_SJR091 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_SJR075 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_71_SJR070 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+                
+define SR_72_MSN004 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_72_SAL006 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_72_SJR117 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_72_SJR106 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_72_SJR091 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_72_SLD027 {std kind 'SURFACE-RUNOFF' units 'CFS'}
+
+define SR_73_MSN004 {std kind 'SURFACE-RUNOFF' units 'CFS'}            
+define SR_73_SLD027 {std kind 'SURFACE-RUNOFF' units 'CFS'}
+
+define CT_MudSlough_SV  {timeseries kind 'CLOSURE-TERM' units 'TAF' convert 'cfs'}
+define CT_SaltSlough_SV {timeseries kind 'CLOSURE-TERM' units 'TAF' convert 'cfs'}
+
+define CT_MudSlough      {lower unbounded upper unbounded kind 'CLOSURE-TERM' units 'CFS'}  
+define CT_SaltSlough     {lower unbounded upper unbounded kind 'CLOSURE-TERM' units 'CFS'}  
+
+goal setNegativeCT_MudSlough {
+    lhs CT_MudSlough
+    case negative {
+        condition CT_MudSlough_SV < 0
+            rhs CT_MudSlough_SV
+                lhs>rhs penalty 88888
+                lhs<rhs constrain
+    }
+}
+goal setNonpositiveCT_MudSlough {
+    lhs CT_MudSlough
+    case negative {
+        condition CT_MudSlough_SV < 0
+            rhs 0
+                lhs>rhs constrain
+                lhs<rhs  penalty 0
+    }
+}
+goal setPostiveCT_MudSlough {
+    lhs CT_MudSlough
+    case postive {
+        condition CT_MudSlough_SV >= 0
+            rhs CT_MudSlough_SV
+    }
+}
+
+goal setNegativeCT_SaltSlough {
+    lhs CT_SaltSlough
+    case negative {
+        condition CT_SaltSlough_SV < 0
+            rhs CT_SaltSlough_SV
+                lhs>rhs penalty 5
+                lhs<rhs constrain
+    }
+}
+goal setNonpositiveCT_SaltSlough {
+    lhs CT_SaltSlough
+    case negative {
+        condition CT_SaltSlough_SV < 0
+            rhs 0
+                lhs>rhs constrain
+                lhs<rhs  penalty 0
+    }
+}
+goal setPostiveCT_SaltSlough {
+    lhs CT_SaltSlough
+    case postive {
+        condition CT_SaltSlough_SV >= 0
+            rhs CT_SaltSlough_SV
+    }
+}

@@ -1,0 +1,16 @@
+! FWS_SMELT_BO_FallX2check.wresl
+!
+! If Reservoir Releases did not make X2 requirement then cut exports to make up difference
+! To limit Fall X2 to September and October to export reductions only, set SEP and OCT flowcap terms to zero
+define FWS_MaxExp_X2 {
+     case Sep_FWS_W {
+          condition      month == SEP .and. wyt_SAC <= 2  ! FWS BO (Dec 08) Action 4 - Fall X2
+          value          max(C_DMC000[UPSTREAM] + C_CAA003[UPSTREAM] + NDOI_ADD[UPSTREAM] + NDOI_MIN[UPSTREAM] - MRDO_X2nocapdv[UPSTREAM],0.) }
+     case Oct_FWS_W {
+          condition      month <= OCT .and. wyt_SAC <= 2  ! FWS BO (Dec 08) Action 4 - Fall X2
+          value          max(C_DMC000[UPSTREAM] + C_CAA003[UPSTREAM] + NDOI_ADD[UPSTREAM] + NDOI_MIN[UPSTREAM] - MRDO_X2nocapdv[UPSTREAM],0.) }
+     case NoExpCut {
+          condition      always
+          value          99999.    }
+}
+define FWS_MaxExpX2dv {alias FWS_MaxExp_X2 kind 'Export-Limit' units 'cfs'} !for output only

@@ -1,0 +1,256 @@
+!Limit diversion of Delta surplus.
+
+/*define Delta_Surplus {timeseries kind 'temporary' units 'cfs'} !NEED TO VERIFY DEFINITION OF DELTA SURPLUS UNDER LV WATER RIGHT
+
+goal lim_DeltaSurplus {D408_DS < Delta_Surplus}
+*/
+goal surplus_to_storage {D408_DS < C422_FILL_CC}
+
+
+!*************************
+!Apply seasonal limit to diversions of Delta surplus under the LV water right.  Limited to 95.85 TAF from November to June.
+!*************************
+define ann_DS_div_ {std kind 'annual-diversion' units 'taf'}
+
+define ann_DS_div {
+	case Nov {
+		condition	month == nov
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		ann_DS_div_(-1) + D408_DS(-1)*cfs_taf(-1)
+	}
+}
+
+!Save new DS diversion total
+goal save_ann_DS_div {ann_DS_div_ = ann_DS_div}
+
+!Apply seasonal limit.
+define lim_DS_season {
+	case JulyToOct {
+		condition	range(month,jul,oct)
+		value		0.
+	}
+	case NovToJune {
+		condition	always
+		value		max(0., (95.85 - ann_DS_div)*taf_cfs)
+	}
+}
+
+goal set_lim_DS_season {D408_DS < lim_DS_season}
+
+!Limit 3f water.
+
+goal lim_3f_to_SA {D408_3f + D408_ECC < D420}
+
+!******************
+!Limit Mokelumne intake to 3.2 TAF/year according to CCWD/EBMUD settlement.  Assume accounting is done on CVP contract year basis.  The 3.2 TAF/year limit
+!can be reset in UserInput.wresl.  The variable name is ann_MOK_div_max.
+!******************
+
+define ann_MOK_div_ {std kind 'annual-diversion' units 'taf'}
+define ann_MOK_div_max_ {alias ann_MOK_div_max kind 'maximum-annual-div' units 'taf'}
+
+define ann_MOK_div {
+	case Jan {
+		condition	month == mar
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		ann_MOK_div_(-1) + I424(-1)*cfs_taf(-1)
+	}
+}
+
+!Save new MOK diversion total
+goal save_ann_MOK_div {ann_MOK_div_ = ann_MOK_div}
+
+!Don't allow Freeport filling in March or April if LV storage is above 140 TAF, and don't allow in May if LV storage is above 150 TAF
+define MI_filling_threshold {
+	case April {
+		condition	range(month,mar,apr)
+		value		140.
+	}
+	case May {
+		condition	month == may
+		value		150.
+	}
+	case otherwise {
+		condition	always
+		value		9999.
+	}
+}
+
+!Apply seasonal limit.
+define lim_MOK_ann {value max(0., min(MI_filling_threshold-S422_CC(-1), ann_MOK_div_max - ann_MOK_div)*taf_cfs)}
+
+goal set_lim_MOK_ann {I424 < lim_MOK_ann}
+
+define lim_MOK_ann_ {alias lim_MOK_ann kind 'annual-div-limit' units 'cfs'}
+
+!********************
+!Limit annual diversion of CVP contract water by annual allocation.  Annual entitlement is 195 TAF.  Freeport diversions are CVP contract water also.
+!********************
+
+!Input NOD M&I allocation from CalSim
+!define perdv_cvpmi_sys {timeseries kind 'percent-delivery' units 'none'}
+
+!Calculate annual allocation.
+define ann_CVP_alloc {value perdel_cvpmi_sys*195.}  ! as of 2010
+!define ann_CVP_alloc {value perdel_cvpmi_sys*140.}
+
+!Track annual diversions of CVP water.
+define ann_CVP_div_ {std kind 'annual-diversion' units 'taf'}
+
+define ann_CVP_div {
+	case March {
+		condition	month == Mar
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		ann_CVP_div_(-1) + D408_CVP(-1)*cfs_taf(-1) + I424(-1)*cfs_taf(-1)
+	}
+}
+
+!Save new CVP diversion total
+goal save_ann_CVP_div {ann_CVP_div_ = ann_CVP_div}
+
+!Apply annual limit
+
+define lim_CVP_ann {value max(0., (ann_CVP_alloc - ann_CVP_div)*taf_cfs)}
+goal set_lim_CVP_ann {D408_CVP + I424 < lim_CVP_ann}
+
+define lim_CVP_ann_ {alias lim_CVP_ann kind 'allocation-limit' units 'cfs'}
+
+!*****************
+!Limit ECCID transfers according to schedule in ECCID_Transfer.table
+!*****************
+
+!Retrieve normal and dry year values from the ECCID_Transfer.table
+define ECCtrans_nrm_af {select Normal from ECCID_Transfer where month=month}  !units acre feet
+define ECCtrans_dry_af {select Dry from ECCID_Transfer where month=month}  !units acre feet
+
+!Convert to TAF and save.  Also, if not a dry year (CVP allocation = 100%), set ECCtrans_dry = 0.
+define ECCtrans_nrm {value ECCtrans_nrm_af/1000.}	!units TAF
+define ECCtrans_dry {					!units TAF
+	case Normal {
+		condition	perdel_cvpmi_sys > 0.99
+		value		0.
+	}
+	case Dry {
+		condition	always
+		value		ECCtrans_dry_af/1000.
+	}
+}
+
+define ECCtrans_nrm_ {alias ECCtrans_nrm kind 'scheduled-transfer' units 'taf'}
+define ECCtrans_dry_ {alias ECCtrans_dry kind 'scheduled-transfer' units 'taf'}
+
+!Only make up Normal shortage of month before, do not carryover shortages to subsequent months.  Do not make up shortages
+!of dry year transfers due to grounwater pumping limitations.
+goal lim_ECCID_trans {D408_ECC < (ECCtrans_nrm + ECCtrans_dry)*taf_cfs}
+
+!ECCID transfers and 3f diversions should not be stored in LV.
+goal ECC_to_delivery {D408_OR_ECC + D408_OR_3f + D408_VC_3f < C423_DEL}
+
+
+!*******************
+!In April, use LV storage above emergency pool to meet deliveries first.  Only divert the balance
+!necessary to meet April demand.  This constraint now allows the user to select a different or more months with minimal diversions
+!using the table CCWD_MinimizeDiv.table to set variable MinDiv_switch as coded in UserInput.wresl.
+!*******************
+
+define lim_min_div {
+	case LimDiv {
+		condition	MinDiv_switch == 1
+		value		max(0., demand_D420 - S422_CC_maxWQrel)
+	}
+	case otherwise {
+		condition	always
+		value		9999.
+	}
+}
+
+goal set_lim_min_div {D408_RS + D408_OR + D408_VC + I424 < lim_min_div}
+
+!*******************
+!Forecast priority third party transfers when CVP allocations insufficient to meet CCWD demand.
+!*******************
+
+!Assume 3f will likely be available in January and February
+define CCWD_Jandem_pattern {			!units none
+    select CCWD_base_demand
+    from   CCWD_demand_pattern
+    where  wyear_type = wyt_SAC_LV, month = jan
+}
+define CCWD_febdem_pattern {			!units none
+    select CCWD_base_demand
+    from   CCWD_demand_pattern
+    where  wyear_type = wyt_SAC_LV, month = feb
+}
+
+!Calculate contract year CCWD service area deliveries.
+define ann_CCWD_del_ {std kind 'annual-sum' units 'taf'}
+define ann_CCWD_del {
+	case March {
+		condition	month == mar
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		ann_CCWD_del_(-1) + D420(-1)*cfs_taf(-1)
+	}
+}
+goal save_ann_CCWD_del {ann_CCWD_del_ = ann_CCWD_del}
+
+!Calculate remaining CCWD demand
+define CCWD_rem_demand {value max(0., CCWD_ann_basedem - ann_CCWD_del)}
+
+!Forecast third party transfer demand.
+define dem_TX_fcst {
+	case MarToJun {
+		condition	range(month,mar,jun)
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		max(0., CCWD_rem_demand - CCWD_ann_basedem *(ccwd_jandem_pattern + ccwd_febdem_pattern) - max(0., ann_CVP_alloc - ann_CVP_div) - max(0., S422(-1) - S422_CC_level1))
+	}
+}
+
+define dem_TX_fcst_ {alias dem_TX_fcst kind 'demand-forecast' units 'taf'}
+
+!Limit priority third party transfers
+goal lim_D408_TX_H {D408_TX_H < dem_TX_fcst*taf_cfs}
+!Prioritize 3f over CVP diversion when allocation is insufficient to meet expected demand.
+define D408_3f_H {std kind 'flow-delivery' units 'cfs'}
+define D408_3f_L {std kind 'flow-delivery' units 'cfs'}
+goal split_D408_3f {D408_3f = D408_3f_H + D408_3f_L}
+goal turn_D408_3f_L_off {D408_3f_L < 0}   !Only handle CCWD shortage situations with third party transfers.
+
+goal lim_D408_3f_H {
+	lhs D408_3f_H
+	case NoRemCVPAlloc {
+		condition	(range(month,oct,feb) .and. CCWD_rem_demand > ann_CVP_alloc - ann_CVP_div) .or. perdel_cvpmi_sys <= 0.8
+		rhs			9999.
+		lhs<rhs		penalty 0
+	}
+	case HighAllocation {
+		condition	always
+		rhs			0.
+		lhs<rhs		penalty 0
+	}
+}
+
+!Limit 3f diversions from October through February if remaining CVP allocation is enough to meet
+
+goal lim_3f_by_rem_CVP_alloc {
+	lhs	D408_3f
+	case Enough_Alloc_Remaining {
+		condition	range(month,oct,feb) .and. CCWD_rem_demand < ann_CVP_alloc - ann_CVP_div
+		rhs			0.
+		lhs<rhs		penalty 0
+	}
+}

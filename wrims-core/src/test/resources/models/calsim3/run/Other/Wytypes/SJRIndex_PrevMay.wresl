@@ -1,0 +1,119 @@
+!SJRIndex_PrevMay.wresl
+
+define I_ST_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_ST(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define I_ST_PrevOctMar_dv{alias I_ST_PrevOctMar kind 'index' units 'taf'}
+
+define I_ST_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_ST(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define I_ST_PrevAprJul_dv{alias I_ST_PrevAprJul kind 'index' units 'taf'}
+
+
+define I_SJ_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_SJ(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define I_SJ_PrevOctMar_dv{alias I_SJ_PrevOctMar kind 'index' units 'taf'}
+
+define I_SJ_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_SJ(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define I_SJ_PrevAprJul_dv{alias I_SJ_PrevAprJul kind 'index' units 'taf'}
+
+
+define I_ME_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_ME(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define I_ME_PrevOctMar_dv{alias I_ME_PrevOctMar kind 'index' units 'taf'}
+
+define I_ME_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_ME(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define I_ME_PrevAprJul_dv{alias I_ME_PrevAprJul kind 'index' units 'taf'}
+
+
+define I_TU_PrevOctMar{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Oct-month-12, mar-month-12, 1) UNIMP_TU(i))
+	}
+	case JunDec{
+		condition always
+		value 0.0
+	}
+}
+define I_TU_PrevOctMar_dv{alias I_TU_PrevOctMar kind 'index' units 'taf'}
+
+define I_TU_PrevAprJul{
+	case JanMay{
+		condition month>=Jan .and. month<=may
+		value (sum(i=Apr-month-12, Jul-month-12, 1) UNIMP_TU(i))
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+} 
+define I_TU_PrevAprJul_dv{alias I_TU_PrevAprJul kind 'index' units 'taf'}
+
+define SJRIndexPrev2{value SJRIndexPrev_dv(prevMay)}
+
+define SJRIndexPrev{
+    case OCTtoJAN {
+         condition  month >= OCT .and. month <= JAN 
+         value SJRIndexPrev_dv(prevMay)
+         }
+    case JuntoSep {
+         condition  month >= Jun .and. month <= Sep 
+         value SJRIndexPrev_dv(prevMay)
+         }
+    case rest {
+         condition  always
+	 value 0.6*(i_ST_PrevAprJul+i_SJ_PrevAprJul+i_ME_PrevAprJul+i_TU_PrevAprJul)+0.2*(i_ST_PrevOctMar+i_SJ_PrevOctMar+i_ME_PrevOctMar+i_TU_PrevOctMar)+0.2*min(4500, SJRIndexPrev2)
+		 }
+		 
+}
+define SJRIndexPrev_dv{alias SJRIndexPrev kind 'index' units 'taf'}

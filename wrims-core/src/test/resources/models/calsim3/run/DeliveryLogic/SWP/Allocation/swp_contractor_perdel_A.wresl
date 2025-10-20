@@ -1,0 +1,553 @@
+/*R.Wilbur 01-24-05
+
+This file calculates the percent delivery for each SWP contractor...
+
+____________________________________________________________________________________________
+
+Contractor ID's:
+ IDC  Type Contractor
+  1   MI   ALAMEDA COUNTY FC&WCD-ZONE 7
+  2   MI   ALAMEDA COUNTY WD
+  3   MI   ANTELOPE VALLEY-EAST KERN WA
+  4   MI   SANTA CLARITA WA - AG
+  5   MI   CITY OF YUBA CITY
+  6   MI   COACHELLA VALLEY WD
+  7   MI   COUNTY OF BUTTE
+  8   AG   COUNTY OF KINGS
+  9   MI   CRESTLINE-LAKE ARROWHEAD WA
+  10  MI   DESERT WA
+  11  AG   DUDLEY RIDGE WD
+  12  AG   EMPIRE WEST SIDE ID
+  13  AG   KERN COUNTY WA - AG
+  14  MI   LITTLEROCK CREEK ID
+  15  MI   METROPOLITAN WDSC
+  16  MI   MOJAVE WA
+  17  MI   NAPA COUNTY FC&WCD
+  18  AG   OAK FLAT WD
+  19  MI   PALMDALE WD
+  20  MI   SAN BERNARDINO VALLEY MWD
+  21  MI   SAN GABRIEL VALLEY MWD
+  22  MI   SAN GORGONIO PASS WA
+  23  MI   SAN LUIS OBISPO COUNTY FC&WCD
+  24  MI   SANTA BARBARA COUNTY FC&WCD
+  25  MI   SANTA CLARA VALLEY WD
+  26  MI   SOLANO COUNTY WA
+  27  AG   TULARE LAKE BASIN WSD
+  28  MI   VENTURA COUNTY WPD
+  29  MI   KERN COUNTY WA - MI
+  30  MI   SANTA CLARITA WA - MI
+____________________________________________________________________________________________
+
+Demand & contractor ID's:
+
+ IDD    DemArc  IDC Type Contractor
+  1     D_SBA009_ACFC    1    MI   ALAMEDA COUNTY FC&WCD-ZONE 7
+  2     D_SBA020_ACFC    1    MI   ALAMEDA COUNTY FC&WCD-ZONE 7
+  3     D_SBA029_ACWD    2    MI   ALAMEDA COUNTY WD
+  4     D_ESB324_AVEK    3    MI   ANTELOPE VALLEY-EAST KERN WA
+  5     D_CSB009_CLRTA1_DDWD    4    AG   SANTA CLARITA WA
+  6     D_WSB032_CLRTA2    30   MI   SANTA CLARITA WA
+  7     D204    5    MI   CITY OF YUBA CITY
+  8     D_ESB407_CCHLA    6    MI   COACHELLA VALLEY WD
+  9     D201    7    MI   COUNTY OF BUTTE
+  10    D_CAA181_KINGS    8    AG   COUNTY OF KINGS
+  11    D_SVRWD_CSTLN     9    MI   CRESTLINE-LAKE ARROWHEAD WA
+  12    D_ESB408_DESRT    10   MI   DESERT WA
+  13    D_CAA184_DUDLEY    11   AG   DUDLEY RIDGE WD
+  14    D_CAA173_EMPIRE    12   AG   EMPIRE WEST SIDE ID
+  15    D_CAA194_KERNA   29   MI   KERN COUNTY WA
+  16    D_CAA194_KERN    13   AG   KERN COUNTY WA
+  17    D_CAA242_Kern    13   AG   KERN COUNTY WA
+  18    D_CAA279_Kern    13   AG   KERN COUNTY WA
+  19    D_CSB015_KERN_BMWD    13   AG   KERN COUNTY WA
+  20    D_ESB355_LROCK    14   MI   LITTLEROCK CREEK ID
+  21    D_PRRIS_MWDSC     15   MWD  METROPOLITAN WDSC
+  22    D_CAA194_KERNB   15   MWD  METROPOLITAN WDSC
+  23    D_ESB413_MWDSC    15   MWD  METROPOLITAN WDSC
+  24    D_WSB031_MWDSC    15   MWD  METROPOLITAN WDSC
+  25    D_ESB433_MWDSC    15   MWD  METROPOLITAN WDSC
+  26    D_ESB403_MOJVE    16   MI   MOJAVE WA
+  27    D_BKR004_NBA009_NAPA  17   AG   NAPA COUNTY FC&WCD
+  28    D802A   18   MI   OAK FLAT WD
+  29    D_ESB347_PLMDL    19   MI   PALMDALE WD
+  30    D_ESB414_BRDNO    20   MI   SAN BERNARDINO VALLEY MWD
+  31    D_ESB415_GABRL    21   MI   SAN GABRIEL VALLEY MWD
+  32    D_ESB420_GRGNO    22   MI   SAN GORGONIO PASS WA
+  33    D_CSB038_OBISPO    23   MI   SAN LUIS OBISPO COUNTY FC&WCD
+  34    D_CSB103_BRBRA    24   MI   SANTA BARBARA COUNTY FC&WCD
+  35    D_SBA036_SCVWD    25   MI   SANTA CLARA VALLEY WD
+  36    D_BKR004_NBA009_SCWA  26   MI   SOLANO COUNTY WA
+  37    D_CAA183_TULARE    27   AG   TULARE LAKE BASIN WSD
+  38    D_PYRMD_VNTRA     28   MI   VENTURA COUNTY WPD
+  39    D_CSTIC_VNTRA     28   MI   VENTURA COUNTY WPD
+
+____________________________________________________________________________________________
+*/
+
+! define values based on Table A entitlements
+define tableA_ag   {select Ag_entitlement  from TableA where Factor=1}
+define tableA_mwd  {select MWD_entitlement from TableA where Factor=1}
+define tableA_oth  {select OTH_entitlement from TableA where Factor=1}
+!define tableA_int  {select INT_entitlement from TableA where Factor=1}
+
+! get the annual requests -- these have been assembled into a lookup table - essentially 'tryswp.dat'
+define req_tot_swp {select Total from AnnualReqDel_swp where year=calendaryear}
+define req_ag_swp  {select AG    from AnnualReqDel_swp where year=calendaryear}
+define req_mwd_swp {select MWD   from AnnualReqDel_swp where year=calendaryear}
+define req_oth_swp {select OTH   from AnnualReqDel_swp where year=calendaryear}
+
+define perdel_ag   {value req_ag_swp/tableA_ag}
+define perdel_mwd  {value req_mwd_swp/tableA_mwd}
+define perdel_oth  {value req_oth_swp/tableA_oth}
+
+!____________________________________________________________________________________________
+
+!normal Table A contract amounts (per contractor):
+define tableA_1  {select TableA from swp_table_A where contractor=1 }  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define tableA_2  {select TableA from swp_table_A where contractor=2 }  !ALAMEDA COUNTY WD
+define tableA_3  {select TableA from swp_table_A where contractor=3 }  !ANTELOPE VALLEY-EAST KERN WA
+define tableA_4  {select TableA from swp_table_A where contractor=4 }  !SANTA CLARITA WA - AG
+define tableA_5  {select TableA from swp_table_A where contractor=5 }  !CITY OF YUBA CITY
+define tableA_6  {select TableA from swp_table_A where contractor=6 }  !COACHELLA VALLEY WD
+define tableA_7  {select TableA from swp_table_A where contractor=7 }  !COUNTY OF BUTTE
+define tableA_8  {select TableA from swp_table_A where contractor=8 }  !COUNTY OF KINGS
+define tableA_9  {select TableA from swp_table_A where contractor=9 }  !CRESTLINE-LAKE ARROWHEAD WA
+define tableA_10 {select TableA from swp_table_A where contractor=10}  !DESERT WA
+define tableA_11 {select TableA from swp_table_A where contractor=11}  !DUDLEY RIDGE WD
+define tableA_12 {select TableA from swp_table_A where contractor=12}  !EMPIRE WEST SIDE ID
+define tableA_13 {select TableA from swp_table_A where contractor=13}  !KERN COUNTY WA - AG
+define tableA_14 {select TableA from swp_table_A where contractor=14}  !LITTLEROCK CREEK ID
+define tableA_15 {select TableA from swp_table_A where contractor=15}  !METROPOLITAN WDSC
+define tableA_16 {select TableA from swp_table_A where contractor=16}  !MOJAVE WA
+define tableA_17 {select TableA from swp_table_A where contractor=17}  !NAPA COUNTY FC&WCD
+define tableA_18 {select TableA from swp_table_A where contractor=18}  !OAK FLAT WD
+define tableA_19 {select TableA from swp_table_A where contractor=19}  !PALMDALE WD
+define tableA_20 {select TableA from swp_table_A where contractor=20}  !SAN BERNARDINO VALLEY MWD
+define tableA_21 {select TableA from swp_table_A where contractor=21}  !SAN GABRIEL VALLEY MWD
+define tableA_22 {select TableA from swp_table_A where contractor=22}  !SAN GORGONIO PASS WA
+define tableA_23 {select TableA from swp_table_A where contractor=23}  !SAN LUIS OBISPO COUNTY FC&WCD
+define tableA_24 {select TableA from swp_table_A where contractor=24}  !SANTA BARBARA COUNTY FC&WCD
+define tableA_25 {select TableA from swp_table_A where contractor=25}  !SANTA CLARA VALLEY WD
+define tableA_26 {select TableA from swp_table_A where contractor=26}  !SOLANO COUNTY WA
+define tableA_27 {select TableA from swp_table_A where contractor=27}  !TULARE LAKE BASIN WSD
+define tableA_28 {select TableA from swp_table_A where contractor=28}  !VENTURA COUNTY WPD
+define tableA_29 {select TableA from swp_table_A where contractor=29}  !KERN COUNTY WA - MI
+define tableA_30 {select TableA from swp_table_A where contractor=30}  !SANTA CLARITA WA - AG
+
+define tableAdv_1  {alias tableA_1  kind 'swp-output' units 'taf'}  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define tableAdv_2  {alias tableA_2  kind 'swp-output' units 'taf'}  !ALAMEDA COUNTY WD
+define tableAdv_3  {alias tableA_3  kind 'swp-output' units 'taf'}  !ANTELOPE VALLEY-EAST KERN WA
+define tableAdv_4  {alias tableA_4  kind 'swp-output' units 'taf'}  !SANTA CLARITA WA
+define tableAdv_5  {alias tableA_5  kind 'swp-output' units 'taf'}  !CITY OF YUBA CITY
+define tableAdv_6  {alias tableA_6  kind 'swp-output' units 'taf'}  !COACHELLA VALLEY WD
+define tableAdv_7  {alias tableA_7  kind 'swp-output' units 'taf'}  !COUNTY OF BUTTE
+define tableAdv_8  {alias tableA_8  kind 'swp-output' units 'taf'}  !COUNTY OF KINGS
+define tableAdv_9  {alias tableA_9  kind 'swp-output' units 'taf'}  !CRESTLINE-LAKE ARROWHEAD WA
+define tableAdv_10 {alias tableA_10 kind 'swp-output' units 'taf'}  !DESERT WA
+define tableAdv_11 {alias tableA_11 kind 'swp-output' units 'taf'}  !DUDLEY RIDGE WD
+define tableAdv_12 {alias tableA_12 kind 'swp-output' units 'taf'}  !EMPIRE WEST SIDE ID
+define tableAdv_13 {alias tableA_13 kind 'swp-output' units 'taf'}  !KERN COUNTY WA
+define tableAdv_14 {alias tableA_14 kind 'swp-output' units 'taf'}  !LITTLEROCK CREEK ID
+define tableAdv_15 {alias tableA_15 kind 'swp-output' units 'taf'}  !METROPOLITAN WDSC
+define tableAdv_16 {alias tableA_16 kind 'swp-output' units 'taf'}  !MOJAVE WA
+define tableAdv_17 {alias tableA_17 kind 'swp-output' units 'taf'}  !NAPA COUNTY FC&WCD
+define tableAdv_18 {alias tableA_18 kind 'swp-output' units 'taf'}  !OAK FLAT WD
+define tableAdv_19 {alias tableA_19 kind 'swp-output' units 'taf'}  !PALMDALE WD
+define tableAdv_20 {alias tableA_20 kind 'swp-output' units 'taf'}  !SAN BERNARDINO VALLEY MWD
+define tableAdv_21 {alias tableA_21 kind 'swp-output' units 'taf'}  !SAN GABRIEL VALLEY MWD
+define tableAdv_22 {alias tableA_22 kind 'swp-output' units 'taf'}  !SAN GORGONIO PASS WA
+define tableAdv_23 {alias tableA_23 kind 'swp-output' units 'taf'}  !SAN LUIS OBISPO COUNTY FC&WCD
+define tableAdv_24 {alias tableA_24 kind 'swp-output' units 'taf'}  !SANTA BARBARA COUNTY FC&WCD
+define tableAdv_25 {alias tableA_25 kind 'swp-output' units 'taf'}  !SANTA CLARA VALLEY WD
+define tableAdv_26 {alias tableA_26 kind 'swp-output' units 'taf'}  !SOLANO COUNTY WA
+define tableAdv_27 {alias tableA_27 kind 'swp-output' units 'taf'}  !TULARE LAKE BASIN WSD
+define tableAdv_28 {alias tableA_28 kind 'swp-output' units 'taf'}  !VENTURA COUNTY WPD
+define tableAdv_29 {alias tableA_29 kind 'swp-output' units 'taf'}  !KERN COUNTY WA - MI
+define tableAdv_30 {alias tableA_30 kind 'swp-output' units 'taf'}  !SANTA CLARITA WA - MI
+
+!____________________________________________________________________________________________
+
+!allocation amount (per contractor):
+define allocate_1  {value swp_perdel_SOD * tableA_1 }!perdel_swp_oth1 * tableA_1 }  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define allocate_2  {value swp_perdel_SOD * tableA_2 }!perdel_swp_oth1 * tableA_2 }  !ALAMEDA COUNTY WD
+define allocate_3  {value swp_perdel_SOD * tableA_3 }!perdel_swp_oth1 * tableA_3 }  !ANTELOPE VALLEY-EAST KERN WA
+define allocate_4  {value swp_perdel_SOD * tableA_4 }!perdel_swp_ag1  * tableA_4 }  !SANTA CLARITA WA
+define allocate_5  {value swp_perdel_yuba * tableA_5 }!perdel_swp_oth1 * tableA_5 }  !CITY OF YUBA CITY
+define allocate_6  {value swp_perdel_SOD * tableA_6 }!perdel_swp_oth1 * tableA_6 }  !COACHELLA VALLEY WD
+define allocate_7  {value swp_perdel_butt * tableA_7 }!perdel_swp_oth1 * tableA_7 }  !COUNTY OF BUTTE
+define allocate_8  {value swp_perdel_SOD * tableA_8 }!perdel_swp_ag1  * tableA_8 }  !COUNTY OF KINGS
+define allocate_9  {value swp_perdel_SOD * tableA_9 }!perdel_swp_oth1 * tableA_9 }  !CRESTLINE-LAKE ARROWHEAD WA
+define allocate_10 {value swp_perdel_SOD * tableA_10}!perdel_swp_oth1 * tableA_10}  !DESERT WA
+define allocate_11 {value swp_perdel_SOD * tableA_11}!perdel_swp_ag1  * tableA_11}  !DUDLEY RIDGE WD
+define allocate_12 {value swp_perdel_SOD * tableA_12}!perdel_swp_ag1  * tableA_12}  !EMPIRE WEST SIDE ID
+define allocate_13 {value swp_perdel_SOD * tableA_13}!perdel_swp_ag1  * tableA_13}  !KERN COUNTY WA
+define allocate_14 {value swp_perdel_SOD * tableA_14}!perdel_swp_oth1 * tableA_14}  !LITTLEROCK CREEK ID
+define allocate_15 {value swp_perdel_SOD * tableA_15}!perdel_swp_mwd1 * tableA_15}  !METROPOLITAN WDSC
+define allocate_16 {value swp_perdel_SOD * tableA_16}!perdel_swp_oth1 * tableA_16}  !MOJAVE WA
+define allocate_17 {value swp_perdel_napa * tableA_17}!perdel_swp_ag1  * tableA_17}  !NAPA COUNTY FC&WCD
+define allocate_18 {value swp_perdel_SOD * tableA_18}!perdel_swp_oth1 * tableA_18}  !OAK FLAT WD
+define allocate_19 {value swp_perdel_SOD * tableA_19}!perdel_swp_oth1 * tableA_19}  !PALMDALE WD
+define allocate_20 {value swp_perdel_SOD * tableA_20}!perdel_swp_oth1 * tableA_20}  !SAN BERNARDINO VALLEY MWD
+define allocate_21 {value swp_perdel_SOD * tableA_21}!perdel_swp_oth1 * tableA_21}  !SAN GABRIEL VALLEY MWD
+define allocate_22 {value swp_perdel_SOD * tableA_22}!perdel_swp_oth1 * tableA_22}  !SAN GORGONIO PASS WA
+define allocate_23 {value swp_perdel_SOD * tableA_23}!perdel_swp_oth1 * tableA_23}  !SAN LUIS OBISPO COUNTY FC&WCD
+define allocate_24 {value swp_perdel_SOD * tableA_24}!perdel_swp_oth1 * tableA_24}  !SANTA BARBARA COUNTY FC&WCD
+define allocate_25 {value swp_perdel_SOD * tableA_25}!perdel_swp_oth1 * tableA_25}  !SANTA CLARA VALLEY WD
+define allocate_26 {value swp_perdel_solano * tableA_26}!perdel_swp_oth1 * tableA_26}  !SOLANO COUNTY WA
+define allocate_27 {value swp_perdel_SOD * tableA_27}!perdel_swp_ag1  * tableA_27}  !TULARE LAKE BASIN WSD
+define allocate_28 {value swp_perdel_SOD * tableA_28}!perdel_swp_oth1 * tableA_28}  !VENTURA COUNTY WPD
+define allocate_29 {value swp_perdel_SOD * tableA_29}!perdel_swp_oth1 * tableA_29}  !KERN COUNTY WA - MI
+define allocate_30 {value swp_perdel_SOD * tableA_30}!perdel_swp_oth1 * tableA_30}  !SANTA CLARITA WA - MI
+
+define allocatedv_1  {alias allocate_1  kind 'swp-output' units 'taf'}  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define allocatedv_2  {alias allocate_2  kind 'swp-output' units 'taf'}  !ALAMEDA COUNTY WD
+define allocatedv_3  {alias allocate_3  kind 'swp-output' units 'taf'}  !ANTELOPE VALLEY-EAST KERN WA
+define allocatedv_4  {alias allocate_4  kind 'swp-output' units 'taf'}  !SANTA CLARITA WA
+define allocatedv_5  {alias allocate_5  kind 'swp-output' units 'taf'}  !CITY OF YUBA CITY
+define allocatedv_6  {alias allocate_6  kind 'swp-output' units 'taf'}  !COACHELLA VALLEY WD
+define allocatedv_7  {alias allocate_7  kind 'swp-output' units 'taf'}  !COUNTY OF BUTTE
+define allocatedv_8  {alias allocate_8  kind 'swp-output' units 'taf'}  !COUNTY OF KINGS
+define allocatedv_9  {alias allocate_9  kind 'swp-output' units 'taf'}  !CRESTLINE-LAKE ARROWHEAD WA
+define allocatedv_10 {alias allocate_10 kind 'swp-output' units 'taf'}  !DESERT WA
+define allocatedv_11 {alias allocate_11 kind 'swp-output' units 'taf'}  !DUDLEY RIDGE WD
+define allocatedv_12 {alias allocate_12 kind 'swp-output' units 'taf'}  !EMPIRE WEST SIDE ID
+define allocatedv_13 {alias allocate_13 kind 'swp-output' units 'taf'}  !KERN COUNTY WA
+define allocatedv_14 {alias allocate_14 kind 'swp-output' units 'taf'}  !LITTLEROCK CREEK ID
+define allocatedv_15 {alias allocate_15 kind 'swp-output' units 'taf'}  !METROPOLITAN WDSC
+define allocatedv_16 {alias allocate_16 kind 'swp-output' units 'taf'}  !MOJAVE WA
+define allocatedv_17 {alias allocate_17 kind 'swp-output' units 'taf'}  !NAPA COUNTY FC&WCD
+define allocatedv_18 {alias allocate_18 kind 'swp-output' units 'taf'}  !OAK FLAT WD
+define allocatedv_19 {alias allocate_19 kind 'swp-output' units 'taf'}  !PALMDALE WD
+define allocatedv_20 {alias allocate_20 kind 'swp-output' units 'taf'}  !SAN BERNARDINO VALLEY MWD
+define allocatedv_21 {alias allocate_21 kind 'swp-output' units 'taf'}  !SAN GABRIEL VALLEY MWD
+define allocatedv_22 {alias allocate_22 kind 'swp-output' units 'taf'}  !SAN GORGONIO PASS WA
+define allocatedv_23 {alias allocate_23 kind 'swp-output' units 'taf'}  !SAN LUIS OBISPO COUNTY FC&WCD
+define allocatedv_24 {alias allocate_24 kind 'swp-output' units 'taf'}  !SANTA BARBARA COUNTY FC&WCD
+define allocatedv_25 {alias allocate_25 kind 'swp-output' units 'taf'}  !SANTA CLARA VALLEY WD
+define allocatedv_26 {alias allocate_26 kind 'swp-output' units 'taf'}  !SOLANO COUNTY WA
+define allocatedv_27 {alias allocate_27 kind 'swp-output' units 'taf'}  !TULARE LAKE BASIN WSD
+define allocatedv_28 {alias allocate_28 kind 'swp-output' units 'taf'}  !VENTURA COUNTY WPD
+define allocatedv_29 {alias allocate_29 kind 'swp-output' units 'taf'}  !KERN COUNTY WA - MI
+define allocatedv_30 {alias allocate_30 kind 'swp-output' units 'taf'}  !SANTA CLARITA WA - MI
+
+!percent allocated for deliveries (per contractor):
+define percent_1  {case zero {condition tableA_1 ==0 value 0.0} case normal {condition always value allocate_1 /tableA_1 }} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define percent_2  {case zero {condition tableA_2 ==0 value 0.0} case normal {condition always value allocate_2 /tableA_2 }} !ALAMEDA COUNTY WD
+define percent_3  {case zero {condition tableA_3 ==0 value 0.0} case normal {condition always value allocate_3 /tableA_3 }} !ANTELOPE VALLEY-EAST KERN WA
+define percent_4  {case zero {condition tableA_4 ==0 value 0.0} case normal {condition always value allocate_4 /tableA_4 }} !SANTA CLARITA WA
+define percent_5  {case zero {condition tableA_5 ==0 value 0.0} case normal {condition always value allocate_5 /tableA_5 }} !CITY OF YUBA CITY
+define percent_6  {case zero {condition tableA_6 ==0 value 0.0} case normal {condition always value allocate_6 /tableA_6 }} !COACHELLA VALLEY WD
+define percent_7  {case zero {condition tableA_7 ==0 value 0.0} case normal {condition always value allocate_7 /tableA_7 }} !COUNTY OF BUTTE
+define percent_8  {case zero {condition tableA_8 ==0 value 0.0} case normal {condition always value allocate_8 /tableA_8 }} !COUNTY OF KINGS
+define percent_9  {case zero {condition tableA_9 ==0 value 0.0} case normal {condition always value allocate_9 /tableA_9 }} !CRESTLINE-LAKE ARROWHEAD WA
+define percent_10 {case zero {condition tableA_10==0 value 0.0} case normal {condition always value allocate_10/tableA_10}} !DESERT WA
+define percent_11 {case zero {condition tableA_11==0 value 0.0} case normal {condition always value allocate_11/tableA_11}} !DUDLEY RIDGE WD
+define percent_12 {case zero {condition tableA_12==0 value 0.0} case normal {condition always value allocate_12/tableA_12}} !EMPIRE WEST SIDE ID
+define percent_13 {case zero {condition tableA_13==0 value 0.0} case normal {condition always value allocate_13/tableA_13}} !KERN COUNTY WA
+define percent_14 {case zero {condition tableA_14==0 value 0.0} case normal {condition always value allocate_14/tableA_14}} !LITTLEROCK CREEK ID
+define percent_15 {case zero {condition tableA_15==0 value 0.0} case normal {condition always value allocate_15/tableA_15}} !METROPOLITAN WDSC
+define percent_16 {case zero {condition tableA_16==0 value 0.0} case normal {condition always value allocate_16/tableA_16}} !MOJAVE WA
+define percent_17 {case zero {condition tableA_17==0 value 0.0} case normal {condition always value allocate_17/tableA_17}} !NAPA COUNTY FC&WCD
+define percent_18 {case zero {condition tableA_18==0 value 0.0} case normal {condition always value allocate_18/tableA_18}} !OAK FLAT WD
+define percent_19 {case zero {condition tableA_19==0 value 0.0} case normal {condition always value allocate_19/tableA_19}} !PALMDALE WD
+define percent_20 {case zero {condition tableA_20==0 value 0.0} case normal {condition always value allocate_20/tableA_20}} !SAN BERNARDINO VALLEY MWD
+define percent_21 {case zero {condition tableA_21==0 value 0.0} case normal {condition always value allocate_21/tableA_21}} !SAN GABRIEL VALLEY MWD
+define percent_22 {case zero {condition tableA_22==0 value 0.0} case normal {condition always value allocate_22/tableA_22}} !SAN GORGONIO PASS WA
+define percent_23 {case zero {condition tableA_23==0 value 0.0} case normal {condition always value allocate_23/tableA_23}} !SAN LUIS OBISPO COUNTY FC&WCD
+define percent_24 {case zero {condition tableA_24==0 value 0.0} case normal {condition always value allocate_24/tableA_24}} !SANTA BARBARA COUNTY FC&WCD
+define percent_25 {case zero {condition tableA_25==0 value 0.0} case normal {condition always value allocate_25/tableA_25}} !SANTA CLARA VALLEY WD
+define percent_26 {case zero {condition tableA_26==0 value 0.0} case normal {condition always value allocate_26/tableA_26}} !SOLANO COUNTY WA
+define percent_27 {case zero {condition tableA_27==0 value 0.0} case normal {condition always value allocate_27/tableA_27}} !TULARE LAKE BASIN WSD
+define percent_28 {case zero {condition tableA_28==0 value 0.0} case normal {condition always value allocate_28/tableA_28}} !VENTURA COUNTY WPD
+define percent_29 {case zero {condition tableA_29==0 value 0.0} case normal {condition always value allocate_29/tableA_29}} !KERN COUNTY WA - MI
+define percent_30 {case zero {condition tableA_30==0 value 0.0} case normal {condition always value allocate_30/tableA_30}} !SANTA CLARITA WA - MI
+
+!____________________________________________________________________________________________
+
+!extended carryover storage (Article 56) for delivery next year (per contractor):
+define carryover_1  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=1 }  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define carryover_2  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=2 }  !ALAMEDA COUNTY WD
+define carryover_3  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=3 }  !ANTELOPE VALLEY-EAST KERN WA
+define carryover_4  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=4 }  !SANTA CLARITA WA
+define carryover_5  {select Carryover from swp_carryover given percent=yuba_demprofile use linear where contractor=5 }  !CITY OF YUBA CITY
+define carryover_6  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=6 }  !COACHELLA VALLEY WD
+define carryover_7  {select Carryover from swp_carryover given percent=butt_demprofile use linear where contractor=7 }  !COUNTY OF BUTTE
+define carryover_8  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=8 }  !COUNTY OF KINGS
+define carryover_9  {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=9 }  !CRESTLINE-LAKE ARROWHEAD WA
+define carryover_10 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=10}  !DESERT WA
+define carryover_11 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=11}  !DUDLEY RIDGE WD
+define carryover_12 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=12}  !EMPIRE WEST SIDE ID
+define carryover_13 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=13}  !KERN COUNTY WA
+define carryover_14 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=14}  !LITTLEROCK CREEK ID
+define carryover_15 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=15}  !METROPOLITAN WDSC
+define carryover_16 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=16}  !MOJAVE WA
+define carryover_17 {select Carryover from swp_carryover given percent=napa_demprofile use linear where contractor=17}  !NAPA COUNTY FC&WCD
+define carryover_18 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=18}  !OAK FLAT WD
+define carryover_19 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=19}  !PALMDALE WD
+define carryover_20 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=20}  !SAN BERNARDINO VALLEY MWD
+define carryover_21 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=21}  !SAN GABRIEL VALLEY MWD
+define carryover_22 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=22}  !SAN GORGONIO PASS WA
+define carryover_23 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=23}  !SAN LUIS OBISPO COUNTY FC&WCD
+define carryover_24 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=24}  !SANTA BARBARA COUNTY FC&WCD
+define carryover_25 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=25}  !SANTA CLARA VALLEY WD
+define carryover_26 {select Carryover from swp_carryover given percent=solano_demprofile use linear where contractor=26}  !SOLANO COUNTY WA
+define carryover_27 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=27}  !TULARE LAKE BASIN WSD
+define carryover_28 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=28}  !VENTURA COUNTY WPD
+define carryover_29 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=29}  !KERN COUNTY WA - MI
+define carryover_30 {select Carryover from swp_carryover given percent=swp_demprofile use linear where contractor=30}  !SANTA CLARITA WA - MI
+
+define carryover_total {value carryover_1  +
+                              carryover_2  +
+                              carryover_3  +
+                              carryover_4  +
+                              carryover_5  +
+                              carryover_6  +
+                              carryover_7  +
+                              carryover_8  +
+                              carryover_9  +
+                              carryover_10 +
+                              carryover_11 +
+                              carryover_12 +
+                              carryover_13 +
+                              carryover_14 +
+                              carryover_15 +
+                              carryover_16 +
+                              carryover_17 +
+                              carryover_18 +
+                              carryover_19 +
+                              carryover_20 +
+                              carryover_21 +
+                              carryover_22 +
+                              carryover_23 +
+                              carryover_24 +
+                              carryover_25 +
+                              carryover_26 +
+                              carryover_27 +
+                              carryover_28 +
+                              carryover_29 +
+                              carryover_30 }
+define co_totaldv {alias carryover_total kind 'swp-output' units 'taf'}
+
+define co_full_dv_1  {alias carryover_1  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define co_full_dv_2  {alias carryover_2  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY WD
+define co_full_dv_3  {alias carryover_3  kind 'swp-output' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define co_full_dv_4  {alias carryover_4  kind 'swp-output' units 'taf'} !SANTA CLARITA WA
+define co_full_dv_5  {alias carryover_5  kind 'swp-output' units 'taf'} !CITY OF YUBA CITY
+define co_full_dv_6  {alias carryover_6  kind 'swp-output' units 'taf'} !COACHELLA VALLEY WD
+define co_full_dv_7  {alias carryover_7  kind 'swp-output' units 'taf'} !COUNTY OF BUTTE
+define co_full_dv_8  {alias carryover_8  kind 'swp-output' units 'taf'} !COUNTY OF KINGS
+define co_full_dv_9  {alias carryover_9  kind 'swp-output' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define co_full_dv_10 {alias carryover_10 kind 'swp-output' units 'taf'} !DESERT WA
+define co_full_dv_11 {alias carryover_11 kind 'swp-output' units 'taf'} !DUDLEY RIDGE WD
+define co_full_dv_12 {alias carryover_12 kind 'swp-output' units 'taf'} !EMPIRE WEST SIDE ID
+define co_full_dv_13 {alias carryover_13 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define co_full_dv_14 {alias carryover_14 kind 'swp-output' units 'taf'} !LITTLEROCK CREEK ID
+define co_full_dv_15 {alias carryover_15 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define co_full_dv_16 {alias carryover_16 kind 'swp-output' units 'taf'} !MOJAVE WA
+define co_full_dv_17 {alias carryover_17 kind 'swp-output' units 'taf'} !NAPA COUNTY FC&WCD
+define co_full_dv_18 {alias carryover_18 kind 'swp-output' units 'taf'} !OAK FLAT WD
+define co_full_dv_19 {alias carryover_19 kind 'swp-output' units 'taf'} !PALMDALE WD
+define co_full_dv_20 {alias carryover_20 kind 'swp-output' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define co_full_dv_21 {alias carryover_21 kind 'swp-output' units 'taf'} !SAN GABRIEL VALLEY MWD
+define co_full_dv_22 {alias carryover_22 kind 'swp-output' units 'taf'} !SAN GORGONIO PASS WA
+define co_full_dv_23 {alias carryover_23 kind 'swp-output' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define co_full_dv_24 {alias carryover_24 kind 'swp-output' units 'taf'} !SANTA BARBARA COUNTY FC&WCD
+define co_full_dv_25 {alias carryover_25 kind 'swp-output' units 'taf'} !SANTA CLARA VALLEY WD
+define co_full_dv_26 {alias carryover_26 kind 'swp-output' units 'taf'} !SOLANO COUNTY WA
+define co_full_dv_27 {alias carryover_27 kind 'swp-output' units 'taf'} !TULARE LAKE BASIN WSD
+define co_full_dv_28 {alias carryover_28 kind 'swp-output' units 'taf'} !VENTURA COUNTY WPD
+define co_full_dv_29 {alias carryover_29 kind 'swp-output' units 'taf'} !KERN COUNTY WA - MI
+define co_full_dv_30 {alias carryover_30 kind 'swp-output' units 'taf'} !SANTA CLARITA WA - MI
+
+!____________________________________________________________________________________________
+
+!scale carryover storage to percent allocated (per contractor):
+define carryover_final_1  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_1  * percent_1 }} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define carryover_final_2  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_2  * percent_2 }} !ALAMEDA COUNTY WD
+define carryover_final_3  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_3  * percent_3 }} !ANTELOPE VALLEY-EAST KERN WA
+define carryover_final_4  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_4  * percent_4 }} !SANTA CLARITA WA
+define carryover_final_5  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_5  * percent_5 }} !CITY OF YUBA CITY
+define carryover_final_6  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_6  * percent_6 }} !COACHELLA VALLEY WD
+define carryover_final_7  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_7  * percent_7 }} !COUNTY OF BUTTE
+define carryover_final_8  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_8  * percent_8 }} !COUNTY OF KINGS
+define carryover_final_9  {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_9  * percent_9 }} !CRESTLINE-LAKE ARROWHEAD WA
+define carryover_final_10 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_10 * percent_10}} !DESERT WA
+define carryover_final_11 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_11 * percent_11}} !DUDLEY RIDGE WD
+define carryover_final_12 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_12 * percent_12}} !EMPIRE WEST SIDE ID
+define carryover_final_13 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_13 * percent_13}} !KERN COUNTY WA
+define carryover_final_14 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_14 * percent_14}} !LITTLEROCK CREEK ID
+define carryover_final_15 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_15 * percent_15}} !METROPOLITAN WDSC
+define carryover_final_16 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_16 * percent_16}} !MOJAVE WA
+define carryover_final_17 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_17 * percent_17}} !NAPA COUNTY FC&WCD
+define carryover_final_18 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_18 * percent_18}} !OAK FLAT WD
+define carryover_final_19 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_19 * percent_19}} !PALMDALE WD
+define carryover_final_20 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_20 * percent_20}} !SAN BERNARDINO VALLEY MWD
+define carryover_final_21 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_21 * percent_21}} !SAN GABRIEL VALLEY MWD
+define carryover_final_22 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_22 * percent_22}} !SAN GORGONIO PASS WA
+define carryover_final_23 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_23 * percent_23}} !SAN LUIS OBISPO COUNTY FC&WCD
+define carryover_final_24 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_24 * percent_24}} !SANTA BARBARA COUNTY FC&WCD
+define carryover_final_25 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_25 * percent_25}} !SANTA CLARA VALLEY WD
+define carryover_final_26 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_26 * percent_26}} !SOLANO COUNTY WA
+define carryover_final_27 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_27 * percent_27}} !TULARE LAKE BASIN WSD
+define carryover_final_28 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_28 * percent_28}} !VENTURA COUNTY WPD
+define carryover_final_29 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_29 * percent_29}} !KERN COUNTY WA - MI
+define carryover_final_30 {case a {condition range(month,oct,dec) .and. wateryear == bgnWY value 0.} case b {condition always value carryover_30 * percent_30}} !SANTA CLARITA WA - MI
+
+define carryover_final {value
+ carryover_final_1   +
+ carryover_final_2   +
+ carryover_final_3   +
+ carryover_final_4   +
+ carryover_final_5   +
+ carryover_final_6   +
+ carryover_final_7   +
+ carryover_final_8   +
+ carryover_final_9   +
+ carryover_final_10  +
+ carryover_final_11  +
+ carryover_final_12  +
+ carryover_final_13  +
+ carryover_final_14  +
+ carryover_final_15  +
+ carryover_final_16  +
+ carryover_final_17  +
+ carryover_final_18  +
+ carryover_final_19  +
+ carryover_final_20  +
+ carryover_final_21  +
+ carryover_final_22  +
+ carryover_final_23  +
+ carryover_final_24  +
+ carryover_final_25  +
+ carryover_final_26  +
+ carryover_final_27  +
+ carryover_final_28  +
+ carryover_final_29  +
+ carryover_final_30  }
+ 
+   define carryover_final_nod {value 
+ 	carryover_final_5 + 
+ 	carryover_final_7 + 
+ 	carryover_final_17 + 
+ 	carryover_final_26
+ }
+ 
+ define carryover_final_sod {value max(0.,carryover_final - carryover_final_nod) } 
+ 
+!define co_final_dv {alias carryover_final kind 'carryover' units 'taf'}
+goal set_co_final {co_final_dv = carryover_final} 
+goal set_co_final_sod {co_final_sod_dv = carryover_final_sod} 
+goal set_co_final_nod {co_final_nod_dv = carryover_final_nod} 
+
+define antco_dv_1  {alias carryover_final_1  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define antco_dv_2  {alias carryover_final_2  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY WD
+define antco_dv_3  {alias carryover_final_3  kind 'swp-output' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define antco_dv_4  {alias carryover_final_4  kind 'swp-output' units 'taf'} !SANTA CLARITA WA
+define antco_dv_5  {alias carryover_final_5  kind 'swp-output' units 'taf'} !CITY OF YUBA CITY
+define antco_dv_6  {alias carryover_final_6  kind 'swp-output' units 'taf'} !COACHELLA VALLEY WD
+define antco_dv_7  {alias carryover_final_7  kind 'swp-output' units 'taf'} !COUNTY OF BUTTE
+define antco_dv_8  {alias carryover_final_8  kind 'swp-output' units 'taf'} !COUNTY OF KINGS
+define antco_dv_9  {alias carryover_final_9  kind 'swp-output' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define antco_dv_10 {alias carryover_final_10 kind 'swp-output' units 'taf'} !DESERT WA
+define antco_dv_11 {alias carryover_final_11 kind 'swp-output' units 'taf'} !DUDLEY RIDGE WD
+define antco_dv_12 {alias carryover_final_12 kind 'swp-output' units 'taf'} !EMPIRE WEST SIDE ID
+define antco_dv_13 {alias carryover_final_13 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define antco_dv_14 {alias carryover_final_14 kind 'swp-output' units 'taf'} !LITTLEROCK CREEK ID
+define antco_dv_15 {alias carryover_final_15 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define antco_dv_16 {alias carryover_final_16 kind 'swp-output' units 'taf'} !MOJAVE WA
+define antco_dv_17 {alias carryover_final_17 kind 'swp-output' units 'taf'} !NAPA COUNTY FC&WCD
+define antco_dv_18 {alias carryover_final_18 kind 'swp-output' units 'taf'} !OAK FLAT WD
+define antco_dv_19 {alias carryover_final_19 kind 'swp-output' units 'taf'} !PALMDALE WD
+define antco_dv_20 {alias carryover_final_20 kind 'swp-output' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define antco_dv_21 {alias carryover_final_21 kind 'swp-output' units 'taf'} !SAN GABRIEL VALLEY MWD
+define antco_dv_22 {alias carryover_final_22 kind 'swp-output' units 'taf'} !SAN GORGONIO PASS WA
+define antco_dv_23 {alias carryover_final_23 kind 'swp-output' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define antco_dv_24 {alias carryover_final_24 kind 'swp-output' units 'taf'} !SANTA BARBARA COUNTY FC&WCD
+define antco_dv_25 {alias carryover_final_25 kind 'swp-output' units 'taf'} !SANTA CLARA VALLEY WD
+define antco_dv_26 {alias carryover_final_26 kind 'swp-output' units 'taf'} !SOLANO COUNTY WA
+define antco_dv_27 {alias carryover_final_27 kind 'swp-output' units 'taf'} !TULARE LAKE BASIN WSD
+define antco_dv_28 {alias carryover_final_28 kind 'swp-output' units 'taf'} !VENTURA COUNTY WPD
+define antco_dv_29 {alias carryover_final_29 kind 'swp-output' units 'taf'} !KERN COUNTY WA - MI
+define antco_dv_30 {alias carryover_final_30 kind 'swp-output' units 'taf'} !SANTA CLARITA WA - MI
+
+!____________________________________________________________________________________________
+!**LINEARIZED** normal Table A contract amounts (per contractor demand):
+define dem_tableA_1  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=1 }  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define dem_tableA_2  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=2 }  !ALAMEDA COUNTY FC&WCD-ZONE 7
+define dem_tableA_3  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=3 }  !ALAMEDA COUNTY WD
+define dem_tableA_4  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=4 }  !ANTELOPE VALLEY-EAST KERN WA
+define dem_tableA_5  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=5 }  !SANTA CLARITA WA
+define dem_tableA_6  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=6 }  !SANTA CLARITA WA
+define dem_tableA_7  {select TableA from swp_3_tableA given percent=yuba_demprofile use linear where contractor=7 }  !CITY OF YUBA CITY
+define dem_tableA_8  {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=8 }  !COACHELLA VALLEY WD
+define dem_tableA_9  {select TableA from swp_3_tableA given percent=butt_demprofile use linear where contractor=9 }  !COUNTY OF BUTTE
+define dem_tableA_10 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=10}  !COUNTY OF KINGS
+define dem_tableA_11 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=11}  !CRESTLINE-LAKE ARROWHEAD WA
+define dem_tableA_12 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=12}  !DESERT WA
+define dem_tableA_13 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=13}  !DUDLEY RIDGE WD
+define dem_tableA_14 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=14}  !EMPIRE WEST SIDE ID
+define dem_tableA_15 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=15}  !KERN COUNTY WA
+define dem_tableA_16 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=16}  !KERN COUNTY WA
+define dem_tableA_17 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=17}  !KERN COUNTY WA
+define dem_tableA_18 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=18}  !KERN COUNTY WA
+define dem_tableA_19 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=19}  !KERN COUNTY WA
+define dem_tableA_20 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=20}  !LITTLEROCK CREEK ID
+define dem_tableA_21 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=21}  !METROPOLITAN WDSC
+define dem_tableA_22 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=22}  !METROPOLITAN WDSC
+define dem_tableA_23 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=23}  !METROPOLITAN WDSC
+define dem_tableA_24 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=24}  !METROPOLITAN WDSC
+define dem_tableA_25 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=25}  !METROPOLITAN WDSC
+define dem_tableA_26 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=26}  !MOJAVE WA
+define dem_tableA_27 {select TableA from swp_3_tableA given percent=napa_demprofile use linear where contractor=27}  !NAPA COUNTY FC&WCD
+define dem_tableA_28 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=28}  !OAK FLAT WD
+define dem_tableA_29 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=29}  !PALMDALE WD
+define dem_tableA_30 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=30}  !SAN BERNARDINO VALLEY MWD
+define dem_tableA_31 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=31}  !SAN GABRIEL VALLEY MWD
+define dem_tableA_32 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=32}  !SAN GORGONIO PASS WA
+define dem_tableA_33 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=33}  !SAN LUIS OBISPO COUNTY FC&WCD
+define dem_tableA_34 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=34}  !SANTA BARBARA COUNTY FC&WCD
+define dem_tableA_35 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=35}  !SANTA CLARA VALLEY WD
+define dem_tableA_36 {select TableA from swp_3_tableA given percent=solano_demprofile use linear where contractor=36}  !SOLANO COUNTY WA
+define dem_tableA_37 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=37}  !TULARE LAKE BASIN WSD
+define dem_tableA_38 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=38}  !VENTURA COUNTY WPD
+define dem_tableA_39 {select TableA from swp_3_tableA given percent=swp_demprofile use linear where contractor=39}  !VENTURA COUNTY WPD
+
+define dem_tableAdv_1  {alias dem_tableA_1  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define dem_tableAdv_2  {alias dem_tableA_2  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY FC&WCD-ZONE 7
+define dem_tableAdv_3  {alias dem_tableA_3  kind 'swp-output' units 'taf'} !ALAMEDA COUNTY WD
+define dem_tableAdv_4  {alias dem_tableA_4  kind 'swp-output' units 'taf'} !ANTELOPE VALLEY-EAST KERN WA
+define dem_tableAdv_5  {alias dem_tableA_5  kind 'swp-output' units 'taf'} !SANTA CLARITA WA
+define dem_tableAdv_6  {alias dem_tableA_6  kind 'swp-output' units 'taf'} !SANTA CLARITA WA
+define dem_tableAdv_7  {alias dem_tableA_7  kind 'swp-output' units 'taf'} !CITY OF YUBA CITY
+define dem_tableAdv_8  {alias dem_tableA_8  kind 'swp-output' units 'taf'} !COACHELLA VALLEY WD
+define dem_tableAdv_9  {alias dem_tableA_9  kind 'swp-output' units 'taf'} !COUNTY OF BUTTE
+define dem_tableAdv_10 {alias dem_tableA_10 kind 'swp-output' units 'taf'} !COUNTY OF KINGS
+define dem_tableAdv_11 {alias dem_tableA_11 kind 'swp-output' units 'taf'} !CRESTLINE-LAKE ARROWHEAD WA
+define dem_tableAdv_12 {alias dem_tableA_12 kind 'swp-output' units 'taf'} !DESERT WA
+define dem_tableAdv_13 {alias dem_tableA_13 kind 'swp-output' units 'taf'} !DUDLEY RIDGE WD
+define dem_tableAdv_14 {alias dem_tableA_14 kind 'swp-output' units 'taf'} !EMPIRE WEST SIDE ID
+define dem_tableAdv_15 {alias dem_tableA_15 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define dem_tableAdv_16 {alias dem_tableA_16 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define dem_tableAdv_17 {alias dem_tableA_17 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define dem_tableAdv_18 {alias dem_tableA_18 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define dem_tableAdv_19 {alias dem_tableA_19 kind 'swp-output' units 'taf'} !KERN COUNTY WA
+define dem_tableAdv_20 {alias dem_tableA_20 kind 'swp-output' units 'taf'} !LITTLEROCK CREEK ID
+define dem_tableAdv_21 {alias dem_tableA_21 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define dem_tableAdv_22 {alias dem_tableA_22 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define dem_tableAdv_23 {alias dem_tableA_23 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define dem_tableAdv_24 {alias dem_tableA_24 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define dem_tableAdv_25 {alias dem_tableA_25 kind 'swp-output' units 'taf'} !METROPOLITAN WDSC
+define dem_tableAdv_26 {alias dem_tableA_26 kind 'swp-output' units 'taf'} !MOJAVE WA
+define dem_tableAdv_27 {alias dem_tableA_27 kind 'swp-output' units 'taf'} !NAPA COUNTY FC&WCD
+define dem_tableAdv_28 {alias dem_tableA_28 kind 'swp-output' units 'taf'} !OAK FLAT WD
+define dem_tableAdv_29 {alias dem_tableA_29 kind 'swp-output' units 'taf'} !PALMDALE WD
+define dem_tableAdv_30 {alias dem_tableA_30 kind 'swp-output' units 'taf'} !SAN BERNARDINO VALLEY MWD
+define dem_tableAdv_31 {alias dem_tableA_31 kind 'swp-output' units 'taf'} !SAN GABRIEL VALLEY MWD
+define dem_tableAdv_32 {alias dem_tableA_32 kind 'swp-output' units 'taf'} !SAN GORGONIO PASS WA
+define dem_tableAdv_33 {alias dem_tableA_33 kind 'swp-output' units 'taf'} !SAN LUIS OBISPO COUNTY FC&WCD
+define dem_tableAdv_34 {alias dem_tableA_34 kind 'swp-output' units 'taf'} !SANTA BARBARA COUNTY FC&WCD
+define dem_tableAdv_35 {alias dem_tableA_35 kind 'swp-output' units 'taf'} !SANTA CLARA VALLEY WD
+define dem_tableAdv_36 {alias dem_tableA_36 kind 'swp-output' units 'taf'} !SOLANO COUNTY WA
+define dem_tableAdv_37 {alias dem_tableA_37 kind 'swp-output' units 'taf'} !TULARE LAKE BASIN WSD
+define dem_tableAdv_38 {alias dem_tableA_38 kind 'swp-output' units 'taf'} !VENTURA COUNTY WPD
+define dem_tableAdv_39 {alias dem_tableA_39 kind 'swp-output' units 'taf'} !VENTURA COUNTY WPD

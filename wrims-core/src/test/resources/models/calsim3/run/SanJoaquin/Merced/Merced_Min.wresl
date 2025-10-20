@@ -1,0 +1,473 @@
+! Merced_Min.wresl
+! Minimum flow requirements for Merced at Shaffer Bridge and Cowell Agreement
+! By Puneet Khatavkar 08/07/2020
+!############################################################################
+
+/*
+The Davis-Grunsky Act requirement expired December 31, 2017. In model code, a switch (DCFlag) is used to zero out the requirement.
+Simulation of the requirement is for model validation purposes in comparing simulated and hsitorical operations.
+*/
+
+define DGFlag {value 0.}				! Flag for use of Davis Grunsky Agreement
+
+
+/*
+The existing FERC license defines a “normal” year as when the May 1 DWR Bulletin 120
+forecasted April through July inflow to Lake McClure is greater than 450,000 AF,
+and a “dry” year when inflow is forecasted to be less than 450,000 AF.
+*/
+
+define MCLRE_AprJuldv {std kind 'inflow' units 'taf'}   !Determine April-July runoff using perfect foresight
+define MCLRE_AprJul {
+    case FirstMonth  {
+	 condition month == Oct .and. WaterYear == BgnWY
+	 sum(i=Apr-month,Jul-month,1)I_MCLRE(i)*cfs_taf(i)  } 
+    case mMay {
+        condition month == May
+        sum(i=-1,2,1)I_MCLRE(i)*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value MCLRE_AprJuldv(-1) }
+}
+goal setMCLRE_APRJULdv {MCLRE_APRJULdv = MCLRE_APRJUL}
+
+define MCLRE_WYtype {                                   !Determine FERC water-year type, 1 = wet, 0 = dry
+    case Dry {
+        condition MCLRE_AprJul < 450.
+        value 0. }
+    case Wet {
+        condition always
+        value 1. }
+}
+
+define MCLRE_WYtype_dv {alias MCLRE_WYtype kind 'WATER-YEAR-TYPE' units 'NONE'}
+
+! In March Forecast the May 1st water year type
+define MCLRE_AprJul_MarForecastdv {std kind 'inflow' units 'taf'}
+define MCLRE_AprJul_MarForecast {
+    case FirstMonth  {
+	   condition month == Oct .and. WaterYear == BgnWY
+	   sum(i=Apr-month,Jul-month,1)I_MCLRE(i)*cfs_taf(i)  } 
+    case Mar {
+        condition month == Mar
+        sum(i=1,4,1)I_MCLRE(i)*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value MCLRE_AprJul_MarForecastdv(-1) }
+}
+goal setMCLRE_APRJUL_MarForecastdv {MCLRE_AprJul_MarForecastdv = MCLRE_AprJul_MarForecastdv}
+
+define MCLRE_WYtype_MarForecast {                                   !Determine FERC water-year type, 1 = wet, 0 = dry
+    case Dry {
+        condition MCLRE_AprJul_MarForecast < 450.
+        value 0. }
+    case Wet {
+        condition always
+        value 1. }
+}
+
+define MCLRE_WYtype_MarForecastdv {alias MCLRE_WYtype_MarForecast kind 'WATER-YEAR-TYPE' units 'NONE'}
+
+
+
+
+/*
+Articles 40 and 41 of the current FERC license require a specific flow at Shaffer Bridge,
+approximtaely 20 miles downstream from Merced ID’s last point of control at Crocker-Huffman.
+Flows vary by month and water year type between 15-100 cfs.
+*/
+
+define FERC_MCD033 {                                   !Determine FERC requirement at Schaffer Bridge from lookup table 
+    case Dry {condition  MCLRE_WYtype <= 0.5 
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=month}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=month}
+	}
+	
+define FERC_MCD033_dv {alias FERC_MCD033 kind 'MIN-FLOW_RQMNT' units 'CFS'}
+
+/*
+As part of the original SJRA, Merced ID releases up to 12,500 AF of water each fall for migrating fall-run
+Chinook salmon (fall fisheries release). The timing and pattern of release is determined by fisheries biologists,
+but typically includes a peak period of higher releases, preceded and followed by lower rates of release.
+These fall fisheries releases were added as a condition in Merced ID’s water rights (A016186) in 2005 in association with the
+consolidation with El Nido Irrigation District. The required flow is measured above the FERC license requirement. The point of
+compliance is Shaffer Bridge.
+ */
+
+define OctFishRel {
+    case mOctober {
+        condition month == OCT
+        value 12.5*taf_cfs }
+    case Otherwise {
+        condition always
+        value 0. }}
+
+
+/*
+The Davis-Grunsky Act contract between Merced ID and the State of California specifies a flow of 180-220 cfs that
+must be maintained in the reach between Crocker-Huffman and Shaffer Bridge from November through March for fall-run Chinook salmon.
+
+For modeling purposes, Davis-Grunsky Act requirements are assumed to be 220 cfs in non-dry years, per the FERC definition.
+In FERC dry years, the Davis-Grunsky Act requirement is modeled as 180 cfs.
+*/
+
+define DGFlow {                                        !Determine Davis-Grunsky requirement at Schaffer Bridge from lookup table
+    case Dry {condition  MCLRE_WYtype <= 0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=month}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=month}
+	}
+	
+define DGFlow_dv {alias DGFlow kind 'MIN-FLOW_RQMNT' units 'CFS'}
+
+/*
+Merced ID is required to release water past Crocker-Huffman for irrigation on lands riparian to the Merced River. Per the 1926 Cowell Agreement,
+Merced ID must make available flows below Crocker-Huffman that are diverted from the Merced River at private ditches and pumps between
+Crocker-Huffman and Shaffer Bridge. Flows specified in the Cowell Agreement are on an irrigation season pattern. From March-May, Merced ID must
+provide the specified flow rate. Starting in June, Merced ID provides 250 cfs until the inflow to Lake McClure drops below 1,200 cfs. From that day forward, Merced ID
+provides specified flows for a certain number of days as follows: 
+
+ - 225 cfs flow for the next 31 days
+ - 175 cfs flow for the next 31 days
+ - 150 cfs for the next 30 days
+ -  75 cfs for the next 30 days
+ - the lesser of 50 cfs or inflow to Lake McClure for the remainder of September
+*/
+
+define CowellBaseInit {                                !Determine Cowell requirement at Crocker-Huffman from lookup table
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=month}
+
+define CowellBase {                                    !From Oct-Feb, requirement is the lesser of 50 cfs or the natural inflow to Lake McClure
+      case OctFeb {condition month <= FEB
+          value min(CowellBaseInit, I_MCLRE)}
+      case otherwise {condition always
+          value CowellBaseInit}
+      }   
+
+! Determine month when inflow to Lake McClure drops below 1,200 cfs
+define CowellTriggerMonthDV {std kind 'FLAG' units 'NONE'}
+
+/*
+
+
+define CowellTriggerMonth {
+      case FirstYear  {condition month <= MAY .AND. WATERYEAR == BgnWY
+          Value 0}
+      case LastYear  {condition month >=JUL .AND. WATERYEAR == EndWY ! Needed to prevent read error in last year
+          Value CowellTriggerMonthDV(-1)}    
+      case MayTrigger {condition month == JUN .AND. I_MCLRE(-1) < 1200.
+          value 1}
+      case JunTrigger {condition month == JUN .AND. I_MCLRE     < 1200.
+          value 2}
+      case JulTrigger {condition month == JUN .AND. I_MCLRE(1)  < 1200.
+          value 3}
+      case AugTrigger {condition month == JUN .AND. I_MCLRE(2)  < 1200.
+          value 4}
+      case SepTrigger {condition month == JUN .AND. I_MCLRE(3)  < 1200.
+          value 5}
+      case otherwise     {condition always
+          value CowellTriggerMonthDV(-1)}
+      }
+      
+      */
+      
+define CowellTriggerMonth { 
+      case MayTrigger {condition I_MCLRE(8-month) < 1200.
+          value 1}
+      case JunTrigger {condition I_MCLRE(9-month)  < 1200. .AND. I_MCLRE(8-month)  > 1200.
+          value 2}
+      case JulTrigger {condition I_MCLRE(10-month) < 1200. .AND. I_MCLRE(9-month)  > 1200.
+          value 3}
+      case AugTrigger {condition I_MCLRE(11-month) < 1200. .AND. I_MCLRE(10-month) > 1200.
+          value 4}
+      case SepTrigger {condition I_MCLRE(12-month) < 1200. .AND. I_MCLRE(11-month) > 1200.
+          value 5}
+      case otherwise     {condition always
+          value CowellTriggerMonthDV(-1)}
+      }      
+      
+      
+goal setCowellTrigger {CowellTriggerMonthDV = CowellTriggerMonth}
+          
+
+!Determine Cowell requirement at Crocker-Huffman from lookup table
+! "Dry" indicates inflow to Lake McClure less than 1,200 cfs on June 1
+! "Normal" indicates that inflow to Lake McClure drops below 1,200 cfs during June - assume June 15th
+! "West" indicates that inflow to Lake McClure drops below 1,200 cfs after June 31st
+
+define CowellMinFlow {
+      case OctFeb {condition month <= FEB
+          value min(50., I_MCLRE)}
+      case Mar {condition month == MAR
+          value 100.}
+      case Apr {condition month == APR
+          value 175.}
+      case May {condition month == MAY
+          value 225.}
+      case JunDry {condition month == JUN .AND. CowellTriggerMonth < 1.5
+          value 225.}								!225 cfs flow for the next 31 days
+      case JunNormal {condition month == JUN .AND. CowellTriggerMonth > 1.5 .AND. CowellTriggerMonth < 2.5
+          value 237.5} 								!250 cfs flow for 15 days, 225 cfs for 15 days
+      case JunWet {condition month == JUN .AND. CowellTriggerMonth > 2.5
+          value 250.} 
+      case JulDry {condition month == JUL .AND. CowellTriggerMonth < 1.5	
+          value 177.}								!225 cfs for 1 day, 175 cfs for next 30 days
+      case JulNormal {condition month == JUL .AND. CowellTriggerMonth > 1.5 .AND. CowellTriggerMonth < 2.5	
+          value 201.} 								!225 cfs for 16 days, 175 cfs for 15 days
+      case JulWet {condition month == JUL .AND. CowellTriggerMonth > 2.5
+          value 225.}
+      case AugDry {condition month == AUG .AND. CowellTriggerMonth < 1.5
+          value 151.}								!175 cfs for 1 day, 150 cfs for next 30 days
+      case AugNormal {condition month == AUG .AND. CowellTriggerMonth > 1.5 .AND. CowellTriggerMonth < 2.5
+          value 163.} 								!175 cfs for 16 days, 150 cfs for 15 days
+      case AugWet {condition month == AUG .AND. CowellTriggerMonth > 2.5
+          value 175.}
+      case SepDry {condition month == SEP .AND. CowellTriggerMonth < 1.5	
+          value 75.}								! 75 cfs for 30 days
+      case SepNormal {condition month == SEP .AND. CowellTriggerMonth > 1.5 .AND. CowellTriggerMonth < 2.5
+          value 112.5} 								!150 cfs for 15 days, 75 cfs for 15 days
+      case SepWet {condition month == SEP .AND. CowellTriggerMonth > 2.5
+          value 150.}
+}
+
+define CowellMinflow_dv {alias CowellMinflow kind 'MIN-FLOW_RQMNT' units 'CFS'}
+
+
+/*
+For calculation of Merced ID available water supply for irrigation and associated allocation logic
+need to determine the April-September non-discretionary release to meet flow requirements
+*/
+! April to September forecast of FERC flow requirement
+define FERC_MCD033_Apr { 
+	case Dry {condition  MCLRE_WYtype <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=Apr}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=Apr}
+	}
+
+define FERC_MCD033_May { 
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=May}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=May}
+	}
+
+define FERC_MCD033_Jun { 
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=Jun}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=Jun}
+	}
+
+define FERC_MCD033_Jul { 
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=Jul}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=Jul}
+	}
+
+define FERC_MCD033_Aug { 
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=Aug}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=Aug}
+	}
+
+define FERC_MCD033_Sep { 
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       FERC_Dry
+       from         Merced_MinFlows
+       where        month=Sep}
+    case Wet {condition always 
+       select       FERC_Wet
+       from         Merced_MinFlows
+       where        month=Sep}
+	}
+
+define FERC_MCD033_AprSep {value FERC_MCD033_Apr*cfs_taf(7-month)+FERC_MCD033_May*cfs_taf(8-month)+FERC_MCD033_Jun*cfs_taf(9-month)+FERC_MCD033_Jul*cfs_taf(10-month)+FERC_MCD033_Aug*cfs_taf(11-month)+FERC_MCD033_Sep*cfs_taf(12-month)}
+define FERC_MCD033_AprSep_dv {alias FERC_MCD033_AprSep kind 'MIN-FLOW_RQMNT' units 'TAF'}
+
+
+
+! April to September forecast of Davis-Grunsky flow requirement
+define DGFlow_Apr {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=Apr}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=Apr}
+	}
+
+define DGFlow_May {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5 
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=May}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=May}
+	}
+
+define DGFlow_Jun {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=Jun}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=Jun}
+	}
+
+define DGFlow_Jul {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=Jul}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=Jul}
+	}
+
+define DGFlow_Aug {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=Aug}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=Aug}
+	}
+
+define DGFlow_Sep {
+	case Dry {condition  MCLRE_WYtype_MarForecast <=0.5  
+       select       DavisGrunskyDry
+       from         Merced_MinFlows
+       where        month=Sep}
+    case Wet {condition always 
+       select       DavisGrunskyWet
+       from         Merced_MinFlows
+       where        month=Sep}
+	}
+
+define DGFlow_AprSep {value DGFlow_Apr*cfs_taf(7-month)+DGFlow_May*cfs_taf(8-month)+DGFlow_Jun*cfs_taf(9-month)+DGFlow_Jul*cfs_taf(10-month)+DGFlow_Aug*cfs_taf(11-month)+DGFlow_Sep*cfs_taf(12-month)}
+define DGFlow_AprSep_dv {alias DGFlow_AprSep kind 'MIN-FLOW_RQMNT' units 'TAF'}
+
+
+
+! April to September forecast of Cowell flow requirement
+define CowellBase_Apr {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=Apr}
+
+define CowellBase_May {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=May}
+
+define CowellBase_Jun {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=Jun}
+
+define CowellBase_Jul {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=Jul}
+
+define CowellBase_Aug {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=Aug}
+
+define CowellBase_Sep {
+       select       Cowell_Base
+       from         Merced_MinFlows
+       where        month=Sep}
+       
+
+! Define Apr-Sep reduction in flow requirement after flow drops below 1200 cfs
+define CowellRedTrigJun {
+      case MayTrigger {condition I_MCLRE(8 - month) < 1200.
+            value 10.41} !TAF
+      case JunTrigger {condition I_MCLRE(9 - month) < 1200. .and. I_MCLRE(8 - month) > 1200.
+      	    value 5.21}
+      case otherwise {condition always
+            value 0.}
+			
+}
+define CowellMinflowAprSep {value CowellBase_Apr*cfs_taf(7-month)+CowellBase_May*cfs_taf(8-month)
+                                 +CowellBase_Jun*cfs_taf(9-month)+CowellBase_Jul*cfs_taf(10-month)
+                                 +CowellBase_Aug*cfs_taf(11-month)+CowellBase_Sep*cfs_taf(12-month)-CowellRedTrigJun}
+
+define CowellMinflowAprSep_dv {alias CowellMinflowAprSep kind 'MIN-FLOW_RQMNT' units 'TAF'}
+
+
+/*
+To meet the flow requirement at Shaffer Bridge, Merced ID must release additional water to account for 
+stream seepage losses from Crocker-Huffman to Shaffer Bridge
+*/
+
+
+define SeepageLossesPerctMerced {
+     case Dryyear {condition MCLRE_WYtype < 0.5
+        value 0.335} !Based on analysis of model results - should be updated if the groundwater model is revised/updated
+     case Otherwise {condition always
+       value 0.129} !Based on analysis of model results - should be updated if the groundwater model is revised/updated
+}
+
+define CowellFercFlow_AprSep_dv   {std kind 'FLOW-MIN-REQUIRED' units 'TAF'}
+define CowellFercFlow_AprSep{
+    case FirstMonth  {
+	     condition month == Oct .and. WaterYear == BgnWY
+	     value 0.
+	     }
+    case aprthrusep {
+        condition   month >= apr .and. month <= sep
+        value (CowellMinflowAprSep+(max(DGFlow_AprSep*DGFlag, FERC_MCD033_AprSep))/(1-SeepageLossesPerctMerced))}
+    case otherwise {
+        condition   always
+        value CowellFercFlow_AprSep_dv(-1) }
+        }
+
+goal setCowellFercFlow_AprSep_dv   {CowellFercFlow_AprSep_dv = CowellFercFlow_AprSep}
+
+

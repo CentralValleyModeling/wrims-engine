@@ -1,0 +1,74 @@
+! Idy Lui 9/21/2020
+/*
+Suisun Marsh Salinity Control Gate Operation using ANN 
+
+For Sep-May, use last 7-day average Martinez EC from previous month and 
+compare to the value specified in the table below to trigger gate operation for the entire month.  
+Martinez EC threshold for triggering SMSCG operation for D-1641 and SMPA (for all wyt)
+month       MTZ EC trigger (mS/cm)
+1 (Oct)          25.2
+2 (Nov)          23.9
+3 (Dec)          23.9
+4 (Jan)          21.1
+5 (Feb)          16.9
+6 (Mar)          16.9
+7 (Apr)          19.4
+8 (May)          19.4
+12(Sep)          24.6
+
+For summer, (for ITP/BiOp)
+  BN, AN, and D following W or AN (operate two months): 
+  	use last 7 day average MTZ EC in May as trigger, 
+	if exceed 17.5 ms/cm operate gate June and July, 
+	otherwise operate July and August.
+  D following BN (operate one month):
+   	for June and July, use last 7 day average MTZ EC of previous month
+   	if exceed 22.2 mS/cm, gate operate for entire month
+   	if operation is not triggered in neither June nor July, gate operate entire August
+  W (operate zero to two months)
+  	use last 7 day average MTZ EC of previous month
+  	if exceed 22.2 mS/cm, gate operate for entire month
+  	summer gate operations are not to exceed 60-days (two months)
+  	if gates are tidally operated in June AND July then no gate operations in Aug 
+  C, D following D or C: No Action   	
+*/
+
+!*************************************************************************************************************
+! calculate last 7-day average MTZ EC from previous month
+define MTZ_EC_7day {std kind 'SALINITY' units 'UMHOS/CM'}
+define MTZ_EC_7day_sv {value MTZ_EC_7day[DELTA]}
+goal setMTZ_EC_7day {MTZ_EC_7day = MTZ_EC_7day_sv}
+
+define BD_EC_Month {std kind 'SALINITY' units 'UMHOS/CM'}
+define BD_EC_Month_sv {value BD_EC_Month[DELTA]}
+goal setBD_EC_MON {BD_EC_Month = BD_EC_Month_sv}
+
+define SMSCG_EC_Trigger1 {value SMSCG_EC_Trigger1_dv[DELTA]}    
+define SMSCG_EC_Trigger1_dv {alias SMSCG_EC_Trigger1 kind 'Trigger' units 'UMHOS/CM'}
+
+define SMSCG_OP1SV {value SMSCG_OP1[DELTA]}
+define SMSCG_OP1 {alias SMSCG_OP1SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_EC_Trigger2 {value SMSCG_EC_Trigger2_dv[DELTA]}    
+define SMSCG_EC_Trigger2_dv {alias SMSCG_EC_Trigger2 kind 'Trigger' units 'UMHOS/CM'}
+
+define SMSCG_wytflag2{value SMSCG_wytflag2_dv[DELTA]}
+define SMSCG_wytflag2_dv {alias SMSCG_wytflag2 kind 'flag' units 'NONE'}
+
+define SMSCG_OP2SV {value SMSCG_OP2[DELTA]}
+define SMSCG_OP2 {alias SMSCG_OP2SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op2_Count {value SMSCG_Op2_Count_dv[DELTA]} 
+define SMSCG_Op2_Count_dv {alias SMSCG_Op2_Count kind 'flag' units 'NONE'}
+
+define SMSCG_wytflag3{value SMSCG_wytflag3_dv[DELTA]}
+define SMSCG_wytflag3_dv {alias SMSCG_wytflag3 kind 'flag' units 'NONE'}
+
+define SMSCG_OP3SV {value SMSCG_OP3[DELTA]}
+define SMSCG_OP3 {alias SMSCG_OP3SV kind 'GATE-OP-RATIO' units 'NONE'} 
+
+define SMSCG_Op3_Count {value SMSCG_Op3_Count_dv[DELTA]} 
+define SMSCG_Op3_Count_dv {alias SMSCG_Op3_Count kind 'flag' units 'NONE'}
+
+define SMSCG_OPSV {value SMSCG_OP[DELTA]}
+define SMSCG_OP {alias SMSCG_OPSV kind 'GATE-OP-RATIO' units 'NONE'}

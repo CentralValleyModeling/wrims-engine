@@ -1,0 +1,31 @@
+! WATER YEAR TYPE DEFININITIONS
+! Code and tables by A. Munevar 7/8/98
+! American River D893 added by Dustin Jones 12/27/99
+
+! Note: the upper watershed calculation of wyt_AMERd893_cvp uses perfect foresight 
+! the American River D893 index as defined by the CVP (changes in March)
+! Apr-Sep sum>=600TAF wyt_AMERd893=1; Apr-Sep sum<600TAF wyt_AMERd893=2
+define I_FOLS_AprSepUW{ 	
+	case OctFeb{  !If in Oct - Feb, use the sum of previous year's Apr-Sep sum
+		condition month>=Oct .and. month<=Feb
+		sum(i=-12+Apr-month,-month,1) UNIMP_FOLS(i)
+		}
+	case MarSep{ ! In March, sum Apr-Sep unimpaired inflows of current year
+		condition month>=Mar .and. month<=Sep
+		sum(i=Apr-month,Sep-month,1) UNIMP_FOLS(i)
+		}
+}
+
+define I_FOLS_AprSepUW_dv{alias I_FOLS_AprSepUW kind 'index' units 'taf'}
+
+define wyt_AMERd893_cvp {
+	case a{
+		condition I_FOLS_AprSepUW > 600
+		value 1
+	}
+	case b{
+		condition always
+		value 2
+	}
+}
+define wyt_AMERd893_cvpUW_dv{alias wyt_AMERd893_cvp kind 'wateryeartype' units 'none'}

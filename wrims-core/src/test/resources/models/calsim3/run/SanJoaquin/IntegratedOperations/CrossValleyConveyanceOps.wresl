@@ -1,0 +1,137 @@
+/*
+!Allow either forward or reverse flow in the C_CAA183_TVC in one month, but not both, based on highest objective value.
+define int_C_CAA183_TVC_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C_CAA183_TVC_f {C_CAA183_TVC_F < int_C_CAA183_TVC_f*10000.}
+goal lim_C_CAA183_TVC_r {C_CAA183_TVC_R < 10000. - int_C_CAA183_TVC_f*10000.}
+
+!Allow either forward or reverse flow in the C931_TVC in one month, but not both, based on highest objective value.
+define int_C931_TVC_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C931_TVC_f {C931_TVC_F < int_C931_TVC_f*10000.}
+goal lim_C931_TVC_r {C931_TVC_R < 10000. - int_C931_TVC_f*10000.}
+
+!Allow either forward or reverse flow in the C_CAA194_SW in one month, but not both, based on highest objective value.
+define int_C_CAA194_SW_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C_CAA194_SW_f {C_CAA194_SW_F < int_C_CAA194_SW_f*10000.}
+goal lim_C_CAA194_SW_r {C_CAA194_SW_R < 10000. - int_C_CAA194_SW_f*10000.}
+
+!Allow either forward or reverse flow in the C936_SW in one month, but not both, based on highest objective value.
+define int_C936_SW_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C936_SW_f {C936_SW_F < int_C936_SW_f*10000.}
+goal lim_C936_SW_r {C936_SW_R < 10000. - int_C936_SW_f*10000.}
+
+!Allow either forward or reverse flow in the CVC in one month, but not both, based on highest objective value.
+define int_C_CAA238_cvc_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C_CAA238_CVC_F {C_CAA238_CVC_F < int_C_CAA238_cvc_f*10000.}
+goal lim_C_CAA238_CVC_R {C_CAA238_CVC_R < 10000. - int_C_CAA238_cvc_f*10000.}
+
+!Since no source along CVC, use same integer for FK conections.
+goal lim_C941A_CVC_F {C941A_CVC_F < int_C_CAA238_cvc_f*10000.}
+goal lim_C941A_CVC_R {C941A_CVC_R < 10000. - int_C_CAA238_cvc_f*10000.}
+goal lim_C941B_CVC_F {C941B_CVC_F < int_C_CAA238_cvc_f*10000.}
+goal lim_C941B_CVC_R {C941B_CVC_R < 10000. - int_C_CAA238_cvc_f*10000.}
+
+!Allow either forward or reverse flow in the C_CAA262_AEI in one month, but not both, based on highest objective value.
+define int_C_CAA262_AEI_f {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+goal lim_C_CAA262_AEI_f {C_CAA262_AEI_F < int_C_CAA262_AEI_f*10000.}
+goal lim_C_CAA262_AEI_r {C_CAA262_AEI_R < 10000. - int_C_CAA262_AEI_f*10000.}
+*/
+!Cross Valley Canal has variable available capacity
+define cap_C_CAA238_CVC_F {timeseries kind 'capacity' units 'taf' convert 'cfs'}
+define cap_C_CAA238_CVC_R {timeseries kind 'capacity' units 'taf' convert 'cfs'}
+goal lim_CVC_F {C_CAA238_CVC < cap_C_CAA238_CVC_F}
+goal lim_CVC_R {C_CAA238_CVC_R < cap_C_CAA238_CVC_R}
+/*
+!If base forward flow in CVC is more than 10% of the combined reverse base and FMP flows,
+!do not send reverse FMP flows down CVC.
+define flow_C_CAA238_CVC_F {timeseries kind 'base' units 'taf' convert 'cfs'}
+define flow_C_CAA238_CVC_R {timeseries kind 'base' units 'taf' convert 'cfs'}
+define int_C_CAA238_cvc_R {INTEGER STD KIND 'INTEGER' UNITS 'NONE'}
+define lb_coefficient {value max(0.,9.*flow_C_CAA238_CVC_F - flow_C_CAA238_CVC_R)}
+goal allow_cvc_r {C_CAA238_CVC_R > lb_coefficient*int_C_CAA238_cvc_R}
+goal allow_cvc_r_2 {C_CAA238_CVC_R < 10000.*int_C_CAA238_cvc_R}
+
+!Make sure that we don't Aqueduct puts upstream of takes.
+goal AEI_forward_off {int_C_CAA262_AEI_F < int_C_CAA238_CVC_F}
+goal CVC_forward_off {int_C_CAA238_CVC_F < int_C_CAA194_SW_F}
+goal SW_forward_off {int_C_CAA194_SW_F < int_C_CAA183_TVC_F}
+*/
+!Arvin-Edison Intertie has variable available capacity(TAF) (This assumes near-term expansion.)
+define cap_AEI_F {
+	case October 	{condition month == oct value 11.8}
+	case November 	{condition month == nov value 13.4}
+	case December 	{condition month == dec value 13.8}
+	case January 	{condition month == jan value 10.8}
+	case February 	{condition month == feb value 9.5}
+	case March 	{condition month == mar value 12.8}
+	case April 	{condition month == apr value 12.4}
+	case May 	{condition month == may value 11.8}
+	case June 	{condition month == jun value 11.4}
+	case July 	{condition month == jul value 11.8}
+	case August 	{condition month == aug value 10.8}
+	case September 	{condition always 	value 10.4}
+}
+define cap_AEI_R {
+	case October 	{condition month == oct value 10.3}
+	case November 	{condition month == nov value 10.9}
+	case December 	{condition month == dec value 11.3}
+	case January 	{condition month == jan value 9.3}
+	case February 	{condition month == feb value 8.1}
+	case March 	{condition month == mar value 11.3}
+	case April 	{condition month == apr value 8.9}
+	case May 	{condition month == may value 8.3}
+	case June 	{condition month == jun value 6.9}
+	case July 	{condition month == jul value 7.3}
+	case August 	{condition month == aug value 8.3}
+	case September 	{condition always 	value 8.9}
+}
+goal lim_AEI_F {C_CAA262_AEI_F < cap_AEI_F*taf_cfs}
+goal lim_AEI_R {C_CAA262_AEI_R < cap_AEI_R*taf_cfs}
+
+!Don't allow FMP water to be used in CVC wheeling.
+!MAY WANT TO INSERT CONSTRAINT TYING PUMPING FOR WHEELING TO CVC DIVERSION
+goal no_fmp_cvc_whl {D_CAA238_CVPCV < C_CAA220}
+
+!Limit local cross valley diversions to FK contractors to 20% of demand.
+
+!Tule to EQ
+
+define D931A_C1 {std kind 'flow-delivery' units 'cfs'}
+define D931A_C2 {std kind 'flow-delivery' units 'cfs'}
+define D931A_215 {std kind 'flow-delivery' units 'cfs'}
+define D931A_SD {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D931A {D931A = D931A_C1 + D931A_C2 + D931A_215 + D931A_SD}
+
+goal lim_D931A_C1 {D931A_C1 < 0.2*D932_C1}
+goal lim_D931A_C2 {D931A_C2 < 0.2*D932_C2}
+goal lim_D931A_215 {D931A_215 < 0.2*D932_215}
+goal lim_D931A_SD {D931A_SD < D932_SD}
+
+!EQ to Kern
+
+!define D931B_C1 {std kind 'flow-delivery' units 'cfs'}
+!define D931B_C2 {std kind 'flow-delivery' units 'cfs'}
+!define D931B_215 {std kind 'flow-delivery' units 'cfs'}
+!define D931B_SD {std kind 'flow-delivery' units 'cfs'}
+
+!goal split_D931B {D931B = D931B_C1 + D931B_C2 + D931B_215 + D931B_SD}
+
+!goal lim_D931B_C1 {D931B_C1 < 0.2*D937_C1}
+!goal lim_D931B_C2 {D931B_C2 < 0.2*D937_C2}
+!goal lim_D931B_215 {D931B_215 < 0.2*D937_215}
+
+!Limit SW diversions to 20% of demand from EQ to Kern.
+define D936_C1 {std kind 'flow-delivery' units 'cfs'}
+define D936_C2 {std kind 'flow-delivery' units 'cfs'}
+define D936_215 {std kind 'flow-delivery' units 'cfs'}
+define D936_SD {std kind 'flow-delivery' units 'cfs'}
+
+goal split_D936 {D936 = D936_C1 + D936_C2 + D936_215 + D936_SD}
+
+goal lim_D936_C1 {D936_C1 < 0.2*D937_C1}
+goal lim_D936_C2 {D936_C2 < 0.2*D937_C2}
+goal lim_D936_215 {D936_215 < 0.2*D937_215}
+goal lim_toD937_SD {D936_SD < D937_SD}
+ 
+
+ 

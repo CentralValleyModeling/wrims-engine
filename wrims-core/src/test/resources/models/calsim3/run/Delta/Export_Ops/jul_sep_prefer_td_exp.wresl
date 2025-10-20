@@ -1,0 +1,21 @@
+!!! This code implements the BDCP assumption to maintain limited flushing for south Delta water quality.
+!!! During Jul - Sep south delta exports are preferred to pump up to 3,000 cfs before diverting from north.
+!!! Assumes that C_DMC000_TD and C_CAA003_TD have a weight of negative two (-2).
+
+goal Prefer_TD_Exp {
+    lhs  C_DMC000_TD + C_CAA003_TD
+    case JulAug {
+         condition     month>=JUL .and. month<=AUG
+!Using 5000.0 for RHS - buffered 3000cfs by about 65% to bring Jul - Aug TD exports to about 3000cfs
+         rhs           5000.
+         lhs<rhs       penalty 4.
+         lhs>rhs       penalty 0.
+    }
+    case Sep {
+         condition     month==SEP
+!Using 3000.0 for RHS - no buffering since september exhibits sufficient flexibility
+         rhs           3000.
+         lhs<rhs       penalty 4.
+         lhs>rhs       penalty 0.
+    }
+}

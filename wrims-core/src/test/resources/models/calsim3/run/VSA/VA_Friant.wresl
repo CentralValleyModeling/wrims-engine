@@ -1,0 +1,337 @@
+! VA_Friant.wresl
+
+
+! Calculate monthly weighted Millerton flood release (in April this is from the independent 
+! non-pulse and pulse period sjrr req'ts, not on the combined overall average release req't)
+define Friant_FloodRels {
+    case April {
+        condition month==APR 
+        value 14.*(C_MLRTNA[SJR_WQ1] + C_MLRTNF[SJR_WQ1])/30. + 16.*(C_MLRTNA[SJR_WQ2] + C_MLRTNF[SJR_WQ2])/30.}
+    case otherwise {
+        condition always
+        value C_MLRTNA[SJR_WQ1] + C_MLRTNF[SJR_WQ1]}
+}
+define Friant_FloodRels_ {alias Friant_FloodRels kind 'va-flow' units 'cfs'}
+
+! Based on known restoration flows and anticipated Delta VA action, calculate target
+! recapture of SJRR flows at Jones and Banks and Friant contribution to Delta Outflow
+
+!*********************************************************************************************
+! Calculate disposition of SJR flows from Millerton Flood Release and Restoration Release
+!*** Need to update below for CS3
+/*define FrFld_to_HORB { value FrFld_to_Vern * C417B[transfers_stage1]/C644[transfers_stage1] } 
+define FrFld_to_SJR  { value FrFld_to_Vern - FrFld_to_HORB}
+define FrFld_to_409  { value max(0., min(FrFld_to_HORB, C409[transfers_stage1]))}
+define FrFld_to_Exp  { value FrFld_to_HORB - FrFld_to_409}
+define FrFld_to_CCWD { value min(max(0., D408[transfers_stage1]-C416B[transfers_stage1]-C408[transfers_stage1]), FrFld_to_409)}
+define FrFld_to_OMR  { value FrFld_to_409 - FrFld_to_CCWD}
+define FrFld_needed_at_514 {value max(0., D514A[transfers_stage1] + D514B[transfers_stage1] - (C417A[transfers_stage1]-FrFld_to_SJR))}
+define FrFld_needed_at_412 {value max(0., D412[transfers_stage1] - (C514[transfers_stage1] - FrFld_needed_at_514))}
+define FrFld_needed_at_410 {value max(0., D410[transfers_stage1] - C413[transfers_stage1] - (C412[transfers_stage1] - FrFld_needed_at_412))}
+define FrFld_to_410 { value FrFld_to_SJR - FrFld_needed_at_514 - FrFld_needed_at_412 - FrFld_needed_at_410}
+define FrFld_to_Dlt  { value min(max(0., C416A[transfers_stage1]), FrFld_to_OMR + FrFld_to_410)}
+
+define FrFld_to_HORB_  {alias FrFld_to_HORB kind 'debug-cfs' units 'cfs'}
+define FrFld_to_SJR_   {alias FrFld_to_SJR  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_409_   {alias FrFld_to_409  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_OMR_   {alias FrFld_to_OMR  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Exp_   {alias FrFld_to_Exp  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_410_   {alias FrFld_to_410  kind 'debug-cfs' units 'cfs'}
+define FrFld_to_Dlt_   {alias FrFld_to_Dlt  kind 'debug-cfs' units 'cfs'}*/
+
+define FrFld_to_Dlt {value SJR116_Mlrtn_fldrel}
+define FrFld_to_Dlt_ {alias FrFld_to_Dlt kind 'debug-cfs' units 'cfs'}
+
+! compute SJRR flows abandoned due to flood control release
+! it's assumed that this flow proceeds to Vernalis 
+! Note that SJRR abandonment is triggered by any flood release from Millerton,
+! not just by flood release that makes it to the Merced confluence.
+define SJRR_Abandoned_at_Merced {  !SJRR flows are no longer considered abandoned when Millerton is spilling TF Stantec 041023
+!    case Flood { 
+!        condition C_MLRTNA[WHEELJPOD] + C_MLRTNF[WHEELJPOD] > 0.5 
+!        value SJR116_SJRRflow}  
+    case otherwise {
+        condition always 
+        value 0.}
+}
+define AbSJRR_to_Vern    {value SJRR_Abandoned_at_Merced}
+define AbSJRR_to_Vern_ {alias AbSJRR_to_Vern kind 'debug-cfs' units 'cfs'}
+
+! Track the combined Flood Release and SJRR flow
+!*** Need to update below for CS3
+/*define FrRels_to_Vern  {value AbSJRR_to_Vern + FrFld_to_Vern}
+define FrRels_to_HORB { value FrRels_to_Vern * C417B[transfers_stage1]/C644[transfers_stage1] } 
+define FrRels_to_SJR  { value FrRels_to_Vern - FrRels_to_HORB}
+define FrRels_to_409  { value max(0., min(FrRels_to_HORB, C409[transfers_stage1]))}
+define FrRels_to_Exp  { value FrRels_to_HORB - FrRels_to_409}
+define FrRels_to_CCWD { value min(max(0., D408[transfers_stage1]-C416B[transfers_stage1]-C408[transfers_stage1]), FrRels_to_409)}
+define FrRels_to_OMR  { value FrRels_to_409 - FrRels_to_CCWD}
+define FrRels_needed_at_514 {value max(0., D514A[transfers_stage1] + D514B[transfers_stage1] - (C417A[transfers_stage1]-FrRels_to_SJR))}
+define FrRels_needed_at_412 {value max(0., D412[transfers_stage1] - (C514[transfers_stage1] - FrRels_needed_at_514))}
+define FrRels_needed_at_410 {value max(0., D410[transfers_stage1] - C413[transfers_stage1] - (C412[transfers_stage1] - FrRels_needed_at_412))}
+define FrRels_to_410 { value FrRels_to_SJR - FrRels_needed_at_514 - FrRels_needed_at_412 - FrRels_needed_at_410}
+define FrRels_to_Dlt  { value min(max(0., C416A[transfers_stage1]), FrRels_to_OMR + FrRels_to_410)}
+
+define AbSJRR_to_Vern_  {alias AbSJRR_to_Vern kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Vern_  {alias FrRels_to_Vern kind 'debug-cfs' units 'cfs'}
+define FrRels_to_HORB_  {alias FrRels_to_HORB kind 'debug-cfs' units 'cfs'}
+define FrRels_to_SJR_   {alias FrRels_to_SJR  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_409_   {alias FrRels_to_409  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_OMR_   {alias FrRels_to_OMR  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Exp_   {alias FrRels_to_Exp  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_410_   {alias FrRels_to_410  kind 'debug-cfs' units 'cfs'}
+define FrRels_to_Dlt_   {alias FrRels_to_Dlt  kind 'debug-cfs' units 'cfs'}
+
+define C644_VAchg_ {alias C644 - C644[transfers_stage1] kind 'va-flow' units 'cfs'}
+*/
+
+! Compute Friant contribution to Friant VA from flood spills from Friant and abandoned SJRR flows
+define FrRels_to_Dlt {value AbSJRR_to_Vern + FrFld_to_Dlt}
+define FrRels_to_Dlt_ {alias FrRels_to_Dlt kind 'debug-cfs' units 'cfs'}
+
+!*********************************************************************************************
+! Keep a running total from February through May of Friant Releases that contributed to Delta Outflow
+define FrRels_to_DO_CumDV {std kind 'va-account' units 'taf'}
+define FrRels_to_DO_Cum {
+    case FirstYear {
+        condition month<FEB .and. wateryear==BgnWY
+        value 0.}
+    case February {
+        condition month==FEB
+        value FrRels_to_Dlt*cfs_taf}
+    case MarchThroughMAY{
+        condition month>=FEB .and. month<=MAY
+        value FrRels_to_DO_CumDV(-1) + FrRels_to_Dlt*cfs_taf}
+    case otherwise {
+        condition always
+        value FrRels_to_DO_CumDV(-1)}
+}
+goal setFrRels_to_DO_CumDV {FrRels_to_DO_CumDV = FrRels_to_DO_Cum}
+    
+
+! calculate additional export capacity that should be available due to SJRR flows at Vernalis
+/*define IE_from_SJRR  {
+    case AprilMay {
+        condition month==APR .or. month==MAY
+        value NMFS_MaxExp_wSJRR - NMFS_MaxExp}
+    case otherwise {
+        condition always
+        value 0.}
+}
+define IE_from_SJRR_ {alias IE_from_SJRR kind 'flow' units 'cfs'}
+*/
+
+!******************************************************************************
+! how much discretionary restoration flow reached HORB and is thus available for either recapture
+! or a VA contribution to Delta outflow?
+define SJRR_Disc_Delta {value D_SJR070_SJRRremove[WHEELJPOD]}
+define SJRR_Disc_Delta_ {alias SJRR_Disc_Delta kind 'va-flow' units 'cfs'}
+!define SJRR_to_HORB { value SJRR_Disc_Delta * C417B[transfers_stage1]/C644[transfers_stage1] } 
+!define SJRR_to_HORB_ { alias SJRR_to_HORB kind 'va-flow' units 'cfs'} 
+
+! define the dvars which track the VA delta outflow action and accounting
+define FriantVA_remainDV {std kind 'va-account' units 'taf'}
+define FriantVA_flowDV {std kind 'va-flow' units 'cfs'}
+
+!SJRR water year types
+!***Is this right?  I thought the WY type switched in the spring? **** 
+!define wyt_sjrr {select sjrr from wytype_sjrr where wyr=wateryear}
+
+! Friant contribution to delta outflow in years that are not critical-high or critical-low
+! Annual amount to be dedicated to outflow - initialized to 50 taf in February
+! This variable depicts the amount of VA obligation at the "start" of a month - it is the 
+! volume of Delta Outflow that Friant still needs to provide.  
+! Note the Friant releases that hit the Delta but can't be recaptured are subtracted in the current timestep
+! And the contribution of SJRR flows is subtracted in the following timestep.
+define usefloodflows {value 0.}  !Set = 1 if flood flows and abandoned SJRR flows should contribute to VA, = 0 if not
+define FriantVA_remain {
+    case FirstYear {
+        condition month<FEB .and. wateryear==BgnWY
+        value 0.}
+    case CriticalFeb {
+        condition wyt_sjrr>4 .and. month==FEB
+        value 0.}
+    case February {
+        condition month==FEB
+        value 0.}! value max(0., 50. - (usefloodflows * FrRels_to_Dlt*cfs_taf))} ! No VA
+    case MarchThroughMay{
+        condition month>=MAR .and. month<=MAY
+        value max(0., FriantVA_remainDV(-1) - FriantVA_flowDV(-1)*cfs_taf(-1) - (usefloodflows * FrRels_to_Dlt*cfs_taf))}
+    case JuneFinal{
+        condition month==JUN
+        value max(0., FriantVA_remainDV(-1) - FriantVA_flowDV(-1)*cfs_taf(-1))}  !This is any remaining VA responsibility that is not met at the end of May
+    case otherwise{
+        condition always
+        value FriantVA_remainDV(-1)}
+}
+goal setFriantVA_remainDV {FriantVA_remainDV = FriantVA_remain}
+
+define FriantVA_tgt {value FriantVA_remain * taf_cfs}
+define FriantVA_tgt_ {alias FriantVA_tgt kind 'va-flow' units 'cfs'}
+
+! calculate this month's contribution to delta outflow
+! This water cannot be recaptured
+define FriantVA_flowTARG {
+    case FebJun {
+        condition month>=FEB .and. month<=MAY
+        value min(FriantVA_tgt, SJRR_Disc_Delta)}
+    case otherwise {
+        condition always
+        value 0.}
+        }
+goal setFriantVA_flowtgt {FriantVA_flow = FriantVA_flowTARG}
+goal setFriantVA_flowDV2 {FriantVA_flowDV = FriantVA_flow}
+
+!******************************************************************************
+! Any restoration flows that are not destined to Delta Outflow can be exported
+
+define Delta_Recap_lmt  {value max(0., SJRR_Disc_Delta /*- FriantVA_flow*/)}
+define Delta_Recap_lmt_ {alias Delta_Recap_lmt kind 'flow' units 'cfs'}
+
+! Export capacity limits
+define Jones_SRPrecap_lmt { value max(min(TracyCapPhys,TracyMaxAllow)-C_DMC000_TD[WHEELJPOD],0.) }
+define Banks_SRPrecap_lmt { value max(min(BanksCapPhys,max_ba,BanksMaxAllow)-C_CAA003_TD[WHEELJPOD],0.) }
+
+define Jones_SRPrecap_lmt_ {alias Jones_SRPrecap_lmt kind 'Debug' units 'cfs'}
+define Banks_SRPrecap_lmt_ {alias Banks_SRPrecap_lmt kind 'Debug' units 'cfs'}
+
+/* from more recent BOR CalSim II model, do I need to use this?  The limit when ITP export cuts are happening is in, but not the DMC, CAA capacity limits
+ * 
+ * define Jones_SRPrecap_lmt { value max(0., min(min(TracyCapPhys,TracyMaxAllow)-D418[TRANSFERS_STAGE1],
+                                              4400. - C700[TRANSFERS_STAGE1],
+                                              4400. - C701[TRANSFERS_STAGE1],
+                                              4200. - C702[TRANSFERS_STAGE1])) }
+define Banks_SRPrecap_lmt { 
+    case ITPAction {
+        condition Alt2BSWPExpCut_SJRIE+Alt2BSWPExpCut_X2+Alt2BSWPExpCut_Final > 1.
+        value 0. }
+    case otherwise {
+        condition always
+        value max(0., min(min(BanksCapPhys,max_ba,BanksMaxAllow)-D419[TRANSFERS_STAGE1],
+                          10300. - C800[TRANSFERS_STAGE1],
+                          10000. - C801[TRANSFERS_STAGE1],
+                          10000. - C802[TRANSFERS_STAGE1],
+                          10000. - C803[TRANSFERS_STAGE1],
+                          10000. - C804[TRANSFERS_STAGE1])) }
+}*/
+
+! CalSim II VA model code 
+!define APRMAY_SRPrecap_lmt { value max(APRMAYEXPCTRL[WHEELJPOD]-D418_TD[TRANSFERS_STAGE1]-D419_TD[TRANSFERS_STAGE1],0.) }
+!define APRMAY_SRPrecap_lmt_ {alias APRMAY_SRPrecap_lmt kind 'Debug' units 'cfs'}
+!define NMFS_SRPrecap_lmt  { value max(NMFS_MaxExp_wSJRR-D418_TD[WHEELJPOD]-D419_TD[WHEELJPOD],0.) }
+!define NMFS_SRPrecap_lmt_ {alias NMFS_SRPrecap_lmt kind 'Debug' units 'cfs'}
+
+!Variable below not needed, limitation under AprMay export cap is handled in april_may_maxexport_BO_wNDD_ITP.wresl
+!T FitzHugh Stantec 021122
+/*define AprMayExpCtrl_wRecap {
+        case April {
+            condition     month == APR
+            value         NonPulseExpCtrl[WHEELJPOD]*14.0/daysin + D_SJR070_SJRRremove[SJR_WQ1]*14./daysin
+                        + PulseExpCtrl[WHEELJPOD]*16.0/daysin + D_SJR070_SJRRremove[SJR_WQ2]*16./daysin }
+        case May {
+            condition     month == MAY
+            value         NonPulseExpCtrl[WHEELJPOD]*16.0/daysin + D_SJR070_SJRRremove[SJR_WQ1]*16./daysin
+                        + PulseExpCtrl[WHEELJPOD]*15.0/daysin + D_SJR070_SJRRremove[SJR_WQ2]*15./daysin  }
+        case otherwise {
+            condition   always
+            value     99999. }
+}
+
+define APRMAY_SRPrecap_lmt { value max(AprMayExpCtrl_wRecap-C_DMC000_TD[WHEELJPOD]-C_CAA003_TD[WHEELJPOD] ,0.) }
+define APRMAY_SRPrecap_lmt_ {alias APRMAY_SRPrecap_lmt kind 'Debug' units 'cfs'}
+*/
+define Delta_SRP_limit {value /*min(APRMAY_SRPrecap_lmt, */Jones_SRPrecap_lmt+Banks_SRPrecap_lmt}
+define Delta_SRP_limit_ {alias Delta_SRP_limit kind 'va-flow' units 'cfs'}
+
+define SRP_Export_limit {value min(Delta_Recap_lmt, Delta_SRP_limit)}
+define SRP_Export_limit_ {alias SRP_Export_limit kind 'SJRR-flow' units 'cfs'}
+ 
+! D_OMR027_SJRRrecap is a placeholder for future recapture - flow is removed in the south delta
+! C_DMC000_SJRRrecap and C_CAA003_SJRRrecap are one possible calculation of the split in export of recaptured water
+! They are not actual exports at Jones and Banks.  Current calculation assumes a preference for Jones export.
+define C_DMC000_SJRRrecap {std kind 'DIVERSION' units 'CFS'} !Delta recapture at Jones
+define C_CAA003_SJRRrecap {std kind 'DIVERSION' units 'CFS'} !Delta recapture at Banks
+
+goal set_Delta_SRP_lmt1 {D_OMR027_SJRRrecap < SRP_Export_limit }
+goal set_Delta_SRP_lmt2 {D_OMR027_SJRRrecap = C_DMC000_SJRRrecap + C_CAA003_SJRRrecap}
+goal set_Delta_SRP_lmt3 {C_DMC000_SJRRrecap < Jones_SRPrecap_lmt}
+goal set_Delta_SRP_lmt4 {C_CAA003_SJRRrecap < Banks_SRPrecap_lmt}
+
+!Don't allow SJRRP recapture at Banks when there is an ITP export cut:
+goal lmtrcapduringITPcut {
+    lhs C_CAA003_SJRRrecap
+    case ITPexportcut {
+        condition Alt2BSWPExpCut_SJRIE +  Alt2BSWPExpCut_X2 + Alt2BSWPExpCut_Final > 0.
+        rhs 0.
+        lhs<rhs penalty 0}
+}
+
+define FrRecap_Delta {alias D_OMR027_SJRRrecap kind 'flow' units 'cfs'}
+
+! Any restoration flows that are eligible for recapture but cannot be exported also go to outflow
+! These are tracked separately from the defined contribution of 50 TAF/yr
+!define FriantVA_EXC {std kind 'va-flow' units 'cfs'}
+goal DistribSJRR1 {D_SJR070_SJRRremove[WHEELJPOD] = D_OMR027_SJRRrecap + FriantVA_Flow + FriantVA_EXC}
+
+goal limitFriantVA_EXC {
+    lhs FriantVA_EXC
+    rhs 0.
+    lhs>rhs penalty 99999}
+
+!goal removeFriantVA_EXC { D_SJR022_SJRRnorecap = FriantVA_EXC }
+goal set_D_SJR022_SJRRnorecap_zero { D_SJR022_SJRRnorecap = 0. }
+
+!Useful aliases for debugginh   
+define D_SJR070_SJRRremove_WHLJP {alias D_SJR070_SJRRremove[WHEELJPOD] kind 'flow' units 'cfs'}
+define D_SJR070_SJRRremove_SJRWQ1 {alias D_SJR070_SJRRremove[SJR_WQ1] kind 'flow' units 'cfs'}
+define D_SJR070_SJRRremove_SJRWQ2 {alias D_SJR070_SJRRremove[SJR_WQ2] kind 'flow' units 'cfs'}
+define C_SJR070_SJRWQ1 {alias C_SJR070[SJR_WQ1] kind 'flow' units 'cfs'}
+define C_SJR070_SJRWQ2 {alias C_SJR070[SJR_WQ2] kind 'flow' units 'cfs'}
+
+!Calculate capacity under D-1641 Apr-May export cap (same calcs as in april_may_maxexport_BO_wNDD_ITP.wresl
+define PulseExpCtrl_est {value min(PulseExpLimit,
+								ExpRatio*(DeltaInflowforNDOI[WHEELJPOD] + D_SJR070_SJRRremove[WHEELJPOD]),
+								MAXEXP_OMR + Export_AprMay_inc,
+								ExportCapacity)}
+	
+define NonPulseExpCtrl_est {value min(ExpRatio*(DeltaInflowforNDOI[WHEELJPOD] + D_SJR070_SJRRremove[WHEELJPOD]),
+								MAXEXP_OMR + Export_AprMay_inc,
+								ExportCapacity)}
+
+define DeltaRecaptoVAlim1_DAprMaysv {
+        case April {
+            condition     month == APR
+            value           max(0.,(NonPulseExpCtrl_est*14.0/daysin + PulseExpCtrl_est*16.0/daysin) - (ExportActualTD[WHEELJPOD] - Alt2BSWPExpCut)) }
+        case May {
+            condition     month == MAY
+            value           max(0.,(NonPulseExpCtrl_est*16.0/daysin + PulseExpCtrl_est*15.0/daysin) - (ExportActualTD[WHEELJPOD] - Alt2BSWPExpCut)) }
+        case otherwise {
+        	condition	always
+        	value		99999. }
+}
+
+define DeltaRecaptoVAlim1_DAprMay {alias DeltaRecaptoVAlim1_DAprMaysv kind 'qa-qc' units 'cfs'}
+
+!Calculate capacity under EI Ratio export cap
+define DeltaRecaptoVAlim2_EIsv {value max(0.,ExpRatio*(DeltaInflowforNDOI[WHEELJPOD] + D_SJR070_SJRRremove[WHEELJPOD]) - (ExportActualTD[WHEELJPOD] + ExportActualIF[WHEELJPOD] - Alt2BSWPExpCut )) }
+define DeltaRecaptoVAlim2_EI {alias DeltaRecaptoVAlim2_EIsv kind 'qa-qc' units 'cfs'}
+
+!Calculate capacity under OMR, this is exports that can occur through space under OMR limit in last cyle
+!+ increase in exports due to increase SJRR flows hitting Delta
+!+ any export reductions under ITP and Delta VA
+define DeltaRecaptoVAlim3_OMRsv {value max(0.,(C_OMR014_limit - C_OMR014[WHEELJPOD])/coefB) + (SJRR_Disc_Delta * coefA) / -coefB + Alt2BSWPExpCut }
+define DeltaRecaptoVAlim3_OMR {alias DeltaRecaptoVAlim3_OMRsv kind 'qa-qc' units 'cfs'}
+
+!Capacity at pumps
+define rempermitcapacity {
+    case ITPexportcut {
+        condition /*DeltaVA_Ops_onoff[WHEELJPOD] +*/ Alt2BSWPExpCut_SJRIE +  Alt2BSWPExpCut_X2 + Alt2BSWPExpCut_Final > 0.1
+		value Jones_SRPrecap_lmt}
+	case otherwise {
+		condition always
+		value Jones_SRPrecap_lmt + Banks_SRPrecap_lmt
+		}
+}
+
+define DeltaRecaptoVAlim5_capacsv {value rempermitcapacity + Alt2BSWPExpCut }
+define DeltaRecaptoVAlim5_capac {alias DeltaRecaptoVAlim5_capacsv kind 'qa-qc' units 'cfs'}

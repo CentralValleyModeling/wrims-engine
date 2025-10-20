@@ -1,0 +1,62 @@
+!Define IO USJR storage accounting variables
+define SIO {STD KIND 'STORAGE' UNITS 'TAF'}		!Combined storage in USJR of FWUA, SWP, and CVP
+define SIO_FWUA {STD KIND 'STORAGE' UNITS 'TAF'}	!FWUA storage in USJR
+define SIO_SWP {STD KIND 'STORAGE' UNITS 'TAF'}		!SWP storage in USJR
+define SIO_CVP {STD KIND 'STORAGE' UNITS 'TAF'}		!CVP storage in USJR.
+
+!Set SIO equal to combined USJRS storage
+goal combine_USJRS {SIO = S17 + S_MLRTN}
+!Split SIO
+goal split_SIO {SIO = SIO_FWUA + SIO_SWP + SIO_CVP}
+
+!Define IO USJRS internal transfers arcs
+
+define DIO_F_S {std kind 'flow-delivery' units 'cfs'}  !Transfer Friant to SWP
+define DIO_S_F {std kind 'flow-delivery' units 'cfs'}  !Transfer SWP to Friant
+define DIO_F_C {std kind 'flow-delivery' units 'cfs'}  !Transfer Friant to CVP
+define DIO_C_F {std kind 'flow-delivery' units 'cfs'}  !Transfer CVP to Friant
+
+!Define IO FK diversion subarcs.
+define D_MLRTN_FRK_FWUA {std kind 'flow-delivery' units 'cfs'} !FWUA diversion into FK Canal
+define D_MLRTN_FRK_SWP {std kind 'flow-delivery' units 'cfs'} !SWP diversion into FK canal
+define D_MLRTN_FRK_CVP {std kind 'flow-delivery' units 'cfs'} !CVP diversion into FK canal
+
+!Define IO Madera diversion subarcs.
+define D_MLRTN_MDC_FWUA {std kind 'flow-delivery' units 'cfs'} !FWUA into Madera Canal
+define D_MLRTN_MDC_SWP {std kind 'flow-delivery' units 'cfs'} !SWP diversion into Madera Canal
+define D_MLRTN_MDC_CVP {std kind 'flow-delivery' units 'cfs'} !CVP diversion into Madera Canal
+
+
+!Split D_MLRTN_FRK and D_MLRTN_MDC
+goal split_D_MLRTN_FRK {D_MLRTN_FRK000 = D_MLRTN_FRK_FWUA + D_MLRTN_FRK_SWP + D_MLRTN_FRK_CVP}
+goal split_D_MLRTN_MDC {D_MLRTN_MDC006 = D_MLRTN_MDC_FWUA + D_MLRTN_MDC_SWP + D_MLRTN_MDC_CVP}
+
+!Define IO USJR release arcs
+define C_MLRTN_FWUA {std kind 'flow-channel' units 'cfs'} !Millerton release of FWUA water
+define C_MLRTN_SWP {std kind 'flow-channel' units 'cfs'} !Millerton release of SWP water
+define C_MLRTN_CVP {std kind 'flow-channel' units 'cfs'} !Millerton release of CVP water
+
+!Split C_MLRTN
+goal split_C_MLRTN {C_MLRTN = C_MLRTN_FWUA + C_MLRTN_SWP + C_MLRTN_CVP}
+
+!These terms are to soften the bounds of IO Millerton storage in the continuity equation
+define FIO {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define FIO_FWUA {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define FIO_SWP {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define FIO_CVP {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define IIO {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define IIO_FWUA {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define IIO_SWP {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+define IIO_CVP {std kind 'flex-bound' units 'cfs'} !apply high negative weight
+
+!Split FIO AND IIO
+goal split_FIO {FIO = FIO_FWUA + FIO_SWP + FIO_CVP}
+goal split_IIO {IIO = IIO_FWUA + IIO_SWP + IIO_CVP}
+
+goal continuityIO_FWUA {I_MLRTN_IMP-C_MLRTN_FWUA-FIO_FWUA+IIO_FWUA-E17-E_MLRTN-D_MLRTN_FRK_FWUA-D_MLRTN_MDC_FWUA-DIO_F_S+DIO_S_F-DIO_F_C+DIO_C_F=SIO_FWUA*taf_cfs-SIO_FWUA(-1)*taf_cfs} !FWUA IO storage continuity
+goal continuityIO_SWP {-C_MLRTN_SWP-FIO_SWP+IIO_SWP-D_MLRTN_FRK_SWP-D_MLRTN_MDC_SWP-DIO_S_F+DIO_F_S=SIO_SWP*taf_cfs-SIO_SWP(-1)*taf_cfs} !SWP IO storage continuity
+goal continuityIO_CVP {-C_MLRTN_CVP-FIO_CVP+IIO_CVP-D_MLRTN_FRK_CVP-D_MLRTN_MDC_CVP-DIO_C_F+DIO_F_C=SIO_CVP*taf_cfs-SIO_CVP(-1)*taf_cfs} !CVP IO storage continuity
+
+
+
+

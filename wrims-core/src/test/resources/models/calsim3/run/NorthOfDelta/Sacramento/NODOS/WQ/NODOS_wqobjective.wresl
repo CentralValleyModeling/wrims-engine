@@ -1,0 +1,70 @@
+! This file provides the operations criteria that will trigger release from NODOS
+! to help meet water quality requirements in the south Delta.  These triggers are based
+! upon the previous month levels of Rock Slough CL concentrations.
+!
+! Note: These trigger levels may be refined in the future.
+!
+define relimitdv {std kind 'FLOW-DESIRED' units 'CFS'}
+define wqrelobjdv {std kind 'FLOW-DESIRED' units 'CFS'}
+!
+define wq_releaseobj {
+    case first_year {
+     condition month <= DEC .and. wateryear == BgnWY
+     value 0.}
+    case notarg0 {
+     condition DeltaWQReleaseSwitch <= 0
+     value 0.}
+! 3 month 1,500 cfs schedule
+    case JulSep1 {
+         condition DeltaWQReleaseSwitch == 1 .and. month >= Jul .and. RS_CL_Month_sv >= 23. !changed from 20 to avoid some operational conflicts
+         value 1500. }
+    case JulSep1ramp {
+         condition DeltaWQReleaseSwitch == 1 .and. month >= Jul
+         value max(0., min(relimitdv(-1)-750.,max(D34(-1),C_SAC041_WQ(-1)))) }
+    case Other1 {  ! code 0
+         condition DeltaWQReleaseSwitch == 1
+         value 0. }
+! 6 month 1,000 - 1,500 cfs tiered schedule
+    case OctDec2_1 {     ! code 1
+         condition DeltaWQReleaseSwitch >= 1 .and. month <= Dec .and. RS_CL_Month_sv >= 100.
+         value 1000. }
+    case OctDec2_2 {
+         condition DeltaWQReleaseSwitch >= 1 .and. month <= Dec .and. RS_CL_Month_sv >= 50. .and. RS_CL_Month_sv < 100.
+         value 750. }
+    case OctDec2_3 {
+         condition DeltaWQReleaseSwitch >= 1 .and. month <= Dec .and. RS_CL_Month_sv >= 0. .and. RS_CL_Month_sv < 50.
+         value 0. }
+    case OctDec2ramp {
+         condition DeltaWQReleaseSwitch >= 1 .and. month <= Dec
+         value max(0., min(relimitdv(-1)-500.,max(D34(-1),C_SAC041_WQ(-1)))) }
+    case JulSep2_1 {  ! code 2
+         condition DeltaWQReleaseSwitch >= 1 .and. month >= Jul .and. RS_CL_Month_sv >= 23.
+         value 1500. }
+    case JulSep2_2 {
+         condition DeltaWQReleaseSwitch >= 1 .and. month >= Jul .and. RS_CL_Month_sv < 23.
+         value 0. }
+    case JulSep2ramp {
+         condition DeltaWQReleaseSwitch >= 1 .and. month >= Jul
+         value max(0., min(relimitdv(-1)-500.,max(D34(-1),C_SAC041_WQ(-1)))) }
+    case Other2 {  ! code 0
+         condition always
+         value 0. }
+    }
+goal save_relobj {wqrelobjdv = wq_releaseobj}
+
+! Further constrain WQ release from NODOS if storage is below 150/300 TAF.
+define release_limit {
+    case first_year {
+     condition month <= DEC .and. wateryear == BgnWY
+     value 0.}
+    case above200 {
+         condition month <= Dec .or. month >=Jul .and. s34(-1) >= 150.*DeltaWQReleaseSwitch
+         value wq_releaseobj }
+    case below200 {
+         condition month <= Dec .or. month >=Jul .and. s34(-1) < 150.*DeltaWQReleaseSwitch
+         value 0.5*wq_releaseobj }
+    case OtherMonths {
+         condition always
+         value 0. }
+    }
+goal save_rellimit {relimitdv = release_limit}

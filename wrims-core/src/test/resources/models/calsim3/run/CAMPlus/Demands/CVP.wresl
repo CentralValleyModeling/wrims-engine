@@ -1,0 +1,326 @@
+! Defines CVP South of Delta demands.
+! Allocation reductions must follow the reduction priorities shown below:
+!     if shasta critical year, cut Exchange and Refuge to 75%
+!     1. (first cut) AG cut to 75%
+!     2. AG cut to 50%, MI cut to 75%
+!     3. AG cut to 25%
+!     4. AG cut to 0%, MI cut to 75%
+!     5. MI cut to 0%
+!     6. Exchange and Refuge cut to 0%
+!     7. (last cut) Losses cut to 0%
+
+! Ryan Wilbur 8-1-03
+
+! demand allocation cut level
+define cut1 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut2 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut3 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut4 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut5 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut6 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+define cut7 {lower 0 upper 1. kind 'CVP-CUT' units 'PERCENT'}
+
+! max annual demand by type
+define CVP_MAX    {value 3332.}
+define CVP_AG_MAX {value 1841.}
+define CVP_MI_MAX {value  144.}
+define CVP_EX_MAX {value  875.}
+define CVP_RF_MAX {value  288.}
+define CVP_LS_MAX {value  184.}
+
+! annual delivery by type
+define CVP    {lower 0 upper 3332. kind 'CVP-DEL' units 'TAF'}
+define CVP_AG {lower 0 upper 1841. kind 'CVP-DEL' units 'TAF'}
+define CVP_MI {lower 0 upper  144. kind 'CVP-DEL' units 'TAF'}
+define CVP_EX {lower 0 upper  875. kind 'CVP-DEL' units 'TAF'}
+define CVP_RF {lower 0 upper  288. kind 'CVP-DEL' units 'TAF'}
+define CVP_LS {lower 0 upper  184. kind 'CVP-DEL' units 'TAF'}
+
+goal setCVP {CVP = CVP_AG + CVP_MI + CVP_EX + CVP_RF + CVP_LS}
+
+! partition ag and mi into annual sub-levels for tiered cut procedure
+define CVP_AG1 {lower 0 upper 460.25 kind 'CVP-TIER' units 'TAF'}
+define CVP_AG2 {lower 0 upper 460.25 kind 'CVP-TIER' units 'TAF'}
+define CVP_AG3 {lower 0 upper 460.25 kind 'CVP-TIER' units 'TAF'}
+define CVP_AG4 {lower 0 upper 460.25 kind 'CVP-TIER' units 'TAF'}
+				  
+define CVP_MI1 {lower 0 upper  72. kind 'CVP-TIER' units 'TAF'}
+define CVP_MI2 {lower 0 upper  36. kind 'CVP-TIER' units 'TAF'}
+define CVP_MI3 {lower 0 upper  36. kind 'CVP-TIER' units 'TAF'}
+			 		  
+!Need to be defined in order to access prior month values			 		 
+define del_cvp_total_s {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+define del_cvp_pag_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+define del_cvp_pmi_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+define del_cvp_pex_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+define del_cvp_prf_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}
+define del_cvp_pls_s   {STD KIND 'DELIVERY-CVP' UNITS 'CFS'}	 		  
+			 		      
+!CVP allocations are Mar-Feb, so calculating them in Jan-Feb doesn't make much sense, but left existing logic as is, since hopefully those early allocations won't matter much 
+!Since FAM calculates, Mar-Dec, Apr-Dec, May-Dec, need to account for past deliveries in current allocation year (Mar, Apr), and also make some assumption of deliveries in future Jan-Fen.
+!Calculate past month actual deliveries if needed
+define MarCVPSODAGdels {
+	case AprilMay {
+		condition range(month, Apr, May)
+		value del_cvp_pag_s(prevMar) * cfs_taf(prevMar)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define AprCVPSODAGdels {
+	case AprilMay {
+		condition month == May
+		value del_cvp_pag_s(prevApr) * cfs_taf(prevApr)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define MarCVPSODMIdels {
+	case AprilMay {
+		condition range(month, Apr, May)
+		value del_cvp_pmi_s(prevMar) * cfs_taf(prevMar)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define AprCVPSODMIdels {
+	case AprilMay {
+		condition month == May
+		value del_cvp_pmi_s(prevApr) * cfs_taf(prevApr)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define MarCVPSODEXdels {
+	case AprilMay {
+		condition range(month, Apr, May)
+		value del_cvp_pex_s(prevMar) * cfs_taf(prevMar)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define AprCVPSODEXdels {
+	case AprilMay {
+		condition month == May
+		value del_cvp_pex_s(prevApr) * cfs_taf(prevApr)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define MarCVPSODRFdels {
+	case AprilMay {
+		condition range(month, Apr, May)
+		value del_cvp_prf_s(prevMar) * cfs_taf(prevMar)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define AprCVPSODRFdels {
+	case AprilMay {
+		condition month == May
+		value del_cvp_prf_s(prevApr) * cfs_taf(prevApr)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define MarCVPSODLSdels {
+	case AprilMay {
+		condition range(month, Apr, May)
+		value del_cvp_pls_s(prevMar) * cfs_taf(prevMar)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+define AprCVPSODLSdels {
+	case AprilMay {
+		condition month == May
+		value del_cvp_pls_s(prevApr) * cfs_taf(prevApr)}
+	case otherwise {
+		condition always
+		value 0.}
+}		 		
+
+!Define assumption of future Jan-Feb deliveries, based on 50% allocation for Ag, 75% for M&I, 100% for rest
+define cvpagmon_demJan {select AGDEM from CAM_CVPDemandPattern where month=Jan}
+define cvpagmon_demFeb {select AGDEM from CAM_CVPDemandPattern where month=Feb}
+define JanFebCVPSODAGdels {value (cvpagmon_demJan+cvpagmon_demFeb)*CVP_AG_MAX*0.5}
+define cvpmimon_demJan {select MIDEM from CAM_CVPDemandPattern where month=Jan}
+define cvpmimon_demFeb {select MIDEM from CAM_CVPDemandPattern where month=Feb}
+define JanFebCVPSODMIdels {value (cvpagmon_demJan+cvpagmon_demFeb)*CVP_MI_MAX*0.75}
+define cvpexmon_demJan {select EXDEM from CAM_CVPDemandPattern where month=Jan}
+define cvpexmon_demFeb {select EXDEM from CAM_CVPDemandPattern where month=Feb}
+define JanFebCVPSODEXdels {value (cvpagmon_demJan+cvpagmon_demFeb)*CVP_EX_MAX}
+define cvprfmon_demJan {select RFDEM from CAM_CVPDemandPattern where month=Jan}
+define cvprfmon_demFeb {select RFDEM from CAM_CVPDemandPattern where month=Feb}
+define JanFebCVPSODRFdels {value (cvpagmon_demJan+cvpagmon_demFeb)*CVP_RF_MAX}
+define cvplsmon_demJan {select LSDEM from CAM_CVPDemandPattern where month=Jan}
+define cvplsmon_demFeb {select LSDEM from CAM_CVPDemandPattern where month=Feb}
+define JanFebCVPSODLSdels {value (cvpagmon_demJan+cvpagmon_demFeb)*CVP_LS_MAX}
+   			 		      
+! apply cuts to corresponding sub-level, in Mar-May make proper adjustments for past month and assumed future Jan-Feb deliveries
+goal setCVP_AG1 {
+	lhs CVP_AG1 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_AG_MAX*cut4 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_AG_MAX - MarCVPSODAGdels - AprCVPSODAGdels - JanFebCVPSODAGdels)*cut4 }
+}
+goal setCVP_AG2 {
+	lhs CVP_AG2 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_AG_MAX*cut3 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_AG_MAX - MarCVPSODAGdels - AprCVPSODAGdels - JanFebCVPSODAGdels)*cut3 }
+}
+goal setCVP_AG3 {
+	lhs CVP_AG3 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_AG_MAX*cut2 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_AG_MAX - MarCVPSODAGdels - AprCVPSODAGdels - JanFebCVPSODAGdels)*cut2 }
+}
+goal setCVP_AG4 {
+	lhs CVP_AG4 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_AG_MAX*cut1 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_AG_MAX - MarCVPSODAGdels - AprCVPSODAGdels - JanFebCVPSODAGdels)*cut1 }
+}
+
+!goal setCVP_AG1 {CVP_AG1 = 0.25*CVP_AG_MAX*cut4}
+!goal setCVP_AG2 {CVP_AG2 = 0.25*CVP_AG_MAX*cut3}
+!goal setCVP_AG3 {CVP_AG3 = 0.25*CVP_AG_MAX*cut2}
+!goal setCVP_AG4 {CVP_AG4 = 0.25*CVP_AG_MAX*cut1}
+
+!Same for M&I
+goal setCVP_MI1 {
+	lhs CVP_MI1 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.50*CVP_MI_MAX*cut5 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.50*(CVP_MI_MAX - MarCVPSODMIdels - AprCVPSODMIdels - JanFebCVPSODMIdels)*cut5 }
+}
+goal setCVP_MI2 {
+	lhs CVP_MI2 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_MI_MAX*cut4 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_MI_MAX - MarCVPSODMIdels - AprCVPSODMIdels - JanFebCVPSODMIdels)*cut4 }
+}
+goal setCVP_MI3 {
+	lhs CVP_MI3 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs 0.25*CVP_MI_MAX*cut2 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs 0.25*(CVP_MI_MAX - MarCVPSODMIdels - AprCVPSODMIdels - JanFebCVPSODMIdels)*cut2 }
+}
+
+!goal setCVP_MI1 {CVP_MI1 = 0.50*CVP_MI_MAX*cut5}
+!goal setCVP_MI2 {CVP_MI2 = 0.25*CVP_MI_MAX*cut4}
+!goal setCVP_MI3 {CVP_MI3 = 0.25*CVP_MI_MAX*cut2}
+
+!In March-May set CVP allocations to same as calculated in CalSim 3
+!Sensitivity trst with this removed
+!goal setcut1 { lhs cut1 case MarMay { condition range(month, Mar, May) rhs 4.*max(0.,min(0.25,(perdv_cvpag_s[SJR_WQ1] - 0.75))) lhs>rhs constrain lhs<rhs penalty 15000 }}  !Ag
+!goal setcut2 { lhs cut2 case MarMay { condition range(month, Mar, May) rhs 4.*max(0.,min(0.25,(perdv_cvpag_s[SJR_WQ1] - 0.5))) lhs>rhs constrain lhs<rhs penalty 15000 }}  !Ag, M&I
+!goal setcut3 { lhs cut3 case MarMay { condition range(month, Mar, May) rhs 4.*max(0.,min(0.25,(perdv_cvpag_s[SJR_WQ1] - 0.25))) lhs>rhs constrain lhs<rhs penalty 15000 }}  !Ag
+!goal setcut4 { lhs cut4 case MarMay { condition range(month, Mar, May) rhs 4.*max(0.,min(0.25,(perdv_cvpag_s[SJR_WQ1] - 0.))) lhs>rhs constrain lhs<rhs penalty 15000 }}  !Ag, M&I
+
+!In March-May set CVP allocations to same as calculated in CalSim 3, below ensures M&I never below 50%
+!goal setcut5 { lhs cut5 case MarMay { condition range(month, Mar, May) rhs 1.0 }}
+
+! limit cut6 to 75% for shasta critical years, uses same WY type as CalSim 3 so will be the same
+goal setCut6 {lhs cut6 case ShaCrit{condition wyt_SHASTA_cvp==4 rhs 0.75 }!lhs>rhs constrain lhs<rhs penalty 0}   
+                       case other  {condition always rhs 1.0 }}! lhs>rhs constrain lhs<rhs penalty 0}}
+
+!In March-May set CVP allocations to same as calculated in CalSim 3, below ensures losses always met
+goal setcut7 { lhs cut7 case MarMay { condition range(month, Mar, May) rhs 1.0 }}
+
+!Same calcs as above for EX. RF, LS
+goal setCVP_EX {
+	lhs CVP_EX 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs CVP_EX_MAX*cut6 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs (CVP_EX_MAX - MarCVPSODEXdels - AprCVPSODEXdels - JanFebCVPSODEXdels)*cut6 }
+}
+goal setCVP_RF {
+	lhs CVP_RF 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs CVP_RF_MAX*cut6 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs (CVP_RF_MAX - MarCVPSODRFdels - AprCVPSODRFdels - JanFebCVPSODRFdels)*cut6 }
+}
+goal setCVP_LS {
+	lhs CVP_LS 
+	case JanFeb {
+ 		condition range(month,Jan,Feb)
+		rhs CVP_LS_MAX*cut7 }
+	case MarMay {
+		condition range(month,Mar,May)
+	 	rhs (CVP_LS_MAX - MarCVPSODLSdels - AprCVPSODLSdels - JanFebCVPSODLSdels)*cut7 }
+}
+
+!goal setCVP_EX {CVP_EX = CVP_EX_MAX*cut6}
+!goal setCVP_RF {CVP_RF = CVP_RF_MAX*cut6}
+!goal setCVP_LS {CVP_LS = CVP_LS_MAX*cut7}
+
+! monthly deliveries for each type
+define(fm) CVP_AG_fm {std kind 'CVP-DEL-AG' units 'TAF'}
+
+define(fm) CVP_MI_fm {std kind 'CVP-DEL-MI' units 'TAF'}
+
+define(fm) CVP_EX_fm {std kind 'CVP-DEL-EX' units 'TAF'}
+
+define(fm) CVP_RF_fm {std kind 'CVP-DEL-RF' units 'TAF'}
+
+define(fm) CVP_LS_fm {std kind 'CVP-DEL-LS' units 'TAF'}
+
+! monthly demand pattern for each type
+define(fm) CVP_AGDEM_fm {select AGDEM from CAM_CVPDemandPattern where month=mv($m)}
+
+define(fm) CVP_MIDEM_fm {select MIDEM from CAM_CVPDemandPattern where month=mv($m)}
+
+define(fm) CVP_EXDEM_fm {select EXDEM from CAM_CVPDemandPattern where month=mv($m)}
+
+define(fm) CVP_RFDEM_fm {select RFDEM from CAM_CVPDemandPattern where month=mv($m)}
+
+define(fm) CVP_LSDEM_fm {select LSDEM from CAM_CVPDemandPattern where month=mv($m)}
+
+! set all monthly deliveries
+goal(fm) setCVP_AG_fm {CVP_AG_fm($m) = CVP_AGDEM_fm($m)*CVP_AG1 + CVP_AGDEM_fm($m)*CVP_AG2 + CVP_AGDEM_fm($m)*CVP_AG3 + CVP_AGDEM_fm($m)*CVP_AG4}
+goal(fm) setCVP_MI_fm {CVP_MI_fm($m) = CVP_MIDEM_fm($m)*CVP_MI1 + CVP_MIDEM_fm($m)*CVP_MI2 + CVP_MIDEM_fm($m)*CVP_MI3}
+goal(fm) setCVP_EX_fm {CVP_EX_fm($m) = CVP_EXDEM_fm($m)*CVP_EX}
+goal(fm) setCVP_RF_fm {CVP_RF_fm($m) = CVP_RFDEM_fm($m)*CVP_RF}
+goal(fm) setCVP_LS_fm {CVP_LS_fm($m) = CVP_LSDEM_fm($m)*CVP_LS}
+
+! total all demands
+goal setCVP_AG {CVP_AG = (sum(i=0, fm, 1) CVP_AG_fm(i))}
+
+goal setCVP_MI {CVP_MI = (sum(i=0, fm, 1) CVP_MI_fm(i))}
+
+goal(fm) setCVP_fm {D7_fm($m) = CVP_AG_fm($m) + CVP_MI_fm($m) + CVP_EX_fm($m) + CVP_RF_fm($m) + CVP_LS_fm($m)}
+
+! temp variables
+!define CVP_Allocation {lower 0 upper 1 kind 'Percent' units 'percent'}
+define CVP_Delivery {lower 0 upper 6000 kind 'Delivery' units 'TAF'}
+goal set_CVP_Del {CVP_Delivery = CVP}
+!goal set_CVP_All {CVP_Allocation = CVP/3332.}

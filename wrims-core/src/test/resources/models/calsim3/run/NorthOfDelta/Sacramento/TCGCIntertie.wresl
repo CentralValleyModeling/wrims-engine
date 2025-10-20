@@ -1,0 +1,46 @@
+! Intertie capacity limits
+define maxTCC062_GCC036 {select maxflow from TCGCIntertie where arc=1,month=month}
+define maxTCC085_GCC056 {select maxflow from TCGCIntertie where arc=2,month=month}
+
+! Intertie capacities are adjusted upward in January and February to account for the fact that GCC capacity is limited to water for
+! 08N_PR1 in those months (for maintenance purposes), so all CVP contract water for 8N_PR2 and 8S_PR must come through the TCGC Intertie (see goal janfebD_SAC207_GCC007)
+! Code below computes demand for surface water at 8N_PR2 and 8S_PR and then allows intertie flow up to that amount
+! TF Stantec 07292020
+
+! Demand for surface water assuming minimum GW pumping
+define SWdem_08N_PR2x {value ((AWR_08N_PR2 + AWO_08N_PR2 + AWW_08N_PR2) * (1 + RPF_08N_PR2)  !!Applied water demand + Riparian ET
+						- min(TW_08N_PR2, RUFR_08N_PR2*AWR_08N_PR2 + RUFO_08N_PR2*AWO_08N_PR2 + RUFW_08N_PR2*AWW_08N_PR2) !Reuse
+						- (AWR_08N_PR2 *(1 + RPF_08N_PR2 - RUFR_08N_PR2) + AWO_08N_PR2 *(1 + RPF_08N_PR2 - RUFO_08N_PR2) + AWW_08N_PR2 *(1 + RPF_08N_PR2 - RUFW_08N_PR2)) 
+							* GPmin_08N_PR2) !Minimum GW pumping
+						* (1 + 1/(1/(EVF_GCC039_08N_PR2 + DPF_GCC039_08N_PR2 + LFF_GCC039_08N_PR2 + OSF_GCC039_08N_PR2) - 1))} !Last line accounts for loss
+define CLdem_08N_PR2x {value CLmon_GCC039_08N_PR2 *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC039_08N_PR2  - DPF_GCC039_08N_PR2 - LFF_GCC039_08N_PR2 - OSF_GCC039_08N_PR2) }  !Contract allocation
+define SWdeltarget_08N_PR2x {value min(SWdem_08N_PR2x,CLdem_08N_PR2x)}   !Surface water delivery target
+
+! Demand for surface water assuming minimum GW pumping
+! There is a water right involved here but ignoring since it is not used in January-February
+define SWdem_08S_PRx {value ((AWR_08S_PR + AWO_08S_PR + AWW_08S_PR) * (1 + RPF_08S_PR)  !!Applied water demand + Riparian ET
+						- min(TW_08S_PR, RUFR_08S_PR*AWR_08S_PR + RUFO_08S_PR*AWO_08S_PR + RUFW_08S_PR*AWW_08S_PR) !Reuse
+						- (AWR_08S_PR *(1 + RPF_08S_PR - RUFR_08S_PR) + AWO_08S_PR *(1 + RPF_08S_PR - RUFO_08S_PR) + AWW_08S_PR *(1 + RPF_08S_PR - RUFW_08S_PR)) 
+							* GPmin_08S_PR) !Minimum GW pumping
+						* (1 + 1/(1/(EVF_CBD037_08S_PR + DPF_CBD037_08S_PR + LFF_CBD037_08S_PR + OSF_CBD037_08S_PR) - 1))} !Last line accounts for loss
+define CLdem_08S_PRx {value CLmon_CBD037_08S_PR *taf_cfs* perdel_cvprf_sys + 
+						   CLmon_GCC056_08S_PR *taf_cfs* perdel_cvprf_sys/(1 - EVF_GCC056_08S_PR   - DPF_GCC056_08S_PR  - LFF_GCC056_08S_PR  - OSF_GCC056_08S_PR) }  !Contract allocation
+define SWdeltarget_08S_PRx {value min(SWdem_08S_PRx,CLdem_08S_PRx)}   !Surface water delivery target
+
+define Intertiemax_JanFeb {value SWdeltarget_08N_PR2x + SWdeltarget_08S_PRx}
+
+goal limitD_TCC062_GCC036 {
+	lhs D_TCC062_GCC036
+    case JanFeb {
+	condition month == Jan .or. month == Feb
+		rhs max(0.,min(1000.,Intertiemax_JanFeb - maxTCC085_GCC056*taf_cfs))  ! Physical capacity of the Maxwell Intertie is 1000 cfs.
+		lhs>rhs constrain
+		lhs<rhs penalty 0.}
+	case otherwise {
+		condition always
+		rhs maxTCC062_GCC036*taf_cfs
+		lhs>rhs constrain
+		lhs<rhs penalty 0.}
+				}
+				
+goal limitD_TCC085_GCC056 {D_TCC085_GCC056 < maxTCC085_GCC056*taf_cfs}

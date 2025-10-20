@@ -1,0 +1,180 @@
+! OMR_PA.wresl
+!
+! Implements only Action 1 from the 15 Dec 2008 FWS Delta Smelt BO.
+! Action 1: Limit Exports so OMR flows >= -2,000 cfs (14-day avg.) w/ 5-day running avg. + 25%
+!
+! Action 2 and 3 are replaced with a limit on exports so that OMR flows >= -5,000 cfs (14-day avg.) w/ 5-day running avg. +/- 25%
+!   if Jan, the limit is adjusted to -5,500 CFS
+!   if Apr or May, the limit is adjusted to -3,500 CFS in AN and BN year types
+!
+! Action 4, the fall X2 action in W and AN years is not included in this model
+!
+! Action 5, HORB gate operations, see SoDeltaChannels code for this modification
+!
+! **********************************************************************************************
+define OMR_background {        ! 
+        case DEC {
+                condition month==DEC
+                value -8000. }
+        case JAN_JUNE {
+                condition month>=JAN .and. month<=JUN
+                value -5000. }
+        case otherwise {
+                condition always        
+                value -9999. }
+}
+
+!December Action Turbidity Trigger
+!Assumes monthly sum of unimpaired flows for four rivers in Sacramento River Basin (Sac, American, Yuba, and Feather) exceeding 20,000 cfs is a good
+!but conservative indicator of turbidty (12NTU) at the three turbidity stations defined in the FWS BO ( Holland Cut, Prisoner's Point, and Victoria Canal).
+define TurbT_Thresh {value 20000.}
+!define SAC_RI {timeseries kind 'SRI_FLOW' units 'CFS'} !Jay
+define SAC_RI{value (UNIMP_OROV + UNIMP_FOLS + UNIMP_YUBA + UNIMP_SRBB)*taf_cfs} !CDEC unimpaired flow at FTO,AMF,YRS,SBB
+
+define SRIdv {alias SAC_RI kind 'FLOW-CHANNEL' units 'CFS'}
+
+define TurbTdv {std kind 'DECAct' units 'NONE'}
+define TurbT {
+        case Initialize {
+            condition month==OCT .and. wateryear==1922
+                value 99.}
+    case ON { 
+                condition month >= DEC .and. month<= MAR .and. SAC_RI>=TurbT_Thresh      !month<= FEB .and. SAC_RI>=TurbT_Thresh
+                value 1.}
+    case OFF {
+        condition always
+                value 99.}
+}
+goal set_TurbTdv {TurbTdv = TurbT}
+
+define OMR_NoTurbBrid { !20230707
+	case NAA {
+		condition always
+		value -2000.}}
+		
+define OMR_NoTurbBriddv {alias OMR_NoTurbBrid kind 'FLOW' units 'CFS' }
+
+define Limit_OMR_50 { value -3500. }
+define Limit_OMR_50dv {alias Limit_OMR_50 kind 'FLOW' units 'CFS' }
+define PA_Percent_50 {select Perc50 from OMR_SLMN_Coverage where WYT=wyt_sac, month=month }
+define Limit_OMR_75 { value -5000. }
+define Limit_OMR_75dv {alias Limit_OMR_75 kind 'FLOW' units 'CFS' }
+define PA_Percent_75 {value 0.}
+
+define DeltaExcess {
+    case BeforeDeltaCyc {condition cyclenum < cn_DELTA value 0.}    !Delta Condition only evaluated starting Delta cycle
+    case otherwise {condition always value 1 - Balanced_D1641}
+}
+
+define QwestFlowEst {
+	case firstmonth {condition month==BgnMo .and. wateryear==BgnWY value 2735.} !use simulated Oct1921 values from earlier runs
+    case FirstCycle {condition cyclenum==cn_GW_INITIAL value C_SJR013(-1)}
+    case otherwise {condition always value C_SJR013[-1]}
+}
+
+define X2Est {
+    case FirstCycle {condition cyclenum==cn_GW_INITIAL value X2_PRV(-1)}
+    case otherwise {condition always value X2_PRV[-1]}
+}
+
+define StormFlexTrig {
+	case triggerOn {condition DeltaExcess == 1 .AND. QwestFlowEst > 1000.0 .AND. X2Est < 81.0 .AND. TurbT==99.0
+					value 1.}
+	case otherwise {condition always value 0.}			
+}
+
+define StormFlexTrigdv {alias StormFlexTrig kind 'index' units 'NONE' }
+
+define StrmFlx_Percent { !20230707
+	case NAA {
+		condition always
+		value StormFlexTrig * min ((1.-PA_Percent_50-PA_Percent_75), 6./daysin)}}
+
+define Bckgrnd_Percent { !20230707
+	case NAA {
+		condition always
+		value max(0., 1.-PA_Percent_50-PA_Percent_75-StrmFlx_Percent)}}
+
+define OMR_Storm { value -6250. }   
+define OMR_Stormdv {alias OMR_Storm kind 'FLOW' units 'CFS' }
+
+define OMR_JanJun { value -5000. }
+define OMR_JanJundv {alias OMR_JanJun kind 'FLOW' units 'CFS' }
+
+ define dryJanCheckdv {std kind 'index' units 'NONE'}
+define dryJanCheck {
+    case ON { 
+                condition month == JAN .and. TurbT==99.0 .and. WYT_Sac_Frcst==4.
+                value 1.}
+    case OFF {
+        condition always
+                value 99.}
+}
+goal set_dryJanCheckdv {dryJanCheckdv = dryJanCheck}
+
+!OMR PA 14 day average
+define OMR_PA_1 {
+
+ case Initialize {
+         condition month==OCT .and. wateryear==1922
+         value -99999.}
+ case Oct_Dec {
+        condition month>=OCT .and. month<DEC
+        value -99999.}
+
+ case OFF_DEC {
+        condition month==DEC .and. SAC_RI<TurbT_Thresh
+        value -99999.}
+!NAA 20230707
+ case FIRST_FLUSH {
+        condition month>=DEC .and. month<=JAN .and. TurbTdv(-1)==99. .and. SAC_RI>=TurbT_Thresh
+        value (((OMR_background * (1. - PA_Percent_50 - PA_Percent_75) + Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) * 17. + OMR_NoTurbBrid*14.)/daysin)}
+ case JAN_TURB_AVOID {                                  
+        condition month==JAN .and. TurbTdv(-1)==1. .and. SAC_RI>=TurbT_Thresh
+        value (((OMR_background * (1. - PA_Percent_50 - PA_Percent_75) + Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) * (daysin-5.) + OMR_NoTurbBrid*5.)/daysin) } 
+ case JAN_ANBND{                                                         
+        condition month==JAN .and. WYT_Sac_Frcst >1. .and. WYT_Sac_Frcst <= 4.   
+    value (OMR_Storm * StrmFlx_Percent + (Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) + OMR_JanJun * Bckgrnd_Percent)}
+ /*case JAN_D {                                                         
+        condition month==JAN .and. WYT_Sac_Frcst==4.
+    value (OMR_Storm * StrmFlx_Percent + (Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) + OMR_JanJun * Bckgrnd_Percent)}
+ */   
+ case FEB_TURB_AVOID {                                  
+        condition month==FEB .and. SAC_RI>=TurbT_Thresh
+        value (((OMR_background * (1. - PA_Percent_50 - PA_Percent_75) + Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) * (daysin-5.)+ OMR_NoTurbBrid * 5.)/daysin )}
+ case FEB_ANBN{                                                         
+        condition month==FEB .and. WYT_Sac_Frcst >1. .and. WYT_Sac_Frcst <= 3.   
+    value (OMR_Storm * StrmFlx_Percent + (Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) + OMR_JanJun * Bckgrnd_Percent)}
+ case FEB_D {                                                         
+        condition month==FEB .and. WYT_Sac_Frcst==4. .and. dryJanCheckdv(-1)==99.   
+    value (OMR_Storm * StrmFlx_Percent + (Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75) + OMR_JanJun * Bckgrnd_Percent)}
+ case JANJUN {                                       
+    condition month>=JAN .and. month<=JUN
+    value OMR_JanJun * (1. - PA_Percent_50 - PA_Percent_75) + Limit_OMR_50 * PA_Percent_50 + Limit_OMR_75 * PA_Percent_75 }
+case otherwise {
+	condition always
+	value -99999. }
+}
+
+  define OMR_PA_1dv {alias OMR_PA_1 kind 'FLOW' units 'CFS'}
+  
+  define OMR_RPA_14day{value OMR_PA_1} !Remove reference to RPAs to avoid confusion.
+  
+  !Put an additional constraint so that 5 day OMR is not negative more than 25% of the 14 day OMR
+  define OMR_RPA_5day {
+        case Action {
+              condition OMR_RPA_14day >= -12000.
+              value 1.25*OMR_RPA_14day}
+        case None {
+              condition always
+              value -99999.}
+  }
+  
+  ! Use Paul Hutton's regression equation to determine an aggregate based on a determination of whether
+  ! the 5 day or the 14 day will control
+define OMR_RPA_FWS {value max(OMR_RPA_14day,(OMR_RPA_5day+389.)/1.02)}
+  
+  !QA/QC
+define OMR_RPA14d {alias OMR_RPA_14day  kind 'FLOW-REG' units 'CFS'} ! for output
+define OMR_RPA_FWSdv {alias OMR_RPA_FWS  kind 'FLOW-REG' units 'CFS'}
+

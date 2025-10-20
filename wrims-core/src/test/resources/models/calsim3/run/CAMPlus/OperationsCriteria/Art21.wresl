@@ -1,0 +1,88 @@
+! Article 21 calculation
+
+!define art_21_tot {lower 0 upper 10000 kind 'DELIVERY' units 'TAF'}
+
+define(fm) art_21_fm {lower 0 upper 500 kind 'DELIVERY' units 'TAF'}
+
+define(fm) SL_int_fm {INTEGER std kind 'INTEGER' units 'NONE'}
+
+goal(fm) set_art_21_mo_fm {lhs art_21_fm($m) rhs 10000. lhs<rhs penalty 0.0}
+
+goal(fm) set_art_21_1_fm {art_21_fm($m) < EI_Max_fm($m) - export2_dv_fm($m)}
+
+goal(fm) set_art_21_2_fm {art_21_fm($m) < swp_exp_lim_fm($m) * cfs_taf($m) - D33D_fm($m)}
+
+goal(fm) set_art_21_3_fm {art_21_fm($m) < C33B_fm($m)}
+
+goal(fm) set_art_21_5_fm {
+	lhs art_21_fm($m) 
+	case DecJun{
+		condition mv($m)>=Dec .and. mv($m)<=Jun
+		rhs max_swp_omr_fm($m)
+		lhs<rhs penalty 0.0	
+	}
+}
+
+goal(fm) set_art_21_6_fm {
+	lhs art_21_fm($m)
+	case AprMay{
+		condition mv($m)>=Apr .and. mv($m)<=May
+		rhs max_swp_sjr_ie_fm($m)
+		lhs<rhs penalty 0.0
+	}
+}
+
+goal(fm) set_art_21_4_fm {art_21_fm($m) < 500 * SL_int_fm($m)}
+
+goal(fm) set_SL_int_1_fm {S_SLUIS_SWP($m) + 1 > 1067 * SL_int_fm($m)}
+
+goal(fm) set_SL_int_2_fm {S_SLUIS_SWP($m) + 1 < 1067 + 1067 * SL_int_fm($m)} 
+
+goal set_tot_a21 { art_21_tot = (sum(i=0, fm, 1) art_21_fm(i))}
+
+!goal set_max_co_spill_2 {CO_spill_tot < art_21_tot}
+
+! set the co spill based on article 21 availability
+/*
+goal set_CO_spill_Jan {CO_spill_Jan < art_21_Jan}
+goal set_CO_spill_Feb {CO_spill_Feb < art_21_Feb}  
+goal set_CO_spill_Mar {CO_spill_Mar < art_21_Mar}
+goal set_CO_spill_Apr {CO_spill_Apr < art_21_Apr}
+goal set_CO_spill_May {CO_spill_May < art_21_May}
+goal set_CO_spill_Jun {CO_spill_Jun < art_21_Jun}
+goal set_CO_spill_Jul {CO_spill_Jul < art_21_Jul}
+goal set_CO_spill_Aug {CO_spill_Aug < art_21_Aug}
+goal set_CO_spill_Sep {CO_spill_Sep < art_21_Sep}
+goal set_CO_spill_Oct {CO_spill_Oct < art_21_Oct}
+goal set_CO_spill_Nov {CO_spill_Nov < art_21_Nov}
+goal set_CO_spill_Dec {CO_spill_Dec < art_21_Dec}
+*/
+/*
+goal con_CO_spill_Jan {CO_spill_Jan < SWP_DP_Jan_2}
+goal con_CO_spill_Feb {CO_spill_Feb < SWP_DP_Feb_2}  
+goal con_CO_spill_Mar {CO_spill_Mar < SWP_DP_Mar_2}
+goal con_CO_spill_Apr {CO_spill_Apr < SWP_DP_Apr_2}
+goal con_CO_spill_May {CO_spill_May < SWP_DP_May_2}
+goal con_CO_spill_Jun {CO_spill_Jun < SWP_DP_Jun_2}
+goal con_CO_spill_Jul {CO_spill_Jul < SWP_DP_Jul_2}
+goal con_CO_spill_Aug {CO_spill_Aug < SWP_DP_Aug_2}
+goal con_CO_spill_Sep {CO_spill_Sep < SWP_DP_Sep_2}
+goal con_CO_spill_Oct {CO_spill_Oct < SWP_DP_Oct_2}
+goal con_CO_spill_Nov {CO_spill_Nov < SWP_DP_Nov_2}
+goal con_CO_spill_Dec {CO_spill_Dec < SWP_DP_Dec_2}
+
+
+
+goal set_CO_spill_Jan {CO_spill_Jan - art_21_Jan = XXCO_Jan_adj1 - XXCO_Jan_adj2}
+goal set_CO_spill_Feb {CO_spill_Feb - art_21_Feb = XXCO_Feb_adj1 - XXCO_Feb_adj2}
+goal set_CO_spill_Mar {CO_spill_Mar - art_21_Mar = XXCO_Mar_adj1 - XXCO_Mar_adj2}
+goal set_CO_spill_Apr {CO_spill_Apr - art_21_Apr = XXCO_Apr_adj1 - XXCO_Apr_adj2}
+goal set_CO_spill_May {CO_spill_May - art_21_May = XXCO_May_adj1 - XXCO_May_adj2}
+goal set_CO_spill_Jun {CO_spill_Jun - art_21_Jun = XXCO_Jun_adj1 - XXCO_Jun_adj2}
+goal set_CO_spill_Jul {CO_spill_Jul - art_21_Jul = XXCO_Jul_adj1 - XXCO_Jul_adj2}
+goal set_CO_spill_Aug {CO_spill_Aug - art_21_Aug = XXCO_Aug_adj1 - XXCO_Aug_adj2}
+goal set_CO_spill_Sep {CO_spill_Sep - art_21_Sep = XXCO_Sep_adj1 - XXCO_Sep_adj2}
+goal set_CO_spill_Oct {CO_spill_Oct - art_21_Oct = XXCO_Oct_adj1 - XXCO_Oct_adj2}
+goal set_CO_spill_Nov {CO_spill_Nov - art_21_Nov = XXCO_Nov_adj1 - XXCO_Nov_adj2}
+goal set_CO_spill_Dec {CO_spill_Dec - art_21_Dec = XXCO_Dec_adj1 - XXCO_Dec_adj2}
+*/

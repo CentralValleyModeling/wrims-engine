@@ -1,0 +1,33 @@
+define MF_KSWCK {timeseries kind 'flow-min-required' units 'CFS'} !As of 12/19/2018 this is always 3250.
+
+define keswick_min1 {lower -999999.0 upper 999999.0 kind 'alias' units 'CFS'}
+define keswick_min2 {lower -999999.0 upper 999999.0 kind 'alias' units 'CFS'}
+
+define tempCtrl_surrogate {value 3250.}
+!define tempCtrl_surrogate {select flow from SAC_TemperatureControl given trigger=KesTrig use linear where month=month}
+
+!AK 04/17/2020
+! set up Fall Flow Stability release targets
+define C_KSWCK_FallStab {
+	case OctFeb {
+		condition month <= FEB
+		select Base from KeswickWinterFlow given EoS=S_SHSTA(prevSEP) use linear }
+	Case otherwise {
+		condition always
+		value 0. }
+}					
+
+define C_KSWCK_MIF1 {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_KSWCK_MIF2 {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define C_KSWCK_MIF3 {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+goal C_KSWCK_MIF_total {C_KSWCK_MIF = C_KSWCK_MIF1 + C_KSWCK_MIF2 + C_KSWCK_MIF3}
+
+
+define effective_C_KSWCKmin1 { value max(MF_KSWCK,tempCtrl_surrogate) }
+goal  setkeswick_min1 { keswick_min1 = effective_C_KSWCKmin1 }
+
+
+goal setC_KSWCKmin2 {C_KSWCK_MIF2 < max(C_KSWCK_FallStab - effective_C_KSWCKmin1,0.) }
+goal setkeswick_min2 { keswick_min2 = C_KSWCK_FallStab }
+
+goal setC5min3 {C_KSWCK_MIF3 = 0. }

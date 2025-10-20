@@ -1,0 +1,119 @@
+! MokelumneFC.wresl
+! compute flood space for Camanche and Pardee
+
+! Determine RainFlood Space Required
+! See constraints-preoperations
+
+! look up non-transferable space and total rain flood space requirement from flood control diagram
+define nonTransSpace      {select nonTrans from Mok_RainfloodReservation where month=month}
+define RainFloodSpace     {select RainFlood from Mok_RainfloodReservation where month=month}
+
+! Determine SnowFlood Space Required - this depends on inflow forecast
+! which is represented here by perfect foresight of unimpaired flow at Mok. Hill
+! The inflow forecast is the flow from the current date through July 31.
+define MokTNFthruJulDV {std kind 'inflow' units 'taf'}
+define MokTNFthruJul {
+    case OctThruFeb {
+        condition month<=MAR
+        value 0.}
+    case MarThruMay {
+        condition   month <= JUL
+        sum(i=1,10-month,1) (I_COL003(i)+I_TGC003(i)+I_NFM010(i)+I_SFM005(i)+I_MFM008(i)+I_BCM003(i)+I_SLTSP(i)+I_UBEAR(i)+I_MOK079(i))*cfs_taf(i) }
+    case otherwise {
+        condition always
+        value MokTNFthruJulDV(-1)}
+}
+goal setMokTNFthruJulDV {MokTNFthruJulDV = MokTNFthruJul}
+
+define SnowFloodSpace {
+    case MarJun {
+        condition month>FEB .and. month<JUL
+        select Space from Mok_SnowmeltReservation given Forecast=MokTNFthruJul use linear where month=month }
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+! Nontransferable space is that portion of gross flood control reservation that must be provided in Cmanache and Pardee reservoirs
+! and may be divided in any portion between them.
+
+! Transferable flood space is that amount of space the gross flood control requirements can be reduced by available space in upstream reservoirs
+! i.e., Salt Springs and Lower Bear.
+
+! Calcuate rain-flood reservation transferable to upstream storage
+define RFTransSpaceSS {value min(max(0.,90.-S_SLTSP_SV2),.75*max(0.,RainFloodSpace - NonTransSpace))}
+define RFTransSpaceLB {value min(max(0.,34.-S_LBEAR_SV2),.25*max(0.,RainFloodSpace - NonTransSpace))}
+define RFTransSpace   {value RFTransSpaceSS + RFTransSpaceLB}
+
+! Calculate snow-flood reservation transferable to upstream storage
+! NOte: Simulation of upstream storage is currently high
+
+define SFTransSpaceSS {value min(max(0.,140.-S_SLTSP_SV2-RFTransSpaceSS), max(0.,.75*(SnowFloodSpace-RainFloodSpace)))}
+define SFTransSpaceLB {value min(max(0.,52. -S_LBEAR_SV2-RFTransSpaceLB), max(0.,.25*(SnowFloodSpace-RainFloodSpace)))}
+define SFTransSpace   {value SFTransSpaceSS + SFTransSpaceLB}
+
+! Add together for total transferable space
+define TotTransSpace  {value RFTransSpace + SFTransSpace}
+
+! Flood space required is total flood space - transferable space
+! Total flood apce is the maximum of rain flood space and snow flood space, NOT the sum of these two.
+define EBMUDFldSpcReqDV {std kind 'rule_curve' units 'taf'}
+define EBMUDFldSpcReq_NonTransDV {std kind 'rule_curve' units 'taf'}
+define FloodSpaceReq  {value max(RainFloodSpace, SnowFloodSpace) - TotTransSpace}
+define FloodSpaceReq_NonTrans {value max(RainFloodSpace, SnowFloodSpace)}
+goal setEBMUDFldSpcReqDV {EBMUDFldSpcReqDV = FloodSpaceReq}
+goal setEBMUDFldSpcReq_NonTransDV{EBMUDFldSpcReq_NonTransDV = FloodSpaceReq_NonTrans}
+!Simulated storage is currently high so calibration factor.
+define RuleCurveCalibration {
+    case APrJun {
+        condition month >= APR .and. month <= JUN
+        value 0.}		! Was 30, removed for debugging
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+! In practice, storage is drawndown in the summer months in anticipation of the fall flood space requirements
+! Gross flood space at end of September = 58.83 TAF, Gross flood space at end of October = 180.41 TAF
+define PreReleaseFloodSpace {
+    case Jul {
+        condition month == JUL
+        value 180.41*0.25}
+    case Aug {     
+        condition month == AUG
+        value 180.41*0.50}
+    case Sep {     
+        condition month == SEP
+        value 180.41*0.75}
+    case otherwise {
+        condition always
+        value 0. }
+}
+
+define AdjEBMUDFldSpcReqDV {std kind 'rule_curve' units 'taf'}
+define AdjFloodSpaceReq  {value max(FloodSpaceReq+RuleCurveCalibration,PreReleaseFloodSpace)}
+goal setAdjEBMUDFldSpcReqDV {AdjEBMUDFldSpcReqDV = AdjFloodSpaceReq}
+
+! Constrain combined storage in Pardee and Camanche to achieve the required flood space
+goal EBMUDFloodControl {S_PARDElevel5 + S_CMCHElevel5 - S_PARDE - S_CMCHE > AdjFloodSpaceReq}
+
+define EBMUDFloodControldv {alias S_PARDElevel5 + S_CMCHElevel5 - S_PARDE - S_CMCHE - AdjFloodSpaceReq kind 'FLOOD-SPACE' UNITS 'TAF'}
+
+!define S_PARDElevel4 {value 210. - .1*FloodSpaceReq}
+!define S_CMCHElevel4 {value min(438.,438. - FloodSpaceReq + (210. - S_PARDElevel4))}
+!goal S_CMCHEZone4       {S_CMCHE_4 < max(0.,S_CMCHElevel4-S_CMCHElevel3)}
+!define S_CMCHElevel3    {value S_CMCHElevel2*0.5 + S_CMCHElevel4*0.5}
+
+
+! aliases for debugging
+define nonTransSpace_     {alias nonTransSpace  kind 'debug' units 'taf'}
+define RainFloodSpace_    {alias RainFloodSpace kind 'debug' units 'taf'}
+define SnowFloodSpace_    {alias SnowFloodSpace kind 'debug' units 'taf'}
+define RFTransSpaceSS_    {alias RFTransSpaceSS kind 'debug' units 'taf'}
+define RFTransSpaceLB_    {alias RFTransSpaceLB kind 'debug' units 'taf'}
+define RFTransSpace_      {alias RFTransSpace   kind 'debug' units 'taf'}
+define SFTransSpaceSS_    {alias SFTransSpaceSS kind 'debug' units 'taf'}
+define SFTransSpaceLB_    {alias SFTransSpaceLB kind 'debug' units 'taf'}
+define SFTransSpace_      {alias SFTransSpace   kind 'debug' units 'taf'}
+define TotTransSpace_     {alias TotTransSpace  kind 'debug' units 'taf'}
+

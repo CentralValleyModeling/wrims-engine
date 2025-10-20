@@ -1,0 +1,95 @@
+! SRSC_LF_Transfer.wresl
+! this file works with reduced deliveries to SRSC rice demands to transfer
+! unused allocation to SOD export in Sept-Nov of critically dry years
+
+! Use these 3 lines to turn off the fall delta export of SRSC LF transfer water
+define SRSC_LFtx_volume {value 0.}
+define SRSC_LFtx_capacity { value 0.}
+goal setSRSCexport {D_OMR028_SRSC = 0.}
+
+! ********************************************************************************
+! Use the code below to implement fall transfer of SRSC LF transfer water
+! ********************************************************************************
+/*
+! annual transfer volumes need to be pre-processed from a run to determine
+! the actual Apr-Oct decrease in SRSC delivery.  Values are looked up from a table.
+define SRSC_LFtx_volume {
+    case September {
+        condition month==SEP
+        select LFtrans from SRSC_LFtrans where wyr=wateryear}
+    case OctNov {
+        condition month<=NOV
+        select LFtrans from SRSC_LFtrans where wyr=wateryear-1}
+    case otherwise {
+        condition always 
+        value 0.}
+}
+
+! transfer export limited to the volume remaining to be moved and the available
+! capacity at Jones.  This is hasty logic which assumes no additional exports for 
+! other reasons will be targetted in Sept-Oct, and since the export is removed
+! from the system it does not interfere with rule curve or other export and CVP
+! delivery operations SOD.
+define SRSC_LFtx_capacity { 
+    case September {
+        condition month==SEP .and. wyt_shasta_cvp>3.5 
+        value max(0., min(S_SHSTA[monthlyweighted]-1000.,SRSC_LFtx_volume*taf_cfs, 4600. - C_DMC003[monthlyweighted]))}
+    case October {
+        condition month==OCT .and. wyt_shasta_cvp>3.5 
+        value max(0., min(S_SHSTA[monthlyweighted]-1000.,(SRSC_LFtx_volume - D_OMR028_SRSC(-1)*cfs_taf(-1))*taf_cfs, 4600. - C_DMC003[monthlyweighted]))}
+    case November {
+        condition month==NOV .and. wyt_shasta_cvp>3.5 
+        value max(0., min(S_SHSTA[monthlyweighted]-1000.,(SRSC_LFtx_volume - D_OMR028_SRSC(-1)*cfs_taf(-1) - D_OMR028_SRSC(-2)*cfs_taf(-2))*taf_cfs, 4600. - C_DMC003[monthlyweighted]))}
+    case otherwise {
+        condition always 
+        value 0.}
+}
+
+goal setSRSCexport {D_OMR028_SRSC < SRSC_LFtx_capacity}
+
+! transfer export is tied to shasta release increase
+! discourage carriage water cost of more than 20%
+
+goal Shasta_SRSC_LFtx_release1 {
+    lhs c_shsta
+    case SRSC_LF_transfer {
+        condition SRSC_LFtx_capacity > 1.0 .and. cyclenum==cn_upstream
+        rhs c_shsta[monthlyweighted] + srsc_lftx_capacity
+        lhs<rhs penalty 5000
+        lhs>rhs penalty 0 }
+}
+goal Shasta_SRSC_LFtx_release1a {
+    lhs c_sac041
+    case SRSC_LF_transfer {
+        condition SRSC_LFtx_capacity > 1.0 .and. cyclenum==cn_upstream
+        rhs c_sac041[monthlyweighted] + C_SHSTA - C_SHSTA[monthlyweighted]
+        lhs<rhs penalty 3000
+        lhs>rhs penalty 0 }
+}
+goal Shasta_SRSC_LFtx_release2 {
+    lhs D_OMR028_SRSC 
+    case SRSC_LF_transfer {
+        condition SRSC_LFtx_capacity > 1.0 .and. cyclenum==cn_upstream
+        rhs C_SHSTA*.8 - C_SHSTA[monthlyweighted]*.8
+        lhs<rhs penalty 5000
+        lhs>rhs penalty 0 }
+}
+goal Shasta_SRSC_LFtx_release3 {
+    lhs C_SHSTA - C_SHSTA[monthlyweighted] 
+    case SRSC_LF_transfer {
+        condition SRSC_LFtx_capacity > 1.0 .and. cyclenum==cn_upstream
+        rhs C_KSWCK - C_KSWCK[monthlyweighted]
+        lhs<rhs penalty 9999
+        lhs>rhs penalty 9999 }
+}
+
+goal maintain_SRSC_LFtx {
+    lhs D_OMR028_SRSC
+    case postMW {
+        condition cyclenum>cn_upstream
+        rhs D_OMR028_SRSC[upstream]
+        lhs<rhs penalty 99999   }
+}
+*/
+
+        

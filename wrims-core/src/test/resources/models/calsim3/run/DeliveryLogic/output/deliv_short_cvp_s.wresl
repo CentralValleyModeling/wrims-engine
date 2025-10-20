@@ -1,0 +1,153 @@
+! Shortage_CVP_S.wresl
+
+! calculate any shortages to allocated deliveries
+! and calculate total deliveries to AG, MI, RF, and EX
+
+
+!  AG Shortage
+define X_50_PA1  {alias CLM_50_PA1 * taf_cfs * perdel_cvpag_s - D_DMC021_50_PA1  kind 'delivery-shortage' units 'cfs'}
+define X_71_PA1  {alias CLM_71_PA1 * taf_cfs * perdel_cvpag_s - D_DMC030_71_PA1  kind 'delivery-shortage' units 'cfs'} 
+define X_71_PA2  {alias CLM_71_PA2 * taf_cfs * perdel_cvpag_s - D_DMC034_71_PA2  kind 'delivery-shortage' units 'cfs'} 
+define X_71_PA3  {alias CLM_71_PA3 * taf_cfs * perdel_cvpag_s - D_DMC034_71_PA3  kind 'delivery-shortage' units 'cfs'} 
+define X_71_PA4  {alias CLM_71_PA4a * taf_cfs * perdel_cvpag_s 
+                      + CLM_71_PA4b * taf_cfs * perdel_cvpex_s - D_DMC044_71_PA4 kind 'delivery-shortage' units 'cfs'}  !EX allocation used for water right water for 71_PA4
+define X_71_PA5  {alias CLM_71_PA5 * taf_cfs * perdel_cvpag_s - D_DMC044_71_PA5  kind 'delivery-shortage' units 'cfs'} 
+define X_71_PA6  {alias CLM_71_PA6 * taf_cfs * perdel_cvpag_s - D_DMC064_71_PA6  kind 'delivery-shortage' units 'cfs'} 
+define X_71_PA8  {alias CLM_71_PA8 * taf_cfs * perdel_cvpag_s - D_DMC011_71_PA8  kind 'delivery-shortage' units 'cfs'} 
+define X_72_PA   {alias CLM_72_PA  * taf_cfs * perdel_cvpag_s - D_XCC025_72_PA   kind 'delivery-shortage' units 'cfs'}
+define X_73_PA1  {alias CLM_73_PA1 * taf_cfs * perdel_cvpag_s - D_DMC070_73_PA1 - D_CAA087_73_PA1  kind 'delivery-shortage' units 'cfs'}
+define X_73_PA2  {alias CLM_73_PA2 * taf_cfs * perdel_cvpag_s - D_DMC105_73_PA2  kind 'delivery-shortage' units 'cfs'}
+define X_73_PA3  {alias CLM_73_PA3 * taf_cfs * perdel_cvpag_s - D_DMC091_73_PA3 - D_CAA109_73_PA3  kind 'delivery-shortage' units 'cfs'}
+define X_90_PA1  {alias CLM_90_PA1 * taf_cfs * perdel_cvpag_s - D_MDOTA_90_PA1 - D_CAA109_90_PA1 - D_CAA143_90_PA1 - D_CAA155_90_PA1 - D_CAA172_90_PA1  kind 'delivery-shortage' units 'cfs'}
+define X_90_PA2  {alias CLM_90_PA2 * taf_cfs * perdel_cvpag_s - D_CAA143_90_PA2  kind 'delivery-shortage' units 'cfs'}
+define X_91_PA   {alias CLM_91_PA  * taf_cfs * perdel_cvpag_s  + WRM_91_PA  * taf_cfs * perdel_cvpex_s - D_MDOTA_91_PA  kind 'delivery-shortage' units 'cfs'} !EX allocation used for water right water for 91_PA
+                                     
+define X_SCVWD_PA {alias CLM_SCVWD_PA * taf_cfs * perdel_cvpag_s - D_PCH000_SCVWD_PA  kind 'delivery-shortage' units 'cfs'}
+define X_SBCWD_PA {alias CLM_SBCWD_PA * taf_cfs * perdel_cvpag_s - D_PCH000_SBCWD_PA  kind 'delivery-shortage' units 'cfs'}
+
+define short_cvp_pag_s {alias X_50_PA1 + X_71_PA1 + X_71_PA2 + X_71_PA3 + 
+                              X_71_PA4 + X_71_PA5 + X_71_PA6 + 
+                              X_71_PA8 + X_72_PA  + X_73_PA1 + X_73_PA2 + 
+                              X_73_PA3 + X_90_PA1 + X_90_PA2 + X_91_PA  + X_SCVWD_PA + X_SBCWD_PA 
+                        kind  'delivery-shortage-cvp'
+                        units 'cfs'}
+
+define del_cvp_pag_s {alias D_DMC021_50_PA1 /*+ D_RFS71A_50_PA1*/   
+                          + D_DMC030_71_PA1   
+                          + D_DMC034_71_PA2 /* + D_SJR082_71_PA2 */   
+                          + D_DMC034_71_PA3   
+                          + D_DMC044_71_PA4 /* + D_SJR096_71_PA4 */   
+                          + D_DMC044_71_PA5   
+                          + D_DMC064_71_PA6   
+                          + D_DMC011_71_PA8   
+                          + D_XCC025_72_PA   
+                          + D_DMC070_73_PA1 + D_CAA087_73_PA1  
+                          + D_DMC105_73_PA2  
+                          + D_DMC091_73_PA3 + D_CAA109_73_PA3  
+                          + D_MDOTA_90_PA1 + D_CAA109_90_PA1 + D_CAA143_90_PA1 + D_CAA155_90_PA1 + D_CAA172_90_PA1  
+                          + D_CAA143_90_PA2  
+                          + D_MDOTA_91_PA  
+                          + D_PCH000_SCVWD_PA 
+                          + D_PCH000_SBCWD_PA
+                      kind  'delivery-cvp'
+                      units 'cfs'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  M&I Shortage  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define X_50_PU   {alias CLM_50_PUa   * taf_cfs * perdel_cvpmi_s + CLM_50_PUc * taf_cfs * perdel_cvpag_s - D_WTPJJO_50_PU kind 'delivery-shortage' units 'cfs'} !50_Pub not included but is not a CVP contract delivery
+define X_71_PU1  {alias CLM_71_PU1 * taf_cfs * perdel_cvpmi_s - D_CAA012_71_PU1  kind 'delivery-shortage' units 'cfs'}
+define X_71_PU2  {alias CLM_71_PU2 * taf_cfs * perdel_cvpmi_s - D_CAA066_71_PU2  kind 'delivery-shortage' units 'cfs'}
+define X_90_PU   {alias CLM_90_PUa * taf_cfs * perdel_cvpmi_s + CLM_90_PUb * taf_cfs - D_CAA156_90_PU - D_CAA165_90_PU - D_CAA143_90_PU  kind 'delivery-shortage' units 'cfs'}
+define X_SCVWD_PU {alias CLM_SCVWD_PU * taf_cfs * perdel_cvpmi_s - D_PCH000_SCVWD_PU  kind 'delivery-shortage' units 'cfs'}
+define X_SBCWD_PU {alias CLM_SBCWD_PU * taf_cfs * perdel_cvpmi_s - D_PCH000_SBCWD_PU  kind 'delivery-shortage' units 'cfs'}
+
+define short_cvp_pmi_s {alias X_50_PU + X_71_PU1 + X_71_PU2 + X_90_PU + X_SCVWD_PU + X_SBCWD_PU kind 'delivery-shortage-cvp' units 'cfs'}
+define del_cvp_pmi_s   {alias D_WTPJJO_50_PU
+                            + D_CAA012_71_PU1 
+                            + D_CAA066_71_PU2
+                            + D_CAA143_90_PU
+                            + D_CAA156_90_PU
+                            + D_CAA165_90_PU 
+                            + D_PCH000_SCVWD_PU
+                            + D_PCH000_SBCWD_PU
+                          kind 'delivery-cvp' units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Exchange Shortage  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define X_72_XA1  {alias CLM_72_XA1 * taf_cfs * perdel_cvpex_s - D_ARY010_72_XA1  kind 'delivery-shortage' units 'cfs'}
+define X_72_XA2  {alias CLM_72_XA2 * taf_cfs * perdel_cvpex_s - D_XCC010_72_XA2  kind 'delivery-shortage' units 'cfs'}
+define X_72_XA3  {alias CLM_72_XA3 * taf_cfs * perdel_cvpex_s - D_XCC054_72_XA3  kind 'delivery-shortage' units 'cfs'}
+define X_73_XA   {alias CLM_73_XA  * taf_cfs * perdel_cvpex_s - D_MDOTA_73_XA - D_DMC111_73_XA  kind 'delivery-shortage' units 'cfs'}
+define X_64_XA   {alias CLM_64_XA  * taf_cfs * perdel_cvpex_s - D_MDOTA_64_XA  kind 'delivery-shortage' units 'cfs'}
+
+
+define short_cvp_pex_s {alias X_72_XA1 + X_72_XA2 + X_72_XA3 + X_73_XA + X_64_XA kind 'delivery-shortage-cvp' units 'cfs'}
+
+define del_cvp_pex_s {alias D_ARY010_72_XA1 + D_XCC010_72_XA2 + D_XCC054_72_XA3
+                          + D_MDOTA_73_XA   + D_DMC111_73_XA  + D_MDOTA_64_XA   kind 'delivery-cvp' units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Refuge Shortage  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define X_72_PR1  {alias CLM_72_PR1 * taf_cfs * perdel_cvprf_s - DN_72_PR1  kind 'delivery-shortage' units 'cfs'}
+define X_72_PR2  {alias CLM_72_PR2 * taf_cfs * perdel_cvprf_s - DN_72_PR2  kind 'delivery-shortage' units 'cfs'}   
+define X_72_PR3  {alias CLM_72_PR3 * taf_cfs * perdel_cvprf_s - DN_72_PR3  kind 'delivery-shortage' units 'cfs'}  
+define X_72_PR4  {alias CLM_72_PR4 * taf_cfs * perdel_cvprf_s - DN_72_PR4  kind 'delivery-shortage' units 'cfs'}  
+define X_72_PR5  {alias CLM_72_PR5 * taf_cfs * perdel_cvprf_s - DN_72_PR5  kind 'delivery-shortage' units 'cfs'} 
+define X_72_PR6  {alias CLM_72_PR6 * taf_cfs * perdel_cvprf_s - DN_72_PR6  kind 'delivery-shortage' units 'cfs'} 
+define X_91_PR   {alias CLM_91_PR  * taf_cfs * perdel_cvprf_s - DN_91_PR  kind 'delivery-shortage' units 'cfs'}
+define X_D_CAA239_CVPRF_prf {alias CLM_D_CAA239_CVPRF_prf*taf_cfs * perdel_cvprf_s - DN_D_CAA239_CVPRF_prf kind 'delivery-shortage' units 'cfs'}  
+
+define short_cvp_prf_s {alias X_72_PR1 + X_72_PR2 + X_72_PR3 + X_72_PR4
+                            + X_72_PR5 + X_72_PR6 + X_91_PR + X_D_CAA239_CVPRF_prf  kind 'delivery-shortage-cvp' units 'cfs'} 
+
+define del_cvp_prf_s {alias D_VLW008_72_PR1  
+                          + D_XCC033_72_PR2     
+                          + D_ARY010_72_PR3    
+                          + D_XCC033_72_PR4 + D_ARY010_72_PR4    
+                          + D_XCC054_72_PR5 + D_VLW008_72_PR5   
+                          + D_ARY010_72_PR6 + D_XCC025_72_PR6   
+                          + D_MDOTA_91_PR 
+                          + D_CAA239_CVPRF_prf  
+                          kind 'delivery-cvp' units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Losses Shortage  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  there are no longer "shortages" to dmc losses, as these are fixed in CalSim3 (for now)
+!  or will someday be the result of a dynamic groundwater model on the westside.
+
+define short_cvp_pls_s {alias 0.0 kind 'delivery-shortage-cvp' units 'cfs'}
+
+define del_cvp_pls_s {alias  - D_DMC003_DMCLOS - D_DMC007_DMCLOS - D_DMC011_DMCLOS -
+                               D_DMC016_DMCLOS - D_DMC021_DMCLOS - D_DMC024_DMCLOS -
+                               D_DMC030_DMCLOS - D_DMC034_DMCLOS - D_DMC039_DMCLOS -
+                               D_DMC044_DMCLOS - D_DMC049_DMCLOS - D_DMC054_DMCLOS -
+                               D_DMC058_DMCLOS - D_DMC064_DMCLOS - D_DMC070_DMCLOS -
+                               D_DMC074_DMCLOS - D_DMC076_DMCLOS - D_DMC080_DMCLOS -
+                               D_DMC085_DMCLOS - D_DMC091_DMCLOS - D_DMC097_DMCLOS -
+                               D_DMC105_DMCLOS - D_DMC111_DMCLOS - D_DMC116_DMCLOS - D_MDOTA_LOSS -  
+                               D_CAA071_CAALOS_CVP - D_CAA087_CAALOS_CVP - D_CAA095_CAALOS_CVP -
+                               D_CAA109_CAALOS_CVP - D_CAA143_CAALOS_CVP - D_CAA155_CAALOS_CVP -
+                               D_CAA156_CAALOS_CVP - D_CAA165_CAALOS_CVP - D_CAA172_CAALOS_CVP
+                      kind  'delivery-cvp'
+                      units 'cfs'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  Total Shortage  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define short_cvp_tot_s {alias short_cvp_pag_s + short_cvp_pmi_s + short_cvp_pex_s + short_cvp_prf_s + short_cvp_pls_s kind 'delivery-shortage-cvp' units 'cfs'}
+!define short_cvp_tot   {alias short_cvp_tot_n + short_cvp_tot_s kind 'delivery-shortage-cvp' units 'cfs'}
+
+
+define del_cvp_total_s {alias del_cvp_pag_s + del_cvp_pmi_s + del_cvp_pex_s + del_cvp_prf_s + del_cvp_pls_s kind 'delivery-cvp' units 'cfs'}
+!define del_cvp_total   {alias del_cvp_total_n + del_cvp_total_s kind 'delivery-cvp' units 'cfs'}
+
+
+
+
+

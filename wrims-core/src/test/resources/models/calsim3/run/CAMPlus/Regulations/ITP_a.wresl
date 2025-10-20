@@ -1,0 +1,40 @@
+define(fm) ITP_Carryover_ {std kind 'carryover' units 'taf'}
+
+define DO_X2_ITP{
+	case wet_abovenormal{
+		condition WYT_Sac<2.5
+		value 0.
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define carryover_ITP{
+	case wet_abovenormal{
+		condition WYT_Sac<2.5
+		value 100
+	}
+	case other{
+		condition always
+		value 0.0
+	}
+}
+
+define(fm) release_ITP_Carryover_taf {
+	case MayisCurrentMonth {
+		condition	wyt_sac > 2.5 .and. wyt_sac < 3.5 .and. month == may .and. $m==0
+		value		ITP_Carryover_(-1)
+	}
+	case May {
+		condition	wyt_sac > 2.5 .and. wyt_sac < 3.5 .and. mv($m) == may
+		value		ITP_Carryover_(-1)-(sum(i=0, $m-1, 1) release_ITP_Carryover_taf(i))
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define(fm) release_ITP_Carryover_taf_{alias release_ITP_Carryover_taf($m) kind 'carryover-release' units 'taf'}

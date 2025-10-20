@@ -1,0 +1,670 @@
+! MokelumneWS.wresl
+
+/*
+define prevdistJVID {
+    case October {
+        condition month == OCT
+        select JVID from Mok_demands where month=12}
+    case otherwise {
+        condition always
+        select JVID from Mok_demands where month=month-1}
+        }
+*/
+
+
+define AnnualAMADR_AWS  {value 8.000}
+define AnnualAMADR_CAWP {value 1.050}
+define AnnualCPUD       {value 2.000}
+define AnnualCACWD       {value 0.200}
+define AnnualAMADR      {value AnnualAMADR_AWS + AnnualAMADR_CAWP}
+
+
+!******************************************************************************
+! JVID diversions from above Pardee Reservoir
+!******************************************************************************
+/*
+Diversions to Jackson Valley ID (JVID) are made directly from Pardee Reservoir. The gravity diversion requires
+a water surface elvation in Pardee of 550 feet. Water not delivered in one month will be delivered in the next month.
+
+JVID has rights to divert up to 3,850 AF of Mokelumne River at a diversion rate of 50 cfs;
+the diversion is authorized year-round for domestic and stock watering uses, and between
+March and October for irrigation uses (SWRCB Decision 1490). However, JVID does not hold rights to store this
+water. JVID’s diversion rights are appropriative, based on a 1927 application, and are
+subject to reversion to upstream needs. Reversion to upstream needs is determined by
+SWRCB, and any reversion of more than 2,200 AF must be accompanied by a substitute
+water source. AWA applied for reversion of 1,050 AF, and is considering substitution of
+recycled water for a portion of JVID's Mokelumne River water right. AWA proposes to
+discharge tertiary treated effluent in Jackson Creek during winter months. JVID is
+evaluating its water rights through a study funded by the County.
+Mokelumne River water flows by gravity from Pardee Reservoir to Lake Amador. The
+District requests and usually receives 3,850 AF annually from EBMUD, although it is subject
+to availability.
+
+The water right permit (A005648B is for 50 cfs maximum diversion, year-round). The annual volume is 5.00 TAF, less
+the 1.05 reversion.
+*/
+
+define AnnualJVID  {value  3.85}
+define distJVID    {select JVID from Mok_demands where month=month}
+define demand_JVID {value AnnualJVID * distJVID}
+
+define prevdistJVID {
+    case October {
+        condition month == OCT
+        select JVID from Mok_demands where month=12}
+    case otherwise {
+        condition always
+        select JVID from Mok_demands where month=month-1}
+        }
+define prevdemand_JVID {value AnnualJVID * prevdistJVID}
+
+define AnnJVIDShortDV {std kind 'SHORTAGE' units 'TAF'}
+define AnnJVIDShort {
+    case First {
+        condition month == OCT .and. wateryear == bgnWY
+        value 0.0}
+    case March {
+        condition month == MAR
+        value 0.0}
+    case otherwise {
+        condition always
+        value AnnJVIDShortDV(-1) + prevdemand_JVID - D_PARDE_AMADR(-1)* cfs_taf(-1)}
+        }
+        
+define prevdemand_JVIDdv {alias prevdemand_JVID kind 'temp' units 'taf'}
+define demand_JVIDdv {alias demand_JVID kind 'temp' units 'taf'}
+
+goal setAnnJVIDShortDV {AnnJVIDShortDV = AnnJVIDShort}
+
+define PardeJVIDFlag {
+    case HiStorage {				 ! No water is available when the elevation drops below 550 ft. With the new Parde bathymetry this corresponds to 166.91 ft. 
+        condition S_PARDE(-1)>= 166.9 !use BOM storage as threshold, should be average storage
+        value 1.0}
+    case otherwise {
+        condition always
+        value 0.0}
+        }
+        
+goal limitJVID1     {D_PARDE_AMADR < demand_JVID*taf_cfs*PardeJVIDFlag + AnnJVIDShort*taf_cfs*PardeJVIDFlag}
+goal limitJVID2     {D_PARDE_AMADR < 50.*PardeJVIDFlag}
+goal limitJVID3     {D_PARDE_AMADR < D_AMADR_60N_NA1}
+
+
+!******************************************************************************
+! Riparian/Appropriative 
+!******************************************************************************
+/*
+Riparian landowners, who have rights that are tied to the river’s natural flow, and other individuals
+and agencies with appropriative rights that predate EBMUD’s rights have claims on Mokelumne
+River water that are senior to EBMUD’s rights. These individuals and agencies include ranches,
+vineyards, and farms that pump water from the Mokelumne River. Downstream of Camanche Dam,
+pumped diversions by riparian and senior appropriative users (not including those described
+above) reached about 34,000 AFY in 1972 but since have declined to less than 15,000 acre-feet.
+
+For modeling purposes EBMUD assumes riparian diversions are 20.6 TAF/year in wet years, when the unimpaired
+inflow to Pardee from October through June is above 250 TAF/year, and 16.1 TAF/year in dry years when the unimpaired inflow to Pardee
+is below 250 TAF/year.
+*/
+define AnnAlloc60n_NA5DV {std kind 'AnnualAlloc' units 'taf'}
+define AnnAlloc60n_NA5 {
+    case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        condition month == OCT .and. wateryear == bgnWY
+        value 20.6}
+    case Above250 {
+        condition month == APR .and. OctJunPardeeFNF>=250.
+        value 20.6}
+    case Below250 {
+        condition month == APR
+        value 16.1}
+    case otherwise {
+        condition always
+        value AnnAlloc60n_NA5DV(-1)}
+}        
+goal setAnnAlloc60n_NA5DV {AnnAlloc60n_NA5DV = AnnAlloc60n_NA5}
+
+define AWRann_60N_NA5dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWRann_60N_NA5{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,11,1)  AWR_60N_NA5(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=prevOCT,SEP-month,1) AWR_60N_NA5(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=0,11,1)  AWR_60N_NA5(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWRann_60N_NA5dv(-1) } }
+goal setAWRann_60N_NA5dv {AWRann_60N_NA5dv = AWRann_60N_NA5}
+
+define AWOann_60N_NA5dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWOann_60N_NA5{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,11,1)  AWO_60N_NA5(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=prevOCT,SEP-month,1) AWO_60N_NA5(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=0,11,1)  AWO_60N_NA5(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWOann_60N_NA5dv(-1) } }
+goal setAWOann_60N_NA5dv {AWOann_60N_NA5dv = AWOann_60N_NA5}
+
+!*****************************************************************************************
+
+define AWROctFeb_60N_NA5dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWROctFeb_60N_NA5{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,4,1)  AWR_60N_NA5(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=-5,-1,1) AWR_60N_NA5(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=7,11,1)  AWR_60N_NA5(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWROctFeb_60N_NA5dv(-1) } }
+                
+goal setAWROctFeb_60N_NA5dv {AWROctFeb_60N_NA5dv = AWROctFeb_60N_NA5}
+
+
+
+define AWOOctFeb_60N_NA5dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWOOctFeb_60N_NA5{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,4,1)  AWO_60N_NA5(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=-5,-1,1) AWO_60N_NA5(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=7,11,1)  AWO_60N_NA5(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWOOctFeb_60N_NA5dv(-1) } }
+                
+goal setAWOOctFeb_60N_NA5dv {AWOOctFeb_60N_NA5dv = AWOOctFeb_60N_NA5}
+
+define dist_60N_NA5_OctFeb   {value (AWoOctFeb_60N_NA5 + AWrOctFeb_60N_NA5)/(AWRann_60N_NA5+AWOann_60N_NA5) }
+define dist_60N_NA5_OctFebdv {std kind 'DEMAND-PATTERN' units 'none'}
+goal setdist_60N_NA5_OctFeb {dist_60N_NA5_OctFebdv = dist_60N_NA5_OctFeb}
+
+!***********************************************************************************************
+
+define dist_60N_NA5 {value (AWR_60N_NA5+AWO_60N_NA5)*cfs_taf/(AWRann_60N_NA5+AWOann_60N_NA5) }
+define dist60N_NA5_ {alias dist_60N_NA5 kind 'debug' units 'none'}
+
+define Cumdist_60N_NA5dv {std kind 'DEMAND-PATTERN' units 'none'}
+
+define Cumdist_60N_NA5{
+	case FirstYear{
+	     condition wateryear == BgnWY
+	     value 0.8}! guess
+	case Oct{
+	     condition month == MAR
+	     value dist_60N_NA5}
+	Case otherwise{
+	     condition always
+	     value dist_60N_NA5 + Cumdist_60N_NA5dv(-1)}}
+	     
+goal setCumdist_60N_NA5dv {Cumdist_60N_NA5dv = Cumdist_60N_NA5}	
+
+define AnnAlloc60n_NA5adjustedDV {std kind 'AnnualAlloc' units 'taf'}
+
+define AnnAlloc60n_NA5adjusted{
+	case OctJun{
+	     condition month >= OCT .AND. month <= JUN
+	     value 20.6}
+	case July{
+	     condition month == JUL .AND. AnnAlloc60n_NA5 <= 17
+	     value (16.1-20.6*Cumdist_60N_NA5dv(-1)-20.6*dist_60N_NA5_OctFebdv(-1))/(1-Cumdist_60N_NA5dv(-1)-dist_60N_NA5_OctFebdv(-1))}
+	case otherwise{
+	     condition always
+	     value AnnAlloc60n_NA5adjusteddv(-1)}}
+
+goal setAnnAlloc60n_NA5adjustedDV {AnnAlloc60n_NA5adjustedDV = AnnAlloc60n_NA5adjusted}	     
+
+! distribution per EBMUD planning
+goal set_D_MOK050_60N_NA5 {D_MOK050_60N_NA5 < 0.65 * AnnAlloc60n_NA5adjusted * dist_60N_NA5 * taf_cfs}
+goal set_D_MOK039_60N_NA5 {D_MOK039_60N_NA5 < 0.05 * AnnAlloc60n_NA5adjusted * dist_60N_NA5 * taf_cfs}
+goal set_D_MOK033_60N_NA5 {D_MOK033_60N_NA5 < 0.30 * AnnAlloc60n_NA5adjusted * dist_60N_NA5 * taf_cfs}
+
+define Mok_MonthlyAlloc60n_NA5 {alias AnnAlloc60n_NA5 * dist_60N_NA5 * taf_cfs kind 'WATER-RIGHT' UNITS 'cfs'}
+
+
+!******************************************************************************
+! Woodbridge ID - already reduced for sale to City of Lodi (6 taf in wet
+! years and 3 taf in dry years)
+!******************************************************************************
+
+/*
+WID serves irrigation water to about 20,000 acres of agricultural land in San Joaquin County in the
+vicinity of Lodi and Woodbridge. The lower Mokelumne River flows through Lodi Lake, which is an
+impoundment created by Woodbridge Dam near Lodi. From this lake, WID diverts water into an
+extensive canal system. WID has pre-1914 water rights senior to EBMUD’s Mokelumne River water
+rights, and also has two overlapping licensed water rights for direct diversions up to 414.4 cfs, the
+maximum capacity of WID Canal. These entitlements are conditioned by the water rights settlement
+agreements with EBMUD, which, depending on inflow to Pardee Reservoir, provide WID with firm
+annual diversions of 60 TAF in normal water years (inflow >375 TAF) and 39 TAF in dry years.
+
+In normal years, WID provides 6 taf to City of Lodi and 6.5 taf to City of Stockton
+In dry years, those values are 3 taf and 3.25 taf to Lodi and Stockton respectively
+*/
+
+
+define AnnAlloc60n_NA4DV {std kind 'AnnualAlloc' units 'taf'}
+define AnnAlloc60n_NA4 {
+    case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        condition month == OCT .and. wateryear == bgnWY
+        value 60. - 6. - 6.5}
+    case Above250 {
+        condition month == MAR .and. annPardeeFNF>=375.
+        value 60. - 6. - 6.5}
+    case Below250 {
+        condition month == MAR
+        value 39. - 3. - 3.25}
+    case otherwise {
+        condition always
+        value AnnAlloc60n_NA4DV(-1)}
+}        
+goal setAnnAlloc60n_NA4DV {AnnAlloc60N_NA4DV = AnnAlloc60n_NA4}
+
+define AWRann_60N_NA4dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWRann_60N_NA4{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,11,1)  AWR_60N_NA4(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=prevOCT,SEP-month,1) AWR_60N_NA4(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=0,11,1)  AWR_60N_NA4(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWRann_60N_NA4dv(-1) } }
+goal setAWRann_60N_NA4dv {AWRann_60N_NA4dv = AWRann_60N_NA4}
+
+define AWOann_60N_NA4dv {std kind 'ANNUAL-APPLIED-WATER' units 'taf'}
+define AWOann_60N_NA4{   
+       case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+            condition month == OCT .and. wateryear == bgnWY
+                sum(i=0,11,1)  AWO_60N_NA4(i)*cfs_taf(i)}
+       case MarEndWY {  ! special case for last wateryear, Sum Oct-Sep
+            condition month == MAR .and. wateryear == EndWY
+                sum(i=prevOCT,SEP-month,1) AWO_60N_NA4(i)*cfs_taf(i)}
+       case March { ! March for wateryears BgnWY - year before EndWY
+            condition month == MAR .and. wateryear < EndWY
+                sum(i=0,11,1)  AWO_60N_NA4(i)*cfs_taf(i)}
+       case Rest { 
+            condition always
+                value AWOann_60N_NA4dv(-1) } }
+goal setAWOann_60N_NA4dv {AWOann_60N_NA4dv = AWOann_60N_NA4}
+
+define dist_60N_NA4 {value (AWR_60N_NA4+AWO_60N_NA4)*cfs_taf/(AWRann_60N_NA4+AWOann_60N_NA4) }
+define dist60N_NA4_ {alias dist_60N_NA4 kind 'debug' units 'none'}
+
+goal setD_MOK035_60N_NA4 {D_MOK035_60N_NA4 < AnnAlloc60N_NA4 * dist_60N_NA4 * taf_cfs}
+
+
+!******************************************************************************
+! Woodbridge Provision to City of Stockton
+!******************************************************************************
+
+define AnnAlloc60S_NU1dv {std kind 'AnnualAlloc' units 'taf'}
+define AnnAlloc60S_NU1 {
+    case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        condition month == OCT .and. wateryear == bgnWY
+        value 6.5}
+    case Above250 {
+        condition month == MAR .and. annPardeeFNF>=375.
+        value 6.5}
+    case Below250 {
+        condition month == MAR
+        value 3.25}
+    case otherwise {
+        condition always
+        value AnnAlloc60S_NU1dv(-1)}
+}        
+goal setAnnWIDtoCoSdv {AnnAlloc60S_NU1dv = AnnAlloc60S_NU1}
+define dist_60S_NU1 {select STOCK from Mok_demands where month=month}
+goal zeroD_MOK035_WTPDWS {D_MOK035_WTPDWS < AnnAlloc60S_NU1 * dist_60S_NU1 * taf_cfs}
+
+!******************************************************************************
+! Woodbridge Provision to City of Lodi
+!******************************************************************************
+/*
+In May 2003, the City entered into an agreement with Woodbridge Irrigation District to purchase 6,000
+acre-feet per year of surface water from the Mokelumne River (via WID canal facilities) for a period of
+40 years. An amendment approved in January 2008 extended the agreement to 2047.
+
+During dry years when WID’s supply is reduced, the City’s allotment can be reduced down to
+3,000 AFY.
+
+Diversion of the water from the Mokelumne River is permitted only from March 1 through
+October 15. However, an agreement with East Bay Municipal Utilities District (EBMUD) will
+allow release of up to 1,000 acre-feet between October 15 and the end of February. This will
+allow year-round operation of the surface water treatment plant.
+*/
+define AnnAlloc60n_NU1DV {std kind 'AnnualAlloc' units 'taf'}
+define AnnAlloc60n_NU1 {
+    case octBgnWY {  ! special case for first wateryear, Sum Oct-Sep
+        condition month == OCT .and. wateryear == bgnWY
+        value 6.}
+    case Above250 {
+        condition month == MAR .and. annPardeeFNF>=375.
+        value 6.}
+    case Below250 {
+        condition month == MAR
+        value 3.}
+    case otherwise {
+        condition always
+        value AnnAlloc60n_NU1DV(-1)}
+}        
+goal setAnnAlloc60n_NU1DV {AnnAlloc60n_NU1DV = AnnAlloc60n_NU1}
+
+define distWIDto60N_NU1 {select Lodi from Mok_demands where month=month}
+goal setD_MOK035_60N_NU1 {D_MOK035_60N_NU1 < AnnAlloc60n_NU1 * distWIDto60N_NU1 * taf_cfs}
+
+
+
+
+!******************************************************************************
+!EBMUD
+!******************************************************************************
+
+/*
+EBMUD introduces rationing/conservation measures when the forecasted total system storage
+at the end of September is less than 500,000 acre-feet.
+
+The supply storage projected in April for the end of a water year in the Water Supply and Availability Report
+determines the need for requiring customers to change their water use. The DMP level of rationing is dependent on
+supply storage, modeled after the DMP guidelines established in the 1992 Contingency Plan and modifi ed to
+reflect the maximum 15 percent rationing goal as adopted by the Board in October 2009. The DMP follows this
+process:
+   - based on water year runoff predicted in April, estimate total system storage that will be available at end of
+     water year (September 30);
+   - if total system storage is projected to be less than 500 TAF, prepare and implement a DMP; and adjust the DMP
+     as conditions change during an extended dry period.
+
+From the 2010 UWMP:
+   Forecasted System Storage > 500 TAF:   No rationing
+   Forecasted System Storage 450-500 TAF: 0%-10% rationing goal
+   Forecasted System Storage 300-450 TAF: 10%-15% rationing goal
+   Forecasted System Storage < 300 TAF:   15% goal
+   
+In the first year of the frought decrease rationing by 50% as a surrogate for delays in EBMUD planning process and
+reaction time of consumers to save water.
+
+*/
+
+! Inflows Apr-Sep
+define EBMUD_WS1 {
+	case AprtoSep	{
+		condition month == APR
+	  	sum(i=0,5) (I_COL003(i)+I_TGC003(i)+I_NFM010(i)+I_SFM005(i)+I_MFM008(i)+I_BCM003(i)+I_SLTSP(i)+I_UBEAR(i)+I_MOK079(i))*cfs_taf(i) + I_PARDE(i)*cfs_taf(i) + CT_PARDE_SV(i)*cfs_taf(i) + I_CMCHE(i)*cfs_taf(i)}
+	case other {
+	  	condition always
+	  	value 0.0}
+}
+
+define AnnualAMADR_AWS_AprSep_Ratio		{ select AMDRAprSep   from Mok_Demands where month=APR}
+define AnnualAMADR_CAWP_AprSep_Ratio	{ select AMDRAprSep   from Mok_Demands where month=APR}
+define AnnualCPUD_AprSep_Ratio			{ select CPUDAprSep   from Mok_Demands where month=APR}
+define AnnualCACWD_AprSep_Ratio			{ select CACWDAprSep   from Mok_Demands where month=APR}
+define Lodi_AprSep_Ratio			{ select LODIAprSep   from Mok_Demands where month=APR}
+define Stockton_AprSep_Ratio			{ select STCKAprSep   from Mok_Demands where month=APR}
+
+define EBMUD_WS2_1 {				!Assume no deliveries to JVID under drought
+	case AprtoSep	{
+		condition month == APR
+	  	value
+	  	+ AnnualAMADR_AWS  * AnnualAMADR_AWS_AprSep_Ratio     !Upstream demand Apr-Sep
+	  	+ AnnualAMADR_CAWP * AnnualAMADR_AWS_AprSep_Ratio     !Upstream demand Apr-Se
+	  	+ AnnualCPUD  * AnnualCPUD_AprSep_Ratio          !Upstream demand Apr-Sep
+	  	+ AnnualCACWD  * AnnualCACWD_AprSep_Ratio          !Upstream demand Apr-Sep
+	  	 }
+	case other {
+	  condition always
+	  value	0.0}
+}
+define EBMUD_WS2_2 {				!Assume no deliveries to JVID under drought
+	case AprtoSep	{
+		condition month == APR
+	  	value
+                + AnnAlloc60N_NA4 * 0.975 !Woodbridge ID demand Apr-Sep based on average of 1922-2015
+                + AnnAlloc60N_NU1 * Lodi_AprSep_Ratio !City of Lodi demand Apr-Sep
+                + AnnAlloc60N_NU1 * Stockton_AprSep_Ratio !City of Stockton demand Apr-Sep
+                + AnnAlloc60N_NA5 * 0.965 !Riparian Diversions Apr-Sep based on average of 1922-2015
+                }
+	case other {
+	  condition always
+	  value	0.0}
+}
+define minflow_C_CMCHE_Apr    { select minCamanche   from Mok_JSAFlow where month=APR, wyt=wyt_MokJSA}
+define Seepage1_Apr			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Apr use linear}
+define Seepage2_Apr			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Apr use linear}
+define minflow_C_CMCHE_May    { select minCamanche   from Mok_JSAFlow where month=May, wyt=wyt_MokJSA}
+define Seepage1_May			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_May use linear}
+define Seepage2_May			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_May use linear}
+define minflow_C_CMCHE_Jun    { select minCamanche   from Mok_JSAFlow where month=Jun, wyt=wyt_MokJSA}
+define Seepage1_Jun			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Jun use linear}
+define Seepage2_Jun			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Jun use linear}
+define minflow_C_CMCHE_Jul    { select minCamanche   from Mok_JSAFlow where month=Jul, wyt=wyt_MokJSA}
+define Seepage1_Jul			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Jul use linear}
+define Seepage2_Jul			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Jul use linear}
+define minflow_C_CMCHE_Aug    { select minCamanche   from Mok_JSAFlow where month=Aug, wyt=wyt_MokJSA}
+define Seepage1_Aug			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Aug use linear}
+define Seepage2_Aug			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Aug use linear}
+define minflow_C_CMCHE_Sep    { select minCamanche   from Mok_JSAFlow where month=Sep, wyt=wyt_MokJSA}
+define Seepage1_Sep			  {select Seepage1 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Sep use linear}
+define Seepage2_Sep			  {select Seepage2 from Mok_GWSeepage given Flow = minflow_C_CMCHE_Sep use linear}
+
+define Seepage_Est	  {value (Seepage1_Apr+Seepage2_Apr
+							  +Seepage1_May+Seepage2_May
+							  +Seepage1_Jun+Seepage2_Jun
+							  +Seepage1_Jul+Seepage2_Jul
+							  +Seepage1_Aug+Seepage2_Aug
+							  +Seepage1_Sep+Seepage2_Sep)*cfs_taf}
+
+define EBMUD_WS2_3 {				!Assume no deliveries to JVID under drought
+	case AprtoSep	{
+		condition month == APR
+	  	value
+                6*SL_PARDE_SV*cfs_taf
+                + 6*SL_CMCHE_SV*cfs_taf
+                + Seepage_Est + 6*40*cfs_taf}
+	case other {
+	  condition always
+	  value	0.0}
+}
+
+define EBMUD_InflowEst{case AprtoSep{condition month == Apr 
+                  sum(i=0,5,1) (I_EBTML(i)-EBTML_Loss(i))*cfs_taf(i)}
+                  case otherwise{condition always value 0}}
+                  
+define EBMUD_WS2_4 {				
+	case AprtoSep	{
+		condition month == APR
+	  	value
+                max(0, AnnualEBMUD * 0.6861 - EBMUD_InflowEst-(S_EBTML(-1) - 118.))		   
+                 }
+	case other {
+	  condition always
+	  value	0.0}
+}
+
+define EBMUD_WS2{value EBMUD_WS2_1+EBMUD_WS2_2+EBMUD_WS2_3+EBMUD_WS2_4}
+
+define EBMUD_WS3 {
+	case AprtoSep	{
+		condition month == APR
+    		select WBAprSepTAF from Mok_JSAFlow where month=month, wyt=wyt_MokJSA}
+	case other {
+		condition always
+	  	value 0.0}
+}
+
+define EBMUD_WS4 { !evaporative loss
+	case FirstyYear	{
+		condition wateryear == BgnWY .and. month == APR
+    		value 32.}
+    	case April {
+    		condition month == APR
+    		sum(i=-12,-7) (E_SLTSP(i)+E_LBEAR(i)+E_PARDE(i)+E_CMCHE(i))*cfs_taf(i)}
+	case other {
+		condition always
+	  	value 0.0}
+}
+
+define EBMUD_WS5 { !PG&E release from storage
+    	case April {
+    		condition month == APR
+    		value min(0., S_SLTSP(-1)+S_LBEAR(-1)-110.)} !Analysis of historical data shows a lareg range of possible carryover storage. 110 TAF seems to be the maximum. Do not rely on positive contributions from PG&E
+	case other {
+		condition always
+	  	value 0.0}
+}
+
+! Calculate the supply index for Mokelumne River for end of September
+! Sum of End of Mar storage and available inflows from Apr-Sep
+define EBMUD_SIdv {std kind 'SUPPLY-INDEX' units 'TAF'}
+
+define EBMUD_SI   {
+	case Initialize {
+		condition month == BgnMo .and. wateryear == BgnWY
+		value 1000.}
+	case April {
+		condition month == APR
+		value min(705,1.10*max(0, S_PARDE(-1) + S_CMCHE(-1) + S_EBTML(-1) + EBMUD_WS1 - EBMUD_WS2 - EBMUD_WS3 - EBMUD_WS4 + EBMUD_WS5)) } !1.10 is a calibration factor based on model simulation
+	case other {
+		condition always
+	  	value EBMUD_SIdv(-1)	}
+}
+
+goal set_EBMUD_SIdv {EBMUD_SIdv = EBMUD_SI }
+
+! If the supply index compted above is below 500 TAF, then the current year is assumed to be a water-deficit year.
+! The flag number of '1' indicates water-deficit years.
+define EBMUD_DefFlagdv {std kind 'FLAG' units 'NONE'}
+
+define EBMUD_DefFlag  {
+	case Initialize {
+	        condition month == BgnMo .and. wateryear == BgnWY
+		value 0.}
+	case ContinuingDefic {
+    		condition month == APR .and. EBMUD_SI <= 475. .and. EBMUD_SIdv(-1) <= 475.
+    		value 1.0  }
+    	case Defic {
+	    	condition month == APR .and. EBMUD_SI <= 475. .and. EBMUD_SIdv(-1) > 475.
+    		value 0.5  }
+	case NoDefic {
+    		condition month == APR
+    		value 0.0  }
+     	case notmarch {
+     	 	condition always
+     	 	value EBMUD_DefFlagdv(-1) }
+}
+
+goal set_EBMUD_DefFlagdv {EBMUD_DefFlagdv = EBMUD_DefFlag }
+
+define EBMUD_FptFlagdv {std kind 'FLAG' units 'NONE'}
+
+define EBMUD_FptFlag  {
+	case Initialize {
+	        condition month == BgnMo .and. wateryear == BgnWY
+		value 0.}
+	case ContinuingDefic {
+    		condition month == APR .and. EBMUD_SI <= 475. .and. EBMUD_SIdv(-1) <= 475.
+    		value 1.0  }
+    	case Defic {
+	    	condition month == APR .and. EBMUD_SI <= 475. .and. EBMUD_SIdv(-1) > 475.
+    		value 0.5  }
+	case NoDefic {
+    		condition month == APR
+    		value 0.0  }
+     	case notmarch {
+     	 	condition always
+     	 	value EBMUD_FptFlagdv(-1) }
+}
+
+goal set_EBMUD_FptFlagdv {EBMUD_FptFlagdv = EBMUD_FptFlag }
+
+! Define monthly rationing factors (from Ben Bray, EBMUD)
+define EBMUD_RationingFactor {
+	case MaySep {condition month >= MAY  .and. month <= SEP value 1.24}
+	case Otherwise {condition always value 0.83}}
+
+! determine the cut in deliveries to the Mokelumne Aqueduct
+define EBMUD_PerCut {select percut_mi from Mok_percut given SI=EBMUD_SI use linear }
+define EBMUD_PerDel {value 1. - EBMUD_PerCut*EBMUD_RationingFactor*EBMUD_DefFlag}
+
+
+goal maxEBMUDDelivery1 {D_MAQ057_EBMUD + D_EBTML_EBMUD < EBMUD_PerDel * UD_EBMUD}
+!goal maxParde {D_PARDE_MAQ001 = UD_EBMUD_HISTORICAL} !FOR HISTORICAL RUN ONLY!!!!!!!!!!!!!!!!!!!!!!!!
+
+define EBMUD_WS1dv    {alias EBMUD_WS1 kind 'Index' units 'TAF'}
+define EBMUD_WS2dv    {alias EBMUD_WS2 kind 'Index' units 'TAF'}
+define EBMUD_WS3dv    {alias EBMUD_WS3 kind 'Index' units 'TAF'}
+define EBMUD_WS4dv    {alias EBMUD_WS4 kind 'Index' units 'TAF'}
+define EBMUD_WS5dv    {alias EBMUD_WS5 kind 'Index' units 'TAF'}
+define EBMUD_PerCutdv {alias EBMUD_PerCut kind 'Rationing' units 'None'}
+define EBMUD_PerDeldv {alias EBMUD_PerDel kind 'Allocation' units 'None'}
+define EBMUD_TotalStoragedv {alias S_PARDE + S_CMCHE + S_EBTML kind 'Storage' units 'TAF'}
+
+
+!******************************************************************************
+! North San Joaquin Water Conservation District (60N_NA3)
+!******************************************************************************
+/*
+North San Joaquin Water Conservation District (NSJWCD) has a junior water right that
+is derived from Permit 10478. It provides a permit for temporary appropriation of water that is excess to the
+needs of a municipality. The temporary permit allows NSJWCD to divert from December 1 to July 1
+up to 20,000 AFY from the Mokelumne River, either directly or to storage in EBMUD’s Camanche
+Reservoir. NSJWCD has an agreement with EBMUD to store water in Camanche Reservoir, when
+water is available under NSJWCD’s junior water right, for later release to NSJWCD. NSJWCD
+historically has used as much as 9,488 AFY under Permit 10477, and in the last 10 years, diversions
+have declined to between 2,000 and 4,000 AFY. In dry and critically dry years, when there is no
+stored water surplus to meet EBMUD’s municipal needs, NSJWCD typically receives no water under
+its entitlement. The maximum diversion rate is 80 cfs.
+*/
+define disAMADR_AWS  {select AMDR_AWS  from Mok_demands where month=month}
+define disAMADR_CAWP {select AMDR_CAWP from Mok_demands where month=month}
+define disCPUD       {select CPUD      from Mok_demands where month=month}
+define disCACWD       {select CACWD      from Mok_demands where month=month}
+
+! keep a running total of the volume available Dec-Jun
+define CamancheSpillForecast {value max(0, S_CMCHE(-1) - S_CMCHELevel5 + (I_COL003+I_TGC003+I_NFM010+I_SFM005+I_MFM008+I_BCM003+I_SLTSP
+	+I_UBEAR+I_MOK079+I_PARDE+CT_PARDE_SV+I_CMCHE)*cfs_taf - (S_LBEAR_SV2 + S_SLTSP_SV2 - S_LBEAR(-1) - S_SLTSP(-1)) +  S_PARDE(-1) - S_PARDELevel5
+	- min(50.*cfs_taf, demand_JVID + AnnJVIDShort)*PardeJVIDFlag -  UD_EBMUD *EBMUD_PerDel*cfs_taf - 8*disAMADR_AWS
+	- 1.050*disAMADR_CAWP - 2*disCPUD - 0.2*disCACWD - AnnAlloc60S_NU1 * dist_60S_NU1 - AnnAlloc60n_NU1 * distWIDto60N_NU1 
+	- AnnAlloc60N_NA4 * dist_60N_NA4 -AnnAlloc60n_NA5 * dist_60N_NA5)}
+
+define CamancheSpillForecastDV {alias CamancheSpillForecast kind 'Forecast' units 'TAF'}
+
+define CamancheSpillForecastTrigger {case Spill {condition CamancheSpillForecast > 0.1 value 1}
+									 case otherwise {condition always value 0}
+}
+
+define Alloc60n_NA3DV {std kind 'AnnualAlloc' units 'taf'}
+define Alloc60n_NA3 {
+    case December {
+        condition month==DEC
+        value 20.}
+    case JanThruJun {
+        condition month>DEC .and. month<JUL
+        value max(0., Alloc60n_NA3DV(-1) - D_MOK050_60N_NA3(-1)*cfs_taf(-1)) }
+    case JulThruOct {
+        condition always
+        value 0.}
+}        
+goal setAlloc60n_NA3DV {Alloc60n_NA3DV = Alloc60n_NA3}
+
+goal setD_MOK050_60N_NA3 {D_MOK050_60N_NA3 < CamancheSpillForecastTrigger*min(80., Alloc60n_NA3 * taf_cfs)}

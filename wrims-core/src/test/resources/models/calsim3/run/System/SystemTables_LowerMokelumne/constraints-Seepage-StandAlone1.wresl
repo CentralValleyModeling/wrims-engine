@@ -1,0 +1,99 @@
+/*
+SEEPAGE ARCS
+
+NAMING TAKES THE FOLLOWING FORM:
+{SG_{CalSim_3 Node}_{corresponding C2VSIM River Node}
+
+positive seepage = gaining stream
+negative seepage = loosing stream
+
+When multiplied by -1, it reflects stream's perspective.  
+
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cosumnes River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setSG188_CSM033_29   {SG188_CSM033_29  = 0.0}
+goal setSG189_CSM026_29   {SG189_CSM026_29  = 0.0}
+goal setSG190_CSM021_29   {SG190_CSM021_29  = 0.0}
+goal setSG191_CSM016_29   {SG191_CSM016_29  = 0.0}
+goal setSG192_CSM011_29   {SG192_CSM011_29  = 0.0}
+goal setSG193_CSM005_29   {SG193_CSM005_29  = 0.0}
+goal setSG194_CSM005_29   {SG194_CSM005_29  = 0.0}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Dry Creek       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal setSG182_DSC035_28   {SG182_DSC035_28  = 0.0}
+goal setSG183_DSC028_28   {SG183_DSC028_28  = 0.0}
+goal setSG184_DSC023_28   {SG184_DSC023_28  = 0.0}
+goal setSG185_DSC016_28   {SG185_DSC016_28  = 0.0}
+goal setSG186_DSC008_28   {SG186_DSC008_28  = 0.0}
+goal setSG187_DSC008_28   {SG187_DSC008_28  = 0.0}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mokelumne River !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+EBMUD assumes seepage losses between Camanche Dam and Interstate 5 are a function of annual
+releases from Camanche Dam.
+
+Annual release < 600 TAF:    Seepage = 56 TAF/yr
+Annual release 600-1200 TAF: Seepage = 56-120 TAF/yr
+Annual release > 1,200 TAF:  Seepage = 120 TAF/yr
+
+5 TAF of the above seepage is below Woodbridge Diversion Dam and is independent of Camanche releases (constant)
+Remaining seepage:
+   2/3 occurs above I-99 road bridge
+   1/3 occurs below I-99 road bridge
+
+May 2018 update:
+A fixed uniform seepage loss of 417 AF/month, (equivalent to 5,000 AF/year) is distributed 
+between three nodes (MOK028, MOK022, MOK019) independent of releases from Camanche.
+
+An additional seepage loss of the maximum of 4,250 AF/month (equivalent to 51,000 AF/year) and 10 percent
+of the monthly Camanche Reservoir release. Two-thirds of this volume is distributed between 
+three nodes (MOK055, MOK050, MOK044), and one-third at the Woodbridge Diversion Dam node (MOK035).
+*/
+
+!Seepage below Woodbridge Dam (independent of Camanche)
+define MokGWSeepageMin_Woodbridge		{value 5.0/12.*taf_cfs}
+!define MokGWSeepageTot_Woodbridge	  	{std kind 'FLOW' units 'CFS'}
+goal setMokGWSeepage_WoodbridgeTot 		{MokGWSeepageTot_Woodbridge > MokGWSeepageMin_Woodbridge}
+
+!Seepage upstream of Woodbridge Dam (function of Camanche releases)
+define MokGWSeepageMin_Camanche		{value (51.0-11.)/12.*taf_cfs} !20 is from model validation
+!define MokGWSeepageRate_Camanche	{value 0.1} !seepage is 10% of monthly Camanche releases
+define MokGWSeepageRate_Camanche	{value 0.075} !0.075 is from model validation
+!define MokGWSeepageTot_Camanche  	{std kind 'FLOW' units 'CFS'}
+goal setMokGWSeepage_CamancheTot1 	{MokGWSeepageTot_Camanche > MokGWSeepageMin_Camanche}
+goal setMokGWSeepage_CamancheTot2 	{MokGWSeepageTot_Camanche > MokGWSeepageRate_Camanche*C_CMCHE}
+
+goal setSG_AMADR510       {SG_AMADR510     = 0}
+goal setSG173_MOK078_27   {SG173_MOK078_27 = 0}
+goal setSG174_CMCHE_27    {SG174_CMCHE_27  = 0}
+
+goal setSG175_CMCHE_27    {SG175_CMCHE_27   = 0.0}
+goal setSG176_MOK055_27   {SG176_MOK055_27  = -(2./3.)*(1./3.)*MokGWSeepageTot_Camanche}
+goal setSG177_MOK050_27   {SG177_MOK050_27  = -(2./3.)*(1./3.)*MokGWSeepageTot_Camanche}
+goal setSG178_MOK044_27   {SG178_MOK044_27  = -(2./3.)*(1./3.)*MokGWSeepageTot_Camanche} 
+goal setSG179_MOK035_27   {SG179_MOK035_27  = -1./3.*MokGWSeepageTot_Camanche}
+goal setSG180_MOK028_27   {SG180_MOK028_27  = -1./3.*MokGWSeepageTot_Woodbridge}
+goal setSG181_MOK022_27   {SG181_MOK022_27  = -1./3.*MokGWSeepageTot_Woodbridge}
+goal setSG195_MOK022_27   {SG195_MOK022_27  = -1./3.*MokGWSeepageTot_Woodbridge}
+goal setSG196_MOK019_30   {SG196_MOK019_30  = 0.0}
+!goal setSG197_MOK014_30   {SG197_MOK014_30  = 0.0}
+!goal setSG198_MOK004_30   {SG198_MOK004_30  = 0.0}
+!goal setSG199_MOK004_30   {SG199_MOK004_30  = 0.0}
+
+define debugGW {lower unbounded upper unbounded kind 'CHANNEL-SEEPAGE' units 'CFS'}
+goal setdebugGW {debugGW=MokGWSeepageTot_Camanche + MokGWSeepageTot_Woodbridge}
+
+define TD_MOK014_197 {value 0.}  !SR_26S_MOK014
+define TD_MOK019_196 {value 0.}  !SR_60N_MOK019
+define TD_MOK035_179 {value 0.}  !SR_60N_MOK035
+define TD_SJR022_200 {value 0.}  !SR_60N_SJR022
+define TD_SJR028_170 {value 0.}  !SR_60N_SJR028
+
+

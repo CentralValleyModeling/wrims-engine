@@ -1,0 +1,276 @@
+! UARP Power Operation Rules
+! Derya Sumer 05/05/06
+!*********************************************************************************
+
+! Will not be operating for Chili Bar power
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Powerhouse Maintenance !!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+/*
+Maintenance periods from OASIS ARIOps Model (see UARP_PHMaintenancePeriods.xls)
+Loon Lake PH			9/20  - 9/29	(875  cfs)
+Gerle Reservoir			9/20  - 9/29	(1025 cfs)
+Robbs Peak Reservoir	        9/20  - 9/29	(1250 cfs)
+Jones Fork PH			10/7  - 10/11	(260  cfs)
+Union Valley PH			10/14 - 10/23	(1450 cfs)	
+Junction PH Unit 1		10/25 - 11/3	(651  cfs)
+Junction PH Unit 2		11/5  - 11/14	(826  cfs; combined = 1200 cfs)
+Camino PH Unit 1		11/16 - 11/24	(729  cfs)
+Camino PH Unit 2		11/26 - 12/4	(729  cfs; combined = 1050 cfs)
+Whiterock PH Unit 1		12/6  - 12/13	(1699 cfs)
+Whiterock PH Unit 2		12/15 - 12/24	(2251 cfs; combined = 3800 cfs)
+*/
+
+! Loon Lake PH
+define SMUDCapacity_D_LOONL_LLT000     {
+	case October {condition month==Oct value (17./31.)*1000.} 
+	case Otherwise {condition always value 1000.}}
+	
+! Gerle Reservoir
+define SMUDCapacity_D_GERLE_SFR006     {value 1120.}
+!	case September {condition month==Sep value (20./30.)*1120.} 
+!	case Otherwise {condition always value 1120.}}
+	
+! Robbs Peak Reservoir	
+define SMUDCapacity_D_SFR006_RPT004    {
+	case October {condition month==Oct value (17./31.)*1020.} 
+	case Otherwise {condition always value 1020.}}
+
+! Jones Fork PH
+define SMUDCapacity_D_ICEHS_IHT002     {
+	case October   {condition month==Oct value (17./31.)*319.} 
+	case Otherwise {condition always value 319.}}
+
+! Union Valley PH
+define SMUDCapacity_D_UNVLY_SLV017           {
+	case October   {condition month==Oct value (17./31.)*1531.} 
+	case Otherwise {condition always value 1531.}}
+	
+! Junction PH	
+define SMUDCapacity_D_SLV015_JBT004 { 
+	case November  {condition month==Nov value ((16./30.)*1232.)} 
+	case Otherwise {condition always value 1232.}}	
+	
+! Camino PH
+!define SMUDCapacity_D_SLV006_CMN005 {
+define SMUDCapacity_C_CMN006 {
+	case November  {condition month==Nov value ((16./30.)*2100.)}
+	case Otherwise {condition always value 2100.}}
+
+! Whiterock PH
+define SMUDCapacity_D_SFA040_WRT000 {
+	case December  {condition month==Dec value ((17./31.)*4000.)} 
+	case Otherwise {condition always value 4000.}}
+
+goal setSMUDMaint_D_LOONL_LLT000	{D_LOONL_LLT000  < SMUDCapacity_D_LOONL_LLT000}
+goal setSMUDMaint_D_GERLE_SFR006	{D_GERLE_SFR006  < SMUDCapacity_D_GERLE_SFR006}
+goal setSMUDMaint_D_SFR006_RPT004	{D_SFR006_RPT004 < SMUDCapacity_D_SFR006_RPT004}
+goal setSMUDMaint_D_ICEHS_IHT002	{D_ICEHS_IHT002  < SMUDCapacity_D_ICEHS_IHT002}
+goal setSMUDMaint_D_SLV017_SLV017	{D_UNVLY_SLV017	 < SMUDCapacity_D_UNVLY_SLV017}
+goal setSMUDMaint_D_SLV015_JBT004	{D_SLV015_JBT004 < SMUDCapacity_D_SLV015_JBT004}
+goal setSMUDMaint_C_CMN006       	{C_CMN006        < SMUDCapacity_C_CMN006}
+goal setSMUDMaint_D_SFA040_WRT000	{D_SFA040_WRT000 < SMUDCapacity_D_SFA040_WRT000}
+
+
+define D_LOONL_LLT000_OPS {std kind 'FLOW-SPILL' units 'CFS'}
+define D_LOONL_LLT000_EXC {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+goal D_LOONL_LLT000total {D_LOONL_LLT000=D_LOONL_LLT000_OPS+D_LOONL_LLT000_EXC}
+
+
+/*
+define UARPSpillVol_Snowmelt_LOONL {
+	case FebMay {
+		condition range(month,Feb,May)
+		value max(0., (UARPForecast_LOONL - (S_LOONLlevel4-S_LOONL(-1)))/(9-month))
+	}
+	case Otherwise {
+		condition always 
+		value 0.
+	}
+}
+
+*/
+define D_ICEHS_IHT002_OPS_SPILL {std kind 'FLOW-SPILL' units 'CFS'}
+define D_ICEHS_IHT002_EXC_SPILL {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+goal D_ICEHS_IHT002total2 {D_ICEHS_IHT002=D_ICEHS_IHT002_OPS_SPILL+D_ICEHS_IHT002_EXC_SPILL}
+
+/*
+define UARPSpillVol_Snowmelt_ICEHS {
+	case FebMay {
+		condition range(month,Feb,May)
+		value max(0., (UARPForecast_ICEHS - (S_ICEHSlevel4-S_ICEHS(-1)))/(9-month))
+	}
+	case Otherwise {
+		condition always 
+		value 0.
+	}
+}
+
+*/
+define D_UNVLY_SLV017_OPS {std kind 'FLOW-SPILL' units 'CFS'}
+define D_UNVLY_SLV017_EXC {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+goal D_UNVLY_SLV017total2 {D_UNVLY_SLV017=D_UNVLY_SLV017_OPS+D_UNVLY_SLV017_EXC}
+
+/*
+define UARPSpillVol_Snowmelt_UNVLY {
+	case FebMay {
+		condition range(month,Feb,May)
+		value max(0., (UARPForecast_UNVLY - (S_UNVLYlevel5-S_UNVLY(-1)))/(9-month))
+	}
+	case Otherwise {
+		condition always 
+		value 0.
+	}
+}
+
+goal setD_LOONL_LLT000 {D_LOONL_LLT000_OPS<UARPSpillVol_Snowmelt_LOONL*taf_cfs}
+goal setD_ICEHS_IHT002 {D_ICEHS_IHT002_OPS_SPILL<UARPSpillVol_Snowmelt_ICEHS*taf_cfs}
+!goal setD_UNVLY_SLV017 {D_UNVLY_SLV017_OPS<UARPSpillVol_Snowmelt_UNVLY*taf_cfs}
+
+define UARPForecast_LOONLdv {alias UARPForecast_LOONL kind 'FORECAST' UNITS 'TAF'}
+define UARPSpillVol_Snowmelt_LOONLdv {alias UARPSpillVol_Snowmelt_LOONL kind 'FORECAST' units 'TAF'}
+define UARPForecast_ICEHSdv {alias UARPForecast_ICEHS kind 'FORECAST' UNITS 'TAF'}
+define UARPSpillVol_Snowmelt_ICEHSdv {alias UARPSpillVol_Snowmelt_ICEHS kind 'FORECAST' units 'TAF'}
+define UARPForecast_UNVLYdv {alias UARPForecast_UNVLY kind 'FORECAST' UNITS 'TAF'}
+define UARPSpillVol_Snowmelt_UNVLYdv {alias UARPSpillVol_Snowmelt_UNVLY kind 'FORECAST' units 'TAF'}
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Monthly Energy Reliability Objective
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!A certain amount (presented in a table) is to be released from the
+!Union Valley Reservoir as long as its usable capacity is above 25%.  Usable capacity is defined as the volume
+!of water between the flood elevation and minimum elevation.  If sufficient water is not available from the Union Valley
+!Reservoir, 40% of it is withdrawn from Ice House and 60% is withdrawn from Loon Lake.
+
+define UVR_min_flow {select Release from American_UARP_UVMinRel where Mo=month}
+
+!goal SetUVRel { C_UNVLY_mif<UVR_min_flow}
+goal setD_UNVLY_SLV017 {D_UNVLY_SLV017_OPS < max(UARPSpillVol_Snowmelt_UNVLY*taf_cfs,UVR_min_flow)}
+
+!define C_UNVLY_EXC1 {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+!define C_UNVLY_EXC2 {std kind 'FLOW-SPILL-POWER' units 'CFS'}
+!goal C_UNVLY_EXC_total {C_UNVLY_EXC=C_UNVLY_EXC1+C_UNVLY_EXC2}
+
+!define C_UNVLY_POW {lower 0 upper 1577 kind 'FLOW-POWER' units 'CFS'}
+!goal C_UNVLY_POW_total {C_UNVLY_POW=C_UNVLY_MIF+C_UNVLY_EXC1}
+
+define LLshare{value 0.6*UVR_min_flow}
+define IHshare{value 0.4*UVR_min_flow}
+
+define UVR_min_flowdv {std kind 'FLOW' units 'CFS'}
+goal checkUVRminflow {UVR_min_flowdv=UVR_min_flow}
+define LLsharedv{std kind 'FLOW' units 'CFS'}
+goal checkLLshare {LLsharedv=LLshare}
+define IHsharedv{std kind 'FLOW' units 'CFS'}
+goal checkIHshare {IHsharedv=IHshare}
+
+!D_SFR006_RPT004 min flow
+define D_SFR006_RPT004req{
+		case firstday{
+			condition month==Oct .and. wateryear==BgnWY
+			value 0
+			}
+		case below_25{
+			condition ((S_UNVLY_4(-1)+S_UNVLY_3(-1))/(S_UNVLYlevel4-S_UNVLYlevel2))<0.25
+			value LLshare
+			}
+		case other {
+			condition always
+			value 0}
+		}
+
+define D_SFR006_RPT004reqdv{std kind 'FLOW' units 'CFS'}
+goal checkD_SFR006_RPT004req {D_SFR006_RPT004reqdv=D_SFR006_RPT004req}
+
+*/
+ define D_SFR006_RPT004_OPS {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define D_SFR006_RPT004_EXC {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+goal D_SFR006_RPT004total  {D_SFR006_RPT004=D_SFR006_RPT004_OPS+D_SFR006_RPT004_EXC}
+
+/*
+ goal setD_SFR006_RPT004MIF {D_SFR006_RPT004_OPS<D_SFR006_RPT004req}
+
+!D_SFR006_RPT004 check
+define checkD_SFR006_RPT004{
+		case firstday{
+			condition month==Oct .and. wateryear==BgnWY
+			value 0
+			}
+		case below_25{
+			condition ((S_UNVLY_4(-1)+S_UNVLY_3(-1))/(S_UNVLYlevel4-S_UNVLYlevel2))<0.25
+			value 1
+			}
+		case other {
+			condition always
+			value 2
+			}
+		}
+define checkD_SFR006_RPT004dv{std kind 'FLOW' units 'CFS'}
+goal CheckActive{checkD_SFR006_RPT004dv=checkD_SFR006_RPT004}
+
+!D_ICEHS_IHT002 min req
+define D_ICEHS_IHT002req{
+		case firstday{
+			condition month==Oct .and. wateryear==BgnWY
+			value 0
+			}
+		case below_25{
+			condition ((S_UNVLY_4(-1)+S_UNVLY_3(-1))/(S_UNVLYlevel4-S_UNVLYlevel2))<0.25
+			value IHshare
+			}
+		case other {
+			condition always
+			value 0
+			}
+		}
+
+define IH_DeIcingFlow {
+	case DecMar_flow {
+		condition range(month,Dec,Mar)
+		value 11.
+	}
+	case Otherwise_noflow {
+		condition always
+		value 0.
+	}	
+	}
+
+define D_ICEHS_IHT002reqdv{std kind 'FLOW' units 'CFS'}
+goal checkD_ICEHS_IHT002req {D_ICEHS_IHT002reqdv=D_ICEHS_IHT002req}
+*/
+
+define D_ICEHS_IHT002_OPS {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define D_ICEHS_IHT002_EXC {std kind 'FLOW-EXCESS-INSTREAM' units 'CFS'}
+goal D_ICEHS_IHT002total  {D_ICEHS_IHT002=D_ICEHS_IHT002_OPS+D_ICEHS_IHT002_EXC}
+/*
+
+goal setD_ICEHS_IHT002MIF {D_ICEHS_IHT002_OPS<max(D_ICEHS_IHT002req,IH_DeIcingFlow)}
+
+!goal D_ICEHS_IHT002time { D_ICEHS_IHT002<D_ICEHS_IHT002*before85}
+!D_ICEHS_IHT002 check
+define checkD_ICEHS_IHT002{
+		case firstday{
+		condition  month==Oct  .and. wateryear==BgnWY
+	    value 0.}
+		case below_25{
+		condition ((S_UNVLY_4(-1)+S_UNVLY_3(-1))/(S_UNVLYlevel4-S_UNVLYlevel2))<0.25
+		value 1.}
+		case other {
+		condition always
+		value 2.}
+		}
+define checkD_ICEHS_IHT002dv{std kind 'FLOW' units 'CFS'}
+goal CheckActive2 {checkD_ICEHS_IHT002dv=checkD_ICEHS_IHT002}
+
+
+*/
+
+
+	

@@ -1,0 +1,40 @@
+!*********************************************************************
+!
+!    Z.Q. Richard Chen 10/24/2018
+!
+!*********************************************************************
+
+!*********************************************************************
+!***  Set the forcings on the groundwater system (using previous cycle's values)
+!*********************************************************************
+include 'SetPumping_SJRBASE_GW2.wresl'
+include 'SetDeepPerc_SJRBASE_GW2.wresl'
+include 'SetStrmFlow_SJRBASE_GW2.wresl'
+
+include 'setExteriorDPGP_SJRBASE.wresl'
+include 'setBUGWRecharge_SJRBASE.wresl'
+
+include 'setExteriorDPGP_SAC.wresl'
+include 'setBUGWRecharge_SAC.wresl'
+
+include 'SetGWreservoirFlows.wresl'
+!*********************************************************************
+!*********************************************************************
+!***  Simulate groundwater system
+!*********************************************************************
+!*********************************************************************
+define rSimGW {value	SimGW(wateryear,month) }       !Returns value of 0 if successfully executed
+
+!*********************************************************************
+!*********************************************************************
+!***  Get Stream Gain/Loss
+!*********************************************************************
+!*********************************************************************
+include '..\System\SystemTables_LowerMokelumne\constraints-Seepage_DeltaES.wresl' 
+include '..\System\SystemTables_SJREast\constraints-Seepage_SJREast.wresl' 
+include '..\System\SystemTables_SJRWest\constraints-Seepage_SJRWest.wresl' 
+include '..\System\SystemTables_LowerMokelumne\constraints-TileDrain_DeltaES.wresl'
+include '..\System\SystemTables_SJREast\constraints-TileDrain_DeltaES.wresl'
+include '..\System\SystemTables_SJRWest\constraints-TileDrain_DeltaES.wresl'
+
+

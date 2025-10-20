@@ -1,0 +1,860 @@
+/*
+File Name: Yuba_AnnualAllocations.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Calculate annual allocation to Yuba County Water Agency Member Units
+
+*/
+
+
+define AprilFlag {case April {condition month == APR value 1.0} case other {condition always value 0.0}}
+
+! Minimum Flows
+
+define MF_MFY012_Apr  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=Apr,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=Apr}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=Apr}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=Apr}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=Apr}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=Apr}
+	
+}
+define MF_MFY012_May  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=May,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=May}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=May}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=May}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=May}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=May}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=May}
+	
+}
+define MF_MFY012_Jun  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=Jun,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=Jun}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=Jun}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=Jun}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=Jun}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=Jun}
+	
+}
+define MF_MFY012_Jul  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=Jul,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=Jul}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=Jul}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=Jul}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=Jul}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=Jul}
+	
+}
+define MF_MFY012_Aug  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=Aug,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=Aug}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=Aug}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=Aug}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=Aug}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=Aug}
+	
+}
+define MF_MFY012_Sep  	{case Lic1963{condition P2246_WQCFlag == 0. select ourhousedam from Yuba_min_FERC2246 where month=Sep,wytype=wyt_FERC2246}
+ 					 case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select OurHouse_ECD from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   	 case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select OurHouse_CDY from Yuba_min_FERC2246_WQC where month=Sep}
+ 				     case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select OurHouse_DY  from Yuba_min_FERC2246_WQC where month=Sep}
+ 				     case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select OurHouse_BNY from Yuba_min_FERC2246_WQC where month=Sep}
+ 				     case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select OurHouse_NY  from Yuba_min_FERC2246_WQC where month=Sep}
+ 				     case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select OurHouse_Wet from Yuba_min_FERC2246_WQC where month=Sep}
+	
+}
+define WY_P2266 	   {case Wet			{condition SmartvilleUnimpaired_ann > 3240. value 1.}
+						case AboveNormal 	{condition SmartvilleUnimpaired_ann >= 2191. value 2.}
+						case BelowNormal	{condition SmartvilleUnimpaired_ann >= 1461. value 3.}
+						case Dry			{condition SmartvilleUnimpaired_ann >= 901. value 4.}
+						case CritDry		{condition SmartvilleUnimpaired_ann >= 616. value 5.}
+						case ExCritDry		{condition always value 6.}
+}
+!Minimum flows below Milton Diversion Dam
+define MF_MFY044_Apr  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=Apr}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=Apr}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=Apr}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=Apr}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=Apr}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=Apr}	
+}
+define MF_MFY044_May  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=May}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=May}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=May}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=May}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=May}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=May}	
+}
+define MF_MFY044_Jun  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=Jun}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=Jun}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=Jun}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=Jun}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=Jun}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=Jun}	
+}
+define MF_MFY044_Jul  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=Jul}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=Jul}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=Jul}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=Jul}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=Jul}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=Jul}
+}
+define MF_MFY044_Aug  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=Aug}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=Aug}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=Aug}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=Aug}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=Aug}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=Aug}
+}
+define MF_MFY044_Sep  	{case oldlicense {condition P2266_WQCFlag == 0. select Miltondam from yuba_min_FERC2266 where month=month}
+						  case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select Milton_ECD from yuba_min_FERC2266_WQC where month=Sep}
+						  case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select Milton_CDY from yuba_min_FERC2266_WQC where month=Sep}
+						  case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select Milton_DY  from yuba_min_FERC2266_WQC where month=Sep}
+						  case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select Milton_BNY from yuba_min_FERC2266_WQC where month=Sep}
+						  case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select Milton_NY from yuba_min_FERC2266_WQC where  month=Sep}
+						  case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select Milton_Wet from yuba_min_FERC2266_WQC where month=Sep}	
+}
+
+! Minimum flow for Oregon creek
+define MF_OGN004_Apr  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=Apr,wytype=wyt_FERC2246}					
+			       case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=Apr}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=Apr}
+}	
+define MF_OGN004_May  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=May,wytype=wyt_FERC2246}					
+			       case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=May}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=May}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=May}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=May}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=May}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=May}
+}	
+define MF_OGN004_Jun  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=Jun,wytype=wyt_FERC2246}	
+			       case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=Jun}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=Jun}					
+}
+define MF_OGN004_Jul  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=Jul,wytype=wyt_FERC2246}	
+				   case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=Jul}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=Jul}
+}
+define MF_OGN004_Aug  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=Aug,wytype=wyt_FERC2246}	
+				   case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=Aug}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=Aug}				
+}
+define MF_OGN004_Sep  {case Lic_1963{condition P2246_WQCFlag == 0. select logcabindam from Yuba_min_FERC2246 where month=Sep,wytype=wyt_FERC2246}	
+				   case WQ_ECD  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	6.	 select LogCabin_ECD from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   case WQ_Crit {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	5. 	 select LogCabin_CDY from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   case WQ_Dry  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	4. 	 select LogCabin_DY  from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   case WQ_BNY  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	3. 	 select LogCabin_BNY from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   case WQ_Abv  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	2. 	 select LogCabin_NY  from Yuba_min_FERC2246_WQC where month=Sep}
+ 				   case WQ_Wet  {condition P2246_WQCFlag == 1. .and. wyt_Smartville == 	1. 	 select LogCabin_Wet from Yuba_min_FERC2246_WQC where month=Sep}				
+}
+!Minimum flows below Bowman Reservoir for forecasting
+define MF_CCS009_APR  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month} 
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=Apr}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=Apr}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=Apr}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=Apr}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=Apr}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=Apr}	
+}                                                                                                                          
+define MF_CCS009_MAY  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month}           	
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=May}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=May}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=May}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=May}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=May}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=May}	
+}                                                                                                                      
+define MF_CCS009_JUN  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month}           
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=Jun}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=Jun}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=Jun}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=Jun}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=Jun}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=Jun}	
+}                                                                                                                    
+define MF_CCS009_JUL  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month}           
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=Jul}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=Jul}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=Jul}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=Jul}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=Jul}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=Jul}	
+}                                                                                                                          
+define MF_CCS009_AUG  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month}           
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=Aug}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=Aug}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=Aug}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=Aug}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=Aug}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=Aug}	
+}                                                                                                                     
+define MF_CCS009_SEP  	{case oldlicense  {condition P2266_WQCFlag == 0. select BSDiversiondam from yuba_min_FERC2266 where month=month}           
+					 case WQ_ECD  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 6. select BowSpd_ECD from yuba_min_FERC2266_WQC where month=Sep}
+					 case WQ_Crit 	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 5. select BowSpd_CDY from yuba_min_FERC2266_WQC where month=Sep}
+					 case WQ_Dry	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 4. select BowSpd_DY  from yuba_min_FERC2266_WQC where month=Sep}
+					 case WQ_BNY  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 3. select BowSpd_BNY from yuba_min_FERC2266_WQC where month=Sep}
+					 case WQ_Abv	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 2. select BowSpd_NY  from yuba_min_FERC2266_WQC where month=Sep}
+				     case WQ_Wet  	  {condition P2266_WQCFlag == 1. .and. WY_P2266 == 1. select BowSpd_Wet from yuba_min_FERC2266_WQC where month=Sep}
+}
+
+! Minimum flows below Spaulding for forecasting
+define MF_SPLDG_Apr   {select Spauldingdam from yuba_min_FERC2310 where month=Apr} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_May   {select Spauldingdam from yuba_min_FERC2310 where month=May} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_Jun   {select Spauldingdam from yuba_min_FERC2310 where month=Jun} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_Jul   {select Spauldingdam from yuba_min_FERC2310 where month=Jul} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_Aug   {select Spauldingdam from yuba_min_FERC2310 where month=Aug} !Drum-Spaulding Project (PG&E)
+define MF_SPLDG_Sep   {select Spauldingdam from yuba_min_FERC2310 where month=Sep} !Drum-Spaulding Project (PG&E)
+
+! Minimum flow for Slate creek
+
+! Switch between existing and new/proposed FERC license requirements
+!define P2088MinFlowFlag {value 0}
+
+define P2088_WYT {
+       case Wet       {condition OrovilleFNF_WY>7100 value 1}       
+       case AN        {condition OrovilleFNF_WY>4000 value 2} 
+       case BN        {condition OrovilleFNF_WY>2400 value 3} 
+       case Dry       {condition always value 4}}
+       
+define MF_SLT008_Apr {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Apr}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Apr}}
+define MF_SLT008_May {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=May}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=May}}
+define MF_SLT008_Jun {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Jun}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Jun}}
+define MF_SLT008_Jul {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Jul}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Jul}}
+define MF_SLT008_Aug {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Aug}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Aug}}
+define MF_SLT008_Sep {
+	case ExistingLicense  {condition P2088_WQCFlag == 0 select MinFlow_Ex from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Sep}
+	case ProposedLicense {condition P2088_WQCFlag == 1 select MinFlow_Alt from UF_P2088MinFlow where Project=5, WYT=P2088_WYT, month=Sep}}
+
+
+!***********************************************************************************************************************************************************
+! The variable 'YCWA_Alloc' is set in April. It is the annual allocation decision for YCWA based on a multi-period optimization for the period April-September
+! It is defined in the lower Yuba system files constraints-contracts.wresl
+!***********************************************************************************************************************************************************
+goal set_YCWA_Alloc {lhs YCWA_Alloc
+    case first5months {condition month <= MAR .and. wateryear == bgnWY rhs 1.0 lhs>rhs constrain lhs<rhs constrain}
+        case April 	  {condition month == APR rhs 1.0 lhs>rhs constrain lhs<rhs penalty 0}
+        case Other    {condition always rhs YCWA_Alloc(-1) lhs>rhs constrain lhs<rhs constrain}}
+     
+!The carryover storage requirement is relaxed when it would result in a delivery shortage of more than 50 percent in the current year. This is because YCWA would not operate the Yuba
+!Project so as to impose deficiencies of 50 percent or greater in the current year to protect against the risk of a 50 percent curtailment in the following year. 	 
+goal set_allocation_lower {lhs YCWA_Alloc rhs 0.5 lhs>rhs penalty 0. lhs<rhs penalty 99999} ! For CC run, 11/2023
+
+goal set_S_NBB_MAR  {lhs S_NBB_MAR
+    case April      {condition month == APR rhs S_NBLDB(-1) lhs>rhs constrain lhs<rhs constrain}
+    case other      {condition always rhs 0.0 lhs>rhs constrain lhs<rhs constrain}
+    }
+
+define carryover_NBB_target {select carryover_req from YUBA_carryover where standard = 4, wateryear=wateryear}
+goal set_carryover_NBB { 
+    lhs S_NBB_SEP
+    rhs carryover_NBB_target
+        lhs<rhs     penalty 100000.*taf_cfs lhs>rhs penalty 0.
+        }
+
+define I_NBB_APR { 
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029 + I_NBLDB + I_SLT009 + min(min(max(0., MF_MFY044_Apr + 1. + I_MFY013 - MF_MFY012_Apr - 3.),860.) 
+		    + max(0., I_OGN005 - MF_OGN004_Apr - 1.),1100.) - min(I_SLT009 - MF_SLT008_Apr,300.,max(I_SLT009 + I_NFY029 + I_NBLDB - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_NBB_MAY {
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029(1) + I_NBLDB(1)  + I_SLT009(1) + min(min(max(0., MF_MFY044_May + 1. + I_MFY013(1) - MF_MFY012_May - 3.),860.) 
+		    + max(0., I_OGN005(1) - MF_OGN004_May - 1.),1100.) - min(I_SLT009(1)- MF_SLT008_May,300.,max(I_SLT009(1) + I_NFY029(1) + I_NBLDB(1) - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_NBB_JUN {
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029(2) + I_NBLDB(2) + I_SLT009(2) + min(min(max(0., MF_MFY044_Jun + 1. + I_MFY013(2) - MF_MFY012_Jun - 3.),860.) 
+		    + max(0., I_OGN005(2) - MF_OGN004_Jun - 1.),1100.) - min(I_SLT009(2)- MF_SLT008_Jun,300.,max(I_SLT009(2) + I_NFY029(2) + I_NBLDB(2) - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_NBB_JUL {
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029(3) + I_NBLDB(3) + I_SLT009(3) + min(min(max(0., MF_MFY044_Jul + 1. + I_MFY013(3) - MF_MFY012_Jul - 3.),860.) 
+		    + max(0., I_OGN005(3) - MF_OGN004_Jul - 1.),1100.)  - min(I_SLT009(3)- MF_SLT008_Jul,300.,max(I_SLT009(3) + I_NFY029(3) + I_NBLDB(3) - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_NBB_AUG {
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029(4) + I_NBLDB(4) + I_SLT009(4) + min(min(max(0., MF_MFY044_Aug + 1. + I_MFY013(4) - MF_MFY012_Aug - 3.),860.) 
+		    + max(0., I_OGN005(4) - MF_OGN004_Aug - 1.),1100.)  - min(I_SLT009(4)- MF_SLT008_Aug,300.,max(I_SLT009(4) + I_NFY029(4) + I_NBLDB(4) - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_NBB_SEP {
+    case april  {
+        condition month == apr
+        value max(0.0, I_NFY029(5) + I_NBLDB(5) + I_SLT009(5) + min(min(max(0., MF_MFY044_Sep + 1. + I_MFY013(5) - MF_MFY012_Sep - 3.),860.) 
+		    + max(0., I_OGN005(5) - MF_OGN004_Sep - 1.),1100.)  - min(I_SLT009(5)- MF_SLT008_Sep,300.,max(I_SLT009(5) + I_NFY029(5) + I_NBLDB(5) - 800,0)))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+!***********************************************************************************************************************************************************
+! Define inflows to Englebright for purposes of forecasting operations April-September
+! Estimated as local inflow, plus inflow from Oregon Creek and Middle Yuba, less diversions through Lohman Ridge and Camptonville tunnels
+!***********************************************************************************************************************************************************
+
+define I_EB_APR {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB + CT_SMARTVILLE_SV + I_OGN005 + MF_MFY044_Apr + 1. + I_MFY013 + I_SFY007 + MF_CCS009_APR + 1. + MF_SPLDG_Apr + 2.
+			- min(min(max(0., MF_MFY044_Apr + 1. + I_MFY013 - MF_MFY012_Apr - 3.),860.) + max(0., I_OGN005 - MF_OGN004_Apr - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_EB_MAY {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB(1) + CT_SMARTVILLE_SV(1) + I_OGN005(1) + MF_MFY044_May + 1. + I_MFY013(1) + I_SFY007(1) + MF_CCS009_May + 1. + MF_SPLDG_May + 2. 
+			- min(min(max(0., MF_MFY044_May + 1. + I_MFY013(1) - MF_MFY012_May - 3.),860.) + max(0., I_OGN005(1) - MF_OGN004_May - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_EB_JUN {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB(2) + CT_SMARTVILLE_SV(2) + I_OGN005(2) + MF_MFY044_Jun + 1. + I_MFY013(2)  + I_SFY007(2) + MF_CCS009_Jun + 1. + MF_SPLDG_Jun + 2. 
+			- min(min(max(0., MF_MFY044_Jun + 1. + I_MFY013(2) - MF_MFY012_Jun - 3.),860.) + max(0., I_OGN005(2) - MF_OGN004_Jun - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_EB_JUL {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB(3) + CT_SMARTVILLE_SV(3) + I_OGN005(3) + MF_MFY044_Jul + 1. + I_MFY013(3) + I_SFY007(3) + MF_CCS009_Jul + 1. + MF_SPLDG_Jul + 2.
+			- min(min(max(0., MF_MFY044_Jul + 1. + I_MFY013(3) - MF_MFY012_Jul - 3.),860.) + max(0., I_OGN005(3) - MF_OGN004_Jul - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_EB_AUG {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB(4) + CT_SMARTVILLE_SV(4) + I_OGN005(4) + MF_MFY044_Aug + 1. + I_MFY013(4) + I_SFY007(4) + MF_CCS009_Aug + 1. + MF_SPLDG_Aug + 2. 
+			- min(min(max(0., MF_MFY044_Aug + 1. + I_MFY013(4) - MF_MFY012_Aug - 3.),860.) + max(0., I_OGN005(4) - MF_OGN004_Aug - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_EB_SEP {
+    case april  {
+        condition month == apr
+        value max(0.0, I_ENGLB(5) + CT_SMARTVILLE_SV(5) + I_OGN005(5) + MF_MFY044_Sep + 1. + I_MFY013(5) + I_SFY007(5) + MF_CCS009_Sep + 1. + MF_SPLDG_Sep + 2.
+			- min(min(max(0., MF_MFY044_Sep + 1. + I_MFY013(5) - MF_MFY012_Sep - 3.),860.) + max(0., I_OGN005(5) - MF_OGN004_Sep - 1.),1100.))}
+    case other  {
+        condition always
+        value 0.0 }}
+        
+!***********************************************************************************************************************************************************
+! Define inflows to Daguerre Point Dam for purposes of forecasting operations April-September
+! Estimated as local accretion to Deer Creek below upstream Deer Creek diversions plus stream gain and Dry Creek minimum flow
+!***********************************************************************************************************************************************************       
+
+define I_DGR_APR {
+    case april  {
+        condition month == apr
+        value I_DER001 + SR_14 * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_DGR_MAY {
+    case april  {
+        condition month == apr
+        value I_DER001(1) + SR_14(1) * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_DGR_JUN {
+    case april  {
+        condition month == apr
+        value I_DER001(2) + SR_14(2) * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_DGR_JUL {
+    case april  {
+        condition month == apr
+        value I_DER001(3) + SR_14(3) * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_DGR_AUG {
+    case april  {
+        condition month == apr
+        value I_DER001(4) + SR_14(4) * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+
+define I_DGR_SEP {
+    case april  {
+        condition month == apr
+        value I_DER001(5) + SR_14(5) * Area_14_YUB011 + MF_FDC006}
+    case other  {
+        condition always
+        value 0.0 }}
+		
+!**********************************************************************************************************************************************************
+! Write continuity equations based on a simplified network of tyhe following nodes
+! New Bullards Bar; Englebright; and Daguerrepoint Dam
+! C_NBB = release from New Bullards Bar
+! C_EB = release from Englebright
+! C_DP = flow below Daguerre Point Diversion Dam
+!*********************************************************************************************************************************************************** 
+
+!continuity for New Bullards Bar
+goal continuityNBB_APR {I_NBB_APR-C_NBB_APR=S_NBB_APR*taf_cfs-S_NBB_MAR*taf_cfs}
+goal continuityNBB_MAY {I_NBB_MAY-C_NBB_MAY=S_NBB_MAY*taf_cfs*30/31-S_NBB_APR*taf_cfs*30/31}
+goal continuityNBB_JUN {I_NBB_JUN-C_NBB_JUN=S_NBB_JUN*taf_cfs-S_NBB_MAY*taf_cfs}
+goal continuityNBB_JUL {I_NBB_JUL-C_NBB_JUL=S_NBB_JUL*taf_cfs*30/31-S_NBB_JUN*taf_cfs*30/31}
+goal continuityNBB_AUG {I_NBB_AUG-C_NBB_AUG=S_NBB_AUG*taf_cfs*30/31-S_NBB_JUL*taf_cfs*30/31}
+goal continuityNBB_SEP {I_NBB_SEP-C_NBB_SEP=S_NBB_SEP*taf_cfs-S_NBB_AUG*taf_cfs}
+
+!continuity for Englebright
+goal continuityEB_APR {I_EB_APR+C_NBB_APR=C_EB_APR} 
+goal continuityEB_MAY {I_EB_MAY+C_NBB_MAY=C_EB_MAY} 
+goal continuityEB_JUN {I_EB_JUN+C_NBB_JUN=C_EB_JUN} 
+goal continuityEB_JUL {I_EB_JUL+C_NBB_JUL=C_EB_JUL} 
+goal continuityEB_AUG {I_EB_AUG+C_NBB_AUG=C_EB_AUG} 
+goal continuityEB_SEP {I_EB_SEP+C_NBB_SEP=C_EB_SEP} 
+
+!continuity for Daguerre Point
+goal continuityDGR_APR {I_DGR_APR+C_EB_APR=C_DGR_APR+D_DGR_APR}
+goal continuityDGR_MAY {I_DGR_MAY+C_EB_MAY=C_DGR_MAY+D_DGR_MAY}
+goal continuityDGR_JUN {I_DGR_JUN+C_EB_JUN=C_DGR_JUN+D_DGR_JUN}
+goal continuityDGR_JUL {I_DGR_JUL+C_EB_JUL=C_DGR_JUL+D_DGR_JUL}
+goal continuityDGR_AUG {I_DGR_AUG+C_EB_AUG=C_DGR_AUG+D_DGR_AUG}
+goal continuityDGR_SEP {I_DGR_SEP+C_EB_SEP=C_DGR_SEP+D_DGR_SEP}
+
+! Daguerre Point deliveries based on water rights and allocations
+! Demand is approximately 80% of full entitlement
+! The adjustment should drop to zero once the allocation drops below 1.
+! Code below adjusts the contract/water right when allocations are 1 (ie non-binding, and crop water demand is binding)
+! and removes adjustment when allocations are less than 1 (ie binding and crop water demand is non-binding)
+! Goal of code: when YCWA_Alloc <1, int_YCWA_alloc2=1, int_YCWA_alloc=0
+!				when YCWA_Alloc =1, int_YCWA_alloc2=0, int_YCWA_alloc=1
+
+define int_YCWA_alloc  {integer std kind 'INTEGER' units 'NONE'}
+define int_YCWA_alloc2 {integer std kind 'INTEGER' units 'NONE'} ! Fixed to be properly defined as an integer, NSO 06/21/2022
+goal setint_YCWA_alloc1 {int_YCWA_alloc2 < 99999 - 99999*YCWA_Alloc}
+goal setint_YCWA_alloc2 {int_YCWA_alloc2 > 1-YCWA_Alloc}
+goal setint_YCWA_alloc3 {int_YCWA_alloc = 1-int_YCWA_alloc2}
+
+goal allocation_APR2 {D_DGR_APR=D_DGR_APR1+ D_DGR_APR2}
+goal allocation_MAY2 {D_DGR_MAY=D_DGR_MAY1+ D_DGR_MAY2}
+goal allocation_JUN2 {D_DGR_JUN=D_DGR_JUN1+ D_DGR_JUN2}
+goal allocation_JUL2 {D_DGR_JUL=D_DGR_JUL1+ D_DGR_JUL2}
+goal allocation_AUG2 {D_DGR_AUG=D_DGR_AUG1+ D_DGR_AUG2}
+goal allocation_SEP2 {D_DGR_SEP=D_DGR_SEP1+ D_DGR_SEP2}
+
+goal allocation_APR1 {D_DGR_APR1=AprilFlag*YCWA_Alloc*CL_DGR   + AprilFlag*WR_DGR   }
+goal allocation_MAY1 {D_DGR_MAY1=AprilFlag*YCWA_Alloc*CL_DGR(1)+ AprilFlag*WR_DGR(1)}
+goal allocation_JUN1 {D_DGR_JUN1=AprilFlag*YCWA_Alloc*CL_DGR(2)+ AprilFlag*WR_DGR(2)}
+goal allocation_JUL1 {D_DGR_JUL1=AprilFlag*YCWA_Alloc*CL_DGR(3)+ AprilFlag*WR_DGR(3)}
+goal allocation_AUG1 {D_DGR_AUG1=AprilFlag*YCWA_Alloc*CL_DGR(4)+ AprilFlag*WR_DGR(4)}
+goal allocation_SEP1 {D_DGR_SEP1=AprilFlag*YCWA_Alloc*CL_DGR(5)+ AprilFlag*WR_DGR(5)}
+
+goal allocation_APR {D_DGR_APR=AprilFlag*YCWA_Alloc*CL_DGR   + AprilFlag*WR_DGR   -  5*taf_cfs   *AprilFlag*int_YCWA_alloc2}
+goal allocation_MAY {D_DGR_MAY=AprilFlag*YCWA_Alloc*CL_DGR(1)+ AprilFlag*WR_DGR(1)- 10*taf_cfs(1)*AprilFlag*int_YCWA_alloc2}
+goal allocation_JUN {D_DGR_JUN=AprilFlag*YCWA_Alloc*CL_DGR(2)+ AprilFlag*WR_DGR(2)- 10*taf_cfs(2)*AprilFlag*int_YCWA_alloc2}
+goal allocation_JUL {D_DGR_JUL=AprilFlag*YCWA_Alloc*CL_DGR(3)+ AprilFlag*WR_DGR(3)- 10*taf_cfs(3)*AprilFlag*int_YCWA_alloc2}
+goal allocation_AUG {D_DGR_AUG=AprilFlag*YCWA_Alloc*CL_DGR(4)+ AprilFlag*WR_DGR(4)- 10*taf_cfs(4)*AprilFlag*int_YCWA_alloc2}
+goal allocation_SEP {D_DGR_SEP=AprilFlag*YCWA_Alloc*CL_DGR(5)+ AprilFlag*WR_DGR(5)-  5*taf_cfs(5)*AprilFlag*int_YCWA_alloc2}
+
+define D_DGR_total {std kind 'DELIVERY' units 'TAF'}
+goal setD_DGR_total {D_DGR_total = D_DGR_APR*cfs_taf + D_DGR_MAY*cfs_taf(1) + D_DGR_JUN*cfs_taf(2) + D_DGR_JUL*cfs_taf(3)
+	+ D_DGR_AUG*cfs_taf(4)+ D_DGR_SEP*cfs_taf(5)}
+
+!**********************************************************************************************************************************************************
+! Spit arcs into MIF and ADD components to model flow requirements for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+goal continuityCDGR_APR {C_DGR_APR=C_DGR_MIF_APR+C_DGR_ADD_APR}
+goal continuityCDGR_MAY {C_DGR_MAY=C_DGR_MIF_MAY+C_DGR_ADD_MAY}
+goal continuityCDGR_JUN {C_DGR_JUN=C_DGR_MIF_JUN+C_DGR_ADD_JUN}
+goal continuityCDGR_JUL {C_DGR_JUL=C_DGR_MIF_JUL+C_DGR_ADD_JUL}
+goal continuityCDGR_AUG {C_DGR_AUG=C_DGR_MIF_AUG+C_DGR_ADD_AUG}
+goal continuityCDGR_SEP {C_DGR_SEP=C_DGR_MIF_SEP+C_DGR_ADD_SEP}
+
+goal continuityCEB_APR {C_EB_APR=C_EB_MIF_APR+C_EB_ADD_APR}
+goal continuityCEB_MAY {C_EB_MAY=C_EB_MIF_MAY+C_EB_ADD_MAY}
+goal continuityCEB_JUN {C_EB_JUN=C_EB_MIF_JUN+C_EB_ADD_JUN}
+goal continuityCEB_JUL {C_EB_JUL=C_EB_MIF_JUL+C_EB_ADD_JUL}
+goal continuityCEB_AUG {C_EB_AUG=C_EB_MIF_AUG+C_EB_ADD_AUG}
+goal continuityCEB_SEP {C_EB_SEP=C_EB_MIF_SEP+C_EB_ADD_SEP}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Smartville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 4 (Accord)
+!***********************************************************************************************************************************************************
+
+define MF_YUB024_APR {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=7}
+        }
+        
+define MF_YUB024_MAY {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=8}
+        }
+
+define MF_YUB024_JUN {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=9}
+        }
+
+define MF_YUB024_JUL {        
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=10}
+        }
+        
+define MF_YUB024_AUG {         
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=11}
+        }
+
+define MF_YUB024_SEP {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 4,month=12}
+        }
+
+goal minflowEB_APR {C_EB_MIF_APR=MF_YUB024_APR*AprilFlag}
+goal minflowEB_MAY {C_EB_MIF_MAY=MF_YUB024_MAY*AprilFlag}
+goal minflowEB_JUN {C_EB_MIF_JUN=MF_YUB024_JUN*AprilFlag}
+goal minflowEB_JUL {C_EB_MIF_JUL=MF_YUB024_JUL*AprilFlag}
+goal minflowEB_AUG {C_EB_MIF_AUG=MF_YUB024_AUG*AprilFlag}
+goal minflowEB_SEP {C_EB_MIF_SEP=MF_YUB024_SEP*AprilFlag}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Marysville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 4 (Accord)
+!***********************************************************************************************************************************************************
+
+define MF_YUB006_APR {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=7}
+        }
+        
+define MF_YUB006_MAY {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=8}
+        }
+
+define MF_YUB006_JUN {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=9}
+        }
+
+define MF_YUB006_JUL {        
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=10}
+        }
+        
+define MF_YUB006_AUG {         
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case AN {
+            condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case BN {
+            condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case Dry {
+            condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case Crit {
+            condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=11}
+        }
+
+define MF_YUB006_SEP {
+    case Wet {
+            condition wytype_YUBA == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case AN {
+        condition wytype_YUBA == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case BN {
+        condition wytype_YUBA == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case Dry {
+        condition wytype_YUBA == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case Crit {
+        condition wytype_YUBA == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 4,month=12}
+        }
+
+goal minflowDGR_APR {C_DGR_MIF_APR=MF_YUB006_APR*AprilFlag}
+goal minflowDGR_MAY {C_DGR_MIF_MAY=MF_YUB006_MAY*AprilFlag}
+goal minflowDGR_JUN {C_DGR_MIF_JUN=MF_YUB006_JUN*AprilFlag}
+goal minflowDGR_JUL {C_DGR_MIF_JUL=MF_YUB006_JUL*AprilFlag}
+goal minflowDGR_AUG {C_DGR_MIF_AUG=MF_YUB006_AUG*AprilFlag}
+goal minflowDGR_SEP {C_DGR_MIF_SEP=MF_YUB006_SEP*AprilFlag}
+
+!**********************************************************************************************************************************************************
+!  Define maximum reservoir storage levels for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+define S_NBBlevel4_APR {select target from res_level where res_num=93,level=4,month=7}
+define S_NBBlevel4_MAY {select target from res_level where res_num=93,level=4,month=8}
+define S_NBBlevel4_JUN {select target from res_level where res_num=93,level=4,month=9}
+define S_NBBlevel4_JUL {select target from res_level where res_num=93,level=4,month=10}
+define S_NBBlevel4_AUG {select target from res_level where res_num=93,level=4,month=11}
+define S_NBBlevel4_SEP {select target from res_level where res_num=93,level=4,month=12}
+
+!**********************************************************************************************************************************************************
+!  Apply a large penalty if the forecasted storage is greater than top of conservation
+!***********************************************************************************************************************************************************
+
+goal set_maxS_NBB_APR {lhs S_NBB_APR rhs S_NBBlevel4_APR lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_MAY {lhs S_NBB_MAY rhs S_NBBlevel4_MAY lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUN {lhs S_NBB_JUN rhs S_NBBlevel4_JUN lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUL {lhs S_NBB_JUL rhs S_NBBlevel4_JUL lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_AUG {lhs S_NBB_AUG rhs S_NBBlevel4_AUG lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_SEP {lhs S_NBB_SEP rhs S_NBBlevel4_SEP lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+
+goal set_I_NBB_APRdv    {I_NBB_APRdv  = I_NBB_APR}
+goal set_I_NBB_MAYdv    {I_NBB_MAYdv  = I_NBB_MAY}
+goal set_I_NBB_JUNdv    {I_NBB_JUNdv  = I_NBB_JUN}
+goal set_I_NBB_JULdv    {I_NBB_JULdv  = I_NBB_JUL}
+goal set_I_NBB_AUGdv    {I_NBB_AUGdv  = I_NBB_AUG}
+goal set_I_NBB_SEPdv    {I_NBB_SEPdv  = I_NBB_SEP}
+
+goal set_I_EB_APRdv     {I_EB_APRdv      = I_EB_APR}
+goal set_I_EB_MAYdv     {I_EB_MAYdv  	 = I_EB_MAY}
+goal set_I_EB_JUNdv     {I_EB_JUNdv      = I_EB_JUN}
+goal set_I_EB_JULdv     {I_EB_JULdv      = I_EB_JUL}
+goal set_I_EB_AUGdv     {I_EB_AUGdv  	 = I_EB_AUG}
+goal set_I_EB_SEPdv     {I_EB_SEPdv      = I_EB_SEP}
+
+goal set_I_DGR_APRdv    {I_DGR_APRdv 	= I_DGR_APR }
+goal set_I_DGR_MAYdv    {I_DGR_MAYdv 	= I_DGR_MAY }
+goal set_I_DGR_JUNdv    {I_DGR_JUNdv  	= I_DGR_JUN }
+goal set_I_DGR_JULdv    {I_DGR_JULdv  	= I_DGR_JUL }
+goal set_I_DGR_AUGdv    {I_DGR_AUGdv 	= I_DGR_AUG }
+goal set_I_DGR_SEPdv    {I_DGR_SEPdv  	= I_DGR_SEP }

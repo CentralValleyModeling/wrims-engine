@@ -1,0 +1,1093 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+File Name: constraints-seepage_repeat.wresl
+CalSim 3.0 System File
+
+Purpose:
+
+Naming takes the following form:
+
+The sign of GetSeep is with respect to groundwater; i.e.
+
+  positive seepage (GetSeep) = loosing stream
+  negative seepage (GetSeep) = gaining stream
+
+When multiplied by -1, it reflects stream's perspective.  
+
+*/
+
+/*
+!*********************************************************************
+!*********************************************************************
+!***  Conversion factor from CFS to CF/MONTH
+!*********************************************************************
+!*********************************************************************
+define  cfs_cfm  {value daysin * 86400.0}
+define  cfs_cfmp {case first{
+                     condition wateryear == bgnWY .and. month == Oct
+                          value daysin * 86400.0}
+                  case other{
+                     condition always
+                          value  daysindv(-1) * 86400.0 }}
+*/
+!*********************************************************************
+!*********************************************************************
+!***  Groundwater simulation
+!*********************************************************************
+!*********************************************************************
+!INCLUDE '..\..\CVGroundwater\CVGroundwater_First.wresl'
+
+         
+!*********************************************************************
+!*********************************************************************
+!***  Define goals
+!*********************************************************************
+!********************************************************************* 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Colusa Basin Drain Extension    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+define	svSG469_CBD055_83	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define SG469_CBD055_83_DLL {alias svSG469_CBD055_83 kind 'STREAM-GAIN' units 'CFS'}
+goal setNegSG469_CBD055_83 {lhs SG469_CBD055_83 case negative {condition svSG469_CBD055_83 < 0 rhs svSG469_CBD055_83 lhs>rhs penalty 75777}}
+goal setPosSG469_CBD055_83 {lhs SG469_CBD055_83 case negative {condition svSG469_CBD055_83 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG469_CBD055_83 }}
+
+define	svSG470_CBD052_83	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define SG470_CBD052_83_DLL {alias svSG470_CBD052_83 kind 'STREAM-GAIN' units 'CFS'}
+goal setNegSG470_CBD052_83 {lhs SG470_CBD052_83 case negative {condition svSG470_CBD052_83 < 0 rhs svSG470_CBD052_83 lhs>rhs penalty 75776}}
+goal setPosSG470_CBD052_83 {lhs SG470_CBD052_83 case negative {condition svSG470_CBD052_83 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG470_CBD052_83 }}
+
+define	svSG471_CBD050_83	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define SG471_CBD050_83_DLL {alias svSG471_CBD050_83 kind 'STREAM-GAIN' units 'CFS'}
+goal setNegSG471_CBD050_83 {lhs SG471_CBD050_83 case negative {condition svSG471_CBD050_83 < 0 rhs svSG471_CBD050_83 lhs>rhs penalty 75775}}
+goal setPosSG471_CBD050_83 {lhs SG471_CBD050_83 case negative {condition svSG471_CBD050_83 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG471_CBD050_83 }}
+
+define	svSG472_CBD049_83	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define SG472_CBD049_83_DLL {alias svSG472_CBD049_83 kind 'STREAM-GAIN' units 'CFS'}
+goal setNegSG472_CBD049_83 {lhs SG472_CBD049_83 case negative {condition svSG472_CBD049_83 < 0 rhs svSG472_CBD049_83 lhs>rhs penalty 75774}}
+goal setPosSG472_CBD049_83 {lhs SG472_CBD049_83 case negative {condition svSG472_CBD049_83 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG472_CBD049_83 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! American River !!!!!!!!!!!
+define	svSG374_FOLSM_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG375_NTOMA_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG376_AMR020_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG377_AMR015_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG378_AMR009_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG379_AMR004_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG380_AMR004_66	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG374_FOLSM_66_DLL {alias svSG374_FOLSM_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG375_NTOMA_66_DLL {alias svSG375_NTOMA_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG376_AMR020_66_DLL {alias svSG376_AMR020_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG377_AMR015_66_DLL {alias svSG377_AMR015_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG378_AMR009_66_DLL {alias svSG378_AMR009_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG379_AMR004_66_DLL {alias svSG379_AMR004_66 kind 'STREAM-GAIN' units 'CFS'}
+define SG380_AMR004_66_DLL {alias svSG380_AMR004_66 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG374_FOLSM_66 {lhs SG374_FOLSM_66 case negative {condition svSG374_FOLSM_66 < 0 rhs svSG374_FOLSM_66 lhs>rhs penalty 75773}}
+goal setNegSG375_NTOMA_66 {lhs SG375_NTOMA_66 case negative {condition svSG375_NTOMA_66 < 0 rhs svSG375_NTOMA_66 lhs>rhs penalty 75772}}
+goal setNegSG376_AMR020_66 {lhs SG376_AMR020_66 case negative {condition svSG376_AMR020_66 < 0 rhs svSG376_AMR020_66 lhs>rhs penalty 75771}}
+goal setNegSG377_AMR015_66 {lhs SG377_AMR015_66 case negative {condition svSG377_AMR015_66 < 0 rhs svSG377_AMR015_66 lhs>rhs penalty 75770}}
+goal setNegSG378_AMR009_66 {lhs SG378_AMR009_66 case negative {condition svSG378_AMR009_66 < 0 rhs svSG378_AMR009_66 lhs>rhs penalty 75769}}
+goal setNegSG379_AMR004_66 {lhs SG379_AMR004_66 case negative {condition svSG379_AMR004_66 < 0 rhs svSG379_AMR004_66 lhs>rhs penalty 75768}}
+goal setNegSG380_AMR004_66 {lhs SG380_AMR004_66 case negative {condition svSG380_AMR004_66 < 0 rhs svSG380_AMR004_66 lhs>rhs penalty 75767}}
+
+goal setPosSG374_FOLSM_66 {lhs SG374_FOLSM_66 case negative {condition svSG374_FOLSM_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG374_FOLSM_66 }}
+goal setPosSG375_NTOMA_66 {lhs SG375_NTOMA_66 case negative {condition svSG375_NTOMA_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG375_NTOMA_66 }}
+goal setPosSG376_AMR020_66 {lhs SG376_AMR020_66 case negative {condition svSG376_AMR020_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG376_AMR020_66 }}
+goal setPosSG377_AMR015_66 {lhs SG377_AMR015_66 case negative {condition svSG377_AMR015_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG377_AMR015_66 }}
+goal setPosSG378_AMR009_66 {lhs SG378_AMR009_66 case negative {condition svSG378_AMR009_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG378_AMR009_66 }}
+goal setPosSG379_AMR004_66 {lhs SG379_AMR004_66 case negative {condition svSG379_AMR004_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG379_AMR004_66 }}
+goal setPosSG380_AMR004_66 {lhs SG380_AMR004_66 case negative {condition svSG380_AMR004_66 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG380_AMR004_66 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Antelope Creek !!!!!!!!!!!
+define	svSG233_ANT010_40	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG234_ANT010_40	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG233_ANT010_40_DLL {alias svSG233_ANT010_40 kind 'STREAM-GAIN' units 'CFS'}
+define SG234_ANT010_40_DLL {alias svSG234_ANT010_40 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG233_ANT010_40 {lhs SG233_ANT010_40 case negative {condition svSG233_ANT010_40 < 0 rhs svSG233_ANT010_40 lhs>rhs penalty 75766}}
+goal setNegSG234_ANT010_40 {lhs SG234_ANT010_40 case negative {condition svSG234_ANT010_40 < 0 rhs svSG234_ANT010_40 lhs>rhs penalty 75765}}
+
+goal setPosSG233_ANT010_40 {lhs SG233_ANT010_40 case negative {condition svSG233_ANT010_40 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG233_ANT010_40 }}
+goal setPosSG234_ANT010_40 {lhs SG234_ANT010_40 case negative {condition svSG234_ANT010_40 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG234_ANT010_40 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Battle Creek !!!!!!!!!!!
+define	svSG220_BTL006_36	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG221_BTL006_36	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG220_BTL006_36_DLL {alias svSG220_BTL006_36 kind 'STREAM-GAIN' units 'CFS'}
+define SG221_BTL006_36_DLL {alias svSG221_BTL006_36 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG220_BTL006_36 {lhs SG220_BTL006_36 case negative {condition svSG220_BTL006_36 < 0 rhs svSG220_BTL006_36 lhs>rhs penalty 75764}}
+goal setNegSG221_BTL006_36 {lhs SG221_BTL006_36 case negative {condition svSG221_BTL006_36 < 0 rhs svSG221_BTL006_36 lhs>rhs penalty 75763}}
+
+goal setPosSG220_BTL006_36 {lhs SG220_BTL006_36 case negative {condition svSG220_BTL006_36 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG220_BTL006_36 }}
+goal setPosSG221_BTL006_36 {lhs SG221_BTL006_36 case negative {condition svSG221_BTL006_36 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG221_BTL006_36 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Bear River !!!!!!!!!!!
+define	svSG357_CMPFW_62	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG358_BRR017_62	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG359_BRR011_62	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG360_BRR004_62	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG361_BRR004_62	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG357_CMPFW_62_DLL {alias svSG357_CMPFW_62 kind 'STREAM-GAIN' units 'CFS'}
+define SG358_BRR017_62_DLL {alias svSG358_BRR017_62 kind 'STREAM-GAIN' units 'CFS'}
+define SG359_BRR011_62_DLL {alias svSG359_BRR011_62 kind 'STREAM-GAIN' units 'CFS'}
+define SG360_BRR004_62_DLL {alias svSG360_BRR004_62 kind 'STREAM-GAIN' units 'CFS'}
+define SG361_BRR004_62_DLL {alias svSG361_BRR004_62 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG357_CMPFW_62 {lhs SG357_CMPFW_62 case negative {condition svSG357_CMPFW_62 < 0 rhs svSG357_CMPFW_62 lhs>rhs penalty 75762}}
+goal setNegSG358_BRR017_62 {lhs SG358_BRR017_62 case negative {condition svSG358_BRR017_62 < 0 rhs svSG358_BRR017_62 lhs>rhs penalty 75761}}
+goal setNegSG359_BRR011_62 {lhs SG359_BRR011_62 case negative {condition svSG359_BRR011_62 < 0 rhs svSG359_BRR011_62 lhs>rhs penalty 75760}}
+goal setNegSG360_BRR004_62 {lhs SG360_BRR004_62 case negative {condition svSG360_BRR004_62 < 0 rhs svSG360_BRR004_62 lhs>rhs penalty 75759}}
+goal setNegSG361_BRR004_62 {lhs SG361_BRR004_62 case negative {condition svSG361_BRR004_62 < 0 rhs svSG361_BRR004_62 lhs>rhs penalty 75758}}
+
+goal setPosSG357_CMPFW_62 {lhs SG357_CMPFW_62 case negative {condition svSG357_CMPFW_62 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG357_CMPFW_62 }}
+goal setPosSG358_BRR017_62 {lhs SG358_BRR017_62 case negative {condition svSG358_BRR017_62 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG358_BRR017_62 }}
+goal setPosSG359_BRR011_62 {lhs SG359_BRR011_62 case negative {condition svSG359_BRR011_62 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG359_BRR011_62 }}
+goal setPosSG360_BRR004_62 {lhs SG360_BRR004_62 case negative {condition svSG360_BRR004_62 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG360_BRR004_62 }}
+goal setPosSG361_BRR004_62 {lhs SG361_BRR004_62 case negative {condition svSG361_BRR004_62 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG361_BRR004_62 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Big Chico Creek !!!!!!!!!!!
+define	svSG269_BCC012_50	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG270_BCC006_50	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG271_BCC004_50	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG272_BCC004_50	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG269_BCC012_50_DLL {alias svSG269_BCC012_50 kind 'STREAM-GAIN' units 'CFS'}
+define SG270_BCC006_50_DLL {alias svSG270_BCC006_50 kind 'STREAM-GAIN' units 'CFS'}
+define SG271_BCC004_50_DLL {alias svSG271_BCC004_50 kind 'STREAM-GAIN' units 'CFS'}
+define SG272_BCC004_50_DLL {alias svSG272_BCC004_50 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG269_BCC012_50 {lhs SG269_BCC012_50 case negative {condition svSG269_BCC012_50 < 0 rhs svSG269_BCC012_50 lhs>rhs penalty 75757}}
+goal setNegSG270_BCC006_50 {lhs SG270_BCC006_50 case negative {condition svSG270_BCC006_50 < 0 rhs svSG270_BCC006_50 lhs>rhs penalty 75756}}
+goal setNegSG271_BCC004_50 {lhs SG271_BCC004_50 case negative {condition svSG271_BCC004_50 < 0 rhs svSG271_BCC004_50 lhs>rhs penalty 75755}}
+goal setNegSG272_BCC004_50 {lhs SG272_BCC004_50 case negative {condition svSG272_BCC004_50 < 0 rhs svSG272_BCC004_50 lhs>rhs penalty 75754}}
+
+goal setPosSG269_BCC012_50 {lhs SG269_BCC012_50 case negative {condition svSG269_BCC012_50 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG269_BCC012_50 }}
+goal setPosSG270_BCC006_50 {lhs SG270_BCC006_50 case negative {condition svSG270_BCC006_50 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG270_BCC006_50 }}
+goal setPosSG271_BCC004_50 {lhs SG271_BCC004_50 case negative {condition svSG271_BCC004_50 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG271_BCC004_50 }}
+goal setPosSG272_BCC004_50 {lhs SG272_BCC004_50 case negative {condition svSG272_BCC004_50 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG272_BCC004_50 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Butte Creek / Little Chico Creek / Edgar Slough / Butte Slough !!!!!!!!!!!
+define	svSG283_BTC043_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG284_BTC036_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG285_BTC032_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG286_BTC029_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG287_BTC024_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG288_BTC018_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG289_BTC015_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG290_BTC007_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG291_BTC003_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG292_BSL001_52	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG283_BTC043_52_DLL {alias svSG283_BTC043_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG284_BTC036_52_DLL {alias svSG284_BTC036_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG285_BTC032_52_DLL {alias svSG285_BTC032_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG286_BTC029_52_DLL {alias svSG286_BTC029_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG287_BTC024_52_DLL {alias svSG287_BTC024_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG288_BTC018_52_DLL {alias svSG288_BTC018_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG289_BTC015_52_DLL {alias svSG289_BTC015_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG290_BTC007_52_DLL {alias svSG290_BTC007_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG291_BTC003_52_DLL {alias svSG291_BTC003_52 kind 'STREAM-GAIN' units 'CFS'}
+define SG292_BSL001_52_DLL {alias svSG292_BSL001_52 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG283_BTC043_52 {lhs SG283_BTC043_52 case negative {condition svSG283_BTC043_52 < 0 rhs svSG283_BTC043_52 lhs>rhs penalty 75753}}
+goal setNegSG284_BTC036_52 {lhs SG284_BTC036_52 case negative {condition svSG284_BTC036_52 < 0 rhs svSG284_BTC036_52 lhs>rhs penalty 75752}}
+goal setNegSG285_BTC032_52 {lhs SG285_BTC032_52 case negative {condition svSG285_BTC032_52 < 0 rhs svSG285_BTC032_52 lhs>rhs penalty 75751}}
+goal setNegSG286_BTC029_52 {lhs SG286_BTC029_52 case negative {condition svSG286_BTC029_52 < 0 rhs svSG286_BTC029_52 lhs>rhs penalty 75750}}
+goal setNegSG287_BTC024_52 {lhs SG287_BTC024_52 case negative {condition svSG287_BTC024_52 < 0 rhs svSG287_BTC024_52 lhs>rhs penalty 75749}}
+goal setNegSG288_BTC018_52 {lhs SG288_BTC018_52 case negative {condition svSG288_BTC018_52 < 0 rhs svSG288_BTC018_52 lhs>rhs penalty 75748}}
+goal setNegSG289_BTC015_52 {lhs SG289_BTC015_52 case negative {condition svSG289_BTC015_52 < 0 rhs svSG289_BTC015_52 lhs>rhs penalty 75747}}
+goal setNegSG290_BTC007_52 {lhs SG290_BTC007_52 case negative {condition svSG290_BTC007_52 < 0 rhs svSG290_BTC007_52 lhs>rhs penalty 75746}}
+goal setNegSG291_BTC003_52 {lhs SG291_BTC003_52 case negative {condition svSG291_BTC003_52 < 0 rhs svSG291_BTC003_52 lhs>rhs penalty 75745}}
+goal setNegSG292_BSL001_52 {lhs SG292_BSL001_52 case negative {condition svSG292_BSL001_52 < 0 rhs svSG292_BSL001_52 lhs>rhs penalty 75744}}
+
+goal setPosSG283_BTC043_52 {lhs SG283_BTC043_52 case negative {condition svSG283_BTC043_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG283_BTC043_52 }}
+goal setPosSG284_BTC036_52 {lhs SG284_BTC036_52 case negative {condition svSG284_BTC036_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG284_BTC036_52 }}
+goal setPosSG285_BTC032_52 {lhs SG285_BTC032_52 case negative {condition svSG285_BTC032_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG285_BTC032_52 }}
+goal setPosSG286_BTC029_52 {lhs SG286_BTC029_52 case negative {condition svSG286_BTC029_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG286_BTC029_52 }}
+goal setPosSG287_BTC024_52 {lhs SG287_BTC024_52 case negative {condition svSG287_BTC024_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG287_BTC024_52 }}
+goal setPosSG288_BTC018_52 {lhs SG288_BTC018_52 case negative {condition svSG288_BTC018_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG288_BTC018_52 }}
+goal setPosSG289_BTC015_52 {lhs SG289_BTC015_52 case negative {condition svSG289_BTC015_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG289_BTC015_52 }}
+goal setPosSG290_BTC007_52 {lhs SG290_BTC007_52 case negative {condition svSG290_BTC007_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG290_BTC007_52 }}
+goal setPosSG291_BTC003_52 {lhs SG291_BTC003_52 case negative {condition svSG291_BTC003_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG291_BTC003_52 }}
+goal setPosSG292_BSL001_52 {lhs SG292_BSL001_52 case negative {condition svSG292_BSL001_52 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG292_BSL001_52 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Cache Creek !!!!!!!!!!!
+define	svSG390_CCH030_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG391_CCH023_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG392_CCH017_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG393_CCH012_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG394_CCH006_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG395_CCH003_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG390_CCH030_68_DLL {alias svSG390_CCH030_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG391_CCH023_68_DLL {alias svSG391_CCH023_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG392_CCH017_68_DLL {alias svSG392_CCH017_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG393_CCH012_68_DLL {alias svSG393_CCH012_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG394_CCH006_68_DLL {alias svSG394_CCH006_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG395_CCH003_68_DLL {alias svSG395_CCH003_68 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG390_CCH030_68 {lhs SG390_CCH030_68 case negative {condition svSG390_CCH030_68 < 0 rhs svSG390_CCH030_68 lhs>rhs penalty 75743}}
+goal setNegSG391_CCH023_68 {lhs SG391_CCH023_68 case negative {condition svSG391_CCH023_68 < 0 rhs svSG391_CCH023_68 lhs>rhs penalty 75742}}
+goal setNegSG392_CCH017_68 {lhs SG392_CCH017_68 case negative {condition svSG392_CCH017_68 < 0 rhs svSG392_CCH017_68 lhs>rhs penalty 75741}}
+goal setNegSG393_CCH012_68 {lhs SG393_CCH012_68 case negative {condition svSG393_CCH012_68 < 0 rhs svSG393_CCH012_68 lhs>rhs penalty 75740}}
+goal setNegSG394_CCH006_68 {lhs SG394_CCH006_68 case negative {condition svSG394_CCH006_68 < 0 rhs svSG394_CCH006_68 lhs>rhs penalty 75739}}
+goal setNegSG395_CCH003_68 {lhs SG395_CCH003_68 case negative {condition svSG395_CCH003_68 < 0 rhs svSG395_CCH003_68 lhs>rhs penalty 75738}}
+
+goal setPosSG390_CCH030_68 {lhs SG390_CCH030_68 case negative {condition svSG390_CCH030_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG390_CCH030_68 }}
+goal setPosSG391_CCH023_68 {lhs SG391_CCH023_68 case negative {condition svSG391_CCH023_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG391_CCH023_68 }}
+goal setPosSG392_CCH017_68 {lhs SG392_CCH017_68 case negative {condition svSG392_CCH017_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG392_CCH017_68 }}
+goal setPosSG393_CCH012_68 {lhs SG393_CCH012_68 case negative {condition svSG393_CCH012_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG393_CCH012_68 }}
+goal setPosSG394_CCH006_68 {lhs SG394_CCH006_68 case negative {condition svSG394_CCH006_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG394_CCH006_68 }}
+goal setPosSG395_CCH003_68 {lhs SG395_CCH003_68 case negative {condition svSG395_CCH003_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG395_CCH003_68 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Colusa Basin Drain !!!!!!!!!!!
+define	svSG318_CBD049_55	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG319_CBD044_55	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG320_CBD041_55	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG321_CBD037_55	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG322_CBD031_55	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG323_CBD031_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG324_CBD028_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG325_CBD023_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG326_CBD018_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG327_CBD012_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG328_CBD005_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG329_CBD000_56	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG318_CBD049_55_DLL {alias svSG318_CBD049_55 kind 'STREAM-GAIN' units 'CFS'}
+define SG319_CBD044_55_DLL {alias svSG319_CBD044_55 kind 'STREAM-GAIN' units 'CFS'}
+define SG320_CBD041_55_DLL {alias svSG320_CBD041_55 kind 'STREAM-GAIN' units 'CFS'}
+define SG321_CBD037_55_DLL {alias svSG321_CBD037_55 kind 'STREAM-GAIN' units 'CFS'}
+define SG322_CBD031_55_DLL {alias svSG322_CBD031_55 kind 'STREAM-GAIN' units 'CFS'}
+define SG323_CBD031_56_DLL {alias svSG323_CBD031_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG324_CBD028_56_DLL {alias svSG324_CBD028_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG325_CBD023_56_DLL {alias svSG325_CBD023_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG326_CBD018_56_DLL {alias svSG326_CBD018_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG327_CBD012_56_DLL {alias svSG327_CBD012_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG328_CBD005_56_DLL {alias svSG328_CBD005_56 kind 'STREAM-GAIN' units 'CFS'}
+define SG329_CBD000_56_DLL {alias svSG329_CBD000_56 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG318_CBD049_55 {lhs SG318_CBD049_55 case negative {condition svSG318_CBD049_55 < 0 rhs svSG318_CBD049_55 lhs>rhs penalty 75737}}
+goal setNegSG319_CBD044_55 {lhs SG319_CBD044_55 case negative {condition svSG319_CBD044_55 < 0 rhs svSG319_CBD044_55 lhs>rhs penalty 75736}}
+goal setNegSG320_CBD041_55 {lhs SG320_CBD041_55 case negative {condition svSG320_CBD041_55 < 0 rhs svSG320_CBD041_55 lhs>rhs penalty 75735}}
+goal setNegSG321_CBD037_55 {lhs SG321_CBD037_55 case negative {condition svSG321_CBD037_55 < 0 rhs svSG321_CBD037_55 lhs>rhs penalty 75734}}
+goal setNegSG322_CBD031_55 {lhs SG322_CBD031_55 case negative {condition svSG322_CBD031_55 < 0 rhs svSG322_CBD031_55 lhs>rhs penalty 75733}}
+goal setNegSG323_CBD031_56 {lhs SG323_CBD031_56 case negative {condition svSG323_CBD031_56 < 0 rhs svSG323_CBD031_56 lhs>rhs penalty 75732}}
+goal setNegSG324_CBD028_56 {lhs SG324_CBD028_56 case negative {condition svSG324_CBD028_56 < 0 rhs svSG324_CBD028_56 lhs>rhs penalty 75731}}
+goal setNegSG325_CBD023_56 {lhs SG325_CBD023_56 case negative {condition svSG325_CBD023_56 < 0 rhs svSG325_CBD023_56 lhs>rhs penalty 75730}}
+goal setNegSG326_CBD018_56 {lhs SG326_CBD018_56 case negative {condition svSG326_CBD018_56 < 0 rhs svSG326_CBD018_56 lhs>rhs penalty 75729}}
+goal setNegSG327_CBD012_56 {lhs SG327_CBD012_56 case negative {condition svSG327_CBD012_56 < 0 rhs svSG327_CBD012_56 lhs>rhs penalty 75728}}
+goal setNegSG328_CBD005_56 {lhs SG328_CBD005_56 case negative {condition svSG328_CBD005_56 < 0 rhs svSG328_CBD005_56 lhs>rhs penalty 75727}}
+goal setNegSG329_CBD000_56 {lhs SG329_CBD000_56 case negative {condition svSG329_CBD000_56 < 0 rhs svSG329_CBD000_56 lhs>rhs penalty 75726}}
+
+goal setPosSG318_CBD049_55 {lhs SG318_CBD049_55 case negative {condition svSG318_CBD049_55 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG318_CBD049_55 }}
+goal setPosSG319_CBD044_55 {lhs SG319_CBD044_55 case negative {condition svSG319_CBD044_55 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG319_CBD044_55 }}
+goal setPosSG320_CBD041_55 {lhs SG320_CBD041_55 case negative {condition svSG320_CBD041_55 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG320_CBD041_55 }}
+goal setPosSG321_CBD037_55 {lhs SG321_CBD037_55 case negative {condition svSG321_CBD037_55 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG321_CBD037_55 }}
+goal setPosSG322_CBD031_55 {lhs SG322_CBD031_55 case negative {condition svSG322_CBD031_55 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG322_CBD031_55 }}
+goal setPosSG323_CBD031_56 {lhs SG323_CBD031_56 case negative {condition svSG323_CBD031_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG323_CBD031_56 }}
+goal setPosSG324_CBD028_56 {lhs SG324_CBD028_56 case negative {condition svSG324_CBD028_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG324_CBD028_56 }}
+goal setPosSG325_CBD023_56 {lhs SG325_CBD023_56 case negative {condition svSG325_CBD023_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG325_CBD023_56 }}
+goal setPosSG326_CBD018_56 {lhs SG326_CBD018_56 case negative {condition svSG326_CBD018_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG326_CBD018_56 }}
+goal setPosSG327_CBD012_56 {lhs SG327_CBD012_56 case negative {condition svSG327_CBD012_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG327_CBD012_56 }}
+goal setPosSG328_CBD005_56 {lhs SG328_CBD005_56 case negative {condition svSG328_CBD005_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG328_CBD005_56 }}
+goal setPosSG329_CBD000_56 {lhs SG329_CBD000_56 case negative {condition svSG329_CBD000_56 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG329_CBD000_56 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Cottonwood Creek !!!!!!!!!!!
+define	svSG218_CWD004_35	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG219_CWD003_35	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG218_CWD004_35_DLL {alias svSG218_CWD004_35 kind 'STREAM-GAIN' units 'CFS'}
+define SG219_CWD003_35_DLL {alias svSG219_CWD003_35 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG218_CWD004_35 {lhs SG218_CWD004_35 case negative {condition svSG218_CWD004_35 < 0 rhs svSG218_CWD004_35 lhs>rhs penalty 75725}}
+goal setNegSG219_CWD003_35 {lhs SG219_CWD003_35 case negative {condition svSG219_CWD003_35 < 0 rhs svSG219_CWD003_35 lhs>rhs penalty 75724}}
+
+goal setPosSG218_CWD004_35 {lhs SG218_CWD004_35 case negative {condition svSG218_CWD004_35 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG218_CWD004_35 }}
+goal setPosSG219_CWD003_35 {lhs SG219_CWD003_35 case negative {condition svSG219_CWD003_35 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG219_CWD003_35 }}
+
+define	svSG450_MCW003_76	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG451_MCW003_76	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG452_CWD022_77	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG453_CWD018_77	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG454_CWD013_77	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG455_CWD009_77	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG456_CWD009_78	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG457_CWD004_78	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG458_NCW001_79	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG459_NCW001_79	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG460_SCW025_80	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG461_SCW020_80	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG462_SCW020_80	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG463_SCW008_81	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG464_SCW004_81	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG465_SCW004_81	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG466_STC010_82	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG467_STC008_82	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG468_STC008_82	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG450_MCW003_76_DLL {alias svSG450_MCW003_76 kind 'STREAM-GAIN' units 'CFS'}
+define SG451_MCW003_76_DLL {alias svSG451_MCW003_76 kind 'STREAM-GAIN' units 'CFS'}
+define SG452_CWD022_77_DLL {alias svSG452_CWD022_77 kind 'STREAM-GAIN' units 'CFS'}
+define SG453_CWD018_77_DLL {alias svSG453_CWD018_77 kind 'STREAM-GAIN' units 'CFS'}
+define SG454_CWD013_77_DLL {alias svSG454_CWD013_77 kind 'STREAM-GAIN' units 'CFS'}
+define SG455_CWD009_77_DLL {alias svSG455_CWD009_77 kind 'STREAM-GAIN' units 'CFS'}
+define SG456_CWD009_78_DLL {alias svSG456_CWD009_78 kind 'STREAM-GAIN' units 'CFS'}
+define SG457_CWD004_78_DLL {alias svSG457_CWD004_78 kind 'STREAM-GAIN' units 'CFS'}
+define SG458_NCW001_79_DLL {alias svSG458_NCW001_79 kind 'STREAM-GAIN' units 'CFS'}
+define SG459_NCW001_79_DLL {alias svSG459_NCW001_79 kind 'STREAM-GAIN' units 'CFS'}
+define SG460_SCW025_80_DLL {alias svSG460_SCW025_80 kind 'STREAM-GAIN' units 'CFS'}
+define SG461_SCW020_80_DLL {alias svSG461_SCW020_80 kind 'STREAM-GAIN' units 'CFS'}
+define SG462_SCW020_80_DLL {alias svSG462_SCW020_80 kind 'STREAM-GAIN' units 'CFS'}
+define SG463_SCW008_81_DLL {alias svSG463_SCW008_81 kind 'STREAM-GAIN' units 'CFS'}
+define SG464_SCW004_81_DLL {alias svSG464_SCW004_81 kind 'STREAM-GAIN' units 'CFS'}
+define SG465_SCW004_81_DLL {alias svSG465_SCW004_81 kind 'STREAM-GAIN' units 'CFS'}
+define SG466_STC010_82_DLL {alias svSG466_STC010_82 kind 'STREAM-GAIN' units 'CFS'}
+define SG467_STC008_82_DLL {alias svSG467_STC008_82 kind 'STREAM-GAIN' units 'CFS'}
+define SG468_STC008_82_DLL {alias svSG468_STC008_82 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG450_MCW003_76 {lhs SG450_MCW003_76 case negative {condition svSG450_MCW003_76 < 0 rhs svSG450_MCW003_76 lhs>rhs penalty 75723}}
+goal setNegSG451_MCW003_76 {lhs SG451_MCW003_76 case negative {condition svSG451_MCW003_76 < 0 rhs svSG451_MCW003_76 lhs>rhs penalty 75722}}
+goal setNegSG452_CWD022_77 {lhs SG452_CWD022_77 case negative {condition svSG452_CWD022_77 < 0 rhs svSG452_CWD022_77 lhs>rhs penalty 75721}}
+goal setNegSG453_CWD018_77 {lhs SG453_CWD018_77 case negative {condition svSG453_CWD018_77 < 0 rhs svSG453_CWD018_77 lhs>rhs penalty 75720}}
+goal setNegSG454_CWD013_77 {lhs SG454_CWD013_77 case negative {condition svSG454_CWD013_77 < 0 rhs svSG454_CWD013_77 lhs>rhs penalty 75719}}
+goal setNegSG455_CWD009_77 {lhs SG455_CWD009_77 case negative {condition svSG455_CWD009_77 < 0 rhs svSG455_CWD009_77 lhs>rhs penalty 75718}}
+goal setNegSG456_CWD009_78 {lhs SG456_CWD009_78 case negative {condition svSG456_CWD009_78 < 0 rhs svSG456_CWD009_78 lhs>rhs penalty 75717}}
+goal setNegSG457_CWD004_78 {lhs SG457_CWD004_78 case negative {condition svSG457_CWD004_78 < 0 rhs svSG457_CWD004_78 lhs>rhs penalty 75716}}
+goal setNegSG458_NCW001_79 {lhs SG458_NCW001_79 case negative {condition svSG458_NCW001_79 < 0 rhs svSG458_NCW001_79 lhs>rhs penalty 75715}}
+goal setNegSG459_NCW001_79 {lhs SG459_NCW001_79 case negative {condition svSG459_NCW001_79 < 0 rhs svSG459_NCW001_79 lhs>rhs penalty 75714}}
+goal setNegSG460_SCW025_80 {lhs SG460_SCW025_80 case negative {condition svSG460_SCW025_80 < 0 rhs svSG460_SCW025_80 lhs>rhs penalty 75713}}
+goal setNegSG461_SCW020_80 {lhs SG461_SCW020_80 case negative {condition svSG461_SCW020_80 < 0 rhs svSG461_SCW020_80 lhs>rhs penalty 75712}}
+goal setNegSG462_SCW020_80 {lhs SG462_SCW020_80 case negative {condition svSG462_SCW020_80 < 0 rhs svSG462_SCW020_80 lhs>rhs penalty 75711}}
+goal setNegSG463_SCW008_81 {lhs SG463_SCW008_81 case negative {condition svSG463_SCW008_81 < 0 rhs svSG463_SCW008_81 lhs>rhs penalty 75710}}
+goal setNegSG464_SCW004_81 {lhs SG464_SCW004_81 case negative {condition svSG464_SCW004_81 < 0 rhs svSG464_SCW004_81 lhs>rhs penalty 75709}}
+goal setNegSG465_SCW004_81 {lhs SG465_SCW004_81 case negative {condition svSG465_SCW004_81 < 0 rhs svSG465_SCW004_81 lhs>rhs penalty 75708}}
+goal setNegSG466_STC010_82 {lhs SG466_STC010_82 case negative {condition svSG466_STC010_82 < 0 rhs svSG466_STC010_82 lhs>rhs penalty 75707}}
+goal setNegSG467_STC008_82 {lhs SG467_STC008_82 case negative {condition svSG467_STC008_82 < 0 rhs svSG467_STC008_82 lhs>rhs penalty 75706}}
+goal setNegSG468_STC008_82 {lhs SG468_STC008_82 case negative {condition svSG468_STC008_82 < 0 rhs svSG468_STC008_82 lhs>rhs penalty 75705}}
+
+goal setPosSG450_MCW003_76 {lhs SG450_MCW003_76 case negative {condition svSG450_MCW003_76 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG450_MCW003_76 }}
+goal setPosSG451_MCW003_76 {lhs SG451_MCW003_76 case negative {condition svSG451_MCW003_76 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG451_MCW003_76 }}
+goal setPosSG452_CWD022_77 {lhs SG452_CWD022_77 case negative {condition svSG452_CWD022_77 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG452_CWD022_77 }}
+goal setPosSG453_CWD018_77 {lhs SG453_CWD018_77 case negative {condition svSG453_CWD018_77 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG453_CWD018_77 }}
+goal setPosSG454_CWD013_77 {lhs SG454_CWD013_77 case negative {condition svSG454_CWD013_77 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG454_CWD013_77 }}
+goal setPosSG455_CWD009_77 {lhs SG455_CWD009_77 case negative {condition svSG455_CWD009_77 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG455_CWD009_77 }}
+goal setPosSG456_CWD009_78 {lhs SG456_CWD009_78 case negative {condition svSG456_CWD009_78 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG456_CWD009_78 }}
+goal setPosSG457_CWD004_78 {lhs SG457_CWD004_78 case negative {condition svSG457_CWD004_78 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG457_CWD004_78 }}
+goal setPosSG458_NCW001_79 {lhs SG458_NCW001_79 case negative {condition svSG458_NCW001_79 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG458_NCW001_79 }}
+goal setPosSG459_NCW001_79 {lhs SG459_NCW001_79 case negative {condition svSG459_NCW001_79 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG459_NCW001_79 }}
+goal setPosSG460_SCW025_80 {lhs SG460_SCW025_80 case negative {condition svSG460_SCW025_80 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG460_SCW025_80 }}
+goal setPosSG461_SCW020_80 {lhs SG461_SCW020_80 case negative {condition svSG461_SCW020_80 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG461_SCW020_80 }}
+goal setPosSG462_SCW020_80 {lhs SG462_SCW020_80 case negative {condition svSG462_SCW020_80 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG462_SCW020_80 }}
+goal setPosSG463_SCW008_81 {lhs SG463_SCW008_81 case negative {condition svSG463_SCW008_81 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG463_SCW008_81 }}
+goal setPosSG464_SCW004_81 {lhs SG464_SCW004_81 case negative {condition svSG464_SCW004_81 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG464_SCW004_81 }}
+goal setPosSG465_SCW004_81 {lhs SG465_SCW004_81 case negative {condition svSG465_SCW004_81 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG465_SCW004_81 }}
+goal setPosSG466_STC010_82 {lhs SG466_STC010_82 case negative {condition svSG466_STC010_82 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG466_STC010_82 }}
+goal setPosSG467_STC008_82 {lhs SG467_STC008_82 case negative {condition svSG467_STC008_82 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG467_STC008_82 }}
+goal setPosSG468_STC008_82 {lhs SG468_STC008_82 case negative {condition svSG468_STC008_82 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG468_STC008_82 }}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Cow Creek !!!!!!!!!!!
+define	svSG211_COW014_33	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG212_COW007_33	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG213_COW003_33	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG214_COW003_33	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG211_COW014_33_DLL {alias svSG211_COW014_33 kind 'STREAM-GAIN' units 'CFS'}
+define SG212_COW007_33_DLL {alias svSG212_COW007_33 kind 'STREAM-GAIN' units 'CFS'}
+define SG213_COW003_33_DLL {alias svSG213_COW003_33 kind 'STREAM-GAIN' units 'CFS'}
+define SG214_COW003_33_DLL {alias svSG214_COW003_33 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG211_COW014_33 {lhs SG211_COW014_33 case negative {condition svSG211_COW014_33 < 0 rhs svSG211_COW014_33 lhs>rhs penalty 75704}}
+goal setNegSG212_COW007_33 {lhs SG212_COW007_33 case negative {condition svSG212_COW007_33 < 0 rhs svSG212_COW007_33 lhs>rhs penalty 75703}}
+goal setNegSG213_COW003_33 {lhs SG213_COW003_33 case negative {condition svSG213_COW003_33 < 0 rhs svSG213_COW003_33 lhs>rhs penalty 75702}}
+goal setNegSG214_COW003_33 {lhs SG214_COW003_33 case negative {condition svSG214_COW003_33 < 0 rhs svSG214_COW003_33 lhs>rhs penalty 75701}}
+
+goal setPosSG211_COW014_33 {lhs SG211_COW014_33 case negative {condition svSG211_COW014_33 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG211_COW014_33 }}
+goal setPosSG212_COW007_33 {lhs SG212_COW007_33 case negative {condition svSG212_COW007_33 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG212_COW007_33 }}
+goal setPosSG213_COW003_33 {lhs SG213_COW003_33 case negative {condition svSG213_COW003_33 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG213_COW003_33 }}
+goal setPosSG214_COW003_33 {lhs SG214_COW003_33 case negative {condition svSG214_COW003_33 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG214_COW003_33 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Deer Creek !!!!!!!!!!!
+define	svSG256_DRC010_47	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG257_DRC005_47	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG258_DRC005_47	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG256_DRC010_47_DLL {alias svSG256_DRC010_47 kind 'STREAM-GAIN' units 'CFS'}
+define SG257_DRC005_47_DLL {alias svSG257_DRC005_47 kind 'STREAM-GAIN' units 'CFS'}
+define SG258_DRC005_47_DLL {alias svSG258_DRC005_47 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG256_DRC010_47 {lhs SG256_DRC010_47 case negative {condition svSG256_DRC010_47 < 0 rhs svSG256_DRC010_47 lhs>rhs penalty 75700}}
+goal setNegSG257_DRC005_47 {lhs SG257_DRC005_47 case negative {condition svSG257_DRC005_47 < 0 rhs svSG257_DRC005_47 lhs>rhs penalty 75699}}
+goal setNegSG258_DRC005_47 {lhs SG258_DRC005_47 case negative {condition svSG258_DRC005_47 < 0 rhs svSG258_DRC005_47 lhs>rhs penalty 75698}}
+
+goal setPosSG256_DRC010_47 {lhs SG256_DRC010_47 case negative {condition svSG256_DRC010_47 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG256_DRC010_47 }}
+goal setPosSG257_DRC005_47 {lhs SG257_DRC005_47 case negative {condition svSG257_DRC005_47 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG257_DRC005_47 }}
+goal setPosSG258_DRC005_47 {lhs SG258_DRC005_47 case negative {condition svSG258_DRC005_47 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG258_DRC005_47 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Elder Creek !!!!!!!!!!!
+define	svSG237_ELD027_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG238_ELD022_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG239_ELD017_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG240_ELD012_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG241_ELD005_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG242_ELD005_42	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG237_ELD027_42_DLL {alias svSG237_ELD027_42 kind 'STREAM-GAIN' units 'CFS'}
+define SG238_ELD022_42_DLL {alias svSG238_ELD022_42 kind 'STREAM-GAIN' units 'CFS'}
+define SG239_ELD017_42_DLL {alias svSG239_ELD017_42 kind 'STREAM-GAIN' units 'CFS'}
+define SG240_ELD012_42_DLL {alias svSG240_ELD012_42 kind 'STREAM-GAIN' units 'CFS'}
+define SG241_ELD005_42_DLL {alias svSG241_ELD005_42 kind 'STREAM-GAIN' units 'CFS'}
+define SG242_ELD005_42_DLL {alias svSG242_ELD005_42 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG237_ELD027_42 {lhs SG237_ELD027_42 case negative {condition svSG237_ELD027_42 < 0 rhs svSG237_ELD027_42 lhs>rhs penalty 75697}}
+goal setNegSG238_ELD022_42 {lhs SG238_ELD022_42 case negative {condition svSG238_ELD022_42 < 0 rhs svSG238_ELD022_42 lhs>rhs penalty 75696}}
+goal setNegSG239_ELD017_42 {lhs SG239_ELD017_42 case negative {condition svSG239_ELD017_42 < 0 rhs svSG239_ELD017_42 lhs>rhs penalty 75695}}
+goal setNegSG240_ELD012_42 {lhs SG240_ELD012_42 case negative {condition svSG240_ELD012_42 < 0 rhs svSG240_ELD012_42 lhs>rhs penalty 75694}}
+goal setNegSG241_ELD005_42 {lhs SG241_ELD005_42 case negative {condition svSG241_ELD005_42 < 0 rhs svSG241_ELD005_42 lhs>rhs penalty 75693}}
+goal setNegSG242_ELD005_42 {lhs SG242_ELD005_42 case negative {condition svSG242_ELD005_42 < 0 rhs svSG242_ELD005_42 lhs>rhs penalty 75692}}
+
+goal setPosSG237_ELD027_42 {lhs SG237_ELD027_42 case negative {condition svSG237_ELD027_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG237_ELD027_42 }}
+goal setPosSG238_ELD022_42 {lhs SG238_ELD022_42 case negative {condition svSG238_ELD022_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG238_ELD022_42 }}
+goal setPosSG239_ELD017_42 {lhs SG239_ELD017_42 case negative {condition svSG239_ELD017_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG239_ELD017_42 }}
+goal setPosSG240_ELD012_42 {lhs SG240_ELD012_42 case negative {condition svSG240_ELD012_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG240_ELD012_42 }}
+goal setPosSG241_ELD005_42 {lhs SG241_ELD005_42 case negative {condition svSG241_ELD005_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG241_ELD005_42 }}
+goal setPosSG242_ELD005_42 {lhs SG242_ELD005_42 case negative {condition svSG242_ELD005_42 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG242_ELD005_42 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Feather River !!!!!!!!!!!
+define	svSG341_FTR068_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG342_FTR063_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG343_FTR059_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG344_FTR053_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG345_FTR048_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG346_FTR045_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG347_FTR036_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG348_FTR029_59	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG352_FTR029_61	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG353_FTR025_61	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG354_FTR021_61	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG355_FTR016_61	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG356_FTR012_61	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG362_FTR012_63	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG363_FTR008_63	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG364_FTR008_64	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG365_FTR003_64	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG366_FTR003_64	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG341_FTR068_59_DLL {alias svSG341_FTR068_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG342_FTR063_59_DLL {alias svSG342_FTR063_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG343_FTR059_59_DLL {alias svSG343_FTR059_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG344_FTR053_59_DLL {alias svSG344_FTR053_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG345_FTR048_59_DLL {alias svSG345_FTR048_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG346_FTR045_59_DLL {alias svSG346_FTR045_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG347_FTR036_59_DLL {alias svSG347_FTR036_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG348_FTR029_59_DLL {alias svSG348_FTR029_59 kind 'STREAM-GAIN' units 'CFS'}
+define SG352_FTR029_61_DLL {alias svSG352_FTR029_61 kind 'STREAM-GAIN' units 'CFS'}
+define SG353_FTR025_61_DLL {alias svSG353_FTR025_61 kind 'STREAM-GAIN' units 'CFS'}
+define SG354_FTR021_61_DLL {alias svSG354_FTR021_61 kind 'STREAM-GAIN' units 'CFS'}
+define SG355_FTR016_61_DLL {alias svSG355_FTR016_61 kind 'STREAM-GAIN' units 'CFS'}
+define SG356_FTR012_61_DLL {alias svSG356_FTR012_61 kind 'STREAM-GAIN' units 'CFS'}
+define SG362_FTR012_63_DLL {alias svSG362_FTR012_63 kind 'STREAM-GAIN' units 'CFS'}
+define SG363_FTR008_63_DLL {alias svSG363_FTR008_63 kind 'STREAM-GAIN' units 'CFS'}
+define SG364_FTR008_64_DLL {alias svSG364_FTR008_64 kind 'STREAM-GAIN' units 'CFS'}
+define SG365_FTR003_64_DLL {alias svSG365_FTR003_64 kind 'STREAM-GAIN' units 'CFS'}
+define SG366_FTR003_64_DLL {alias svSG366_FTR003_64 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG341_FTR068_59 {lhs SG341_FTR068_59 case negative {condition svSG341_FTR068_59 < 0 rhs svSG341_FTR068_59 lhs>rhs penalty 75691}}
+goal setNegSG342_FTR063_59 {lhs SG342_FTR063_59 case negative {condition svSG342_FTR063_59 < 0 rhs svSG342_FTR063_59 lhs>rhs penalty 75690}}
+goal setNegSG343_FTR059_59 {lhs SG343_FTR059_59 case negative {condition svSG343_FTR059_59 < 0 rhs svSG343_FTR059_59 lhs>rhs penalty 75689}}
+goal setNegSG344_FTR053_59 {lhs SG344_FTR053_59 case negative {condition svSG344_FTR053_59 < 0 rhs svSG344_FTR053_59 lhs>rhs penalty 75688}}
+goal setNegSG345_FTR048_59 {lhs SG345_FTR048_59 case negative {condition svSG345_FTR048_59 < 0 rhs svSG345_FTR048_59 lhs>rhs penalty 75687}}
+goal setNegSG346_FTR045_59 {lhs SG346_FTR045_59 case negative {condition svSG346_FTR045_59 < 0 rhs svSG346_FTR045_59 lhs>rhs penalty 75686}}
+goal setNegSG347_FTR036_59 {lhs SG347_FTR036_59 case negative {condition svSG347_FTR036_59 < 0 rhs svSG347_FTR036_59 lhs>rhs penalty 75685}}
+goal setNegSG348_FTR029_59 {lhs SG348_FTR029_59 case negative {condition svSG348_FTR029_59 < 0 rhs svSG348_FTR029_59 lhs>rhs penalty 75684}}
+goal setNegSG352_FTR029_61 {lhs SG352_FTR029_61 case negative {condition svSG352_FTR029_61 < 0 rhs svSG352_FTR029_61 lhs>rhs penalty 75683}}
+goal setNegSG353_FTR025_61 {lhs SG353_FTR025_61 case negative {condition svSG353_FTR025_61 < 0 rhs svSG353_FTR025_61 lhs>rhs penalty 75682}}
+goal setNegSG354_FTR021_61 {lhs SG354_FTR021_61 case negative {condition svSG354_FTR021_61 < 0 rhs svSG354_FTR021_61 lhs>rhs penalty 75681}}
+goal setNegSG355_FTR016_61 {lhs SG355_FTR016_61 case negative {condition svSG355_FTR016_61 < 0 rhs svSG355_FTR016_61 lhs>rhs penalty 75680}}
+goal setNegSG356_FTR012_61 {lhs SG356_FTR012_61 case negative {condition svSG356_FTR012_61 < 0 rhs svSG356_FTR012_61 lhs>rhs penalty 75679}}
+goal setNegSG362_FTR012_63 {lhs SG362_FTR012_63 case negative {condition svSG362_FTR012_63 < 0 rhs svSG362_FTR012_63 lhs>rhs penalty 75678}}
+goal setNegSG363_FTR008_63 {lhs SG363_FTR008_63 case negative {condition svSG363_FTR008_63 < 0 rhs svSG363_FTR008_63 lhs>rhs penalty 75677}}
+goal setNegSG364_FTR008_64 {lhs SG364_FTR008_64 case negative {condition svSG364_FTR008_64 < 0 rhs svSG364_FTR008_64 lhs>rhs penalty 75676}}
+goal setNegSG365_FTR003_64 {lhs SG365_FTR003_64 case negative {condition svSG365_FTR003_64 < 0 rhs svSG365_FTR003_64 lhs>rhs penalty 75675}}
+goal setNegSG366_FTR003_64 {lhs SG366_FTR003_64 case negative {condition svSG366_FTR003_64 < 0 rhs svSG366_FTR003_64 lhs>rhs penalty 75674}}
+
+goal setPosSG341_FTR068_59 {lhs SG341_FTR068_59 case negative {condition svSG341_FTR068_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG341_FTR068_59 }}
+goal setPosSG342_FTR063_59 {lhs SG342_FTR063_59 case negative {condition svSG342_FTR063_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG342_FTR063_59 }}
+goal setPosSG343_FTR059_59 {lhs SG343_FTR059_59 case negative {condition svSG343_FTR059_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG343_FTR059_59 }}
+goal setPosSG344_FTR053_59 {lhs SG344_FTR053_59 case negative {condition svSG344_FTR053_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG344_FTR053_59 }}
+goal setPosSG345_FTR048_59 {lhs SG345_FTR048_59 case negative {condition svSG345_FTR048_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG345_FTR048_59 }}
+goal setPosSG346_FTR045_59 {lhs SG346_FTR045_59 case negative {condition svSG346_FTR045_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG346_FTR045_59 }}
+goal setPosSG347_FTR036_59 {lhs SG347_FTR036_59 case negative {condition svSG347_FTR036_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG347_FTR036_59 }}
+goal setPosSG348_FTR029_59 {lhs SG348_FTR029_59 case negative {condition svSG348_FTR029_59 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG348_FTR029_59 }}
+goal setPosSG352_FTR029_61 {lhs SG352_FTR029_61 case negative {condition svSG352_FTR029_61 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG352_FTR029_61 }}
+goal setPosSG353_FTR025_61 {lhs SG353_FTR025_61 case negative {condition svSG353_FTR025_61 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG353_FTR025_61 }}
+goal setPosSG354_FTR021_61 {lhs SG354_FTR021_61 case negative {condition svSG354_FTR021_61 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG354_FTR021_61 }}
+goal setPosSG355_FTR016_61 {lhs SG355_FTR016_61 case negative {condition svSG355_FTR016_61 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG355_FTR016_61 }}
+goal setPosSG356_FTR012_61 {lhs SG356_FTR012_61 case negative {condition svSG356_FTR012_61 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG356_FTR012_61 }}
+goal setPosSG362_FTR012_63 {lhs SG362_FTR012_63 case negative {condition svSG362_FTR012_63 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG362_FTR012_63 }}
+goal setPosSG363_FTR008_63 {lhs SG363_FTR008_63 case negative {condition svSG363_FTR008_63 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG363_FTR008_63 }}
+goal setPosSG364_FTR008_64 {lhs SG364_FTR008_64 case negative {condition svSG364_FTR008_64 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG364_FTR008_64 }}
+goal setPosSG365_FTR003_64 {lhs SG365_FTR003_64 case negative {condition svSG365_FTR003_64 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG365_FTR003_64 }}
+goal setPosSG366_FTR003_64 {lhs SG366_FTR003_64 case negative {condition svSG366_FTR003_64 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG366_FTR003_64 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Mill Creek !!!!!!!!!!!
+define	svSG243_MLC006_43	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG244_MLC004_43	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG245_MLC004_43	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG243_MLC006_43_DLL {alias svSG243_MLC006_43 kind 'STREAM-GAIN' units 'CFS'}
+define SG244_MLC004_43_DLL {alias svSG244_MLC004_43 kind 'STREAM-GAIN' units 'CFS'}
+define SG245_MLC004_43_DLL {alias svSG245_MLC004_43 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG243_MLC006_43 {lhs SG243_MLC006_43 case negative {condition svSG243_MLC006_43 < 0 rhs svSG243_MLC006_43 lhs>rhs penalty 75673}}
+goal setNegSG244_MLC004_43 {lhs SG244_MLC004_43 case negative {condition svSG244_MLC004_43 < 0 rhs svSG244_MLC004_43 lhs>rhs penalty 75672}}
+goal setNegSG245_MLC004_43 {lhs SG245_MLC004_43 case negative {condition svSG245_MLC004_43 < 0 rhs svSG245_MLC004_43 lhs>rhs penalty 75671}}
+
+goal setPosSG243_MLC006_43 {lhs SG243_MLC006_43 case negative {condition svSG243_MLC006_43 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG243_MLC006_43 }}
+goal setPosSG244_MLC004_43 {lhs SG244_MLC004_43 case negative {condition svSG244_MLC004_43 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG244_MLC004_43 }}
+goal setPosSG245_MLC004_43 {lhs SG245_MLC004_43 case negative {condition svSG245_MLC004_43 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG245_MLC004_43 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Paynes Creek !!!!!!!!!!!
+define	svSG225_PYN001_38	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG226_PYN001_38	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG225_PYN001_38_DLL {alias svSG225_PYN001_38 kind 'STREAM-GAIN' units 'CFS'}
+define SG226_PYN001_38_DLL {alias svSG226_PYN001_38 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG225_PYN001_38 {lhs SG225_PYN001_38 case negative {condition svSG225_PYN001_38 < 0 rhs svSG225_PYN001_38 lhs>rhs penalty 75670}}
+goal setNegSG226_PYN001_38 {lhs SG226_PYN001_38 case negative {condition svSG226_PYN001_38 < 0 rhs svSG226_PYN001_38 lhs>rhs penalty 75669}}
+
+goal setPosSG225_PYN001_38 {lhs SG225_PYN001_38 case negative {condition svSG225_PYN001_38 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG225_PYN001_38 }}
+goal setPosSG226_PYN001_38 {lhs SG226_PYN001_38 case negative {condition svSG226_PYN001_38 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG226_PYN001_38 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Putah Creek !!!!!!!!!!!
+define	svSG400_PTH024_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG401_PTH020_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG402_PTH015_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG403_PTH011_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG404_PTH007_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG405_PTH007_69	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG400_PTH024_69_DLL {alias svSG400_PTH024_69 kind 'STREAM-GAIN' units 'CFS'}
+define SG401_PTH020_69_DLL {alias svSG401_PTH020_69 kind 'STREAM-GAIN' units 'CFS'}
+define SG402_PTH015_69_DLL {alias svSG402_PTH015_69 kind 'STREAM-GAIN' units 'CFS'}
+define SG403_PTH011_69_DLL {alias svSG403_PTH011_69 kind 'STREAM-GAIN' units 'CFS'}
+define SG404_PTH007_69_DLL {alias svSG404_PTH007_69 kind 'STREAM-GAIN' units 'CFS'}
+define SG405_PTH007_69_DLL {alias svSG405_PTH007_69 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG400_PTH024_69 {lhs SG400_PTH024_69 case negative {condition svSG400_PTH024_69 < 0 rhs svSG400_PTH024_69 lhs>rhs penalty 75668}}
+goal setNegSG401_PTH020_69 {lhs SG401_PTH020_69 case negative {condition svSG401_PTH020_69 < 0 rhs svSG401_PTH020_69 lhs>rhs penalty 75667}}
+goal setNegSG402_PTH015_69 {lhs SG402_PTH015_69 case negative {condition svSG402_PTH015_69 < 0 rhs svSG402_PTH015_69 lhs>rhs penalty 75666}}
+goal setNegSG403_PTH011_69 {lhs SG403_PTH011_69 case negative {condition svSG403_PTH011_69 < 0 rhs svSG403_PTH011_69 lhs>rhs penalty 75665}}
+goal setNegSG404_PTH007_69 {lhs SG404_PTH007_69 case negative {condition svSG404_PTH007_69 < 0 rhs svSG404_PTH007_69 lhs>rhs penalty 75664}}
+goal setNegSG405_PTH007_69 {lhs SG405_PTH007_69 case negative {condition svSG405_PTH007_69 < 0 rhs svSG405_PTH007_69 lhs>rhs penalty 75663}}
+
+goal setPosSG400_PTH024_69 {lhs SG400_PTH024_69 case negative {condition svSG400_PTH024_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG400_PTH024_69 }}
+goal setPosSG401_PTH020_69 {lhs SG401_PTH020_69 case negative {condition svSG401_PTH020_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG401_PTH020_69 }}
+goal setPosSG402_PTH015_69 {lhs SG402_PTH015_69 case negative {condition svSG402_PTH015_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG402_PTH015_69 }}
+goal setPosSG403_PTH011_69 {lhs SG403_PTH011_69 case negative {condition svSG403_PTH011_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG403_PTH011_69 }}
+goal setPosSG404_PTH007_69 {lhs SG404_PTH007_69 case negative {condition svSG404_PTH007_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG404_PTH007_69 }}
+goal setPosSG405_PTH007_69 {lhs SG405_PTH007_69 case negative {condition svSG405_PTH007_69 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG405_PTH007_69 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Sacramento River (see also Freeport) !!!!!!!!!!!
+define	svSG205_SAC296_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG206_SAC294_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG207_SAC289_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG208_SAC287_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG209_SAC281_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG210_SAC277_32	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG215_SAC277_34	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG216_SAC275_34	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG217_SAC269_34	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG222_SAC269_37	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG223_SAC265_37	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG224_SAC259_37	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG227_SAC259_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG228_SAC254_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG229_SAC250_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG230_SAC247_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG231_SAC240_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG232_SAC232_39	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG235_SAC232_41	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG236_SAC228_41	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG246_SAC228_44	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG247_SAC224_44	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG254_SAC224_46	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG255_SAC218_46	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG259_SAC218_48	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG260_SAC214_48	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG261_SAC207_48	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG262_SAC196_48	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG273_SAC196_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG274_SAC193_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG275_SAC188_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG276_SAC182_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG277_SAC178_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG278_SAC174_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG279_SAC168_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG280_SAC162_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG281_SAC154_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG282_SAC148_51	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG293_SAC148_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG294_SAC141_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG295_SAC134_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG296_SAC129_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG297_SAC122_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG298_SAC115_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG299_SAC106_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG300_SAC097_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG301_SAC092_53	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG330_SAC092_57	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG331_SAC085_57	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG332_SAC083_57	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG367_SAC083_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG368_SAC082_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG369_SAC081_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG370_SAC078_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG371_SAC075_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG372_SAC066_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG373_SAC063_65	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG381_SAC063_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG382_SAC057_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG383_SAC053_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG384_SAC048_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG385_SAC041_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG386_SAC036_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG387_SAC030_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG388_SAC022_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG389_SAC017_67	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG413_SAC017_71	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG414_SAC011_71	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG415_SAC007_71	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG416_SAC003_71	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG417_SAC000_71	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+!define	svSG418_SAC000_72	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG205_SAC296_32_DLL {alias svSG205_SAC296_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG206_SAC294_32_DLL {alias svSG206_SAC294_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG207_SAC289_32_DLL {alias svSG207_SAC289_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG208_SAC287_32_DLL {alias svSG208_SAC287_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG209_SAC281_32_DLL {alias svSG209_SAC281_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG210_SAC277_32_DLL {alias svSG210_SAC277_32 kind 'STREAM-GAIN' units 'CFS'}
+define SG215_SAC277_34_DLL {alias svSG215_SAC277_34 kind 'STREAM-GAIN' units 'CFS'}
+define SG216_SAC275_34_DLL {alias svSG216_SAC275_34 kind 'STREAM-GAIN' units 'CFS'}
+define SG217_SAC269_34_DLL {alias svSG217_SAC269_34 kind 'STREAM-GAIN' units 'CFS'}
+define SG222_SAC269_37_DLL {alias svSG222_SAC269_37 kind 'STREAM-GAIN' units 'CFS'}
+define SG223_SAC265_37_DLL {alias svSG223_SAC265_37 kind 'STREAM-GAIN' units 'CFS'}
+define SG224_SAC259_37_DLL {alias svSG224_SAC259_37 kind 'STREAM-GAIN' units 'CFS'}
+define SG227_SAC259_39_DLL {alias svSG227_SAC259_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG228_SAC254_39_DLL {alias svSG228_SAC254_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG229_SAC250_39_DLL {alias svSG229_SAC250_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG230_SAC247_39_DLL {alias svSG230_SAC247_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG231_SAC240_39_DLL {alias svSG231_SAC240_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG232_SAC232_39_DLL {alias svSG232_SAC232_39 kind 'STREAM-GAIN' units 'CFS'}
+define SG235_SAC232_41_DLL {alias svSG235_SAC232_41 kind 'STREAM-GAIN' units 'CFS'}
+define SG236_SAC228_41_DLL {alias svSG236_SAC228_41 kind 'STREAM-GAIN' units 'CFS'}
+define SG246_SAC228_44_DLL {alias svSG246_SAC228_44 kind 'STREAM-GAIN' units 'CFS'}
+define SG247_SAC224_44_DLL {alias svSG247_SAC224_44 kind 'STREAM-GAIN' units 'CFS'}
+define SG254_SAC224_46_DLL {alias svSG254_SAC224_46 kind 'STREAM-GAIN' units 'CFS'}
+define SG255_SAC218_46_DLL {alias svSG255_SAC218_46 kind 'STREAM-GAIN' units 'CFS'}
+define SG259_SAC218_48_DLL {alias svSG259_SAC218_48 kind 'STREAM-GAIN' units 'CFS'}
+define SG260_SAC214_48_DLL {alias svSG260_SAC214_48 kind 'STREAM-GAIN' units 'CFS'}
+define SG261_SAC207_48_DLL {alias svSG261_SAC207_48 kind 'STREAM-GAIN' units 'CFS'}
+define SG262_SAC196_48_DLL {alias svSG262_SAC196_48 kind 'STREAM-GAIN' units 'CFS'}
+define SG273_SAC196_51_DLL {alias svSG273_SAC196_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG274_SAC193_51_DLL {alias svSG274_SAC193_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG275_SAC188_51_DLL {alias svSG275_SAC188_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG276_SAC182_51_DLL {alias svSG276_SAC182_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG277_SAC178_51_DLL {alias svSG277_SAC178_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG278_SAC174_51_DLL {alias svSG278_SAC174_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG279_SAC168_51_DLL {alias svSG279_SAC168_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG280_SAC162_51_DLL {alias svSG280_SAC162_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG281_SAC154_51_DLL {alias svSG281_SAC154_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG282_SAC148_51_DLL {alias svSG282_SAC148_51 kind 'STREAM-GAIN' units 'CFS'}
+define SG293_SAC148_53_DLL {alias svSG293_SAC148_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG294_SAC141_53_DLL {alias svSG294_SAC141_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG295_SAC134_53_DLL {alias svSG295_SAC134_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG296_SAC129_53_DLL {alias svSG296_SAC129_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG297_SAC122_53_DLL {alias svSG297_SAC122_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG298_SAC115_53_DLL {alias svSG298_SAC115_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG299_SAC106_53_DLL {alias svSG299_SAC106_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG300_SAC097_53_DLL {alias svSG300_SAC097_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG301_SAC092_53_DLL {alias svSG301_SAC092_53 kind 'STREAM-GAIN' units 'CFS'}
+define SG330_SAC092_57_DLL {alias svSG330_SAC092_57 kind 'STREAM-GAIN' units 'CFS'}
+define SG331_SAC085_57_DLL {alias svSG331_SAC085_57 kind 'STREAM-GAIN' units 'CFS'}
+define SG332_SAC083_57_DLL {alias svSG332_SAC083_57 kind 'STREAM-GAIN' units 'CFS'}
+define SG367_SAC083_65_DLL {alias svSG367_SAC083_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG368_SAC082_65_DLL {alias svSG368_SAC082_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG369_SAC081_65_DLL {alias svSG369_SAC081_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG370_SAC078_65_DLL {alias svSG370_SAC078_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG371_SAC075_65_DLL {alias svSG371_SAC075_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG372_SAC066_65_DLL {alias svSG372_SAC066_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG373_SAC063_65_DLL {alias svSG373_SAC063_65 kind 'STREAM-GAIN' units 'CFS'}
+define SG381_SAC063_67_DLL {alias svSG381_SAC063_67 kind 'STREAM-GAIN' units 'CFS'}
+define SG382_SAC057_67_DLL {alias svSG382_SAC057_67 kind 'STREAM-GAIN' units 'CFS'}
+define SG383_SAC053_67_DLL {alias svSG383_SAC053_67 kind 'STREAM-GAIN' units 'CFS'}
+define SG384_SAC048_67_DLL {alias svSG384_SAC048_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG385_SAC041_67_DLL {alias svSG385_SAC041_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG386_SAC036_67_DLL {alias svSG386_SAC036_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG387_SAC030_67_DLL {alias svSG387_SAC030_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG388_SAC022_67_DLL {alias svSG388_SAC022_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG389_SAC017_67_DLL {alias svSG389_SAC017_67 kind 'STREAM-GAIN' units 'CFS'}
+!define SG413_SAC017_71_DLL {alias svSG413_SAC017_71 kind 'STREAM-GAIN' units 'CFS'}
+!define SG414_SAC011_71_DLL {alias svSG414_SAC011_71 kind 'STREAM-GAIN' units 'CFS'}
+!define SG415_SAC007_71_DLL {alias svSG415_SAC007_71 kind 'STREAM-GAIN' units 'CFS'}
+!define SG416_SAC003_71_DLL {alias svSG416_SAC003_71 kind 'STREAM-GAIN' units 'CFS'}
+!define SG417_SAC000_71_DLL {alias svSG417_SAC000_71 kind 'STREAM-GAIN' units 'CFS'}
+!define SG418_SAC000_72_DLL {alias svSG418_SAC000_72 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG205_SAC296_32 {lhs SG205_SAC296_32 case negative {condition svSG205_SAC296_32 < 0 rhs svSG205_SAC296_32 lhs>rhs penalty 75662}}
+goal setNegSG206_SAC294_32 {lhs SG206_SAC294_32 case negative {condition svSG206_SAC294_32 < 0 rhs svSG206_SAC294_32 lhs>rhs penalty 75661}}
+goal setNegSG207_SAC289_32 {lhs SG207_SAC289_32 case negative {condition svSG207_SAC289_32 < 0 rhs svSG207_SAC289_32 lhs>rhs penalty 75660}}
+goal setNegSG208_SAC287_32 {lhs SG208_SAC287_32 case negative {condition svSG208_SAC287_32 < 0 rhs svSG208_SAC287_32 lhs>rhs penalty 75659}}
+goal setNegSG209_SAC281_32 {lhs SG209_SAC281_32 case negative {condition svSG209_SAC281_32 < 0 rhs svSG209_SAC281_32 lhs>rhs penalty 75658}}
+goal setNegSG210_SAC277_32 {lhs SG210_SAC277_32 case negative {condition svSG210_SAC277_32 < 0 rhs svSG210_SAC277_32 lhs>rhs penalty 75657}}
+goal setNegSG215_SAC277_34 {lhs SG215_SAC277_34 case negative {condition svSG215_SAC277_34 < 0 rhs svSG215_SAC277_34 lhs>rhs penalty 75656}}
+goal setNegSG216_SAC275_34 {lhs SG216_SAC275_34 case negative {condition svSG216_SAC275_34 < 0 rhs svSG216_SAC275_34 lhs>rhs penalty 75655}}
+goal setNegSG217_SAC269_34 {lhs SG217_SAC269_34 case negative {condition svSG217_SAC269_34 < 0 rhs svSG217_SAC269_34 lhs>rhs penalty 75654}}
+goal setNegSG222_SAC269_37 {lhs SG222_SAC269_37 case negative {condition svSG222_SAC269_37 < 0 rhs svSG222_SAC269_37 lhs>rhs penalty 75653}}
+goal setNegSG223_SAC265_37 {lhs SG223_SAC265_37 case negative {condition svSG223_SAC265_37 < 0 rhs svSG223_SAC265_37 lhs>rhs penalty 75652}}
+goal setNegSG224_SAC259_37 {lhs SG224_SAC259_37 case negative {condition svSG224_SAC259_37 < 0 rhs svSG224_SAC259_37 lhs>rhs penalty 75651}}
+goal setNegSG227_SAC259_39 {lhs SG227_SAC259_39 case negative {condition svSG227_SAC259_39 < 0 rhs svSG227_SAC259_39 lhs>rhs penalty 75650}}
+goal setNegSG228_SAC254_39 {lhs SG228_SAC254_39 case negative {condition svSG228_SAC254_39 < 0 rhs svSG228_SAC254_39 lhs>rhs penalty 75649}}
+goal setNegSG229_SAC250_39 {lhs SG229_SAC250_39 case negative {condition svSG229_SAC250_39 < 0 rhs svSG229_SAC250_39 lhs>rhs penalty 75648}}
+goal setNegSG230_SAC247_39 {lhs SG230_SAC247_39 case negative {condition svSG230_SAC247_39 < 0 rhs svSG230_SAC247_39 lhs>rhs penalty 75647}}
+goal setNegSG231_SAC240_39 {lhs SG231_SAC240_39 case negative {condition svSG231_SAC240_39 < 0 rhs svSG231_SAC240_39 lhs>rhs penalty 75646}}
+goal setNegSG232_SAC232_39 {lhs SG232_SAC232_39 case negative {condition svSG232_SAC232_39 < 0 rhs svSG232_SAC232_39 lhs>rhs penalty 75645}}
+goal setNegSG235_SAC232_41 {lhs SG235_SAC232_41 case negative {condition svSG235_SAC232_41 < 0 rhs svSG235_SAC232_41 lhs>rhs penalty 75644}}
+goal setNegSG236_SAC228_41 {lhs SG236_SAC228_41 case negative {condition svSG236_SAC228_41 < 0 rhs svSG236_SAC228_41 lhs>rhs penalty 75643}}
+goal setNegSG246_SAC228_44 {lhs SG246_SAC228_44 case negative {condition svSG246_SAC228_44 < 0 rhs svSG246_SAC228_44 lhs>rhs penalty 75642}}
+goal setNegSG247_SAC224_44 {lhs SG247_SAC224_44 case negative {condition svSG247_SAC224_44 < 0 rhs svSG247_SAC224_44 lhs>rhs penalty 75641}}
+goal setNegSG254_SAC224_46 {lhs SG254_SAC224_46 case negative {condition svSG254_SAC224_46 < 0 rhs svSG254_SAC224_46 lhs>rhs penalty 75640}}
+goal setNegSG255_SAC218_46 {lhs SG255_SAC218_46 case negative {condition svSG255_SAC218_46 < 0 rhs svSG255_SAC218_46 lhs>rhs penalty 75639}}
+goal setNegSG259_SAC218_48 {lhs SG259_SAC218_48 case negative {condition svSG259_SAC218_48 < 0 rhs svSG259_SAC218_48 lhs>rhs penalty 75638}}
+goal setNegSG260_SAC214_48 {lhs SG260_SAC214_48 case negative {condition svSG260_SAC214_48 < 0 rhs svSG260_SAC214_48 lhs>rhs penalty 75637}}
+goal setNegSG261_SAC207_48 {lhs SG261_SAC207_48 case negative {condition svSG261_SAC207_48 < 0 rhs svSG261_SAC207_48 lhs>rhs penalty 75636}}
+goal setNegSG262_SAC196_48 {lhs SG262_SAC196_48 case negative {condition svSG262_SAC196_48 < 0 rhs svSG262_SAC196_48 lhs>rhs penalty 75635}}
+goal setNegSG273_SAC196_51 {lhs SG273_SAC196_51 case negative {condition svSG273_SAC196_51 < 0 rhs svSG273_SAC196_51 lhs>rhs penalty 75634}}
+goal setNegSG274_SAC193_51 {lhs SG274_SAC193_51 case negative {condition svSG274_SAC193_51 < 0 rhs svSG274_SAC193_51 lhs>rhs penalty 75633}}
+goal setNegSG275_SAC188_51 {lhs SG275_SAC188_51 case negative {condition svSG275_SAC188_51 < 0 rhs svSG275_SAC188_51 lhs>rhs penalty 75632}}
+goal setNegSG276_SAC182_51 {lhs SG276_SAC182_51 case negative {condition svSG276_SAC182_51 < 0 rhs svSG276_SAC182_51 lhs>rhs penalty 75631}}
+goal setNegSG277_SAC178_51 {lhs SG277_SAC178_51 case negative {condition svSG277_SAC178_51 < 0 rhs svSG277_SAC178_51 lhs>rhs penalty 75630}}
+goal setNegSG278_SAC174_51 {lhs SG278_SAC174_51 case negative {condition svSG278_SAC174_51 < 0 rhs svSG278_SAC174_51 lhs>rhs penalty 75629}}
+goal setNegSG279_SAC168_51 {lhs SG279_SAC168_51 case negative {condition svSG279_SAC168_51 < 0 rhs svSG279_SAC168_51 lhs>rhs penalty 75628}}
+goal setNegSG280_SAC162_51 {lhs SG280_SAC162_51 case negative {condition svSG280_SAC162_51 < 0 rhs svSG280_SAC162_51 lhs>rhs penalty 75627}}
+goal setNegSG281_SAC154_51 {lhs SG281_SAC154_51 case negative {condition svSG281_SAC154_51 < 0 rhs svSG281_SAC154_51 lhs>rhs penalty 75626}}
+goal setNegSG282_SAC148_51 {lhs SG282_SAC148_51 case negative {condition svSG282_SAC148_51 < 0 rhs svSG282_SAC148_51 lhs>rhs penalty 75625}}
+goal setNegSG293_SAC148_53 {lhs SG293_SAC148_53 case negative {condition svSG293_SAC148_53 < 0 rhs svSG293_SAC148_53 lhs>rhs penalty 75624}}
+goal setNegSG294_SAC141_53 {lhs SG294_SAC141_53 case negative {condition svSG294_SAC141_53 < 0 rhs svSG294_SAC141_53 lhs>rhs penalty 75623}}
+goal setNegSG295_SAC134_53 {lhs SG295_SAC134_53 case negative {condition svSG295_SAC134_53 < 0 rhs svSG295_SAC134_53 lhs>rhs penalty 75622}}
+goal setNegSG296_SAC129_53 {lhs SG296_SAC129_53 case negative {condition svSG296_SAC129_53 < 0 rhs svSG296_SAC129_53 lhs>rhs penalty 75621}}
+goal setNegSG297_SAC122_53 {lhs SG297_SAC122_53 case negative {condition svSG297_SAC122_53 < 0 rhs svSG297_SAC122_53 lhs>rhs penalty 75620}}
+goal setNegSG298_SAC115_53 {lhs SG298_SAC115_53 case negative {condition svSG298_SAC115_53 < 0 rhs svSG298_SAC115_53 lhs>rhs penalty 75619}}
+goal setNegSG299_SAC106_53 {lhs SG299_SAC106_53 case negative {condition svSG299_SAC106_53 < 0 rhs svSG299_SAC106_53 lhs>rhs penalty 75618}}
+goal setNegSG300_SAC097_53 {lhs SG300_SAC097_53 case negative {condition svSG300_SAC097_53 < 0 rhs svSG300_SAC097_53 lhs>rhs penalty 75617}}
+goal setNegSG301_SAC092_53 {lhs SG301_SAC092_53 case negative {condition svSG301_SAC092_53 < 0 rhs svSG301_SAC092_53 lhs>rhs penalty 75616}}
+goal setNegSG330_SAC092_57 {lhs SG330_SAC092_57 case negative {condition svSG330_SAC092_57 < 0 rhs svSG330_SAC092_57 lhs>rhs penalty 75615}}
+goal setNegSG331_SAC085_57 {lhs SG331_SAC085_57 case negative {condition svSG331_SAC085_57 < 0 rhs svSG331_SAC085_57 lhs>rhs penalty 75614}}
+goal setNegSG332_SAC083_57 {lhs SG332_SAC083_57 case negative {condition svSG332_SAC083_57 < 0 rhs svSG332_SAC083_57 lhs>rhs penalty 75613}}
+goal setNegSG367_SAC083_65 {lhs SG367_SAC083_65 case negative {condition svSG367_SAC083_65 < 0 rhs svSG367_SAC083_65 lhs>rhs penalty 75612}}
+goal setNegSG368_SAC082_65 {lhs SG368_SAC082_65 case negative {condition svSG368_SAC082_65 < 0 rhs svSG368_SAC082_65 lhs>rhs penalty 75611}}
+goal setNegSG369_SAC081_65 {lhs SG369_SAC081_65 case negative {condition svSG369_SAC081_65 < 0 rhs svSG369_SAC081_65 lhs>rhs penalty 75610}}
+goal setNegSG370_SAC078_65 {lhs SG370_SAC078_65 case negative {condition svSG370_SAC078_65 < 0 rhs svSG370_SAC078_65 lhs>rhs penalty 75609}}
+goal setNegSG371_SAC075_65 {lhs SG371_SAC075_65 case negative {condition svSG371_SAC075_65 < 0 rhs svSG371_SAC075_65 lhs>rhs penalty 75608}}
+goal setNegSG372_SAC066_65 {lhs SG372_SAC066_65 case negative {condition svSG372_SAC066_65 < 0 rhs svSG372_SAC066_65 lhs>rhs penalty 75607}}
+goal setNegSG373_SAC063_65 {lhs SG373_SAC063_65 case negative {condition svSG373_SAC063_65 < 0 rhs svSG373_SAC063_65 lhs>rhs penalty 75606}}
+goal setNegSG381_SAC063_67 {lhs SG381_SAC063_67 case negative {condition svSG381_SAC063_67 < 0 rhs svSG381_SAC063_67 lhs>rhs penalty 75605}}
+goal setNegSG382_SAC057_67 {lhs SG382_SAC057_67 case negative {condition svSG382_SAC057_67 < 0 rhs svSG382_SAC057_67 lhs>rhs penalty 75604}}
+goal setNegSG383_SAC053_67 {lhs SG383_SAC053_67 case negative {condition svSG383_SAC053_67 < 0 rhs svSG383_SAC053_67 lhs>rhs penalty 75603}}
+goal setNegSG384_SAC048_67 {lhs SG384_SAC048_67 case negative {condition svSG384_SAC048_67 < 0 rhs svSG384_SAC048_67 lhs>rhs penalty 75602}}
+!goal setNegSG385_SAC041_67 {lhs SG385_SAC041_67 case negative {condition svSG385_SAC041_67 < 0 rhs svSG385_SAC041_67 lhs>rhs penalty 75601}}
+!goal setNegSG386_SAC036_67 {lhs SG386_SAC036_67 case negative {condition svSG386_SAC036_67 < 0 rhs svSG386_SAC036_67 lhs>rhs penalty 75600}}
+!goal setNegSG387_SAC030_67 {lhs SG387_SAC030_67 case negative {condition svSG387_SAC030_67 < 0 rhs svSG387_SAC030_67 lhs>rhs penalty 75599}}
+!goal setNegSG388_SAC022_67 {lhs SG388_SAC022_67 case negative {condition svSG388_SAC022_67 < 0 rhs svSG388_SAC022_67 lhs>rhs penalty 75598}}
+!goal setNegSG389_SAC017_67 {lhs SG389_SAC017_67 case negative {condition svSG389_SAC017_67 < 0 rhs svSG389_SAC017_67 lhs>rhs penalty 75597}}
+!goal setNegSG413_SAC017_71 {lhs SG413_SAC017_71 case negative {condition svSG413_SAC017_71 < 0 rhs svSG413_SAC017_71 lhs>rhs penalty 75596}}
+!goal setNegSG414_SAC011_71 {lhs SG414_SAC011_71 case negative {condition svSG414_SAC011_71 < 0 rhs svSG414_SAC011_71 lhs>rhs penalty 75595}}
+!goal setNegSG415_SAC007_71 {lhs SG415_SAC007_71 case negative {condition svSG415_SAC007_71 < 0 rhs svSG415_SAC007_71 lhs>rhs penalty 75594}}
+!goal setNegSG416_SAC003_71 {lhs SG416_SAC003_71 case negative {condition svSG416_SAC003_71 < 0 rhs svSG416_SAC003_71 lhs>rhs penalty 75593}}
+!goal setNegSG417_SAC000_71 {lhs SG417_SAC000_71 case negative {condition svSG417_SAC000_71 < 0 rhs svSG417_SAC000_71 lhs>rhs penalty 75592}}
+!goal setNegSG418_SAC000_72 {lhs SG418_SAC000_72 case negative {condition svSG418_SAC000_72 < 0 rhs svSG418_SAC000_72 lhs>rhs penalty 75591}}
+
+goal setPosSG205_SAC296_32 {lhs SG205_SAC296_32 case negative {condition svSG205_SAC296_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG205_SAC296_32 }}
+goal setPosSG206_SAC294_32 {lhs SG206_SAC294_32 case negative {condition svSG206_SAC294_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG206_SAC294_32 }}
+goal setPosSG207_SAC289_32 {lhs SG207_SAC289_32 case negative {condition svSG207_SAC289_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG207_SAC289_32 }}
+goal setPosSG208_SAC287_32 {lhs SG208_SAC287_32 case negative {condition svSG208_SAC287_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG208_SAC287_32 }}
+goal setPosSG209_SAC281_32 {lhs SG209_SAC281_32 case negative {condition svSG209_SAC281_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG209_SAC281_32 }}
+goal setPosSG210_SAC277_32 {lhs SG210_SAC277_32 case negative {condition svSG210_SAC277_32 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG210_SAC277_32 }}
+goal setPosSG215_SAC277_34 {lhs SG215_SAC277_34 case negative {condition svSG215_SAC277_34 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG215_SAC277_34 }}
+goal setPosSG216_SAC275_34 {lhs SG216_SAC275_34 case negative {condition svSG216_SAC275_34 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG216_SAC275_34 }}
+goal setPosSG217_SAC269_34 {lhs SG217_SAC269_34 case negative {condition svSG217_SAC269_34 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG217_SAC269_34 }}
+goal setPosSG222_SAC269_37 {lhs SG222_SAC269_37 case negative {condition svSG222_SAC269_37 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG222_SAC269_37 }}
+goal setPosSG223_SAC265_37 {lhs SG223_SAC265_37 case negative {condition svSG223_SAC265_37 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG223_SAC265_37 }}
+goal setPosSG224_SAC259_37 {lhs SG224_SAC259_37 case negative {condition svSG224_SAC259_37 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG224_SAC259_37 }}
+goal setPosSG227_SAC259_39 {lhs SG227_SAC259_39 case negative {condition svSG227_SAC259_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG227_SAC259_39 }}
+goal setPosSG228_SAC254_39 {lhs SG228_SAC254_39 case negative {condition svSG228_SAC254_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG228_SAC254_39 }}
+goal setPosSG229_SAC250_39 {lhs SG229_SAC250_39 case negative {condition svSG229_SAC250_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG229_SAC250_39 }}
+goal setPosSG230_SAC247_39 {lhs SG230_SAC247_39 case negative {condition svSG230_SAC247_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG230_SAC247_39 }}
+goal setPosSG231_SAC240_39 {lhs SG231_SAC240_39 case negative {condition svSG231_SAC240_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG231_SAC240_39 }}
+goal setPosSG232_SAC232_39 {lhs SG232_SAC232_39 case negative {condition svSG232_SAC232_39 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG232_SAC232_39 }}
+goal setPosSG235_SAC232_41 {lhs SG235_SAC232_41 case negative {condition svSG235_SAC232_41 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG235_SAC232_41 }}
+goal setPosSG236_SAC228_41 {lhs SG236_SAC228_41 case negative {condition svSG236_SAC228_41 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG236_SAC228_41 }}
+goal setPosSG246_SAC228_44 {lhs SG246_SAC228_44 case negative {condition svSG246_SAC228_44 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG246_SAC228_44 }}
+goal setPosSG247_SAC224_44 {lhs SG247_SAC224_44 case negative {condition svSG247_SAC224_44 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG247_SAC224_44 }}
+goal setPosSG254_SAC224_46 {lhs SG254_SAC224_46 case negative {condition svSG254_SAC224_46 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG254_SAC224_46 }}
+goal setPosSG255_SAC218_46 {lhs SG255_SAC218_46 case negative {condition svSG255_SAC218_46 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG255_SAC218_46 }}
+goal setPosSG259_SAC218_48 {lhs SG259_SAC218_48 case negative {condition svSG259_SAC218_48 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG259_SAC218_48 }}
+goal setPosSG260_SAC214_48 {lhs SG260_SAC214_48 case negative {condition svSG260_SAC214_48 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG260_SAC214_48 }}
+goal setPosSG261_SAC207_48 {lhs SG261_SAC207_48 case negative {condition svSG261_SAC207_48 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG261_SAC207_48 }}
+goal setPosSG262_SAC196_48 {lhs SG262_SAC196_48 case negative {condition svSG262_SAC196_48 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG262_SAC196_48 }}
+goal setPosSG273_SAC196_51 {lhs SG273_SAC196_51 case negative {condition svSG273_SAC196_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG273_SAC196_51 }}
+goal setPosSG274_SAC193_51 {lhs SG274_SAC193_51 case negative {condition svSG274_SAC193_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG274_SAC193_51 }}
+goal setPosSG275_SAC188_51 {lhs SG275_SAC188_51 case negative {condition svSG275_SAC188_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG275_SAC188_51 }}
+goal setPosSG276_SAC182_51 {lhs SG276_SAC182_51 case negative {condition svSG276_SAC182_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG276_SAC182_51 }}
+goal setPosSG277_SAC178_51 {lhs SG277_SAC178_51 case negative {condition svSG277_SAC178_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG277_SAC178_51 }}
+goal setPosSG278_SAC174_51 {lhs SG278_SAC174_51 case negative {condition svSG278_SAC174_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG278_SAC174_51 }}
+goal setPosSG279_SAC168_51 {lhs SG279_SAC168_51 case negative {condition svSG279_SAC168_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG279_SAC168_51 }}
+goal setPosSG280_SAC162_51 {lhs SG280_SAC162_51 case negative {condition svSG280_SAC162_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG280_SAC162_51 }}
+goal setPosSG281_SAC154_51 {lhs SG281_SAC154_51 case negative {condition svSG281_SAC154_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG281_SAC154_51 }}
+goal setPosSG282_SAC148_51 {lhs SG282_SAC148_51 case negative {condition svSG282_SAC148_51 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG282_SAC148_51 }}
+goal setPosSG293_SAC148_53 {lhs SG293_SAC148_53 case negative {condition svSG293_SAC148_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG293_SAC148_53 }}
+goal setPosSG294_SAC141_53 {lhs SG294_SAC141_53 case negative {condition svSG294_SAC141_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG294_SAC141_53 }}
+goal setPosSG295_SAC134_53 {lhs SG295_SAC134_53 case negative {condition svSG295_SAC134_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG295_SAC134_53 }}
+goal setPosSG296_SAC129_53 {lhs SG296_SAC129_53 case negative {condition svSG296_SAC129_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG296_SAC129_53 }}
+goal setPosSG297_SAC122_53 {lhs SG297_SAC122_53 case negative {condition svSG297_SAC122_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG297_SAC122_53 }}
+goal setPosSG298_SAC115_53 {lhs SG298_SAC115_53 case negative {condition svSG298_SAC115_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG298_SAC115_53 }}
+goal setPosSG299_SAC106_53 {lhs SG299_SAC106_53 case negative {condition svSG299_SAC106_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG299_SAC106_53 }}
+goal setPosSG300_SAC097_53 {lhs SG300_SAC097_53 case negative {condition svSG300_SAC097_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG300_SAC097_53 }}
+goal setPosSG301_SAC092_53 {lhs SG301_SAC092_53 case negative {condition svSG301_SAC092_53 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG301_SAC092_53 }}
+goal setPosSG330_SAC092_57 {lhs SG330_SAC092_57 case negative {condition svSG330_SAC092_57 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG330_SAC092_57 }}
+goal setPosSG331_SAC085_57 {lhs SG331_SAC085_57 case negative {condition svSG331_SAC085_57 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG331_SAC085_57 }}
+goal setPosSG332_SAC083_57 {lhs SG332_SAC083_57 case negative {condition svSG332_SAC083_57 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG332_SAC083_57 }}
+goal setPosSG367_SAC083_65 {lhs SG367_SAC083_65 case negative {condition svSG367_SAC083_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG367_SAC083_65 }}
+goal setPosSG368_SAC082_65 {lhs SG368_SAC082_65 case negative {condition svSG368_SAC082_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG368_SAC082_65 }}
+goal setPosSG369_SAC081_65 {lhs SG369_SAC081_65 case negative {condition svSG369_SAC081_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG369_SAC081_65 }}
+goal setPosSG370_SAC078_65 {lhs SG370_SAC078_65 case negative {condition svSG370_SAC078_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG370_SAC078_65 }}
+goal setPosSG371_SAC075_65 {lhs SG371_SAC075_65 case negative {condition svSG371_SAC075_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG371_SAC075_65 }}
+goal setPosSG372_SAC066_65 {lhs SG372_SAC066_65 case negative {condition svSG372_SAC066_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG372_SAC066_65 }}
+goal setPosSG373_SAC063_65 {lhs SG373_SAC063_65 case negative {condition svSG373_SAC063_65 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG373_SAC063_65 }}
+goal setPosSG381_SAC063_67 {lhs SG381_SAC063_67 case negative {condition svSG381_SAC063_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG381_SAC063_67 }}
+goal setPosSG382_SAC057_67 {lhs SG382_SAC057_67 case negative {condition svSG382_SAC057_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG382_SAC057_67 }}
+goal setPosSG383_SAC053_67 {lhs SG383_SAC053_67 case negative {condition svSG383_SAC053_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG383_SAC053_67 }}
+goal setPosSG384_SAC048_67 {lhs SG384_SAC048_67 case negative {condition svSG384_SAC048_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG384_SAC048_67 }}
+!goal setPosSG385_SAC041_67 {lhs SG385_SAC041_67 case negative {condition svSG385_SAC041_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG385_SAC041_67 }}
+!goal setPosSG386_SAC036_67 {lhs SG386_SAC036_67 case negative {condition svSG386_SAC036_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG386_SAC036_67 }}
+!goal setPosSG387_SAC030_67 {lhs SG387_SAC030_67 case negative {condition svSG387_SAC030_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG387_SAC030_67 }}
+!goal setPosSG388_SAC022_67 {lhs SG388_SAC022_67 case negative {condition svSG388_SAC022_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG388_SAC022_67 }}
+!goal setPosSG389_SAC017_67 {lhs SG389_SAC017_67 case negative {condition svSG389_SAC017_67 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG389_SAC017_67 }}
+!goal setPosSG413_SAC017_71 {lhs SG413_SAC017_71 case negative {condition svSG413_SAC017_71 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG413_SAC017_71 }}
+!goal setPosSG414_SAC011_71 {lhs SG414_SAC011_71 case negative {condition svSG414_SAC011_71 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG414_SAC011_71 }}
+!goal setPosSG415_SAC007_71 {lhs SG415_SAC007_71 case negative {condition svSG415_SAC007_71 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG415_SAC007_71 }}
+!goal setPosSG416_SAC003_71 {lhs SG416_SAC003_71 case negative {condition svSG416_SAC003_71 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG416_SAC003_71 }}
+!goal setPosSG417_SAC000_71 {lhs SG417_SAC000_71 case negative {condition svSG417_SAC000_71 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG417_SAC000_71 }}
+!goal setPosSG418_SAC000_72 {lhs SG418_SAC000_72 case negative {condition svSG418_SAC000_72 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG418_SAC000_72 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Stony Creek !!!!!!!!!!!
+define	svSG263_STN026_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG264_STN021_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG265_STN014_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG266_STN009_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG267_STN004_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG268_STN004_49	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG263_STN026_49_DLL {alias svSG263_STN026_49 kind 'STREAM-GAIN' units 'CFS'}
+define SG264_STN021_49_DLL {alias svSG264_STN021_49 kind 'STREAM-GAIN' units 'CFS'}
+define SG265_STN014_49_DLL {alias svSG265_STN014_49 kind 'STREAM-GAIN' units 'CFS'}
+define SG266_STN009_49_DLL {alias svSG266_STN009_49 kind 'STREAM-GAIN' units 'CFS'}
+define SG267_STN004_49_DLL {alias svSG267_STN004_49 kind 'STREAM-GAIN' units 'CFS'}
+define SG268_STN004_49_DLL {alias svSG268_STN004_49 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG263_STN026_49 {lhs SG263_STN026_49 case negative {condition svSG263_STN026_49 < 0 rhs svSG263_STN026_49 lhs>rhs penalty 75590}}
+goal setNegSG264_STN021_49 {lhs SG264_STN021_49 case negative {condition svSG264_STN021_49 < 0 rhs svSG264_STN021_49 lhs>rhs penalty 75589}}
+goal setNegSG265_STN014_49 {lhs SG265_STN014_49 case negative {condition svSG265_STN014_49 < 0 rhs svSG265_STN014_49 lhs>rhs penalty 75588}}
+goal setNegSG266_STN009_49 {lhs SG266_STN009_49 case negative {condition svSG266_STN009_49 < 0 rhs svSG266_STN009_49 lhs>rhs penalty 75587}}
+goal setNegSG267_STN004_49 {lhs SG267_STN004_49 case negative {condition svSG267_STN004_49 < 0 rhs svSG267_STN004_49 lhs>rhs penalty 75586}}
+goal setNegSG268_STN004_49 {lhs SG268_STN004_49 case negative {condition svSG268_STN004_49 < 0 rhs svSG268_STN004_49 lhs>rhs penalty 75585}}
+
+goal setPosSG263_STN026_49 {lhs SG263_STN026_49 case negative {condition svSG263_STN026_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG263_STN026_49 }}
+goal setPosSG264_STN021_49 {lhs SG264_STN021_49 case negative {condition svSG264_STN021_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG264_STN021_49 }}
+goal setPosSG265_STN014_49 {lhs SG265_STN014_49 case negative {condition svSG265_STN014_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG265_STN014_49 }}
+goal setPosSG266_STN009_49 {lhs SG266_STN009_49 case negative {condition svSG266_STN009_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG266_STN009_49 }}
+goal setPosSG267_STN004_49 {lhs SG267_STN004_49 case negative {condition svSG267_STN004_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG267_STN004_49 }}
+goal setPosSG268_STN004_49 {lhs SG268_STN004_49 case negative {condition svSG268_STN004_49 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG268_STN004_49 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Sutter Bypass !!!!!!!!!!!
+define	svSG333_BSL001_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG334_SBP031_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG335_SBP028_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG336_SBP024_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG337_SBP021_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG338_SBP018_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG339_SBP014_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG340_SBP012_58	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG333_BSL001_58_DLL {alias svSG333_BSL001_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG334_SBP031_58_DLL {alias svSG334_SBP031_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG335_SBP028_58_DLL {alias svSG335_SBP028_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG336_SBP024_58_DLL {alias svSG336_SBP024_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG337_SBP021_58_DLL {alias svSG337_SBP021_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG338_SBP018_58_DLL {alias svSG338_SBP018_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG339_SBP014_58_DLL {alias svSG339_SBP014_58 kind 'STREAM-GAIN' units 'CFS'}
+define SG340_SBP012_58_DLL {alias svSG340_SBP012_58 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG333_BSL001_58 {lhs SG333_BSL001_58 case negative {condition svSG333_BSL001_58 < 0 rhs svSG333_BSL001_58 lhs>rhs penalty 75584}}
+goal setNegSG334_SBP031_58 {lhs SG334_SBP031_58 case negative {condition svSG334_SBP031_58 < 0 rhs svSG334_SBP031_58 lhs>rhs penalty 75583}}
+goal setNegSG335_SBP028_58 {lhs SG335_SBP028_58 case negative {condition svSG335_SBP028_58 < 0 rhs svSG335_SBP028_58 lhs>rhs penalty 75582}}
+goal setNegSG336_SBP024_58 {lhs SG336_SBP024_58 case negative {condition svSG336_SBP024_58 < 0 rhs svSG336_SBP024_58 lhs>rhs penalty 75581}}
+goal setNegSG337_SBP021_58 {lhs SG337_SBP021_58 case negative {condition svSG337_SBP021_58 < 0 rhs svSG337_SBP021_58 lhs>rhs penalty 75580}}
+goal setNegSG338_SBP018_58 {lhs SG338_SBP018_58 case negative {condition svSG338_SBP018_58 < 0 rhs svSG338_SBP018_58 lhs>rhs penalty 75579}}
+goal setNegSG339_SBP014_58 {lhs SG339_SBP014_58 case negative {condition svSG339_SBP014_58 < 0 rhs svSG339_SBP014_58 lhs>rhs penalty 75578}}
+goal setNegSG340_SBP012_58 {lhs SG340_SBP012_58 case negative {condition svSG340_SBP012_58 < 0 rhs svSG340_SBP012_58 lhs>rhs penalty 75577}}
+
+goal setPosSG333_BSL001_58 {lhs SG333_BSL001_58 case negative {condition svSG333_BSL001_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG333_BSL001_58 }}
+goal setPosSG334_SBP031_58 {lhs SG334_SBP031_58 case negative {condition svSG334_SBP031_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG334_SBP031_58 }}
+goal setPosSG335_SBP028_58 {lhs SG335_SBP028_58 case negative {condition svSG335_SBP028_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG335_SBP028_58 }}
+goal setPosSG336_SBP024_58 {lhs SG336_SBP024_58 case negative {condition svSG336_SBP024_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG336_SBP024_58 }}
+goal setPosSG337_SBP021_58 {lhs SG337_SBP021_58 case negative {condition svSG337_SBP021_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG337_SBP021_58 }}
+goal setPosSG338_SBP018_58 {lhs SG338_SBP018_58 case negative {condition svSG338_SBP018_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG338_SBP018_58 }}
+goal setPosSG339_SBP014_58 {lhs SG339_SBP014_58 case negative {condition svSG339_SBP014_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG339_SBP014_58 }}
+goal setPosSG340_SBP012_58 {lhs SG340_SBP012_58 case negative {condition svSG340_SBP012_58 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG340_SBP012_58 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Thomes Creek !!!!!!!!!!!
+define	svSG248_THM026_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG249_THM021_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG250_THM017_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG251_THM012_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG252_THM005_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG253_THM005_45	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG248_THM026_45_DLL {alias svSG248_THM026_45 kind 'STREAM-GAIN' units 'CFS'}
+define SG249_THM021_45_DLL {alias svSG249_THM021_45 kind 'STREAM-GAIN' units 'CFS'}
+define SG250_THM017_45_DLL {alias svSG250_THM017_45 kind 'STREAM-GAIN' units 'CFS'}
+define SG251_THM012_45_DLL {alias svSG251_THM012_45 kind 'STREAM-GAIN' units 'CFS'}
+define SG252_THM005_45_DLL {alias svSG252_THM005_45 kind 'STREAM-GAIN' units 'CFS'}
+define SG253_THM005_45_DLL {alias svSG253_THM005_45 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG248_THM026_45 {lhs SG248_THM026_45 case negative {condition svSG248_THM026_45 < 0 rhs svSG248_THM026_45 lhs>rhs penalty 75576}}
+goal setNegSG249_THM021_45 {lhs SG249_THM021_45 case negative {condition svSG249_THM021_45 < 0 rhs svSG249_THM021_45 lhs>rhs penalty 75575}}
+goal setNegSG250_THM017_45 {lhs SG250_THM017_45 case negative {condition svSG250_THM017_45 < 0 rhs svSG250_THM017_45 lhs>rhs penalty 75574}}
+goal setNegSG251_THM012_45 {lhs SG251_THM012_45 case negative {condition svSG251_THM012_45 < 0 rhs svSG251_THM012_45 lhs>rhs penalty 75573}}
+goal setNegSG252_THM005_45 {lhs SG252_THM005_45 case negative {condition svSG252_THM005_45 < 0 rhs svSG252_THM005_45 lhs>rhs penalty 75572}}
+goal setNegSG253_THM005_45 {lhs SG253_THM005_45 case negative {condition svSG253_THM005_45 < 0 rhs svSG253_THM005_45 lhs>rhs penalty 75571}}
+
+goal setPosSG248_THM026_45 {lhs SG248_THM026_45 case negative {condition svSG248_THM026_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG248_THM026_45 }}
+goal setPosSG249_THM021_45 {lhs SG249_THM021_45 case negative {condition svSG249_THM021_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG249_THM021_45 }}
+goal setPosSG250_THM017_45 {lhs SG250_THM017_45 case negative {condition svSG250_THM017_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG250_THM017_45 }}
+goal setPosSG251_THM012_45 {lhs SG251_THM012_45 case negative {condition svSG251_THM012_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG251_THM012_45 }}
+goal setPosSG252_THM005_45 {lhs SG252_THM005_45 case negative {condition svSG252_THM005_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG252_THM005_45 }}
+goal setPosSG253_THM005_45 {lhs SG253_THM005_45 case negative {condition svSG253_THM005_45 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG253_THM005_45 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Yolo Bypass !!!!!!!!!!!
+define	svSG396_YBP032_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG397_YBP026_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG398_YBP023_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG399_YBP020_68	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG406_YBP020_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG407_YBP016_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG408_YBP014_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG409_YBP011_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG410_YBP007_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG411_YBP002_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG412_YBP002_70	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG396_YBP032_68_DLL {alias svSG396_YBP032_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG397_YBP026_68_DLL {alias svSG397_YBP026_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG398_YBP023_68_DLL {alias svSG398_YBP023_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG399_YBP020_68_DLL {alias svSG399_YBP020_68 kind 'STREAM-GAIN' units 'CFS'}
+define SG406_YBP020_70_DLL {alias svSG406_YBP020_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG407_YBP016_70_DLL {alias svSG407_YBP016_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG408_YBP014_70_DLL {alias svSG408_YBP014_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG409_YBP011_70_DLL {alias svSG409_YBP011_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG410_YBP007_70_DLL {alias svSG410_YBP007_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG411_YBP002_70_DLL {alias svSG411_YBP002_70 kind 'STREAM-GAIN' units 'CFS'}
+define SG412_YBP002_70_DLL {alias svSG412_YBP002_70 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG396_YBP032_68 {lhs SG396_YBP032_68 case negative {condition svSG396_YBP032_68 < 0 rhs svSG396_YBP032_68 lhs>rhs penalty 75570}}
+goal setNegSG397_YBP026_68 {lhs SG397_YBP026_68 case negative {condition svSG397_YBP026_68 < 0 rhs svSG397_YBP026_68 lhs>rhs penalty 75569}}
+goal setNegSG398_YBP023_68 {lhs SG398_YBP023_68 case negative {condition svSG398_YBP023_68 < 0 rhs svSG398_YBP023_68 lhs>rhs penalty 75568}}
+goal setNegSG399_YBP020_68 {lhs SG399_YBP020_68 case negative {condition svSG399_YBP020_68 < 0 rhs svSG399_YBP020_68 lhs>rhs penalty 75567}}
+goal setNegSG406_YBP020_70 {lhs SG406_YBP020_70 case negative {condition svSG406_YBP020_70 < 0 rhs svSG406_YBP020_70 lhs>rhs penalty 75566}}
+goal setNegSG407_YBP016_70 {lhs SG407_YBP016_70 case negative {condition svSG407_YBP016_70 < 0 rhs svSG407_YBP016_70 lhs>rhs penalty 75565}}
+goal setNegSG408_YBP014_70 {lhs SG408_YBP014_70 case negative {condition svSG408_YBP014_70 < 0 rhs svSG408_YBP014_70 lhs>rhs penalty 75564}}
+goal setNegSG409_YBP011_70 {lhs SG409_YBP011_70 case negative {condition svSG409_YBP011_70 < 0 rhs svSG409_YBP011_70 lhs>rhs penalty 75563}}
+goal setNegSG410_YBP007_70 {lhs SG410_YBP007_70 case negative {condition svSG410_YBP007_70 < 0 rhs svSG410_YBP007_70 lhs>rhs penalty 75562}}
+goal setNegSG411_YBP002_70 {lhs SG411_YBP002_70 case negative {condition svSG411_YBP002_70 < 0 rhs svSG411_YBP002_70 lhs>rhs penalty 75561}}
+goal setNegSG412_YBP002_70 {lhs SG412_YBP002_70 case negative {condition svSG412_YBP002_70 < 0 rhs svSG412_YBP002_70 lhs>rhs penalty 75560}}
+
+goal setPosSG396_YBP032_68 {lhs SG396_YBP032_68 case negative {condition svSG396_YBP032_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG396_YBP032_68 }}
+goal setPosSG397_YBP026_68 {lhs SG397_YBP026_68 case negative {condition svSG397_YBP026_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG397_YBP026_68 }}
+goal setPosSG398_YBP023_68 {lhs SG398_YBP023_68 case negative {condition svSG398_YBP023_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG398_YBP023_68 }}
+goal setPosSG399_YBP020_68 {lhs SG399_YBP020_68 case negative {condition svSG399_YBP020_68 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG399_YBP020_68 }}
+goal setPosSG406_YBP020_70 {lhs SG406_YBP020_70 case negative {condition svSG406_YBP020_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG406_YBP020_70 }}
+goal setPosSG407_YBP016_70 {lhs SG407_YBP016_70 case negative {condition svSG407_YBP016_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG407_YBP016_70 }}
+goal setPosSG408_YBP014_70 {lhs SG408_YBP014_70 case negative {condition svSG408_YBP014_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG408_YBP014_70 }}
+goal setPosSG409_YBP011_70 {lhs SG409_YBP011_70 case negative {condition svSG409_YBP011_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG409_YBP011_70 }}
+goal setPosSG410_YBP007_70 {lhs SG410_YBP007_70 case negative {condition svSG410_YBP007_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG410_YBP007_70 }}
+goal setPosSG411_YBP002_70 {lhs SG411_YBP002_70 case negative {condition svSG411_YBP002_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG411_YBP002_70 }}
+goal setPosSG412_YBP002_70 {lhs SG412_YBP002_70 case negative {condition svSG412_YBP002_70 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG412_YBP002_70 }}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!! Yuba River !!!!!!!!!!!
+define	svSG349_YUB011_60	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG350_YUB006_60	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+define	svSG351_YUB002_60	{timeseries	kind	'STREAM-GAIN'	units	'CFS'}
+
+define SG349_YUB011_60_DLL {alias svSG349_YUB011_60 kind 'STREAM-GAIN' units 'CFS'}
+define SG350_YUB006_60_DLL {alias svSG350_YUB006_60 kind 'STREAM-GAIN' units 'CFS'}
+define SG351_YUB002_60_DLL {alias svSG351_YUB002_60 kind 'STREAM-GAIN' units 'CFS'}
+
+goal setNegSG349_YUB011_60 {lhs SG349_YUB011_60 case negative {condition svSG349_YUB011_60 < 0 rhs svSG349_YUB011_60 lhs>rhs penalty 75559}}
+goal setNegSG350_YUB006_60 {lhs SG350_YUB006_60 case negative {condition svSG350_YUB006_60 < 0 rhs svSG350_YUB006_60 lhs>rhs penalty 75558}}
+goal setNegSG351_YUB002_60 {lhs SG351_YUB002_60 case negative {condition svSG351_YUB002_60 < 0 rhs svSG351_YUB002_60 lhs>rhs penalty 75557}}
+
+goal setPosSG349_YUB011_60 {lhs SG349_YUB011_60 case negative {condition svSG349_YUB011_60 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG349_YUB011_60 }}
+goal setPosSG350_YUB006_60 {lhs SG350_YUB006_60 case negative {condition svSG350_YUB006_60 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG350_YUB006_60 }}
+goal setPosSG351_YUB002_60 {lhs SG351_YUB002_60 case negative {condition svSG351_YUB002_60 < 0 rhs 0 lhs<rhs penalty 0} case postive {condition always rhs svSG351_YUB002_60 }}
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Calculate total seepage per river reach
+
+include 'SeepageTribReachOutput_SAC.wresl'

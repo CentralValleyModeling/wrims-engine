@@ -1,0 +1,85 @@
+/* This code computes monthly Black Butte Flood Control Storage based on the
+precipitation parameter storage requirement (S_BLKBTlevel4) and creditable space
+in East Park and Stony Gorge Reservoirs
+*/
+
+/*
+Site				Lat			 	 Long			CDEC ID		Source		
+Black Butte Dam		39.808000°		-122.329000°	BLB			US Army Corps of Engineers
+Log Springs			39.833000°		-122.783000°	LGS			US Army Corps of Engineers
+Trough Springs		39.296000°		-122.654000°	TRS			US Army Corps of Engineers
+Noel Springs		39.538000°		-122.667000°	NLS			US Army Corps of Engineers
+Alder Springs		39.650000°		-122.725000°	ADS			US Forest Service
+ */
+! Precipitation data for stations mentioned above
+define PP_BLB {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_LGS {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_TRS {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_NLS {timeseries kind 'PRECIP' units 'INCHES'}
+define PP_ADS {timeseries kind 'PRECIP' units 'INCHES'}
+
+! Precipitation computed using P = BNAP*STAP/SNAP
+! Basin Normal Annual Precipitation (BNAP) = 176 in
+! SNAP = 32 in
+! STAP = Sum of precipitation at Black Butte Dam, Log Springs, Trough Springs, Noel Springs, Alder Springs
+define PP_BLKBT {value (PP_BLB+PP_LGS+PP_TRS+PP_NLS+PP_ADS)*32./176.}
+
+! Multiplier for previous month's precipitation with 3 percent reduction per day of the month
+define Multiplier1_BLKBT	{value pow(0.97,(daysin))}
+! Multiplier for current month's precipitation assumed constant throughout the month, with 3 percent daily reduction
+define Multiplier2_BLKBT	{value ((pow(0.97,daysin)-1)/(-0.03))/daysin}
+
+define PAR_BLKBTdv {std kind 'PRECIPITATION' units 'INCHES'}
+! Rainfall parameter defined in the Flood Curve Diagram 
+define PAR_BLKBT {case mOct {condition month == Oct value PP_BLKBT*Multiplier2_BLKBT}
+				  case Otherwise {condition always value PAR_BLKBTdv(-1)*Multiplier1_BLKBT + PP_BLKBT*Multiplier2_BLKBT}}
+				  
+goal PAR_BLKBT_Set {PAR_BLKBTdv = PAR_BLKBT}
+
+! Gross flood reservation for East Park, Stony Gorge and Black Butte Reservoirs
+define FC_Stony_GrossRes {case LessThan3 {condition PAR_BLKBT <= 3. select FloodCurve from Stony_Gross_Res where month=month, PAR = 3.}	
+						  case Bet3_14 {condition PAR_BLKBT <= 14. select FloodCurve from Stony_Gross_Res given PAR = PAR_BLKBT use linear where month=month}
+						  case otherwise {condition always select FloodCurve from Stony_Gross_Res where month=month, PAR = 14.}
+}
+
+define S_BLKBTlevel3 {select target from res_level where res_num=42,level=3,month=month}
+
+! Compute creditable space in East Park Reservoir
+define credit_EPdv {value max(0, min(48.2 - (S_EPARK(-1) + I_EPARK*cfs_taf - 5.*cfs_taf),10.))} ! TAF ! 5cfs is the minimum instream flow requirement downstream of East Park reservoir
+
+! Compute creditable space in Stony Gorge Reservoir
+define credit_SGdv {
+       CASE      SG_1 {
+       CONDITION MONTH >= FEB .and. MONTH <= AUG   !Assuming the release from EPARK = release from Stony Gorge
+       value     max(0., 28.4 - (S_SGRGE(-1)  + I_SGRGE*cfs_taf)) }  ! TAF
+       CASE      SG_2 {
+       CONDITION always
+       value     max(0., 23.4 - (S_SGRGE(-1)  + I_SGRGE*cfs_taf))} } ! TAF
+
+! Compute total creditable space
+define total_FC_credit {value min(40., credit_EPdv + credit_SGdv)} ! TAF
+       
+define total_FC_creditdv {alias total_FC_credit kind 'debug' units 'TAF'}
+
+define total_FC_req {value max(0., FC_Stony_GrossRes - total_FC_credit)}
+
+define total_FC_reqdv {alias total_FC_req kind 'Debug' units 'TAF'}
+! Compute Black Butte Flood Control Storage
+define S_BLKBTlevel4adj {value max(S_BLKBTlevel2, S_BLKBTlevel5 - total_FC_req)} ! TAF
+
+define S_BLKBTlevel4dv {alias S_BLKBTlevel4adj kind 'STORAGE-LEVEL' units 'TAF'}
+
+! Limit Level 3 storage to adjusted Level 4 storage or less
+define S_BLKBTlevel3adj {
+       CASE      Level3_1 {
+       CONDITION S_BLKBTlevel4adj - S_BLKBTLEVEL3 < 0.0
+       value     S_BLKBTlevel4adj }  ! TAF
+       CASE      Level3_2 {
+       CONDITION always
+       value     S_BLKBTLEVEL3 } } ! TAF
+
+define S_BLKBTlevel3dv {alias S_BLKBTlevel3adj kind 'STORAGE-LEVEL' units 'TAF'}
+
+goal S_BLKBTZone3 {S_BLKBT_3 < S_BLKBTlevel3adj - S_BLKBTlevel2}
+goal S_BLKBTZone4 {S_BLKBT_4 < S_BLKBTlevel4adj - S_BLKBTlevel3adj}
+goal S_BLKBTZone5 {S_BLKBT_5 < S_BLKBTlevel5 - S_BLKBTlevel4adj}

@@ -1,0 +1,1963 @@
+! A. Dev 10/19/99
+! R.Wilbur 7/27/04
+
+! This file calculates the sum of the actual deliveries for each type (PAG, MWD-MI, and OTH-MI)
+! from January to the month prior to the current model month.
+
+! Define the conversion factor for past reference
+!define xfactor {alias cfs_taf}
+
+
+
+! Note: PINerruptible deliveries and losses are not included since this would affect makeup
+! N.Osorio 04/2020: Calculate Jan-Dec Article 21 deliveries and the monthly limit a contractor can take.
+! ********************************* DEFINES *******************************************
+
+! PAG Deliveries
+
+define swpdel_PAG802A {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG846 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG847 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG848 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG849 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG867 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG868 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG851 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG859 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PAG863 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PAG(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PAG(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+! *************************************************************************************
+! MWD-MI Deliveries
+
+define swpdel_PMI27 { ! Actual MWD-MI Deliveries at node 27
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI885 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI899 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI895 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI851B{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNB_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNB_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }       
+
+! *************************************************************************************
+! OTH-MI Deliveries
+
+define swpdel_PMI25 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI28 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI29 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*
+define swpdel_pmid201 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) d201_pmi(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) d201_pmi(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_pmid204 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) d204_pmi(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) d204_pmi(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/
+define swpdel_ButteCo {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       !sum(i=-1,prevJAN,-1) perdv_swp_oth1(i)*CLmon_ButteC(i) * cfs_taf(i) }
+       value CLann_ButteC }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       !sum(i=-1,prevJAN,-1) perdv_swp_oth1(i)*CLmon_ButteC(i) * cfs_taf(i) }
+       value CLann_ButteC }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_YubaCity {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+!       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU(i) * cfs_taf(i) }
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PMI(i) * cfs_taf(i) } !D_WTPCYC_16_PU
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+!       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU(i) * cfs_taf(i) }
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PMI(i) * cfs_taf(i) }  !D_WTPCYC_16_PU
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_NBA_NAPA {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_NBA_SCWA {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+ define swpdel_PMI869{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+ define swpdel_PMI870{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI877{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI878{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI879{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI881{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI883{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI884{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI886{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI887{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI888{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI896{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI810{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI813{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI814{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI815{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PMI851A{
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNA_PMI(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNA_PMI(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+       
+! Actual Previous OTHERMI Deliveries
+define prvactdel_oth {value swpdel_PMI25 + swpdel_PMI28 + swpdel_PMI29 + swpdel_ButteCo 
+                      + swpdel_YubaCity + swpdel_NBA_NAPA + swpdel_NBA_SCWA + swpdel_PMI869
+                      + swpdel_PMI870 + swpdel_PMI877 + swpdel_PMI878 + swpdel_PMI879 + swpdel_PMI881
+                      + swpdel_PMI883 + swpdel_PMI884 + swpdel_PMI886 + swpdel_PMI887
+                      + swpdel_PMI888 + swpdel_PMI896 + swpdel_PMI810 + swpdel_PMI813
+                      + swpdel_PMI814 + swpdel_PMI815 + swpdel_PMI851A}
+
+!define SWP_OTH_PRV {alias prvactdel_oth kind 'DEBUG' units 'TAF'}
+
+! *************************************************************************************
+! Carryover Deliveries (allocated from previous year but kept in storage for current year
+
+define swpdel_PCO25 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO27 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO28 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO29 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_YUBA_PCO {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_NBA_NAPA_PCO {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_NBA_SCWA_PCO {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO802A {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+define swpdel_PCO810 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO813 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO814 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO815 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO846 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO847 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO848 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO849 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO851 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO859 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO863 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO867 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO869 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO870 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO877 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO879 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO878 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO881 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO883 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO884 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO885 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO886 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO887 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO888 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO868 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO895 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO896 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define swpdel_PCO899 {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PCO(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+! Actual Previous Carryover Deliveries
+define prvactdel_co {value
+                     swpdel_PCO25  +
+                     swpdel_PCO27 +
+                     swpdel_PCO28 +
+                     swpdel_PCO29 +
+                     swpdel_YUBA_PCO +
+                     swpdel_NBA_NAPA_PCO +
+                     swpdel_NBA_SCWA_PCO +
+                     swpdel_PCO802A +
+                     swpdel_PCO810 +
+                     swpdel_PCO813 +
+                     swpdel_PCO814 +
+                     swpdel_PCO815 +
+                     swpdel_PCO846 +
+                     swpdel_PCO847 +
+                     swpdel_PCO848 +
+                     swpdel_PCO849 +
+                     swpdel_PCO851 +
+                     swpdel_PCO859 +
+                     swpdel_PCO863 +
+                     swpdel_PCO867 +
+                     swpdel_PCO869 +
+                     swpdel_PCO870 +
+                     swpdel_PCO877 +
+                     swpdel_PCO879 +
+                     swpdel_PCO878 +
+                     swpdel_PCO881 +
+                     swpdel_PCO883 +
+                     swpdel_PCO884 +
+                     swpdel_PCO885 +
+                     swpdel_PCO886 +
+                     swpdel_PCO887 +
+                     swpdel_PCO888 +
+                     swpdel_PCO868 +
+                     swpdel_PCO895 +
+                     swpdel_PCO896 +
+                     swpdel_PCO899}
+
+!define SWP_CO_PRV {alias prvactdel_co kind 'DEBUG' units 'TAF'}
+
+! Interuptible Deliveries Running Total
+define ANN_TOTAL_D_WTPCYC_16_PU_SWP_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > 1922
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CAA046_71_PA7_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > 1922
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA046_71_PA7_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_SBA009_ACFC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA009_ACFC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*	   
+define ANN_TOTAL_D_SBA020_ACFC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA020_ACFC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/
+define ANN_TOTAL_D_SBA029_ACWD_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA029_ACWD_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_ESB324_AVEK_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB324_AVEK_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_CSB009_CLRTA1_DDWD_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB009_CLRTA1_DDWD_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*
+define ANN_TOTAL_D_WSB032_CLRTA2_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB032_CLRTA2_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_WTPCYC_16_PU_SWP_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WTPCYC_16_PU_SWP_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/	   
+
+define ANN_TOTAL_D_ESB407_CCHLA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB407_CCHLA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*
+define ANN_TOTAL_D201_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D201_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D201_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/	   
+define ANN_TOTAL_D_CAA181_KINGS_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA181_KINGS_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*
+define ANN_TOTAL_D_SVRWD_CSTLN_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SVRWD_CSTLN_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/
+define ANN_TOTAL_D_ESB408_DESRT_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB408_DESRT_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_CAA184_DUDLEY_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA184_DUDLEY_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CAA173_EMPIRE_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA173_EMPIRE_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*	   
+define ANN_TOTAL_D_CAA194_KERNA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CAA194_KERN_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERN_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/	   
+define ANN_TOTAL_D_CAA242_Kern_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA242_Kern_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*	   
+define ANN_TOTAL_D_CAA279_Kern_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA279_Kern_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CSB015_KERN_BMWD_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB015_KERN_BMWD_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/	   
+define ANN_TOTAL_D_ESB355_LROCK_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB355_LROCK_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_PRRIS_MWDSC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PRRIS_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+/*	   
+define ANN_TOTAL_D_CAA194_KERNB_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNB_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA194_KERNB_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/
+	   
+define ANN_TOTAL_D_ESB413_MWDSC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB413_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_WSB031_MWDSC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_WSB031_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_ESB433_MWDSC_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB433_MWDSC_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_ESB403_MOJVE_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB403_MOJVE_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+
+define ann_total_d_bkr004_nba009_napa_pin {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_NAPA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+define ANN_TOTAL_D_ESB347_PLMDL_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB347_PLMDL_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_ESB414_BRDNO_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB414_BRDNO_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_ESB415_GABRL_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB415_GABRL_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_ESB420_GRGNO_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_ESB420_GRGNO_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CSB038_OBISPO_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB038_OBISPO_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CSB103_BRBRA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSB103_BRBRA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_SBA036_SCVWD_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_SBA036_SCVWD_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_BKR004_NBA009_SCWA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_BKR004_NBA009_SCWA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+define ANN_TOTAL_D_CAA183_TULARE_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CAA183_TULARE_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+/*	   
+define ANN_TOTAL_D_PYRMD_VNTRA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_PYRMD_VNTRA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+*/	   
+define ANN_TOTAL_D_CSTIC_VNTRA_PIN {
+
+       case      Oct_DEC  {
+       condition month >= OCT .and. month <= DEC .and. Wateryear > bgnWY
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PIN(i) * cfs_taf(i) }
+
+       case      Feb_SEP {
+       condition month >= FEB .and. month <= SEP
+       sum(i=-1,prevJAN,-1) D_CSTIC_VNTRA_PIN(i) * cfs_taf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+	   
+	   
+define limit_D_SBA009_ACFC_PIN_ANNUAL {value max(0.,dem_D_SBA009_ACFC_PIN_ANN_MAX - ANN_TOTAL_D_SBA009_ACFC_PIN)*taf_cfs}
+!define limit_D_SBA020_ACFC_PIN_ANNUAL {value max(0.,dem_D_SBA020_ACFC_PIN_ANN_MAX - ANN_TOTAL_D_SBA020_ACFC_PIN)*taf_cfs}
+define limit_D_SBA029_ACWD_PIN_ANNUAL {value max(0.,dem_D_SBA029_ACWD_PIN_ANN_MAX - ANN_TOTAL_D_SBA029_ACWD_PIN)*taf_cfs}
+define limit_D_ESB324_AVEK_PIN_ANNUAL {value max(0.,dem_D_ESB324_AVEK_PIN_ANN_MAX - ANN_TOTAL_D_ESB324_AVEK_PIN)*taf_cfs}
+define limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL {value max(0.,dem_D_CSB009_CLRTA1_DDWD_PIN_ANN_MAX - ANN_TOTAL_D_CSB009_CLRTA1_DDWD_PIN)*taf_cfs}
+!define limit_D_WSB032_CLRTA2_PIN_ANNUAL {value max(0.,dem_D_WSB032_CLRTA2_PIN_ANN_MAX - ANN_TOTAL_D_WSB032_CLRTA2_PIN)*taf_cfs}
+define limit_D_WTPCYC_16_PU_SWP_PIN_ANNUAL {value max(0.,dem_D_WTPCYC_16_PU_SWP_PIN_ANN_MAX - ANN_TOTAL_D_WTPCYC_16_PU_SWP_PIN)*taf_cfs}
+define limit_D_ESB407_CCHLA_PIN_ANNUAL {value max(0.,dem_D_ESB407_CCHLA_PIN_ANN_MAX - ANN_TOTAL_D_ESB407_CCHLA_PIN)*taf_cfs}
+!define limit_D201_PIN_ANNUAL {value max(0.,dem_D201_PIN_ANN_MAX - ANN_TOTAL_D201_PIN)*taf_cfs}
+define limit_D_CAA181_KINGS_PIN_ANNUAL {value max(0.,dem_D_CAA181_KINGS_PIN_ANN_MAX - ANN_TOTAL_D_CAA181_KINGS_PIN)*taf_cfs}
+!define limit_D_SVRWD_CSTLN_PIN_ANNUAL {value max(0.,dem_D_SVRWD_CSTLN_PIN_ANN_MAX - ANN_TOTAL_D_SVRWD_CSTLN_PIN)*taf_cfs}
+define limit_D_ESB408_DESRT_PIN_ANNUAL {value max(0.,dem_D_ESB408_DESRT_PIN_ANN_MAX - ANN_TOTAL_D_ESB408_DESRT_PIN)*taf_cfs}
+define limit_D_CAA184_DUDLEY_PIN_ANNUAL {value max(0.,dem_D_CAA184_DUDLEY_PIN_ANN_MAX - ANN_TOTAL_D_CAA184_DUDLEY_PIN)*taf_cfs}
+define limit_D_CAA173_EMPIRE_PIN_ANNUAL {value max(0.,dem_D_CAA173_EMPIRE_PIN_ANN_MAX - ANN_TOTAL_D_CAA173_EMPIRE_PIN)*taf_cfs}
+!define limit_D_CAA194_KERNA_PIN_ANNUAL {value max(0.,dem_D_CAA194_KERNA_PIN_ANN_MAX - ANN_TOTAL_D_CAA194_KERNA_PIN)*taf_cfs}
+!define limit_D_CAA194_KERN_PIN_ANNUAL {value max(0.,dem_D_CAA194_KERN_PIN_ANN_MAX - ANN_TOTAL_D_CAA194_KERN_PIN)*taf_cfs}
+define limit_D_CAA242_Kern_PIN_ANNUAL {value max(0.,dem_D_CAA242_Kern_PIN_ANN_MAX - ANN_TOTAL_D_CAA242_Kern_PIN)*taf_cfs}
+!define limit_D_CAA279_Kern_PIN_ANNUAL {value max(0.,dem_D_CAA279_Kern_PIN_ANN_MAX - ANN_TOTAL_D_CAA279_Kern_PIN)*taf_cfs}
+!define limit_D_CSB015_KERN_BMWD_PIN_ANNUAL {value max(0.,dem_D_CSB015_KERN_BMWD_PIN_ANN_MAX - ANN_TOTAL_D_CSB015_KERN_BMWD_PIN)*taf_cfs}
+define limit_D_ESB355_LROCK_PIN_ANNUAL {value max(0.,dem_D_ESB355_LROCK_PIN_ANN_MAX - ANN_TOTAL_D_ESB355_LROCK_PIN)*taf_cfs}
+define limit_D_PRRIS_MWDSC_PIN_ANNUAL {value max(0.,dem_D_PRRIS_MWDSC_PIN_ANN_MAX - ANN_TOTAL_D_PRRIS_MWDSC_PIN)*taf_cfs}
+!define limit_D_CAA194_KERNB_PIN_ANNUAL {value max(0.,dem_D_CAA194_KERNB_PIN_ANN_MAX - ANN_TOTAL_D_CAA194_KERNB_PIN)*taf_cfs}
+define limit_D_ESB413_MWDSC_PIN_ANNUAL {value max(0.,dem_D_ESB413_MWDSC_PIN_ANN_MAX - ANN_TOTAL_D_ESB413_MWDSC_PIN)*taf_cfs}
+define limit_D_WSB031_MWDSC_PIN_ANNUAL {value max(0.,dem_D_WSB031_MWDSC_PIN_ANN_MAX - ANN_TOTAL_D_WSB031_MWDSC_PIN)*taf_cfs}
+define limit_D_ESB433_MWDSC_PIN_ANNUAL {value max(0.,dem_D_ESB433_MWDSC_PIN_ANN_MAX - ANN_TOTAL_D_ESB433_MWDSC_PIN)*taf_cfs}
+define limit_D_ESB403_MOJVE_PIN_ANNUAL {value max(0.,dem_D_ESB403_MOJVE_PIN_ANN_MAX - ANN_TOTAL_D_ESB403_MOJVE_PIN)*taf_cfs}
+define limit_D_BKR004_NBA009_NAPA_PIN_ANNUAL {value max(0.,dem_D_BKR004_NBA009_NAPA_PIN_ANN_MAX - ANN_TOTAL_D_BKR004_NBA009_NAPA_PIN)*taf_cfs}
+define limit_D_CAA046_71_PA7_PIN_ANNUAL {value max(0.,dem_D_CAA046_71_PA7_PIN_ANN_MAX - ANN_TOTAL_D_CAA046_71_PA7_PIN)*taf_cfs}
+define limit_D_ESB347_PLMDL_PIN_ANNUAL {value max(0.,dem_D_ESB347_PLMDL_PIN_ANN_MAX - ANN_TOTAL_D_ESB347_PLMDL_PIN)*taf_cfs}
+define limit_D_ESB414_BRDNO_PIN_ANNUAL {value max(0.,dem_D_ESB414_BRDNO_PIN_ANN_MAX - ANN_TOTAL_D_ESB414_BRDNO_PIN)*taf_cfs}
+define limit_D_ESB415_GABRL_PIN_ANNUAL {value max(0.,dem_D_ESB415_GABRL_PIN_ANN_MAX - ANN_TOTAL_D_ESB415_GABRL_PIN)*taf_cfs}
+define limit_D_ESB420_GRGNO_PIN_ANNUAL {value max(0.,dem_D_ESB420_GRGNO_PIN_ANN_MAX - ANN_TOTAL_D_ESB420_GRGNO_PIN)*taf_cfs}
+define limit_D_CSB038_OBISPO_PIN_ANNUAL {value max(0.,dem_D_CSB038_OBISPO_PIN_ANN_MAX - ANN_TOTAL_D_CSB038_OBISPO_PIN)*taf_cfs}
+define limit_D_CSB103_BRBRA_PIN_ANNUAL {value max(0.,dem_D_CSB103_BRBRA_PIN_ANN_MAX - ANN_TOTAL_D_CSB103_BRBRA_PIN)*taf_cfs}
+define limit_D_SBA036_SCVWD_PIN_ANNUAL {value max(0.,dem_D_SBA036_SCVWD_PIN_ANN_MAX - ANN_TOTAL_D_SBA036_SCVWD_PIN)*taf_cfs}
+define limit_D_BKR004_NBA009_SCWA_PIN_ANNUAL {value max(0.,dem_D_BKR004_NBA009_SCWA_PIN_ANN_MAX - ANN_TOTAL_D_BKR004_NBA009_SCWA_PIN)*taf_cfs}
+define limit_D_CAA183_TULARE_PIN_ANNUAL {value max(0.,dem_D_CAA183_TULARE_PIN_ANN_MAX - ANN_TOTAL_D_CAA183_TULARE_PIN)*taf_cfs}
+!define limit_D_PYRMD_VNTRA_PIN_ANNUAL {value max(0.,dem_D_PYRMD_VNTRA_PIN_ANN_MAX - ANN_TOTAL_D_PYRMD_VNTRA_PIN)*taf_cfs}
+define limit_D_CSTIC_VNTRA_PIN_ANNUAL {value max(0.,dem_D_CSTIC_VNTRA_PIN_ANN_MAX - ANN_TOTAL_D_CSTIC_VNTRA_PIN)*taf_cfs}
+
+! QAQC outputs
+define	limit_D_SBA009_ACFC_PIN_ANNUAL_	{alias	limit_D_SBA009_ACFC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_SBA020_ACFC_PIN_ANNUAL_	{alias	limit_D_SBA020_ACFC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_SBA029_ACWD_PIN_ANNUAL_	{alias	limit_D_SBA029_ACWD_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB324_AVEK_PIN_ANNUAL_	{alias	limit_D_ESB324_AVEK_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL_	{alias	limit_D_CSB009_CLRTA1_DDWD_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_WSB032_CLRTA2_PIN_ANNUAL_	{alias	limit_D_WSB032_CLRTA2_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_WTPCYC_16_PU_SWP_PIN_ANNUAL_	{alias	limit_D_WTPCYC_16_PU_SWP_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB407_CCHLA_PIN_ANNUAL_	{alias	limit_D_ESB407_CCHLA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D201_PIN_ANNUAL_	{alias	limit_D201_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA181_KINGS_PIN_ANNUAL_	{alias	limit_D_CAA181_KINGS_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_SVRWD_CSTLN_PIN_ANNUAL_	{alias	limit_D_SVRWD_CSTLN_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB408_DESRT_PIN_ANNUAL_	{alias	limit_D_ESB408_DESRT_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA184_DUDLEY_PIN_ANNUAL_	{alias	limit_D_CAA184_DUDLEY_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA173_EMPIRE_PIN_ANNUAL_	{alias	limit_D_CAA173_EMPIRE_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_CAA194_KERNA_PIN_ANNUAL_	{alias	limit_D_CAA194_KERNA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_CAA194_KERN_PIN_ANNUAL_	{alias	limit_D_CAA194_KERN_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA242_Kern_PIN_ANNUAL_	{alias	limit_D_CAA242_Kern_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_CAA279_Kern_PIN_ANNUAL_	{alias	limit_D_CAA279_Kern_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_CSB015_KERN_BMWD_PIN_ANNUAL_	{alias	limit_D_CSB015_KERN_BMWD_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB355_LROCK_PIN_ANNUAL_	{alias	limit_D_ESB355_LROCK_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_PRRIS_MWDSC_PIN_ANNUAL_	{alias	limit_D_PRRIS_MWDSC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_CAA194_KERNB_PIN_ANNUAL_	{alias	limit_D_CAA194_KERNB_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB413_MWDSC_PIN_ANNUAL_	{alias	limit_D_ESB413_MWDSC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_WSB031_MWDSC_PIN_ANNUAL_	{alias	limit_D_WSB031_MWDSC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB433_MWDSC_PIN_ANNUAL_	{alias	limit_D_ESB433_MWDSC_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB403_MOJVE_PIN_ANNUAL_	{alias	limit_D_ESB403_MOJVE_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_BKR004_NBA009_NAPA_PIN_ANNUAL_	{alias	limit_D_BKR004_NBA009_NAPA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA046_71_PA7_PIN_ANNUAL_	{alias	limit_D_CAA046_71_PA7_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB347_PLMDL_PIN_ANNUAL_	{alias	limit_D_ESB347_PLMDL_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB414_BRDNO_PIN_ANNUAL_	{alias	limit_D_ESB414_BRDNO_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB415_GABRL_PIN_ANNUAL_	{alias	limit_D_ESB415_GABRL_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_ESB420_GRGNO_PIN_ANNUAL_	{alias	limit_D_ESB420_GRGNO_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CSB038_OBISPO_PIN_ANNUAL_	{alias	limit_D_CSB038_OBISPO_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CSB103_BRBRA_PIN_ANNUAL_	{alias	limit_D_CSB103_BRBRA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_SBA036_SCVWD_PIN_ANNUAL_	{alias	limit_D_SBA036_SCVWD_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_BKR004_NBA009_SCWA_PIN_ANNUAL_	{alias	limit_D_BKR004_NBA009_SCWA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CAA183_TULARE_PIN_ANNUAL_	{alias	limit_D_CAA183_TULARE_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+!define	limit_D_PYRMD_VNTRA_PIN_ANNUAL_	{alias	limit_D_PYRMD_VNTRA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+define	limit_D_CSTIC_VNTRA_PIN_ANNUAL_	{alias	limit_D_CSTIC_VNTRA_PIN_ANNUAL	kind	'debug'	units	'cfs'}
+
+define	ANN_TOTAL_D_SBA009_ACFC_PIN_	{alias	ANN_TOTAL_D_SBA009_ACFC_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_SBA020_ACFC_PIN_	{alias	ANN_TOTAL_D_SBA020_ACFC_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_SBA029_ACWD_PIN_	{alias	ANN_TOTAL_D_SBA029_ACWD_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB324_AVEK_PIN_	{alias	ANN_TOTAL_D_ESB324_AVEK_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CSB009_CLRTA1_DDWD_PIN_	{alias	ANN_TOTAL_D_CSB009_CLRTA1_DDWD_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_WSB032_CLRTA2_PIN_	{alias	ANN_TOTAL_D_WSB032_CLRTA2_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_WTPCYC_16_PU_SWP_PIN_	{alias	ANN_TOTAL_D_WTPCYC_16_PU_SWP_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB407_CCHLA_PIN_	{alias	ANN_TOTAL_D_ESB407_CCHLA_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D201_PIN_	{alias	ANN_TOTAL_D201_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA181_KINGS_PIN_	{alias	ANN_TOTAL_D_CAA181_KINGS_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_SVRWD_CSTLN_PIN_	{alias	ANN_TOTAL_D_SVRWD_CSTLN_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB408_DESRT_PIN_	{alias	ANN_TOTAL_D_ESB408_DESRT_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA184_DUDLEY_PIN_	{alias	ANN_TOTAL_D_CAA184_DUDLEY_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA173_EMPIRE_PIN_	{alias	ANN_TOTAL_D_CAA173_EMPIRE_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_CAA194_KERNA_PIN_	{alias	ANN_TOTAL_D_CAA194_KERNA_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_CAA194_KERN_PIN_	{alias	ANN_TOTAL_D_CAA194_KERN_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA242_Kern_PIN_	{alias	ANN_TOTAL_D_CAA242_Kern_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_CAA279_Kern_PIN_	{alias	ANN_TOTAL_D_CAA279_Kern_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_CSB015_KERN_BMWD_PIN_	{alias	ANN_TOTAL_D_CSB015_KERN_BMWD_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB355_LROCK_PIN_	{alias	ANN_TOTAL_D_ESB355_LROCK_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_PRRIS_MWDSC_PIN_	{alias	ANN_TOTAL_D_PRRIS_MWDSC_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_CAA194_KERNB_PIN_	{alias	ANN_TOTAL_D_CAA194_KERNB_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB413_MWDSC_PIN_	{alias	ANN_TOTAL_D_ESB413_MWDSC_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_WSB031_MWDSC_PIN_	{alias	ANN_TOTAL_D_WSB031_MWDSC_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB433_MWDSC_PIN_	{alias	ANN_TOTAL_D_ESB433_MWDSC_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB403_MOJVE_PIN_	{alias	ANN_TOTAL_D_ESB403_MOJVE_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_BKR004_NBA009_NAPA_PIN_	{alias	ANN_TOTAL_D_BKR004_NBA009_NAPA_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA046_71_PA7_PIN_	{alias	ANN_TOTAL_D_CAA046_71_PA7_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB347_PLMDL_PIN_	{alias	ANN_TOTAL_D_ESB347_PLMDL_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB414_BRDNO_PIN_	{alias	ANN_TOTAL_D_ESB414_BRDNO_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB415_GABRL_PIN_	{alias	ANN_TOTAL_D_ESB415_GABRL_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_ESB420_GRGNO_PIN_	{alias	ANN_TOTAL_D_ESB420_GRGNO_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CSB038_OBISPO_PIN_	{alias	ANN_TOTAL_D_CSB038_OBISPO_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CSB103_BRBRA_PIN_	{alias	ANN_TOTAL_D_CSB103_BRBRA_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_SBA036_SCVWD_PIN_	{alias	ANN_TOTAL_D_SBA036_SCVWD_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_BKR004_NBA009_SCWA_PIN_	{alias	ANN_TOTAL_D_BKR004_NBA009_SCWA_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CAA183_TULARE_PIN_	{alias	ANN_TOTAL_D_CAA183_TULARE_PIN	kind	'debug'	units	'TAF'}
+!define	ANN_TOTAL_D_PYRMD_VNTRA_PIN_	{alias	ANN_TOTAL_D_PYRMD_VNTRA_PIN	kind	'debug'	units	'TAF'}
+define	ANN_TOTAL_D_CSTIC_VNTRA_PIN_	{alias	ANN_TOTAL_D_CSTIC_VNTRA_PIN	kind	'debug'	units	'TAF'}

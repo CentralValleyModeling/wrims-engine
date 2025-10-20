@@ -1,0 +1,1709 @@
+!WS_Contracts.wresl
+
+/* 
+This file contains contracts, water rights, and Water Forum restrictions for
+greater Sacramento area water contractors.
+
+Contracts include CVP and Middle Fork Project (MFP) contracts
+Water rights include licenses and permits
+Water Forum restrictions are based on the 2015 updated Water Forum Agreement
+
+Edits made by A. Draper April 11, 2023
+	- Set Parks and Recreation water right amount to zero
+	- Decreased Roseville MFP contract at 2040 so that total of Roseville and San Juan is 49.5 TAF/year
+	- Set SMUD use of water right water from Folsom South Canal to zero
+	- Set maximum annual diversion by Sacramento Suburban to 8 TAF/year
+	- Increased City of Sacramento wholesale delivries to Cal Am to 20.1 TAF/yr and to Sac Suburban WD to 26.1 TAF/yr
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Omuchumne WD, Galt ID, Caly WD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!goal limitD_FSC015_60N_NA2  {D_FSC015_60N_NA2 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! California Parks and Recreation !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*Water Supply
+Reclamation and Dept of Parks and Recreation enetred an agreement in December 1966
+(14-06-200-3193A) allowing the Department to divert up to 5,000 AF/year from Auburn,
+Folosm, and Lake Natoma for operation of recretioanl facilities.
+
+To date, no water has been delived and it was decided to set diversion to zero for modeling purposes.
+E-mail, N Parker, 2/21/23
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+! No disaggregation as only one source
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26S_PU3 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26S_PU3_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU3(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU3(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU3(-1)}}
+        
+goal setSumUD_26S_PU3 {SumUD_26S_PU3=SumUD_26S_PU3_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+define WRann_FOLSM_26S_PU3 {value 1.}
+define WRmon_FOLSM_26S_PU3 {
+	case div_by_zero {
+		condition SumUD_26S_PU3_sv < .0001
+		value 0.}
+	case otherwise {
+		condition always
+		value max(0.0, WRann_FOLSM_26S_PU3 * UD_26S_PU3*cfs_taf / SumUD_26S_PU3_sv)}
+} 
+define WR_FOLSM_26S_PU3    {alias WRmon_FOLSM_26S_PU3 kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+!No constraint
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitD_FOLSM_26S_PU3  {D_FOLSM_26S_PU3 < WRmon_FOLSM_26S_PU3*taf_cfs} !Water right constraint
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! El Dorado Irrigation District !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+define D_FOLSM_WTPEDH_WR  {std kind 'DIVERSION' units 'CFS'} !Transmission of Project 184 water under permit 21112
+define D_FOLSM_WTPEDH_CVP {std kind 'DIVERSION-CVP' units 'CFS'} !Transmission of CVP water
+
+!---------------------------------------
+!Calculate Annual volume for demand
+!---------------------------------------
+define SumUD_ELDID_NU3 {std kind 'URBAN-DEMAND' units 'TAF'}
+define SumUD_ELDID_NU3_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,11,1) UD_ELDID_NU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_ELDID_NU3(-1)}}
+        
+goal setSumUD_ELDID_NU3 {SumUD_ELDID_NU3=SumUD_ELDID_NU3_sv}
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+! Water right diversions specified in NorthofDelta\American\EID\EID_contracts
+! D_FOLSM_WTPEDH_WR_SV specified in arcs-preoperations and constraints-preoperations
+define WRann_FOLSM_WTPEDH {
+    case Existing {condition LODflag==0. value 4.56 + 17.0/2.} ! Use of full 17 TAF Permit 21112 LTWAC water req. TCD, otherwise 8.5 TAF
+    case Future   {condition LODflag==1. value 4.56 + 17.0}}   ! Assume TCD built in future, and all capacity constraints alleviated
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_WTPEDH {value 7.550 + 7.50} !TAF; CVP contract amount with annual allocation, INCLUDING Fazio
+define CLmon_FOLSM_WTPEDH {value max(0.0, CLann_FOLSM_WTPEDH * UD_ELDID_NU3*cfs_taf / SumUD_ELDID_NU3_sv) } 
+define CL_FOLSM_WTPEDH    {alias CLmon_FOLSM_WTPEDH kind 'DIVERSION-LIMIT' units 'TAF'}
+define lim_EDWWTP_ELDID_NU3 {alias 3.5*UD_ELDID_NU3*cfs_taf / SumUD_ELDID_NU3_sv kind 'Flow Limit' units 'TAF'}  ! waste water reuse of 3.5 taf per year. - Puneet 
+goal limD_EDWWTP_ELDID_NU3 {D_EDWWTP_ELDID_NU3 < lim_EDWWTP_ELDID_NU3*taf_cfs}  !Code needed to limit waste water reuse
+
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+!No constraint - not a signatory
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitD_FOLSM_ELDID1  {D_FOLSM_WTPEDH = D_FOLSM_WTPEDH_WR + D_FOLSM_WTPEDH_CVP}
+goal limitD_FOLSM_ELDID2  {D_FOLSM_WTPEDH_CVP + D_FOLSM_EDCOCA_CVP < CLmon_FOLSM_WTPEDH*taf_cfs*perdel_cvpmi_sys} 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Aerojet !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*Water Supply
+Assume 3 TAF water supply - source (CVP, water right?) not identified
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+! No disaggregation as only one source
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26S_NU4 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26S_NU4_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_NU4(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_NU4(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_NU4(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_NU4(-1)}}
+        
+goal setSumUD_26S_NU4 {SumUD_26S_NU4=SumUD_26S_NU4_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+define WRann_FOLSM_26S_NU4 {value 3.}
+define WRmon_FOLSM_26S_NU4 {value max(0.0, WRann_FOLSM_26S_NU4 * UD_26S_NU4*cfs_taf / SumUD_26S_NU4_sv)} 
+define WR_FOLSM_26S_NU4    {alias WRmon_FOLSM_26S_NU4 kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+!No constraint
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitD_FOLSM_26S_NU4  {D_FOLSM_26S_NU4 < WRmon_FOLSM_26S_NU4*taf_cfs} !Water right constraint
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Carmichael Water District !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Water Supply
+!  Three water rights:
+!  License 1387: Year-round diversion of 15 cfs
+!  License 8731: May 1-Nov 1 diversion of 10 cfs
+!  Permit  7356: Year-round diversion of 25 cfs
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+! No disaggregation as only one source
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26N_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26N_NU2_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_NU2(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_NU2(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_NU2(-1)}}
+        
+goal setSumUD_26N_NU2 {SumUD_26N_NU2=SumUD_26N_NU2_sv}
+
+!---------------------------------------
+!Define water right limit
+!--------------------------------------
+define WRAnn_AMR017_WTPBJM {value 10.859 + 3.669 + 18.099}
+define WRmon_AMR017_WTPBJM {
+    case MayOct {condition range(month,May,Sep) .or. month==OCT value 50.}  
+    case other  {condition always value 40.}}
+            
+define WR_AMR017_WTPBJM {alias WRmon_AMR017_WTPBJM kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+define WFann_AMR017_WTPBJM { 
+    !case Existing {condition LODflag==0. value 32.6} !face value of WR amount
+    case Existing {condition LODflag==0. value 12.} !face value of WR amount
+    case WF2030   {condition LODflag==1. value 12.}} !2030 baseline defined by Water Forum
+define WFmon_AMR017_WTPBJM {value max(0.0, WFann_AMR017_WTPBJM * UD_26N_NU2*cfs_taf / SumUD_26N_NU2_sv)}
+define WF_AMR017_WTPBJM    {alias WFmon_AMR017_WTPBJM*taf_cfs kind 'WATERFORUM-LIMIT' units 'CFS'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limit1D_AMR017_WTPBJM  {D_AMR017_WTPBJM < WRmon_AMR017_WTPBJM}         !Water right constraint
+goal limit2D_AMR017_WTPBJM  {D_AMR017_WTPBJM < WFmon_AMR017_WTPBJM*taf_cfs} !Water Forum constraint
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! City of Folsom, Folsom Prison    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Water Supply
+!City of Folsom // Appropriative WR (pre-1914): 22 TAF
+!City of Folsom // Golden State Water Company supply: 5 TAF
+!City of Folsom // CVP contract: 7 TAF
+!Folsom Prison  // Water right:  4 TAF
+!City of Folsom also gets 3.25 TAF of water from GET A and GET B (Aerojet GW remediation)
+!This is currently ignored in this model
+
+February 13, 1953 agreement between the State, USACE, and Reclamation states that Reclamation will provide up to 5 cfs
+to Folsom Prison from a tee off the Natomas Pipeline. A court judgement refers to a diversion of 9 cfs and a maximum
+annual amount of 4,000 AF.
+
+*/
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_FOLSM_WTPFOL_WR  {std kind 'DIVERSION-WR' units 'CFS'}
+define D_FOLSM_WTPFOL_CVP {std kind 'DIVERSION-CVP' units 'CFS'}
+goal setD_FOLSM_WTPFOL    {D_FOLSM_WTPFOL = D_FOLSM_WTPFOL_WR + D_FOLSM_WTPFOL_CVP}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+
+define SumUD_26S_PU1 {std kind 'URBAN-DEMAND' units 'TAF'} ! Annual demand
+define SumUD_26S_PU1_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU1(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU1(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU1(-1)
+        }}       
+goal setSumUD_26S_PU1 {SumUD_26S_PU1=SumUD_26S_PU1_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+!  City of Folsom and Folsom Prison
+define WRann_FOLSM_WTPFOL {value 27. + 4.} !TAF; WR contract amounts (22+5+4). Folsom Prison water right (4 TAF) not subject to Water Forum
+define WRmon_FOLSM_WTPFOL {value max(0.0, WRann_FOLSM_WTPFOL * UD_26S_PU1*cfs_taf / SumUD_26S_PU1_sv)} 
+define WR_FOLSM_WTPFOL    {alias WRmon_FOLSM_WTPFOL kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_WTPFOL {value 7.} !TAF; CVP contract amount with annual allocation
+define CLmon_FOLSM_WTPFOL {value max(0.0, CLann_FOLSM_WTPFOL * UD_26S_PU1*cfs_taf / SumUD_26S_PU1_sv)} 
+define CL_FOLSM_WTPFOL    {alias CLmon_FOLSM_WTPFOL kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+!  City of Folsom
+define WFann_FOLSM_WTPFOL       {
+    case WF_950 {
+        condition UIFR_MarNov > 950.
+        value 34.
+        }
+    case WF_870 {
+        condition UIFR_MarNov > 870.
+        value 27. + (34. - 27.) * ((950. - UIFR_MarNov)/(950. - 870.)) !linear interpolation
+        } 
+    case WF_650 {
+        condition UIFR_MarNov > 650.
+        value 27.
+        }
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 22.
+        }
+    case other {
+        condition always
+        value 20.
+        }}
+define WFmon_FOLSM_WTPFOL {value max(0.0, WFann_FOLSM_WTPFOL * UD_26S_PU1*cfs_taf / SumUD_26S_PU1_sv + (4/35)*WRmon_FOLSM_WTPFOL*taf_cfs)}
+define WF_FOLSM_WTPFOL    {alias WFmon_FOLSM_WTPFOL*taf_cfs kind 'WATERFORUM-LIMIT' units 'CFS'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limit1D_FOLSM_WTPFOL_WR {D_FOLSM_WTPFOL_WR   <  WRmon_FOLSM_WTPFOL*taf_cfs} !Water supply constraints (water right)
+goal limit2D_FOLSM_WTPFOL_CVP {D_FOLSM_WTPFOL_CVP <  CLmon_FOLSM_WTPFOL*taf_cfs * perdel_cvpmi_sys} !Water supply constraints (CVP contract)
+goal limit3D_FOLSM_WTPFOL {D_FOLSM_WTPFOL < WFmon_FOLSM_WTPFOL*taf_cfs} !Water Forum constraint
+
+define DLT_WTPFOL_26S_PU1 {alias WRmon_FOLSM_WTPFOL*taf_cfs + CLmon_FOLSM_WTPFOL*taf_cfs * perdel_cvpmi_sys kind 'DIVERSION-LIMIT' units 'CFS'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Golden State Water Company !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Water Supply
+Warren Act contract: 5 TAF through Folsom South Canal
+!!!!! Need to add in supply from Carmichael (on schematic and in code) !!!!!
+*/
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+! No disaggregation as only one source
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26S_PU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26S_PU2_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU2(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU2(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU2(-1)
+        }}
+goal setSumUD_26S_PU2 {SumUD_26S_PU2=SumUD_26S_PU2_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+define WRann_WTPCOL_26S_PU2 {value 5.} !TAF; WR contract amount, 5 TAF via LTWAC through Folsom South Canal
+define WRmon_WTPCOL_26S_PU2 {value max(0.0, WRann_WTPCOL_26S_PU2 * UD_26S_PU2*cfs_taf / SumUD_26S_PU2_sv)} 
+define WR_WTPCOL_26S_PU2    {alias WRmon_WTPCOL_26S_PU2 kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_WTPCOL_26S_PU2 {value 0.} !TAF 
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitD_WTPCOL_26S_PU2    {D_WTPCOL_26S_PU2 < WRmon_WTPCOL_26S_PU2*taf_cfs} !Water right constraint
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Placer County Water Agency (PCWA)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define S_MFP    {std kind 'STORAGE-MFP' units 'TAF'} !total Middle Fork Project storage
+goal setS_MFP   {S_MFP = S_FRMDW + S_HHOLE}
+
+! The following code is also used in the Bear River module as part of ARPS.wresl
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+ define D_FOLSM_PCWA_CVP {std kind 'DIVERSION-CVP' units 'CFS'} !Assume 35 TAF CVP Contract limit under future conditions only; POD from Folsom
+
+! From April-September assume all deliveries are for Zone 5
+! From October-March assume all deliveries are for lower Zone 1 M&I
+
+!---------------------------------------------
+!Define annual urban demand
+!---------------------------------------------
+define SumUD_24_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_24_NU2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1) UD_24_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_24_NU2(-1)
+        }}
+goal setSumUD_24_NU2 {SumUD_24_NU2=SumUD_24_NU2_sv}
+
+
+!---------------------------------------------
+!Define annual agricultural demand
+!---------------------------------------------
+
+define SumAW_24_NA2 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_24_NA2_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_24_NA2(-1)
+        }}
+goal setSumAW_24_NA2 {SumAW_24_NA2=SumAW_24_NA2_sv}
+
+define SumAW_24_NA3 {std kind 'ANNUAL-APPLIED-WATER' units 'TAF'} !Annual demand
+define SumAW_24_NA3_sv {
+    case oct{
+     condition month == oct
+        sum(i=0,11,1)  2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3)
+        }
+    case otherwise {
+        condition   always
+        value  SumAW_24_NA3(-1)
+        }}
+goal setSumAW_24_NA3 {SumAW_24_NA3=SumAW_24_NA3_sv}
+
+!---------------------------------------------
+!Define remaining urban demand
+!--------------------------------------------
+define RemUD_24_NU2 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define RemUD_24_NU2_sv {
+    case octBgnWY{
+     condition month == oct
+        sum(i=0,5,1) UD_24_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value max(0.,RemUD_24_NU2(-1) - UD_24_NU2(-1)*cfs_taf(-1))
+        }}
+goal setRemUD_24_NU2 {RemUD_24_NU2=RemUD_24_NU2_sv}
+
+!---------------------------------------------
+!Define remaining agricultural demand
+!--------------------------------------------
+define RemAW_24_NA2 {std kind 'AG-DEMAND' units 'TAF'} !Annual demand
+define RemAW_24_NA2_sv {
+    case oct {
+     condition month == oct
+        sum(i=6,11,1) AWR_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(i)*cfs_taf(i)*(1+RPF_24_NA2-RUFO_24_NA2)
+        }
+        case NovMar{
+         condition month >= nov .and. month <= apr
+            value RemAW_24_NA2(-1)
+        }
+    case otherwise {
+        condition   always
+        value max(0.,RemAW_24_NA2(-1) - AWR_24_NA2(-1)*cfs_taf(-1)*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2(-1)*cfs_taf(-1)*(1+RPF_24_NA2-RUFO_24_NA2))
+        }}
+goal setRemAW_24_NA2 {RemAW_24_NA2=RemAW_24_NA2_sv}
+
+define RemAW_24_NA3 {std kind 'AG-DEMAND' units 'TAF'} !Annual demand
+define RemAW_24_NA3_sv {
+    case oct {
+     condition month == oct
+        sum(i=6,11,1) 2.5*AWR_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3(i)*cfs_taf(i)*(1+RPF_24_NA3-RUFO_24_NA3)
+        }
+        case NovMar{
+         condition month >= nov .and. month <= apr
+            value RemAW_24_NA3(-1)
+        }
+    case otherwise {
+        condition   always
+        value max(0.,RemAW_24_NA3(-1) - 2.5*AWR_24_NA3(-1)*cfs_taf(-1)*(1+RPF_24_NA3-RUFR_24_NA3) - 2.5*AWO_24_NA3(-1)*cfs_taf(-1)*(1+RPF_24_NA3-RUFO_24_NA3))
+        }}
+goal setRemAW_24_NA3 {RemAW_24_NA3=RemAW_24_NA3_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+! See NorthOfDelta\American\MFP\WaterRights.wresl
+
+
+!---------------------------------------
+!Define  Water Forum limits
+!---------------------------------------
+!  PCWA 'Replacement' (or, 'mitigation') water code is in MFP/WatForum_mitigation.wresl
+define D_NFA016_ABT002dv {std kind 'diversion' units 'cfs'}
+goal setD_NFA016_ABT002 {D_NFA016_ABT002dv = D_NFA016_ABT002}
+
+define WFann_NFA016_ABT002 {
+        case Existing {condition LODflag==0. value 35.5}  
+        case Buildout {condition LODflag==1. value 70.5}}!65.5}}
+define WFann_NFA016_ABT002_remdv {std kind 'DIVERSION' units 'TAF'}
+
+define WFann_NFA016_ABT002_rem  {
+    case October {condition month==OCT value WFann_NFA016_ABT002}
+    case NovSep  {condition always value max(0.,WFann_NFA016_ABT002_remdv(-1) - /*D_NFA016_ABT002_SV(-1)*/D_NFA016_ABT002dv(-1)*cfs_taf(-1))}}
+
+goal setWFann_NFA016_ABT002_remdv {WFann_NFA016_ABT002_remdv = WFann_NFA016_ABT002_rem}
+
+define UrbanFlag {case OctMar {condition month >= Oct .and. month <= mar value 1.} case otherwise {condition always value 0.}}
+define AgFlag {value 1. - UrbanFlag}
+
+define AW_24_NA2_ {value AWR_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFR_24_NA2) + AWO_24_NA2*cfs_taf*(1+RPF_24_NA2-RUFO_24_NA2)}
+define AW_24_NA3_ {value 2.5*AWR_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFR_24_NA3) + 2.5*AWO_24_NA3*cfs_taf*(1+RPF_24_NA3-RUFO_24_NA3)}
+
+define WFmon_NFA016_ABT002 {value max(0.0, WFann_NFA016_ABT002_rem * (UD_24_NU2*cfs_taf*UrbanFlag + AW_24_NA2_/**cfs_taf*/*AgFlag) / (RemUD_24_NU2_sv+RemAW_24_NA2_sv))}
+define WF_NFA016_ABT002    {alias WFmon_NFA016_ABT002 kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_PCWA {
+        case Existing {condition LODflag==0. value 0.}   !TAF No point of diversion under existing conditions
+        case Buildout {condition LODflag==1. value 35.0}} !Assume 35 TAF CVP Contract limit under future conditions; POD from Folsom
+
+define CLmon_FOLSM_PCWA {value max(0.0, CLann_FOLSM_PCWA * UD_24_NU2*cfs_taf / SumUD_24_NU2_sv)} 
+define CL_FOLSM_PCWA  {alias CLmon_FOLSM_PCWA kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!***********Full Contract Demands*********************************************
+! Under future conditions, simulate the delivery of full contract demands for PCWA
+
+define PCWA_FullContract_add_ann {value LODFlag*((/*CLann_PCWA_1_5*/104.0 /*+ CLann_FOLSM_PCWA */ + WFann_NFA016_ABT002) - (1-GPmin_24_NU2)*SumUD_24_NU2_sv - (1-GPmin_24_NA2)*SumAW_24_NA2_sv - (1-GPmin_24_NA3)*SumAW_24_NA3_sv)}
+define  UD_24_NU2_add    {value PCWA_FullContract_add_ann*taf_cfs * ((UD_24_NU2*cfs_taf)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+define  AW_24_NA2_add    {value PCWA_FullContract_add_ann*taf_cfs * ((AW_24_NA2_)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+define  AW_24_NA3_add    {value PCWA_FullContract_add_ann*taf_cfs * ((AW_24_NA3_)/(SumUD_24_NU2_sv + SumAW_24_NA2_sv + SumAW_24_NA3_sv))}
+
+define  UD_24_NU2_add_dv {alias UD_24_NU2_add kind 'ADD-URBAN-DEMAND' units 'CFS'}
+define  AW_24_NA2_add_dv {alias AW_24_NA2_add kind 'ADD-APPLIED-WATER' units 'CFS'}
+define  AW_24_NA3_add_dv {alias AW_24_NA3_add kind 'ADD-APPLIED-WATER' units 'CFS'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!goal limitD_NFA016_ABT002 {D_NFA016_ABT002 < WFmon_NFA016_ABT002*taf_cfs}
+
+! Assume under future conditions PCWA can receive their 35.0 TAF CVP water from Folsom Reservoir.
+! Create a variable to track the remaining amount
+define rem_FOLSM_PCWA{
+    case beginYr{
+        condition month <= Oct .and. wateryear == BGNWY
+        value CLann_FOLSM_PCWA*PerDel_CVPMI_SYS}
+    case Oct {
+        condition month == Oct
+        value CLann_FOLSM_PCWA*PerDel_CVPMI_SYS}            
+    case otherwise{
+        condition always
+        value max(0,rem_FOLSM_PCWA_sv(-1)-(D_FOLSM_24_NU2_CVP(-1)/* +D_FOLSM_24_NA2(-1)*/+D_FOLSM_24_NA3_CVP(-1))*CFS_TAF(-1))}
+    }
+define rem_FOLSM_PCWA_sv {alias rem_FOLSM_PCWA kind 'VOLUME' units 'TAF'}  
+
+! Limit PCWA CVP deliveries from Folsom Reservoir to the remaining CVP contract amount
+goal limitD_FOLSM_PCWA    {D_FOLSM_24_NU2_CVP + D_FOLSM_24_NA3_CVP < rem_FOLSM_PCWA*taf_cfs} !Folsom diversions for PCWA limited to 35.0 TAF/yr CVP water
+
+goal setD_FOLSM_PCWA_CVP {D_FOLSM_PCWA_CVP = D_FOLSM_24_NU2_CVP + D_FOLSM_24_NA3_CVP}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! City of Roseville !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+The City of Roseville recieves a mix of CVP water and MFP water
+*/
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_FOLSM_WTPRSV_MFP {std kind 'DIVERSION-MFP' units 'CFS'}
+define D_FOLSM_WTPRSV_CVP {std kind 'DIVERSION-CVP' units 'CFS'}
+goal setD_FOLSM_WTPRSV    {D_FOLSM_WTPRSV = D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPRSV_CVP}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26N_PU1          {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26N_PU1_sv       {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_PU1(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_PU1(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_PU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_PU1(-1)}}
+goal setSumUD_26N_PU1         {SumUD_26N_PU1=SumUD_26N_PU1_sv}
+
+!---------------------------------------
+!Define MFP water
+!---------------------------------------
+
+! The contract with SJWD for PCWA water allows for 800 acre-feet per year to serve the City of Roseville
+! service areas of Doctors Ranch and Foothills Business Park. An additional 3,200 acre-feet from the
+! SJWD PCWA water is contracted to provide supply to the West Roseville Specific Plan area. These
+! supplies are only available during wet and normal years.
+
+define MFPann_FOLSM_WTPRSV  {
+    case Existing {condition LODflag==0. value 20. + 4.} !20 TAF available through July 1 2021, then increases. 4 TAF available from San Juan 
+    case Buildout {condition LODflag==1. value 30. + 4. - 5.5}} !Annual MFP water (TAF)      ! 5.5 TAF reduced to limit total PCWA MFP water to 120 TAF (70.5 ARPS + 21 WTPSJP + 28.5 WTPRSV)
+define MFPmon_FOLSM_WTPRSV  {value max(0.0, MFPann_FOLSM_WTPRSV * UD_26N_PU1*cfs_taf / SumUD_26N_PU1_sv)} 
+define MFP_FOLSM_WTPRSV     {alias MFPmon_FOLSM_WTPRSV kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_WTPRSV {value 32.} !TAF; CVP contract amount
+define CLmon_FOLSM_WTPRSV {value max(0.0, CLann_FOLSM_WTPRSV * UD_26N_PU1*cfs_taf / SumUD_26N_PU1_sv)}
+define CL_FOLSM_WTPRSV    {alias CLmon_FOLSM_WTPRSV kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limit
+!---------------------------------------
+define WFann_FOLSM_WTPRSV {
+    case WF_950 {
+        condition UIFR_MarNov > 950.
+        value 58.9
+        }
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 38.9 + (58.9 - 39.8) * ((950. - UIFR_MarNov)/(950. - 400.)) !linear interpolation
+        } 
+    case other {
+        condition always
+        value 39.8
+        }}
+define WFmon_FOLSM_WTPRSV {value max(0.0, WFann_FOLSM_WTPRSV * UD_26N_PU1*cfs_taf / SumUD_26N_PU1_sv)}
+define WF_FOLSM_WTPRSV    {alias WFmon_FOLSM_WTPRSV kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+! Create a variable for remaining amount
+
+define WTPRSV_CVP_remaining       {std kind 'Flow' units 'TAF'} 
+define WTPRSV_CVP_remaining_sv{
+    case octBgnWY{  condition month == oct .and. wateryear==bgnWY
+      value CLann_FOLSM_WTPRSV* perdel_cvpmi_sys
+        }
+    case March{condition month == Mar 
+     value CLann_FOLSM_WTPRSV* perdel_cvpmi_sys}
+    case April {condition month == Apr
+     value CLann_FOLSM_WTPRSV* perdel_cvpmi_sys - D_FOLSM_WTPRSV_CVP(-1)*cfs_taf(-1)    
+    }
+        case MMay {condition month == May
+     value CLann_FOLSM_WTPRSV* perdel_cvpmi_sys - D_FOLSM_WTPRSV_CVP(-1)*cfs_taf(-1)- D_FOLSM_WTPRSV_CVP(-2)*cfs_taf(-2)    
+    }
+    case otherwise{
+        condition always 
+    value max(0,  WTPRSV_CVP_remaining(-1) - D_FOLSM_WTPRSV_CVP(-1)*cfs_taf(-1))
+        }
+    }
+goal setWTPRSV_CVP_remaining {WTPRSV_CVP_remaining = WTPRSV_CVP_remaining_sv}
+
+define WTPRSV_MFP_remaining       {std kind 'Flow' units 'TAF'}  
+define WTPRSV_MFP_remaining_sv{
+    case beginYr{
+        condition month <= Oct .and. wateryear == BGNWY
+        value MFPann_FOLSM_WTPRSV}
+    case mJan {
+        condition month == Jan
+        value MFPann_FOLSM_WTPRSV}          
+    case otherwise{
+        condition always
+        value max(0,WTPRSV_MFP_remaining(-1)- D_FOLSM_WTPRSV_MFP(-1)*cfs_taf(-1))}
+    }
+goal setWTPRSV_MFP_remaining {WTPRSV_MFP_remaining = WTPRSV_MFP_remaining_sv}
+
+goal limit1D_FOLSM_WTPRSV       {D_FOLSM_WTPRSV_CVP <  WTPRSV_CVP_remaining_sv*taf_cfs}         ! CVP WS contract constraint
+goal limit2D_FOLSM_WTPRSV_MFP   {D_FOLSM_WTPRSV_MFP <  WTPRSV_MFP_remaining_sv*taf_cfs}         ! MFP contract constraint: constrain to overall contract amount
+goal limit3D_FOLSM_WTPRSV_MFP   {D_FOLSM_WTPRSV_MFP < max(0, UD_26N_PU1 - WTPRSV_CVP_remaining_sv*taf_cfs)}! MFP constraint: MFP water taken before CVP water
+goal limit4D_FOLSM_WTPRSV       {D_FOLSM_WTPRSV     <  WFmon_FOLSM_WTPRSV*taf_cfs}              ! Water Forum constraint
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Sacramento Municipal Utility District (SMUD)  !!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Water Supply
+!CVP contract:  30 TAF available (total contract=60 TAF; 30 TAF designated to others)
+!Water right:   14.48 TAF (15 TAF/WY limit, but 20 cfs is more restrictive [14.48 TAF=annual equivalent])
+ */
+ 
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_FSC025_60N_PU_WR  {std kind 'DIVERSION-WR' units 'CFS'}
+define D_FSC025_60N_PU_CVP {std kind 'DIVERSION-CVP' units 'CFS'}
+goal setD_FSC025_60N_PU    {D_FSC025_60N_PU = D_FSC025_60N_PU_WR + D_FSC025_60N_PU_CVP}
+ 
+!---------------------------------------
+!Define monthly pattern of urban demand
+!--------------------------------------- 
+define SumUD_60N_PU       {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_60N_PU_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_60N_PU(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_60N_PU(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_60N_PU(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_60N_PU(-1)}}
+goal setSumUD_60N_PU {SumUD_60N_PU=SumUD_60N_PU_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+define WRann_FSC025_60N_PU {value 0.} !14.48} !TAF (annual volumetric equivalent of 20 cfs; for FolRuleCurv_OASIS.wresl)
+define WRmon_FSC025_60N_PU {value 0.} !20. * cfs_taf} !cfs; 
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FSC025_60N_PU {value 30.} !TAF
+define CLmon_FSC025_60N_PU {value max(0.0, CLann_FSC025_60N_PU * UD_60N_PU*cfs_taf / SumUD_60N_PU_sv)}
+define CL_FSC025_60N_PU    {alias CLmon_FSC025_60N_PU kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limits
+!---------------------------------------
+define WFann_FSC025_60N_PU   { !TAF
+    case WF_950 {
+        condition UIFR_MarNov > 950.
+        value 30.
+        }
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 15. + (30. - 15.)*((950. - UIFR_MarNov)/(950. - 400.)) !linear interpolation
+        } 
+    case other {
+        condition always
+        value 15.
+        }}
+define WFmon_FSC025_60N_PU {value max(0.0, WFann_FSC025_60N_PU * UD_60N_PU*cfs_taf / SumUD_60N_PU_sv)}
+define WF_FSC025_60N_PU    {alias WFmon_FSC025_60N_PU kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limit1D_60N_PU {D_FSC025_60N_PU < WRmon_FSC025_60N_PU*taf_cfs + CLmon_FSC025_60N_PU*taf_cfs * perdel_cvpmi_sys} !Water supply constraints (water right, CVP contract)
+goal limit2D_60N_PU {D_FSC025_60N_PU < WFmon_FSC025_60N_PU*taf_cfs}                                          !Water Forum constraint
+define WS_60N_PU    {alias max(WRmon_FSC025_60N_PU + CLmon_FSC025_60N_PU * perdel_cvpmi_sys, WFmon_FSC025_60N_PU) kind 'DIVERSION-LIMIT' units 'TAF'}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! San Juan Water District (SJWD) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+San Juan WD has its own water right and additionally receives both CVP water and MFP water
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_FOLSM_WTPSJP_WR    {lower 0 upper 75 kind 'DIVERSION-WR' units 'CFS'}  !Water Right diversion rate limited to 75 cfs [SJWD WWMRS, 2016]
+define D_FOLSM_WTPSJP_MFP   {std kind 'DIVERSION-MFP' units 'CFS'}
+!define D_FOLSM_WTPSJP_MFPSS {std kind 'DIVERSION-MFP' units 'CFS'} !Defined under Sacramento SUburban WD
+define D_FOLSM_WTPSJP_MFPSJ {std kind 'DIVERSION-MFP' units 'CFS'}
+define D_FOLSM_WTPSJP_CVP   {std kind 'DIVERSION-CVP' units 'CFS'}
+define D_FOLSM_WTPSJP_SJ    {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_WTPSJP_SS    {std kind 'DIVERSION' units 'CFS'}
+
+goal setD_FOLSM_WTPSJP_1 {D_FOLSM_WTPSJP = D_FOLSM_WTPSJP_MFPSJ + D_FOLSM_WTPSJP_MFPSS + D_FOLSM_WTPSJP_CVP + D_FOLSM_WTPSJP_WR}
+goal setD_FOLSM_WTPSJP_2 {D_FOLSM_WTPSJP_MFP = D_FOLSM_WTPSJP_MFPSS + D_FOLSM_WTPSJP_MFPSJ}
+goal setD_FOLSM_WTPSJP_3 {D_FOLSM_WTPSJP_SJ = D_FOLSM_WTPSJP_MFPSJ + D_FOLSM_WTPSJP_CVP + D_FOLSM_WTPSJP_WR}
+goal setD_FOLSM_WTPSJP_4 {D_FOLSM_WTPSJP_SS = D_FOLSM_WTPSJP_MFPSS}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26N_PU2          {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26N_PU2_sv       {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_PU2(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_PU2(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_PU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_PU2(-1)}}
+
+goal setSumUD_26N_PU2 {SumUD_26N_PU2 = SumUD_26N_PU2_sv}
+
+define SumUD_26N_PU3          {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26N_PU3_sv       {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_PU3(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_PU3(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_PU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_PU3(-1)}}
+
+goal setSumUD_26N_PU3 {SumUD_26N_PU3 = SumUD_26N_PU3_sv}
+
+!---------------------------------------
+!Define water right limit
+!---------------------------------------
+!  Need to limit delivery to 60 cfs from Nov 1 - Jun 1 (see Andy/Rebecca notes)
+define WRann_FOLSM_WTPSJP   {value 33.} !Annual water right amount (TAF) [SJWD WWMRS, 2016]   
+define WRmon_FOLSM_WTPSJP_Limit{case OctMay{condition month <= 8 value 60.}
+                                case otherwise{condition always value 75.}
+}
+define WRmon_FOLSM_WTPSJP   {value max(0.0, min(WRmon_FOLSM_WTPSJP_Limit*cfs_taf, WRann_FOLSM_WTPSJP * (UD_26N_PU2*cfs_taf + UD_26N_PU3*cfs_taf)/ (SumUD_26N_PU2_sv + SumUD_26N_PU3_sv)))} 
+define WR_WTPSJP_Consump    {value min(WRmon_FOLSM_WTPSJP, UD_26N_PU2*cfs_taf + UD_26N_PU3*cfs_taf)}
+define WR_FOLSM_WTPSJP      {alias WRmon_FOLSM_WTPSJP kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Middle Fork Project water
+!---------------------------------------
+!  Annual contract amount is 25 TAF, but have two water transfer contracts 
+!  with Roseville: one for 3,200 AF, and one for 800 AF, totaling 4 TAF/WY.
+!  Therefore, MFP contract amount modeled is 25 - 4 = 21 TAF
+
+! The contract with SJWD for PCWA water allows for 800 acre-feet per year to serve the City of Roseville
+! service areas of Doctors Ranch and Foothills Business Park. An additional 3,200 acre-feet from the
+! SJWD PCWA water is contracted to provide supply to the West Roseville Specific Plan area. These
+! supplies are only available during wet and normal years.
+
+
+define MFPSJann_FOLSM_WTPSJP {value 21.} !Annual MFP water (TAF) [SJWD WWMRS, 2016]   
+define MFPSJmon_FOLSM_WTPSJP {value max(0.0, MFPSJann_FOLSM_WTPSJP * (UD_26N_PU2*cfs_taf + UD_26N_PU3*cfs_taf)/ (SumUD_26N_PU2_sv + SumUD_26N_PU3_sv))}
+define MFPSJ_FOLSM_WTPSJP    {alias MFPSJmon_FOLSM_WTPSJP kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define CVP contract
+!---------------------------------------
+define CLann_FOLSM_WTPSJP  {value 24.2} !TAF; CVP contract amount
+define CLmon_FOLSM_WTPSJP  {value max(0.0, CLann_FOLSM_WTPSJP * (UD_26N_PU2*cfs_taf + UD_26N_PU3*cfs_taf)/ (SumUD_26N_PU2_sv + SumUD_26N_PU3_sv))}
+define CL_FOLSM_WTPSJP     {alias CLmon_FOLSM_WTPSJP kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Define Water Forum limit
+!---------------------------------------
+define WFann_FOLSM_WTPSJP_SJ      {
+    case WF_950 {
+        condition UIFR_MarNov > 950.
+        value 82.2
+        }
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 54.2 + (82.2 - 54.2) * ((950. - UIFR_MarNov)/(950. - 400.)) !linear interpolation
+        } 
+    case other {
+        condition always
+        value 54.2
+        }}
+define WFmon_FOLSM_WTPSJP_SJ {value max(0.0, WFann_FOLSM_WTPSJP_SJ * (UD_26N_PU2*cfs_taf + UD_26N_PU3*cfs_taf)/ (SumUD_26N_PU2_sv + SumUD_26N_PU3_sv))}  
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limit1D_WTPSJP_26N_PU2    {D_FOLSM_WTPSJP_SJ < WRmon_FOLSM_WTPSJP*taf_cfs + MFPSJ_FOLSM_WTPSJP*taf_cfs + CLmon_FOLSM_WTPSJP*taf_cfs * perdel_cvpmi_sys} !Constraint on water supply
+goal limit2D_WTPSJP_26N_PU2    {D_FOLSM_WTPSJP_SJ < WFmon_FOLSM_WTPSJP_SJ*taf_cfs}
+
+goal limitD_FOLSM_WTPSJP_WR    {D_FOLSM_WTPSJP_WR  = WR_WTPSJP_Consump*taf_cfs}
+goal limitMFP_MFP {D_FOLSM_WTPSJP_MFPSJ = D_FOLSM_WTPSJP_CVP*(MFPSJmon_FOLSM_WTPSJP/CLmon_FOLSM_WTPSJP)}
+goal limitD_FOLSM_WTPSJP_MFPSJ {D_FOLSM_WTPSJP_MFPSJ < MFPSJ_FOLSM_WTPSJP*taf_cfs}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Sacramento Suburban Water District (SSWD) - Northern Service Area !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+Sacramento Suburban WD receives MFP water in wetter years
+*/
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_FOLSM_WTPSJP_MFPSS {std kind 'DIVERSION-MFP' units 'CFS'}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26N_NU1 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define SumUD_26N_NU1_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_NU1(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_NU1(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_NU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_NU1(-1)}}
+       
+goal setSumUD_26N_NU1 {SumUD_26N_NU1=SumUD_26N_NU1_sv}
+
+!---------------------------------------
+!Define Middle Fork Project water
+!---------------------------------------
+! At 2040, limit MFP deliveries to 8 TAF/year as per model data sent by Jared Emery to Nancy Parker, 03/03/23
+define MFPSSann_FOLSM_WTPSJP {value (14-(6*LODFlag)) * WaterForum_wetyear} !Guaranteed 12 TAF (existing and buildout); Annual MFP water (TAF); only available in wet yearsThe annual entitlement is 12 TAF. Additionally, the district may request up to a total water supply of 29 TAF. Recent deliveries are approximately 14 TAF/year.
+define MFPSSmon_FOLSM_WTPSJP {value max(0.0, MFPSSann_FOLSM_WTPSJP * UD_26N_NU1*cfs_taf / SumUD_26N_NU1_sv)}
+define MFPSS_FOLSM_WTPSJP    {alias MFPSSmon_FOLSM_WTPSJP kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+goal limitFOLSM_WTPSJP   {D_FOLSM_WTPSJP_MFPSS < MFPSSmon_FOLSM_WTPSJP*taf_cfs} !Constraint on water supply
+goal setD_WTPSJP_26N_NU1 {D_WTPSJP_26N_NU1 < D_FOLSM_WTPSJP_MFPSS}
+
+! PCWA Diversion Limit of 120 TAF
+! ARPS + Roseville + WTPSJP = 120
+! 70.5 TAF + 25 TAF + 24.5 TAF 
+! Therefore limit MFP Water to Roseville and San Juan to 49.5 TAF
+
+define WTPRSV_WTPSJP_MFP_Cumulative       {std kind 'Flow' units 'TAF'}  
+    
+goal setWTPRSV_WTPSJP_MFP_Cumulative {lhs WTPRSV_WTPSJP_MFP_Cumulative 
+	    							case octBgnWY{
+    								  condition month == oct .and. wateryear==bgnWY
+									  rhs /*WTPRSV_WTPSJP_MFP_Cumulative (-1)+*/  (D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFPSJ + D_FOLSM_WTPSJP_MFPSS)*cfs_taf}
+									case mOct{
+									  condition month == Oct 
+									  rhs (D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFPSJ + D_FOLSM_WTPSJP_MFPSS)*cfs_taf}
+									case otherwise{
+									condition always rhs WTPRSV_WTPSJP_MFP_Cumulative (-1)+  (D_FOLSM_WTPRSV_MFP + D_FOLSM_WTPSJP_MFPSJ + D_FOLSM_WTPSJP_MFPSS)*cfs_taf}}
+									
+goal limitWTPRSV_WTPSJP_MFP_Cumulative {WTPRSV_WTPSJP_MFP_Cumulative < 120. - WFann_NFA016_ABT002}		!PCWA has to limit their MFP water to 120 TAF through a settlement agreement with Reclamation
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Sacramento Suburban Water District (SSWD) - Southern Service Area !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+SSWD can purchase up to 26 AFY from the City of Sacramento, provided that 
+the Hodge criteria (above) has been met.
+It is assumed that the Hodge criteria is appropriately applied to the
+American River diversion to the Fairbairn WTP in the code above, therefore
+the constraint is not repeated for SSWD's diversion arc.
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+! Only one source of surface water supply: Wholesale purchased from City of Sacramento
+define D_WTPFBN_26N_NU4_WHOLESALE {std kind 'DIVERSION-WHOLESALE' units 'CFS'}
+goal splitD_WTPFBN_26N_NU4 {D_WTPFBN_26N_NU4 = D_WTPFBN_26N_NU4_WHOLESALE}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define SumUD_26N_NU4 {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand - SSWD from Fairbairn WTP
+define SumUD_26N_NU4_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_NU4(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_NU4(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_NU4(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_NU4(-1)}}
+        
+goal setSumUD_26N_NU4 {SumUD_26N_NU4=SumUD_26N_NU4_sv}
+
+!---------------------------------------------
+!Define wholesale Supplies purchased from City of Sacramento
+!---------------------------------------------
+ define CityofSacWholesaleAnn_SSWD { 
+    case Existing {condition LODflag==0. value min(19.0,SumUD_26N_NU4_sv*(1-GPmin_26N_NU4))}   ! Cut in dry years. Reduced from 22.4 to 19.0 which is the 2020 demand
+    case LOD2040  {condition LODflag==1. value min(26.1,SumUD_26N_NU4_sv*(1-GPmin_26N_NU4))}} 
+
+define Wholesalemon_WTPFBN_26N_NU4 {value max(0.0, CityofSacWholesaleAnn_SSWD * UD_26N_NU4*cfs_taf / SumUD_26N_NU4_sv)}
+define Wholesalemon_WTPFBN_26N_NU4_dv {alias Wholesalemon_WTPFBN_26N_NU4*taf_cfs kind 'DEMANDS-WHOLESALE' units 'cfs'}
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!This constraint is repeated under City of Sacramento section with additional constraints for (a) Hodge Criteria, (b) Dry years
+goal setD_WTPFBN_26N_NU4_WHOLESALE {D_WTPFBN_26N_NU4_WHOLESALE < Wholesalemon_WTPFBN_26N_NU4*taf_cfs} 
+
+    
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Sacramento County Water Agency!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*
+SCWA Zone 40 is divided into three regions:
+  - Mather Sunrise (NSA) - 26S_PU6: The NSA is currently supplied exclusively by groundwater.
+  - Laguna         (CSA) - 26S_PU6: The CSA is supplied by surface water from the Vineyard WTP and groundwater.
+  - Vineyard       (SSA) - 26S_PU4: The SSA is supplied by a mix of surface water and groundwater
+ */
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_WTPSAC_26S_PU4_CVP       {std kind 'DIVERSION-CVP' units 'CFS'}
+define D_WTPSAC_26S_PU4_WHOLESALE {std kind 'DIVERSION-WHOLESALE' units 'CFS'}
+goal splitD_WTPSAC_26S_PU4 {D_WTPSAC_26S_PU4 = D_WTPSAC_26S_PU4_CVP + D_WTPSAC_26S_PU4_WHOLESALE}
+
+define D_FPT013_WTPVNY_CVP       {std kind 'DIVERSION-CVP' units 'CFS'}
+define D_FPT013_WTPVNY_WR        {std kind 'DIVERSION-WR' units 'CFS'}
+goal splitD_FPT013_WTPVNY {D_FPT013_WTPVNY = D_FPT013_WTPVNY_CVP + D_FPT013_WTPVNY_WR}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define  SumUD_26S_PU4     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_PU4_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU4(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU4(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU4(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU4(-1)}}
+        
+goal setSumUD_26S_PU4    {SumUD_26S_PU4=SumUD_26S_PU4_sv}
+
+define  SumUD_26S_PU5     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_PU5_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU5(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU5(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU5(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU5(-1)}}
+        
+goal setSumUD_26S_PU5    {SumUD_26S_PU5=SumUD_26S_PU5_sv}
+
+define  SumUD_26S_PU6     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_PU6_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_PU6(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_PU6(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_PU6(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_PU6(-1)}}
+        
+goal setSumUD_26S_PU6    {SumUD_26S_PU6=SumUD_26S_PU6_sv}
+
+!---------------------------------------
+!Define CVP contract supplies
+!---------------------------------------
+! 22 TAF of PL 101-514 water, 7 TAF is subcontracted to the City of Folsom
+! SCWA has entered into agreements City of Sacramento and SMUD for the assignment to SCWA for a total of 30 TAF
+! Assume only Fazio water wheeled through Sac River WTP
+
+define CLann_WTPSAC_SCWA  {value 15.0 /* + 30.0*/}                                                 
+define CLmon_WTPSAC_SCWA  {value CLann_WTPSAC_SCWA * UD_26S_PU4*cfs_taf/SumUD_26S_PU4_sv}
+define CL_WTPSAC_SCWA     {alias CLmon_WTPSAC_SCWA kind 'DIVERSION-LIMIT' units 'TAF'}
+
+define CLann_WTPSACVNY_SCWA  {value 15.0 + 30.0}                                               
+define CLmon_WTPSACVNY_SCWA  {value CLann_WTPSACVNY_SCWA * (UD_26S_PU4+UD_26S_PU5+UD_26S_PU6)*cfs_taf/(SumUD_26S_PU4_sv+SumUD_26S_PU5_sv+SumUD_26S_PU6_sv)}
+define CL_WTPSACVNY_SCWA     {alias CLmon_WTPSACVNY_SCWA kind 'DIVERSION-LIMIT' units 'TAF'}
+
+!---------------------------------------------
+!Define wholesale Supplies purchased from City of Sacramento
+!---------------------------------------------
+/*
+CVP water used in Sacramento County WA’s SSA is treated at the City of Sacramento’s Sacramento River WTP,
+wheeled through the city’s distribution system, and delivered through the Franklin intertie. The capacity
+of the Franklin intertie is 11.1 mgd, or approximately 12,400 acre-feet per year. The unused portion of the
+Fazio water and the SMUD 1 and SMUD 2 assignments are available for diversion at the Freeport intake and
+treatment at the Vineyard WTP.
+ */
+
+ define CityofSacWholesaleAnn_SCWA { 
+    case Existing {condition LODflag==0. value min(0.0, SumUD_26S_PU4_sv*(1-GPmin_26S_PU4))} ! Revised from 5.3 to zero
+    case LOD2040  {condition LODflag==1. value min(10.6, SumUD_26S_PU4_sv*(1-GPmin_26S_PU4))}}  ! From City of Sacramento 2015 UWMP table 4-7, Cannot exceed 12.44 beacuse of capacity limitation. Capacity constraint relaxed at 2040
+
+define Wholesalemon_WTPSAC_26S_PU4 {value min ((11.1*1.5472 - 11.1*1.5472*LODFlag + 9999.*LODFlag)*cfs_taf,max(0.0, CityofSacWholesaleAnn_SCWA * UD_26S_PU4*cfs_taf / SumUD_26S_PU4_sv))}
+define Wholesalemon_WTPSAC_26S_PU4_dv {alias Wholesalemon_WTPSAC_26S_PU4*taf_cfs kind 'DEMANDS-WHOLESALE' units 'cfs'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!Capacity limitations
+goal setD_WTPSAC_26S_PU4_Capacity  {D_WTPSAC_26S_PU4 < 11.1*1.5472 - 11.1*1.5472*LODFlag + 9999.*LODFlag}
+goal limit_D_WTPVNY_SCWA           {D_WTPVNY_26S_PU4 + D_WTPVNY_26S_PU5 + D_WTPVNY_26S_PU6 < 85.* 1.5472} ! SCWA use of capacity set to max of 85 MGD
+
+!CVP water
+goal setD_WTPSAC_26S_PU4_CVP       {D_WTPSAC_26S_PU4_CVP < CLmon_WTPSAC_SCWA*taf_cfs*perdel_cvpmi_sys }
+goal limitSCWA_CVP                 {D_WTPSAC_26S_PU4_CVP + D_FPT013_WTPVNY_CVP < CLmon_WTPSACVNY_SCWA*taf_cfs*perdel_cvpmi_sys}
+
+!Wholesale water - constraint repeated under City of Sacramento section with additional constraints for (a) Hodge Criteria, (b) Dry years
+goal setD_WTPSAC_26S_PU4_WHOLESALE {D_WTPSAC_26S_PU4_WHOLESALE < Wholesalemon_WTPSAC_26S_PU4*taf_cfs}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! California American Water Company!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+define D_WTPFBN_26S_NU2_WHOLESALE {std kind 'DIVERSION-WHOLESALE' units 'CFS'}
+goal splitD_WTPFBN_26S_NU2 {D_WTPFBN_26S_NU2 = D_WTPFBN_26S_NU2_WHOLESALE}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define  SumUD_26S_NU2     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_NU2_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_NU2(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_NU2(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_NU2(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_NU2(-1)}}
+goal setSumUD_26S_NU2    {SumUD_26S_NU2=SumUD_26S_NU2_sv}
+
+!---------------------------------------------
+!Define wholesale Supplies purchased from City of Sacramento
+!---------------------------------------------
+ define CityofSacWholesaleAnn_CAWC { 
+    case Existing {condition LODflag==0. value min(5.8, SumUD_26S_NU2_sv*(1-GPmin_26S_NU2))} 
+    case LOD2040  {condition LODflag==1. value min(20.1, SumUD_26S_NU2_sv*(1-GPmin_26S_NU2))}}   ! Includes CalAM - Arden north of River
+
+
+define Wholesalemon_WTPFBN_26S_NU2 {value max(0.0, CityofSacWholesaleAnn_CAWC * UD_26S_NU2*cfs_taf / SumUD_26S_NU2_sv)}
+define Wholesalemon_WTPFBN_26S_NU2_dv {alias Wholesalemon_WTPFBN_26S_NU2*taf_cfs kind 'DEMANDS-WHOLESALE' units 'cfs'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!This constraint is repeated under City of Sacramento section with additional constraints for (a) Hodge Criteria, (b) Dry years
+goal setD_WTPFBN_26S_NU2_WHOLESALE {D_WTPFBN_26S_NU2_WHOLESALE < Wholesalemon_WTPFBN_26S_NU2*taf_cfs}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! ! Fruitridge Vista Water Company!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!Delineating sub-arcs
+!---------------------------------------
+define D_WTPFBN_26S_NU3_WHOLESALE {std kind 'DIVERSION-WHOLESALE' units 'CFS'}
+goal splitD_WTPFBN_26S_NU3 {D_WTPFBN_26S_NU3 = D_WTPFBN_26S_NU3_WHOLESALE}
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+define  SumUD_26S_NU3     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_NU3_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_NU3(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_NU3(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_NU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_NU3(-1)}}
+goal setSumUD_26S_NU3    {SumUD_26S_NU3=SumUD_26S_NU3_sv}
+
+!---------------------------------------------
+!Define wholesale Supplies purchased from City of Sacramento
+!---------------------------------------------
+ define CityofSacWholesaleAnn_FVWC { 
+    case Existing {condition LODflag==0. value min(3.6,SumUD_26S_NU3_sv*(1-GPmin_26S_NU3))}
+    case LOD2040  {condition LODflag==1. value min(8.7,SumUD_26S_NU3_sv*(1-GPmin_26S_NU3))}}   ! From City of Sacramento 2015 UWMP table 4-7.
+
+
+define Wholesalemon_WTPFBN_26S_NU3 {value max(0.0, CityofSacWholesaleAnn_FVWC * UD_26S_NU3*cfs_taf / SumUD_26S_NU3_sv)}
+define Wholesalemon_WTPFBN_26S_NU32_dv {alias Wholesalemon_WTPFBN_26S_NU3*taf_cfs kind 'DEMANDS-WHOLESALE' units 'cfs'}
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!This constraint is repeated under City of Sacramento section with additional constraints for (a) Hodge Criteria, (b) Dry years
+goal setD_WTPFBN_26S_NU3_WHOLESALE {D_WTPFBN_26S_NU3_WHOLESALE < Wholesalemon_WTPFBN_26S_NU3*taf_cfs}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! City of Sacramento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Water Supply
+Entitlements to American and Sacramento River water together with agreement with Reclamation
+*/
+
+!---------------------------------------
+!Delineating sub-arcs
+!---------------------------------------
+
+! No disaggregation as only one source - water right water
+
+
+!---------------------------------------
+!Define monthly pattern of urban demand
+!---------------------------------------
+
+!***********Retail Service Area*********************************************
+! City of Sacramento retail demands are 122 TAF (2020 LOD) - 161 TAF (2040 LOD)  - 2015 City of Sacramento UWMP
+! North/South Split                    43/79 TAF             56/105 TAF
+define  SumUD_26N_NU3    {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26N_NU3_sv {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26N_NU3(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26N_NU3(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26N_NU3(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26N_NU3(-1)}}
+goal setSumUD_26N_NU3 {SumUD_26N_NU3=SumUD_26N_NU3_sv}
+
+define  SumUD_26S_NU1     {std kind 'URBAN-DEMAND' units 'TAF'} !Annual demand
+define  SumUD_26S_NU1_sv  {
+    case octBgnWY{
+     condition month == oct .and. wateryear==bgnWY
+        sum(i=0,11,1) UD_26S_NU1(i)*cfs_taf(i)
+        }
+    case MarEndWY {
+     condition month == mar .and. wateryear==EndWY
+        sum(i=prevOCT,SEP-month,1) UD_26S_NU1(i)*cfs_taf(i)
+        }
+    case march {
+        condition month == mar .and. wateryear < EndWY
+        sum(i=0,11,1) UD_26S_NU1(i)*cfs_taf(i)
+        }
+    case otherwise {
+        condition   always
+        value SumUD_26S_NU1(-1)}}
+goal setSumUD_26S_NU1    {SumUD_26S_NU1=SumUD_26S_NU1_sv}
+
+!***********Wholesale Service Area*********************************************
+
+/* The City currently provides wholesale treated water for four water agencies
+   Values are from Table 4-7, City of Sacramento 2015 UWMP
+   Values for Sacramento County WA Zone 40 do not include wheeling of SCWA entitlement water, which is treated separately and is not part of the City's demand
+   Values for CalAm Arden (part of 26N_NU5) are small and have been aggregated with CalAM service area south of the river
+ 
+    - Sacramento County Water Agency:       3.5  TAF (2020 LOD)  -   5.3 TAF (2040 LOD) from Sacramento River WTP to Int. Airport and Zone 50
+    - Sacramento County Water Agency:       5.3  TAF (2020 LOD)  -  10.6 TAF (2040 LOD) from Fairbairn WTP.
+    - Sacramento Suburban Water District:  22.4  TAF (2020 LOD)  -  22.4 TAF (2040 LOD) from Fairbairn WTP. Reduced to demand 19.0 TAF/yr multiplied by (1-GPmin).
+    - California American Water Company:    5.8  TAF (2020 LOD)  -  11.6 TAF (2040 LOD) from Fairbairn WTP
+    - Fruitridge Vista Water Company:       3.6  TAF (2020 LOD)  -   8.7 TAF (2040 LOD) from Sacramento River WTP. Reduced to demand of 7.0 TAF/yr multiplied by (1-GPmin).
+                                           -------------------------------------------
+                                           40.6 TAF (2020 LOD)     58.6 TAF (2040 LOD)
+                                           * 
+    - Wholesale deliveries to SCWA set to zero at 2020 based on SCWA 2015 UWMP
+ */   
+    
+ /*   
+    Wholesale amounts at 2040 (from 2020 UWMP):
+    SCWA - Airport (22_NU)		 1,400 AF/year. Mix of SW and GW supplies provided by the City. Do not include in CalSim 3.
+    SCWA - Zone 50 (22_NU)		 5,000 AF/year. Currently 100% groundwater supply. Do not include in CalSim 3.
+    SCWA - Arden Park Vista (26N_NU5)	 4,211 AF/year. Currently 100% groundwater supply. Do not include in CalSim 3.
+    SCWA - Zone 40 CSA (26S_PU6)	10,644 AF/year.
+    SCWA - Zone 40, all(26S_PU6)	12,350 AF/year SCWA water wheeled through the Franklin Intertie. This is modeled as SCWA water and not as wholesale water
+    
+    SSWD - Arden (26N_NU4)		26,064 AF/year. This is the maximum that can be delivered under a 2003 agreement. Subject to Hodge Criteria
+    SSWD - Northridge(26N_NU1)	 	 4,260 AF/year. Exchanges from City of Sacramento as part of a groundwater substitution transfers is provided as a result of short-term, one-year agreements.
+    					 Do not include in CalSim 3.					
+    
+    GSWC - Arden Park (26N_NU5) 	 1,037 AF/year. Currently 100% groundwater supply. Do not include in CalSim 3.
+    
+    Del Paso Manor WD (26N_NU5)	 	 1,344 AF. Currently, all on groundwater. Del Paso WD and the City of Sacramento executed an agreement in 1968 establishing conditions for transfer of up to 6.8 cfs,
+                                 	 or 2,460 AF/year of the City’s surface water supply at Fairburn to the District through the Area D water service area.
+    
+    Cal AM - Arden (26N_NU5)		  1,855 AF/year.
+    Cal Am - Fruitridge	(26S_NU3) 	  8,692 AF/year. Water Company acquired by Cal Am in 2020
+    Cal Am - Rosement&Parkway (26S_NU2)	 18,202 AF/year.
+    
+    Tokay Park(26S_NU3)	    	    	    95 AF/year. Currently 100% groundwater supply. Do not include in CalSim 3.
+    
+    Florin County WD(26S_NU3)		 1,837 AF/year. Currently 100% groundwater supply. Do not include in CalSim 3.
+    
+    Natomas Unified School District	    69 AF/year not modeled in CalSim 3
+    
+    CityofSacWholesaleAnn_SCWA  = 10.644 (2040)
+    CityofSacWholesaleAnn_SSWD  = 26.064 (2040)
+    CityofSacWholesaleAnn_CAWC  = 18.202 + 1.855 (2040) to simplify model deliver water to Cal Am - Arden to area south of River.
+    CityofSacWholesaleAnn_FVWV  =  8.692 (2040)
+    CityofSacWholesaleAnn_DPMWD =  1.344 (2040) THIS IS NOT CURRENTLY NOT MODELED
+ */
+
+! Sacramento River WTP to Int. Airport and Zone 50 currently not modeled
+ define CityofSacWholesaleAnn {value CityofSacWholesaleAnn_SCWA + CityofSacWholesaleAnn_SSWD + CityofSacWholesaleAnn_CAWC + CityofSacWholesaleAnn_FVWC}
+
+!***********Full Contract Demands*********************************************
+! Under future conditions, simulate full contract demands for the city of Sacramento 326 TAF
+! Under 2040 conditions, the projected retail and wholesale demands for the city of Sacramento are about 220 TAF (161 TAF retail and 59 TAF wholesale)
+! In order to achieve full contract demands, a hypothetical demand of 100 TAF will be assumed
+
+! This is the optional additional retail demand the that City of Sacramento would need to realize full contract diversions
+! Additional retail demand = Full Contract - Projected Retail - Projected Wholesale
+! These additional demands can be turned off by the LOD Flag; future LOD = full contract.
+
+! svar CVP_AmRvr_FullContractFlag {value 1.}
+!define CitySac_FullContract_add_ann {value /*CVP_AmRvr_FullContractFlag**/LODFlag*((81.8 + 245.0) - SumUD_26N_NU3_sv - SumUD_26S_NU1_sv)}
+!define UD_26N_NU3_add    {value CitySac_FullContract_add_ann*taf_cfs * ((UD_26N_NU3*cfs_taf)/(SumUD_26S_NU1_sv + SumUD_26N_NU3_sv))}
+!define UD_26S_NU1_add    {value CitySac_FullContract_add_ann*taf_cfs * ((UD_26S_NU1*cfs_taf)/(SumUD_26S_NU1_sv + SumUD_26N_NU3_sv))}
+!define UD_26N_NU3_add_dv {alias UD_26N_NU3_add kind 'URBAN-DEMAND' units 'CFS'}
+!define UD_26S_NU1_add_dv {alias UD_26S_NU1_add kind 'URBAN-DEMAND' units 'CFS'}
+
+
+! City of Sac Wholesale Weighted Average In TAF
+define CityofSacWholesaleMon {value CityofSacWholesaleAnn_SCWA*UD_26S_PU4*cfs_taf/SumUD_26S_PU4_SV
+                               + CityofSacWholesaleAnn_SSWD*UD_26N_NU4*cfs_taf/SumUD_26N_NU4_SV
+                               + CityofSacWholesaleAnn_CAWC*UD_26S_NU2*cfs_taf/SumUD_26S_NU2_SV
+                               + CityofSacWholesaleAnn_FVWC*UD_26S_NU3*cfs_taf/SumUD_26S_NU3_SV }
+                                                        
+
+!---------------------------------------
+!Water Forum - Extremely Dry Years
+!---------------------------------------    
+/*
+ The PSA defines extremely dry years (i.e., "Conference Years") as years in which DWR projects an annual unimpaired flow into Folsom Reservoir
+ of 550,000 AF or less, or the projected March through November unimpaired flow into Folsom Reservoir is less than 400,000 AF.
+ During extremely chy years, the City has agreed to limit its diversions for water treated at the Fairbairn WTP to 155 cfs and 50,000 AF/year.
+ 
+ Conference Years have occurred on the American River only three times over the period of record historical hydrology. These years were water years 1924, 1977, and 2015. A water year is the 12-month period, starting October 1 and ending on September 30. The water year is designated by the calendar year in which it ends and which includes 9 of the 12 months. For example, the year ending September 30, 2p 15 is called the "2015 water year".
+*/
+! Assume no delivery of wholesale water during conference years
+define WFConfYear {
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 0
+        }
+    case other {
+        condition always
+        value 1.
+        }}
+        
+define FairbairnLimit { 
+    case Existing {condition LODflag==0. value 189.} 
+    case WF2030   {condition LODflag==1. value 245.}}        
+ 
+ define WFann_AMR007_WTPFBN {
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value FairbairnLimit
+        }
+    case other {
+        condition always
+        value 50.
+        }}
+
+define WFmon_AMR007_WTPFBN {value max(0.0, (WFann_AMR007_WTPFBN * UD_26S_NU1*(1-GPmin_26S_NU1)*cfs_taf + WFann_AMR007_WTPFBN * UD_26N_NU3*(1-GPmin_26N_NU3)*cfs_taf /*+ CityofSacWholesaleMon*/)/(SumUD_26S_NU1_sv*(1-GPmin_26S_NU1) + SumUD_26N_NU3_sv*(1-GPmin_26N_NU3)/*+CityofSacWholesaleAnn*/))} !Water supply constraints
+define WF_AMR007_WTPFBN    {alias WFmon_AMR007_WTPFBN kind 'DIVERSION-LIMIT' units 'TAF'}
+
+define WFMaxDivRate { !cfs
+    case WF_400 {
+        condition UIFR_MarNov > 400.
+        value 310. + 9999*LODFlag - 310.*LODFlag
+        }
+    case other {
+        condition always
+        value 155.
+        }}
+        
+!---------------------------------------
+!Water Forum - Hodge Criteria
+!---------------------------------------
+
+!  The Water Forum agreed to use the Hodge Flow Criteria as a minimum flow that would preserve and protect the instream resources of the lower American River.
+!  The City agreed to reduce its diversions from the American River water at Fairburn when flows are less than the Hodge Flow Criteria.
+!  Specifically, the PSA allows the City to divert At Fairburn up 310 cfs when flows are above Hodge and extrenmely dry year conditions do not exist.
+
+!Hodge  Criteria (cfs):
+!Oct16-Feb: 2,000
+!Mar-Jun:   3,000
+!Jul-Oct15: 1,750 (weighted flow for October 1879 cfs)
+
+!Max Diversion Rate (cfs):
+!Jan-May: 120
+!Jun-Aug: 155
+!Sep:     120
+!Oct-Dec: 100
+
+!  If flow in the lower American River is less than the Hodge Decision flow levels,
+!  then more of the City of Sacramento demand is shifted to the Sacramento River
+
+
+!  Hodge flow criteria for flow past Fairbairn, measured at H street(C_AMR006)
+define Hodge_thresh { 
+    case October     {condition month == OCT value 1879.0}
+    case NOV_FEB     {condition range(month,NOV,FEB) value 2000.0}
+    case MAR_JUN     {condition range(month,MAR,JUN) value 3000.0}
+    case JUL_SEP     {condition always value 1750.0}
+    }
+
+!  Max diversion (D_AMR007_WTPFBN) at Fairburn if flow is below threshold.
+define Hodge_div_limit {
+    case OCT_DEC     {condition range(month,OCT,DEC) value 100.0}
+    case JUN_AUG     {condition range(month,JUN,AUG) value 155.0}
+    case FEB_MAY_SEP {condition always value 120.0}
+    }
+define Hodge_div_limit_dv {alias Hodge_div_limit kind 'FLOW' units 'CFS'}
+
+! Set up integer to determine the condition for limiting diversions to the City of Sacramento
+define Hst_max {value 60000.0} !zrc@ 29334 < 60000.0
+define int_Hst_abv   {INTEGER std kind 'INTEGER' units 'none'}             ! 1 if C_AMR006 > threshold
+define int_Hst_blw   {alias 1. - int_Hst_abv kind 'INTEGER' units 'NONE'}  ! 1 if C_AMR006 < threshold
+define Hst_above     {std kind 'FLOW-HST-ABV' units 'CFS'}
+define Hst_below     {std kind 'FLOW-HST-BLW' units 'CFS'}
+
+goal Hst_flow {Hst_above - Hst_below = C_AMR006 - Hodge_thresh} 
+goal Hst_abv_force {Hst_above < int_Hst_abv*Hst_max}
+goal Hst_blw_force {Hst_below < Hst_max - int_Hst_abv*Hst_max}
+
+!---------------------------------------
+! Reclamation Water Right Settlement limit
+!---------------------------------------
+/*
+Operating Contract Relating to Folsom and Nimbus Dams and their Related Works and to Diversion of Water by the City of Sacramento, Contract Number 14-06-200-6497 
+
+The City has a water rights settlement contract entered into in 1957 by the City and Reclamatio. At that time, the SWRCB was deciding how to allocate water rights
+on the American River among numerous competing applicants, including the City and USBR. The City and Reclamation had protested each other's applications. This
+contract settled their differences and enabled both parties to drop their protests to the benefit of both parties. h1 the Settlement Contract, the City agreed
+to limitations on the City's rate and amount of diversion under its water rights pennits in exchange for the USBR's agreement to operate its facilities to assure
+the City a pennanent reliable supply of surface water under the City's permits. 
+
+The City agreed to limit its total combined diversions of the Sacramento and American River to a Maximum Combined Diversion. Additionally, the City agreed to limit
+its diversions of Sacramento River water to a maximum of 225 cfs and a maximum amount of 81,800 AF/year and to limit its diversions of American River water to a
+maximun of 675 cfs and up to a maximum amount of 245,000 AF/year in the year 2030, as long as it did not divert more than the Maximun Combined Diversion from both sources.
+ 
+In return, the Settlement Contract requires Reclamation to make available in the rivers at all times enough water to enable the agreed-upon diversions by the City
+pursuant to the City's water rights. The Settlement Contract is permanent and not subject to deficiencies.
+ */
+
+define WRann_AMR007_WTPFBN { 
+    case Existing {condition LODflag==0. value 189.} 
+    case WF2030   {condition LODflag==1. value 245.}}
+
+define WRann_SAC062_WTPSAC {value 81.8} !Annual limit under Settlement Agreement with Reclamation   
+    
+! Define demand for surface water
+define CityofSacDemand          {value (UD_26N_NU3/*+UD_26N_NU3_add*/)*(1-GPmin_26N_NU3) + (UD_26S_NU1/*+UD_26S_NU1_add*/)*(1-GPmin_26S_NU1)}
+define CityofSacDemand_ConfYear {value (UD_26N_NU3/*+UD_26N_NU3_add*/)*(1-GPmin_26N_NU3) + (UD_26S_NU1/*+UD_26S_NU1_add*/)*(1-GPmin_26S_NU1)}
+
+define CityofSacDemand_FWTP {value CityofSacDemand*WRann_AMR007_WTPFBN/(WRann_AMR007_WTPFBN + WRann_SAC062_WTPSAC)}
+define CityofSacDemand_SWTP {value CityofSacDemand*WRann_SAC062_WTPSAC/(WRann_AMR007_WTPFBN + WRann_SAC062_WTPSAC)}
+
+define WTPFBN_WholesaleAdjmnt {value CityofSacWholesaleMon*taf_cfs*WRann_AMR007_WTPFBN/(WRann_AMR007_WTPFBN + WRann_SAC062_WTPSAC)}
+define WTPSAC_WholesaleAdjmnt {value CityofSacWholesaleMon*taf_cfs*WRann_SAC062_WTPSAC/(WRann_AMR007_WTPFBN + WRann_SAC062_WTPSAC)}
+
+! Limits on Wholesale deliveries during Hodge restrictions and Waterforum limit
+! Soft penalty approach used here since giving these deliveries a standard high delivery weight and using a < in the goals below led to a few months where the model released additional water to get flow up the Hodge flow just so it can make these deliveries
+! Deliveries are essentially unweighted in Weight-table.wresl (see note there)
+define D_WTPFBN_WHOLESALE_TOT {std kind'DIVERSION-WHOLESALE' units'CFS'}
+define D_WTPSAC_WHOLESALE_TOT {std kind'DIVERSION-WHOLESALE' units'CFS'}
+
+goal limitWholesale_D_WTPFBN_26N_NU1  {D_WTPFBN_26N_NU1            <  0.} ! NO existing infrastructure, also outside of Am. River point of use (Area D)
+!goal limitWholesale_D_WTPFBN_26N_NU4  {lhs D_WTPFBN_26N_NU4_WHOLESALE rhs (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26N_NU4*taf_cfs lhs>rhs penalty 9999 lhs<rhs penalty 9999}! * LODFlag*9999}  !SSWD - SSA 
+!goal limitWholesale_D_WTPFBN_26S_NU2  {lhs D_WTPFBN_26S_NU2_WHOLESALE rhs (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU2*taf_cfs lhs>rhs penalty 9999 lhs<rhs penalty 9999}! * LODFlag*9999}  !CAWC
+!goal limitWholesale_D_WTPSAC_26S_PU4  {lhs D_WTPSAC_26S_PU4_WHOLESALE rhs (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPSAC_26S_PU4*taf_cfs lhs>rhs penalty 9999 lhs<rhs penalty 9999}! * LODFlag*9999}  !SCWA Zone 40
+!goal limitWholesale_D_WTPFBN_26S_NU3  {lhs D_WTPFBN_26S_NU3_WHOLESALE rhs (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU3*taf_cfs lhs>rhs penalty 9999 lhs<rhs penalty 9999}! * LODFlag*9999}  !FVWC
+
+!goal limitWholesale_D_WTPFBN_26N_NU4  {D_WTPFBN_26N_NU4_WHOLESALE < (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26N_NU4*taf_cfs*(1-LODFlag) + Wholesalemon_WTPFBN_26N_NU4*taf_cfs*LODFlag}!SSWD - SSA 
+!goal limitWholesale_D_WTPFBN_26S_NU2  {D_WTPFBN_26S_NU2_WHOLESALE < (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU2*taf_cfs*(1-LODFlag) + Wholesalemon_WTPFBN_26S_NU2*taf_cfs*LODFlag}!CAWC
+!goal limitWholesale_D_WTPSAC_26S_PU4  {D_WTPSAC_26S_PU4_WHOLESALE < (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPSAC_26S_PU4*taf_cfs*(1-LODFlag) + Wholesalemon_WTPSAC_26S_PU4*taf_cfs*LODFlag}!SCWA Zone 40
+!goal limitWholesale_D_WTPFBN_26S_NU3  {D_WTPFBN_26S_NU3_WHOLESALE < (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU3*taf_cfs*(1-LODFlag) + Wholesalemon_WTPFBN_26S_NU3*taf_cfs*LODFlag}!FVWC
+
+goal limitWholesale_D_WTPFBN_26N_NU4  {D_WTPFBN_26N_NU4_WHOLESALE < Wholesalemon_WTPFBN_26N_NU4*taf_cfs}!SSWD - SSA 
+goal limitWholesale_D_WTPFBN_26S_NU2  {D_WTPFBN_26S_NU2_WHOLESALE < Wholesalemon_WTPFBN_26S_NU2*taf_cfs}!CAWC
+goal limitWholesale_D_WTPSAC_26S_PU4  {D_WTPSAC_26S_PU4_WHOLESALE < Wholesalemon_WTPSAC_26S_PU4*taf_cfs}!SCWA Zone 40
+goal limitWholesale_D_WTPFBN_26S_NU3  {D_WTPFBN_26S_NU3_WHOLESALE < Wholesalemon_WTPFBN_26S_NU3*taf_cfs}!FVWC
+
+goal setD_WTPFBN_WHOLESALE_TOT {D_WTPFBN_WHOLESALE_TOT = D_WTPFBN_26N_NU1 + D_WTPFBN_26N_NU4_WHOLESALE + D_WTPFBN_26S_NU2_WHOLESALE + D_WTPFBN_26S_NU3_WHOLESALE}
+goal setD_WTPSAC_WHOLESALE_TOT {D_WTPSAC_WHOLESALE_TOT = D_WTPSAC_26S_PU4_WHOLESALE}
+
+! Define the amount by which the Hodge Criteria limit diversions
+define Hodge_cut   {std kind 'REDUCTION-CFS' units 'CFS'}
+!goal set_Hodge_cut {Hodge_cut =  max(0., CityofSacDemand_FWTP + WTPFBN_WholesaleAdjmnt*LODFlag - Hodge_div_limit)
+!                    -int_Hst_abv*max(0., CityofSacDemand_FWTP + WTPFBN_WholesaleAdjmnt*LODFlag - Hodge_div_limit)}
+                    
+goal set_Hodge_cut {Hodge_cut =  max(0., CityofSacDemand_FWTP + WTPFBN_WholesaleAdjmnt - Hodge_div_limit)
+                    -int_Hst_abv*max(0., CityofSacDemand_FWTP + WTPFBN_WholesaleAdjmnt - Hodge_div_limit)}                    
+
+!---------------------------------------
+!Constraints
+!---------------------------------------
+!The City of Sacramento has agreed with Reclamation to limit its diversion of American River water under its American River water right permits to a maximum of 675 cfs
+! Commented-out as Water Forum Agreement more binding
+!goal limit1_D_AMR007_WTPFBN  {D_AMR007_WTPFBN < 675.}
+
+! The City of Sacramento has the following permits for diversions from the Sacramento River:
+! Pre-1914 water right up to 75 cfs
+! Permit 992 water up to 225 cfs
+! Permit 11359 water (may be diverted at both American River and Sacramento River)
+! Permit 11360 water (may be diverted at both American River and Sacramento River)
+! The combined maximum allowable diversion under these last two permits includes rediversion of up to 1510 cfs of water diverted, but not stored, by the UARP, and up to 589,000 acre feet per year of stored water.
+
+! Unconstrain rather than quantifying; diversions would not exceed 1510 cfs even under full contract diversions. In CS2 LTO study, diversions are at ~650 cfs from WTPSAC
+!goal limit1_D_SAC062_WTPSAC  {D_SAC062_WTPSAC < 75.0 + 225.0}
+
+! Limit Fairbairn diversion to either the water forum limit or the Hodge limit
+goal limit2_D_AMR007_WTPFBN  {D_AMR007_WTPFBN < int_Hst_abv*WFMaxDivRate + Hodge_div_limit - int_Hst_abv*Hodge_div_limit}
+
+! Split diversions accordig to targets adjusted for whether Wholesale diversions alllowd and Hodge Cut
+!goal limit3_D_AMR007_WTPFBN  {D_AMR007_WTPFBN < CityofSacDemand_FWTP - Hodge_cut + WTPFBN_WholesaleAdjmnt*int_Hst_abv*(1-LODFlag) + WTPFBN_WholesaleAdjmnt*LODFlag}
+goal limit3_D_AMR007_WTPFBN  {D_AMR007_WTPFBN < CityofSacDemand_FWTP - Hodge_cut + WTPFBN_WholesaleAdjmnt}
+
+!goal limit4_D_SAC062_WTPSAC  {D_SAC062_WTPSAC < (1-WFConfYear)*CityofSacDemand_SWTP + D_WTPSAC_26S_PU4_CVP + (1-WFConfYear)*Hodge_cut
+!                                                + WFConfYear*CityofSacDemand_ConfYear - WFConfYear*WFmon_AMR007_WTPFBN*taf_cfs
+!                                                + WTPSAC_WholesaleAdjmnt*int_Hst_abv*(1-LODFlag) + WTPSAC_WholesaleAdjmnt*LODFlag}
+
+goal limit4_D_SAC062_WTPSAC  {D_SAC062_WTPSAC < (1-WFConfYear)*CityofSacDemand_SWTP + D_WTPSAC_26S_PU4_CVP + (1-WFConfYear)*Hodge_cut
+                                                + WFConfYear*CityofSacDemand_ConfYear - WFConfYear*WFmon_AMR007_WTPFBN*taf_cfs
+                                                + WTPSAC_WholesaleAdjmnt}                                                
+                                                                                               
+goal limit5_WF_AMR007_WTPFBN { D_AMR007_WTPFBN < min(WFMaxDivRate, WFmon_AMR007_WTPFBN*taf_cfs) }
+
+!---------------------------------------
+!Output for debugging purposes
+!---------------------------------------
+define WFConfYear_dv           {alias WFConfYear kind 'DEBUG-LAR' units 'NONE'}
+define WFann_AMR007_WTPFBN_dv  {alias WFann_AMR007_WTPFBN kind 'DEBUG-LAR' units 'TAF'}
+define WFmon_AMR007_WTPFBN_dv  {alias WFmon_AMR007_WTPFBN*taf_cfs kind 'DEBUG-LAR' units 'CFS'}
+define WFMaxDivRate_dv         {alias WFMaxDivRate kind 'DEBUG-LAR' units 'CFS'}
+
+define int_Hst_abv_dv          {alias int_Hst_abv kind 'DEBUG-LAR' units 'NONE'}
+define C_AMR007_dv             {alias C_AMR007    kind 'DEBUG-LAR' units 'CFS'}
+
+define Hodge_cut_dv            {alias Hodge_cut kind 'DEBUG-LAR' units 'CFS'}
+define CityofSacDemand_dv      {alias CityofSacDemand kind 'DEBUG-LAR' units 'CFS'}
+define CityofSacDemand_FWTP_dv {alias CityofSacDemand_FWTP kind 'DEBUG-LAR' units 'CFS'}
+define CityofSacDemand_SWTP_dv {alias CityofSacDemand_SWTP kind 'DEBUG-LAR' units 'CFS'}
+
+define CityofSacWholesaleMon_dv {alias CityofSacWholesaleMon*taf_cfs kind 'DEBUG-LAR' units 'cfs'}    
+define CityofSacRetailMon_dv    {alias (UD_26N_NU3+UD_26S_NU1) kind 'DEBUG-LAR' units 'cfs'} 
+!define CityofSacRetailAddMon_dv {alias (UD_26N_NU3_add_dv+UD_26S_NU1_add_dv) kind 'DEBUG-LAR' units 'cfs'}
+
+
+define limit2_D_AMR007_WTPFBN_dv           {alias int_Hst_abv*WFMaxDivRate + Hodge_div_limit - int_Hst_abv*Hodge_div_limit kind 'DEBUG-LAR' units 'CFS'}
+define limit3_D_AMR007_WTPFBN_dv           {alias CityofSacDemand_FWTP - WTPFBN_WholesaleAdjmnt*int_Hst_blw - Hodge_cut kind 'DEBUG-LAR' units 'CFS'}
+define limit4_D_SAC062_WTPSAC_dv           {alias (1-WFConfYear)*CityofSacDemand_SWTP - (1-WFConfYear)*WTPSAC_WholesaleAdjmnt*int_Hst_blw + D_WTPSAC_26S_PU4_CVP + (1-WFConfYear)*Hodge_cut + WFConfYear*CityofSacDemand_ConfYear - WFConfYear*WFmon_AMR007_WTPFBN*taf_cfs kind 'DEBUG-LAR' units 'CFS'}                                               
+define limit5_WF_AMR007_WTPFBN_dv          {alias (1-WFConfYear)*WFMaxDivRate + WFmon_AMR007_WTPFBN*WFConfYear*taf_cfs kind 'DEBUG-LAR' units 'CFS'}
+define limitWholesale_D_WTPFBN_26N_NU4_dv  {alias (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26N_NU4*taf_cfs kind 'DEBUG-LAR' units 'CFS'} 
+define limitWholesale_D_WTPFBN_26S_NU2_dv  {alias (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU2*taf_cfs kind 'DEBUG-LAR' units 'CFS'}
+define limitWholesale_D_WTPSAC_26S_PU4_dv  {alias (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPSAC_26S_PU4*taf_cfs kind 'DEBUG-LAR' units 'CFS'}
+define limitWholesale_D_WTPFBN_26S_NU3_dv  {alias (1-WFConfYear)*int_Hst_abv*Wholesalemon_WTPFBN_26S_NU3*taf_cfs kind 'DEBUG-LAR' units 'CFS'}
+
+
+
+!!!!!!!!!! Total Folsom Res. contract (CVP + Water Rights) water!!!!!!!!!!
+/*goal conD_FOLSM_WTPEDH	   {D_FOLSM_WTPEDH     = D_FOLSM_WTPEDH_CVP + D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_WTPEDH_P21112_WR}
+goal conD_FOLSM_EDCOCA_NU1 {D_FOLSM_EDCOCA_NU1 = D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU1_Ditch_WR + D_FOLSM_EDCOCA_NU1_P21112_WR} !OCA Urban dem can be met from CVP and WR
+goal conD_FOLSM_EDCOCA_NU2 {D_FOLSM_EDCOCA_NU2 = D_FOLSM_EDCOCA_NU2_CVP + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR} !OCA Urban dem can be met from CVP and WR
+goal conD_FOLSM_EDCOCA_NA1 {D_FOLSM_EDCOCA_NA1 = D_FOLSM_EDCOCA_NA1_P21112_WR}
+goal conD_FOLSM_EDCOCA_NA2 {D_FOLSM_EDCOCA_NA2 = D_FOLSM_EDCOCA_NA2_P21112_WR} 
+
+goal zeroLTWAC_FolsomAg {D_FOLSM_EDCOCA_NA2_P21112_WR + D_FOLSM_EDCOCA_NA1_P21112_WR =  0.} !Water through P21112-Folsom LTWAC for M&I Use only
+
+define D_FOLSM_EID_WR   {std kind 'DIVERSION' units 'CFS'}
+goal setD_FOLSM_EID_WR {D_FOLSM_WTPEDH_WR =   D_FOLSM_WTPEDH_Ditch_WR      + D_FOLSM_WTPEDH_P21112_WR
+                                              + D_FOLSM_EDCOCA_NU1_Ditch_WR  + D_FOLSM_EDCOCA_NU1_P21112_WR
+                                              + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR
+                                              + D_FOLSM_EDCOCA_NA1_P21112_WR + D_FOLSM_EDCOCA_NA2_P21112_WR}
+
+define D_FOLSM_EDCOCA      {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_EDCOCA_WR   {std kind 'DIVERSION' units 'CFS'}
+define D_FOLSM_EDCOCA_CVP  {std kind 'DIVERSION-CVP' units 'CFS'}
+
+
+goal setD_FOLSM_EDCOCA     {D_FOLSM_EDCOCA = D_FOLSM_EDCOCA_WR + D_FOLSM_EDCOCA_CVP}
+goal setD_FOLSM_EDCOCA_WR  {D_FOLSM_EDCOCA_WR = D_FOLSM_EDCOCA_NU1_Ditch_WR  + D_FOLSM_EDCOCA_NU1_P21112_WR + D_FOLSM_EDCOCA_NU2_Ditch_WR + D_FOLSM_EDCOCA_NU2_P21112_WR + D_FOLSM_EDCOCA_NA1_P21112_WR + D_FOLSM_EDCOCA_NA2_P21112_WR}                         
+goal setD_FOLSM_EDCOCA_CVP {D_FOLSM_EDCOCA_CVP = D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP} 
+
+define D_FOLSM_EDC_CVP     {std kind 'DIVERSION' units 'CFS'}   
+
+                                                                                       
+goal setD_FOLSM_WTPEDH_WR  {D_FOLSM_WTPEDH_WR  = D_FOLSM_WTPEDH_Ditch_WR + D_FOLSM_WTPEDH_P21112_WR }                                             
+goal setD_FOLSM_EDC_CVP    {D_FOLSM_EDC_CVP    = D_FOLSM_WTPEDH_CVP + D_FOLSM_EDCOCA_NU1_CVP + D_FOLSM_EDCOCA_NU2_CVP}*/
+ 

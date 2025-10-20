@@ -1,0 +1,21 @@
+!! TRINITY Minimum Flow Code
+!       code by J. Burke
+! 2017.11.27 - USBR @JMG - updated for consistency with CSII 'Current Ops' v2017.11.07 @NP
+
+! Get the minimum flow required at TRINITY (C94)
+define MF_LWSTNROD { 
+       select       river_q
+       from         Trinitymin
+       where        month=month, wyt_TRIN=wyt_TRIN}
+
+define MF_LWSTN {
+    case TFFA {
+        condition month>JUL .and. wyt_TRIN>1
+        value MF_LWSTNROD + 413.25 } ! 50 TAF over August-September is additional flow release for Klamath
+    case otherwise {
+        condition always 
+        value MF_LWSTNROD }
+}
+	   
+! Set the minimum flow goal       
+goal TrinityMin {C_LWSTN_MIF < MF_LWSTN }

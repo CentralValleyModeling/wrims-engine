@@ -1,0 +1,22 @@
+!For now, implement simple Mallard Slough operation. If salinity at Mallard Slough is at or below the delivery target, deliver as much water
+!to CCWD from Mallard Slough as demand allows.
+
+
+define lim_MS_div {
+	case OverWQStd {
+                condition       WQ406A_MS > WQ420_target
+		value		0.
+	}
+	case otherwise {
+		condition	always
+                value           D406A_MS_max
+	}
+}
+
+goal set_lim_MS_div {D406A_MS < lim_MS_div}
+
+!Calculate estimate of Mallard Slough diversion for use in WQ operations
+
+define D406A_MS_est {value min(D406A_MS_max, lim_MS_div, demand_D420)}
+
+define D406A_MS_est_ {alias D406A_MS_est kind 'diversion-estimate' units 'cfs'}

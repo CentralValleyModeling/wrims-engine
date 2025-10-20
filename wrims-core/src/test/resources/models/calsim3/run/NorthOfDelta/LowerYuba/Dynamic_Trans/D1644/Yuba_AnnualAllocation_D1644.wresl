@@ -1,0 +1,430 @@
+/*
+File Name: Yuba_AnnualAllocations_D1644.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Calculate annual allocation to Yuba County Water Agency Member Units under D1644 operations
+
+*/
+
+!***********************************************************************************************************************************************************
+! The variable 'YCWA_Alloc' is set in April. It is the annual allocation decision for YCWA based on !a multi-period optimization for the period April-September
+! It is defined in the lower Yuba system files constraints-contracts.wresl
+!***********************************************************************************************************************************************************
+
+goal set_YCWA_Alloc_D1644 {lhs YCWA_Alloc_D1644
+    case first5months {condition month <= MAR .and. wateryear == bgnWY rhs 1.0 lhs>rhs constrain lhs<rhs constrain}
+        case April    {condition month == APR rhs 1.0 lhs>rhs constrain lhs<rhs penalty 0}
+        case Other    {condition always rhs YCWA_Alloc_D1644(-1) lhs>rhs constrain lhs<rhs constrain}}
+ 
+!The carryover storage requirement is relaxed when it would result in a delivery shortage of more than 50 percent in the current year. This is because YCWA would not operate the Yuba
+!Project so as to impose deficiencies of 50 percent or greater in the current year to protect against the risk of a 50 percent curtailment in the following year. 
+goal set_allocation_lower_D1644 {YCWA_Alloc_D1644 > 0.5}
+
+!***********************************************************************************************************************************************************
+! Set initial conditions in New Bullards Bar Reservoir for forecasting operations April-September
+!***********************************************************************************************************************************************************
+goal set_S_NBB_MAR_D1644  {lhs S_NBB_MAR_D1644
+    case April      {condition month == APR rhs S_NBLDB_D1644(-1) lhs>rhs constrain lhs<rhs constrain}
+    case other      {condition always rhs 0.0 lhs>rhs constrain lhs<rhs constrain}}
+
+!***********************************************************************************************************************************************************
+! Apply a large penalty if the forecasted carryover storage is less than the target carryover storage
+!***********************************************************************************************************************************************************
+
+goal set_carryover_NBB_D1644 {
+	lhs S_NBB_SEP_D1644 
+	rhs carryover_NBB_target 
+	lhs<rhs penalty 100000.*taf_cfs lhs>rhs penalty 0.}
+
+!**********************************************************************************************************************************************************
+! Write continuity equations based on a simplified network of tyhe following nodes
+! New Bullards Bar; Englebright; and Daguerrepoint Dam
+! C_NBB = release from New Bullards Bar
+! C_EB = release from Englebright
+! C_DP = flow below Daguerre Point Diversion Dam
+!*********************************************************************************************************************************************************** 
+
+!continuity for New Bullards Bar
+goal continuityNBB_APR_D1644 {I_NBB_APR-C_NBB_APR_D1644=S_NBB_APR_D1644*taf_cfs-S_NBB_MAR_D1644*taf_cfs}
+goal continuityNBB_MAY_D1644 {I_NBB_MAY-C_NBB_MAY_D1644=S_NBB_MAY_D1644*taf_cfs*30/31-S_NBB_APR_D1644*taf_cfs*30/31}
+goal continuityNBB_JUN_D1644 {I_NBB_JUN-C_NBB_JUN_D1644=S_NBB_JUN_D1644*taf_cfs-S_NBB_MAY_D1644*taf_cfs}
+goal continuityNBB_JUL_D1644 {I_NBB_JUL-C_NBB_JUL_D1644=S_NBB_JUL_D1644*taf_cfs*30/31-S_NBB_JUN_D1644*taf_cfs*30/31}
+goal continuityNBB_AUG_D1644 {I_NBB_AUG-C_NBB_AUG_D1644=S_NBB_AUG_D1644*taf_cfs*30/31-S_NBB_JUL_D1644*taf_cfs*30/31}
+goal continuityNBB_SEP_D1644 {I_NBB_SEP-C_NBB_SEP_D1644=S_NBB_SEP_D1644*taf_cfs-S_NBB_AUG_D1644*taf_cfs}
+
+!continuity for Englebright
+goal continuityEB_APR_D1644 {I_EB_APR+C_NBB_APR_D1644=C_EB_APR_D1644} 
+goal continuityEB_MAY_D1644 {I_EB_MAY+C_NBB_MAY_D1644=C_EB_MAY_D1644} 
+goal continuityEB_JUN_D1644 {I_EB_JUN+C_NBB_JUN_D1644=C_EB_JUN_D1644} 
+goal continuityEB_JUL_D1644 {I_EB_JUL+C_NBB_JUL_D1644=C_EB_JUL_D1644} 
+goal continuityEB_AUG_D1644 {I_EB_AUG+C_NBB_AUG_D1644=C_EB_AUG_D1644} 
+goal continuityEB_SEP_D1644 {I_EB_SEP+C_NBB_SEP_D1644=C_EB_SEP_D1644} 
+
+!continuity for Daguerre Point
+goal continuityDGR_APR_D1644 {I_DGR_APR+C_EB_APR_D1644=C_DGR_APR_D1644+D_DGR_APR_D1644}
+goal continuityDGR_MAY_D1644 {I_DGR_MAY+C_EB_MAY_D1644=C_DGR_MAY_D1644+D_DGR_MAY_D1644}
+goal continuityDGR_JUN_D1644 {I_DGR_JUN+C_EB_JUN_D1644=C_DGR_JUN_D1644+D_DGR_JUN_D1644}
+goal continuityDGR_JUL_D1644 {I_DGR_JUL+C_EB_JUL_D1644=C_DGR_JUL_D1644+D_DGR_JUL_D1644}
+goal continuityDGR_AUG_D1644 {I_DGR_AUG+C_EB_AUG_D1644=C_DGR_AUG_D1644+D_DGR_AUG_D1644}
+goal continuityDGR_SEP_D1644 {I_DGR_SEP+C_EB_SEP_D1644=C_DGR_SEP_D1644+D_DGR_SEP_D1644}
+
+!**********************************************************************************************************************************************************
+! Limit forecasted diversions at Daguerrepoint Dam to sum of water rights and YWA allocation
+! CL_DGR is 12-month repeating timeseries data equal to 162.46 TAF
+!   BVID = 24.462
+!   CID  = 60.000
+!   HIC  = 78.000
+! WR_DGR is 12-month repeating timeseries data equal to 226.04 TAF
+!   BVID = 9.500
+!   BWD  = 75.647
+!   SYWD = 44.330
+!   DCMWC = 16.743
+!   WWD  = 40.230
+!   CID  = 12.000
+!   RWD  = 25.101
+!   Marysville = 2.500
+! Total is 388.513 TAF (which is larger than actual diversions)
+!*********************************************************************************************************************************************************** 
+
+! Daguerre Point deliveries based on water rights and allocations
+! Demand is approximately 80% of full entitlement
+! The adjustment should drop to zero once the allocation drops below 1.
+! Code below adjusts the contract/water right when allocations are 1 (ie non-binding, and crop water demand is binding)
+! and removes adjustment when allocations are less than 1 (ie binding and crop water demand is non-binding)
+! Goal of code: when YCWA_Alloc <1, int_YCWA_alloc2=1, int_YCWA_alloc=0
+!				when YCWA_Alloc =1, int_YCWA_alloc2=0, int_YCWA_alloc=1
+
+define int_YCWA_alloc_D1644  {integer std kind 'INTEGER' units 'NONE'}
+define int_YCWA_alloc2_D1644 {integer std kind 'INTEGER' units 'NONE'} ! Fixed to be properly defined as an integer, NSO 06/21/2022
+goal setint_YCWA_alloc1_D1644 {int_YCWA_alloc2_D1644 < 99999 - 99999*YCWA_Alloc_D1644}
+goal setint_YCWA_alloc2_D1644 {int_YCWA_alloc2_D1644 > 1-YCWA_Alloc_D1644}
+goal setint_YCWA_alloc3_D1644 {int_YCWA_alloc_D1644 = 1-int_YCWA_alloc2_D1644}
+
+goal allocation_APR2_D1644 {D_DGR_APR_D1644=D_DGR_APR1_D1644+ D_DGR_APR2_D1644}
+goal allocation_MAY2_D1644 {D_DGR_MAY_D1644=D_DGR_MAY1_D1644+ D_DGR_MAY2_D1644}
+goal allocation_JUN2_D1644 {D_DGR_JUN_D1644=D_DGR_JUN1_D1644+ D_DGR_JUN2_D1644}
+goal allocation_JUL2_D1644 {D_DGR_JUL_D1644=D_DGR_JUL1_D1644+ D_DGR_JUL2_D1644}
+goal allocation_AUG2_D1644 {D_DGR_AUG_D1644=D_DGR_AUG1_D1644+ D_DGR_AUG2_D1644}
+goal allocation_SEP2_D1644 {D_DGR_SEP_D1644=D_DGR_SEP1_D1644+ D_DGR_SEP2_D1644}
+
+goal allocation_APR1_D1644 {D_DGR_APR1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR   + AprilFlag*WR_DGR   }
+goal allocation_MAY1_D1644 {D_DGR_MAY1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(1)+ AprilFlag*WR_DGR(1)}
+goal allocation_JUN1_D1644 {D_DGR_JUN1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(2)+ AprilFlag*WR_DGR(2)}
+goal allocation_JUL1_D1644 {D_DGR_JUL1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(3)+ AprilFlag*WR_DGR(3)}
+goal allocation_AUG1_D1644 {D_DGR_AUG1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(4)+ AprilFlag*WR_DGR(4)}
+goal allocation_SEP1_D1644 {D_DGR_SEP1_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(5)+ AprilFlag*WR_DGR(5)}
+
+goal allocation_APR_D1644 {D_DGR_APR_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR   + AprilFlag*WR_DGR   -  5*taf_cfs   *AprilFlag*int_YCWA_alloc2_D1644}
+goal allocation_MAY_D1644 {D_DGR_MAY_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(1)+ AprilFlag*WR_DGR(1)- 10*taf_cfs(1)*AprilFlag*int_YCWA_alloc2_D1644}
+goal allocation_JUN_D1644 {D_DGR_JUN_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(2)+ AprilFlag*WR_DGR(2)- 10*taf_cfs(2)*AprilFlag*int_YCWA_alloc2_D1644}
+goal allocation_JUL_D1644 {D_DGR_JUL_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(3)+ AprilFlag*WR_DGR(3)- 10*taf_cfs(3)*AprilFlag*int_YCWA_alloc2_D1644}
+goal allocation_AUG_D1644 {D_DGR_AUG_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(4)+ AprilFlag*WR_DGR(4)- 10*taf_cfs(4)*AprilFlag*int_YCWA_alloc2_D1644}
+goal allocation_SEP_D1644 {D_DGR_SEP_D1644=AprilFlag*YCWA_Alloc_D1644*CL_DGR(5)+ AprilFlag*WR_DGR(5)-  5*taf_cfs(5)*AprilFlag*int_YCWA_alloc2_D1644}
+
+define D_DGR_total_D1644 {std kind 'DELIVERY' units 'TAF'}
+goal setD_DGR_total_D1644 {D_DGR_total_D1644 = D_DGR_APR_D1644*cfs_taf + D_DGR_MAY_D1644*cfs_taf(1) + D_DGR_JUN_D1644*cfs_taf(2) + D_DGR_JUL_D1644*cfs_taf(3)
+	+ D_DGR_AUG_D1644*cfs_taf(4)+ D_DGR_SEP_D1644*cfs_taf(5)}
+
+!**********************************************************************************************************************************************************
+! Spit arcs into MIF and ADD components to model flow requirements for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+goal continuityCDGR_APR_D1644 {C_DGR_APR_D1644=C_DGR_MIF_APR_D1644+C_DGR_ADD_APR_D1644}
+goal continuityCDGR_MAY_D1644 {C_DGR_MAY_D1644=C_DGR_MIF_MAY_D1644+C_DGR_ADD_MAY_D1644}
+goal continuityCDGR_JUN_D1644 {C_DGR_JUN_D1644=C_DGR_MIF_JUN_D1644+C_DGR_ADD_JUN_D1644}
+goal continuityCDGR_JUL_D1644 {C_DGR_JUL_D1644=C_DGR_MIF_JUL_D1644+C_DGR_ADD_JUL_D1644}
+goal continuityCDGR_AUG_D1644 {C_DGR_AUG_D1644=C_DGR_MIF_AUG_D1644+C_DGR_ADD_AUG_D1644}
+goal continuityCDGR_SEP_D1644 {C_DGR_SEP_D1644=C_DGR_MIF_SEP_D1644+C_DGR_ADD_SEP_D1644}
+
+goal continuityCEB_APR2_D1644 {C_EB_APR_D1644=C_EB_MIF_APR_D1644+C_EB_ADD_APR_D1644}
+goal continuityCEB_MAY2_D1644 {C_EB_MAY_D1644=C_EB_MIF_MAY_D1644+C_EB_ADD_MAY_D1644}
+goal continuityCEB_JUN2_D1644 {C_EB_JUN_D1644=C_EB_MIF_JUN_D1644+C_EB_ADD_JUN_D1644}
+goal continuityCEB_JUL2_D1644 {C_EB_JUL_D1644=C_EB_MIF_JUL_D1644+C_EB_ADD_JUL_D1644}
+goal continuityCEB_AUG2_D1644 {C_EB_AUG_D1644=C_EB_MIF_AUG_D1644+C_EB_ADD_AUG_D1644}
+goal continuityCEB_SEP2_D1644 {C_EB_SEP_D1644=C_EB_MIF_SEP_D1644+C_EB_ADD_SEP_D1644}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Smartville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 2 (D1644 Interim)
+!***********************************************************************************************************************************************************
+
+define MF_YUB024_APR_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=7}}
+        
+define MF_YUB024_MAY_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}
+    case AN {
+        condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}
+    case BN {
+        condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}
+    case Dry {
+        condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}
+    case Crit {
+        condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=8}}
+
+define MF_YUB024_JUN_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}
+    case AN {
+        condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}
+    case BN {
+        condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}
+    case Dry {
+        condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}
+    case Crit {
+        condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=9}}
+
+define MF_YUB024_JUL_D1644 {        
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}
+        case otherwise {
+            condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=10}}
+        
+define MF_YUB024_AUG_D1644 {         
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}
+        case otherwise {
+            condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=11}}
+
+define MF_YUB024_SEP_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}
+    case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}
+    case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}
+    case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}
+    case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}
+    case otherwise {
+             condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=237,standard = 2,month=12}}
+
+goal minflowEB_APR_D1644 {C_EB_MIF_APR_D1644=MF_YUB024_APR_D1644*AprilFlag}
+goal minflowEB_MAY_D1644 {C_EB_MIF_MAY_D1644=MF_YUB024_MAY_D1644*AprilFlag}
+goal minflowEB_JUN_D1644 {C_EB_MIF_JUN_D1644=MF_YUB024_JUN_D1644*AprilFlag}
+goal minflowEB_JUL_D1644 {C_EB_MIF_JUL_D1644=MF_YUB024_JUL_D1644*AprilFlag}
+goal minflowEB_AUG_D1644 {C_EB_MIF_AUG_D1644=MF_YUB024_AUG_D1644*AprilFlag}
+goal minflowEB_SEP_D1644 {C_EB_MIF_SEP_D1644=MF_YUB024_SEP_D1644*AprilFlag}
+
+!**********************************************************************************************************************************************************
+!  Impose flow requirement at Marysville for purposes of forecasting operations April-September
+!  Yuba_MinFlowCrit = 2 (D1644 Interim)
+!***********************************************************************************************************************************************************
+
+define MF_YUB006_APR_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=7}}
+        
+define MF_YUB006_MAY_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}
+    case AN {
+        condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}
+    case BN {
+        condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}
+    case Dry {
+        condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}
+    case Crit {
+        condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=8}}
+
+define MF_YUB006_JUN_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}
+    case AN {
+        condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}
+    case BN {
+        condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}
+    case Dry {
+        condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}
+    case Crit {
+        condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=9}}
+
+define MF_YUB006_JUL_D1644 {        
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=10}}
+        
+define MF_YUB006_AUG_D1644 {         
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}
+        case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}
+        case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}
+        case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}
+        case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}
+        case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=11}}
+
+define MF_YUB006_SEP_D1644 {
+    case Wet {
+            condition YrType_D1644 == 1
+            select Wet   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}
+    case AN {
+            condition YrType_D1644 == 2
+            select AN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}
+    case BN {
+            condition YrType_D1644 == 3
+            select BN    from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}
+    case Dry {
+            condition YrType_D1644 == 4
+            select Dry   from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}
+    case Crit {
+            condition YrType_D1644 == 5
+            select Crit  from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}
+    case otherwise {
+        condition always
+            select Ecrit from Yuba_LowerYubaMinflow where C_arc=230,standard = 2,month=12}}
+
+goal minflowDGR_APR_D1644 {C_DGR_MIF_APR_D1644=MF_YUB006_APR_D1644*AprilFlag}
+goal minflowDGR_MAY_D1644 {C_DGR_MIF_MAY_D1644=MF_YUB006_MAY_D1644*AprilFlag}
+goal minflowDGR_JUN_D1644 {C_DGR_MIF_JUN_D1644=MF_YUB006_JUN_D1644*AprilFlag}
+goal minflowDGR_JUL_D1644 {C_DGR_MIF_JUL_D1644=MF_YUB006_JUL_D1644*AprilFlag}
+goal minflowDGR_AUG_D1644 {C_DGR_MIF_AUG_D1644=MF_YUB006_AUG_D1644*AprilFlag}
+goal minflowDGR_SEP_D1644 {C_DGR_MIF_SEP_D1644=MF_YUB006_SEP_D1644*AprilFlag}
+
+!**********************************************************************************************************************************************************
+!  Define maximum reservoir storage levels for purposes of forecasting operations April-September
+!***********************************************************************************************************************************************************
+
+define S_NBBlevel4_APR_D1644 {select target from res_level where res_num=93,level=1644,month=7}
+define S_NBBlevel4_MAY_D1644 {select target from res_level where res_num=93,level=1644,month=8}
+define S_NBBlevel4_JUN_D1644 {select target from res_level where res_num=93,level=1644,month=9}
+define S_NBBlevel4_JUL_D1644 {select target from res_level where res_num=93,level=1644,month=10}
+define S_NBBlevel4_AUG_D1644 {select target from res_level where res_num=93,level=1644,month=11}
+define S_NBBlevel4_SEP_D1644 {select target from res_level where res_num=93,level=1644,month=12}
+
+!**********************************************************************************************************************************************************
+!  Apply a large penalty if the forecasted storage is greater than top of conservation
+!***********************************************************************************************************************************************************
+
+goal set_maxS_NBB_APR_D1644 {lhs S_NBB_APR_D1644 rhs S_NBBlevel4_APR_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_MAY_D1644 {lhs S_NBB_MAY_D1644 rhs S_NBBlevel4_MAY_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUN_D1644 {lhs S_NBB_JUN_D1644 rhs S_NBBlevel4_JUN_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_JUL_D1644 {lhs S_NBB_JUL_D1644 rhs S_NBBlevel4_JUL_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_AUG_D1644 {lhs S_NBB_AUG_D1644 rhs S_NBBlevel4_AUG_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}
+goal set_maxS_NBB_SEP_D1644 {lhs S_NBB_SEP_D1644 rhs S_NBBlevel4_SEP_D1644 lhs>rhs penalty 100000.*taf_cfs lhs<rhs penalty 0.}

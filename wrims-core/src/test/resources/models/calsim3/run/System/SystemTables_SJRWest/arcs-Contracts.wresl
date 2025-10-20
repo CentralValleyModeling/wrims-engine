@@ -1,0 +1,1113 @@
+/*
+CALSIM 3 SYSTEM FILE
+ARCS-CONTRACTS.WRESL
+
+NAMING TAKES THE FOLLOWING FORMS:
+
+NAMING TAKES THE FOLLOWING FORMS:
+CL_{ORIGIN PREFIX}_{DESTINATION}    - limitation on specific contractors diversion from particular source
+
+*/
+ 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! CVP Annual Contract Amounts
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Each contractor has a "code", which enables all contract info to be in the same table
+! The contractor code can be parsed as AABC.d where:
+! AA = WBA #
+! B = 1 for Ag, 2 for RF, 3 for MI, and 4 for EX
+! C = the count of the particular contract type in the WBA
+! d = used if a contractor has more than one contract
+! Example: 7214 would be 72_PA4
+
+! CL variables are annual contract limits
+! CLM variables are monthly contract limits
+! These values are in TAF
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!WBA 50 Contracts
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  
+! 50_PA1
+define CL_50_PA1       {select contract from CVP_SOD_Contracts where contractor=5011}  ! Banta Carbona, Westside
+
+define AW_50_PA1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_50_PA1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_50_PA1(i)+AWR_50_PA1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_50_PA1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_50_PA1(i)+AWR_50_PA1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_50_PA1_ann_dv(-1))}
+}         
+goal set_50_PA1_ann_dv {AW_50_PA1_ann_dv = AW_50_PA1_ann}
+
+define DIST_50_PA1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_50_PA1     {value (AWO_50_PA1+AWR_50_PA1)*cfs_taf/AW_50_PA1_ann}
+goal set_DIST_50_PA1_dv{DIST_50_PA1_dv = DIST_50_PA1}
+
+define CLM_50_PA1      {value CL_50_PA1 * DIST_50_PA1}
+define CLM_50_PA1_     {alias CL_50_PA1 * DIST_50_PA1     kind 'contract-limit' units 'taf'}
+
+
+! 50_PU  
+define CL_50_PUa       {select contract from CVP_SOD_Contracts where contractor=5031.0}  ! 10 taf CVP MI Reliability
+define CL_50_PUb       {select contract from CVP_SOD_Contracts where contractor=5031.1}  ! 10 taf from SSJID 
+define CL_50_PUc       {select contract from CVP_SOD_Contracts where contractor=5031.2}  ! 10 taf CVP Ag Reliability (assignment from BCID and WSID)
+define CL_50_PU        {value  CL_50_PUa + CL_50_PUb + CL_50_PUc}
+
+define UD_50_PU_ann_dv {std kind 'demand-annual' units 'taf'}
+define UD_50_PU_ann    {   
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+        condition month==OCT .and. wateryear==bgnWY
+        sum(i=0,11,1)  (UD_50_PU(i)*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear  -- use previous contract year
+        condition month==MAR .and. wateryear==EndWY
+        value          (UD_50_PU_ann_dv(-1))}
+    case March {    ! compute annual demand at start of each contract year
+        condition month==MAR .and. wateryear<EndWY
+        sum(i=0,11,1)  (UD_50_PU(i)*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year 
+        condition always
+        value          (UD_50_PU_ann_dv(-1))}
+}
+goal set_50_PU_ann_dv  {UD_50_PU_ann_dv = UD_50_PU_ann}
+
+define UD_50_PUa_ann {value min(CL_50_PUa, UD_50_PU_ann)}
+define UD_50_PUc_ann {value max(0., UD_50_PU_ann - UD_50_PUa_ann)}
+define UD_50_PUb_ann {value max(0., UD_50_PU_ann - UD_50_PUa_ann - UD_50_PUc_ann)}
+
+define DIST_50_PU_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_50_PU      {value UD_50_PU*cfs_taf/UD_50_PU_ann}
+goal set_DIST_50_PU_dv {DIST_50_PU_dv = DIST_50_PU}
+
+define CLM_50_PUa      {value CL_50_PUa * DIST_50_PU}
+define CLM_50_PUb      {value CL_50_PUb * DIST_50_PU}
+define CLM_50_PUc      {value CL_50_PUc * DIST_50_PU}
+define CLM_50_PU       {value CLM_50_PUa + CLM_50_PUb + CLM_50_PUc}
+define CLM_50_PUa_     {alias CL_50_PUa * DIST_50_PU    kind 'contract-limit' units 'taf' }
+define CLM_50_PUb_     {alias CL_50_PUb * DIST_50_PU    kind 'contract-limit' units 'taf' }
+define CLM_50_PUc_     {alias CL_50_PUc * DIST_50_PU    kind 'contract-limit' units 'taf' }
+define CLM_50_PU_      {alias CLM_50_PUa + CLM_50_PUb + CLM_50_PUc   kind 'contract-limit' units 'taf' }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*********************************************************
+! Demand Unit 71_NA1  Riparian and Appropriative Diverters
+
+!This demand unit represents lands that are located on the left bank of the San Joaquin River,
+!between Orestimba CReek and Del Puerto Creek. Diversions are made by Twin Oaks Irrigation Company.
+
+! A004327: Twin Oask IC
+! February 15 - October 15 period of diversion up to 21.91 cfs
+! Irrigation of 2,212 acres
+
+define WRmon_SJR102_71_NA1_CFS { !in cfs
+	case October   {condition month == OCT value 21.91/2.}
+	case NovJan    {condition range(month, nov,jan) value 0.}
+	case February  {condition month == FEB value 21.91/2.}
+	case Otherwise {condition always value 21.91}
+}
+
+define WRmon_SJR102_71_NA1 {value WRmon_SJR102_71_NA1_CFS * cfs_taf}
+define WR_SJR102_71_NA1 {alias WRmon_SJR102_71_NA1 kind 'WATER-RIGHT' UNITS 'TAF'}
+
+
+!*********************************************************
+! Demand Unit 71_NA2  Riparian and Appropriative Diverters
+
+!This demand unit represents lands that are located on the left bank of the San Joaquin River,
+!between Orestimba Creek and Del Puerto Creek. Diversions are made by El Solyo WD and NBINV AP6 LLC (fomerly Blewett Ranch)
+
+! A001476: El SOlyo WD.
+! March 1 - November 1 period of diversion up to 46.74 cfs
+! Irrigation of 3,781 acres
+
+! A001195: NBINV AP6 LLC. (Ignore diversions under S016897, S016965, S016949, S021735)
+! March 1 - October 15 period of diversion up to 35.00 cfs
+! Irrigation of 2,359 acres
+
+define WRmon_SJR090_71_NA2_CFS { !in cfs
+	case October   {condition month == OCT value 46.74 + 35./2}
+	case NovFeb    {condition range(month, nov,feb) value 0.}
+	case Otherwise {condition always value 46.74 + 35.00}
+}
+
+define WRmon_SJR090_71_NA2 {value WRmon_SJR090_71_NA2_CFS * cfs_taf}
+define WR_SJR090_71_NA2 {alias WRmon_SJR090_71_NA2 kind 'WATER-RIGHT' UNITS 'TAF'}
+
+
+!*********************************************************
+! 71_PU1
+define CL_71_PU1       {select contract from CVP_SOD_Contracts where contractor=7131}  ! Musco Olive Products
+
+define UD_71_PU1_ann_dv{std kind 'demand-annual' units 'taf'}
+define UD_71_PU1_ann   {   
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+        condition month==OCT .and. wateryear==bgnWY
+        sum(i=0,11,1)  (UD_71_PU1(i)*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear  -- use previous contract year
+        condition month==MAR .and. wateryear==EndWY
+        value          (UD_71_PU1_ann_dv(-1))}
+    case March {    ! compute annual demand at start of each contract year
+        condition month==MAR .and. wateryear<EndWY
+        sum(i=0,11,1)  (UD_71_PU1(i)*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year 
+        condition always
+        value          (UD_71_PU1_ann_dv(-1))}
+}
+goal set_71_PU1_ann_dv {UD_71_PU1_ann_dv = UD_71_PU1_ann}
+
+define DIST_71_PU1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PU1     {case zero{ condition UD_71_PU1_ann<.1 value 0.0} case otherwise{ condition always value  UD_71_PU1*cfs_taf/UD_71_PU1_ann}}
+goal set_DIST_71_PU1_dv{DIST_71_PU1_dv = DIST_71_PU1}
+
+define CLM_71_PU1      {value CL_71_PU1 * DIST_71_PU1}
+define CLM_71_PU1_     {alias CL_71_PU1 * DIST_71_PU1   kind 'contract-limit' units 'taf' }
+
+
+!*********************************************************
+! 71_PU2
+define CL_71_PU2       {select contract from CVP_SOD_Contracts where contractor=7132}  ! VA Cemetary
+
+define UD_71_PU2_ann_dv{std kind 'demand-annual' units 'taf'}
+define UD_71_PU2_ann   {   
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+        condition month==OCT .and. wateryear==bgnWY
+        sum(i=0,11,1)  (UD_71_PU2(i)*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear  -- use previous contract year
+        condition month==MAR .and. wateryear==EndWY
+        value          (UD_71_PU2_ann_dv(-1))}
+    case March {    ! compute annual demand at start of each contract year
+        condition month==MAR .and. wateryear<EndWY
+        sum(i=0,11,1)  (UD_71_PU2(i)*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year 
+        condition always
+        value          (UD_71_PU2_ann_dv(-1))}
+}
+goal set_71_PU2_ann_dv {UD_71_PU2_ann_dv = UD_71_PU2_ann}
+
+define DIST_71_PU2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PU2     {case zero{ condition UD_71_PU2_ann<.1 value 0.0} case otherwise{ condition always value  UD_71_PU2*cfs_taf/UD_71_PU2_ann}}
+goal set_DIST_71_PU2_dv{DIST_71_PU2_dv = DIST_71_PU2}
+
+define CLM_71_PU2      {value CL_71_PU2 * DIST_71_PU2}
+define CLM_71_PU2_     {alias CL_71_PU2 * DIST_71_PU2   kind 'contract-limit' units 'taf' }
+
+
+!*********************************************************
+! 71_PA1
+define CL_71_PA1       {select contract from CVP_SOD_Contracts where contractor=7111}  ! Hospital WD
+
+define AW_71_PA1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA1(i)+AWR_71_PA1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA1(i)+AWR_71_PA1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA1_ann_dv(-1))}
+}         
+goal set_71_PA1_ann_dv {AW_71_PA1_ann_dv = AW_71_PA1_ann}
+
+define DIST_71_PA1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA1     {value (AWO_71_PA1+AWR_71_PA1)*cfs_taf/AW_71_PA1_ann}
+goal set_DIST_71_PA1_dv{DIST_71_PA1_dv = DIST_71_PA1}
+
+define CLM_71_PA1      {value CL_71_PA1 * DIST_71_PA1}
+define CLM_71_PA1_     {alias CL_71_PA1 * DIST_71_PA1     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 71_PA2
+define CL_71_PA2       {select contract from CVP_SOD_Contracts where contractor=7112}  ! West Stanislaus ID
+
+define AW_71_PA2_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA2_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA2(i)+AWR_71_PA2(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA2_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA2(i)+AWR_71_PA2(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA2_ann_dv(-1))}
+}         
+goal set_71_PA2_ann_dv {AW_71_PA2_ann_dv = AW_71_PA2_ann}
+
+define DIST_71_PA2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA2     {value (AWO_71_PA2+AWR_71_PA2)*cfs_taf/AW_71_PA2_ann}
+goal set_DIST_71_PA2_dv{DIST_71_PA2_dv = DIST_71_PA2}
+
+define CLM_71_PA2      {value CL_71_PA2 * DIST_71_PA2}
+define CLM_71_PA2_     {alias CL_71_PA2 * DIST_71_PA2     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 71_PA3
+define CL_71_PA3       {select contract from CVP_SOD_Contracts where contractor=7113}  ! Kern Canon WD
+
+define AW_71_PA3_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA3_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA3(i)+AWR_71_PA3(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA3_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA3(i)+AWR_71_PA3(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA3_ann_dv(-1))}
+}         
+goal set_71_PA3_ann_dv {AW_71_PA3_ann_dv = AW_71_PA3_ann}
+
+define DIST_71_PA3_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA3     {value (AWO_71_PA3+AWR_71_PA3)*cfs_taf/AW_71_PA3_ann}
+goal set_DIST_71_PA3_dv{DIST_71_PA3_dv = DIST_71_PA3}
+
+define CLM_71_PA3      {value CL_71_PA3 * DIST_71_PA3}
+define CLM_71_PA3_     {alias CL_71_PA3 * DIST_71_PA3     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 71_PA4
+define CL_71_PA4a       {select contract from CVP_SOD_Contracts where contractor=7114.1}  ! Patterson ID (16.5 taf)
+define CL_71_PA4b       {select contract from CVP_SOD_Contracts where contractor=7114.2}  ! Patterson ID (6.0 taf replacement water - follows exch. alloc)
+
+define AW_71_PA4_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA4_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA4(i)+AWR_71_PA4(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA4_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA4(i)+AWR_71_PA4(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA4_ann_dv(-1))}
+}         
+goal set_71_PA4_ann_dv {AW_71_PA4_ann_dv = AW_71_PA4_ann}
+
+define AW_71_PA4b_ann {value min(CL_71_PA4b, AW_71_PA4_ann)}
+define AW_71_PA4a_ann {value max(0., AW_71_PA4_ann - AW_71_PA4b_ann)}
+
+define DIST_71_PA4_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA4     {value (AWO_71_PA4+AWR_71_PA4)*cfs_taf/AW_71_PA4_ann}
+goal set_DIST_71_PA4_dv{DIST_71_PA4_dv = DIST_71_PA4}
+
+define CLM_71_PA4a     {value CL_71_PA4a * DIST_71_PA4}
+define CLM_71_PA4b     {value CL_71_PA4b * DIST_71_PA4}
+define CLM_71_PA4a_    {alias CL_71_PA4a * DIST_71_PA4     kind 'contract-limit' units 'taf'}
+define CLM_71_PA4b_    {alias CL_71_PA4b * DIST_71_PA4     kind 'contract-limit' units 'taf'}
+
+define AWO_71_PA4a    {value AWO_71_PA4 * AW_71_PA4a_ann/AW_71_PA4_ann}
+define AWR_71_PA4a    {value AWR_71_PA4 * AW_71_PA4a_ann/AW_71_PA4_ann}
+define AWO_71_PA4b    {value AWO_71_PA4 * AW_71_PA4b_ann/AW_71_PA4_ann}
+define AWR_71_PA4b    {value AWR_71_PA4 * AW_71_PA4b_ann/AW_71_PA4_ann}
+
+
+!*********************************************************
+! 71_PA5
+define CL_71_PA5       {select contract from CVP_SOD_Contracts where contractor=7115}  ! Del Puerto, Salado, Orestimba, Sunflower
+
+define AW_71_PA5_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA5_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA5(i)+AWR_71_PA5(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA5_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA5(i)+AWR_71_PA5(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA5_ann_dv(-1))}
+}         
+goal set_71_PA5_ann_dv {AW_71_PA5_ann_dv = AW_71_PA5_ann}
+
+define DIST_71_PA5_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA5     {value (AWO_71_PA5+AWR_71_PA5)*cfs_taf/AW_71_PA5_ann}
+goal set_DIST_71_PA5_dv{DIST_71_PA5_dv = DIST_71_PA5}
+
+define CLM_71_PA5      {value CL_71_PA5 * DIST_71_PA5}
+define CLM_71_PA5_     {alias CL_71_PA5 * DIST_71_PA5     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 71_PA6
+define CL_71_PA6       {select contract from CVP_SOD_Contracts where contractor=7116}  ! Davis, Foothill, Mustang, Quinto, Centinella, and Romero
+
+define AW_71_PA6_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA6_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA6(i)+AWR_71_PA6(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA6_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA6(i)+AWR_71_PA6(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA6_ann_dv(-1))}
+}         
+goal set_71_PA6_ann_dv {AW_71_PA6_ann_dv = AW_71_PA6_ann}
+
+define DIST_71_PA6_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA6     {value (AWO_71_PA6+AWR_71_PA6)*cfs_taf/AW_71_PA6_ann}
+goal set_DIST_71_PA6_dv{DIST_71_PA6_dv = DIST_71_PA6}
+
+define CLM_71_PA6      {value CL_71_PA6 * DIST_71_PA6}
+define CLM_71_PA6_     {alias CL_71_PA6 * DIST_71_PA6     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 71_PA8
+define CL_71_PA8    {select contract from CVP_SOD_Contracts where contractor=7118}  ! Byron Bethany (Plainview)
+
+define AW_71_PA8_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_71_PA8_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_71_PA8(i)+AWR_71_PA8(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_71_PA8_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_71_PA8(i)+AWR_71_PA8(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_71_PA8_ann_dv(-1))}
+}         
+goal set_71_PA8_ann_dv {AW_71_PA8_ann_dv = AW_71_PA8_ann}
+
+define DIST_71_PA8_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_71_PA8     {value (AWO_71_PA8+AWR_71_PA8)*cfs_taf/AW_71_PA8_ann}
+goal set_DIST_71_PA8_dv{DIST_71_PA8_dv = DIST_71_PA8}
+
+define CLM_71_PA8      {value CL_71_PA8 * DIST_71_PA8}
+define CLM_71_PA8_     {alias CL_71_PA8 * DIST_71_PA8     kind 'contract-limit' units 'taf'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*********************************************************
+! Demand Unit 72_NA1  Riparian and Appropriative Diverters
+
+!This demand unit represents lands that are located on the left bank of the San Joaquin River,
+!between Mud Slough and Orestimba Creek. Diversions are made by Souza and Sons (S005469), Cerutti Bros (A013555), Moonshine Dairy (A006393)
+! S005469: Historical diversions reported as 0.207 TAF each month April-September
+! A013555: February 1 to December 31 up to 4 cfs
+! A006393: January 1 to December 31 up to 1.2 cfs
+
+define WRmon_SJR116_72_NA1_CFS { !in cfs
+	case October   {condition month == OCT value 0.207*taf_cfs + 4. + 1.2}
+	case NovJan    {condition range(month, nov,jan) value 1.2}
+	case FebMar    {condition month == FEB value 4. + 1.2}
+	case Otherwise {condition always value 0.207*taf_cfs + 4. + 1.2}
+}
+
+define WRmon_SJR116_72_NA1 {value WRmon_SJR116_72_NA1_CFS * cfs_taf}
+define WR_SJR116_72_NA1 {alias WRmon_SJR116_72_NA1 kind 'WATER-RIGHT' UNITS 'TAF'}
+
+!*********************************************************
+! 72_PA
+define CL_72_PA        {select contract from CVP_SOD_Contracts where contractor=7211}  ! Laguna WD
+
+define AW_72_PA_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_72_PA_ann    {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PA(i)+AWR_72_PA(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PA_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PA(i)+AWR_72_PA(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PA_ann_dv(-1))}
+}         
+goal set_72_PA_ann_dv  {AW_72_PA_ann_dv = AW_72_PA_ann}
+
+define DIST_72_PA_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_72_PA      {value (AWO_72_PA+AWR_72_PA)*cfs_taf/AW_72_PA_ann}
+goal set_DIST_72_PA_dv {DIST_72_PA_dv = DIST_72_PA}
+
+define CLM_72_PA       {value CL_72_PA * DIST_72_PA}
+define CLM_72_PA_      {alias CL_72_PA * DIST_72_PA     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_XA1
+define CL_72_XA1       {select contract from CVP_SOD_Contracts where contractor=7241}  ! San Luis Canal Co Exchange Contractors
+
+define AW_72_XA1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_XA1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_XA1(i)+AWR_72_XA1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_XA1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_XA1(i)+AWR_72_XA1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_XA1_ann_dv(-1))}
+}         
+goal set_72_XA1_ann_dv {AW_72_XA1_ann_dv = AW_72_XA1_ann}
+
+define DIST_72_XA1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_XA1     {value (AWO_72_XA1+AWR_72_XA1)*cfs_taf/AW_72_XA1_ann}
+goal set_DIST_72_XA1_dv{DIST_72_XA1_dv = DIST_72_XA1}
+
+define CLM_72_XA1      {value CL_72_XA1 * DIST_72_XA1}
+define CLM_72_XA1_     {alias CL_72_XA1 * DIST_72_XA1     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_XA2
+define CL_72_XA2       {select contract from CVP_SOD_Contracts where contractor=7242}  ! Central California ID South Exchange Contractors
+
+define AW_72_XA2_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_XA2_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_XA2(i)+AWR_72_XA2(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_XA2_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_XA2(i)+AWR_72_XA2(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_XA2_ann_dv(-1))}
+}         
+goal set_72_XA2_ann_dv {AW_72_XA2_ann_dv = AW_72_XA2_ann}
+
+define DIST_72_XA2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_XA2     {value (AWO_72_XA2+AWR_72_XA2)*cfs_taf/AW_72_XA2_ann}
+goal set_DIST_72_XA2_dv{DIST_72_XA2_dv = DIST_72_XA2}
+
+define CLM_72_XA2      {value CL_72_XA2 * DIST_72_XA2}
+define CLM_72_XA2_     {alias CL_72_XA2 * DIST_72_XA2     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_XA3
+define CL_72_XA3       {select contract from CVP_SOD_Contracts where contractor=7243}  ! Central California ID North Exchange Contractors
+
+define AW_72_XA3_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_XA3_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_XA3(i)+AWR_72_XA3(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_XA3_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_XA3(i)+AWR_72_XA3(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_XA3_ann_dv(-1))}
+}         
+goal set_72_XA3_ann_dv {AW_72_XA3_ann_dv = AW_72_XA3_ann}
+
+define DIST_72_XA3_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_XA3     {value (AWO_72_XA3+AWR_72_XA3)*cfs_taf/AW_72_XA3_ann}
+goal set_DIST_72_XA3_dv{DIST_72_XA3_dv = DIST_72_XA3}
+
+define CLM_72_XA3      {value CL_72_XA3 * DIST_72_XA3}
+define CLM_72_XA3_     {alias CL_72_XA3 * DIST_72_XA3     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR1
+define CL_72_PR1       {select contract from CVP_SOD_Contracts where contractor=7221}  ! Volta WA
+
+define AW_72_PR1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR1(i)+AWR_72_PR1(i)+AWW_72_PR1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR1(i)+AWR_72_PR1(i)+AWW_72_PR1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR1_ann_dv(-1))}
+}         
+goal set_72_PR1_ann_dv {AW_72_PR1_ann_dv = AW_72_PR1_ann}
+
+define DIST_72_PR1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR1     {value (AWO_72_PR1+AWR_72_PR1+AWW_72_PR1)*cfs_taf/AW_72_PR1_ann}
+goal set_DIST_72_PR1_dv{DIST_72_PR1_dv = DIST_72_PR1}
+
+define CLM_72_PR1      {value CL_72_PR1 * DIST_72_PR1}
+define CLM_72_PR1_     {alias CL_72_PR1 * DIST_72_PR1     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR2
+define CL_72_PR2    {select contract from CVP_SOD_Contracts where contractor=7222}  ! Kesterson, Freitas, & Blue Goose units of San Luis NWR, China Island unit of North Grassland
+
+define AW_72_PR2_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR2_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR2(i)+AWR_72_PR2(i)+AWW_72_PR2(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR2_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR2(i)+AWR_72_PR2(i)+AWW_72_PR2(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR2_ann_dv(-1))}
+}         
+goal set_72_PR2_ann_dv {AW_72_PR2_ann_dv = AW_72_PR2_ann}
+
+define DIST_72_PR2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR2     {value (AWO_72_PR2+AWR_72_PR2+AWW_72_PR2)*cfs_taf/AW_72_PR2_ann}
+goal set_DIST_72_PR2_dv{DIST_72_PR2_dv = DIST_72_PR2}
+
+define CLM_72_PR2      {value CL_72_PR2 * DIST_72_PR2}
+define CLM_72_PR2_     {alias CL_72_PR2 * DIST_72_PR2     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR3
+define CL_72_PR3    {select contract from CVP_SOD_Contracts where contractor=7223}  ! West Bear Ck and San Luis units of San Luis NWR
+
+define AW_72_PR3_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR3_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR3(i)+AWR_72_PR3(i)+AWW_72_PR3(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR3_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR3(i)+AWR_72_PR3(i)+AWW_72_PR3(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR3_ann_dv(-1))}
+}         
+goal set_72_PR3_ann_dv {AW_72_PR3_ann_dv = AW_72_PR3_ann}
+
+define DIST_72_PR3_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR3     {value (AWO_72_PR3+AWR_72_PR3+AWW_72_PR3)*cfs_taf/AW_72_PR3_ann}
+goal set_DIST_72_PR3_dv{DIST_72_PR3_dv = DIST_72_PR3}
+
+define CLM_72_PR3      {value CL_72_PR3 * DIST_72_PR3}
+define CLM_72_PR3_     {alias CL_72_PR3 * DIST_72_PR3     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR4
+define CL_72_PR4    {select contract from CVP_SOD_Contracts where contractor=7224}  ! Los Banos WA, Salt Slouth and Gadwall units of North Grassland
+
+define AW_72_PR4_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR4_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR4(i)+AWR_72_PR4(i)+AWW_72_PR4(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR4_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR4(i)+AWR_72_PR4(i)+AWW_72_PR4(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR4_ann_dv(-1))}
+}         
+goal set_72_PR4_ann_dv {AW_72_PR4_ann_dv = AW_72_PR4_ann}
+
+define DIST_72_PR4_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR4     {value (AWO_72_PR4+AWR_72_PR4+AWW_72_PR4)*cfs_taf/AW_72_PR4_ann}
+goal set_DIST_72_PR4_dv{DIST_72_PR4_dv = DIST_72_PR4}
+
+define CLM_72_PR4      {value CL_72_PR4 * DIST_72_PR4}
+define CLM_72_PR4_     {alias CL_72_PR4 * DIST_72_PR4     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR5
+define CL_72_PR5    {select contract from CVP_SOD_Contracts where contractor=7225}  ! Grassland WD North
+
+define AW_72_PR5_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR5_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR5(i)+AWR_72_PR5(i)+AWW_72_PR5(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR5_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR5(i)+AWR_72_PR5(i)+AWW_72_PR5(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR5_ann_dv(-1))}
+}         
+goal set_72_PR5_ann_dv {AW_72_PR5_ann_dv = AW_72_PR5_ann}
+
+define DIST_72_PR5_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR5     {value (AWO_72_PR5+AWR_72_PR5+AWW_72_PR5)*cfs_taf/AW_72_PR5_ann}
+goal set_DIST_72_PR5_dv{DIST_72_PR5_dv = DIST_72_PR5}
+
+define CLM_72_PR5      {value CL_72_PR5 * DIST_72_PR5}
+define CLM_72_PR5_     {alias CL_72_PR5 * DIST_72_PR5     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PR6
+define CL_72_PR6    {select contract from CVP_SOD_Contracts where contractor=7226}  ! Grassland WD South
+
+define AW_72_PR6_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_72_PR6_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_72_PR6(i)+AWR_72_PR6(i)+AWW_72_PR6(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_72_PR6_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_72_PR6(i)+AWR_72_PR6(i)+AWW_72_PR6(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_72_PR6_ann_dv(-1))}
+}         
+goal set_72_PR6_ann_dv {AW_72_PR6_ann_dv = AW_72_PR6_ann}
+
+define DIST_72_PR6_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_72_PR6     {value (AWO_72_PR6+AWR_72_PR6+AWW_72_PR6)*cfs_taf/AW_72_PR6_ann}
+goal set_DIST_72_PR6_dv{DIST_72_PR6_dv = DIST_72_PR6}
+
+define CLM_72_PR6      {value CL_72_PR6 * DIST_72_PR6}
+define CLM_72_PR6_     {alias CL_72_PR6 * DIST_72_PR6     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 72_PU  
+
+define UD_72_PU_ann_dv {std kind 'demand-annual' units 'taf'}
+define UD_72_PU_ann    {   
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+        condition month==OCT .and. wateryear==bgnWY
+        sum(i=0,11,1)  (UD_72_PU(i)*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear  -- use previous contract year
+        condition month==MAR .and. wateryear==EndWY
+        value          (UD_72_PU_ann_dv(-1))}
+    case March {    ! compute annual demand at start of each contract year
+        condition month==MAR .and. wateryear<EndWY
+        sum(i=0,11,1)  (UD_72_PU(i)*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year 
+        condition always
+        value          (UD_72_PU_ann_dv(-1))}
+}
+goal set_72_PU_ann_dv  {UD_72_PU_ann_dv = UD_72_PU_ann}
+
+define DIST_72_PU_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_72_PU      {value UD_72_PU*cfs_taf/UD_72_PU_ann}
+goal set_DIST_72_PU_dv {DIST_72_PU_dv = DIST_72_PU}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*********************************************************
+! 73_PA1
+define CL_73_PA1       {select contract from CVP_SOD_Contracts where contractor=7311}  ! San Luis WD North
+
+define AW_73_PA1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_73_PA1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_73_PA1(i)+AWR_73_PA1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_73_PA1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_73_PA1(i)+AWR_73_PA1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_73_PA1_ann_dv(-1))}
+}         
+goal set_73_PA1_ann_dv {AW_73_PA1_ann_dv = AW_73_PA1_ann}
+
+define DIST_73_PA1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_73_PA1     {value (AWO_73_PA1+AWR_73_PA1)*cfs_taf/AW_73_PA1_ann}
+goal set_DIST_73_PA1_dv{DIST_73_PA1_dv = DIST_73_PA1}
+
+define CLM_73_PA1      {value CL_73_PA1 * DIST_73_PA1}
+define CLM_73_PA1_     {alias CL_73_PA1 * DIST_73_PA1     kind 'contract-limit' units 'taf'}
+
+
+
+!*********************************************************
+! 73_PA2
+define CL_73_PA2    {select contract from CVP_SOD_Contracts where contractor=7312}  ! Eagle Field, Mercy Springs, Oro Loma
+
+define AW_73_PA2_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_73_PA2_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_73_PA2(i)+AWR_73_PA2(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_73_PA2_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_73_PA2(i)+AWR_73_PA2(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_73_PA2_ann_dv(-1))}
+}         
+goal set_73_PA2_ann_dv {AW_73_PA2_ann_dv = AW_73_PA2_ann}
+
+define DIST_73_PA2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_73_PA2     {value (AWO_73_PA2+AWR_73_PA2)*cfs_taf/AW_73_PA2_ann}
+goal set_DIST_73_PA2_dv{DIST_73_PA2_dv = DIST_73_PA2}
+
+define CLM_73_PA2      {value CL_73_PA2 * DIST_73_PA2}
+define CLM_73_PA2_     {alias CL_73_PA2 * DIST_73_PA2     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 73_PA3
+define CL_73_PA3a    {select contract from CVP_SOD_Contracts where contractor=7313.1}  ! San Luis WD - South (62.540), Pacheco WD (10.080), Panoche WD (67.000). The total amount for Panoche WD is 94.000
+define CL_73_PA3b    {select contract from CVP_SOD_Contracts where contractor=7313.2}  ! Panoche WD (27.000), this is the amount from the Delta-Mendota Canal
+define CL_73_PA3     {value CL_73_PA3a + CL_73_PA3b}
+
+define AW_73_PA3_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_73_PA3_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_73_PA3(i)+AWR_73_PA3(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_73_PA3_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_73_PA3(i)+AWR_73_PA3(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_73_PA3_ann_dv(-1))}
+}         
+goal set_73_PA3_ann_dv {AW_73_PA3_ann_dv = AW_73_PA3_ann}
+
+
+define DIST_73_PA3_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_73_PA3     {value (AWO_73_PA3+AWR_73_PA3)*cfs_taf/AW_73_PA3_ann}
+goal set_DIST_73_PA3_dv{DIST_73_PA3_dv = DIST_73_PA3}
+
+define CLM_73_PA3      {value CL_73_PA3 * DIST_73_PA3}
+define CLM_73_PA3a     {value CLM_73_PA3 * CL_73_PA3a/CL_73_PA3}
+define CLM_73_PA3b     {value CLM_73_PA3 * CL_73_PA3b/CL_73_PA3}
+define CLM_73_PA3_     {alias CL_73_PA3 * DIST_73_PA3     kind 'contract-limit' units 'taf'}
+define CLM_73_PA3a_    {alias CLM_73_PA3a     kind 'contract-limit' units 'taf'}
+define CLM_73_PA3b_    {alias CLM_73_PA3b     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 73_XA
+define CL_73_XA        {select contract from CVP_SOD_Contracts where contractor=7341}  ! Firebaugh Exchange Contractors
+
+define AW_73_XA_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_73_XA_ann    {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_73_XA(i)+AWR_73_XA(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_73_XA_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_73_XA(i)+AWR_73_XA(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_73_XA_ann_dv(-1))}
+}         
+goal set_73_XA_ann_dv  {AW_73_XA_ann_dv = AW_73_XA_ann}
+
+define DIST_73_XA_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_73_XA      {value (AWO_73_XA+AWR_73_XA)*cfs_taf/AW_73_XA_ann}
+goal set_DIST_73_XA_dv {DIST_73_XA_dv = DIST_73_XA}
+
+define CLM_73_XA       {value CL_73_XA * DIST_73_XA}
+define CLM_73_XA_      {alias CL_73_XA * DIST_73_XA     kind 'contract-limit' units 'taf'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*********************************************************
+! 90_PA1
+define CL_90_PA1a       {select contract from CVP_SOD_Contracts where contractor=9011}  ! Westlands WD Priority 1
+define CL_90_PA1b       {select contract from CVP_SOD_Contracts where contractor=9013}  ! Westlands WD reassignment water
+define CL_90_PA1        {value CL_90_PA1a + CL_90_PA1b}
+
+define AW_90_PA1_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_90_PA1_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_90_PA1(i)+AWR_90_PA1(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_90_PA1_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_90_PA1(i)+AWR_90_PA1(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_90_PA1_ann_dv(-1))}
+}         
+goal set_90_PA1_ann_dv {AW_90_PA1_ann_dv = AW_90_PA1_ann}
+
+define DIST_90_PA1_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_90_PA1     {value (AWO_90_PA1+AWR_90_PA1)*cfs_taf/AW_90_PA1_ann}
+goal set_DIST_90_PA1_dv{DIST_90_PA1_dv = DIST_90_PA1}
+
+define CLM_90_PA1      {value CL_90_PA1 * DIST_90_PA1}
+define CLM_90_PA1_     {alias CL_90_PA1 * DIST_90_PA1     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 90_PA2
+define CL_90_PA2       {select contract from CVP_SOD_Contracts where contractor=9012}  ! Westlands WD Priority 2
+
+define AW_90_PA2_ann_dv{std kind 'demand-annual' units 'taf'}
+define AW_90_PA2_ann   {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_90_PA2(i)+AWR_90_PA2(i))*cfs_taf(i))}
+    case Mar2009 {  ! specia case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_90_PA2_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_90_PA2(i)+AWR_90_PA2(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_90_PA2_ann_dv(-1))}
+}         
+goal set_90_PA2_ann_dv {AW_90_PA2_ann_dv = AW_90_PA2_ann}
+
+define DIST_90_PA2_dv  {std kind 'monthly-dist' units 'none'}
+define DIST_90_PA2     {value (AWO_90_PA2+AWR_90_PA2)*cfs_taf/AW_90_PA2_ann}
+goal set_DIST_90_PA2_dv{DIST_90_PA2_dv = DIST_90_PA2}
+
+define CLM_90_PA2      {value CL_90_PA2 * DIST_90_PA2}
+define CLM_90_PA2_     {alias CL_90_PA2 * DIST_90_PA2     kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 90_PU
+define CL_90_PUa        {select contract from CVP_SOD_Contracts where contractor=9031.1}  ! 16.5 TAF Avenal, Coalinga, Huron
+define CL_90_PUb        {select contract from CVP_SOD_Contracts where contractor=9031.2}  ! Chnaged to zero from 3TAF water right for Avenal
+define CL_90_PU         {value CL_90_PUa + CL_90_PUb}
+
+define UD_90_PU_ann_dv {std kind 'demand-annual' units 'taf'}
+define UD_90_PU_ann    {   
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+        condition month==OCT .and. wateryear==bgnWY
+        sum(i=0,11,1)  (UD_90_PU(i)*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear  -- use previous contract year
+        condition month==MAR .and. wateryear==EndWY
+        value          (UD_90_PU_ann_dv(-1))}
+    case March {    ! compute annual demand at start of each contract year
+        condition month==MAR .and. wateryear<EndWY
+        sum(i=0,11,1)  (UD_90_PU(i)*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year 
+        condition always
+        value          (UD_90_PU_ann_dv(-1))}
+}
+goal set_90_PU_ann_dv  {UD_90_PU_ann_dv = UD_90_PU_ann}
+
+define DIST_90_PU_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_90_PU      {case zero{ condition UD_90_PU_ann<.1 value 0.0} case otherwise{ condition always value  UD_90_PU*cfs_taf/UD_90_PU_ann}}
+goal set_DIST_90_PU_dv {DIST_90_PU_dv = DIST_90_PU}
+
+define CLM_90_PUa       {value CL_90_PUa * DIST_90_PU}
+define CLM_90_PUa_      {alias CL_90_PUa * DIST_90_PU   kind 'contract-limit' units 'taf' }
+define CLM_90_PUb       {value CL_90_PUb * DIST_90_PU}
+define CLM_90_PUb_      {alias CL_90_PUb * DIST_90_PU   kind 'contract-limit' units 'taf' }
+
+! the first 3 taf of the annual demand is for the water right and cannot be cut
+! the remainder of the annual UD is the demand addressed by the 16.5 taf/yr contract
+define UD_90_PUb_ann {value min(0.0, UD_90_PU_ann)} ! Chnaged this from 3 to 0 TAF. No evidence of 3 TAF water right
+define UD_90_PUa_ann {value max(0., UD_90_PU_ann - UD_90_PUb_ann)}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!*********************************************************
+! 91_PA
+define CL_91_PA        {select contract from CVP_SOD_Contracts where contractor=9111.1}  ! CVP Contract Water
+define WR_91_PA        {select contract from CVP_SOD_Contracts where contractor=9111.2}  ! Schedule 2 water
+
+define AW_91_PA_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_91_PA_ann    {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_91_PA(i)+AWR_91_PA(i))*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_91_PA_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_91_PA(i)+AWR_91_PA(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_91_PA_ann_dv(-1))}
+}         
+goal set_91_PA_ann_dv  {AW_91_PA_ann_dv = AW_91_PA_ann}
+
+define DIST_91_PA_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_91_PA      {value (AWO_91_PA+AWR_91_PA)*cfs_taf/AW_91_PA_ann}
+goal set_DIST_91_PA_dv {DIST_91_PA_dv = DIST_91_PA}
+
+define DIST_91_WR_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_91_WR      {value (AWO_91_PA+AWR_91_PA)*cfs_taf/AW_91_PA_ann}
+goal set_DIST_91_WR_dv {DIST_91_WR_dv = DIST_91_WR}
+
+define CLM_91_PA       {value CL_91_PA * DIST_91_PA}
+define WRM_91_PA       {value WR_91_PA * DIST_91_PA}
+define CLM_91_PA_      {alias CL_91_PA * DIST_91_PA kind 'contract-limit' units 'taf'}
+define WRM_91_PA_      {alias WR_91_PA * DIST_91_PA kind 'contract-limit' units 'taf'}
+
+
+!*********************************************************
+! 91_PR
+define CL_91_PR        {select contract from CVP_SOD_Contracts where contractor=9121}    ! Mendota WA
+
+define AW_91_PR_ann_dv {std kind 'demand-annual' units 'taf'}
+define AW_91_PR_ann    {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand over water year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=0,11,1) ((AWO_91_PR(i)+AWR_91_PR(i)+AWW_91_PR(i))*cfs_taf(i))}
+    case Mar2009 {  ! special case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         (AW_91_PR_ann_dv(-1))}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) ((AWO_91_PR(i)+AWR_91_PR(i)+AWW_91_PR(i))*cfs_taf(i))}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (AW_91_PR_ann_dv(-1))}
+}         
+goal set_91_PR_ann_dv  {AW_91_PR_ann_dv = AW_91_PR_ann}
+
+define DIST_91_PR_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_91_PR      {value (AWO_91_PR+AWR_91_PR+AWW_91_PR)*cfs_taf/AW_91_PR_ann}
+goal set_DIST_91_PR_dv {DIST_91_PR_dv = DIST_91_PR}
+
+define CLM_91_PR       {value CL_91_PR * DIST_91_PR}
+define CLM_91_PR_      {alias CL_91_PR * DIST_91_PR     kind 'contract-limit' units 'taf'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Kern and Pixley NWR
+!Demand in TAF
+
+define CL_D_CAA239_CVPRF_PRF        {select contract from CVP_SOD_Contracts where contractor=9932}    ! Kern and Pixley NWRs
+define dem_D_CAA239_CVPRF_PRF_ann_dv {std kind 'demand-annual' units 'taf'}
+define dem_D_CAA239_CVPRF_PRF_ann    {
+    case Oct1922 {  ! special case for first wateryear -- use annual demand for next contract year instead of contract year
+         condition month==OCT .and. wateryear==bgnWY
+         sum(i=5,16,1) dem_D_CAA239_CVPRF_prf(i)}
+    case Mar2009 {  ! special case for last wateryear   -- use previous countract year
+         condition month==MAR .and. wateryear==EndWY
+         value         dem_D_CAA239_CVPRF_PRF_ann_dv(-1)}
+    case March   {  ! compute annual demand at start of each contract year
+         condition month==MAR .and. wateryear<EndWY
+         sum(i=0,11,1) dem_D_CAA239_CVPRF_prf(i)}
+    case otherwise {! use annual demand for duration of year
+         condition always
+         value         (dem_D_CAA239_CVPRF_PRF_ann_dv(-1))}
+}         
+goal set_dem_D_CAA239_CVPRF_prf_ann_dv  {dem_D_CAA239_CVPRF_prf_ann_dv = dem_D_CAA239_CVPRF_prf_ann}
+
+define DIST_D_CAA239_CVPRF_PRF_dv   {std kind 'monthly-dist' units 'none'}
+define DIST_D_CAA239_CVPRF_PRF      {value dem_D_CAA239_CVPRF_prf/dem_D_CAA239_CVPRF_PRF_ann}
+goal set_DIST_dem_D_CAA239_CVPRF_PRF_dv {DIST_D_CAA239_CVPRF_prf_dv = DIST_D_CAA239_CVPRF_prf}
+
+define CLM_D_CAA239_CVPRF_PRF       {value CL_D_CAA239_CVPRF_PRF * DIST_D_CAA239_CVPRF_PRF}
+define CLM_D_CAA239_CVPRF_PRF_dv      {alias CL_D_CAA239_CVPRF_PRF * DIST_D_CAA239_CVPRF_PRF     kind 'contract-limit' units 'taf'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! San Felipe UNit  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!San Felipe Unit Demands
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+define CL_SCVWD_PA  {select contract from CVP_SOD_Contracts where contractor=9911.1} ! San Felipe Ag
+define CL_SCVWD_PU  {select contract from CVP_SOD_Contracts where contractor=9931.1} ! San Felipe MI
+define CL_SBCWD_PA  {select contract from CVP_SOD_Contracts where contractor=9911.2} ! San Felipe Ag
+define CL_SBCWD_PU  {select contract from CVP_SOD_Contracts where contractor=9931.2} ! San Felipe MI
+
+! distribution is taken from CalSim2 input demand patterns
+define SFU_AG_Dist   {select SFU_AG from JUBSFU_Dist where month=month}
+define SFU_MI_Dist   {select SFU_MI from JUBSFU_Dist where month=month}
+
+define CLM_SCVWD_PA {value CL_SCVWD_PA  * SFU_Ag_Dist}
+define CLM_SCVWD_PU {value CL_SCVWD_PU  * SFU_MI_Dist}
+define CLM_SBCWD_PA {value CL_SBCWD_PA  * SFU_Ag_Dist}
+define CLM_SBCWD_PU {value CL_SBCWD_PU  * SFU_MI_Dist}
+
+define CLM_SCVWD_PA_ {alias CL_SCVWD_PA * SFU_Ag_Dist   kind 'contract-limit' units 'taf' }
+define CLM_SCVWD_PU_ {alias CL_SCVWD_PU * SFU_MI_Dist   kind 'contract-limit' units 'taf' }
+define CLM_SBCWD_PA_ {alias CL_SBCWD_PA * SFU_Ag_Dist   kind 'contract-limit' units 'taf' }
+define CLM_SBCWD_PU_ {alias CL_SBCWD_PU * SFU_MI_Dist   kind 'contract-limit' units 'taf' }

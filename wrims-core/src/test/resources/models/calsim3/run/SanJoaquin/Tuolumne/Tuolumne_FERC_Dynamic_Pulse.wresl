@@ -1,0 +1,200 @@
+! Tuol_FERC_min.wresl
+! This code calculates the FERC minimum flows on the Tuolumne River
+
+
+/*
+The Districts have actively participated in the study, monitoring, protection, and enhancement of
+the fall-run Chinook Salmon in the lower Tuolumne River. Since the issuance of the original
+license, operations have been modified to improve conditions for fall-run Chinook Salmon. In
+1995, the Districts entered into a settlement agreement with CDFW, USFWS, CCSF, and four
+non-governmental organizations (NGOs) that provided greater releases from the Don Pedro
+Project to the lower Tuolumne River to improve conditions for fall-run Chinook Salmon. FERC
+issued an order on July 31, 1996 amending the Don Pedro license to incorporate the lower
+Tuolumne River minimum flow provisions contained in the settlement agreement. The revised
+summertime minimum flows were to vary from 50 cfs to 250 cfs, a substantial increase over the
+prior summertime minimum flow of 3 cfs, and fall through winter minimum flows would vary
+from 150 cfs to 300 cfs depending on water year type. There are 10 water year types. The water
+year classifications are re-calculated each year to maintain approximately the same frequency
+distribution of water year types. The settlement agreement and license order also provided for
+the release of pulse flows, the volume of which also varies with water year type.
+
+Steps of Tuolumne River minimum flow requirement calculation:
+1) A look up table containing San Joaquin Basin 60-20-20 Index is developed (SJRINDX.table)
+2) A look up table mapping San Joaquin Basin 60-20-20 Index year type (seven-year types based on the flow volumes) to “Oct”, “Nov to May”, and “Jun to Sep” FERC Base, FERC Pulse, and annual FERC Flows is developed (LaGrangeFERC.table). 
+3) For each year type classification, a Base flow is identified for the break point for the year type (LaGrangeFERC.wresl).
+4) Initial outmigration Pulse flows (April and May only Pulse flows) is identified for the break point for the year type (LaGrangeFERC.wresl).
+5) The FERC license requires an interpolation of schedules within year type classifications. Therefore, the annual FERC requirement is calculated as a linearly interpolated volume between San Joaquin Basin 6-20-20 Index categories. The amount of water determined from the interpolation is assumed to be added to the basic schedule during the outmigration pulse flow period (LaGrangeFERC.wresl).
+
+The FERC license identifies ten-year type classifications for the Tuolumne River, of which only seven have distinctly different minimum flow schedules. 
+Minimum flow requirement for different SJRINDEX categories based on the reference is as follows (units in cfs). 
+
+SJR INDEX (1000 AF)	Oct1toOct15(cfs)	Oct16toMay(cfs)	JuntoSept(cfs) 
+0			100			150		50
+1499			100			150		50
+1500			100			150		50
+2000			150			150		50
+2200			150			150		75
+2400			180			180		75
+2700			200			175		75
+3100			300			300		250
+10000			300			300		250
+
+
+There are also attraction Pulse flows in Oct 1 to Oct 15 as follows (units in AF). The attraction Pulse flows are added to the Base flow. 
+
+SJR INDEX(1000 AF)	Oct1toOct15 (AF)
+0			0
+1499			0
+1500			0
+2000			0
+2200			0
+2400			1676
+2700			1736
+3100			5950
+10000			5950
+
+
+Adding and summarizing two above tables, FERCBASE table is obtained as:
+
+SJRINDEX(1000 AF)	 Oct(cfs)		NovtoMay(cfs)	 JuntoSept(cfs) 
+0			 125			150		 50
+1499			 125			150       	 50
+1500			 125			150		 50
+2000			 150			150		 50
+2200			 150			150		 75
+2400			 207			180		 75
+2700			 215			175	 	 75
+3100			 397			300		 250
+10000			 397			300	 	 250
+*/
+
+! Read SJR Index as flow volumes. the data is collected from:
+! http://cdec.water.ca.gov/reportapp/javareports?name=WSIHIST 
+! Since the forsight is made in April, SJR index is considered as the previous year index for the period of Oct to March. 
+define SJRINDXFLW { value SJRIndex}
+
+! Determine the water year type
+define P2299WaterYrType {
+          case IntermediatetoWet {
+              condition SJRINDXFLW > 3100
+              value 1.}
+          case MedianNormal {
+              condition SJRINDXFLW > 2700
+              value 5.}
+          case DryBelowNormal {
+              condition SJRINDXFLW > 2400
+              value 6.}
+          case MedianDry {
+              condition SJRINDXFLW > 2200
+              value 7.}
+          case CriticalDry {
+              condition SJRINDXFLW > 2000
+              value 8.}
+          case MedianCritical {
+              condition SJRINDXFLW > 1500
+              value 9.}
+          case Critical {
+              condition always
+              value 10}} 
+              
+define P2299WaterYrTypedv  {std kind 'WATERYEAR-TYPE' units 'NONE'}					
+goal setP2299WaterYrTypedv {P2299WaterYrTypedv = P2299WaterYrType}
+
+! Calculate FERC Base minimum requirement from the LaGrangeFERC Lookup table. 
+define FERCBASE {
+    case october {
+         condition  month == Oct
+         select     Octbase from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use minimum}     
+    case NovtoMay {
+	 condition  month > Oct  .and. month < Jun
+	 select     NovMaybase from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use minimum} 
+   case JuntoSep {
+	 condition  always
+	 select     JunSepbase from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use minimum}}
+
+define FERCBASEdv  {std kind 'FLOW-RQMNT' units 'CFS'}					
+goal setFERCBASEdv {FERCBASEdv = FERCBASE}
+
+
+
+/*
+The Outmigration pulse flows which occurs in April and May are provided in the following table (units in cfs).
+Flows are equivalent to the total pulse volume averaged over the two months for simulation purposes.
+
+SJRINDX(1000 AF)	Apr-May(cfs)
+0			92		
+1499			92		
+1500			166		
+2000			270		
+2200			306		
+2400			297		
+2700			496		
+3100			743		
+10000			743		
+*/
+
+define PULSE {
+    case AprilandMay {
+         condition  month >= Apr .and. month<=May
+         select     AprMayPulse from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use minimum}   
+    case other {
+         condition  always
+         value    0.  }}
+
+define InitPULSELaGr  {std kind 'flow' units 'CFS'}						
+goal setInitPULSELaGr {InitPULSELaGr = PULSE}
+
+/*
+The FERC license requires an interpolation of schedules within year type classifications.  
+Therefore, the annual FERC requirement is calculated as a linearly interpolated volume between SJR Index categories.
+The amount of water determined from the interpolation is assumed to be added to the basic schedule during the out migration pulse flow period.
+
+The annual FERC requirement is shown in the follwoing table.
+
+SJR Index(1000AF)	Annual FERC (AF)
+0			 94000
+1499			 94000
+1500			103000
+2000			117016
+2200			127507
+2400			142502
+2700			165002
+3100			300923
+10000			300923
+*/
+
+
+! Calculate annual FERC requirement for the break point for the year type
+define AnnualFERC {
+       case AprilandMay {
+             condition month>=Apr .and. month<=May
+             select Annual from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use minimum}
+       case other {
+             condition always
+             value  0.}}
+ 
+! Interpolate annual FERC requirement between breakpoints 
+define Annualinterp {
+       case AprilandMay {
+              condition month>=Apr .and. month<=May
+              select Annual from Tuolumne_LaGrangeFERC given SJR=SJRINDXFLW use linear}
+       case other {
+              condition always
+              value  0.}}
+ 
+! Add the additional annual FERC requirement determined from the interpolation to the basic schedule during the out migration pulse flow period. 
+! the additional Pulse flow is added to both April and May. Final Pulse flow (FERCPULSE) is a combination of FERCBASE and Pulse flows. 
+define AddinPulse {
+       case AprilandMay {
+              condition month >= Apr .and. month <= May
+              value max(0.,Annualinterp-AnnualFERC)*43560./(86400.*31.)}
+       case other {
+              condition always
+              value  0.}}
+
+
+define LaGrangeRqmnt    {value FERCBASE+PULSE+AddinPulse}
+define LaGrangeRqmntdv  {std kind 'FLOW-RQMNT' units 'CFS'}						
+goal setLaGrangeRqmntDV {LaGrangeRqmntDV = LaGrangeRqmnt}
+
+goal setC_TUO054_mif    { C_TUO054_mif < LaGrangeRqmnt}

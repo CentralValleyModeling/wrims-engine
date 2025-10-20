@@ -1,0 +1,51 @@
+! Minimum Instream Flow Requirements for Stumpy Meadow Project
+! M. Bachman 12/2017
+!*********************************************************************************
+
+! Minimum flow requirements specified in Application 5644A, Permit 12827 Paragraph 9 (Amended Mar 24, 2000)
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Flow Requirements !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Pilot Creek between Stumpy Meadows Reservoir and the Pilot Creek Diversion Dam 
+! Application also specifies a compliance point upstream of Stumpy, but that is 
+! outside of this model domain, so this is only enforced on downstream of Stumpy
+define MIF_GDPUD_PLC009{
+	case OctJan{
+		condition range(month,Oct,Jan)
+		value min(4.,max(2.,I_STMPY))}
+	case FebSep_Above1500{
+		condition amer_annual >= 1500
+		value min(4.,max(2.,I_STMPY))}
+	case FebSep_Below1500{
+		condition always
+		value 2.}
+	}
+
+goal Stumpy_min_release {C_PLC009_MIF<MIF_GDPUD_PLC009}
+
+
+! Pilot Creek in the Section of Stream Downstream of the Pilot Creek Diversion Dam 
+define MIF_GDPUD_PLC006{
+	case OctJan{
+		condition range(month,Oct,Jan)
+		value min(4.,max(2.,I_STMPY))}
+	case FebSep_Above1500{
+		condition amer_annual >= 1500
+		value min(4.,max(2.,I_STMPY))}
+	case FebSep_Below1500{
+		condition always
+		value 2.}
+	}
+
+goal Pilot_min_release {C_PLC006_MIF<MIF_GDPUD_PLC006}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define MIF_GDPUD_PLC009dv {alias MIF_GDPUD_PLC009 kind 'MIF' units 'CFS'}
+define MIF_GDPUD_PLC006dv {alias MIF_GDPUD_PLC006 kind 'MIF' units 'CFS'}

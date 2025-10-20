@@ -1,0 +1,145 @@
+/*
+Separate Los Vaqueros Reservoir into emergency pool and water quality pool.  Do not allow encroachment into emergency pool except for evaportation.
+*/
+
+!Separate emergency pool (S422_1) from WQ pool (S422_2)
+
+define S422_CC_level1 {
+	case DryCritical {
+		condition       wyt_SAC_LV > 3.5
+		value		44.
+	}
+	case otherwise {
+		condition	always
+		value		70.
+	}
+}
+
+goal S422_CC_Zone1 {S422_CC_1 < S422_CC_level1}
+goal S422_CC_Zone2 {S422_CC_2 < S422_CC_level2 - S422_CC_level1}
+
+define S422_CC_level1_ {alias S422_CC_level1 kind 'storage-level' units 'taf'}
+define S422_CC_level2_ {alias S422_CC_level2 kind 'storage-level' units 'taf'}
+
+!Separate P LV storage into two operations pools.
+define S422_P_level1 {value S422_P_level2}
+
+goal S422_P_Zone1 {S422_P_1 < S422_P_level1}
+goal S422_P_Zone2 {S422_P_2 < S422_P_level2 - S422_P_level1}
+
+define S422_P_level1_ {alias S422_P_level1 kind 'storage-level' units 'taf'}
+define S422_P_level2_ {alias S422_P_level2 kind 'storage-level' units 'taf'}
+
+!Release Kellogg Creek inflow above 5 cfs to stream channel.
+goal lim_KC_release {C422_KC < min(5., I422)}
+
+
+!Estimate LV evap for use in WQ operations calculations
+define CC_share {
+	case NoStorage {
+		condition	S422(-1) < 0.1
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		S422_CC(-1)/S422(-1)
+	}
+}
+
+define E422_CC_est {value (ER_S422/24)*A422last*af_cfs*CC_share}
+define E422_est {value (ER_S422/24)*A422last*af_cfs}
+
+!Save Kellogg Creek inflow
+define I422_ {alias I422 kind 'FLOW-INFLOW' units 'cfs'}
+
+!Define maximum Los Vaqueros WQ and April release.  Purpose of parameter is to prevent release of emergency pool
+!for water quality purposes of April deliveries.
+define S422_CC_maxWQrel {value max(0.,(S422_CC(-1) - S422_CC_level1)*taf_cfs + max(0.,I422 - 5.) + I422_ppt_cfs - E422_CC_est)}
+
+!Limit LV release to protect emergency storage pool.
+goal save_emergency_pool {C422_REL_CC < S422_CC_maxWQrel}
+
+!No fill period specified in UserInput.wresl
+
+define BO_nofill_frac {value real(BO_nofill_days)/real(daysinmonth)}
+
+define lim_NoFill {value max(0., 1. - BO_nofill_frac)*C422_FILL_max}
+define lim_NoFill_ {alias lim_NoFill kind 'fill-constraint' units 'cfs'}
+
+goal set_lim_NoFill {C422_FILL < lim_NoFill}
+
+!Apply the AIP DFG permit February no fill limit.
+
+define feb_nofill_frac {
+	case Feb {
+		condition	month == feb
+		value 		real(feb_nofill_days)/real(daysinmonth)
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+
+define lim_FebNoFill {value max(0.,1. - feb_nofill_frac)*C422_FILL_max}
+define lim_FebNoFill_ {alias lim_FebNoFill kind 'fill-constraint' units 'cfs'}
+
+goal set_lim_FebNoFill {C422_FILL < lim_FebNoFill}
+
+!Must meet X2 requirements from January to June
+/*
+define Delta_Outflow {timeseries kind 'flow' units 'cfs'} !net Delta outflow from CalSim baseline
+define X2 {timeseries kind 'x2-position' units 'km'}  !X2 at end of current time step processed from CalSim baseline results.
+
+define lim_fill_X2 {
+	case FebToMay {
+		condition	range(month,feb,may) .and. X2 > 75 .and. Delta_Outflow < 11400
+		value		0.
+	}
+	case JanorJun {
+		condition	range(month,jan,jun) .and. X2 > 81 .and. Delta_Outflow < 7100
+		value		0.
+	}
+	case otherwise {
+		condition	always
+		value		99999.
+	}
+}
+
+*/
+
+define lim_fill_X2 {
+	case NoLimit {
+		condition	range(month,jan,jun) .and. X2_last < km_chs - 1 .or. range(month,jul,dec)   
+		value		99999.
+	}
+	case JanNoLimit {
+		condition	month == jan .and. X2_last < km_cnf - 1
+		value		99999.
+	}
+	case JunNoLimit {
+		condition	month == jun .and. X2_last < km_cnf - 1
+		value		99999.
+	}
+	case FebToMay {
+		condition	range(month,feb,may)
+		value		real(daysX2_chs)/real(daysinmonth)*C422_FILL_max
+	}
+	case June {
+		condition	month == jun
+		value		real(daysX2_cnf)/real(daysinmonth)*C422_FILL_max
+	}
+	case January {
+		condition	always
+		value		0.
+	}
+}
+
+!define lim_fill_X2 {value 99999.}
+
+
+define lim_fill_X2_ {alias lim_fill_X2 kind 'fill-constraint' units 'cfs'}
+
+goal set_lim_fill_X2 {C422_FILL < lim_fill_X2}
+
+

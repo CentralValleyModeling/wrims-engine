@@ -1,0 +1,44 @@
+/*
+KellyRidgePowerhouse.wresl
+CalSim 3.0 Upper Feather River Watershed Module
+
+Purpose:
+Restrict flows through the Kelly Ridge Powerhouse during fall maintemance period.
+
+Created A Draper M Bachman, MWH/Stantec, 06.08.17
+ 
+/*
+Water is conveyed from Miners Ranch Reservoir through the Kelly Ridge Power Tunnel to
+the Kelly Ridge Powerhouse. The Power Tunnel has a 260 cfs capacity. Flow through the
+powerhouse is recorded by USGS gauge 11396329.
+
+There are no regulatory or contractual operating constraints on the Kelly Ridge Powerhouse.
+However, DWR has at times requested that Kelly Ridge Powerhouse be shutdown to aid them
+in achieving temperature criteria at the downstream Feather River Fish Hatchery. When this
+has occurred, it has been done so on acooperative basis, and DWR and PG&E have agreed to an
+exchange of power to offset lost generation at Kelly Ridge. This has typically occurred
+during dry water years in the early fall when Lake Oroville water levels are low and the
+pool of available cold water is limited.
+*/
+
+! Assume 2 weeks annual maintenace or temperature-related shut-down in October
+define KRTCapacity {
+	case October   {condition month == OCT value 131}
+	case Otherwise {condition always value 262}}
+
+goal setC_KRT000 {C_KRT000 < KRTCapacity}
+
+!**********************************************
+! Flow Limits based on Historical Operations
+!**********************************************
+define HistoricalKellyRidge {
+	case Oct      {condition month ==  OCT value 100.}
+	case Nov      {condition month ==  NOV value 150.} 
+	case Dec      {condition month ==  DEC value 175.}  
+	case Sep      {condition month ==  SEP value 175.}   
+	case JanMar   {condition month >=  JAN .and. month <= APR value 200.} 
+	case Otherwise {condition always value 262.}}
+	
+!goal setHistoricalKellyRidge {C_KRT000 < HistoricalKellyRidge}
+
+

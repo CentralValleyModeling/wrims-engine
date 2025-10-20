@@ -1,0 +1,41 @@
+! Net demands north of navigation control point (ncp) are comprised of the following:
+! diversions: 1. Non-project demands (DSA 10,12,15,58)
+!	      2. CVP settlement
+!	      3. Refuge
+!             4. CVP water service contractors (ag+mi) - subject to cuts
+! accretions: 1. Return flows (DSA 10,15,58)
+
+! Ryan Wilbur 8-6-03
+ 
+! non-project demands  (DSA 10,12,15,58)
+define(fm) NPD_NNCP_fm {select NPD from CAM_Demands_NNCP where month=mv($m)}
+
+
+! cvp settlement demands (DSA 10,12,15,58) - cut to 75% of contract if shasta critical year
+define(fm) CVPS_NNCP_temp_fm {select CVPS from CAM_Demands_NNCP where month=mv($m)}
+define(fm) CVPS_NNCP_fm {value   CVPS_NNCP_temp_fm($m)*(1.-0.25*ShastaCriteriaMet)}
+
+define(fm) CVPS_NNCP_dv_fm {alias CVPS_NNCP_fm($m) kind 'DEMANDS' units 'TAF'}           !output SC demands, MYT 20210722
+
+! cvp contractors ag+mi (DSA 10,12,15,58) - subject to cuts (cuts not applied)
+define(fm) CVPC_AG_NNCP_fm {select CVPC_AG from CAM_Demands_NNCP where month=mv($m)}
+define(fm) CVPC_MI_NNCP_fm {select CVPC_MI from CAM_Demands_NNCP where month=mv($m)}
+define(fm) CVPC_NNCP_fm{value CVPC_AG_NNCP_fm($m)+CVPC_MI_NNCP_fm($m)}
+
+! wildlife refuge
+define(fm) WR_NNCP_fm {select WR from CAM_Demands_NNCP where month=mv($m)} 
+
+! return flow (DSA 10,15,58)
+define(fm) RF_NNCP_fm {select RF from CAM_Demands_NNCP where month=mv($m)}
+
+! to prevent non-infeasible solutions:
+define(fm) XXD31_fm {std kind 'FLOW' units 'TAF'}
+
+
+!! set demands
+!zeroing out the Settlement contractors demand since it is in the ,I30 DLL calc already. 
+!And adding the fudge factor to avoid infeasibilities. Miller/Wilde 6.22.2022
+goal(fm) set_D30_fm {lhs D30_fm($m) rhs  0.0 - XXD31_fm($m) lhs>rhs penalty 99999. lhs<rhs penalty 99999. }    
+!goal(fm) set_D30_fm {D30_fm($m) = NPD_NNCP_fm($m) + CVPS_NNCP_fm($m) + CVPC_NNCP_fm($m) + WR_NNCP_fm($m) - RF_NNCP_fm($m) - XXD31_fm($m)}
+!goal(fm) set_D30_fm {D30_fm($m) = CVPS_NNCP_fm($m) - XXD31_fm($m)}    ! Settlement contractors only, MYT 20210721
+!goal(fm) set_D30_fm {D30_fm($m) = 0.0}    

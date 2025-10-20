@@ -1,0 +1,34 @@
+/*
+Constraints-connectivity_LYRA.wresl
+Lower Yuba River System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!North Yuba
+goal continuityNBLDB_LYRA    {I_NBLDB + C_NFY017 + C_CMT000 - D_NBLDB_CGT005_LYRA - C_NBLDB_LYRA - E_NBLDB_LYRA  = S_NBLDB_LYRA * taf_cfs - S_NBLDB_LYRA(-1) * taf_cfs + 0. }! New Bullards Bar Reservoir 
+goal continuityNFY002_LYRA   {C_NBLDB_LYRA - C_NFY002_LYRA = 0.}
+
+!Yuba River
+goal continuityYUB039_LYRA   {C_NFY002_LYRA + C_MFY005 - C_YUB039_LYRA = 0. }! Confluence: Middle Fork Yuba
+goal continuityYUB034_LYRA   {C_YUB039_LYRA + C_CGT006_LYRA - C_YUB034_LYRA = 0.}
+goal continuityYUB030_LYRA   {C_YUB034_LYRA + C_SFY007 - C_YUB030_LYRA = 0. }! Confluence: South Fork Yuba
+goal continuityENGLB_LYRA   {I_ENGLB + C_YUB030_LYRA + CT_Smartville - C_ENGLB_LYRA - E_ENGLB	= S_ENGLB * taf_cfs - S_ENGLB(-1) * taf_cfs + 0. }! Englebright Reservoir 
+goal continuityYUB024_LYRA   {C_ENGLB_LYRA - C_YUB024_LYRA = 0. }! Smartsville gage (USGS ####), flow requirement
+goal continuityYUB023_LYRA   {C_DER001 + C_YUB024_LYRA - C_YUB023_LYRA = 0. }! Confluence: Deere Creek
+goal continuityYUB022_LYRA   {C_YUB023_LYRA - C_YUB022_LYRA = 0.} ! Yuba River at Smartville gage (discontinued)
+goal continuityYUB014_LYRA   {C_YUB022_LYRA + C_FDC006 + R_RFS14_YUB014_LYRA - C_YUB014_LYRA = 0. }! Confluence: French Dry Creek
+goal continuityYUB013_LYRA   {C_YUB014_LYRA - D_YUB013_14_NA_LYRA - C_YUB013_LYRA = 0. }! BVID Pipeline Canal Diversion
+goal continuityYUB011_LYRA   {C_YUB013_LYRA /*+ SG349_YUB011_60*/ + SR_14_YUB011 - D_YUB011_15N_NA2_LYRA - D_YUB011_15S_NA2_LYRA - C_YUB011_LYRA   = 0. }! Degeurre Dam & diversions for N. and S. Canals
+goal continuityYUB006_LYRA   {C_YUB011_LYRA /*+ SG350_YUB006_60*/ - C_YUB006_LYRA = 0. }! Marysville gage (USGS ####), flow requirement
+goal continuityYUB003_LYRA   {C_YUB006_LYRA - D_YUB003_15N_NU - C_YUB003_LYRA = 0. }! Diversion for Marysville's Lake Ellis (presumed)
+
+!Colgate Tunnel
+goal continuityCGT005_LYRA   {D_NBLDB_CGT005_LYRA /*- D_CGT005_14_NA*/ - C_CGT005_LYRA = 0.} !Colgate diversion abandoned long ago
+goal continuityCGT006_LYRA   {C_CGT005_LYRA - C_CGT006_LYRA = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS14_LYRA    {R_14_NA_RFS14_LYRA - R_RFS14_YUB014_LYRA - R_RFS14_JCK002 = 0. }

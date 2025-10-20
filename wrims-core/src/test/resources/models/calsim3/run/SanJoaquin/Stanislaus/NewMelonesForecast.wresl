@@ -1,0 +1,63 @@
+! NewMelonesForecast.wresl
+! Edward Chang
+! 4/04/00
+! This code calculates two separate New Melones Forecasts
+! Revised by C. Hsu, 2/26/03, USBR, for review and documentation project
+! Revised by C. Olson, 5/1/2007, for Calsim-III
+!######################################################################################
+
+/*
+The New Melones forecasts are used to determine demands and minimum flows on the Stanislaus River.
+NMforecast1 is the February end of month storage + forecasted March thru September inflows.  This
+forecast is updated each March.  NMforecast1 is used to determine the minimum fish and wildlife
+flows, the Stockton East demands, and the Central San Joaquin demands.  The second forecast
+(NMforecast2) is the sum of forecasted October thru September inflows.  This forecast is updated
+each October. NMforecast2 is used to determine the Oakdale Irrigation District and the Southern San
+Joaquin Irrigation District.
+*/
+
+! Placeholder
+Define I_MELON_FCST {Timeseries kind 'INFLOW' units 'TAF' convert 'CFS'} !NEW MELONES RESERVOIR FORECASTED INFLOW
+
+! Define sum of March through September New Melones inflows)
+define I_MELON_MarthruSeptFCST_dv      { std kind 'flow-inflow' units 'taf'}
+define I_MELON_MarthruSeptFCST {
+    case start{
+        condition   month<=FEB .and. wateryear==BgnWY
+    value 1000.}
+    case march  {
+	    condition   month == mar
+	   sum(i=0,6,1) I_ST_fm_med[Forecast2](i) }
+    case otherwise {
+	   condition   always
+           value          I_MELON_MarthruSeptFCST_dv(-1) }
+        }
+
+goal setI_MELON_MarthruSeptFCST_dv  {I_MELON_MarthruSeptFCST_dv  = I_MELON_MarthruSeptFCST }
+        
+! NewMelones1 is the February end of month storage plus forecasted March through September inflows
+define NMforecast1_dv      { std kind 'flow-inflow' units 'taf'}
+define NMforecast1 {
+     case start {
+          condition wateryear == BgnWY .and. month <= feb
+          value        1700. + /*  S_MELON(-12) + */ I_MELON_MarthruSeptFCST }
+     case March {
+          condition month == mar
+          value          S_MELON(-1) + I_MELON_MarthruSeptFCST }
+    case otherwise {
+        condition   always
+        value       S_MELON(prevfeb) + I_MELON_MarthruSeptFCST }
+        }
+ goal setNMforecast1_dv  {NMforecast1_dv  = NMforecast1 } 
+ 
+! NMforecast2, October thru September inflow sum (wy forecast)
+define NMforecast2_dv      { std kind 'flow-inflow' units 'taf'}
+define NMforecast2 {
+     case October {
+          condition month == oct
+          sum(i=0,11,1) I_MELON_FCST(i) * cfs_TAF(i) }
+     case otherwise {
+          condition always
+          value NMforecast2_dv(-1) }
+          }
+ goal setNMforecast2_dv  {NMforecast2_dv  = NMforecast2 } 

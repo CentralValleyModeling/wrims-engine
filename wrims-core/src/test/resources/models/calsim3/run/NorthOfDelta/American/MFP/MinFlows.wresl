@@ -1,0 +1,1246 @@
+! Middle Fork Project Minimum Instream Flow Requirements
+! M. Bachman 11/2017
+!*********************************************************************************
+
+! Determine minimum flows as specified in Condition 22 of FERC Middle Fork Project No.2079 License
+! MFP minimum flows are based on annual unimpaired flow at Fair Oaks.
+
+! Include 2 cfs buffer on all minimum flow requirements to ensure compliance
+define MIF_MFP_buffer {value 2.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Project Water Year !!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*Middle Fork Project water year type is based on unimpaired flow below Folsom Lake (defined in \wyt\amer_unimp.wresl), 
+and changes in February.
+ 
+Most flow requirements in Project No. 2079 are defined as changing in March (usually approximately halfway through the month).
+As a result, many flow requirements below use the previous WY for their February & 1st half of March requirements,
+then switch over to using current water year in 2nd half of March.
+ 
+Only Oxbow and Ralston flow requirements are defined as changing in February.*/
+
+define WY_MFP{
+	case Wet{
+		condition amer_annual >= 3400
+		value 1.
+		}
+	case AboveNormal{
+		condition amer_annual >= 2400
+		value 2.
+		}
+	case BelowNormal{
+		condition amer_annual >= 1500
+		value 3.
+		}
+	case Dry{
+		condition amer_annual >= 1000
+		value 4.
+		}
+	case Critical{
+		condition amer_annual >= 600
+		value 5.
+		}
+	case ExtremeCritical{
+		condition always
+		value 6.
+		}}
+
+define WY_MFPdv	{alias WY_MFP kind 'WATERYEAR' units 'NONE'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Flow Requirements !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Duncan Creek below Duncan Creek Diversion Dam 
+define MIF_MFP_DCC008_Feb {
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_DCC008_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 1
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_DCC008_Mar15to31{
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 1
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_DCC008_1{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_DCC008_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_DCC008_Mar1to14*14 + MIF_MFP_DCC008_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 .and. range(month,Oct,Jun)
+		select Wet from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 .and. range(month,Oct,Jun)
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 .and. range(month,Oct,Jun)
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 .and. range(month,Oct,Jun)
+		select Dry from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 .and. range(month,Oct,Jun)
+		select Critical from MIF_MFP
+		where month = month, identifier = 1
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 .and. range(month,Oct,Jun)
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 1
+		}
+	!!!!!/Refine (ECorp)
+	case JulSep{ 
+		condition always
+		value 0.
+		}
+	!!!!!Refine/
+	}		
+define MIF_MFP_DCC008 {value min(MIF_MFP_DCC008_1,I_DCC010)} !Final flow requirement = minimum of requirement, natural flow 
+
+goal Duncan_min_release {C_DCC008_mif < (MIF_MFP_DCC008 + MIF_MFP_buffer)}
+
+! For MFP discretionary (hydropower) supply forecasting
+define  sumMIF_MFP_DCC008	{
+	case Wet{
+		condition WY_MFP == 1 .and. (range(month,MAY,JUN) .or. range(month,OCT,DEC))
+		select Wet from MFPpow_forecast
+		where month = month, identifier = 3
+		}
+	case AboveNormal{
+		condition WY_MFP == 2 .and. (range(month,MAY,JUN) .or. range(month,OCT,DEC))
+		select AboveNormal from MFPpow_forecast
+		where month = month, identifier = 3
+		}
+	case BelowNormal{
+		condition WY_MFP == 3 .and. (range(month,MAY,JUN) .or. range(month,OCT,DEC))
+		select BelowNormal from MFPpow_forecast
+		where month = month, identifier = 3
+		}
+	case Dry{
+		condition WY_MFP == 4 .and. (range(month,MAY,JUN) .or. range(month,OCT,DEC))
+		select Dry from MFPpow_forecast
+		where month = month, identifier = 3
+		}
+	case Critical{
+		condition WY_MFP == 5 .and. (range(month,MAY,JUN) .or. range(month,OCT,DEC))
+		select Critical from MFPpow_forecast
+		where month = month, identifier = 3
+		}
+	case Otherwise {
+		condition always
+		value 0.}
+}
+		
+define  sumMIF_MFP_DCC008dv	{std kind 'MFP-POW_INFLOW' units 'taf'}
+goal setsumMIF_MFP_DCC008dv	{sumMIF_MFP_DCC008dv = sumMIF_MFP_DCC008}
+
+
+! Middle Fork American River below French Meadows Reservoir Dam 
+define MIF_MFP_MFA047_Feb{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA047_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 2
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA047_Mar15to31{
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 2
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_MFA047{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_MFA047_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_MFA047_Mar1to14*14 + MIF_MFP_MFA047_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 2
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 2
+		}
+	}
+
+goal FMeadows_min_release {C_MFA047_mif < (MIF_MFP_MFA047 + MIF_MFP_buffer)}
+
+
+! Middle Fork American River below Interbay Dam 
+define MIF_MFP_MFA035_Feb{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA035_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 3
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA035_Mar15to31 {
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 3
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_MFA035{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_MFA035_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_MFA035_Mar1to14*14 + MIF_MFP_MFA035_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 3
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 3
+		}
+	}		  
+
+goal Interbay_min_release {C_MFA035_mif < (MIF_MFP_MFA035 + MIF_MFP_buffer)}
+
+
+! Rubicon River below Hell Hole Reservoir Dam 
+define MIF_MFP_RUB031_Feb{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_RUB031_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 4
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_RUB031_Mar15to31 {
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 4
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_RUB031{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_RUB031_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_RUB031_Mar1to14*14 + MIF_MFP_RUB031_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 4
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 4
+		}
+	}  
+
+goal HellHole_min_release {C_RUB031_mif < (MIF_MFP_RUB031 + MIF_MFP_buffer)}
+
+
+! North Fork Long Canyon Creek Below North Fork Long Canyon Diversion Dam 
+define MIF_MFP_NLC002_Feb{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 5}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_NLC002_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 5
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_NLC002_Mar15to31{
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 5
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_NLC002_1{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_NLC002_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_NLC002_Mar1to14*14 + MIF_MFP_NLC002_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 .and. range(month,Oct,Jun)
+		select Wet from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 .and. range(month,Oct,Jun)
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 .and. range(month,Oct,Jun)
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 .and. range(month,Oct,Jun)
+		select Dry from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 .and. range(month,Oct,Jun)
+		select Critical from MIF_MFP
+		where month = month, identifier = 5
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 .and. range(month,Oct,Jun)
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 5
+		}	
+	case JulSep{
+		condition always
+		value 0.
+		}
+	}  
+define MIF_MFP_NLC002 {value min(MIF_MFP_NLC002_1,I_NLC003)} !Final flow requirement = minimum of requirement, natural flow
+
+goal NFLCC_min_release {C_NLC002_mif < (MIF_MFP_NLC002 + MIF_MFP_buffer)}
+
+
+! South Fork Long Canyon Creek Below South Fork Long Canyon Diversion Dam 
+define MIF_MFP_SLC002_Feb{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_SLC002_Mar1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 6
+		value 0
+		}
+	case Wet{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.1, identifier = 6
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_SLC002_Mar15to31{
+	case Wet{
+		condition month==Mar .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case AboveNormal{
+		condition month==Mar .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case BelowNormal{
+		condition month==Mar .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case Dry{
+		condition month==Mar .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case Critical{
+		condition month==Mar .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case ExtremeCritical{
+		condition month==Mar .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = 6.2, identifier = 6
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	} 
+define MIF_MFP_SLC002_1{
+	case February{
+		condition month==Feb 
+		value MIF_MFP_SLC002_Feb
+		}
+	case March{
+		condition month==Mar
+		value (MIF_MFP_SLC002_Mar1to14*14 + MIF_MFP_SLC002_Mar15to31*17)/31
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 .and. range(month,Oct,Jun)
+		select Wet from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 .and. range(month,Oct,Jun)
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 .and. range(month,Oct,Jun)
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 .and. range(month,Oct,Jun)
+		select Dry from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 .and. range(month,Oct,Jun)
+		select Critical from MIF_MFP
+		where month = month, identifier = 6
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 .and. range(month,Oct,Jun)
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 6
+		}	
+	case JulSep{
+		condition always
+		value 0.
+		}  
+	}	
+define MIF_MFP_SLC002 {value min(MIF_MFP_SLC002_1,I_SLC003)} !Final flow requirement = minimum of requirement, natural flow
+
+goal SFLCC_min_release {C_SLC002_mif < (MIF_MFP_SLC002 + MIF_MFP_buffer)}
+
+
+! Middle Fork American River below Ralston Afterbay Dam 
+! Water year calculated differently than for other compliance points (changes in Feb, not Mar)
+! This flow requirement is not affected by that change, however, as its requirement in February is 3 cfs regardless of WY type
+define MIF_MFP_MFA025 {
+	case Mar_NoECYrType{
+		condition month == Mar .and. WY_MFP < 6
+		value (3.+25.)/2.
+		}
+	case AprMay_NoECYrType{
+		condition range(month,Apr,May) .and. WY_MFP < 6
+		value 25.
+		}
+	case JunSep_NoECYrType{
+		condition range(month,Jun,Sep) .and. WY_MFP < 6
+		value 10.
+		}
+	case Otherwise{
+		condition always
+		value 3.
+		}
+	}
+
+goal Ralston_min_release {C_MFA025_mif < (MIF_MFP_MFA025 + MIF_MFP_buffer)}
+
+
+! Middle Fork American River below Oxbow Powerhouse 
+/*Water year calculated differently than for other compliance points (changes in Feb, not Mar)
+Total required flows include recreational flows (Condition 40), and minimum instream flow requirements (Condition 22)
+Monthly requirements were developed by first calculating the daily flow-weighted flow requirement, assuming that:
+	1) Recreational flow requirements are met for the specified number of hours (with respect to day of year, day of week, and water year type)
+	2) Instream requirements are met for the remaining hours of the day
+These assumptions were applied to every day from 1/1/1922-12/31/2015 to develop daily flow-weighted requirements
+Monthly requirements represent the average of the flow-weighted requirements of every day in that month from 1922-2015
+See MFPRequiredFlows_v2.xls for breakdown of calculations of final averaged flow-weighted requirements*/
+define MIF_MFP_MFA023_Feb1to14{
+	case FirstWY{
+		condition wateryear == BgnWY .and. month < 5
+		value 0
+		}
+	case Wet{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFPdv(prevJan) == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA023_Feb15to28{
+	case Wet{
+		condition month==Feb .and. WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case AboveNormal{
+		condition month==Feb .and. WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case BelowNormal{
+		condition month==Feb .and. WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case Dry{
+		condition month==Feb .and. WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case Critical{
+		condition month==Feb .and. WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case ExtremeCritical{
+		condition month==Feb .and. WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case otherwise{
+		condition always
+		value 0.
+		}
+	}
+define MIF_MFP_MFA023 {
+	case February{
+		condition month==Feb
+		value (MIF_MFP_MFA023_Feb1to14*14 + MIF_MFP_MFA023_Feb15to28*(daysin-14))/daysin
+		}
+	case OctJun_Wet{
+		condition WY_MFP == 1 
+		select Wet from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case OctJun_AboveNormal{
+		condition WY_MFP == 2 
+		select AboveNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case OctJun_BelowNormal{
+		condition WY_MFP == 3 
+		select BelowNormal from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case OctJun_Dry{
+		condition WY_MFP == 4 
+		select Dry from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case OctJun_Critical{
+		condition WY_MFP == 5 
+		select Critical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	case OctJun_ExtremeCritical{
+		condition WY_MFP == 6 
+		select ExCritical from MIF_MFP
+		where month = month, identifier = 7
+		}
+	}
+
+goal Oxbow_min_release {C_MFA023_mif < (MIF_MFP_MFA023 + MIF_MFP_buffer)}
+
+
+! American River Pump Station Minimum Instream Release 
+! Downstream of Auburn Dam Site to Folsom Reservoir
+! from Stipulation and Agreement between PCWA and CDFG in 1962, cited by Decision 1104
+define MIF_MFP_NFA016 {value 75.}
+goal SetMIF_MFP_NFA016 {C_NFA016_mif < (MIF_MFP_NFA016 + MIF_MFP_buffer)}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Output/Validation !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!define WY_MFPdv {std kind 'INDEX' units 'NONE'}
+!goal setWY_MFPdv {WY_MFPdv=WY_MFP}
+
+define MIF_MFP_DCC008dv {alias MIF_MFP_DCC008 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA047dv {alias MIF_MFP_MFA047 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA035dv {alias MIF_MFP_MFA035 kind 'MIF' units 'CFS'}
+define MIF_MFP_HHOLEdv  {alias MIF_MFP_RUB031 kind 'MIF' units 'CFS'}
+define MIF_MFP_NLC002dv {alias MIF_MFP_NLC002 kind 'MIF' units 'CFS'}
+define MIF_MFP_SLC002dv {alias MIF_MFP_SLC002 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA025dv {alias MIF_MFP_MFA025 kind 'MIF' units 'CFS'}
+define MIF_MFP_MFA023dv {alias MIF_MFP_MFA023 kind 'MIF' units 'CFS'}

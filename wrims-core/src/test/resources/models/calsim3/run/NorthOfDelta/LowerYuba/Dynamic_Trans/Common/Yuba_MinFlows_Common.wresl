@@ -1,0 +1,237 @@
+/*
+File Name: Yuba_MinFlows_Common.wresl
+CalSim 3.0  File for New Bullards Bar Dam and Lower Yuba River Operations
+
+Purpose: Defines minimum instream flow requirements for a range of regulatory condition
+CalSIm 3.0 uses flows established for the lower Yuba River Accord
+
+*/
+
+!**********************************************************        
+!For Calculation of the North Yuba Index
+
+! For Future conditions use unimpaired inflows at Smartville and Goodyear
+!define SmartvilleUnimpaired {value (I_FRNCH + I_BOWMN + I_DER001 + I_DER004 + I_FRDYC + I_JKSMD  + I_SFD003 + I_SFY007  + I_SPLDG  + I_SFY048 + I_LCBRF + I_SCOTF + I_NBLDB + I_ENGLB + I_SLT009 + I_OGN005 + I_NFY029 + I_MFY013)*cfs_taf + CT_Smartville_SV}
+define GoodyearUnimpaired {value (I_NFY029)*cfs_taf}
+
+define BaseCarryover {value 234.0}
+define Triggervalue  {value 0.0} /*{value 166.0}*/
+
+define EndPrevMONInflow {
+	case beginYR {
+		condition month == OCT .and. wateryear == bgnWY
+		value 0.0 }
+	case otherwise {
+		condition always  
+		sum(i=prevOCT,-1,1) I_NBLDB(i) * cfs_taf(i)  + C_NFY017(i) * cfs_taf(i) + C_CMT000(i) * cfs_taf(i)}
+	}
+
+define EndPrevMONInflowdv {alias EndPrevMONInflow kind 'FLOW' units 'TAF'}
+
+define Feb_ForecastAPRtoJUL_YU {					! Smartsville for Feb
+	case forAPRtoJUL_YU{
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAPRtoJUL_YUdv(-1)}
+	}
+
+define Feb_ForecastAPRtoJUL_YUdv {alias Feb_ForecastAPRtoJUL_YU kind 'FLOW' units 'TAF'}	
+
+define Mar_ForecastAPRtoJUL_YU {					! Smartsville for Mar
+	case forAPRtoJUL_YU {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAPRtoJUL_YUdv(-1)}
+	}
+
+define Mar_ForecastAPRtoJUL_YUdv {alias Mar_ForecastAPRtoJUL_YU kind 'FLOW' units 'TAF'}	
+
+define Apr_ForecastAPRtoJUL_YU {					! Smartsville for Apr
+	case forAPRtoJUL_YU_Future {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAPRtoJUL_YUdv(-1)}
+	}
+
+define Apr_ForecastAPRtoJUL_YUdv {alias Apr_ForecastAPRtoJUL_YU kind 'FLOW' units 'TAF'}	
+
+define May_ForecastAPRtoJUL_YU {					! Smartsville for May
+	case forAPRtoJUL_YU {
+		condition month == OCT
+		sum(i=6,9,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAPRtoJUL_YUdv(-1)}
+	}
+
+define May_ForecastAPRtoJUL_YUdv {alias May_ForecastAPRtoJUL_YU kind 'FLOW' units 'TAF'}	
+
+!	GoodYear Bar Bulletin 120 Flows
+define Feb_ForecastAPRtoJUL_GB {					! Goodyear for Feb
+	case forAPRtoJUL_GB { 
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAPRtoJUL_GBdv(-1)}
+	}
+
+define Feb_ForecastAPRtoJUL_GBdv {alias Feb_ForecastAPRtoJUL_GB kind 'FLOW' units 'TAF'}	
+
+define Mar_ForecastAPRtoJUL_GB {					! Goodyear for Mar
+	case forAPRtoJUL_GB {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAPRtoJUL_GBdv(-1)}
+	}
+
+define Mar_ForecastAPRtoJUL_GBdv {alias Mar_ForecastAPRtoJUL_GB kind 'FLOW' units 'TAF'}	
+
+define Apr_ForecastAPRtoJUL_GB {					! Goodyear for Apr
+	case forAPRtoJUL_GB_Future {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAPRtoJUL_GBdv(-1)}
+	}
+
+define Apr_ForecastAPRtoJUL_GBdv {alias Apr_ForecastAPRtoJUL_GB kind 'FLOW' units 'TAF'}	
+
+define May_ForecastAPRtoJUL_GB {					! Goodyear for May
+	case forAPRtoJUL_GB_Future {
+		condition month == OCT
+		sum(i=6,9,1) I_NFY029(i)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAPRtoJUL_GBdv(-1)}
+	}
+
+define May_ForecastAPRtoJUL_GBdv {alias May_ForecastAPRtoJUL_GB kind 'FLOW' units 'TAF'}	
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define Feb_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Feb_ForecastAUGandSEP_YUdv(-1)}				!Feb
+	}
+
+define Feb_ForecastAUGandSEP_YUdv {alias Feb_ForecastAUGandSEP_YU kind 'FLOW' units 'TAF'}
+
+define Mar_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Mar_ForecastAUGandSEP_YUdv(-1)}				!Mar
+	}
+	
+define Mar_ForecastAUGandSEP_YUdv {alias Mar_ForecastAUGandSEP_YU kind 'FLOW' units 'TAF'}
+
+define Apr_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value Apr_ForecastAUGandSEP_YUdv(-1)}				!Apr
+	}
+	
+define Apr_ForecastAUGandSEP_YUdv {alias Apr_ForecastAUGandSEP_YU kind 'FLOW' units 'TAF'}
+
+define May_ForecastAUGandSEP_YU {
+	case forAUGandSEP_YU {
+		condition month == OCT
+		sum(i=10,11,1) (I_FRNCH(i) + I_BOWMN(i) + I_DER001(i) + I_DER004(i) + I_FRDYC(i) + I_JKSMD(i)  + I_SFD003(i) + I_SFY007(i)  + I_SPLDG(i)  + I_SFY048(i) + I_LCBRF(i) + I_SCOTF(i) + I_NBLDB(i) + I_ENGLB(i) + I_SLT009(i) + I_OGN005(i) + I_NFY029(i) + I_MFY013)*cfs_taf(i)}
+	case otherwise {
+		condition always 
+		value May_ForecastAUGandSEP_YUdv(-1)}				!May
+	}
+
+define May_ForecastAUGandSEP_YUdv {alias May_ForecastAUGandSEP_YU kind 'FLOW' units 'TAF'}
+
+define FEBForecastInflow {		
+	case beginYR {
+		condition month <= JAN .and. wateryear == bgnWY
+		value 0.0 }
+	case FEB {
+		condition month == FEB
+		value -2.146 + 14.24 * EndPrevMONInflow + 525.33 * SmartvilleUnimpaired_ann - 3.221 + 24.58 * EndPrevMONInflow + 547.87 * ((I_FRNCH(1) + I_BOWMN(1) + I_DER001(1) + I_DER004(1) + I_FRDYC(1) + I_JKSMD(1)  + I_SFD003(1) + I_SFY007(1)  + I_SPLDG(1)  + I_SFY048(1) + I_LCBRF(1) + I_SCOTF(1) + I_NBLDB(1) + I_ENGLB(1) + I_SLT009(1) + I_OGN005(1) + I_NFY029(1) + I_MFY013)*cfs_taf(1))
+		- 30.416 + 14.13 * EndPrevMONInflow + 624.73 * Feb_ForecastAPRtoJUL_YU - 240.81 * Feb_ForecastAPRtoJUL_GB + 15.93 * EndPrevMONInflow 
+		+ 640.37 * Feb_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value FEBForecastInflowdv(-1) * 1000.0}
+	}
+
+define FEBForecastInflowdv {alias FEBForecastInflow / 1000.0 kind 'FLOW' units 'TAF'}	
+
+define MARForecastInflow {		
+	case beginYR {
+		condition month == OCT .and. wateryear == bgnWY
+		value 0.0 }
+	case MAR {
+		condition month == MAR
+		value -23.495 + 5.96 * EndPrevMONInflow + 553.86 * SmartvilleUnimpaired_ann - 31.134 + 12.37 * EndPrevMONInflow + 621.62 * Mar_ForecastAPRtoJUL_YU 
+		- 232.66 * Mar_ForecastAPRtoJUL_GB + 14.73 * EndPrevMONInflow + 593.96 * Mar_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value MARForecastInflowdv(-1) * 1000.0}
+	}
+
+define MARForecastInflowdv {alias MARForecastInflow / 1000.0 kind 'FLOW' units 'TAF'}	
+
+define APRForecastInflow {		
+	case beginYR {
+		condition month == OCT .and. wateryear == bgnWY
+		value 0.0 }
+	case APR {
+		condition month == APR
+		value -30.665 + 5.47 * EndPrevMONInflow + 613.32 * Apr_ForecastAPRtoJUL_YU - 196.23 * Apr_ForecastAPRtoJUL_GB + 14.09 * EndPrevMONInflow + 
+		532.41 * Apr_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value APRForecastInflowdv(-1) * 1000.0}
+	}
+
+define APRForecastInflowdv {alias APRForecastInflow / 1000.0 kind 'FLOW' units 'TAF'}		
+
+define MAYForecastInflow {		
+	case beginYR {
+		condition month == OCT .and. wateryear == bgnWY
+		value 0.0 }
+	case MAY {
+		condition month == MAY
+		value -31.652 + 10.33 * EndPrevMONInflow + 616.45 * May_ForecastAPRtoJUL_YU - 223.53 * May_ForecastAPRtoJUL_GB + 12.98 * EndPrevMONInflow + 
+		500.71 * May_ForecastAUGandSEP_YU}		
+	case otherwise {
+		condition always
+		value MAYForecastInflowdv(-1) * 1000.0}
+	}
+
+define MAYForecastInflowdv {alias MAYForecastInflow / 1000.0 kind 'FLOW' units 'TAF'}	
+
+!********************************************************** 
+!Conference year (Schedule 7) logic
+
+define ConfYrDGRpattern {select DPD_per_del from Daguerre_del_pattern where month=month}
+
+!**********************************************************    
+!Minimum flows, Smartsville and Marysville
+
+define MF_YUB024 {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}
+define MF_YUB006 {std kind 'FLOW-MIN-INSTREAM' units 'CFS'}

@@ -1,0 +1,110 @@
+!X2day.wresl
+!To calculate X2day.table values in wresl code
+!Refer to FOOTNOTE 14 FOR TABLE 3 from SWRCB's 1995 Water Quality Control Plan
+!And TABLE A: Number of Days When Maximum Daily Average Electrical Conductivity of 2.64 mmhos/cm Must Be Maintained at Specified Location [a]
+
+define roe_days_{
+	case Feb {
+	condition	month == Feb
+	select		FEB 		
+	from 		x2days_roe
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Mar {
+	condition	month == Mar
+	select		MAR		
+	from 		x2days_roe
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Apr {
+	condition	month == Apr
+	select		APR		
+	from 		x2days_roe
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case May {
+	condition	month == May
+	select		MAY 		
+	from 		x2days_roe
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Jun {
+	condition	month == Jun
+	select		JUN 		
+	from 		x2days_roe
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case other {
+	condition always
+	value 99999
+	}
+}
+define roe_days{ value int(roe_days_)}
+define roe_days_dv{alias roe_days kind 'debug' units 'none'}
+
+define chs_days_{
+	case Feb {
+	condition	month == Feb
+	select		FEB 		
+	from 		x2days_chs
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Mar {
+	condition	month == Mar
+	select		MAR		
+	from 		x2days_chs
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Apr {
+	condition	month == Apr
+	select		APR		
+	from 		x2days_chs
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case May {
+	condition	month == May
+	select		MAY 		
+	from 		x2days_chs
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case Jun {
+	condition	month == Jun
+	select		JUN 		
+	from 		x2days_chs
+	given 		PMI=EightRiver_Index_dv(-1) use linear
+	}
+	case other {
+	condition 	always
+	value 		99999
+	}
+}
+define chs_days{ value max(int(chs_days_),roe_days)}
+define chs_days_dv{alias chs_days kind 'debug' units 'none'}
+
+define cnf_days{
+	case OctJan {
+	condition	month>=Oct .and. month<=Jan
+	value		99999
+	}
+	case JulSep {
+	condition	month>=Jul .and. month<=Sep
+	value		99999
+	}
+	case MayOff {
+	condition	month==May .and. SacRiverIndex_May90<8100
+	value		0.	
+	}
+	case JunOff {
+	condition   month==Jun .and. SacRiverIndex_May90_dv(-1)<8100
+	value		0.
+	}
+	case other	{
+	condition 	always
+	value		daysin
+	}	
+}
+define cnf_days_dv{alias cnf_days kind 'debug' units 'none'}
+		
+	
+
+

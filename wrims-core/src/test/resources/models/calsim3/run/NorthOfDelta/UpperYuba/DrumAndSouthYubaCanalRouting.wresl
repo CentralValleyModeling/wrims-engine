@@ -1,0 +1,15 @@
+/*
+DrumAndYubaSouthCanalRouting.wresl; 
+
+Purpose: Spill water from the South Yuba Canal back to the Bear River in excess of Bear River flow requirement
+only when Drum Canal at capacity
+*/
+
+define intDrumMax         {INTEGER STD KIND 'INTEGER' UNITS 'NONE'} ! =1 indicates Drum Canal at capacity
+define UnusedDrumCapacity {STD KIND 'FLOW' UNITS 'CFS'}
+
+goal setDrumMax1 {UnusedDrumCapacity = 840-C_DRM002}
+goal setDrumMax2 {D_SYC002_BRR074 < intDrumMax *9999 + C_BRR073_MIF}
+goal setDrumMax3 {UnusedDrumCapacity <  840 - intDrumMax * 840} ! If integer = 0, unused capacity has +ve value, if integer = 1, zero unused capacity
+ 
+

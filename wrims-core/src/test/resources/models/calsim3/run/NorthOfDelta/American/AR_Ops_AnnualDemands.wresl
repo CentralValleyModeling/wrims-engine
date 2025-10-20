@@ -1,0 +1,644 @@
+/*
+==================================================================================================
+Title:      Flow Management Plan Input Calculations
+Description:    The purpose of this module is to calculate inputs for the following files:
+            WaterForum.wresl
+            AR_Ops_Inputs.wresl
+Comments:
+
+
+
+
+
+Changes-------------------------------------------------------------------------------------------
+Date            Programmer                      Change
+
+
+
+==================================================================================================
+*/
+
+
+!____________________________Begin Urban Demand Calculations_____________________________________!
+
+!=================================================================================================
+!26N_NU1    - Sacramento Suburban WD (Northridge, North Highlands)
+!         Cal. Am. WC (Antelope, Lincoln Oaks)
+!         Rio Linda Elverta CWD (Rio Linda, Elverta)
+!=================================================================================================
+/*
+define UD_26N_NU1_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26N_NU1_NowSep {                            sum(i=0       ,SEP-month,1) UD_26N_NU1(i)*cfs_taf(i)                     }
+define UD_26N_NU1_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26N_NU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_NU1_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26N_NU1(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26N_NU1(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26N_NU1_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26N_NU1_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26N_NU1(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26N_NU1(i)*cfs_taf(i)}
+             case other {condition always value UD_26N_NU1_ANNdv(-1)}
+             }
+
+goal set_UD_26N_NU1_ANNdv {UD_26N_NU1_ANNdv = UD_26N_NU1_ANN}
+
+!=================================================================================================
+!26S_NU4    - Aerojet/Boeing GW Remediation
+!=================================================================================================
+/*
+define UD_26S_NU4_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26S_NU4(i)*cfs_taf(i)} case OCT_DEC {condition month>=OCT .and. month <= DEC sum(i=OCT-month+1, DEC-month, 1)UD_26S_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26S_NU4_NowSep {                            sum(i=0       ,SEP-month,1) UD_26S_NU4(i)*cfs_taf(i)                     }
+define UD_26S_NU4_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26N_NU4(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_NU4_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26N_NU4(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26N_NU4(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26S_NU4_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_NU4_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_NU4(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_NU4(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_NU4_ANNdv(-1)}
+             }
+
+goal set_UD_26S_NU4_ANNdv {UD_26S_NU4_ANNdv = UD_26S_NU4_ANN}
+
+!=================================================================================================
+!26N_PU1    - City of Roseville
+!=================================================================================================
+/*
+define UD_26N_PU1_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26N_PU1_NowSep {                            sum(i=0       ,SEP-month,1) UD_26N_PU1(i)*cfs_taf(i)                     }
+define UD_26N_PU1_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26N_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU1_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26N_PU1(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26N_PU1(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26N_PU1_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26N_PU1_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26N_PU1(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26N_PU1(i)*cfs_taf(i)}
+             case other {condition always value UD_26N_PU1_ANNdv(-1)}
+             }
+
+goal set_UD_26N_PU1_ANNdv {UD_26N_PU1_ANNdv = UD_26N_PU1_ANN}
+
+!=================================================================================================
+!26N_PU2    - San Juan WD, Orange Val WC, Citrus Heights WD, Fair Oaks WD
+!=================================================================================================
+/*
+define UD_26N_PU2_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26N_PU2_NowSep {                            sum(i=0       ,SEP-month,1) UD_26N_PU2(i)*cfs_taf(i)                     }
+define UD_26N_PU2_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26N_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU2_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26N_PU2(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26N_PU2(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26N_PU2_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26N_PU2_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26N_PU2(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26N_PU2(i)*cfs_taf(i)}
+             case other {condition always value UD_26N_PU2_ANNdv(-1)}
+             }
+
+goal set_UD_26N_PU2_ANNdv {UD_26N_PU2_ANNdv = UD_26N_PU2_ANN}
+
+!=================================================================================================
+!26N_PU3    - City of Roseville (part), City of Folsom (part)
+!=================================================================================================
+/*
+define UD_26N_PU3_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26N_PU3_NowSep {                            sum(i=0       ,SEP-month,1) UD_26N_PU3(i)*cfs_taf(i)                     }
+define UD_26N_PU3_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26N_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26N_PU3_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26N_PU3(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26N_PU3(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26N_PU3_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26N_PU3_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26N_PU3(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26N_PU3(i)*cfs_taf(i)}
+             case other {condition always value UD_26N_PU3_ANNdv(-1)}
+             }
+
+goal set_UD_26N_PU3_ANNdv {UD_26N_PU3_ANNdv = UD_26N_PU3_ANN}
+
+!=================================================================================================
+!26S_PU1    - City of Folsom, Folsom State Prison
+!=================================================================================================
+/*
+define UD_26S_PU1_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26S_PU1_NowSep {                            sum(i=0       ,SEP-month,1) UD_26S_PU1(i)*cfs_taf(i)                     }
+define UD_26S_PU1_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26S_PU1(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU1_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26S_PU1(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26S_PU1(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26S_PU1_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_PU1_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_PU1(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_PU1(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_PU1_ANNdv(-1)}
+             }
+
+goal set_UD_26S_PU1_ANNdv {UD_26S_PU1_ANNdv = UD_26S_PU1_ANN}
+
+!=================================================================================================
+!26S_PU2    - Golden State WC
+!=================================================================================================
+/*
+define UD_26S_PU2_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26S_PU2_NowSep {                            sum(i=0       ,SEP-month,1) UD_26S_PU2(i)*cfs_taf(i)                     }
+define UD_26S_PU2_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26S_PU2(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU2_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26S_PU2(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26S_PU2(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26S_PU2_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_PU2_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_PU2(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_PU2(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_PU2_ANNdv(-1)}
+             }
+
+goal set_UD_26S_PU2_ANNdv {UD_26S_PU2_ANNdv = UD_26S_PU2_ANN}
+
+!=================================================================================================
+!26S_PU3    - California Parks and Recreation
+!=================================================================================================
+/*
+define UD_26S_PU3_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_26S_PU3_NowSep {                            sum(i=0       ,SEP-month,1) UD_26S_PU3(i)*cfs_taf(i)                     }
+define UD_26S_PU3_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_26S_PU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_26S_PU3_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_26S_PU3(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_26S_PU3(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_26S_PU3_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_PU3_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_PU3(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_PU3(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_PU3_ANNdv(-1)}
+             }
+
+goal set_UD_26S_PU3_ANNdv {UD_26S_PU3_ANNdv = UD_26S_PU3_ANN}
+
+!=================================================================================================
+!60N_PU     - SMUD, Rancho Seco Power Plant
+!=================================================================================================
+/*
+define UD_60N_PU_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_60N_PU_NowSep {                            sum(i=0       ,SEP-month,1) UD_60N_PU(i)*cfs_taf(i)                     }
+define UD_60N_PU_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY  sum(i=1,May-month,1) UD_60N_PU(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_60N_PU_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_60N_PU(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_60N_PU(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_60N_PU_ANNdv  {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_60N_PU_ANN    {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_60N_PU(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_60N_PU(i)*cfs_taf(i)}
+             case other {condition always value UD_60N_PU_ANNdv(-1)}
+             }
+
+goal set_UD_60N_PU_ANNdv {UD_60N_PU_ANNdv = UD_60N_PU_ANN}
+
+!=================================================================================================
+!ELDID_NU3      - El Dorado Irrigation District, El Dorado Hills water supply region
+!=================================================================================================
+/*
+define UD_ELDID_NU3_MarApr {case MAR_APR {condition month >= MAR .and. month <= APR sum(i=-(month-MAR),APR-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_MarMay {case MAR_MAY {condition month >= MAR .and. month <= MAY sum(i=-(month-MAR),MAY-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_MarJun {case MAR_JUN {condition month >= MAR .and. month <= JUN sum(i=-(month-MAR),JUN-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_MarJul {case MAR_JUL {condition month >= MAR .and. month <= JUL sum(i=-(month-MAR),JUL-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_MarAug {case MAR_AUG {condition month >= MAR .and. month <= AUG sum(i=-(month-MAR),AUG-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_MarSep {case MAR_SEP {condition month >= MAR .and. month <= SEP sum(i=-(month-MAR),SEP-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_JunSep {case JUN_SEP {condition month >= JUN .and. month <= SEP sum(i=-(month-JUN),SEP-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_OctDec {case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY sum(i=SEP-month+1,SEP-month+3,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+*/
+!define UD_ELDID_NU3_NowSep {                            sum(i=0           ,SEP-month,1) UD_ELDID_NU3(i)*cfs_taf(i)                             }
+define UD_ELDID_NU3_NowMay {case FEB_MAY {condition month >= FEB .and. month <=MAY sum(i=1,May-month,1) UD_ELDID_NU3(i)*cfs_taf(i)} case other {condition always value 0.0}}
+define UD_ELDID_NU3_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) UD_ELDID_NU3(i)*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  UD_ELDID_NU3(i)*cfs_taf(i) }
+    case other {condition always value 0.0}}
+
+define UD_ELDID_NU3_ANNdv   {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_ELDID_NU3_ANN     {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_ELDID_NU3(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_ELDID_NU3(i)*cfs_taf(i)}
+             case other {condition always value UD_ELDID_NU3_ANNdv(-1)}
+             }
+
+goal set_UD_ELDID_NU3_ANN_dv {UD_ELDID_NU3_ANNdv = UD_ELDID_NU3_ANN}
+
+!=================================================================================================
+!26S_NU1    - City of Sacramento (South of American River)
+!=================================================================================================
+
+define UD_26S_NU1_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_NU1_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_NU1(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_NU1(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_NU1_ANNdv(-1)}
+             }
+
+goal set_UD_26S_NU1_ANNdv {UD_26S_NU1_ANNdv = UD_26S_NU1_ANN}
+
+!=================================================================================================
+!26S_PU4    - Sac County WA (SMUD transfer and PL 101-514)
+!=================================================================================================
+
+define UD_26S_PU4_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26S_PU4_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26S_PU4(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26S_PU4(i)*cfs_taf(i)}
+             case other {condition always value UD_26S_PU4_ANNdv(-1)}
+             }
+
+goal set_UD_26S_PU4_ANNdv {UD_26S_PU4_ANNdv = UD_26S_PU4_ANN}
+
+!=================================================================================================
+!26N_NU2    - Carmichael WD
+!=================================================================================================
+
+define UD_26N_NU2_ANNdv {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_26N_NU2_ANN   {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_26N_NU2(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_26N_NU2(i)*cfs_taf(i)}
+             case other {condition always value UD_26N_NU2_ANNdv(-1)}
+             }
+
+goal set_UD_26N_NU2_ANNdv {UD_26N_NU2_ANNdv = UD_26N_NU2_ANN}
+
+!____________________________________End Demand Calculations_____________________________________!
+!_________________________________Begin PCWA Totals Calculations_________________________________!
+
+!=================================================================================================
+!PCWATotals - PCWA Totals for Applied Water and Urban Demands
+! When PCWA reviewed the American River watershed operations, they commented that our Zone 1 agricultural demands were much too low. 
+! PCWA lower Zone 1 is represented by 24_NA3. PCWA estimated that agricultural demands are approximately 58 TAF/year. Our average applied water demand is only 18.9 TAF/yr.
+! Multiplying a factor of 2.5 to AWO and AWR is a quick solution to achieve a realistic agricultural demand. ----- Idy Lui 2/27/2020
+!=================================================================================================
+
+define DFo_24_NA2  {value ((1 - RUFO_24_NA2 + RPF_24_NA2)/ (1 - DPF_ABN010_24_NA2 - EVF_ABN010_24_NA2 - LFF_ABN010_24_NA2 - OSF_ABN010_24_NA2))}
+define DFr_24_NA2  {value ((1 - RUFR_24_NA2 + RPF_24_NA2)/ (1 - DPF_ABN010_24_NA2 - EVF_ABN010_24_NA2 - LFF_ABN010_24_NA2 - OSF_ABN010_24_NA2))}
+define DFo_24_NA3  {value ((1 - RUFO_24_NA3 + RPF_24_NA3)/ (1 - DPF_STH003_24_NA3 - EVF_STH003_24_NA3 - LFF_STH003_24_NA3 - OSF_STH003_24_NA3))}
+define DFr_24_NA3  {value ((1 - RUFR_24_NA3 + RPF_24_NA3)/ (1 - DPF_STH003_24_NA3 - EVF_STH003_24_NA3 - LFF_STH003_24_NA3 - OSF_STH003_24_NA3))}
+
+!First, calculate annual demands for 24_NA2, 24_NA3, & 24_NU2
+define AW_24_NA2_ANNdv  {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define AW_24_NA2_ANN    {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2)*cfs_taf(i)}
+             case other {condition always value AW_24_NA2_ANNdv(-1)}
+             }
+
+goal set_AW_24_NA2_ANNdv {AW_24_NA2_ANNdv = AW_24_NA2_ANN}
+
+define AW_24_NA3_ANNdv  {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define AW_24_NA3_ANN    {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) (2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) (2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3)*cfs_taf(i)}
+             case other {condition always value AW_24_NA3_ANNdv(-1)}
+             }
+
+goal set_AW_24_NA3_ANNdv {AW_24_NA3_ANNdv = AW_24_NA3_ANN}
+
+define UD_24_NU2_ANNdv  {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define UD_24_NU2_ANN    {case FirstMonth {condition month == OCT .and. WaterYear == BgnWY sum(i=0,11,1) UD_24_NU2(i)*cfs_taf(i)}
+             case MAR {condition month == MAR .and. WaterYear < EndWY sum(i=0,11,1) UD_24_NU2(i)*cfs_taf(i)}
+             case other {condition always value UD_24_NU2_ANNdv(-1)}
+             }
+
+goal set_UD_24_NU2_ANNdv {UD_24_NU2_ANNdv = UD_24_NU2_ANN}
+
+!Determine PCWATotal_ANN
+define PCWATotal_ANNdv   {std kind 'ANNUAL-DEMAND' units 'TAF'}
+define PCWATotal_ANN     {value AW_24_NA2_ANN + AW_24_NA3_ANN + UD_24_NU2_ANN}
+goal set_PCWATotal_ANNdv {PCWATotal_ANNdv = PCWATotal_ANN} 
+
+! Next, calculate the PCWA Totals
+/*
+define PCWATotals_MarApr {
+    case MAR_APR {condition month >= MAR .and. month <= APR
+              sum(i=-(month-MAR),APR-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_MarMay {
+    case MAR_MAY {condition month >= MAR .and. month <= MAY
+              sum(i=-(month-MAR),MAY-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_MarJun {
+    case MAR_JUN {condition month >= MAR .and. month <= JUN
+              sum(i=-(month-MAR),JUN-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_MarJul {
+    case MAR_JUL {condition month >= MAR .and. month <= JUL
+              sum(i=-(month-MAR),JUL-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_MarAug {
+    case MAR_AUG {condition month >= MAR .and. month <= AUG
+              sum(i=-(month-MAR),AUG-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_MarSep {
+    case MAR_SEP {condition month >= MAR .and. month <= SEP
+              sum(i=-(month-MAR),SEP-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_JunSep {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP
+              sum(i=-(month-JUN),SEP-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }
+define PCWATotals_OctDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY
+              sum(i=SEP-month+1,SEP-month+3,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) }
+    case other   {condition always value 0.0}
+                  }               
+define PCWATotals_NowSep {
+              sum(i=0           ,SEP-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i)
+                  }*/
+define PCWATotals_NowMay {
+    case Feb_May {condition month >= FEB .and. month <=MAY
+            sum(i=1           ,May-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i)  }                 
+    case other   {condition always value 0.0}
+                }
+define PCWATotals_NowDec {
+    case JUN_SEP {condition month >= JUN .and. month <= SEP .and. WATERYEAR < EndWY 
+        sum(i=1,SEP-month+3,1) (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i) } 
+    case OCT_DEC {condition month >= OCT .and. month <= DEC 
+        sum(i=1, DEC-month,1)  (AWO_24_NA2(i)*DFo_24_NA2 + AWR_24_NA2(i)*DFr_24_NA2 + 2.5*AWO_24_NA3(i)*DFo_24_NA3 + 2.5*AWR_24_NA3(i)*DFr_24_NA3 + UD_24_NU2(i))*cfs_taf(i)}
+    case other {condition always value 0.0}}
+
+!_____________________________End PCWA Totals Calculations_______________________________________!
+!_____________________________Begin Percent Demand Calculations__________________________________!
+
+! Monthly percent demands (use for October through March case and WaterForum.wresl
+define perdem_UD_26N_PU1   {value  UD_26N_PU1 * cfs_taf               /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3 {value (UD_26N_PU2 + UD_26N_PU3) * cfs_taf / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1   {value  UD_26S_PU1 * cfs_taf               /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2   {value  UD_26S_PU2 * cfs_taf               /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3 * cfs_taf      /  UD_26S_PU3_ANN                   }
+}
+define perdem_UD_60N_PU    {value  UD_60N_PU  * cfs_taf               /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3 {value  UD_ELDID_NU3   * cfs_taf           /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1   {value  UD_26N_NU1 * cfs_taf               /  UD_26N_NU1_ANN                   }
+
+define perdem_PCWA         {value (AWO_24_NA2*DFo_24_NA2
+                 + AWR_24_NA2*DFr_24_NA2
+                 + 2.5*AWO_24_NA3*DFo_24_NA3
+                 + 2.5*AWR_24_NA3*DFr_24_NA3
+                 + UD_24_NU2) * cfs_taf           /  PCWATotal_ANN                    }
+                 
+define perdem_UD_26S_NU1   {value  UD_26S_NU1 * cfs_taf               /  UD_26S_NU1_ANN                   }
+define perdem_UD_26S_PU4   {value  UD_26S_PU4 * cfs_taf               /  UD_26S_PU4_ANN                   }
+define perdem_UD_26N_NU2   {value  UD_26N_NU2 * cfs_taf               /  UD_26N_NU2_ANN                   }
+define perdem_UD_26N_PU2   {value  UD_26N_PU2 * cfs_taf               /  UD_26N_PU2_ANN                   }
+define perdem_UD_26N_PU3   {value  UD_26N_PU3 * cfs_taf               /  UD_26N_PU3_ANN                   }
+
+! March through April percent deliveries
+/*
+define perdem_UD_26N_PU1_MarApr   {value  UD_26N_PU1_MarApr                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarApr {value (UD_26N_PU2_MarApr + UD_26N_PU3_MarApr)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarApr   {value  UD_26S_PU1_MarApr                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarApr   {value  UD_26S_PU2_MarApr                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarApr   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarApr                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarApr    {value  UD_60N_PU_MarApr                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarApr {value  UD_ELDID_NU3_MarApr                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarApr   {value  UD_26N_NU1_MarApr                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarApr         {value  PCWATotals_MarApr                       /  PCWATotal_ANN                    }
+
+! March through May percent deliveries
+define perdem_UD_26N_PU1_MarMay   {value  UD_26N_PU1_MarMay                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarMay {value (UD_26N_PU2_MarMay + UD_26N_PU3_MarMay)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarMay   {value  UD_26S_PU1_MarMay                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarMay   {value  UD_26S_PU2_MarMay                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarMay   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarMay                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarMay    {value  UD_60N_PU_MarMay                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarMay {value  UD_ELDID_NU3_MarMay                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarMay   {value  UD_26N_NU1_MarMay                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarMay         {value  PCWATotals_MarMay                       /  PCWATotal_ANN                    }
+
+! March through June percent deliveries
+define perdem_UD_26N_PU1_MarJun   {value  UD_26N_PU1_MarJun                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarJun {value (UD_26N_PU2_MarJun + UD_26N_PU3_MarJun)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarJun   {value  UD_26S_PU1_MarJun                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarJun   {value  UD_26S_PU2_MarJun                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarJun   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarJun                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarJun    {value  UD_60N_PU_MarJun                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarJun {value  UD_ELDID_NU3_MarJun                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarJun   {value  UD_26N_NU1_MarJun                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarJun         {value  PCWATotals_MarJun                       /  PCWATotal_ANN                    }
+
+! March through July percent deliveries
+define perdem_UD_26N_PU1_MarJul   {value  UD_26N_PU1_MarJul                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarJul {value (UD_26N_PU2_MarJul + UD_26N_PU3_MarJul)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarJul   {value  UD_26S_PU1_MarJul                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarJul   {value  UD_26S_PU2_MarJul                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarJul   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarJul                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarJul    {value  UD_60N_PU_MarJul                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarJul {value  UD_ELDID_NU3_MarJul                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarJul   {value  UD_26N_NU1_MarJul                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarJul         {value  PCWATotals_MarJul                       /  PCWATotal_ANN                    }
+
+! March through August percent deliveries
+define perdem_UD_26N_PU1_MarAug   {value  UD_26N_PU1_MarAug                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarAug {value (UD_26N_PU2_MarAug + UD_26N_PU3_MarAug)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarAug   {value  UD_26S_PU1_MarAug                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarAug   {value  UD_26S_PU2_MarAug                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarAug   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarAug                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarAug    {value  UD_60N_PU_MarAug                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarAug {value  UD_ELDID_NU3_MarAug                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarAug   {value  UD_26N_NU1_MarAug                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarAug         {value  PCWATotals_MarAug                       /  PCWATotal_ANN                    }
+
+! March through September percent deliveries
+define perdem_UD_26N_PU1_MarSep   {value  UD_26N_PU1_MarSep                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_MarSep {value (UD_26N_PU2_MarSep + UD_26N_PU3_MarSep)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_MarSep   {value  UD_26S_PU1_MarSep                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_MarSep   {value  UD_26S_PU2_MarSep                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_MarSep   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_MarSep                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_MarSep    {value  UD_60N_PU_MarSep                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_MarSep {value  UD_ELDID_NU3_MarSep                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_MarSep   {value  UD_26N_NU1_MarSep                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_MarSep         {value  PCWATotals_MarSep                       /  PCWATotal_ANN                    }
+
+! June through September percent deliveries
+define perdem_UD_26N_PU1_JunSep   {value  UD_26N_PU1_JunSep                   /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_JunSep {value (UD_26N_PU2_JunSep + UD_26N_PU3_JunSep)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_JunSep   {value  UD_26S_PU1_JunSep                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_JunSep   {value  UD_26S_PU2_JunSep                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_JunSep   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_JunSep                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_JunSep    {value  UD_60N_PU_JunSep                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_JunSep {value  UD_ELDID_NU3_JunSep                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_JunSep   {value  UD_26N_NU1_JunSep                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_JunSep         {value  PCWATotals_JunSep                       /  PCWATotal_ANN                    }
+*/
+! Now through September percent deliveries
+/*
+define perdem_UD_26N_PU1_NowSep   {value  UD_26N_PU1_NowSep                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_NowSep {value (UD_26N_PU2_NowSep + UD_26N_PU3_NowSep)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_NowSep   {value  UD_26S_PU1_NowSep                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_NowSep   {value  UD_26S_PU2_NowSep                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_NowSep   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_NowSep                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_NowSep    {value  UD_60N_PU_NowSep                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_NowSep {value  UD_ELDID_NU3_NowSep                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_NowSep   {value  UD_26N_NU1_NowSep                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_NowSep         {value  PCWATotals_NowSep                       /  PCWATotal_ANN                    }*/
+
+! Now through May percent deliveries
+define perdem_UD_26N_PU1_NowMay   {value  UD_26N_PU1_NowMay                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_NowMay {value (UD_26N_PU2_NowMay + UD_26N_PU3_NowMay)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_NowMay   {value  UD_26S_PU1_NowMay                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_NowMay   {value  UD_26S_PU2_NowMay                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_NowMay   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_NowMay                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_NowMay    {value  UD_60N_PU_NowMay                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_NowMay {value  UD_ELDID_NU3_NowMay                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_NowMay   {value  UD_26N_NU1_NowMay                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_NowMay         {value  PCWATotals_NowMay                       /  PCWATotal_ANN                    }
+
+! Now through Dec percent deliveries
+define perdem_UD_26N_PU1_NowDec   {value  UD_26N_PU1_NowDec                       /  UD_26N_PU1_ANN                   }
+define perdem_UD_26N_PU2a3_NowDec {value (UD_26N_PU2_NowDec + UD_26N_PU3_NowDec)  / (UD_26N_PU2_ANN + UD_26N_PU3_ANN) }
+define perdem_UD_26S_PU1_NowDec   {value  UD_26S_PU1_NowDec                       /  UD_26S_PU1_ANN                   }
+define perdem_UD_26S_PU2_NowDec   {value  UD_26S_PU2_NowDec                       /  UD_26S_PU2_ANN                   }
+define perdem_UD_26S_PU3_NowDec   {
+    case zero {condition UD_26S_PU3_ANN < 0.0000001 value 0.}
+    case otherwise {condition always value  UD_26S_PU3_NowDec                       /  UD_26S_PU3_ANN                   }
+}
+
+define perdem_UD_60N_PU_NowDec    {value  UD_60N_PU_NowDec                        /  UD_60N_PU_ANN                    }
+define perdem_UD_ELDID_NU3_NowDec {value  UD_ELDID_NU3_NowDec                     /  UD_ELDID_NU3_ANN                 }
+define perdem_UD_26N_NU1_NowDec   {value  UD_26N_NU1_NowDec                       /  UD_26N_NU1_ANN                   }
+define perdem_PCWA_NowDec         {value  PCWATotals_NowDec                       /  PCWATotal_ANN                    }
+!_____________________________End Percent Demand Calculations____________________________________!
+!____________________________________End of file_________________________________________________!

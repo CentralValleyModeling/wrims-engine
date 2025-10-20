@@ -1,0 +1,124 @@
+! TransfersOps_Stg1_CalSim3.wresl
+
+!goal zeroI204_WTS {I204_WTS = 0.}
+goal setI607_WTS {I_MDOTA_WTS = 0.}
+goal setI839_WTS {I839_WTS = 0.}
+goal setI_CAA207_WTS {I_CAA207_WTS = 0.}
+!goal zeroD143A_WTS {D143A_WTS = 0.}
+!goal zeroD145A_WTS {D145A_WTS = 0.}
+!goal zeroD122A_WTS {D122A_WTS = 0.}
+!goal zeroD122B_WTS {D122B_WTS = 0.}
+!goal zeroD128_WTS {D128_WTS = 0.}
+!goal zeroD7b_WTS  {D7b_WTS = 0.}
+!goal zeroD168A_WTS {D168A_WTS = 0.}
+
+goal set_WTS_Yuba_Stg1 {WTS_Yuba_Stg1 = WTS_YubaSW + WTS_YubaGW}
+define C_YUB006_Delta {alias C_YUB006[Delta] kind 'flow-channel' units 'cfs'}
+
+goal set_I_OROVL_WTS {lhs I_OROVL_WTS rhs I_OROVL_WTS[TRANSFERS_STAGE1] lhs<rhs penalty 99999 lhs>rhs penalty 99999}
+goal set_I_SHSTA_WTS {I_SHSTA_WTS = 0.}
+
+goal route_WTS_Yuba_Stg1_swp {WTS_Yuba_Stg1_swp + C_FTR059_WTS_Stg1_swp + C_KSWCK_WTS_Stg1_swp = I_OROVL_WTS + C_CAA003_WTS_Stg1 + NDOI_ADD_WTS_stg1}
+goal route_WTS_Yuba_Stg1_cvp {WTS_Yuba_Stg1_cvp = I_SHSTA_WTS}
+
+define S_Orovl_WTS_Stg1 {std kind 'storage' units 'taf'}
+define S_Shsta_WTS_Stg1 {std kind 'storage' units 'taf'}
+
+goal track_S_Orovl_Stg1 {
+	LHS S_Orovl_WTS_Stg1
+	CASE NotJanuaryorFlood {
+		condition	range(month,feb,dec) .and. S_OROVL(-1) + 1 < S_OROVLLevel5
+		rhs		max(0,S_Orovl_WTS_Stg1(-1)) + I_OROVL_WTS*cfs_taf - C_FTR059_WTS_Stg1_swp*cfs_taf
+	}
+	CASE JanuaryOrFlood {
+		condition	always
+		rhs		0.
+	}
+}
+
+goal track_S_Shsta_Stg1 {
+	LHS S_Shsta_WTS_Stg1
+	CASE NotJanuaryorFlood {
+		condition	range(month,feb,dec) .and. S_Shsta(-1) + 1 < S_ShstaLevel5
+		rhs		max(0,S_Shsta_WTS_Stg1(-1)) + I_Shsta_WTS*cfs_taf - C_KSWCK_WTS_Stg1_swp*cfs_taf
+	}
+	CASE JanuaryOrFlood {
+		condition	always
+		rhs		0.
+	}
+}
+
+
+goal NoJanOrFloodOroCaptOrRel {
+	lhs I_OROVL_WTS + C_FTR059_WTS_Stg1_swp
+	case JanuaryOrFlood {
+		condition	month == jan .or. S_OROVL(-1) + 1 >= S_OROVLLevel5
+		rhs		0.
+		lhs<rhs		penalty 0
+	}
+}
+
+goal NoJanOrFloodShaCaptOrRel {
+	lhs I_SHSTA_WTS + C_KSWCK_WTS_Stg1_swp
+	case JanuaryOrFlood {
+		condition	month == jan .or. S_SHSTA(-1) + 1 >= S_SHSTALevel5
+		rhs		0.
+		lhs<rhs		penalty 0
+	}
+}
+
+
+goal zeroC_DMC000_WTS {C_DMC000_WTS  = 0.}
+
+goal setS_SHSTA_WTS {S_SHSTA_WTS = S_Shsta_WTS_Stg1}!S_SHSTA_WTS(-1)}
+goal setS_OROVL_WTS {S_OROVL_WTS = S_Orovl_WTS_Stg1}!S_OROVL_WTS(-1)}
+
+define WTS_CI12 {value 0.}
+define WTS_DSA12 {value 0.}
+define WTS_CI15 {value 0.}
+define WTS_DSA15 {value 0.}
+define WTS_CI69 {value 0.}
+define WTS_DSA69 {value 0.}
+define WTS_CI70 {value 0.}
+define WTS_GW70 {value 0.}
+define WTS_DSA70 {value 0.}
+
+define frac_GC_N_DSA12 {value 0.}
+define frac_GC_S_DSA12 {value 0.}
+define frac_SC_N_DSA12 {value 0.}
+define frac_SC_S_DSA12 {value 0.}
+
+goal zeroD_SBA036_SCVWD_WTS {D_SBA036_SCVWD_WTS = 0.}
+goal zeroD_ESB413_MWDSC_WTS {D_ESB413_MWDSC_WTS = 0.}
+goal zeroD_WSB031_MWDSC_WTS {D_WSB031_MWDSC_WTS = 0.}
+
+define SacCI_Stg1 {value 0.}
+define SacCI_Stg2 {value 0.}
+define SacOthCI_Stg1 {value 0.}
+define SacOthCI_Stg2 {value 0.}
+
+define SacCI_Max1 {value 0.}
+define SacOthCI_Max1 {value 0.}
+
+!goal zeroC_FTR059_WTS {C_FTR059_WTS  = 0.}
+!goal zeroC_KSWCK_WTS {C_KSWCK_WTS  = 0.}
+!goal zeroC_OROVL_WTS {C_OROVL_WTS  = 0.}
+!goal zeroC_SAC041_WTS {C_SAC041_WTS  = 0.}
+goal zeroD400_WTS {D400_WTS  = 0.}
+
+!Don't Allow Release from Oroville in June. EIR/EIS LYRA Appendix D 2007
+goal noC_FTR059_WTS_Jun {
+  lhs     C_FTR059_WTS
+  case noRelease {
+    condition month == Jun
+    rhs   0. }}
+
+!Don't Allow Export in May. O&M
+goal noC_CAA003_WTS_May_Jun {
+  lhs     C_CAA003_WTS
+  case noRelease {
+    condition month == May .OR. month == jun
+    rhs   0. }}	
+		
+!Route transfer water
+goal route_WTS_Yuba_Stg1 {C_SAC041_WTS + I_OROVL_WTS + I_SHSTA_WTS = WTS_Yuba_Stg1 + C_KSWCK_WTS + C_FTR059_WTS}

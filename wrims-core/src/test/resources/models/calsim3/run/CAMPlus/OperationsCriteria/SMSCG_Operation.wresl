@@ -1,0 +1,236 @@
+!SMSCG_Operation_DELTA.wresl
+
+!DCR turned off D1641 SMSCG re-op representation in CalSim.
+!Here it is turned back on and re-op is dependent on X2 location.
+
+!Variables pulled from prior timesteps from CalSim 3
+!define SMSCG_Op1_Count_dv { std kind 'FLAG' units 'NONE' } !SMSCG_OpFlag_EX_Count_DV
+define SMSCG_Op2 { std kind 'Gate-op-ratio' units 'None' } !SMSCG_OpFlag_PA_DV
+define SMSCG_Op2_Count_dv { std kind 'Flag' units 'None' } !SMSCG_OPFlag_PA_Count_DV
+define SMSCG_Op3_Count_dv { std kind 'Flag' units 'None' } !SMSCG_OPFlat_ITP_Count_DV
+
+define(fm) SMSCG_OpFlag_EX_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_EX_Count_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_EX {
+	case October {
+		condition	mv($m) == Oct .and. X2_LAST($m) > 88
+		value		1.
+	}
+	case November {
+		condition	mv($m) == Nov .and. X2_LAST($m) > 88
+		value		1.
+	}
+	case December {
+		condition	mv($m) == Dec .and. X2_LAST($m) > 84
+		value		1.
+	}
+	case January {
+		condition	mv($m) == Jan .and. X2_LAST($m) > 82
+		value		1.
+	}
+	case February {
+		condition	mv($m) == Feb .and. X2_LAST($m) > 71
+		value		1.
+	}
+	case March {
+		condition	mv($m) == Mar .and. X2_LAST($m) > 71
+		value		1.
+	}
+	case April {
+		condition	mv($m) == Apr .and. X2_LAST($m) > 73
+		value		1.
+	}
+	case May {
+		condition	mv($m) == May .and. X2_LAST($m) > 73
+		value		1.
+	}
+	case otherwise {
+		condition	always
+		value		0.
+	}
+}
+goal(fm) setSMSCGOpFlagEXDV { SMSCG_OpFlag_EX_DV($m) = SMSCG_OpFlag_EX($m) }
+
+define(fm) SMSCG_OpFlag_EX_Count {
+	case reset {
+		condition mv($m) == JUN
+		value 0. }
+	case currentmonth{
+		condition $m==0
+		value SMSCG_OpFlag_EX_Count_DV($m-1) + SMSCG_OpFlag_EX($m) }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_EX_Count($m-1) + SMSCG_OpFlag_EX($m) }
+}
+goal(fm) setSMSCGOpFlagEXCountDV { SMSCG_OpFlag_EX_Count_DV($m) = SMSCG_OpFlag_EX_Count($m) }
+
+
+/*
+define SMSCG_OpFlag_EX_Count {
+	case firstyear	{
+		condition wateryear == 1922. .and. month <= OCT
+		value SMSCG_OpFlag_EX }
+	case reset {
+		condition month == JUN
+		value 0. }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_EX_Count_DV(-1) + SMSCG_OpFlag_EX }
+}
+goal setSMSCGOpFlagEXCountDV { SMSCG_OpFlag_EX_Count_DV = SMSCG_OpFlag_EX_Count }
+*/
+
+
+
+!******************************************************************************
+! ROC on LTO Proposed Action Summer/Fall Delta Smelt Habitat Operation criteria:
+!   - beginning June or later through Sep/Oct
+!   - BN, AN and Wet years
+!   - up to 60 days consecutive
+!   - if X2 estimated between 76 and 87
+!   - before August, delay start till previous month X2 in range
+!
+
+define(fm) SMSCG_OpFlag_PA_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_PA_Count_DV { std kind 'Flag' units 'None' }
+
+define(fm) SMSCG_OpFlag_PA {
+	case Check_months {
+		condition mv($m) >= NOV .and. mv($m) <= MAY ! exclude if November through May
+		value 0. }
+	case Check_WYT	{
+		condition wyt_SAC > 3.  ! exclude  Dry and Critically Dry years !AA_06192020 and exclude the wet wateryear
+		value 0. }
+	case Check_60day_done_currentmonth  {
+		condition $m==0 .and. SMSCG_Op2_Count_dv(-1) >= 2.
+		value 0. }
+	case Check_60day_done {
+		condition $m>0 .and. (SMSCG_Op2_Count_dv(-1)+(sum (i=0, $m-1, 1) SMSCG_OpFlag_PA(i))) >= 2.
+		value 0. }
+	case Check_30day_done_currentmonth {
+		condition $m==0 .and.SMSCG_Op2_Count_dv(-1) == 1. .and. SMSCG_Op2(-1) == 0.
+		value 0. }
+	case Check_30day_done {
+		condition $m>0 .and. (SMSCG_Op2_Count_dv(-1)+(sum (i=0, $m-1, 1) SMSCG_OpFlag_PA(i))) == 1. .and. SMSCG_OpFlag_PA($m-1) == 0.
+		value 0. }	
+	case Check_X2_range {
+		condition X2_MOD_est($m) <= 76. !.or. X2_MOD_est >= 87.
+		value 0. }
+	case Check_X2_delay_Jun_Jul	{
+		condition mv($m) <= JUL .and. X2_last_MOD($m) <= 76. ! delay start in June and July if previous X2 west of 76 km
+		value 0. }
+	case Commence_GateOp {
+		condition always
+		value 1. }
+}
+goal(fm) setSMSCGOpFlagPADV { SMSCG_OpFlag_PA_DV($m) = SMSCG_OpFlag_PA($m) }
+
+define(fm) SMSCG_OpFlag_PA_Count {
+	case reset {
+		condition mv($m) == NOV
+		value 0. }
+	case currentmonth{
+		condition $m==0
+		value SMSCG_Op2_Count_dv(-1) + SMSCG_OpFlag_PA }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_PA_Count($m-1) + SMSCG_OpFlag_PA($m) }
+}
+goal(fm) setSMSCGOpFlagPACountDV { SMSCG_OpFlag_PA_Count_DV($m) = SMSCG_OpFlag_PA_Count($m) }
+
+
+!******************************************************************************
+! ITP SMSCG re-operation implements dry year SMSCG re-operations following W, AN, or BN years
+! Re-operation is to occur for 60 days (2 months) following W and AN years and 30 days following a BN year
+! Re-operation is to occur between June and October, but given the X2 trigger conditions applied (> 76 km)
+! in a dry year it typically happens in June and July of that period.
+! Re-operation following Wet and AN years are dependent on carryover of ITP 100 TAF export cut (ITP_Carryover)
+define(fm) SMSCG_OpFlag_ITP_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_ITP_Count_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_ITP {
+	case Check_months {
+		condition mv($m) >= NOV .and. mv($m) <= MAY ! exclude if November through May
+		value 0. }
+	case Check_WYT	{
+		condition wyt_SAC < 3.5 .or. wyt_SAC == 5 .or.  prev_wyt_SAC > 3.5 ! only dry years that follow W, AN, or BN years
+		value 0.}
+	case InsufficientCarryOver_currentmonth {
+		condition	$m==0 .and. prev_wyt_SAC < 2.5 .and. ITP_Carryover_(-1) < 10 !TAF
+		value		0. 
+	}
+	case InsufficientCarryOver {
+		condition	$m>0 .and. prev_wyt_SAC < 2.5 .and. 1.1*ITP_Carryover_(-1) < (sum(i=0, $m-1, 1) SMSCG_OpFlag_ITP(i)*500*cfs_taf(i))+500*cfs_taf($m) 
+		value		0. 
+	}
+	case Check_30day_60day_done_currentmonth {
+		condition $m==0 .and. ((prev_wyt_SAC == 3 .and. SMSCG_Op3_Count_dv(-1) > 0.5) .or. SMSCG_Op3_Count_dv(-1) > 1.5)
+		value 0. }
+	case Check_30day_60day_done {
+		condition $m>0 .and. ((prev_wyt_SAC == 3 .and. (SMSCG_Op3_Count_dv(-1)+(sum (i=0, $m-1, 1) SMSCG_OpFlag_ITP(i))) > 0.5) .or. (SMSCG_Op3_Count_dv(-1)+(sum (i=0, $m-1, 1) SMSCG_OpFlag_ITP(i))) > 1.5)
+		value 0. }
+	/*case Check_30day_done {
+		condition SMSCG_OpFlag_ITP_Count_DV(-1) == 1. .and. SMSCG_OpFlag_ITP_DV(-1) == 0.
+		value 0. }*/
+	case Check_X2_range {
+		condition X2_MOD_est($m) <= 76. !.or. X2_MOD_est >= 87.
+		value 0. }
+	case Check_X2_delay_Jun_Jul	{
+		condition mv($m) <= JUL .and. X2_last_MOD($m) <= 76. ! delay start in June and July if previous X2 west of 76 km
+		value 0. }	
+	case Commence_GateOp {
+		condition always
+		value 1. }
+}
+goal(fm) setSMSCGOpFlagITPDV { SMSCG_OpFlag_ITP_DV($m) = SMSCG_OpFlag_ITP($m) }
+
+define(fm) SMSCG_OpFlag_ITP_Count {
+	case reset {
+		condition month == NOV
+		value 0. }
+	case otherwise_currentmonth {
+		condition $m==0
+		value SMSCG_Op3_Count_dv(-1) + SMSCG_OpFlag_ITP }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_ITP_Count($m-1) + SMSCG_OpFlag_ITP($m) }
+}
+goal(fm) setSMSCGOpFlagITPCountDV { SMSCG_OpFlag_ITP_Count_DV($m) = SMSCG_OpFlag_ITP_Count($m) }
+
+!******************************************************************************
+
+define(fm) SMSCG_OpFlag_Count_DV { std kind 'Flag' units 'None' }
+define(fm) SMSCG_OpFlag_Count {
+	case reset {
+		condition max(SMSCG_OpFlag_EX($m),SMSCG_OpFlag_PA($m),SMSCG_OpFlag_ITP($m)) < 1.
+		value 0. }
+	case currentmonth {
+		condition $m==0
+		value SMSCG_Op3_Count_dv(-1) + max(SMSCG_OpFlag_EX,SMSCG_OpFlag_PA,SMSCG_OpFlag_ITP) }
+	case otherwise {
+		condition always
+		value SMSCG_OpFlag_Count($m-1) + max(SMSCG_OpFlag_EX($m),SMSCG_OpFlag_PA($m),SMSCG_OpFlag_ITP($m)) }
+}
+goal(fm) setSMSCGOpFlagCountDV { SMSCG_OpFlag_Count_DV($m) = SMSCG_OpFlag_Count($m) }
+
+! first two months of continuous operation adjust for 500 cfs then drop to 200 cfs for each additional month; if interrupted, start again with 500 cfs
+define(fm) SMSCG_NDO_adj { 
+    case exclude_ANNschedule {
+	    condition mv($m) <= FEB
+        value 0. }                      ! don't use an adjustment in months where ANN training already included SMSCG Ops
+    case OpFlagCount_low {
+	    condition SMSCG_OpFlag_Count($m) <= 2.
+        value max(SMSCG_OpFlag_EX($m),SMSCG_OpFlag_PA($m), SMSCG_OpFlag_ITP($m)) * 500. }  ! assume SMSCG Ops has a salinity effect equivalent to a change in NDO of 500 CFS
+    case OpFlagCount_high {
+	    condition SMSCG_OpFlag_Count($m) >= 3.
+        value max(SMSCG_OpFlag_EX($m),SMSCG_OpFlag_PA($m), SMSCG_OpFlag_ITP($m)) * 500. }  ! assume SMSCG Ops has a salinity effect equivalent to a change in NDO of 200 CFS
+}
+define(fm) SMSCG_ITP_NDO_adj_taf {value 0} !zrc@20220905 {value SMSCG_OpFlag_ITP($m) * 500.*cfs_taf($m) } 
+define(fm) SMSCG_ITP_NDO_adj_taf_ {alias SMSCG_ITP_NDO_adj_taf($m) kind 'ITP-Action' units 'taf'}
+
+define(fm) SMSCG_NDO_adj_taf {std kind 'FLOW-DELIVERY' units 'taf'} !SMSCG Ops NDO cost associated with salinity effect
+goal(fm) setSMSCGOper { SMSCG_NDO_adj_taf($m) = SMSCG_NDO_adj($m)*cfs_taf($m)}
+
+define(fm) SMSCG_EX_PA_NDO_adj_taf {std kind 'FLOW-DELIVERY' units 'taf'} !SMSCG Ops NDO cost associated with salinity effect
+goal(fm) setSMSCGOper_Ex_PA { SMSCG_EX_PA_NDO_adj_taf($m) = SMSCG_NDO_adj_taf($m)-SMSCG_ITP_NDO_adj_taf($m)}
+
+

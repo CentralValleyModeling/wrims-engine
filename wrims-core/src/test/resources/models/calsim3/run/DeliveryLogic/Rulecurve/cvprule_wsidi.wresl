@@ -1,0 +1,44 @@
+!WRESL statements for CVP San Luis Rule Curve
+!
+!This code calculates the target storage level for San Luis reservoir
+!******************************************************************************************
+define CVPRULECV { std kind 'rulecurve' units 'TAF' }   !Decision variable of CVP San Luis rule curve
+
+define CVP_filling_rule {select CVPSL_fill from CVPSL_fill_targets given prvShasta=S_SHSTA(-1) use linear where month=month}
+
+define CVPRuleDrainTar {value init_CVPRuleDrainTar
+                            + max(acvpdel_tot_s - 2000.,0.)*0.1}  !10% buffer for delivery in excess of 2 MAF
+define CVPRuleDrainTarDV {alias CVPRuleDrainTar kind 'rulecv-calc' units 'taf'}
+
+
+define CVPRULEcalc {
+     case Oct {
+          condition month == oct
+          value     max(CVPRuleDrainTar, CVP_filling_rule * month/6.)}
+     case NovFeb {
+          condition month>=NOV .and. month<=FEB
+          value     max(CVPRuleDrainTar, CVP_filling_rule * month/6., CVPRULECV(-1))} 
+     case MarchApril {
+          condition month>=MAR .and. month<=APR 
+          value     max(CVPRuleDrainTar, CVP_filling_rule, CVPRULECV(-1))} 
+     case May {
+          condition month==MAY 
+          value       max(S_SLUIS_CVP(-1),CVPRULECV(-1))} !min(CVPRULECV(-1), S_SLUIS_CVP(-1) - TargetCVPSLwdwl)}
+     case June {
+          condition month==JUN
+          value       min(CVPRULECV(-1), S_SLUIS_CVP(-1) - TargetCVPSLwdwl)}
+     case July {
+          condition month == jul
+          value       max((CVPRuleCV(-1)+S_SLUIS_CVPLevel2)*0.5, min(CVPRULECV(-1), S_SLUIS_CVP(-1) - TargetCVPSLwdwl))}
+     case Aug {
+           condition month == AUG
+         value       max(S_SLUIS_CVP_DP, S_SLUIS_CVP(-1) - TargetCVPSLwdwl)}
+     case otherwise { ! (i.e. September)
+          condition always
+          value CVPRuleCV(-1)}
+ }
+define CVPRULEcalc_ { alias CVPRulecalc kind 'rulecurve' units 'TAF' }
+
+define CvpRuleCalc1 { value max(S_SLUIS_CVPLevel2,min(CvpRuleCalc, S_SLUIS_CVPLevel4))}
+
+goal setCVPRULECV { CVPRULECV = CVPRulecalc1 }

@@ -1,0 +1,251 @@
+! Required Delta Outflow.
+! Ryan Wilbur
+! Hongbing Yin 3-18-04
+!**********************************************************************************************
+
+! input DCU maco (from DWR's DCO model)
+define(fm) DCU_Maco_fm {select DCU_Mac from CAM_DCU_MAC where month=mv($m)}
+define(fm) DCU_Macodv_fm {alias DCU_Maco_fm($m) kind 'FLOW' units 'TAF'}
+
+! input Yolo Bypass Inflow
+define(fm) YoloQ_fm {value 0}
+!define(FAMmonths) YoloQ_dv {alias YoloQ($m) kind 'FLOW' units 'TAF'}
+
+! input required DOI for salinity standard (from DWR's DCO model)
+define(fm) DOI_Lookup_fm {select salinity from CAM_DO_FX2 where month=mv($m),WYT=wyt_SAC}
+define(fm) DOI_Salin_fm {value DOI_Lookup_fm($m)*cfs_taf($m)}
+define(fm) DOI_Salin_dv_fm {alias DOI_Salin_fm($m) kind 'FLOW' units 'TAF'}
+
+! input required NDOI for minflow standard (from DWR's DCO model)
+! input required NDOI for minflow standard (from DWR's DCO model)
+define(fm) NDOI_Lookup_fm {select outflow from CAM_DO_FX2 where month= mv($m),WYT=wyt_SAC}
+define(fm) NDOI_fm {value NDOI_Lookup_fm($m)*cfs_taf($m)}
+define(fm) NDOI_dv_fm {alias NDOI_fm($m) kind 'FLOW' units 'TAF'}
+
+! compute salinity flow standard
+define(fm) Q_Salin_Std_fm{
+	!case a{condition month>=Mar .and. mv($m)==Nov !These cases removed because no one knew what it was for BGiorgi 20181226
+	!	value 5500.0*cfs_taf($m)
+	!}
+	!case b{condition month>=Mar .and. mv($m)==Dec
+	!	value 7000.0*cfs_taf($m)
+	!}
+	case c{condition always
+		value DOI_Salin_fm($m) + I33A_fm($m) + DCU_Maco_fm($m) + YoloQ_fm($m) - DCU_fm($m)
+	}
+}
+define(fm) Q_Sal_Std_dv_fm {alias Q_Salin_Std_fm($m) kind 'FLOW' units 'TAF'}
+
+!**********************************************************************************************
+
+! X2 Requirements.
+
+! input X2 flow at Port Chicago
+define PC_X2Q_Feb {value 29200*cfs_taf}
+define PC_X2Q_Mar {value 29200*cfs_taf}
+define PC_X2Q_Apr {value 29200*cfs_taf}
+define PC_X2Q_May {value 29200*cfs_taf}
+define PC_X2Q_Jun {value 29200*cfs_taf}
+
+! input X2 flow at Chipps
+define CHP_X2Q_Feb {value 11400*cfs_taf}
+define CHP_X2Q_Mar {value 11400*cfs_taf}
+define CHP_X2Q_Apr {value 11400*cfs_taf}
+define CHP_X2Q_May {value 11400*cfs_taf}
+define CHP_X2Q_Jun {value 11400*cfs_taf}
+
+! forecasted 8-river index:
+/*define RI_Jan {select Jan from CAM_EightRiver where year=wateryear}
+define RI_Feb {select Feb from CAM_EightRiver where year=wateryear}
+define RI_Mar {select Mar from CAM_EightRiver where year=wateryear}
+define RI_Apr {select Apr from CAM_EightRiver where year=wateryear}
+define RI_May {select May from CAM_EightRiver where year=wateryear}
+define RI_Jun {select Jun from CAM_EightRiver where year=wateryear}*/
+
+! number of days for chipps at 11,400cfs
+define CHP_Days_Feb1 {case a{condition RI_Jan<=800 value 0.}
+                      case b{condition always value min(28.,(RI_Jan-800)/200.*28.)}}
+define CHP_Days_Mar1 {select Mar from CAM_X2_CHP given PMI=RI_Feb use linear}
+define CHP_Days_Apr1 {select Apr from CAM_X2_CHP given PMI=RI_Mar use linear}
+define CHP_Days_May1 {select May from CAM_X2_CHP given PMI=RI_Apr use linear}
+define CHP_Days_Jun1 {select Jun from CAM_X2_CHP given PMI=RI_May use linear}
+
+define CHP_Days_Feb {value min(29,int(CHP_Days_Feb1))}
+define CHP_Days_Mar {value min(31,int(CHP_Days_Mar1))}
+define CHP_Days_Apr {value min(30,int(CHP_Days_Apr1))}
+define CHP_Days_May {value min(31,int(CHP_Days_May1))}
+define CHP_Days_Jun {value min(30,int(CHP_Days_Jun1))}
+
+define CHP_Feb {alias CHP_Days_Feb kind 'X2' units 'DAYS'}
+define CHP_Mar {alias CHP_Days_Mar kind 'X2' units 'DAYS'}
+define CHP_Apr {alias CHP_Days_Apr kind 'X2' units 'DAYS'}
+define CHP_May {alias CHP_Days_May kind 'X2' units 'DAYS'}
+define CHP_Jun {alias CHP_Days_Jun kind 'X2' units 'DAYS'}
+
+! number of days for port chicago at 29,200cfs
+define PC_Days_Feb2 {select Feb from CAM_X2_PC given PMI=RI_Jan use linear}
+define PC_Days_Mar2 {select Mar from CAM_X2_PC given PMI=RI_Feb use linear}
+define PC_Days_Apr2 {select Apr from CAM_X2_PC given PMI=RI_Mar use linear}
+define PC_Days_May2 {select May from CAM_X2_PC given PMI=RI_Apr use linear}
+define PC_Days_Jun2 {select Jun from CAM_X2_PC given PMI=RI_May use linear}
+
+define PC_Days_Feb1 {value min(29,int(PC_Days_Feb2))}
+define PC_Days_Mar1 {value min(31,int(PC_Days_Mar2))}
+define PC_Days_Apr1 {value min(30,int(PC_Days_Apr2))}
+define PC_Days_May1 {value min(31,int(PC_Days_May2))}
+define PC_Days_Jun1 {value min(30,int(PC_Days_Jun2))}
+
+define PC_Feb {alias PC_Days_Feb1 kind 'X2' units 'DAYS'}
+define PC_Mar {alias PC_Days_Mar1 kind 'X2' units 'DAYS'}
+define PC_Apr {alias PC_Days_Apr1 kind 'X2' units 'DAYS'}
+define PC_May {alias PC_Days_May1 kind 'X2' units 'DAYS'}
+define PC_Jun {alias PC_Days_Jun1 kind 'X2' units 'DAYS'}
+
+/*! coefficients used in Kimmerer-Monismith equation (X2 = a + b*X2_prv - c*log10(NDO)):
+define x2_a {value 122.2}
+define x2_b {value 0.3278}
+define x2_c {value 17.65}
+
+! trigger for port chigaco, km to just beyond Roe Island
+define X2_Trigger {value 66.3} */
+
+! Each month Feb-Jun is based on X2 requirements.  Port Chicago requirements are based on previous
+! months X2 position: if it is larger than PC location no PC flow needed, if less than trigger
+! it must be based on lookup table.  X2 is based on required delta outflow of previous month.
+! If DOI is about 30,000cfs (1.8MAF) for previous month, port chicago will be triggered.  
+! Also, if 8RI is in range of 2.3-2.5 MAF the DOI will be about 1.8MAF. If previous month Port Chicago
+! is triggered and current month 8RI is larger than 2MAF Port Chicago will also be triggered to
+! maintain high outflow.
+
+!define X2_init {value 66.3}
+
+define DOI_init {value NDOI(-1)*cfs_taf} !select DOI from DCO_Init where month=month}
+
+define PC_Days_Feb {case a{condition DOI_init > 1800 .AND. month <= FEB                      value PC_Days_Feb1}
+                    case b{condition RI_Jan > 2300                                           value PC_Days_Feb1} 
+                    case c{condition always                                                  value 0}}
+define PC_Days_Mar {case a{condition DOI_init > 1800 .AND. month == MAR                      value PC_Days_Mar1}
+		    case b{condition RI_Feb > 2000 .AND. PC_Days_Feb > 0.4 .AND. month < MAR value PC_Days_Mar1}
+                    case c{condition RI_Feb > 2300 .AND. month < MAR                         value PC_Days_Mar1} 
+                    case d{condition always                                                  value 0}}
+define PC_Days_Apr {case a{condition DOI_init > 1800 .AND. month == APR                      value PC_Days_Apr1}
+		    case b{condition RI_Mar > 2000 .AND. PC_Days_Mar > 0.4 .AND. month < APR value PC_Days_Apr1}
+                    case c{condition RI_Mar > 2300 .AND. month < APR                         value PC_Days_Apr1} 
+                    case d{condition always                                                  value 0}}
+define PC_Days_May {case a{condition DOI_init > 1800 .AND. month == MAY                      value PC_Days_May1}
+		    case b{condition RI_Apr > 2000 .AND. PC_Days_Apr > 0.4 .AND. month < MAY value PC_Days_May1}
+                    case c{condition RI_Apr > 2300 .AND. month < MAY                         value PC_Days_May1} 
+                    case d{condition always                                                  value 0}}
+define PC_Days_Jun {case a{condition DOI_init > 1800 .AND. month == JUN                      value PC_Days_Jun1}
+		    case b{condition RI_May > 2000 .AND. PC_Days_May > 0.4 .AND. month < JUN value PC_Days_Jun1}
+                    case c{condition RI_May > 2300 .AND. month < JUN                         value PC_Days_Jun1} 
+                    case d{condition always                                                  value 0}}
+define PC_Days_Febdv {alias PC_Days_Feb kind 'X2' units 'DAYS'}
+define PC_Days_Mardv {alias PC_Days_Mar kind 'X2' units 'DAYS'}
+define PC_Days_Aprdv {alias PC_Days_Apr kind 'X2' units 'DAYS'}
+define PC_Days_Maydv {alias PC_Days_May kind 'X2' units 'DAYS'}
+define PC_Days_Jundv {alias PC_Days_Jun kind 'X2' units 'DAYS'}
+
+! computer average minimum required delta outflow
+define(fm) C33_1_fm{
+	Case Jan{condition mv($m)==Jan
+			value max(Q_Salin_Std_fm($m),NDOI_fm($m))}
+	case Feb_a{condition mv($m) == Feb .and. CHP_X2Q_Feb>=max(Q_Salin_Std_fm($m),NDOI_fm($m))
+	   	    value (PC_X2Q_Feb*PC_Days_Feb+max(0.,CHP_Days_Feb-PC_Days_Feb)*CHP_X2Q_Feb+max(0.,28.-PC_Days_Feb-max(0.,CHP_Days_Feb-PC_Days_Feb))*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/28.}
+	case Feb_b{condition mv($m) == Feb
+	   	    value (PC_X2Q_Feb*PC_Days_Feb+(28.-PC_Days_Feb)*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/28.}
+	case Mar_a{condition mv($m) == Mar .and. CHP_X2Q_Mar>=max(Q_Salin_Std_fm($m),NDOI_fm($m))
+	   	    value (PC_X2Q_Mar*PC_Days_Mar+max(0.,CHP_Days_Mar-PC_Days_Mar)*CHP_X2Q_Mar+max(0.,31.-PC_Days_Mar-max(0.,CHP_Days_Mar-PC_Days_Mar))*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/31.}
+	case Mar_b{condition mv($m) == Mar
+	   	    value (PC_X2Q_Mar*PC_Days_Mar+(31.-PC_Days_Mar)*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/31.}
+	case Apr_a{condition mv($m) == Apr .and. CHP_X2Q_Apr>=max(Q_Salin_Std_fm($m),NDOI_fm($m))
+	   	    value (PC_X2Q_Apr*PC_Days_Apr+max(0.,CHP_Days_Apr-PC_Days_Apr)*CHP_X2Q_Apr+max(0.,30.-PC_Days_Apr-max(0.,CHP_Days_Apr-PC_Days_Apr))*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/30.}
+	case Apr_b{condition mv($m) == Apr
+	   	    value (PC_X2Q_Apr*PC_Days_Apr+(30.-PC_Days_Apr)*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/30.}
+	case May_a{condition mv($m) == May .and. CHP_X2Q_May>=max(Q_Salin_Std_fm($m),NDOI_fm($m))
+		    value (PC_X2Q_May*PC_Days_May+max(0.,CHP_Days_May-PC_Days_May)*CHP_X2Q_May+max(0.,31.-PC_Days_May-max(0.,CHP_Days_May-PC_Days_May))*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/31.}
+	case May_b{condition mv($m) == May
+	   	    value (PC_X2Q_May*PC_Days_May+(31.-PC_Days_May)*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/31.}
+	case Jun_a{condition mv($m) == Jun .and. CHP_X2Q_Jun>=max(Q_Salin_Std_fm($m),NDOI_fm($m))
+	   	    value (PC_X2Q_Jun*PC_Days_Jun+max(0.,CHP_Days_Jun-PC_Days_Jun)*CHP_X2Q_Jun+max(0.,30.-PC_Days_Jun-max(0.,CHP_Days_Jun-PC_Days_Jun))*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/30.}
+	case Jun_b{condition mv($m) == Jun
+	   	    value (PC_X2Q_Jun*PC_Days_Jun+(30.-PC_Days_Jun)*max(Q_Salin_Std_fm($m),NDOI_fm($m)))/30.}
+	case JulDec{condition always
+			value max(Q_Salin_Std_fm($m),NDOI_fm($m))}   	    
+}
+
+define(fm) C33_1_fm_ {alias C33_1_fm($m) kind 'FLOWREQ' units 'TAF'}
+
+! For writing out X2 requirement, NDOI is still used since the 7,100 cfs in the NDOI table is actually the max required flow at Collinsville, since NDOI rqmt doesn't apply Feb-June
+define(fm) C33_1_fm_X2{
+	case Feb_a{condition mv($m) == Feb 
+	   	    value (PC_X2Q_Feb*PC_Days_Feb+max(0.,CHP_Days_Feb-PC_Days_Feb)*CHP_X2Q_Feb+max(0.,28.-PC_Days_Feb-max(0.,CHP_Days_Feb-PC_Days_Feb))*NDOI_fm($m))/28.}
+	case Mar_a{condition mv($m) == Mar 
+	   	    value (PC_X2Q_Mar*PC_Days_Mar+max(0.,CHP_Days_Mar-PC_Days_Mar)*CHP_X2Q_Mar+max(0.,31.-PC_Days_Mar-max(0.,CHP_Days_Mar-PC_Days_Mar))*NDOI_fm($m))/31.}
+	case Apr_a{condition mv($m) == Apr 
+	   	    value (PC_X2Q_Apr*PC_Days_Apr+max(0.,CHP_Days_Apr-PC_Days_Apr)*CHP_X2Q_Apr+max(0.,30.-PC_Days_Apr-max(0.,CHP_Days_Apr-PC_Days_Apr))*NDOI_fm($m))/30.}
+	case May_a{condition mv($m) == May 
+		    value (PC_X2Q_May*PC_Days_May+max(0.,CHP_Days_May-PC_Days_May)*CHP_X2Q_May+max(0.,31.-PC_Days_May-max(0.,CHP_Days_May-PC_Days_May))*NDOI_fm($m))/31.}
+	case Jun_a{condition mv($m) == Jun 
+	   	    value (PC_X2Q_Jun*PC_Days_Jun+max(0.,CHP_Days_Jun-PC_Days_Jun)*CHP_X2Q_Jun+max(0.,30.-PC_Days_Jun-max(0.,CHP_Days_Jun-PC_Days_Jun))*NDOI_fm($m))/30.}
+	case otherwise{condition always
+			value 0.}   	    
+}
+
+define(fm) C33_1_fm_X2_ {alias C33_1_fm_X2($m) kind 'FLOWREQ' units 'TAF'}
+
+! Define regression equation coeffiencts for converting CAM_DO to CALSIM II_DO
+! CalSim_DO = A + B * CAM_DO
+define(fm) A_fm {select A from CAM_CALSIM_DO where month= mv($m),WYT=wyt_SAC}
+define(fm) B_fm {select B from CAM_CALSIM_DO where month= mv($m),WYT=wyt_SAC}
+
+define(fm) C33calc_fm {
+	case August{
+		condition mv($m)==Aug
+		value min(29200*cfs_taf($m), C33_1_fm($m))+DO_X2_ITP
+	}
+	case other{
+		condition always
+		value min(29200*cfs_taf($m), C33_1_fm($m))	
+	}
+}
+
+!Left this to compare prior calculation method with new table
+define(fm) C33calc_fm_dv_fm {alias C33calc_fm($m) kind 'FLOW' units 'TAF'}
+
+!timeseries of outflow requirement from full model to test sensitivity
+!define outflowreq {timeseries 'OUTFLOWREQ' kind 'FLOW' units 'TAF'}
+!define(fm) outflowreq_fm {value outflowreq($m)}
+
+!Now using requirement from a table by month and WY type, deried from a prior CalSim 3 un
+define(fm) outflowreq_lookup_fm {select combined from CAM_DO_FX2 where month= mv($m),WYT=wyt_SAC}
+define(fm) outflowreq_fm {value outflowreq_lookup_fm($m)*cfs_taf($m)}
+define(fm) outflowreq_dv_fm {alias NDOI_fm($m) kind 'FLOW' units 'TAF'}
+
+! This is to convert CAM DO to CALSIM II DO
+!goal(fm) set_DO_fm {C33_fm($m) = C33calc_fm($m)+SMSCG_EX_PA_NDO_adj_taf($m)+SMSCG_ITP_NDO_adj_taf($m)+release_ITP_Carryover_taf($m)+Alt2BSWPExpCut_SJRIE_taf($m)}
+goal(fm) set_DO_fm {C33_fm($m) = outflowreq_fm($m)+SMSCG_EX_PA_NDO_adj_taf($m)+SMSCG_ITP_NDO_adj_taf($m)+release_ITP_Carryover_taf($m)+Alt2BSWPExpCut_SJRIE_taf($m)}
+
+define(fm) C33MIF_dv_fm {alias C33_fm($m) kind 'FLOW' units 'TAF'}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

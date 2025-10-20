@@ -1,0 +1,242 @@
+/*
+Arcs-Reservoirs.wresl
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Upper Bear Reservoir, Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define S_UBEARlevel1    {value 0.5}! dead pool (1978, 1985 PG&E agreements). FERC-mandated minimum pool.
+define S_UBEARlevel6    {value 7.3}! full capacity (EBMUD)
+
+define S_UBEARlevel2 { ! average Upper Bear storage WY 2002-2015
+    case Oct {condition month == OCT value 1.38}
+    case Nov {condition month == NOV value 2.22}
+    case Dec {condition month == DEC value 2.82}
+    case Jan {condition month == JAN value 3.08}
+    case Feb {condition month == FEB value 3.49}
+    case Mar {condition month == MAR value 5.15}
+    case Apr {condition month == APR value 7.01}
+    case May {condition month == MAY value 7.24}
+    case Jun {condition month == JUN value 7.04}
+    case Jul {condition month == JUL value 5.75}
+    case Aug {condition month == AUG value 2.95}
+    case Sep {condition month == SEP value 1.58}}
+    
+define S_UBEARlevel3 	{value S_UBEARlevel2}
+define S_UBEARlevel4 	{value S_UBEARlevel2}
+define S_UBEARlevel5 	{value S_UBEARlevel2}  
+
+define S_UBEAR_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_UBEAR_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_UBEAR_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_UBEAR_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_UBEAR_5    {std kind 'STORAGE-ZONE' units 'TAF'}              
+define S_UBEAR_6    {std kind 'STORAGE-ZONE' units 'TAF'}                                            
+define S_UBEAR      {std kind 'STORAGE'      units 'TAF'}                                             
+define E_UBEAR      {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_UBEAR      {std kind 'SURFACE-AREA' units 'ACRES'}                                                       
+define ER_UBEAR     {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}                                         
+define A_UBEARlast      {select area      from Mok_ResInfo given storage=1000*S_UBEAR(-1) use linear where resnum=4}        
+define A_UBEARforward   {select area      from Mok_ResInfo given storage=1050*S_UBEAR(-1) use linear where resnum=4}     
+define A_UBEARback      {select area      from Mok_ResInfo given storage= 950*S_UBEAR(-1) use linear where resnum=4}
+define relcap_UBEAR     {select discharge from Mok_ResInfo given storage=1000*S_UBEAR(-1) use linear where resnum=4}        
+define coefev_UBEAR     {value (A_UBEARforward - A_UBEARback)/(100*max(0.01,S_UBEAR(-1)))} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Bear Reservoir, Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+The Lodi decree establishes two sets of levels for combined storage in Lower Bear and Salt Springs reservoirs
+
+Level4:
+	June 112,000
+	July  94,000
+	Aug   76,000
+	Sept  58,000
+	Oct   40,000
+	Nov   30,000
+	Dec   20,000
+	Jan   10,000
+
+Level3:
+	Sept  30,000
+	Oct   18,000
+	Nov   18,000
+	Dec   15,000
+	Jan   10,000
+
+*/	
+define S_LBEARlevel1    {value  3.3}! FERC mandated minimum pool. Dead pool is 2.1 TAF.
+define S_LBEARlevel6    {value 52.0}! full capacity
+
+
+define S_LBEARlevel5 {
+    case Oct       {condition month == OCT value 52.0} !No mandatory flood control space
+    case NovMar    {condition month >= NOV .and. month <= MAR value 42.8} !Capacity reduced due to removal of flashboards
+    case otherwise {condition always value 52.0}}
+
+define S_LBEARlevel5dv{alias S_LBEARlevel5 kind'Level' units 'TAF'}
+define S_LBEARHistMin {!Defined based on historical data to prevent excessive drawdown
+    case Oct {condition month == OCT value 21}
+    case Nov {condition month == NOV value 16}
+    case Dec {condition month == DEC value 14}
+    case Jan {condition month == JAN value 13}
+    case Feb {condition month == FEB value 15}
+    case Mar {condition month == MAR value 17}
+    case Apr {condition month == APR value 29}
+    case May {condition month == MAY value 46}
+    case Jun {condition month == JUN value 46}
+    case Jul {condition month == JUL value 39}
+    case Aug {condition month == AUG value 32}
+    case Sep {condition month == SEP value 26}}
+    
+!goal LBEARHist {
+!  lhs S_LBEAR
+!  case MatchHistorical{
+!    condition always
+!    rhs S_LBEARHistMin
+!    lhs<rhs penalty 10000*taf_cfs
+!    lhs>rhs penalty 0}} 
+    
+    
+define S_LBEAR_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_LBEAR_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_LBEAR_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_LBEAR_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_LBEAR_5    {std kind 'STORAGE-ZONE' units 'TAF'} 
+define S_LBEAR_6    {std kind 'STORAGE-ZONE' units 'TAF'}                                                      
+define S_LBEAR      {std kind 'STORAGE'      units 'TAF'}                                                  
+define E_LBEAR      {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_LBEAR      {std kind 'SURFACE-AREA' units 'ACRES'}                                                       
+define ER_LBEAR   {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}                                         
+define A_LBEARlast      {select area      from Mok_ResInfo given storage=1000*S_LBEAR(-1) use linear where resnum=5}        
+define A_LBEARforward   {select area      from Mok_ResInfo given storage=1050*S_LBEAR(-1) use linear where resnum=5}     
+define A_LBEARback      {select area      from Mok_ResInfo given storage= 950*S_LBEAR(-1) use linear where resnum=5} 
+define relcap_LBEAR     {select discharge from Mok_ResInfo given storage=1000*S_LBEAR(-1) use linear where resnum=5}        
+define coefev_LBEAR     {value (A_LBEARforward - A_LBEARback)/(100*max(0.01,S_LBEAR(-1)))} 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Salt Springs Reservoir - Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                                   
+define S_SLTSPlevel1    {value   5.0}! FERC-mandated minimum pool 4.993 TAF rounded to 1 dp. 
+define S_SLTSPlevel6    {value 141.9}! full capacity 
+    
+define S_SLTSPlevel5 {
+    case Oct       {condition month == OCT value 141.9} !No mandatory flood control space
+    case NovMar    {condition month >= NOV .and. month <= MAR value 131.4} !Capacity reduced due to removal of flashboards
+    case otherwise {condition always value 141.9}}
+
+
+define S_SLTSPlevel5dv{alias S_SLTSPlevel5 kind 'Level' units 'TAF'}
+
+!define S_SLTSPlevel2 {value S_SLTSPlevel4}
+!define S_SLTSPlevel3 {value S_SLTSPlevel4}     
+
+define S_SLTSP_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_SLTSP_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_SLTSP_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_SLTSP_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_SLTSP_5    {std kind 'STORAGE-ZONE' units 'TAF'}                      
+define S_SLTSP_6    {std kind 'STORAGE-ZONE' units 'TAF'}                                  
+define S_SLTSP      {std kind 'STORAGE' units 'TAF'} 
+                                               
+define E_SLTSP          {lower unbounded kind 'EVAPORATION' units 'CFS'}                                              
+define A_SLTSP          {std kind 'SURFACE-AREA' units 'ACRES'}                                                       
+define ER_SLTSP         {timeseries kind 'EVAPORATION-RATE' units 'INCHES'}                                         
+define A_SLTSPlast      {select area      from Mok_ResInfo given storage=1000*S_SLTSP(-1) use linear where resnum=6}        
+define A_SLTSPforward   {select area      from Mok_ResInfo given storage=1050*S_SLTSP(-1) use linear where resnum=6}     
+define A_SLTSPback      {select area      from Mok_ResInfo given storage= 950*S_SLTSP(-1) use linear where resnum=6}
+define relcap_SLTSP     {select discharge from Mok_ResInfo given storage=1000*S_SLTSP(-1) use linear where resnum=6}        
+define coefev_SLTSP     {value (A_SLTSPforward - A_SLTSPback)/(100*max(0.01,S_SLTSP(-1)))} 
+
+define PGEStorage        {std kind 'STORAGE' units 'TAF'}
+define PGEStorage_Level1 {value S_SLTSPlevel1 + S_LBEARlevel1} !Dead Pool/FERC minimum
+
+define PGEStorage_Level2 { !Lodi Decree lower storage related minimum flows
+    case Oct {condition month == OCT value 18}
+    case Nov {condition month == NOV value 18}
+    case Dec {condition month == DEC value 15}
+    case Jan {condition month == JAN value 10}
+    case Feb {condition month == FEB value 10}
+    case Mar {condition month == MAR value 10}
+    case Apr {condition month == APR value 10}
+    case May {condition month == MAY value 10}
+    case Jun {condition month == JUN value 30}
+    case Jul {condition month == JUL value 30}
+    case Aug {condition month == AUG value 30}
+    case Sep {condition month == SEP value 30}}
+
+define PGEStorage_Level3Lodi { ! Lodi Decree upper storage related minimum flows
+    case Oct {condition month == OCT value 40}
+    case Nov {condition month == NOV value 30}
+    case Dec {condition month == DEC value 20}
+    case Jan {condition month == JAN value 10}
+    case Feb {condition month == FEB value 10}
+    case Mar {condition month == MAR value 10}
+    case Apr {condition month == APR value 10}
+    case May {condition month == MAY value 10}
+    case Jun {condition month == JUN value 112}
+    case Jul {condition month == JUL value 94}
+    case Aug {condition month == AUG value 76}
+    case Sep {condition month == SEP value 58}}   
+
+!define PGEStorage_Level4 {value S_SLTSPlevel4 + S_LBEARlevel4} ! Top of Buffer
+define PGEStorage_Level5 {value S_SLTSPlevel5 + S_LBEARlevel5} ! Top of conservation
+define PGEStorage_Level6 {value S_SLTSPlevel6 + S_LBEARlevel6} ! Physical capacity
+
+define PGEStorage_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define PGEStorage_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define PGEStorage_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define PGEStorage_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define PGEStorage_5    {std kind 'STORAGE-ZONE' units 'TAF'}
+define PGEStorage_6    {std kind 'STORAGE-ZONE' units 'TAF'}
+
+define PGEStorage_Level1_ {alias PGEStorage_Level1 kind 'STORAGE-LEVEL' units 'TAF'}
+define PGEStorage_Level2_ {alias PGEStorage_Level2 kind 'STORAGE-LEVEL' units 'TAF'}
+define PGEStorage_Level3_ {alias PGEStorage_Level3 kind 'STORAGE-LEVEL' units 'TAF'}
+define PGEStorage_Level4_ {alias PGEStorage_Level4 kind 'STORAGE-LEVEL' units 'TAF'}
+define PGEStorage_Level5_ {alias PGEStorage_Level5 kind 'STORAGE-LEVEL' units 'TAF'}
+define PGEStorage_Level6_ {alias PGEStorage_Level5 kind 'STORAGE-LEVEL' units 'TAF'}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Upper Blue, Lower Blue, Twin, and Meadow Lakes - Upper Mokelumne Watershed !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+define S_BLUMDlevel1    {value   0.0}! FERC-mandated minimum pools not simulated
+define S_BLUMDlevel6    {value 19.317}! full capacity 
+    
+define S_BLUMDlevel5 { ! Average monthly values 1996-2015. Note FERC license issued in 2001, which specifies additional requirements
+    case Oct {condition month == OCT value 5.42}
+    case Nov {condition month == NOV value 5.00}
+    case Dec {condition month == DEC value 4.87}
+    case Jan {condition month == JAN value 4.72}
+    case Feb {condition month == FEB value 5.39}
+    case Mar {condition month == MAR value 5.16}
+    case Apr {condition month == APR value 7.84}
+    case May {condition month == MAY value 12.73}
+    case Jun {condition month == JUN value 15.07}
+    case Jul {condition month == JUL value 13.18}
+    case Aug {condition month == AUG value 9.97}
+    case Sep {condition month == SEP value 7.17}}
+    
+define S_BLUMDlevel2 {value S_BLUMDlevel5}
+define S_BLUMDlevel3 {value S_BLUMDlevel5}     
+define S_BLUMDlevel4 {value S_BLUMDlevel5} 
+
+define S_BLUMD_1    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_BLUMD_2    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_BLUMD_3    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_BLUMD_4    {std kind 'STORAGE-ZONE' units 'TAF'}                                                       
+define S_BLUMD_5    {std kind 'STORAGE-ZONE' units 'TAF'}               
+define S_BLUMD_6    {std kind 'STORAGE-ZONE' units 'TAF'}                                         
+define S_BLUMD      {std kind 'STORAGE' units 'TAF'} 
+
+! Reservoir evaporation not simulated                                               
+define E_BLUMD      {value 0.}                                              
+

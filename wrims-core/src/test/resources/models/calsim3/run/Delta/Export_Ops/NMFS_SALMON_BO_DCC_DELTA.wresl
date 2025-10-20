@@ -1,0 +1,14 @@
+! NMFS_SALMON_BO_DCC_DELTA.wresl
+!
+! Fix NMFS DCC and related operation parameters to the results of the DELTA cycle
+
+! final number of days in each month that the DXC gate is open under NMFS action
+define NMFSdaysopendv  {std kind 'DCC-DAYS-OPEN' UNITS 'NONE'}  !for output only
+define NMFS_days_open  {value NMFSdaysopendv[DELTA]}  ! grab from DELTA cycle
+goal   setNMFSdaysopen {NMFSdaysopendv = NMFS_days_open}
+
+! If not going to meet target number of days, drop exports to 2000 cfs max
+define NMFS_MaxExpDCCdv {std kind 'Export-Limit' units 'cfs'} !for output only
+define NMFS_MaxExp_DCC  {value NMFS_MaxExpDCCdv[DELTA]}  ! grab from DELTA cycle
+goal   setNMFSMaxExpDCC {NMFS_MaxExpDCCdv = NMFS_MaxExp_DCC}
+

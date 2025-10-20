@@ -1,0 +1,288 @@
+! A. Dev 10/19/99
+
+! This file splits any SWP Demand arc (ie. MI, PAG, PLS or PIN)
+! PINo separate subarcs to ensure the proper delivery pattern.
+! The file 'swp_deliveries' actually applies the proper bounds.
+! The weights for the subarcs are specified in the Weights-table.xPLS file.
+! In general, 'PLS' subarcs should have a weight greater than the 'MI' or 'PAG'
+! subarc, and 'PIN' subarcs have small weights to ensure that water is only
+! delivered from excess supply in the Delta and not from storPAGe.  This helps
+! to ensure that losses are always met and that MI and PAG demands are met before
+! any PINerruptible water.
+
+define D_SVRWD_CSTLN_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SVRWD_CSTLN_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SVRWD_CSTLN_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SVRWD_CSTLN     { D_SVRWD_CSTLN = D_SVRWD_CSTLN_PRJ }
+goal totalD_SVRWD_CSTLN_prj { D_SVRWD_CSTLN_prj = D_SVRWD_CSTLN_PMI + D_SVRWD_CSTLN_PCO }
+
+define D_PRRIS_MWDSC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_PRRIS_MWDSC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_PRRIS_MWDSC_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_PRRIS_MWDSC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_PRRIS_MWDSC     { D_PRRIS_MWDSC = D_PRRIS_MWDSC_PRJ}
+goal totalD_PRRIS_MWDSC_prj { D_PRRIS_MWDSC_PRJ = D_PRRIS_MWDSC_PMI + D_PRRIS_MWDSC_PIN + D_PRRIS_MWDSC_PCO}
+
+define D_PYRMD_VNTRA_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_PYRMD_VNTRA_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_PYRMD_VNTRA_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_PYRMD_VNTRA     { D_PYRMD_VNTRA = D_PYRMD_VNTRA_PRJ }
+goal totalD_PYRMD_VNTRA_prj { D_PYRMD_VNTRA_PRJ = D_PYRMD_VNTRA_PMI + D_PYRMD_VNTRA_PCO}
+
+define D_CSTIC_VNTRA_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSTIC_VNTRA_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSTIC_VNTRA_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' } ! New Article 21 demands. 1/2/2020
+define D_CSTIC_VNTRA_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CSTIC_VNTRA     { D_CSTIC_VNTRA = D_CSTIC_VNTRA_PRJ }
+goal totalD_CSTIC_VNTRA_prj { D_CSTIC_VNTRA_PRJ = D_CSTIC_VNTRA_PMI + D_CSTIC_VNTRA_PCO + D_CSTIC_VNTRA_PIN}
+
+define D_CAA046_71_PA7_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA046_71_PA7_PAG    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA046_71_PA7_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA046_71_PA7_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA046_71_PA7     { D_CAA046_71_PA7 = D_CAA046_71_PA7_PRJ }
+goal totalD_CAA046_71_PA7_prj { D_CAA046_71_PA7_PRJ = D_CAA046_71_PA7_PAG + D_CAA046_71_PA7_PIN + D_CAA046_71_PA7_PCO }
+
+define D_CAA173_EMPIRE_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA173_EMPIRE_PAG    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA173_EMPIRE_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA173_EMPIRE_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA173_EMPIRE     { D_CAA173_EMPIRE = D_CAA173_EMPIRE_PRJ }
+goal totalD_CAA173_EMPIRE_prj { D_CAA173_EMPIRE_PRJ = D_CAA173_EMPIRE_PAG + D_CAA173_EMPIRE_PIN + D_CAA173_EMPIRE_PCO}
+
+define D_CAA181_KINGS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA181_KINGS_PAG    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA181_KINGS_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA181_KINGS_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' } ! New Article 21 demands. 1/2/2020
+goal totalD_CAA181_KINGS     { D_CAA181_KINGS = D_CAA181_KINGS_PRJ }
+goal totalD_CAA181_KINGS_prj { D_CAA181_KINGS_PRJ = D_CAA181_KINGS_PAG + D_CAA181_KINGS_PCO + D_CAA181_KINGS_PIN}
+
+define D_CAA183_TULARE_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA183_TULARE_PAG    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA183_TULARE_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA183_TULARE_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA183_TULARE     { D_CAA183_TULARE = D_CAA183_TULARE_PRJ }
+goal totalD_CAA183_TULARE_prj { D_CAA183_TULARE_PRJ = D_CAA183_TULARE_PAG + D_CAA183_TULARE_PIN + D_CAA183_TULARE_PCO}
+
+define D_CAA184_DUDLEY_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA184_DUDLEY_PAG    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA184_DUDLEY_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA184_DUDLEY_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA184_DUDLEY     { D_CAA184_DUDLEY = D_CAA184_DUDLEY_PRJ }
+goal totalD_CAA184_DUDLEY_prj { D_CAA184_DUDLEY_PRJ = D_CAA184_DUDLEY_PAG + D_CAA184_DUDLEY_PIN + D_CAA184_DUDLEY_PCO}
+
+define D_CSB015_KERN_BMWD_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB015_KERN_BMWD_PAG    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB015_KERN_BMWD_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CSB015_KERN_BMWD     { D_CSB015_KERN_BMWD = D_CSB015_KERN_BMWD_PRJ }
+goal totalD_CSB015_KERN_BMWD_prj { D_CSB015_KERN_BMWD_PRJ = D_CSB015_KERN_BMWD_PAG + D_CSB015_KERN_BMWD_PCO}
+
+define D_CSB009_CLRTA1_DDWD_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB009_CLRTA1_DDWD_PAG    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB009_CLRTA1_DDWD_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB009_CLRTA1_DDWD_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CSB009_CLRTA1_DDWD     { D_CSB009_CLRTA1_DDWD = D_CSB009_CLRTA1_DDWD_PRJ }
+goal totalD_CSB009_CLRTA1_DDWD_prj { D_CSB009_CLRTA1_DDWD_PRJ = D_CSB009_CLRTA1_DDWD_PAG + D_CSB009_CLRTA1_DDWD_PIN + D_CSB009_CLRTA1_DDWD_PCO}
+
+define D_CSB038_OBISPO_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB038_OBISPO_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB038_OBISPO_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB038_OBISPO_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CSB038_OBISPO     { D_CSB038_OBISPO = D_CSB038_OBISPO_PRJ }
+goal totalD_CSB038_OBISPO_prj { D_CSB038_OBISPO_PRJ = D_CSB038_OBISPO_PMI + D_CSB038_OBISPO_PIN + D_CSB038_OBISPO_PCO}
+
+define D_CSB103_BRBRA_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB103_BRBRA_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB103_BRBRA_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CSB103_BRBRA_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' } ! New Article 21 demands. 1/2/2020
+goal totalD_CSB103_BRBRA     { D_CSB103_BRBRA = D_CSB103_BRBRA_PRJ }
+goal totalD_CSB103_BRBRA_prj { D_CSB103_BRBRA_PRJ = D_CSB103_BRBRA_PMI + D_CSB103_BRBRA_PCO + D_CSB103_BRBRA_PIN}
+
+define D_CAA194_KERN_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA194_KERN_PAG    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA194_KERNA_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA194_KERNB_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA194_KERN_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA194_KERN     { D_CAA194_KERN = D_CAA194_KERN_PRJ }
+goal totalD_CAA194_KERN_prj { D_CAA194_KERN_PRJ = D_CAA194_KERN_PAG + D_CAA194_KERNA_PMI + D_CAA194_KERNB_PMI + D_CAA194_KERN_PCO}
+
+define D_CAA220_CAALOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA220_CAALOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA220_CAALOS     { D_CAA220_CAALOS = D_CAA220_CAALOS_PRJ }
+goal totalD_CAA220_CAALOS_prj { D_CAA220_CAALOS_PRJ = D_CAA220_CAALOS_PLS }
+
+!define D_CAA242_Kern_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA242_Kern_PAG    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_CAA242_Kern_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA242_Kern_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA242_Kern     { D_CAA242_Kern = D_CAA242_Kern_PRJ + D_CAA242_Kern_GWRECHARGE}   !KERN COUNTY GW RECHARGE for NODOS Operation
+goal totalD_CAA242_Kern_prj { D_CAA242_Kern_PRJ = D_CAA242_Kern_PAG + D_CAA242_Kern_PIN + D_CAA242_Kern_PCO}
+
+define D_CAA278_CAALOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA278_CAALOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA278_CAALOS     { D_CAA278_CAALOS = D_CAA278_CAALOS_PRJ }
+goal totalD_CAA278_CAALOS_prj { D_CAA278_CAALOS_PRJ = D_CAA278_CAALOS_PLS }
+
+define D_CAA279_Kern_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA279_Kern_pag    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA279_Kern_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA279_Kern     { D_CAA279_Kern = D_CAA279_Kern_PRJ }
+goal totalD_CAA279_Kern_prj { D_CAA279_Kern_PRJ = D_CAA279_Kern_pag + D_CAA279_Kern_PCO}
+
+define D_CAA280_CAALOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_CAA280_CAALOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_CAA280_CAALOS     { D_CAA280_CAALOS = D_CAA280_CAALOS_PRJ }
+goal totalD_CAA280_CAALOS_prj { D_CAA280_CAALOS_PRJ = D_CAA280_CAALOS_PLS }
+
+define D_ESB324_AVEK_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_ESB324_AVEK_PMI    {std kind 'FLOW-DELIVERY' units 'CFS'  }
+define D_ESB324_AVEK_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB324_AVEK_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB324_AVEK     { D_ESB324_AVEK = D_ESB324_AVEK_PRJ }
+goal totalD_ESB324_AVEK_prj { D_ESB324_AVEK_PRJ = D_ESB324_AVEK_PMI + D_ESB324_AVEK_PIN + D_ESB324_AVEK_PCO}
+
+define D_ESB347_PLMDL_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB347_PLMDL_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB347_PLMDL_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB347_PLMDL_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB347_PLMDL     { D_ESB347_PLMDL = D_ESB347_PLMDL_PRJ }
+goal totalD_ESB347_PLMDL_prj { D_ESB347_PLMDL_PRJ = D_ESB347_PLMDL_PMI + D_ESB347_PLMDL_PIN + D_ESB347_PLMDL_PCO}
+
+define D_ESB355_LROCK_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB355_LROCK_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB355_LROCK_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB355_LROCK_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB355_LROCK     { D_ESB355_LROCK = D_ESB355_LROCK_PRJ }
+goal totalD_ESB355_LROCK_prj { D_ESB355_LROCK_PRJ = D_ESB355_LROCK_PMI + D_ESB355_LROCK_PIN + D_ESB355_LROCK_PCO}
+
+define D_ESB361_ESBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB361_ESBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB361_ESBLOS     { D_ESB361_ESBLOS = D_ESB361_ESBLOS_PRJ }
+goal totalD_ESB361_ESBLOS_prj { D_ESB361_ESBLOS_PRJ = D_ESB361_ESBLOS_PLS }
+
+define D_ESB403_MOJVE_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB403_MOJVE_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB403_MOJVE_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB403_MOJVE_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB403_MOJVE     { D_ESB403_MOJVE = D_ESB403_MOJVE_PRJ }
+goal totalD_ESB403_MOJVE_prj { D_ESB403_MOJVE_PRJ = D_ESB403_MOJVE_PMI + D_ESB403_MOJVE_PIN + D_ESB403_MOJVE_PCO}
+
+define D_ESB406_ESBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB406_ESBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB406_ESBLOS     { D_ESB406_ESBLOS = D_ESB406_ESBLOS_PRJ }
+goal totalD_ESB406_ESBLOS_prj { D_ESB406_ESBLOS_PRJ = D_ESB406_ESBLOS_PLS }
+
+define D_ESB407_CCHLA_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB407_CCHLA_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB407_CCHLA_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB407_CCHLA_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB407_CCHLA     { D_ESB407_CCHLA = D_ESB407_CCHLA_PRJ }
+goal totalD_ESB407_CCHLA_prj { D_ESB407_CCHLA_PRJ = D_ESB407_CCHLA_PMI + D_ESB407_CCHLA_PIN + D_ESB407_CCHLA_PCO}
+
+define D_ESB408_DESRT_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB408_DESRT_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB408_DESRT_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB408_DESRT_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB408_DESRT     { D_ESB408_DESRT = D_ESB408_DESRT_PRJ }
+goal totalD_ESB408_DESRT_prj { D_ESB408_DESRT_PRJ = D_ESB408_DESRT_PMI + D_ESB408_DESRT_PIN + D_ESB408_DESRT_PCO}
+
+define D_ESB413_MWDSC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB413_MWDSC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB413_MWDSC_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB413_MWDSC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB413_MWDSC     { D_ESB413_MWDSC = D_ESB413_MWDSC_PRJ }
+goal totalD_ESB413_MWDSC_prj { D_ESB413_MWDSC_PRJ = D_ESB413_MWDSC_PMI + D_ESB413_MWDSC_PIN + D_ESB413_MWDSC_PCO}
+
+define D_ESB414_BRDNO_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB414_BRDNO_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB414_BRDNO_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB414_BRDNO_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB414_BRDNO     { D_ESB414_BRDNO = D_ESB414_BRDNO_PRJ }
+goal totalD_ESB414_BRDNO_prj { D_ESB414_BRDNO_PRJ = D_ESB414_BRDNO_PMI + D_ESB414_BRDNO_PIN + D_ESB414_BRDNO_PCO}
+
+define D_ESB415_GABRL_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB415_GABRL_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB415_GABRL_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' } ! New Article 21 demands. 1/2/2020
+define D_ESB415_GABRL_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB415_GABRL     { D_ESB415_GABRL = D_ESB415_GABRL_PRJ }
+goal totalD_ESB415_GABRL_prj { D_ESB415_GABRL_PRJ = D_ESB415_GABRL_PMI + D_ESB415_GABRL_PCO + D_ESB415_GABRL_PIN}
+
+define D_ESB420_GRGNO_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB420_GRGNO_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB420_GRGNO_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB420_GRGNO_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB420_GRGNO     { D_ESB420_GRGNO = D_ESB420_GRGNO_PRJ }
+goal totalD_ESB420_GRGNO_prj { D_ESB420_GRGNO_PRJ = D_ESB420_GRGNO_PMI + D_ESB420_GRGNO_PIN + D_ESB420_GRGNO_PCO}
+
+define D_ESB425_ESBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB425_ESBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB425_ESBLOS     { D_ESB425_ESBLOS = D_ESB425_ESBLOS_PRJ }
+goal totalD_ESB425_ESBLOS_prj { D_ESB425_ESBLOS_PRJ = D_ESB425_ESBLOS_PLS }
+
+define D_ESB433_MWDSC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB433_MWDSC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB433_MWDSC_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_ESB433_MWDSC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_ESB433_MWDSC     { D_ESB433_MWDSC = D_ESB433_MWDSC_PRJ }
+goal totalD_ESB433_MWDSC_prj { D_ESB433_MWDSC_PRJ = D_ESB433_MWDSC_PMI + D_ESB433_MWDSC_PIN + D_ESB433_MWDSC_PCO}
+
+define D_WSB006_WSBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB006_WSBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_WSB006_WSBLOS     { D_WSB006_WSBLOS = D_WSB006_WSBLOS_PRJ }
+goal totalD_WSB006_WSBLOS_prj { D_WSB006_WSBLOS_PRJ = D_WSB006_WSBLOS_PLS }
+
+define D_WSB026_WSBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB026_WSBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_WSB026_WSBLOS     { D_WSB026_WSBLOS = D_WSB026_WSBLOS_PRJ }
+goal totalD_WSB026_WSBLOS_prj { D_WSB026_WSBLOS_PRJ = D_WSB026_WSBLOS_PLS }
+
+define D_WSB027_WSBLOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB027_WSBLOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_WSB027_WSBLOS     { D_WSB027_WSBLOS = D_WSB027_WSBLOS_PRJ }
+goal totalD_WSB027_WSBLOS_prj { D_WSB027_WSBLOS_PRJ = D_WSB027_WSBLOS_PLS }
+
+define D_WSB031_MWDSC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB031_MWDSC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB031_MWDSC_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB031_MWDSC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_WSB031_MWDSC     { D_WSB031_MWDSC = D_WSB031_MWDSC_PRJ }
+goal totalD_WSB031_MWDSC_prj { D_WSB031_MWDSC_PRJ = D_WSB031_MWDSC_PMI + D_WSB031_MWDSC_PIN + D_WSB031_MWDSC_PCO}
+
+define D_WSB032_CLRTA2_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB032_CLRTA2_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_WSB032_CLRTA2_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_WSB032_CLRTA2     { D_WSB032_CLRTA2 = D_WSB032_CLRTA2_PRJ }
+goal totalD_WSB032_CLRTA2_prj { D_WSB032_CLRTA2_PRJ = D_WSB032_CLRTA2_PMI + D_WSB032_CLRTA2_PCO}
+
+define D_SBA009_ACFC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA009_ACFC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA009_ACFC_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA009_ACFC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SBA009_ACFC     { D_SBA009_ACFC = D_SBA009_ACFC_PRJ }
+goal totalD_SBA009_ACFC_prj { D_SBA009_ACFC_PRJ = D_SBA009_ACFC_PMI + D_SBA009_ACFC_PIN + D_SBA009_ACFC_PCO}
+
+define D_SBA020_ACFC_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA020_ACFC_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA020_ACFC_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SBA020_ACFC     { D_SBA020_ACFC = D_SBA020_ACFC_PRJ }
+goal totalD_SBA020_ACFC_prj { D_SBA020_ACFC_PRJ = D_SBA020_ACFC_PMI + D_SBA020_ACFC_PCO}
+
+define D_SBA029_ACWD_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA029_ACWD_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA029_ACWD_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA029_ACWD_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SBA029_ACWD     { D_SBA029_ACWD = D_SBA029_ACWD_PRJ }
+goal totalD_SBA029_ACWD_prj { D_SBA029_ACWD_PRJ = D_SBA029_ACWD_PMI + D_SBA029_ACWD_PIN + D_SBA029_ACWD_PCO}
+
+define D_SBA036_SCVWD_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA036_SCVWD_PMI    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA036_SCVWD_PIN    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA036_SCVWD_PCO    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SBA036_SCVWD     { D_SBA036_SCVWD = D_SBA036_SCVWD_PRJ }
+goal totalD_SBA036_SCVWD_prj { D_SBA036_SCVWD_PRJ = D_SBA036_SCVWD_PMI + D_SBA036_SCVWD_PIN + D_SBA036_SCVWD_PCO}
+
+define D_SBA042_SBALOS_PRJ    {std kind 'FLOW-DELIVERY' units 'CFS' }
+define D_SBA042_SBALOS_PLS    {std kind 'FLOW-DELIVERY' units 'CFS' }
+goal totalD_SBA042_SBALOS     { D_SBA042_SBALOS = D_SBA042_SBALOS_PRJ }
+goal totalD_SBA042_SBALOS_prj { D_SBA042_SBALOS_PRJ = D_SBA042_SBALOS_PLS }
+

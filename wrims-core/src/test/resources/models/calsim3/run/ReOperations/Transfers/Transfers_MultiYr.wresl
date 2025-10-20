@@ -1,0 +1,51 @@
+! Transfers_MultiYr.wresl
+!
+! Tracking parameters for multi-year Max calculations related to GW substitution transfers
+!
+!
+define YubaGWdv        {std kind 'WTS-Acquisition' units 'taf'}
+define PrevYrYubaGWdv  {std kind 'Acquisition' units 'taf'}
+define PrevYrYubaGW {
+      case FirstYr {
+            condition wateryear == 1922
+            value 0. }
+      case Oct {
+            condition month == OCT
+            value   YubaGWdv(prevSep) }     !Adjusting for WTS 
+      case otherwise {
+            condition always
+            value PrevYrYubaGWdv(-1) }
+}
+goal setPrevYrYubaGWdv {PrevYrYubaGWdv = PrevYrYubaGW }
+!
+!Track SW transfers for following refill operations
+!Yuba Refill Operations are tracked within dynamic tranfer calculations
+/*
+define cum_Yuba_Trans {std kind 'CUM-LYRA-SW-Transfer' units 'TAF'}
+goal set_cum_Yuba_Trans {
+    lhs cum_Yuba_Trans
+    case OctoberToMay {
+        condition   range(month,oct,may)
+        rhs         0
+    }
+    case otherwise {
+        condition   always
+        rhs         cum_Yuba_Trans(-1) + Yuba_Trans*cfs_taf
+    }
+}*/
+define YubaSWdv       {std kind 'WTS-Acquisition' units 'taf'}
+/*
+define PrevYrYubaSWdv {std kind 'Acquisition' units 'taf'}
+define PrevYrYubaSW {
+      case FirstYr {
+            condition wateryear == 1922
+            value 0. }
+      case Oct {
+            condition month == OCT
+            value   cum_Yuba_Trans(prevSep) }
+      case otherwise {
+            condition always
+            value PrevYrYubaSWdv(-1) }
+}
+goal setPrevYrYubaSWdv {PrevYrYubaSWdv = PrevYrYubaSW }
+*/

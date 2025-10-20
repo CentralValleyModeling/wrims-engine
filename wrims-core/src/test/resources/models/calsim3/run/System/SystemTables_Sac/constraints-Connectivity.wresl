@@ -1,0 +1,781 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+
+/*
+Constraints-connectivity.wresl
+CalSim 3.0 System File
+
+Purpose:
+Assure continuity in surface water network
+ */
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! American River  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Goal continuityNFA011   {C_NFA016+C_MRM001+C_STH007+R_GDPUD_NU_NFA011+R_GDPUD_PU_NFA011+R_GDPUD_NA_NFA011-C_NFA011=0} !NF American above Folsom Lake
+goal continuityABT002    {D_NFA016_ABT002 - D_ABT002_STH001 - C_ABT002 = 0} !Auburn Dam Site
+goal continuityFOLSM    {C_NFA011 + I_FOLSM + CT_FAIROAKS + C_SFA011 + SG374_FOLSM_66 - C_FOLSM - D_FOLSM_26S_PU3 - D_FOLSM_26S_NU4 - D_FOLSM_WTPRSV - D_FOLSM_WTPSJP - D_FOLSM_WTPFOL - D_FOLSM_WTPEDH - D_FOLSM_EDCOCA  - D_FOLSM_24_NU2_CVP /*- D_FOLSM_24_NA2*/ - D_FOLSM_24_NA3_CVP - E_FOLSM   = S_FOLSM * taf_cfs - S_FOLSM(-1) * taf_cfs } !Folsom Lake 
+goal continuityNTOMA    {C_FOLSM + SR_26N_NTOMA + SR_26S_NTOMA + SG375_NTOMA_66 - C_NTOMA - D_NTOMA_FSC003 - E_NTOMA  = S_NTOMA * taf_cfs - S_NTOMA(-1) * taf_cfs }!Lake Natoma
+goal continuityAMR022   {C_NTOMA - C_AMR022                                                     = 0. } !Lower American River - C2VSIM seepage node
+goal continuityAMR020   {C_AMR022 + SG376_AMR020_66 + R_RFS26S_AMR020 - C_AMR020                                  = 0. }!Lower American River - C2VSIM seepage node
+goal continuityAMR017   {C_AMR020 - D_AMR017_WTPBJM - C_AMR017                                          = 0. }  !C2VSIM Node
+goal continuityAMR015   {C_AMR017 + SG377_AMR015_66 - C_AMR015                                            = 0. } !Lower American River - C2VSIM seepage node
+goal continuityAMR009   {C_AMR015 + SG378_AMR009_66 - C_AMR009                                            = 0. }  !C2VSIM Node
+goal continuityAMR007   {C_AMR009 + SR_26S_AMR007 - D_AMR007_WTPFBN - C_AMR007                          = 0. }!City of Sacramento Diversion from American River
+goal continuityAMR006   {C_AMR007 - C_AMR006                                    = 0.}  !American River at H Street gage (discontinued)
+goal continuityAMR004   {C_AMR006 + SG379_AMR004_66 + SG380_AMR004_66 + SR_26N_AMR004 - C_AMR004                                            = 0. } !C2VSIM Node
+goal continuityEMD001   {C_EMD007 + SR_26N_EMD001 + R_RFS22_EMD001 - C_EMD001                                           = 0. }
+goal continuityEMD007   {C_DCK012 + SR_24_EMD007 + SR_26N_EMD007 + R_26N_NA_EMD007 - C_EMD007                           = 0. }
+goal continuityDCWWTP   {R_RFS26N_DCWWTP - R_DCWWTP_DCK012                                          = 0. }
+goal continuityPGWWTP   {R_RFS26N_PGWWTP - R_PGWWTP_CRC002                                          = 0. }
+goal continuityWTPBJM   {D_AMR017_WTPBJM - D_WTPBJM_26N_NU2                                         = 0. }
+goal continuityWTPFBN   {D_AMR007_WTPFBN - D_WTPFBN_26S_NU1 - D_WTPFBN_26N_NU1 - D_WTPFBN_26N_NU3 - D_WTPFBN_26N_NU4 - D_WTPFBN_26S_NU2 - D_WTPFBN_26S_NU3    = 0. }
+goal continuityWTPFOL   {D_FOLSM_WTPFOL  - D_WTPFOL_26S_PU1                                         = 0. }
+goal continuityWTPRSV   {D_FOLSM_WTPRSV  - D_WTPRSV_26N_PU1                                         = 0. }
+goal continuityWTPSJP   {D_FOLSM_WTPSJP  - D_WTPSJP_26N_PU2 - D_WTPSJP_26N_PU3 - D_WTPSJP_26N_NU1                       = 0. }
+goal continuityWTPCOL   {D_FSC003_WTPCOL - D_WTPCOL_26S_PU2                                         = 0. }
+goal continuityWTPEDH   {D_FOLSM_WTPEDH - D_WTPEDH_ELDID_NU3                                           = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Antelope Creek  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityANT011   {I_ANT011 - C_ANT011                    = 0. }!test1 RsdPos_ANT011 - RsdNeg_ANT011}    
+goal continuityANT010   {C_ANT011 + SG233_ANT010_40 + SG234_ANT010_40 - D_ANT010_05_NA - C_ANT010   = 0. }  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Auburn Ravine   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityABN027   {D_STH000_ABN027 + R_24_NU1_ABN027 - C_ABN027 = 0}
+goal continuityABN026   {C_ABN027 + C_ABT002 + D_STH002_ABN026 - C_ABN026 = 0}
+goal continuityABN024   {C_ABN026 - D_ABN024_24_NA1 - C_ABN024 = 0}
+goal continuityABN014   {C_ABN024 - C_ABN014 = 0}
+goal continuityABN010   {C_ABN014 + SR_24_ABN010 - D_ABN010_24_NA2 - C_ABN010 = 0}
+goal continuityABN006   {C_ABN010 - D_ABN006_23_NA - C_ABN006                   = 0. }
+goal continuityABN000   {C_ABN006 + C_CCK007 + SR_23_ABN000 + SR_24_ABN000 + R_24_NA2_ABN000 - C_ABN000     = 0. }
+goal continuityCCK038   {R_24_NU3_CCK038 - C_CCK038                             = 0. }
+goal continuityCCK036   {C_CCK038 + D_CBC001_CCK036 - C_CCK036                          = 0. }
+goal continuityCCK022   {C_CCK036 + SR_24_CCK022 + R_24_NA1_CCK022 - C_CCK022                   = 0. }
+goal continuityCCK007   {C_CCK022 + SR_23_CCK007 + SR_24_CCK007 + R_RFS23_CCK007 - C_CCK007                         = 0. }
+goal continuityCRC002   {SR_22_CRC002 + SR_23_CRC002 + SR_24_CRC002 + SR_26N_CRC002 + C_ABN000 + R_PGWWTP_CRC002 - D_CRC002_22_SA1 - C_CRC002   = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Battle Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBTL006   {I_BTL006 + SG220_BTL006_36 + SG221_BTL006_36 - D_BTL006_03_NA - C_BTL006   = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Barker Slough    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBKR004   {C_CSL004B - D_BKR004_NBA009                                -D_BKR004_NBA009_SCWA_B= 0. } ! Barker Slough Pumping Plant/North Bay Aqueduct
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bear Creek North    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBCN010   {I_BCN010 - C_BCN010                        = 0. }
+goal continuityBCN005   {C_BCN010 - D_BCN005_03_NA - C_BCN005   = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bear River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityBRR049 {C_BRR050 - C_BRR049                          = 0. }
+!goal continuityCMBIE  {I_CMBIE + C_BRR049 - D_CMBIE_CBC000 - C_CMBIE - E_CMBIE = S_CMBIE*taf_cfs - S_CMBIE(-1)*taf_cfs }!Lake Combie
+goal continuityBRR031 {C_CMBIE + C_WLF013 - C_BRR031                = 0. }
+goal continuityBRR028 {C_BRR031 - C_BRR028                          = 0. }
+goal continuityBRR023 {C_BRR028 + I_BRR023 - C_BRR023               = 0. }
+goal continuityCMPFW  {I_CMPFW + C_BRR023 + SG357_CMPFW_62 + CT_Wheatland - C_CMPFW - E_CMPFW = S_CMPFW*taf_cfs - S_CMPFW(-1)*taf_cfs }!Camp Far West Reservoir
+goal continuityBRR017 {C_CMPFW + SG358_BRR017_62 - D_BRR017_23_NA - C_BRR017          = 0. }
+goal continuityBRR011 {C_BRR017 + SG359_BRR011_62 + SR_23_BRR011 + SR_24_BRR011 - C_BRR011                    = 0. }    
+goal continuityBRR004 {C_BRR011 + SG360_BRR004_62 + SG361_BRR004_62 + SR_23_BRR004 + SR_24_BRR004 + SR_15S_BRR004 + C_DHC001 + R_RFS23_BRR004 - C_BRR004    = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Big Chico Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBCC014   {I_BCC014 - C_BCC014                        = 0. }
+goal continuityBCC012   {C_BCC014 + SG269_BCC012_50 - C_BCC012    = 0. }    
+goal continuityBCC006   {C_BCC012 + SG270_BCC006_50 - C_BCC006    = 0. }    
+goal continuityBCC004   {C_BCC006 + SG271_BCC004_50 +  SG272_BCC004_50 - C_BCC004    = 0. }  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Boardman Canal    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityLBC030 {C_LBC010 - D_LBC030_BEC021 - C_LBC030 = 0.}
+goal continuityLBC031 {C_LBC030 - C_LBC031 = 0.}
+goal continuityLBC032 {C_LBC031 + D_BEC021_LBC032 - C_LBC032 = 0.}
+goal continuityLBC038 {C_LBC032 - D_LBC038_WTPAUB - C_LBC038 = 0.}
+goal continuityLBC040 {C_LBC038 + D_WSE003_LBC040 - C_LBC040 = 0.}
+goal continuityWTPAUB {D_LBC038_WTPAUB - D_WTPAUB_24_NU1 = 0.}
+goal continuityLBC043 {C_LBC040 - C_LBC043 - D_LBC043_MRM001 = 0.}
+goal continuityLBC047 {C_LBC043 + D_STH003_LBC047 - C_LBC047 = 0.}
+goal continuityLBC049 {C_LBC047 - D_LBC049_24_NA3 - C_LBC049 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Bear River Canal    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityBEC000 {D_BRR050_BEC000 - C_BEC000 = 0.}
+goal continuityBEC021 {C_BEC000 + D_LBC030_BEC021 - D_BEC021_LBC032 - D_BEC021_BECLOS - C_BEC021 = 0.}
+goal continuityBEC022 {C_BEC021 - D_BEC022_WTPBWM - C_BEC022 = 0.}
+goal continuityBEC024 {C_BEC022 - C_BEC024 = 0.}
+goal continuityWSE000 {C_BEC024 - C_WSE000= 0.}
+goal continuityWSE003 {C_WSE000 - D_WSE003_LBC040 - C_WSE003 = 0.}
+goal continuityWSE004 {C_WSE003 - D_WSE004_24_NA1 - D_WSE004_24_NU3 - C_WSE004 = 0.}
+goal continuityWSE006 {C_WSE004 - D_WSE006_24_NA3 - C_WSE006= 0.}
+goal continuityWSE008 {C_WSE006 - C_WSE008 = 0.}
+goal continuitySTH000 {C_WSE008 - D_STH000_ABN027 - C_STH000 = 0.}
+goal continuitySTH001 {C_STH000 + D_ABT002_STH001 - C_STH001 = 0.}
+goal continuitySTH002 {C_STH001 - D_STH002_ABN026  - C_STH002 = 0.}
+goal continuitySTH003 {C_STH002 - D_STH003_WTPFSS - D_STH003_24_NA3 - D_STH003_LBC047 - C_STH003 = 0.}
+goal continuitySTH004 {C_STH003 - C_STH004 = 0}
+goal continuitySTPFSS {D_STH003_WTPFSS - D_WTPFSS_24_NU2= 0.}
+goal continuitySTH005 {C_STH004 - D_STH005_MRM001 - D_STH005_24_NA3  - C_STH005 = 0.}
+goal continuitySTH007 {C_STH005 - D_STH007_STHLOS - C_STH007 = 0.}
+!goal continuitySCR002{C_LBC049 + R_24_NA3_SCR002 - C_SCR002= 0}
+
+goal continuityWTPBWM {D_BEC022_WTPBWM - D_WTPBWM_24_NU1 = 0.}
+goal continuityMRM001 {D_STH005_MRM001 + D_LBC043_MRM001 - C_MRM001 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Combie Canal    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityCBC000   {D_CMBIE_CBC000 - D_CBC000_PINES - D_CBC000_NIDBR_NA - C_CBC000 = 0.}
+goal setD_CBC001_CBCLOS {D_CBC001_CBCLOS = 0.15 * C_CBC000}
+goal continuityCBC001   {C_CBC000 - D_CBC001_CCK036 - D_CBC001_24_NA1 - D_CBC001_CBCLOS = .0}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Butte Creek / Little Chico Creek / Edgar Slough / Butte Slough  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityBTC060   {C_TTC002 - C_BTC060                                                                                         = 0. }
+goal continuityBTC048   {I_BTC048 + C_BTC060 - C_BTC048                                                                                                    = 0. }
+goal continuityBTC045   {C_BTC048 - D_BTC045_ESL008 - C_BTC045                                          = 0. }       
+goal continuityBTC043   {C_BTC045 + D_LCC038_BTC043 + SG283_BTC043_52 - C_BTC043 - D_BTC043_10_NA                                                 = 0. }
+goal continuityBTC041   {C_BTC043 - C_BTC041                                                                                                    = 0. }
+goal continuityBTC036   {C_BTC041 + SG284_BTC036_52 - D_BTC036_10_NA - C_BTC036                                                                   = 0. }        
+goal continuityBTC032   {C_BTC036 + SG285_BTC032_52 + R_10_NA_BTC032 + D_WEC005_BTC032 - C_BTC032                     = 0. }       
+goal continuityBTC029   {C_BTC032 + SG286_BTC029_52 - C_BTC029                                                                                    = 0. }       
+goal continuityBTC024   {C_BTC029 + SG287_BTC024_52 - C_BTC024                                                                                    = 0. }       
+goal continuityBTC018   {C_BTC024 + SG288_BTC018_52 - C_BTC018                                                                                    = 0. }       
+goal continuityBTC017   {C_BTC018 + SR_09_BTC017 + SR_10_BTC017 + SR_11_BTC017 + R_11_PR_BTC017 - C_BTC017                                       = 0. }
+goal continuityBTC016   {C_BTC017 + C_LDC007 - C_BTC016                                       = 0. }
+goal continuityBTC015   {C_BTC016 + SG289_BTC015_52 - C_BTC015                       = 0.}
+goal continuityBTC012   {C_BTC015 + C_LCC016 - D_BTC012_CRK005 - D_BTC012_09_SA2   - C_BTC012                       = 0. }! confluence with Angel Slough.  actual confluence at RM 12 through 13
+goal continuityBTC007   {C_BTC012 + SG290_BTC007_52 + R_09_SA2_BTC007 - C_BTC007                                      = 0. }     
+goal continuityBTC003   {C_BTC007 + C_CRK005 + SG291_BTC003_52 + R_17N_NA_BTC003 + R_17N_NR_BTC003 + SP_SAC193_BTC003 + SP_SAC188_BTC003 + SP_SAC178_BTC003 + SP_SAC159_BTC003 + SP_SAC148_BTC003 - C_BTC003 = 0. }    ! Colusa Bypass, Moulton Weir Overflow.  actual confluence RM 3-3.5
+
+goal continuityBSL000   {C_BSL001a - D_BSL000_SAC141                                                = 0. }
+goal continuityBSL001   {C_BTC003 + SG292_BSL001_52 + SG333_BSL001_58 + SR_09_BSL001 + SR_10_BSL001 + SR_11_BSL001 + SR_17N_BSL001 - D_BSL001_18_NA   - C_BSL001a - C_BSL001b               = 0. }! Butte Slough
+goal continuityBSL004   {C_BSL001b - C_BSL004                                                   = 0. }
+
+goal continuityLCC038   {I_LCC038 - D_LCC038_BTC043 - C_LCC038                                          =  0. } ! Little Chico Creek
+goal continuityLCC029   {C_LCC038 - D_LCC029_09_SA1 - C_LCC029                                              =  0. } ! Little Chico Creek
+goal continuityLCC026   {C_LCC029 + R_09_SA1_LCC026 - C_LCC026                                              =  0. } ! Little Chico Creek
+goal continuityLCC024   {C_LCC026 + C_ESL010 /*- D_LCC024_09_NA*/ - C_LCC024                                    =  0. } ! Little Chico Creek
+goal continuityLCC016   {C_LCC024 + R_09_PR_LCC016 + R_09_NA_LCC016 - C_LCC016                                      =  0. } ! Little Chico Creek
+
+goal continuityESL008   {D_BTC045_ESL008 - D_ESL008_09_SA1 - C_ESL008                                           =  0. } ! Edgar Slough                          
+goal continuityESL010   {C_ESL008- D_ESL010_09_NA - C_ESL010                                           =  0. } ! Edgar Slough      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cache Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCLRLK    {I_CLRLK - C_CLRLK - D_CLRLK_CLLPT - E_CLRLK    = S_CLRLK*taf_cfs - S_CLRLK(-1)*taf_cfs }
+goal continuityCCH083   {C_CLRLK - C_CCH083                 = 0. }
+goal continuityCCH075   {C_CCH083 + C_NFC005 - C_CCH075             = 0. }
+goal continuityCCH058   {C_CCH075 + C_BRC002 - C_CCH058             = 0. }
+goal continuityCCH053   {I_CCH053 + C_CCH058 - C_CCH053             = 0. }
+goal continuityCCH052   {C_CCH053 - D_CCH052_20_NA1 - C_CCH052          = 0. }
+goal continuityCCH032   {C_CCH052 + SR_20_CCH032 - C_CCH032         = 0. }   
+goal continuityCCH030   {C_CCH032 + SG390_CCH030_68 - D_CCH030_20_NA1 - C_CCH030  = 0. }   
+goal continuityCCH023   {C_CCH030 + SG391_CCH023_68 - C_CCH023            = 0. }  
+goal continuityCCH017   {C_CCH023 + SG392_CCH017_68 + SR_20_CCH017 - C_CCH017     = 0. }  
+goal continuityCCH012   {C_CCH017 + CT_Yolo + SG393_CCH012_68 - C_CCH012            = 0. }   
+goal continuityCCH006   {C_CCH012 + SG394_CCH006_68 - C_CCH006            = 0. }
+goal continuityCCH003   {C_CCH006 + SG395_CCH003_68 - C_CCH003            = 0. }
+
+goal continuityINDVL    {I_INDVL - C_INDVL - E_INDVL    = S_INDVL*taf_cfs - S_INDVL(-1)*taf_cfs}
+goal continuityNFC013   {C_INDVL - C_NFC013                 = 0. } ! North Fork Cache Creek
+goal continuityNFC005   {C_NFC013 - C_NFC005                    = 0. }
+
+goal continuityBRC003   {I_BRC003 - C_BRC003                    = 0. } ! Bear Creek
+goal continuityBRC002   {C_BRC003 - C_BRC002                    = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cache Slough     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityEAWWTP   {R_25_PU_EAWWTP  - R_EAWWTP_CSL005      = 0.}
+goal continuityCSL005   {C_YBP002 + SR_25_CSL005 + R_25_PA2_CSL005 + R_25_NA_CSL005 + R_RFS25_CSL005 + R_EAWWTP_CSL005 - D_CSL005_25_NA - C_CSL005 = 0.}
+goal continuityCSL004   {C_CSL005 - C_CSL004B - C_CSL004A   = 0.} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cherokee Canal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCRK005   {D_BTC012_CRK005 + R_11_SA1_CRK005 + R_11_SA2_CRK005 + R_17N_PR_CRK005 + C_BGD000 - D_CRK005_17N_NR - C_CRK005 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Clear Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCCT011   {D_LWSTN_CCT011 - C_CCT011             = 0. }! Clear Creek Tunnel
+goal continuityCLR025   {C_CCT011 - C_CLR025        = 0. }
+goal continuityWKYTN    {I_WKYTN + C_CLR025 - D_WKYTN_SPT003 - D_WKYTN_02_PU - D_WKYTN_WTPBUK - D_WKYTN_WTPCSD - C_WKYTN - E_WKYTN    = S_WKYTN * taf_cfs-S_WKYTN(-1) * taf_cfs }   ! Wiskeytown
+goal continuityCLR011   {C_WKYTN + I_CLR011 - C_CLR011                = 0. }    
+goal continuityCLR009   {C_CLR011 - D_CLR009_02_NA - C_CLR009         = 0. }    
+goal continuityWTPBUK   {D_WKYTN_WTPBUK - D_WTPBUK_03_SU             = 0. }   
+goal continuityWTPCSD   {D_WKYTN_WTPCSD - D_WTPCSD_02_PU - D_WTPCSD_02_PA    = 0. }
+goal continuityCCWWTP   {R_02_PU_CCWWTP + R_02_SU_CCWWTP - R_CCWWTP_SAC287   = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Colusa Basin Drain  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCBD055   {           SG469_CBD055_83 - C_CBD055    = 0. }!    
+goal continuityCBD052   {C_CBD055 + SG470_CBD052_83 - C_CBD052    = 0. }! 
+goal continuityCBD050   {C_CBD052 + SG471_CBD050_83 - C_CBD050    = 0. }! 
+goal continuityCBD049   {C_CBD050 + SG472_CBD049_83 + R_07N_NU_CBD049 + R_08N_NA_CBD049 + R_08N_SA2_CBD049 + R_08N_PR1_CBD049 + SG318_CBD049_55 + SR_06_CBD049 + SR_07N_CBD049 + SR_08N_CBD049 - D_CBD049_08N_SA1  - D_CBD049_08N_PA - C_CBD049    = 0. }   
+goal continuityCBD044   {C_CBD049 + SG319_CBD044_55 + R_06_NA_CBD044 + R_08N_PR2_CBD044 + R_07N_NA_CBD044 + R_07N_PA_CBD044 + R_07S_NA_CBD044 + R_08N_SA1_CBD044 + R_08N_PA_CBD044 - C_CBD044  = 0. }  !Richard 5/22/2013 
+goal continuityCBD041   {C_CBD044 + SG320_CBD041_55 - D_CBD041_08S_SA1 - D_CBD041_08S_SA2 - C_CBD041       = 0. }
+goal continuityCBD038   {C_CBD041 + SR_07S_CBD038 + SR_08S_CBD038 - C_CBD038                               = 0. } 
+goal continuityCBD037   {C_CBD038 + SG321_CBD037_55 + R_08S_SA2_CBD037 - D_CBD037_08S_PR - C_CBD037        = 0. }
+goal continuityCBD031   {C_CBD037 + SG322_CBD031_55 + SG323_CBD031_56 + C_GCC065 + R_08S_PR_CBD031 + R_08S_SA1_CBD031 + R_08S_NA1_CBD031 - C_CBD031    = 0. }   
+goal continuityCBD028   {C_CBD031 + SG324_CBD028_56 + SR_07S_CBD028 + SR_08S_CBD028 + R_07S_PA_CBD028 - D_CBD028_08S_PA - D_CBD028_08S_SA3 - C_CBD028  = 0. }   
+goal continuityCBD023   {C_CBD028 + SG325_CBD023_56 - C_CBD023    = 0. }
+goal continuityCBD018   {C_CBD023 + SG326_CBD018_56 - C_CBD018    = 0. }   
+goal continuityCBD012   {C_CBD018 + SG327_CBD012_56 + R_08S_PA_CBD012 - C_CBD012       = 0. }
+goal continuityCBD005   {C_CBD012 + SG328_CBD005_56 - C_CBD005                         = 0. }   
+goal continuityCBD001   {C_CBD005 + CT_Colusa - C_CBD001 + SG329_CBD000_56            = 0. }
+goal continuityCBD000   {C_CBD001 - D_CBD000_KLR005 - C_CBD000                         = 0. } !SG329_CBD000_56 moved to CBD001 due to infeasibility in knight's landing ops
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Contra Costa Water District !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityCCC004  {D_RSL004_CCC004 - C_CCC004                   = 0.}
+!goal continuityCCC007  {C_CCC004 + C_LVP007 - D_CCC007_ANTOC - C_CCC007   = 0.}
+!goal continuityCCC019  {C_CCC007 + D_CHIPPS_CCC019 - D_CCC019_CCWD        = 0.}
+!goal continuityVCT002  {C_OMR024b - D_VCT002_ORP000                            = 0.} ! Victoria Canal
+!goal continuityORP000  {D_OMR021_ORP000 + D_VCT002_ORP000 - C_ORP000      = 0.}
+!goal continuityTRNSF  {C_ORP000 + D_LOSVQ_TRNSF - C_TRNSF        = 0.}
+!goal continuityLVP007  {C_TRNSF + D_MAQ057_LVP007 - C_LVP007         = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Corning Canal   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCCL005   {D_TCC001_CCL005 - D_CCL005_04_PA1 = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cottonwood Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Commented out C_CWD022, C_SCW020, C_STC008 in continuities because I_CWD018 and I_SCW008 have already counted these flows. 
+!Keep the upstream continuities of these three nodes because we needs that to release the groundwater from DLL. 
+!
+!North Fork Cottonwood Creek SG458_NCW001_79   SG459_NCW001_79                                  
+goal continuityNCW001g  {SG458_NCW001_79 +SG459_NCW001_79 - C_NCW001 = 0. }
+!Middle Fork Cottonwood Creek SG450_MCW003_76 SG451_MCW003_76
+goal continuityMCW003g  {SG450_MCW003_76 +SG451_MCW003_76 - C_MCW003 = 0. } 
+!Cottonwood Creek SG452_CWD022_77 SG453_CWD018_77 SG454_CWD013_77 SG455_CWD009_77 
+goal continuityCWD022g  {C_NCW001 + C_MCW003  +SG452_CWD022_77 - C_CWD022  = 0. }
+goal continuityCWD018   {/*C_CWD022 +*/ I_CWD018 + SG453_CWD018_77 - C_CWD018  = 0. }    
+goal continuityCWD013   {C_CWD018 + SG454_CWD013_77 + SG455_CWD009_77- C_CWD013  = 0. }    
+
+!Salt Creek flowing into South Fork Cottonwood Creek SG466_STC010_82 SG467_STC008_82 SG468_STC008_82
+goal continuitySTC010   {           SG466_STC010_82                   - C_STC010 = 0. }    
+goal continuitySTC008   {C_STC010+  SG467_STC008_82 + SG468_STC008_82 - C_STC008 = 0. }    
+!South Fork Cottonwood Creek upstream SG460_SCW025_80 SG461_SCW020_80 SG462_SCW020_80
+goal continuitySCW025   {           SG460_SCW025_80                   - C_SCW025 = 0. }    
+goal continuitySCW020   {C_SCW025 + SG461_SCW020_80 + SG462_SCW020_80 - C_SCW020 = 0. } 
+
+!South Fork Cottonwood Creek  SG463_SCW008_81 SG464_SCW004_81 SG465_SCW004_81
+goal continuitySCW008   {/*C_SCW020 + C_STC008 +*/ I_SCW008 + SG463_SCW008_81 - C_SCW008 = 0. } 
+goal continuitySCW004   {C_SCW008 + SG464_SCW004_81  + SG465_SCW004_81 - C_SCW004 = 0. } 
+
+
+!Cottonwood Creek downstream SG456_CWD009_78 SG457_CWD004_78 
+goal continuityCWD009   {C_CWD013 + C_SCW004  + SG456_CWD009_78 - D_CWD009_02_NA - C_CWD009 = 0. } 
+goal continuityCWD004   {C_CWD009 + SG457_CWD004_78 + SG218_CWD004_35 + R_02_NA_CWD004 - C_CWD004 = 0. }
+goal continuityCWD003   {C_CWD004 + SG219_CWD003_35 + SR_02_CWD003 - C_CWD003   = 0. }  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Cow Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCOW014   {I_COW014 + SG211_COW014_33 - D_COW014_03_NA - C_COW014   = 0. }  ! from Little Cow & Clover Creeks
+goal continuityCOW007   {C_COW014 + SG212_COW007_33 - C_COW007            = 0. }
+goal continuityCOW003   {C_COW007 + SG213_COW003_33 + SG214_COW003_33 + SR_03_COW003 - C_COW003     = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deer Creek      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDRC012   {I_DRC012 - C_DRC012                            = 0. }
+goal continuityDRC010   {C_DRC012 + SG256_DRC010_47 - D_DRC010_05_NA - C_DRC010   = 0. }  
+goal continuityDRC005   {C_DRC010 + SG257_DRC005_47 + SG258_DRC005_47 - D_DRC005_05_NA - C_DRC005   = 0. }  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Deere Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityDER001   {I_DER001 - C_DER001 = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Delta !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityCHIPPS     {C_SAC000 - D_CHIPPS_CCC019 - C_CHIPPS = 0.}
+!goal continuityCHIPPS     {C_SAC000_MIN + C_SAC000_ADD - D_CHIPPS_CCC019 - C_CHIPPS = 0.}
+goal continuityCHCGO      {C_CHIPPS - C_CHCGO = 0.}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Dry Creek / Hutchison Creek !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityDHC021   {I_DHC021 - C_DHC021        = 0. }
+goal continuityDHC001   {C_DHC021 + R_15S_NA1_DHC001 + R_15S_NA2_DHC001 + R_15S_NU_DHC001 - C_DHC001        = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Elder Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityELD027   {I_ELD027 + SG237_ELD027_42 - C_ELD027                = 0. }    
+goal continuityELD022   {C_ELD027 + SG238_ELD022_42 - C_ELD022                = 0. }    
+goal continuityELD017   {C_ELD022 + SG239_ELD017_42 - C_ELD017                = 0. }    
+goal continuityELD012   {C_ELD017 + SG240_ELD012_42 - D_ELD012_04_NA - C_ELD012   = 0. }    
+goal continuityELD005   {C_ELD012 + SG241_ELD005_42 + SG242_ELD005_42 - C_ELD005                = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Feather River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+goal continuityOROVL    {C_FTR074 + I_OROVL + CT_OROVILLE - D_OROVL_13_NU1 - E_OROVL - C_OROVL                    = S_OROVL * taf_cfs - S_OROVL(-1) * taf_cfs + 0. } ! Lake Oroville. 
+goal continuityFTR072   {C_OROVL  + C_KRT000 - C_FTR072                                           = 0. }! Kelly Ridge return
+goal continuityFTR068   {C_FTR072 + SG341_FTR068_59 - D_FTR068_THRMF - C_FTR068                                  = 0. }! Diversion to Thermalito Forebay.
+goal continuityFTR067   {C_FTR068 - C_FTR067                                                    = 0. }! Feather River at Oroville gage.   
+goal continuityTHRMF    {D_FTR068_THRMF - D_THRMF_11_NU1 - D_THRMF_12_NU1 - E_THRMF - C_THRMF                                      = S_THRMF * taf_cfs - S_THRMF(-1) * taf_cfs + 0. } ! Thermalito Forebay
+goal continuityTHRMA    {C_THRMF - D_THRMA_WEC000 - D_THRMA_RVC000 - D_THRMA_JBC000 - E_THRMA - C_THRMA           = S_THRMA * taf_cfs - S_THRMA(-1) * taf_cfs + 0. } ! Thermalito Afterbay 
+goal continuityTAB000   {C_THRMA - C_TAB000                                                 = 0. } ! Thermalito Afterbay release to Feather River. 
+goal continuityFTR063   {C_FTR067 + SG342_FTR063_59 + R_ORWWTP_FTR063 - C_FTR063                                  = 0. }    
+goal continuityFTR059   {C_FTR063 + SG343_FTR059_59 + SR_11_FTR059 + C_TAB000 - D_FTR059_12_SA - C_FTR059                     = 0. }
+goal continuityFTR053   {C_FTR059 + SG344_FTR053_59 - C_FTR053                                            = 0. }
+goal continuityFTR051   {C_FTR053 - C_FTR051                                                    = 0. } ! Feather near Gridley 
+goal continuityFTR048   {C_FTR051 + SG345_FTR048_59 + R_JBC008_FTR048 - C_FTR048                                  = 0. }           
+goal continuityFTR045   {C_FTR048 + SG346_FTR045_59 + C_HON004 + R_12_SA_FTR045 - D_FTR045_15N_SA - C_FTR045                  = 0. }   
+goal continuityFTR039   {C_FTR045 - D_FTR039_SEC009 - C_FTR039                                          = 0. } ! Sunset Pumps 
+goal continuityFTR036   {C_FTR039 + SG347_FTR036_59 - C_FTR036                                            = 0. }
+goal continuityFTR031   {C_FTR036 + R_15N_SA_FTR031 + R_15N_NA1_FTR031 - D_FTR031_WTPCYC - C_FTR031                         = 0. } ! City of Yuba City
+goal continuityFTR030   {C_FTR031 + C_JCK002 - C_FTR030                                             = 0. } 
+goal continuityFTR029   {C_FTR030 + SG348_FTR029_59 + SG352_FTR029_61 + SR_15N_FTR029 - C_FTR029                                    = 0. } 
+goal continuityFTR028   {C_FTR029 + C_YUB002 - C_YUB002_LYRA + R_YCWWTP_FTR028 - D_FTR028_15S_SA - C_FTR028                = 0. } ! confluence with Yuba River  
+goal continuityFTR025   {C_FTR028 + SG353_FTR025_61 + R_LCWWTP_FTR025 - C_FTR025                                            = 0. }
+goal continuityFTR021   {C_FTR025 + SG354_FTR021_61  - D_FTR021_16_PA - D_FTR021_16_SA - C_FTR021                         = 0. }! Feather Water District, Plumas MWC
+goal continuityFTR018   {C_FTR021 - D_FTR018_16_SA - D_FTR018_15S_SA - C_FTR018                                 = 0. } ! Tudor Mutual Water Company
+goal continuityFTR016   {C_FTR018 + SG355_FTR016_61 - C_FTR016                                            = 0. }
+goal continuityFTR014   {C_FTR016 + R_15S_SA_FTR014 - D_FTR014_16_SA - C_FTR014                                 = 0. }! Garden Highway Mutual Water Company
+goal continuityFTR012   {C_FTR014 + SG356_FTR012_61 + SG362_FTR012_63 + C_BRR004 + SR_15S_FTR012 - C_FTR012                             = 0. }  ! confluence with Bear River.  
+goal continuityFTR008   {C_FTR012 + CT_Nicolaus + SG363_FTR008_63 + SG364_FTR008_64 - D_FTR008_16_SA - C_FTR008                         = 0. }  ! confluence with Sutter Bypass.  
+goal continuityFTR003   {C_FTR008 + SG365_FTR003_64 + SG366_FTR003_64 - D_FTR003_17S_SA - D_FTR003_22_SA2 - C_FTR003                                  = 0. }
+
+goal continuityJCK002   {R_RFS14_JCK002 + R_15N_NA2_JCK002 + SR_15N_JCK002 + SR_14_JCK002 - C_JCK002    = 0. }  
+
+!Sutter Extension Canal
+goal continuitySEC009   {C_JBC008 + D_FTR039_SEC009 - D_SEC009_11_SA4 - D_SEC009_17S_PR         = 0. } ! Sutter Extension Canal   
+goal continuityBGD000   {R_RFS11_BGD000 - D_BGD000_17N_PR - C_BGD000                            = 0. }
+
+
+!Little Dry Creek
+goal continuityLDC029   {I_LDC029 - C_LDC029                                        = 0. }! Little Dry Creek
+goal continuityLDC021   {C_LDC029 /*+ D_MIO023_LDC021*/ - C_LDC021                              = 0. }! Little Dry Creek
+goal continuityLDC007   {C_LDC021 - D_LDC007_11_SA2 - C_LDC007                              = 0. }! Little Dry Creek
+
+!Thermalito Afterbay
+goal continuityJBC000   {D_THRMA_JBC000 - C_JBC000                                          = 0. }! Joint Board Canal
+goal continuityJBC002   {C_JBC000 - D_JBC002_RVC005 - D_JBC002_17N_PR - C_JBC002                            = 0. }! Joint Board Canal
+goal continuityJBC004   {C_JBC002 - D_JBC004_11_SA3 - C_JBC004                                  = 0. }! Joint Board Canal
+goal continuityJBC008   {C_JBC004 - R_JBC008_FTR048 - C_JBC008                                  = 0. }! Joint Board Canal
+goal continuityWEC000   {D_THRMA_WEC000 - C_WEC000                              = 0. }! Joint Board Canal
+goal continuityRVC000   {D_THRMA_RVC000 - C_RVC000                         = 0. }! Richvale Canal
+goal continuityRVC005   {C_RVC000 + D_JBC002_RVC005 - D_RVC005_11_SA2 - D_RVC005_11_PR                   = 0. }! Richvale Canal
+goal continuityWEC005   {C_WEC000 - D_WEC005_11_SA1 - D_WEC005_BTC032 - D_WEC005_11_PR                       = 0. }! Western Canal
+
+!Return Flows
+goal continuityWTPCYC   {D_FTR031_WTPCYC - D_WTPCYC_16_PU                                   = 0. }! City of Yuba City water treatment plant
+goal continuityORWWTP   {R_13_NU1_ORWWTP + R_11_NU1_ORWWTP + R_12_NU1_ORWWTP - R_ORWWTP_FTR063              = 0. } ! Oroville Wastewater Treatment Plant
+goal continuityYCWWTP   {R_16_PU_YCWWTP - R_YCWWTP_FTR028                                   = 0. } ! Yuba City Wastewater Treatment Plant
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Folsom South Canal  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityFSC003   {D_NTOMA_FSC003 - D_FSC003_FSCLOS - D_FSC003_WTPCOL - C_FSC003 = 0. }
+goal continuityFSC013   {C_FSC003   + D_FPT013_FSC013 - C_FSC013                    = 0. }
+goal continuityFSC015   {C_FSC013   - D_FSC015_60N_NA2  - C_FSC015                  = 0. }
+goal continuityFSC025   {C_FSC015   - D_FSC025_60N_PU - C_FSC025                    = 0. }
+goal continuityFSC027   {C_FSC025   - D_FSC027_MAQ012                            = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Freeport                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityFPT013   {D_SAC050_FPT013 - D_FPT013_WTPVNY - D_FPT013_FSC013                        = 0. }
+goal continuityWTPVNY   {D_FPT013_WTPVNY - D_WTPVNY_26S_PU1 - D_WTPVNY_26S_PU4 - D_WTPVNY_26S_PU5 - D_WTPVNY_26S_PU6           = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! French Dry Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityMERLC    {I_MERLC - C_MERLC - E_MERLC = S_MERLC * taf_cfs - S_MERLC(-1) * taf_cfs} !Merle Collins Reservoir
+goal continuityFDC006   {C_MERLC - D_FDC006_14_NA - C_FDC006        = 0. }                        !BVID Diversion
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Glenn-Colusa Canal  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityGCC007   {D_SAC207_GCC007 + D_STN004_GCC007 - C_GCC007                                   = 0. }    
+goal continuityGCC010   {C_GCC007 - C_GCC010                                        = 0. }    
+goal continuityGCC015   {C_GCC010 - C_GCC015                                        = 0. }    
+goal continuityGCC022   {C_GCC015 - C_GCC022                                    = 0. }    
+goal continuityGCC027   {C_GCC022 - D_GCC027_08N_SA2 - D_GCC027_08N_PR1 - C_GCC027      = 0. }    
+goal continuityGCC032   {C_GCC027 - C_GCC032                                        = 0. }  
+goal continuityGCC036   {C_GCC032 + D_TCC062_GCC036 - C_GCC036              = 0. }  
+goal continuityGCC039   {C_GCC036 - D_GCC039_08N_PR2 - C_GCC039             = 0. }  
+goal continuityGCC042   {C_GCC039 - C_GCC042                            = 0. }  
+goal continuityGCC046   {C_GCC042 - C_GCC046                        = 0. }  
+goal continuityGCC050   {C_GCC046 - C_GCC050                                        = 0. }  
+goal continuityGCC056   {C_GCC050 + D_TCC085_GCC056 - D_GCC056_08S_SA2 - D_GCC056_08S_PR - C_GCC056   = 0. }    
+goal continuityGCC060   {C_GCC056 - C_GCC060                                        = 0. }  
+goal continuityGCC065   {C_GCC060 - D_GCC065_08S_PA - C_GCC065                  = 0. }    
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Honcut Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityHON021   {I_HON021 - C_HON021                                    = 0. }!test1 RsdPos_HON021 - RsdNeg_HON021}    
+goal continuityHON004   {C_HON021 + SR_12_HON004 + SR_14_HON004 + SR_15N_HON004 + R_RFS13_HON004 + R_12_NA_HON004 - C_HON004    = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Isolated Facility    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityISF001  {D_SAC041_ISF001 - D_ISF001_OMR024 - C_ISF001_OMR027 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Knights Landing Ridgecut    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityKLR005   {D_CBD000_KLR005 - D_KLR005_21_PA - C_KLR005 = 0. }    
+goal continuityKLR006   {C_KLR005 - C_KLR006 = 0.}                          ! gated weir
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Los Vaqueros !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!goal continuityLOSVQ  {I_LOSVQ - C_LOSVQ - D_LOSVQ_TRNSF - E_LOSVQ = S_LOSVQ*taf_cfs - S_LOSVQ(-1)*taf_cfs} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Mill Creek      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMLC006   {I_MLC006 + SG243_MLC006_43 - D_MLC006_05_NA - C_MLC006           = 0. }   
+goal continuityMLC004   {C_MLC006 + SG244_MLC004_43 + SG245_MLC004_43 - C_MLC004                        = 0. }  
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Miner's and Secret Ravines, Dry Creek   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySCR002   {C_LBC049 + R_24_NA3_SCR002 - C_SCR002                      = 0. }
+goal continuityDCK012   {C_SCR002 + R_DCWWTP_DCK012 - C_DCK012                      = 0. }    
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Minor Northeast Streams at SAC207   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityMNS000   {I_MNS000 - C_MNS000                                = 0. }    
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! North Bay Aqueduct                  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityNBA009   {D_BKR004_NBA009 - D_NBA009_WTPTAB - C_NBA009 = 0. }
+goal continuityNBA011   {C_NBA009 - D_NBA011_WTPNBR - C_NBA011 = 0. }
+goal continuityNBA021   {C_NBA011 - D_NBA021_VJB000 - C_NBA021 = 0. }
+goal continuityNBA027   {C_NBA021 - D_NBA027_WTPJAC - D_NBA027_WTPAMC - D_NBA027_NBALOS = 0. }
+goal continuityVJB000   {D_NBA021_VJB000 + D_PSC033_VJB000 - D_VJB000_WTPFMH - D_VJB000_WTPBNC = 0. }
+goal continuityWTPTAB   {D_NBA009_WTPTAB - D_WTPTAB_TVAFB                        = 0. }
+goal continuityWTPJAC   {D_NBA027_WTPJAC - D_WTPJAC_NAPA - D_WTPJAC_AMCYN            = 0. }
+goal continuityWTPAMC   {D_NBA027_WTPAMC - D_WTPAMC_AMCYN                       = 0. }
+goal continuityWTPFMH   {D_VJB000_WTPFMH - D_WTPFMH_VLLJO                     = 0. }
+goal continuityWTPBNC   {D_VJB000_WTPBNC - D_WTPBNC_BNCIA                       = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Paynes Creek        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityPYN001   {I_PYN001 + SG225_PYN001_38 + SG226_PYN001_38 - C_PYN001 = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Putah Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityPTH070   {I_PTH070_ADD + I_PTH070 - C_PTH070 - D_PTH070_PUTAH                = 0. }
+goal continuityBRYSA    {C_PTH070 - D_BRYSA_NAPA2 - C_BRYSA - E_BRYSA                = S_BRYSA * taf_cfs - S_BRYSA(-1) * taf_cfs + 0. }  ! Beressa
+goal continuityPTH030   {C_BRYSA - C_PTH030                 = 0. }  
+goal continuityPTH024   {C_PTH030 + SG400_PTH024_69 + SR_20_PTH024 + SR_25_PTH024 - D_PTH024_PSC003 - C_PTH024    = 0. }   
+goal continuityPTH021   {C_PTH024 + SR_20_PTH021 + SR_25_PTH021 - C_PTH021  = 0. }   
+goal continuityPTH020   {C_PTH021 + SG401_PTH020_69 - C_PTH020                = 0. }   
+goal continuityPTH015   {C_PTH020 + SG402_PTH015_69 - C_PTH015            = 0. } 
+goal continuityPTH011   {C_PTH015 + SG403_PTH011_69 + R_20_PA_PTH011 - C_PTH011   = 0. }  
+goal continuityPTH007   {C_PTH011 + CT_Davis + SG404_PTH007_69 + SG405_PTH007_69 - C_PTH007     = 0. }   
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Putah South Canal   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityPSC003   {D_PTH024_PSC003 - D_PSC003_PSCLOS - D_PSC003_20_PA - D_PSC003_25_PA1 - C_PSC003      = 0. }   
+goal continuityPSC006   {C_PSC003 - D_PSC006_25_PA2 - C_PSC006                          = 0. }    
+goal continuityPSC013   {C_PSC006 - D_PSC013_WTPDEF - C_PSC013                          = 0.} 
+goal continuityPSC015   {C_PSC013 - D_PSC015_CSPSO - C_PSC015                           = 0. }    
+goal continuityPSC017   {C_PSC015 - D_PSC017_WTPNBR - C_PSC017                          = 0. }    
+goal continuityPSC020   {C_PSC017 - D_PSC020_WTPCMT - C_PSC020                          = 0. }    
+goal continuityPSC024   {C_PSC020 - D_PSC024_SIDSH - D_PSC024_WTPWMN - C_PSC024         = 0. }    
+goal continuityPTH033   {C_PSC024 - D_PSC033_VJB000                                 = 0. }
+
+goal continuityWTPCMT   {D_PSC020_WTPCMT - D_WTPCMT_SUISN                               = 0. }    
+goal continuityWTPWMN   {D_PSC024_WTPWMN - D_WTPWMN_FRFLD                               = 0. }
+goal continuityWTPDEF   {D_PSC013_WTPDEF - D_WTPDEF_25_PU                               = 0. }    
+goal continuityWTPNBR   {D_PSC017_WTPNBR + D_NBA011_WTPNBR - D_WTPNBR_FRFLD - D_WTPNBR_25_PU          = 0. }
+
+/*
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Rock Slough     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRSL001   {C_OMR013B - C_RSL001A - C_RSL001B      = 0. }
+goal continuityRSL004   {C_RSL001A - D_RSL004_CCC004            = 0. }
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Split Return Arcs   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityRFS11    {R_11_SA3_RFS11 - R_RFS11_WWC006 - R_RFS11_BGD000                   = 0. }
+goal continuityRFS14    {R_14_NA_RFS14 - R_RFS14_YUB014 - R_RFS14_JCK002                        = 0. }
+goal continuityRFS8S    {R_08S_NA2_RFS8S + R_08S_SA3_RFS8S + SR_08S_RFS8S - R_RFS8S_SAC097 - R_RFS8S_SAC093     = 0. }
+goal continuityRFS18    {R_18_NA_RFS18 + R_18_SA_RFS18 + SR_18_RFS18 - R_RFS18_SAC122 - R_RFS18_SBP021      = 0. }
+goal continuityRFS22    {R_22_NA_RFS22 + R_22_SA1_RFS22 - R_RFS22_SAC066 - R_RFS22_EMD001           = 0. }
+goal continuityRFS13    {R_13_NA_RFS13 + SR_13_RFS13 - D_RFS13_12_NA - R_RFS13_HON004      = 0. }! Return Flows from WBA13
+goal continuityRFS23    {R_23_NA_RFS23 - R_RFS23_CCK007 - R_RFS23_BRR004                    = 0. }
+goal continuityRFS25    {R_25_PA1_RFS25 - D_RFS25_25_PA2 - R_RFS25_CSL005                   = 0. }
+goal continuityRFS26N   {R_26N_PU1_RFS26N + R_24_NU2_RFS26N - R_RFS26N_DCWWTP - R_RFS26N_PGWWTP         = 0. }
+goal continuityRFS26S   {R_26S_NU4_RFS26S - R_RFS26S_AMR020 - R_RFS26S_SRWWTP                   = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Sacramento River (see also Freeport)    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySHSTA    {I_SHSTA - C_SHSTA - D_SHSTA_WTPJMS - E_SHSTA                                   = S_SHSTA * taf_cfs-S_SHSTA(-1) * taf_cfs + 0. }! Shasta
+goal continuitySPT003   {D_WKYTN_SPT003 - C_SPT003                                                          = 0. } ! Spring Creek Tunnel
+goal continuitySAC301   {C_SHSTA + C_SPT003 - C_SAC301                                                          = 0. } ! upstream of Keswick
+goal continuityWTPJMS   {D_SHSTA_WTPJMS - D_WTPJMS_03_PU1                                                   = 0. } ! Water Treatment Plant 3A
+goal continuityKSWCK    {C_SAC301 + SR_02_KSWCK + SR_03_KSWCK + R_03_PU1_KSWCK - C_KSWCK - E_KSWCK  = S_KSWCK * taf_cfs-S_KSWCK(-1) * taf_cfs + 0. }    ! Keswick
+goal continuitySAC299   {C_KSWCK - C_SAC299                                                                 = 0. } ! downstream of Keswick
+goal continuitySAC296   {C_SAC299 + SG205_SAC296_32 - D_SAC296_WTPFTH - D_SAC296_02_SA - C_SAC296                 = 0. }
+goal continuitySAC294   {C_SAC296 + SG206_SAC294_32  - D_SAC294_WTPBLV - D_SAC294_03_PA - C_SAC294                 = 0. }
+goal continuityWTPBLV   {D_SAC294_WTPBLV - D_WTPBLV_03_PU2                 = 0.}
+goal continuitySAC289   {C_SAC294 + SG207_SAC289_32 - D_SAC289_03_SA - C_SAC289                                 = 0. }
+goal continuityWTPFTH   {D_SAC296_WTPFTH - D_WTPFTH_03_SU - D_WTPFTH_02_SU                                      = 0. } ! Water Treatment Plant FTH
+goal continuitySWWWTP   {R_03_SU_SWWWTP + R_03_PU2_SWWWTP + /*R_03_PU3_SWWWTP*/ - R_SWWWTP_SAC281                       = 0. }! Wastewater Treatment Plant 3B
+goal continuitySAC287   {C_SAC289 + SG208_SAC287_32 + C_CLR009 + R_03_PA_SAC287 + R_CCWWTP_SAC287 - C_SAC287          = 0. }! confluence Clear Creek.  
+goal continuitySAC281   {C_SAC287 + SG209_SAC281_32 + R_02_NU_SAC281 + R_03_SA_SAC281 + R_SWWWTP_SAC281 - D_SAC281_02_NA - C_SAC281                     = 0. }
+goal continuitySAC277   {C_SAC281 + SG210_SAC277_32 + SG215_SAC277_34 + SR_03_SAC277 + C_COW003 - C_SAC277                              = 0. }! confluence Cow Creek.  
+goal continuitySAC275   {C_SAC277 + SG216_SAC275_34 + C_BCN005 - C_SAC275                                             = 0. }
+goal continuitySAC273   {C_SAC275 + R_02_SA_SAC273 + R_02_PA_SAC273 - D_SAC273_03_NA - C_SAC273                                      = 0. }
+goal continuitySAC271   {C_SAC273 + C_CWD003 + SR_02_SAC271 - C_SAC271                                              = 0. }
+goal continuitySAC269   {C_SAC271 + SG217_SAC269_34 + SG222_SAC269_37+ C_BTL006 + R_03_NA_SAC269 - C_SAC269                            = 0. }! confluence Cottonwood & Battle Creek.  
+goal continuitySAC265   {C_SAC269 + SG223_SAC265_37 + SR_03_SAC265 - C_SAC265                                         = 0. }! Edge of DSA - Accretions/Depletions (CalSim-2)
+goal continuitySAC259   {C_SAC265 + SG224_SAC259_37 + SG227_SAC259_39 - C_SAC259                                                        = 0. }
+goal continuitySAC257   {C_SAC259 + SR_02_SAC257 + CT_BendBridge - C_SAC257                                         = 0. }
+goal continuitySAC254   {C_SAC257 + SG228_SAC254_39 - C_SAC254                                                  = 0. }
+goal continuitySAC250   {C_SAC254 + SG229_SAC250_39 + C_PYN001  - C_SAC250                              = 0. }! confluence Paynes Creek.  
+goal continuitySAC247   {C_SAC250 + SG230_SAC247_39 - C_SAC247                                                  = 0. }
+goal continuitySAC240   {C_SAC247 + SG231_SAC240_39 - D_SAC240_TCC001 - D_SAC240_05_NA - C_SAC240 + R_04_NU1_SAC240                   = 0. }! diversion Tehama-Colusa Canal & Corning Canal, Red Bluff.  
+goal continuitySAC232   {C_SAC240 + SG232_SAC232_39 + SG235_SAC232_41 + C_ANT010 - C_SAC232                                             = 0. }! confluence Antelope Creek.
+goal continuitySAC229   {C_SAC232 + C_ELD005 - C_SAC229                                                     = 0. }! confluence Mill & Elder Creeks.  
+goal continuitySAC228   {C_SAC229 + SG236_SAC228_41 + SG246_SAC228_44 + C_MLC004 - C_SAC228                                         = 0. }! confluence Mill & Elder Creeks.  
+goal continuitySAC224   {C_SAC228 + SG247_SAC224_44 + SG254_SAC224_46 + C_THM005 - D_SAC224_04_NA  - C_SAC224                       = 0. }! confluence Thomes Creek.  Edge of DSA - Accretions/Depletions (CalSim-2)
+goal continuitySAC218   {C_SAC224 + SG255_SAC218_46 + SG259_SAC218_48 + C_DRC005 - C_SAC218                                             = 0. }! confluence Deer Creek.
+goal continuitySAC217   {C_SAC218 + R_04_NU2_SAC217 + SR_04_SAC217 + SR_05_SAC217 - C_SAC217                                        = 0. }! Vina-Woodson Bridge gage
+goal continuitySAC214   {C_SAC217 + SG260_SAC214_48 - C_SAC214                                                        = 0. }
+goal continuitySAC207   {C_SAC214 + C_MNS000 + SG261_SAC207_48 + SR_04_SAC207 + R_04_NA_SAC207 + R_04_PA2_SAC207 - D_SAC207_GCC007 - C_SAC207         = 0. }! diversion Glenn-Colusa Canal. 
+goal continuitySAC201   {C_SAC207 + R_05_NA_SAC201 + SR_05_SAC201 - C_SAC201                                = 0. }! Hamilton City gage  
+goal continuitySAC196   {C_SAC201 + SG262_SAC196_48 + SG273_SAC196_51 + SR_05_SAC196 + SR_10_SAC196 + C_BCC004 - D_SAC196_MTC000 - C_SAC196     = 0. }! confluence with Mudd Creek.  
+
+goal continuityMTC000   {D_SAC196_MTC000 - D_MTC000_09_PR - D_MTC000_09_NA - D_MTC000_09_SA1        = 0. }
+
+goal continuitySAC195   {C_SAC196 + R_CHWWTP_SAC195 - C_SAC195                                  = 0. }! confluence with Mudd Creek. 
+goal continuityCHWWTP   {R_10_NU1_CHWWTP - R_CHWWTP_SAC195                                      = 0. }
+goal continuitySAC193   {C_SAC195 + SG274_SAC193_51 + C_STN004 - SP_SAC193_BTC003 - C_SAC193                              = 0. }! confluence with Stony Creek, begin of Angel Slough.
+goal continuitySAC188   {C_SAC193 + SG275_SAC188_51 - SP_SAC188_BTC003 - C_SAC188                                             = 0. }
+goal continuitySAC185   {C_SAC188 + SR_06_SAC185 + SR_07N_SAC185 + SR_08N_SAC185 + SR_09_SAC185 - D_SAC185_08N_NA - D_SAC185_09_NA - C_SAC185    = 0. }
+goal continuitySAC182   {C_SAC185 + SG276_SAC182_51 - C_SAC182                                                        = 0. }
+goal continuitySAC178   {C_SAC182 + SG277_SAC178_51 - D_SAC178_08N_SA1 - SP_SAC178_BTC003 - C_SAC178                          = 0. }! Angel Slough
+goal continuitySAC174   {C_SAC178 + SG278_SAC174_51 - C_SAC174                                                = 0. }
+goal continuitySAC169   {C_SAC174 + CT_BUTTECITY - C_SAC169                                                        = 0. }! USGS gage at Butte City
+goal continuitySAC168   {C_SAC169 + SG279_SAC168_51 - C_SAC168                                                        = 0. }
+goal continuitySAC162   {C_SAC168 + SG280_SAC162_51 - D_SAC162_09_SA2 - C_SAC162                                          = 0. }!Edge of DSA - Accretions/Depletions
+goal continuitySAC159   {C_SAC162 - D_SAC159_08S_SA1 - D_SAC159_08N_SA1 - SP_SAC159_BTC003 - C_SAC159                   = 0. }! Moulton Weir.  
+goal continuitySAC154   {C_SAC159 + SG281_SAC154_51 + SR_08N_SAC154 - C_SAC154                                                        = 0. }! C2VSim inflow Moultin Weir
+goal continuitySAC148   {C_SAC154 + SG282_SAC148_51 + SG293_SAC148_53 - SP_SAC148_BTC003 - C_SAC148                                     = 0. }! Colusa Bypass.
+goal continuitySAC146   {C_SAC148 + SR_08S_SAC146 - D_SAC146_08S_NA1 - C_SAC146                                        = 0. }! Colusa gage  
+goal continuitySAC141   {C_SAC146 + SG294_SAC141_53 + D_BSL000_SAC141 + SR_09_SAC141  - C_SAC141                      = 0. }! Butte Slough, confluence Butte Creek.  
+goal continuitySAC136   {C_SAC141 - D_SAC136_18_NA - D_SAC136_18_SA - C_SAC136                                                       = 0. }
+goal continuitySAC134   {C_SAC136 + SG295_SAC134_53 - C_SAC134                                                        = 0. }
+goal continuitySAC129   {C_SAC134 + SG296_SAC129_53 - D_SAC129_08S_NA2 - C_SAC129                                                        = 0. }    
+goal continuitySAC122   {C_SAC129 + SG297_SAC122_53 + R_RFS18_SAC122 - D_SAC122_19_SA - SP_SAC122_SBP021 - C_SAC122           = 0. }  ! Tisdale Bypass. 
+goal continuitySAC121   {C_SAC122 - D_SAC121_08S_SA3 - C_SAC121                                     = 0. }
+goal continuitySAC120   {C_SAC121 + CT_WilkinsSl - C_SAC120                                                    = 0. }
+goal continuitySAC115   {C_SAC120 + SG298_SAC115_53 - D_SAC115_19_SA - C_SAC115                                           = 0. }  
+goal continuitySAC109   {C_SAC115 - D_SAC109_08S_SA3 - D_SAC109_19_SA - C_SAC109                                         = 0. }
+goal continuitySAC106   {C_SAC109 + SG299_SAC106_53 - C_SAC106                                        = 0. }
+goal continuitySAC099   {C_SAC106 - D_SAC099_19_SA - C_SAC099                                           = 0. }
+goal continuitySAC097   {C_SAC099 + SG300_SAC097_53 + R_RFS8S_SAC097 - C_SAC097                              = 0. }   
+goal continuitySAC093   {C_SAC097 + C_CBD000 + R_RFS8S_SAC093 - C_SAC093                                                        = 0. }
+goal continuitySAC092   {C_SAC093 + SG301_SAC092_53 + SG330_SAC092_57 - C_SAC092                                                    = 0. }
+goal continuitySAC091   {C_SAC092 - D_SAC091_19_SA - C_SAC091                                           = 0. }
+goal continuitySAC085   {C_SAC091 + SG331_SAC085_57 + C_SSL001 + R_17S_SA_SAC085 - C_SAC085                       = 0. }  ! Knights Landing Ridgecut/Grays Bend.  
+goal continuitySAC083   {C_SAC085 + CT_Verona + SG332_SAC083_57 + SG367_SAC083_65 + C_FTR003 + R_22_SA2_SAC083 - D_SAC083_21_SA - SP_SAC083_YBP037 - C_SAC083           = 0. }
+goal continuitySAC082   {C_SAC083 + SG368_SAC082_65 + C_CRC002 - D_SAC082_22_SA1 - C_SAC082                           = 0. }! confluence Feather River.  
+goal continuitySAC081   {C_SAC082 + SG369_SAC081_65 - D_SAC081_21_NA - C_SAC081                                                = 0. }! Verona gage
+goal continuitySAC078   {C_SAC081 + SG370_SAC078_65 - D_SAC078_22_SA1 - C_SAC078                                              = 0. }
+goal continuitySAC077   {C_SAC078 - C_SAC077                                              = 0. }
+goal continuitySAC075   {C_SAC077 + SG371_SAC075_65 - D_SAC075_22_NA - C_SAC075                                            = 0. }
+goal continuitySAC074   {C_SAC075 - D_SAC074_WTPDWP - D_SAC074_21_SA  - C_SAC074                                      = 0. }
+goal continuityWTPDWP   {D_SAC074_WTPDWP - D_WTPDWP_20_NU1                = 0.}
+goal continuitySAC066   {C_SAC074 + SG372_SAC066_65 + SR_22_SAC066 + R_RFS22_SAC066 - SP_SAC066_YBP020  - C_SAC066                    = 0. }
+goal continuityWTPBTB   {D_SAC065_WTPBTB - D_WTPBTB_21_PU                                       = 0. }
+goal continuitySAC065   {C_SAC066  - D_SAC065_WTPBTB - C_SAC065                                     = 0. }
+goal continuitySAC064   {C_SAC065 + C_EMD001 - C_SAC064                                         = 0. }
+goal continuitySAC063   {C_SAC064 + C_AMR004 + SG373_SAC063_65 + SG381_SAC063_67 - C_SAC063                                 = 0. }! Confluence with American River
+goal continuitySAC062   {C_SAC063 - D_SAC062_WTPSAC - C_SAC062                                      = 0. }
+goal continuityWTPSAC   {D_SAC062_WTPSAC - D_WTPSAC_26S_NU1 - D_WTPSAC_26S_PU4 - D_WTPSAC_26N_NU3                   = 0. }
+goal continuitySAC061   {C_SAC062 - C_SAC061                    = 0.} !Sacramento River at Sacramento gage (discontinued)   
+goal continuitySAC057   {C_SAC061 + SG382_SAC057_67 - C_SAC057                                        = 0. }
+goal continuitySAC053   {C_SAC057 + SG383_SAC053_67 - C_SAC053                                        = 0. }
+goal continuitySRWWTP   {R_26N_PU2_SRWWTP + R_26N_PU3_SRWWTP + R_26N_NU1_SRWWTP + R_26N_NU2_SRWWTP + R_26N_NU3_SRWWTP + R_26N_NU4_SRWWTP + R_26N_NU5_SRWWTP + R_26S_PU1_SRWWTP + R_26S_PU2_SRWWTP + R_26S_NU1_SRWWTP + R_26S_PU4_SRWWTP + R_26S_NU2_SRWWTP + R_26S_PU5_SRWWTP + R_26S_PU6_SRWWTP + R_26S_NU3_SRWWTP + R_RFS26S_SRWWTP + R_21_PU_SRWWTP - R_SRWWTP_SAC048   = 0. }! Sacramento Regional Wastewater Treatment Plant
+goal continuitySAC050   {C_SAC053 - D_SAC050_FPT013 - C_SAC050                                      = 0. }! Sacramento Pocket, NGVD -10 ft.
+goal continuitySAC049   {C_SAC050 + CT_Freeport - C_SAC049                                      = 0. }! Freeport and East Bank Sacramento River agricultural diversions
+goal continuitySAC048   {C_SAC049 + SG384_SAC048_67 + SR_26S_SAC048 + R_SRWWTP_SAC048 - C_SAC048                      = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stony Creek     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityEPARK    {I_EPARK - D_EPARK_SCKWD - E_EPARK - C_EPARK = S_EPARK * taf_cfs - S_EPARK(-1) * taf_cfs}
+goal continuitySGRGE    {I_SGRGE  + C_EPARK - E_SGRGE - C_SGRGE = S_SGRGE * taf_cfs - S_SGRGE(-1) * taf_cfs + 0. }
+goal continuityBLKBT    {I_BLKBT  + C_SGRGE - E_BLKBT - C_BLKBT  = S_BLKBT * taf_cfs - S_BLKBT(-1) * taf_cfs + 0. }
+goal continuitySTN026   {C_BLKBT  + SG263_STN026_49 - D_STN026_06_PA - C_STN026    = 0. }   
+goal continuitySTN021   {C_STN026 + SG264_STN021_49 - D_STN021_06_PA - C_STN021    = 0. }   
+goal continuitySTN014   {C_STN021 + SG265_STN014_49 - D_STN014_TCC031 - C_STN014  = 0. }
+goal continuitySTN009   {C_STN014 + SG266_STN009_49 + R_06_PA_STN009 - C_STN009                = 0. } !Richard 5/22/2013
+goal continuitySTN004   {C_STN009 + SG267_STN004_49 + SG268_STN004_49 - D_STN004_GCC007 - C_STN004                = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Sutter Bypass   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuitySBP031   {C_BSL004 + SG334_SBP031_58 - D_SBP031_18_NA - C_SBP031               = 0. }   
+goal continuitySBP028   {C_SBP031 + C_WWC006 + SG335_SBP028_58 - D_SBP028_17S_PR - C_SBP028           = 0. }   
+goal continuitySBP024   {C_SBP028 + SG336_SBP024_58 - C_SBP024                                            = 0. }   
+goal continuitySBP021   {C_SBP024 + SG337_SBP021_58 - D_SBP021_DWRPS2 + R_17S_PR_SBP021 + R_DWRPS2_SBP021 + R_RFS18_SBP021 + SP_SAC122_SBP021 - C_SBP021  = 0. } 
+goal continuitySBP018   {C_SBP021 + SG338_SBP018_58 - C_SBP018                            = 0. }  
+goal continuitySBP014   {C_SBP018 + SG339_SBP014_58 - D_SBP014_17S_NA - C_SBP014                  = 0. }
+goal continuitySBP012   {C_SBP014 + SG340_SBP012_58 - D_SBP012_DWRPS1 - C_SBP012 + R_DWRPS1_SBP012            = 0. }
+goal continuityRD1500   {R_19_SA_RD1500 /*+ R_19_NA_RD1500*/ + SR_19_RD1500 - C_RD1500                   = 0. }
+goal continuitySSL001   {C_SBP012 + CT_SacSlough + SR_17S_SSL001 + R_17S_NA_SSL001 + C_RD1500 - C_SSL001       = 0. }
+
+
+goal continuityDWRPS1   {R_16_NA2_DWRPS1 + R_16_SA_DWRPS1 + SR_11_DWRPS1 + SR_16_DWRPS1 + D_SBP012_DWRPS1 - D_DWRPS1_16_NA2 - R_DWRPS1_SBP012           = 0. }
+goal continuityDWRPS2   {R_16_PA_DWRPS2 + R_16_NA1_DWRPS2 + R_11_NA_DWRPS2 + R_11_SA4_DWRPS2 - D_DWRPS2_11_NA + D_SBP021_DWRPS2 - R_DWRPS2_SBP021   = 0. }
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Snake River     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityWWC006   {R_RFS11_WWC006 - C_WWC006 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Tehama-Colusa Canal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityTCC001   {D_SAC240_TCC001 -D_TCC001_CCL005 - C_TCC001    = 0. }   
+goal continuityTCC022   {C_TCC001 - D_TCC022_TCCLOS - D_TCC022_04_PA2 - C_TCC022    = 0. }    
+goal continuityTCC031   {C_TCC022 + D_STN014_TCC031 - C_TCC031      = 0. }   
+goal continuityTCC036   {C_TCC031 - D_TCC036_07N_PA - C_TCC036          = 0. }   
+goal continuityTCC062   {C_TCC036 - D_TCC062_GCC036 - C_TCC062          = 0. }   
+goal continuityTCC066   {C_TCC062 - C_TCC066                = 0. } 
+goal continuityTCC081   {C_TCC066 - D_TCC081_07S_PA - C_TCC081      = 0. }  
+goal continuityTCC085   {C_TCC081 - D_TCC085_GCC056 - C_TCC085      = 0. }
+goal continuityTCC111   {C_TCC085 - D_TCC111_07S_PA         = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Thomes Creek    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityTHM028   {I_THM028 - C_THM028                        = 0. }
+goal continuityTHM026   {C_THM028 + SG248_THM026_45 - C_THM026                = 0. }   
+goal continuityTHM021   {C_THM026 + SG249_THM021_45- C_THM021                = 0. }   
+goal continuityTHM017   {C_THM021 + SG250_THM017_45 - C_THM017                = 0. }   
+goal continuityTHM012   {C_THM017 + SG251_THM012_45 - D_THM012_04_NA - C_THM012   = 0. }    
+goal continuityTHM005   {C_THM012 + SG252_THM005_45 + SG253_THM005_45 + R_04_PA1_THM005 - C_THM005  = 0. } 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Trinity River   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityTRNTY    {I_TRNTY - C_TRNTY - E_TRNTY = S_TRNTY * taf_cfs - S_TRNTY(-1) * taf_cfs + 0. }                           ! Trinity 
+goal continuityLWSTN    {I_LWSTN + C_TRNTY - C_LWSTN - D_LWSTN_CCT011 - E_LWSTN = S_LWSTN * taf_cfs - S_LWSTN(-1) * taf_cfs + 0. }! Lewiston
+goal continuityTRN111   {C_LWSTN - C_TRN111 = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Willow Slough Bypass    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityWLW000   {R_20_NA1_WLW000 + R_20_NA2_WLW000 - C_WLW000 = 0. }
+goal continuityDVWWTP   {R_20_NU1_DVWWTP - R_DVWWTP_WLW005 = 0.}
+goal continuityWLW005   {C_WLW000 + R_DVWWTP_WLW005 - C_WLW005 = 0.}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yolo Bypass     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityYBP037   {SP_SAC083_YBP037 - C_YBP037 = 0.}  ! USGS gage discontinued
+goal continuityYBP034   {C_KLR006 + SR_07S_YBP034 + C_YBP037 - C_YBP034                                 = 0. }  
+goal continuityWLWWTP   {R_20_NU1_WLWWTP - R_WLWWTP_YBP032 = 0.}
+goal continuityYBP032   {C_YBP034 + C_CCH003 + SG396_YBP032_68 + R_21_NA_YBP032 + R_21_PA_YBP032 + R_WLWWTP_YBP032 - C_YBP032          = 0. }
+goal continuityYBP026   {C_YBP032 + SG397_YBP026_68 - C_YBP026                                            = 0. }   
+goal continuityYBP023   {C_YBP026 + SR_21_YBP023 + SR_20_YBP023 + C_WLW005 + SG398_YBP023_68 - D_YBP023_21_SA - C_YBP023              = 0. }   
+goal continuityYBP020   {C_YBP023 + R_21_SA_YBP020 + SP_SAC066_YBP020 + C_PTH007 + CT_Woodland + SG399_YBP020_68 + SG406_YBP020_70 - C_YBP020       = 0. }
+goal continuityYBP016   {C_YBP020 + SG407_YBP016_70 - C_YBP016                                            = 0. }    
+goal continuityYBP014   {C_YBP016 + SG408_YBP014_70 - C_YBP014                                            = 0. }    
+goal continuityYBP011   {C_YBP014 + SG409_YBP011_70 - C_YBP011                                            = 0. }    
+goal continuityYBP007   {C_YBP011 + SG410_YBP007_70 - C_YBP007                                            = 0. }
+goal continuityYBP002   {C_YBP007 + SG411_YBP002_70 + SG412_YBP002_70 - C_YBP002                          = 0. }
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Yuba River      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+goal continuityYUB014   {C_YUB022 + C_FDC006 + R_RFS14_YUB014 - C_YUB014 = 0. }                                                 ! Confluence: French Dry Creek
+goal continuityYUB013   {C_YUB014 - D_YUB013_14_NA - C_YUB013 = 0. }                                                            ! BVID Pipeline Canal Diversion
+goal continuityYUB011   {C_YUB013 /*+ SG349_YUB011_60*/ + SR_14_YUB011 - D_YUB011_15N_NA2 - D_YUB011_15S_NA2 - C_YUB011   = 0. }! Dageurre Dam & diversions for N. and S. Canals
+goal continuityYUB006   {C_YUB011 /*+ SG350_YUB006_60*/ - C_YUB006 = 0. }                                                       ! Marysville gage (USGS ####), flow requirement
+goal continuityYUB003   {C_YUB006 - D_YUB003_15N_NU - C_YUB003 = 0. }                                                           ! Diversion for Marysville's Lake Ellis (presumed)
+goal continuityYUB002   {C_YUB003 + SG351_YUB002_60 + SG349_YUB011_60+ SG350_YUB006_60- C_YUB002 = 0. }                         ! Yuba River at Marysville
+
+goal continuityLCWWTP   {R_15N_NU_LCWWTP + R_15S_NU_LCWWTP - R_LCWWTP_FTR025 = 0.}  

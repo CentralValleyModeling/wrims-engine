@@ -1,0 +1,69 @@
+! ANN required outflow in excess of NDOI_MIN needs to be removed from COA project accounting.
+
+
+!determine excess required outflow (can be negative due to ANN_MRDO calcs)
+/*define RS_Z_1 {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define RS_Z_2 {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define RS_Z_3 {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define EM_Z   {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define JP_Z   {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+define CO_Z   {lower unbounded upper unbounded kind 'FLOW' units 'CFS'}
+
+goal aRSZ1 {RS_Z_1  = RS_MRDO_1 - NDOI_MIN}
+goal aRSZ2 {RS_Z_2  = RS_MRDO_2 - NDOI_MIN}
+goal aRSZ3 {RS_Z_3  = RS_MRDO_3 - NDOI_MIN}
+goal aEMZ  {EM_Z    = EM_MRDO   - NDOI_MIN}
+goal aJPZ  {JP_Z    = JP_MRDO   - NDOI_MIN}
+goal aCOZ  {CO_Z    = CO_MRDO   - NDOI_MIN}
+
+!use slack/surplus type variables to get to positive values:
+define RS_X_1 {std kind 'FLOW' units 'CFS'}
+define RS_X_2 {std kind 'FLOW' units 'CFS'}
+define RS_X_3 {std kind 'FLOW' units 'CFS'}
+define EM_X   {std kind 'FLOW' units 'CFS'}
+define JP_X   {std kind 'FLOW' units 'CFS'}
+define CO_X   {std kind 'FLOW' units 'CFS'}
+
+define RS_Y_1 {std kind 'FLOW' units 'CFS'}
+define RS_Y_2 {std kind 'FLOW' units 'CFS'}
+define RS_Y_3 {std kind 'FLOW' units 'CFS'}
+define EM_Y   {std kind 'FLOW' units 'CFS'}
+define JP_Y   {std kind 'FLOW' units 'CFS'}
+define CO_Y   {std kind 'FLOW' units 'CFS'}
+
+goal bRSZ1 {RS_Z_1 + RS_X_1 - RS_Y_1 = 0}
+goal bRSZ2 {RS_Z_2 + RS_X_2 - RS_Y_2 = 0}
+goal bRSZ3 {RS_Z_3 + RS_X_3 - RS_Y_3 = 0}
+goal bEMZ  {EM_Z   + EM_X   - EM_Y   = 0}
+goal bJPZ  {JP_Z   + JP_X   - JP_Y   = 0}
+goal bCOZ  {CO_Z   + CO_X   - CO_Y   = 0}*/
+
+define RS_Q_1 {std kind 'FLOW' units 'CFS'}
+define RS_Q_2 {std kind 'FLOW' units 'CFS'}
+define RS_Q_3 {std kind 'FLOW' units 'CFS'}
+define EM_Q   {std kind 'FLOW' units 'CFS'}
+define JP_Q   {std kind 'FLOW' units 'CFS'}
+define CO_Q   {std kind 'FLOW' units 'CFS'}
+
+!final calc for getting excess required outflow:
+/*goal cRSZ1 {RS_Q_1 = RS_Z_1 + RS_X_1}
+goal cRSZ2 {RS_Q_2 = RS_Z_2 + RS_X_2}
+goal cRSZ3 {RS_Q_3 = RS_Z_3 + RS_X_3}
+goal cEMZ  {EM_Q   = EM_Z   + EM_X  }
+goal cJPZ  {JP_Q   = JP_Z   + JP_X  }
+goal cCOZ  {CO_Q   = CO_Z   + CO_X  }*/
+
+goal set_RS_Q_1 {RS_Q_1 = RS_Q_1[DELTA]}
+goal set_RS_Q_2 {RS_Q_2 = RS_Q_2[DELTA]}
+goal set_RS_Q_3 {RS_Q_3 = RS_Q_3[DELTA]}
+goal set_EM_Q {EM_Q = EM_Q[DELTA]}
+goal set_JP_Q {JP_Q = JP_Q[DELTA]}
+goal set_CO_Q {CO_Q = CO_Q[DELTA]}
+
+!link ann outflow to coa outflow:
+goal coa_RS1 {NDOI_ADD_ANN > RS_Q_1}
+goal coa_RS2 {NDOI_ADD_ANN > RS_Q_2}
+goal coa_RS3 {NDOI_ADD_ANN > RS_Q_3}
+goal coa_EM  {NDOI_ADD_ANN > EM_Q  }
+goal coa_JP  {NDOI_ADD_ANN > JP_Q  }
+goal coa_CO  {NDOI_ADD_ANN > CO_Q  }

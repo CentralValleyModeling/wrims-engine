@@ -1,0 +1,41 @@
+!!   This is the minimum required Delta outflow (MRDO) code 
+!       code by E. Reyes 7/8/98   / Armin Munevar 11/21/98
+!
+! 2017.11.28 USBR @JMG - updated file to include extreme dry year NDO
+!                        relaxations;  
+!                        code changes adapted from CalSimII 'current ops' run  
+!                        from August 2017
+
+define January_PMI {
+    case MonthJan{
+        condition month==Jan
+        value EightRiver_Index_dv(-1)
+    }
+    case other{
+        condition always
+        value 999999
+    }
+}
+define January_PMI_dv{alias January_PMI kind 'index' units 'taf'}
+
+define NDOreqflowstd_orig {select flow from NDO_flow_std where month=month, wyt_SAC=wyt_SAC}
+
+define NDOreqflowstd {
+    case OctJan {condition month<FEB value NDOreqflowstd_orig}
+    case FebMayTUCP {condition month<JUN .and. tucp_trigger>.5  value 4000.}
+    case JunSepTUCP {condition month>MAY .and. tucp_trigger>.5  value 3000.}
+    case otherwise {condition always value NDOreqflowstd_orig}
+    }
+        
+define DO_req_flow {
+    case    jan_pmi_LessThan_800 {
+      condition    month == JAN .and. January_PMI < 800.
+      value        4500.}
+    case other {
+      condition    always
+      value        NDOreqflowstd}
+}
+
+define begday_flw {value 1}
+define endday_flw {value daysin}
+

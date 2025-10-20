@@ -1,0 +1,26 @@
+! wq_defs.wresl
+
+! The following code contains definitions and goals which are common to the pulse 
+! and non-pulse Water Quality cycles.  
+!*****************************************************************************************
+
+! In March, define the annual cap on releases from New Melones for water quality.
+! The cap is based on New Melones forecast.  
+define WQRelCapdv   {std kind 'WQ-REL-CAP' units 'TAF'}
+define WQRelCap     {          
+        case March  {condition month==mar select NMWQcap from stan_yr given NMF=NMforecast1 use linear}
+        case other  {condition always value WQRelCapdv(-1) } }   
+        
+goal set_WQRelCap   {WQRelCapdv = WQRelCap}   
+define remWQrelCap  {std kind 'storage' units 'TAF' }   !remaining WQ cap calculated in Cycle 6       
+
+! define the monthly water quality standard at Vernalis
+define VernWQstd    {select WQstd from Vern_WQ_std where month = month }
+
+define regEC_intercept_SJR070 {value 600.0422}
+define regEC_C_BCK024_SJR070  {value -0.000314}
+define regEC_C_MCD005_SJR070  {value -0.00017}
+define regEC_C_MSN005_SJR070  {value 0.002778}
+define regEC_C_SJR096_SJR070  {value 0.000035}
+define regEC_C_TUO017_SJR070  {value -0.000187}
+define regEC_SJR070Diff       {value -0.000169}

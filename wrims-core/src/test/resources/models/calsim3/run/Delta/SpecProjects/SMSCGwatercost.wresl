@@ -1,0 +1,44 @@
+! estimate water cost for SMSCG D Year op  SC, YC, NSO, NI 10/08/2020
+!start calling this in the DELTA cycle with assigned values, before this call a dummy file that consist of the 
+!variables that inherit zero values.
+!*************************************************************************************************************
+define smscg_op_on {value 0}
+define smscg_op_off {value 1}
+
+! Only calculating for JP and EM because RS is very less likely to control in summer months
+! Collinsville never controls
+
+include 'JerseyPoint_SMSCG_cost.wresl'
+include 'Emmaton_SMSCG_cost.wresl'
+
+! Only keep track when it is Dry following W, AN (60 day) or BN (30 day)
+define SMSCG_Dyr_watercost_sv {
+	case D_WAN_BN {
+		condition SMSCG_OP3SV < 0.5
+		value max(0, max(JP_smscg_costSac_opsSV, EM_smscg_costSac_opsSV))
+	}	
+	case otherwise {
+		condition always
+		value 0.
+	}			
+}
+define SMSCG_Dyr_watercost {alias SMSCG_Dyr_watercost_sv kind 'flow' units 'cfs'}
+
+!create a running cost variable
+define cum_SMSCG_Dyr_watercost_sv {
+    
+    case Initialize {
+    condition month==OCT .and. wateryear==1922
+    value 0}
+                
+    case beginreset{
+	condition month == OCT
+	value 0.}
+	
+	case other {
+    condition  always
+    value cum_SMSCG_Dyr_watercost(-1) + SMSCG_Dyr_watercost_sv}
+}
+
+define cum_SMSCG_Dyr_watercost {alias cum_SMSCG_Dyr_watercost_sv kind 'flow' units 'cfs'}
+

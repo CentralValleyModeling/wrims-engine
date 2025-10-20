@@ -1,0 +1,1043 @@
+/*
+CALCULATE DELIVERY LOSSES
+
+The Calsim-III Conceptual Model for determining delivery losses is as follows:
+
+  NAMING TAKES THE FOLLOWING FORMS:
+  EF_{source prefix}_{demand unit} - non recoverable evaporative loss
+  SL_{source prefix}_{demand unit} - seepage loss 
+  DL_{source prefix}_{demand unit} - total conveyance loss (EL + SL)
+
+In some cases, the Calsim-III conceptual model did not allow for consistant 
+representation of delivery losses with Calsim-II.  In these cases, the Calsim-III
+conceptual model was modified in order to be consistant with Calsim-II assumptions.
+
+Original formulation: C. Olson (MWH) April 2007
+*/
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 50      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 50_PA1 - Banta Carbona ID/Westside ID - Ag
+!============================== 
+! deliveries
+goal setEV_SJR062_50_PA1  {EV_SJR062_50_PA1 = D_SJR062_50_PA1 *EVF_SJR062_50_PA1}
+goal setEV_DMC021_50_PA1  {EV_DMC021_50_PA1 = D_DMC021_50_PA1 *EVF_DMC021_50_PA1}
+goal setEV_RFS71A_50_PA1  {EV_RFS71A_50_PA1 = D_RFS71A_50_PA1 *EVF_RFS71A_50_PA1}
+goal setEV_50_PA1         {EV_50_PA1        = EV_SJR062_50_PA1 + EV_DMC021_50_PA1 + EV_RFS71A_50_PA1}
+
+goal setDP_SJR062_50_PA1  {DP_SJR062_50_PA1 = D_SJR062_50_PA1 *DPF_SJR062_50_PA1}
+goal setDP_DMC021_50_PA1  {DP_DMC021_50_PA1 = D_DMC021_50_PA1 *DPF_DMC021_50_PA1}
+goal setDP_RFS71A_50_PA1  {DP_RFS71A_50_PA1 = D_RFS71A_50_PA1 *DPF_RFS71A_50_PA1}
+goal setDP_50_PA1         {DP_50_PA1        = DP_SJR062_50_PA1 + DP_DMC021_50_PA1 + DP_RFS71A_50_PA1}
+
+goal setLF_SJR062_50_PA1  {LF_SJR062_50_PA1 = D_SJR062_50_PA1 *LFF_SJR062_50_PA1}
+goal setLF_DMC021_50_PA1  {LF_DMC021_50_PA1 = D_DMC021_50_PA1 *LFF_DMC021_50_PA1}
+goal setLF_RFS71A_50_PA1  {LF_RFS71A_50_PA1 = D_RFS71A_50_PA1 *LFF_RFS71A_50_PA1}
+goal setLF_50_PA1         {LF_50_PA1        = LF_SJR062_50_PA1 + LF_DMC021_50_PA1 + LF_RFS71A_50_PA1}
+
+goal setOS_SJR062_50_PA1  {OS_SJR062_50_PA1 = D_SJR062_50_PA1 *OSF_SJR062_50_PA1}
+goal setOS_DMC021_50_PA1  {OS_DMC021_50_PA1 = D_DMC021_50_PA1 *OSF_DMC021_50_PA1}
+goal setOS_RFS71A_50_PA1  {OS_RFS71A_50_PA1 = D_RFS71A_50_PA1 *OSF_RFS71A_50_PA1}
+goal setOS_50_PA1         {OS_50_PA1        = OS_SJR062_50_PA1 + OS_DMC021_50_PA1 + OS_RFS71A_50_PA1}
+
+goal setDL_SJR062_50_PA1  {DL_SJR062_50_PA1 = EV_SJR062_50_PA1  + DP_SJR062_50_PA1  + LF_SJR062_50_PA1  + OS_SJR062_50_PA1 }
+goal setDL_DMC021_50_PA1  {DL_DMC021_50_PA1 = EV_DMC021_50_PA1  + DP_DMC021_50_PA1  + LF_DMC021_50_PA1  + OS_DMC021_50_PA1 }
+goal setDL_RFS71A_50_PA1  {DL_RFS71A_50_PA1 = EV_RFS71A_50_PA1  + DP_RFS71A_50_PA1  + LF_RFS71A_50_PA1  + OS_RFS71A_50_PA1 }
+goal setDL_50_PA1         {DL_50_PA1        = EV_50_PA1 + DP_50_PA1  + LF_50_PA1  + OS_50_PA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_50_PA1        {RU_50_PA1  = min(TW_50_PA1,RUFR_50_PA1*AWR_50_PA1  + RUFO_50_PA1*AWO_50_PA1)} 
+!zrc@ goal set2RU_50_PA1        {RU_50_PA1  < RUFR_50_PA1*AWR_50_PA1  + RUFO_50_PA1*AWO_50_PA1 } 
+! applied water  = awr + awo
+goal setAW_50_PA1         {AW_50_PA1  = AWR_50_PA1 + AWO_50_PA1 } 
+! riparian losse = factor * aw
+goal setRP_50_PA1         {RP_50_PA1  = AW_50_PA1  * RPF_50_PA1 } 
+
+
+
+!==============================
+! 50_PU - City of Tracy - M&I
+!==============================
+goal setEL_WTPDGT_50_PU   {EL_DGT_50_PU     = D_WTPDGT_50_PU * EF_DGT_50_PU} 
+goal setSL_WTPDGT_50_PU   {SL_DGT_50_PU     = D_WTPDGT_50_PU * SF_DGT_50_PU} 
+goal setDL_WTPDGT_50_PU   {DL_DGT_50_PU     = EL_DGT_50_PU   + SL_DGT_50_PU}
+ 
+goal setEL_WTPJJO_50_PU   {EL_JJO_50_PU     = D_WTPJJO_50_PU * EF_JJO_50_PU} 
+goal setSL_WTPJJO_50_PU   {SL_JJO_50_PU     = D_WTPJJO_50_PU * SF_JJO_50_PU} 
+goal setDL_WTPJJO_50_PU   {DL_JJO_50_PU     = EL_JJO_50_PU   + SL_JJO_50_PU}
+   
+goal setDL_50_PU          {DL_50_PU         = DL_DGT_50_PU + DL_JJO_50_PU}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 71_PA1 - Hospital WD - Ag
+!==============================
+! deliveries
+goal setEV_DMC030_71_PA1  {EV_DMC030_71_PA1 = D_DMC030_71_PA1*EVF_DMC030_71_PA1}
+goal setEV_71_PA1         {EV_71_PA1        = EV_DMC030_71_PA1}
+ 
+goal setDP_DMC030_71_PA1  {DP_DMC030_71_PA1 = D_DMC030_71_PA1*DPF_DMC030_71_PA1}
+goal setDP_71_PA1         {DP_71_PA1        = DP_DMC030_71_PA1}
+
+goal setLF_DMC030_71_PA1  {LF_DMC030_71_PA1 = D_DMC030_71_PA1*LFF_DMC030_71_PA1}
+goal setLF_71_PA1         {LF_71_PA1        = LF_DMC030_71_PA1}
+
+goal setOS_DMC030_71_PA1  {OS_DMC030_71_PA1 = D_DMC030_71_PA1*OSF_DMC030_71_PA1}
+goal setOS_71_PA1         {OS_71_PA1        = OS_DMC030_71_PA1}
+
+goal setDL_DMC030_71_PA1  {DL_DMC030_71_PA1 = EV_DMC030_71_PA1 + DP_DMC030_71_PA1 + LF_DMC030_71_PA1 + OS_DMC030_71_PA1}
+goal setDL_71_PA1         {DL_71_PA1        = EV_71_PA1 + DP_71_PA1 + LF_71_PA1 + OS_71_PA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA1        {RU_71_PA1 = min(TW_71_PA1,RUFR_71_PA1*AWR_71_PA1 + RUFO_71_PA1*AWO_71_PA1)} 
+!zrc@ goal set2RU_71_PA1  {RU_71_PA1 < RUFR_71_PA1*AWR_71_PA1 + RUFO_71_PA1*AWO_71_PA1} 
+! applied water  = awr + awo
+goal setAW_71_PA1         {AW_71_PA1 = AWR_71_PA1 + AWO_71_PA1} 
+! riparian losse = factor * aw
+goal setRP_71_PA1         {RP_71_PA1 = AW_71_PA1 * RPF_71_PA1} 
+
+
+
+!==============================
+! 71_PA2 - West Stanislaus ID - Ag
+!==============================
+! deliveries
+goal setEV_SJR082_71_PA2  {EV_SJR082_71_PA2  = D_SJR082_71_PA2*EVF_SJR082_71_PA2}
+goal setEV_DMC034_71_PA2  {EV_DMC034_71_PA2  = D_DMC034_71_PA2*EVF_DMC034_71_PA2}
+goal setEV_71_PA2         {EV_71_PA2         = EV_SJR082_71_PA2 + EV_DMC034_71_PA2}
+
+goal setDP_SJR082_71_PA2  {DP_SJR082_71_PA2  = D_SJR082_71_PA2*DPF_SJR082_71_PA2}
+goal setDP_DMC034_71_PA2  {DP_DMC034_71_PA2  = D_DMC034_71_PA2*DPF_DMC034_71_PA2}
+goal setDP_71_PA2         {DP_71_PA2         = DP_SJR082_71_PA2 + DP_DMC034_71_PA2}
+
+goal setLF_SJR082_71_PA2  {LF_SJR082_71_PA2  = D_SJR082_71_PA2*LFF_SJR082_71_PA2}
+goal setLF_DMC034_71_PA2  {LF_DMC034_71_PA2  = D_DMC034_71_PA2*LFF_DMC034_71_PA2}
+goal setLF_71_PA2         {LF_71_PA2         = LF_SJR082_71_PA2 + LF_DMC034_71_PA2}
+
+goal setOS_SJR082_71_PA2  {OS_SJR082_71_PA2  = D_SJR082_71_PA2*OSF_SJR082_71_PA2}
+goal setOS_DMC034_71_PA2  {OS_DMC034_71_PA2  = D_DMC034_71_PA2*OSF_DMC034_71_PA2}
+goal setOS_71_PA2         {OS_71_PA2         = OS_SJR082_71_PA2 + OS_DMC034_71_PA2}
+ 
+goal setDL_SJR082_71_PA2  {DL_SJR082_71_PA2  = EV_SJR082_71_PA2 + DP_SJR082_71_PA2 + LF_SJR082_71_PA2 + OS_SJR082_71_PA2}
+goal setDL_DMC034_71_PA2  {DL_DMC034_71_PA2  = EV_DMC034_71_PA2 + DP_DMC034_71_PA2 + LF_DMC034_71_PA2 + OS_DMC034_71_PA2}
+goal setDL_71_PA2         {DL_71_PA2         = EV_71_PA2 + DP_71_PA2 + LF_71_PA2+ OS_71_PA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA2    {RU_71_PA2 = min(TW_71_PA2,RUFR_71_PA2*AWR_71_PA2+ RUFO_71_PA2*AWO_71_PA2)} 
+!zrc@ goal set2RU_71_PA2    {RU_71_PA2 < RUFR_71_PA2*AWR_71_PA2+ RUFO_71_PA2*AWO_71_PA2} 
+! applied water  = awr + awo
+goal setAW_71_PA2     {AW_71_PA2 = AWR_71_PA2 + AWO_71_PA2} 
+! riparian losse = factor * aw 
+goal setRP_71_PA2     {RP_71_PA2 = AW_71_PA2* RPF_71_PA2} 
+
+
+!==============================
+! 71_PA3 - Kern Canon WD - Ag
+!==============================
+! deliveries
+goal setEV_DMC034_71_PA3  {EV_DMC034_71_PA3 = D_DMC034_71_PA3*EVF_DMC034_71_PA3}
+goal setEV_71_PA3         {EV_71_PA3        = EV_DMC034_71_PA3}
+
+goal setDP_DMC034_71_PA3  {DP_DMC034_71_PA3 = D_DMC034_71_PA3*DPF_DMC034_71_PA3}
+goal setDP_71_PA3         {DP_71_PA3        = DP_DMC034_71_PA3}
+
+goal setLF_DMC034_71_PA3  {LF_DMC034_71_PA3 = D_DMC034_71_PA3*LFF_DMC034_71_PA3}
+goal setLF_71_PA3         {LF_71_PA3        = LF_DMC034_71_PA3}
+
+goal setOS_DMC034_71_PA3  {OS_DMC034_71_PA3 = D_DMC034_71_PA3*OSF_DMC034_71_PA3}
+goal setOS_71_PA3         {OS_71_PA3        = OS_DMC034_71_PA3}
+
+goal setDL_DMC034_71_PA3  {DL_DMC034_71_PA3 = EV_DMC034_71_PA3 + DP_DMC034_71_PA3 + LF_DMC034_71_PA3 + OS_DMC034_71_PA3}
+goal setDL_71_PA3         {DL_71_PA3        = EV_71_PA3 + DP_71_PA3 + LF_71_PA3 + OS_71_PA3}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA3        {RU_71_PA3 = min(TW_71_PA3,RUFR_71_PA3*AWR_71_PA3 + RUFO_71_PA3*AWO_71_PA3)} 
+!zrc@ goal set2RU_71_PA3  {RU_71_PA3 < RUFR_71_PA3*AWR_71_PA3 + RUFO_71_PA3*AWO_71_PA3} 
+! applied water  = awr + awo
+goal setAW_71_PA3         {AW_71_PA3 = AWR_71_PA3 + AWO_71_PA3} 
+! riparian losse = factor * aw
+goal setRP_71_PA3         {RP_71_PA3 = AW_71_PA3 * RPF_71_PA3} 
+
+
+!==============================
+! 71_PA4 - Patterson ID - Ag
+!==============================
+! deliveries
+goal setEV_DMC044_71_PA4  {EV_DMC044_71_PA4  = D_DMC044_71_PA4*EVF_DMC044_71_PA4}
+goal setEV_SJR096_71_PA4  {EV_SJR096_71_PA4  = D_SJR096_71_PA4*EVF_SJR096_71_PA4}
+goal setEV_71_PA4         {EV_71_PA4         = EV_DMC044_71_PA4 + EV_SJR096_71_PA4}
+
+goal setDP_DMC044_71_PA4  {DP_DMC044_71_PA4  = D_DMC044_71_PA4*DPF_DMC044_71_PA4}
+goal setDP_SJR096_71_PA4  {DP_SJR096_71_PA4  = D_SJR096_71_PA4*DPF_SJR096_71_PA4}
+goal setDP_71_PA4         {DP_71_PA4         = DP_DMC044_71_PA4 + DP_SJR096_71_PA4}
+
+goal setLF_DMC044_71_PA4  {LF_DMC044_71_PA4  = D_DMC044_71_PA4*LFF_DMC044_71_PA4}
+goal setLF_SJR096_71_PA4  {LF_SJR096_71_PA4  = D_SJR096_71_PA4*LFF_SJR096_71_PA4}
+goal setLF_71_PA4         {LF_71_PA4         = LF_DMC044_71_PA4 + LF_SJR096_71_PA4}
+
+goal setOS_DMC044_71_PA4  {OS_DMC044_71_PA4  = D_DMC044_71_PA4*OSF_DMC044_71_PA4}
+goal setOS_SJR096_71_PA4  {OS_SJR096_71_PA4  = D_SJR096_71_PA4*OSF_SJR096_71_PA4}
+goal setOS_71_PA4         {OS_71_PA4         = OS_DMC044_71_PA4 + OS_SJR096_71_PA4}
+
+goal setDL_DMC044_71_PA4  {DL_DMC044_71_PA4  = EV_DMC044_71_PA4 + DP_DMC044_71_PA4 + LF_DMC044_71_PA4 + OS_DMC044_71_PA4}
+goal setDL_SJR096_71_PA4  {DL_SJR096_71_PA4  = EV_SJR096_71_PA4 + DP_SJR096_71_PA4 + LF_SJR096_71_PA4 + OS_SJR096_71_PA4}
+goal setDL_71_PA4         {DL_71_PA4         = EV_71_PA4 + DP_71_PA4 + LF_71_PA4 + OS_71_PA4}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA4        {RU_71_PA4 = min(TW_71_PA4,RUFR_71_PA4*AWR_71_PA4+ RUFO_71_PA4*AWO_71_PA4)} 
+!zrc@ goal set2RU_71_PA4  {RU_71_PA4 < RUFR_71_PA4*AWR_71_PA4+ RUFO_71_PA4*AWO_71_PA4} 
+! applied water  = awr + awo
+goal setAW_71_PA4         {AW_71_PA4 = AWR_71_PA4 + AWO_71_PA4} 
+! riparian losse = factor * aw 
+goal setRP_71_PA4         {RP_71_PA4 = AW_71_PA4* RPF_71_PA4} 
+
+
+!==============================
+! 71_PA5 - Del Puerto, Salado WD, Orestimba, Sunflower - Ag
+!==============================
+! deliveries
+goal setEV_DMC044_71_PA5  {EV_DMC044_71_PA5 = D_DMC044_71_PA5*EVF_DMC044_71_PA5}
+goal setEV_71_PA5         {EV_71_PA5        = EV_DMC044_71_PA5}
+
+goal setDP_DMC044_71_PA5  {DP_DMC044_71_PA5 = D_DMC044_71_PA5*DPF_DMC044_71_PA5}
+goal setDP_71_PA5         {DP_71_PA5        = DP_DMC044_71_PA5}
+
+goal setLF_DMC044_71_PA5  {LF_DMC044_71_PA5 = D_DMC044_71_PA5*LFF_DMC044_71_PA5}
+goal setLF_71_PA5         {LF_71_PA5        = LF_DMC044_71_PA5}
+
+goal setOS_DMC044_71_PA5  {OS_DMC044_71_PA5 = D_DMC044_71_PA5*OSF_DMC044_71_PA5}
+goal setOS_71_PA5         {OS_71_PA5        = OS_DMC044_71_PA5}
+
+goal setDL_DMC044_71_PA5  {DL_DMC044_71_PA5 = EV_DMC044_71_PA5 + DP_DMC044_71_PA5 + LF_DMC044_71_PA5 + OS_DMC044_71_PA5}
+goal setDL_71_PA5         {DL_71_PA5        = EV_71_PA5 + DP_71_PA5 + LF_71_PA5 + OS_71_PA5}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA5        {RU_71_PA5 = min(TW_71_PA5,RUFR_71_PA5*AWR_71_PA5 + RUFO_71_PA5*AWO_71_PA5)} 
+!zrc@ goal set2RU_71_PA5  {RU_71_PA5 < RUFR_71_PA5*AWR_71_PA5 + RUFO_71_PA5*AWO_71_PA5} 
+! applied water  = awr + awo
+goal setAW_71_PA5         {AW_71_PA5 = AWR_71_PA5 + AWO_71_PA5} 
+! riparian losse = factor * aw
+goal setRP_71_PA5         {RP_71_PA5 = AW_71_PA5 * RPF_71_PA5} 
+
+ 
+!==============================
+! 71_PA6 - Davis, Foothill, Mestang, Qu9into, Romero, Centinella - Ag
+!==============================
+! deliveries
+goal setEV_DMC064_71_PA6  {EV_DMC064_71_PA6 = D_DMC064_71_PA6*EVF_DMC064_71_PA6}
+goal setEV_71_PA6         {EV_71_PA6        = EV_DMC064_71_PA6}
+
+goal setDP_DMC064_71_PA6  {DP_DMC064_71_PA6 = D_DMC064_71_PA6*DPF_DMC064_71_PA6}
+goal setDP_71_PA6         {DP_71_PA6        = DP_DMC064_71_PA6}
+
+goal setLF_DMC064_71_PA6  {LF_DMC064_71_PA6 = D_DMC064_71_PA6*LFF_DMC064_71_PA6}
+goal setLF_71_PA6         {LF_71_PA6        = LF_DMC064_71_PA6}
+
+goal setOS_DMC064_71_PA6  {OS_DMC064_71_PA6 = D_DMC064_71_PA6*OSF_DMC064_71_PA6}
+goal setOS_71_PA6         {OS_71_PA6        = OS_DMC064_71_PA6}
+
+goal setDL_DMC064_71_PA6  {DL_DMC064_71_PA6 = EV_DMC064_71_PA6 + DP_DMC064_71_PA6 + LF_DMC064_71_PA6 + OS_DMC064_71_PA6}
+goal setDL_71_PA6         {DL_71_PA6        = EV_71_PA6 + DP_71_PA6 + LF_71_PA6 + OS_71_PA6}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA6        {RU_71_PA6 = min(TW_71_PA6,RUFR_71_PA6*AWR_71_PA6 + RUFO_71_PA6*AWO_71_PA6)} 
+!zrc@ goal set2RU_71_PA6  {RU_71_PA6 < RUFR_71_PA6*AWR_71_PA6 + RUFO_71_PA6*AWO_71_PA6} 
+! applied water  = awr + awo
+goal setAW_71_PA6         {AW_71_PA6 = AWR_71_PA6 + AWO_71_PA6} 
+! riparian losse = factor * aw
+goal setRP_71_PA6         {RP_71_PA6 = AW_71_PA6 * RPF_71_PA6} 
+
+
+!==============================
+! 71_PA8 - Byron-Bethany ID (portion formerly called Plainview) - Ag
+!==============================
+! deliveries
+goal setEV_DMC011_71_PA8  {EV_DMC011_71_PA8 = D_DMC011_71_PA8*EVF_DMC011_71_PA8}
+goal setEV_71_PA8         {EV_71_PA8        = EV_DMC011_71_PA8}
+
+goal setDP_DMC011_71_PA8  {DP_DMC011_71_PA8 = D_DMC011_71_PA8*DPF_DMC011_71_PA8}
+goal setDP_71_PA8         {DP_71_PA8        = DP_DMC011_71_PA8}
+
+goal setLF_DMC011_71_PA8  {LF_DMC011_71_PA8 = D_DMC011_71_PA8*LFF_DMC011_71_PA8}
+goal setLF_71_PA8         {LF_71_PA8        = LF_DMC011_71_PA8}
+
+goal setOS_DMC011_71_PA8  {OS_DMC011_71_PA8 = D_DMC011_71_PA8*OSF_DMC011_71_PA8}
+goal setOS_71_PA8         {OS_71_PA8        = OS_DMC011_71_PA8}
+
+goal setDL_DMC011_71_PA8  {DL_DMC011_71_PA8 = EV_DMC011_71_PA8 + DP_DMC011_71_PA8 + LF_DMC011_71_PA8 + OS_DMC011_71_PA8}
+goal setDL_71_PA8         {DL_71_PA8        = EV_71_PA8 + DP_71_PA8 + LF_71_PA8 + OS_71_PA8}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_PA8        {RU_71_PA8 = min(TW_71_PA8,RUFR_71_PA8*AWR_71_PA8 + RUFO_71_PA8*AWO_71_PA8)} 
+!zrc@ goal set2RU_71_PA8  {RU_71_PA8 < RUFR_71_PA8*AWR_71_PA8 + RUFO_71_PA8*AWO_71_PA8} 
+! applied water  = awr + awo
+goal setAW_71_PA8         {AW_71_PA8 = AWR_71_PA8 + AWO_71_PA8} 
+! riparian losse = factor * aw
+goal setRP_71_PA8         {RP_71_PA8 = AW_71_PA8 * RPF_71_PA8} 
+
+
+
+!==============================
+! 71_PU1 - Musco Olive Products - M&I
+!==============================
+goal setEL_CAA012_71_PU1  {EL_CAA012_71_PU1  = D_CAA012_71_PU1   * EF_CAA012_71_PU1}
+goal setSL_CAA012_71_PU1  {SL_CAA012_71_PU1  = D_CAA012_71_PU1   * SF_CAA012_71_PU1}
+goal setDL_CAA012_71_PU1  {DL_CAA012_71_PU1  = EL_CAA012_71_PU1  + SL_CAA012_71_PU1}
+
+goal setDL_71_PU1         {DL_71_PU1         = DL_CAA012_71_PU1}
+
+
+
+!==============================
+! 71_PU2 - VA Cemetary - M&I
+!==============================
+goal setEL_CAA066_71_PU2  {EL_CAA066_71_PU2  = D_CAA066_71_PU2   * EF_CAA066_71_PU2}
+goal setSL_CAA066_71_PU2  {SL_CAA066_71_PU2  = D_CAA066_71_PU2   * SF_CAA066_71_PU2}
+goal setDL_CAA066_71_PU2  {DL_CAA066_71_PU2  = EL_CAA066_71_PU2  + SL_CAA066_71_PU2}
+
+goal setDL_71_PU2         {DL_71_PU2         = DL_CAA066_71_PU2}
+
+
+
+!==============================
+! 71_NA1 - Non-District - Riparian Ag
+!==============================
+! deliveries
+goal setEV_SJR102_71_NA1  {EV_SJR102_71_NA1 = D_SJR102_71_NA1*EVF_SJR102_71_NA1}
+goal setEV_71_NA1         {EV_71_NA1        = EV_SJR102_71_NA1}
+
+goal setDP_SJR102_71_NA1  {DP_SJR102_71_NA1 = D_SJR102_71_NA1*DPF_SJR102_71_NA1}
+goal setDP_71_NA1         {DP_71_NA1        = DP_SJR102_71_NA1}
+
+goal setLF_SJR102_71_NA1  {LF_SJR102_71_NA1 = D_SJR102_71_NA1*LFF_SJR102_71_NA1}
+goal setLF_71_NA1         {LF_71_NA1        = LF_SJR102_71_NA1}
+
+goal setOS_SJR102_71_NA1  {OS_SJR102_71_NA1 = D_SJR102_71_NA1*OSF_SJR102_71_NA1}
+goal setOS_71_NA1         {OS_71_NA1        = OS_SJR102_71_NA1}
+
+goal setDL_SJR102_71_NA1  {DL_SJR102_71_NA1 = EV_SJR102_71_NA1 + DP_SJR102_71_NA1 + LF_SJR102_71_NA1 + OS_SJR102_71_NA1}
+goal setDL_71_NA1         {DL_71_NA1        = EV_71_NA1 + DP_71_NA1 + LF_71_NA1 + OS_71_NA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_NA1        {RU_71_NA1 = min(TW_71_NA1,RUFR_71_NA1*AWR_71_NA1 + RUFO_71_NA1*AWO_71_NA1)} 
+!zrc@ goal set2RU_71_NA1  {RU_71_NA1 < RUFR_71_NA1*AWR_71_NA1 + RUFO_71_NA1*AWO_71_NA1} 
+! applied water  = awr + awo
+goal setAW_71_NA1         {AW_71_NA1 = AWR_71_NA1 + AWO_71_NA1} 
+! riparian losse = factor * aw
+goal setRP_71_NA1         {RP_71_NA1 = AW_71_NA1 * RPF_71_NA1} 
+
+
+
+!==============================
+! 71_NA2 - El Solyo WD, Non-District Ag
+!==============================
+! deliveries
+goal setEV_SJR090_71_NA2  {EV_SJR090_71_NA2 = D_SJR090_71_NA2*EVF_SJR090_71_NA2}
+goal setEV_71_NA2         {EV_71_NA2        = EV_SJR090_71_NA2}
+
+goal setDP_SJR090_71_NA2  {DP_SJR090_71_NA2 = D_SJR090_71_NA2*DPF_SJR090_71_NA2}
+goal setDP_71_NA2         {DP_71_NA2        = DP_SJR090_71_NA2}
+
+goal setLF_SJR090_71_NA2  {LF_SJR090_71_NA2 = D_SJR090_71_NA2*LFF_SJR090_71_NA2}
+goal setLF_71_NA2         {LF_71_NA2        = LF_SJR090_71_NA2}
+
+goal setOS_SJR090_71_NA2  {OS_SJR090_71_NA2 = D_SJR090_71_NA2*OSF_SJR090_71_NA2}
+goal setOS_71_NA2         {OS_71_NA2        = OS_SJR090_71_NA2}
+
+goal setDL_SJR090_71_NA2  {DL_SJR090_71_NA2 = EV_SJR090_71_NA2 + DP_SJR090_71_NA2 + LF_SJR090_71_NA2 + OS_SJR090_71_NA2}
+goal setDL_71_NA2         {DL_71_NA2        = EV_71_NA2 + DP_71_NA2 + LF_71_NA2 + OS_71_NA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_71_NA2        {RU_71_NA2 = min(TW_71_NA2,RUFR_71_NA2*AWR_71_NA2 + RUFO_71_NA2*AWO_71_NA2)} 
+!zrc@ goal set2RU_71_NA2  {RU_71_NA2 < RUFR_71_NA2*AWR_71_NA2 + RUFO_71_NA2*AWO_71_NA2} 
+! applied water  = awr + awo
+goal setAW_71_NA2         {AW_71_NA2 = AWR_71_NA2 + AWO_71_NA2} 
+! riparian losse = factor * aw
+goal setRP_71_NA2         {RP_71_NA2 = AW_71_NA2 * RPF_71_NA2} 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 72_NA1 - West Bank of SJR below Merced - Riparian Ag
+!==============================
+! deliveries
+goal setEV_SJR116_72_NA1  {EV_SJR116_72_NA1 = D_SJR116_72_NA1*EVF_SJR116_72_NA1}
+goal setEV_72_NA1         {EV_72_NA1        = EV_SJR116_72_NA1}
+
+goal setDP_SJR116_72_NA1  {DP_SJR116_72_NA1 = D_SJR116_72_NA1*DPF_SJR116_72_NA1}
+goal setDP_72_NA1         {DP_72_NA1        = DP_SJR116_72_NA1}
+
+goal setOS_SJR116_72_NA1  {OS_SJR116_72_NA1 = D_SJR116_72_NA1*OSF_SJR116_72_NA1}
+goal setOS_72_NA1         {OS_72_NA1        = OS_SJR116_72_NA1}
+
+goal setLF_SJR116_72_NA1  {LF_SJR116_72_NA1 = D_SJR116_72_NA1*LFF_SJR116_72_NA1}
+goal setLF_72_NA1         {LF_72_NA1        = LF_SJR116_72_NA1}
+
+goal setDL_SJR116_72_NA1  {DL_SJR116_72_NA1 = EV_SJR116_72_NA1 + DP_SJR116_72_NA1 + LF_SJR116_72_NA1 + OS_SJR116_72_NA1}
+goal setDL_72_NA1         {DL_72_NA1        = EV_72_NA1 + DP_72_NA1 + LF_72_NA1 + OS_72_NA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_NA1        {RU_72_NA1 = min(TW_72_NA1,RUFR_72_NA1*AWR_72_NA1 + RUFO_72_NA1*AWO_72_NA1)} 
+!zrc@ goal set2RU_72_NA1  {RU_72_NA1 < RUFR_72_NA1*AWR_72_NA1 + RUFO_72_NA1*AWO_72_NA1} 
+! applied water  = awr + awo
+goal setAW_72_NA1         {AW_72_NA1 = AWR_72_NA1 + AWO_72_NA1} 
+! riparian losse = factor * aw
+goal setRP_72_NA1         {RP_72_NA1 = AW_72_NA1 * RPF_72_NA1} 
+
+
+
+!==============================
+! 72_NA2 - El Solyo WD - Ag
+!==============================
+! 72_NA2 -- no surface deliveries
+goal setAW_72_NA2         {AW_72_NA2 = AWR_72_NA2 + AWO_72_NA2} 
+
+
+!==============================
+! 72_PA - Laguna WD - Ag
+!==============================
+! deliveries
+goal setEV_XCC025_72_PA   {EV_XCC025_72_PA  = D_XCC025_72_PA *EVF_XCC025_72_PA }
+goal setEV_72_PA          {EV_72_PA         = EV_XCC025_72_PA }
+
+goal setDP_XCC025_72_PA   {DP_XCC025_72_PA  = D_XCC025_72_PA *DPF_XCC025_72_PA }
+goal setDP_72_PA          {DP_72_PA         = DP_XCC025_72_PA }
+
+goal setOS_XCC025_72_PA   {OS_XCC025_72_PA  = D_XCC025_72_PA *OSF_XCC025_72_PA }
+goal setOS_72_PA          {OS_72_PA         = OS_XCC025_72_PA }
+
+goal setLF_XCC025_72_PA   {LF_XCC025_72_PA  = D_XCC025_72_PA *LFF_XCC025_72_PA }
+goal setLF_72_PA          {LF_72_PA         = LF_XCC025_72_PA }
+
+goal setDL_XCC025_72_PA   {DL_XCC025_72_PA  = EV_XCC025_72_PA  + DP_XCC025_72_PA  + LF_XCC025_72_PA  + OS_XCC025_72_PA }
+goal setDL_72_PA          {DL_72_PA         = EV_72_PA  + DP_72_PA  + LF_72_PA  + OS_72_PA }
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PA         {RU_72_PA  = min(TW_72_PA,RUFR_72_PA *AWR_72_PA  + RUFO_72_PA *AWO_72_PA)} 
+!zrc@ goal set2RU_72_PA   {RU_72_PA  < RUFR_72_PA *AWR_72_PA  + RUFO_72_PA *AWO_72_PA } 
+! applied water  = awr + awo
+goal setAW_72_PA          {AW_72_PA  = AWR_72_PA  + AWO_72_PA } 
+! riparian losse = factor * aw
+goal setRP_72_PA          {RP_72_PA  = AW_72_PA  * RPF_72_PA } 
+
+
+
+!==============================
+! 72_XA1 - San Luis Canal Co Exchange Contractors - Ag
+!==============================
+! deliveries
+goal setEV_ARY010_72_XA1  {EV_ARY010_72_XA1 = D_ARY010_72_XA1*EVF_ARY010_72_XA1}
+goal setEV_72_XA1         {EV_72_XA1        = EV_ARY010_72_XA1}
+
+goal setDP_ARY010_72_XA1  {DP_ARY010_72_XA1 = D_ARY010_72_XA1*DPF_ARY010_72_XA1}
+goal setDP_72_XA1         {DP_72_XA1        = DP_ARY010_72_XA1}
+
+goal setOS_ARY010_72_XA1  {OS_ARY010_72_XA1 = D_ARY010_72_XA1*OSF_ARY010_72_XA1}
+goal setOS_72_XA1         {OS_72_XA1        = OS_ARY010_72_XA1}
+
+goal setLF_ARY010_72_XA1  {LF_ARY010_72_XA1 = D_ARY010_72_XA1*LFF_ARY010_72_XA1}
+goal setLF_72_XA1         {LF_72_XA1        = LF_ARY010_72_XA1}
+
+goal setDL_ARY010_72_XA1  {DL_ARY010_72_XA1 = EV_ARY010_72_XA1 + DP_ARY010_72_XA1 + LF_ARY010_72_XA1 + OS_ARY010_72_XA1}
+goal setDL_72_XA1         {DL_72_XA1        = EV_72_XA1 + DP_72_XA1 + LF_72_XA1 + OS_72_XA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_XA1        {RU_72_XA1 = min(TW_72_XA1, RUFR_72_XA1*AWR_72_XA1 + RUFO_72_XA1*AWO_72_XA1)} 
+!zrc@ goal set2RU_72_XA1  {RU_72_XA1 < RUFR_72_XA1*AWR_72_XA1 + RUFO_72_XA1*AWO_72_XA1} 
+! applied water  = awr + awo
+goal setAW_72_XA1         {AW_72_XA1 = AWR_72_XA1 + AWO_72_XA1} 
+! riparian losse = factor * aw
+goal setRP_72_XA1         {RP_72_XA1 = AW_72_XA1 * RPF_72_XA1} 
+
+
+
+!==============================
+! 72_XA2 - Central California ID South Exchange Contractors - Ag
+!==============================
+! deliveries
+goal setEV_XCC010_72_XA2  {EV_XCC010_72_XA2 = D_XCC010_72_XA2*EVF_XCC010_72_XA2}
+goal setEV_72_XA2         {EV_72_XA2        = EV_XCC010_72_XA2}
+
+goal setDP_XCC010_72_XA2  {DP_XCC010_72_XA2 = D_XCC010_72_XA2*DPF_XCC010_72_XA2}
+goal setDP_72_XA2         {DP_72_XA2        = DP_XCC010_72_XA2}
+
+goal setOS_XCC010_72_XA2  {OS_XCC010_72_XA2 = D_XCC010_72_XA2*OSF_XCC010_72_XA2}
+goal setOS_72_XA2         {OS_72_XA2        = OS_XCC010_72_XA2}
+
+goal setLF_XCC010_72_XA2  {LF_XCC010_72_XA2 = D_XCC010_72_XA2*LFF_XCC010_72_XA2}
+goal setLF_72_XA2         {LF_72_XA2        = LF_XCC010_72_XA2}
+
+goal setDL_XCC010_72_XA2  {DL_XCC010_72_XA2 = EV_XCC010_72_XA2 + DP_XCC010_72_XA2 + LF_XCC010_72_XA2 + OS_XCC010_72_XA2}
+goal setDL_72_XA2         {DL_72_XA2        = EV_72_XA2 + DP_72_XA2 + LF_72_XA2 + OS_72_XA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_XA2        {RU_72_XA2 = min(TW_72_XA2,RUFR_72_XA2*AWR_72_XA2 + RUFO_72_XA2*AWO_72_XA2)} 
+!zrc@ goal set2RU_72_XA2  {RU_72_XA2 < RUFR_72_XA2*AWR_72_XA2 + RUFO_72_XA2*AWO_72_XA2} 
+! applied water  = awr + awo
+goal setAW_72_XA2         {AW_72_XA2 = AWR_72_XA2 + AWO_72_XA2} 
+! riparian losse = factor * aw
+goal setRP_72_XA2         {RP_72_XA2 = AW_72_XA2 * RPF_72_XA2} 
+
+
+
+!==============================
+! 72_XA3 - Central California ID North Exchange Contractors - Ag
+!==============================
+! deliveries
+goal setEV_XCC054_72_XA3  {EV_XCC054_72_XA3 = D_XCC054_72_XA3*EVF_XCC054_72_XA3}
+goal setEV_72_XA3         {EV_72_XA3        = EV_XCC054_72_XA3}
+
+goal setDP_XCC054_72_XA3  {DP_XCC054_72_XA3 = D_XCC054_72_XA3*DPF_XCC054_72_XA3}
+goal setDP_72_XA3         {DP_72_XA3        = DP_XCC054_72_XA3}
+
+goal setOS_XCC054_72_XA3  {OS_XCC054_72_XA3 = D_XCC054_72_XA3*OSF_XCC054_72_XA3}
+goal setOS_72_XA3         {OS_72_XA3        = OS_XCC054_72_XA3}
+
+goal setLF_XCC054_72_XA3  {LF_XCC054_72_XA3 = D_XCC054_72_XA3*LFF_XCC054_72_XA3}
+goal setLF_72_XA3         {LF_72_XA3        = LF_XCC054_72_XA3}
+
+goal setDL_XCC054_72_XA3  {DL_XCC054_72_XA3 = EV_XCC054_72_XA3 + DP_XCC054_72_XA3 + LF_XCC054_72_XA3 + OS_XCC054_72_XA3}
+goal setDL_72_XA3         {DL_72_XA3        = EV_72_XA3 + DP_72_XA3 + LF_72_XA3 + OS_72_XA3} !DL_XCC054_72_XA3}!
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_XA3        {RU_72_XA3 = min(TW_72_XA3, RUFR_72_XA3*AWR_72_XA3 + RUFO_72_XA3*AWO_72_XA3)} 
+!zrc@ goal set2RU_72_XA3  {RU_72_XA3 < RUFR_72_XA3*AWR_72_XA3 + RUFO_72_XA3*AWO_72_XA3} 
+
+! applied water  = awr + awo
+goal setAW_72_XA3         {AW_72_XA3 = AWR_72_XA3 + AWO_72_XA3} 
+! riparian losse = factor * aw
+goal setRP_72_XA3         {RP_72_XA3 = AW_72_XA3 * RPF_72_XA3} 
+
+
+
+!==============================
+! 72_PR1 - Volta WA - Refuge
+!==============================
+! deliveries
+goal setEV_VLW008_72_PR1  {EV_VLW008_72_PR1 = D_VLW008_72_PR1*EVF_VLW008_72_PR1}
+goal setEV_72_PR1         {EV_72_PR1        = EV_VLW008_72_PR1}
+
+goal setDP_VLW008_72_PR1  {DP_VLW008_72_PR1 = D_VLW008_72_PR1*DPF_VLW008_72_PR1}
+goal setDP_72_PR1         {DP_72_PR1        = DP_VLW008_72_PR1}
+
+goal setOS_VLW008_72_PR1  {OS_VLW008_72_PR1 = D_VLW008_72_PR1*OSF_VLW008_72_PR1}
+goal setOS_72_PR1         {OS_72_PR1        = OS_VLW008_72_PR1}
+
+goal setLF_VLW008_72_PR1  {LF_VLW008_72_PR1 = D_VLW008_72_PR1*LFF_VLW008_72_PR1}
+goal setLF_72_PR1         {LF_72_PR1        = LF_VLW008_72_PR1}
+
+goal setDL_VLW008_72_PR1  {DL_VLW008_72_PR1 = EV_VLW008_72_PR1 + DP_VLW008_72_PR1 + LF_VLW008_72_PR1 + OS_VLW008_72_PR1}
+goal setDL_72_PR1         {DL_72_PR1        = EV_72_PR1 + DP_72_PR1 + LF_72_PR1 + OS_72_PR1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR1        {RU_72_PR1 = min(TW_72_PR1,RUFR_72_PR1*AWR_72_PR1 + RUFO_72_PR1*AWO_72_PR1 + RUFW_72_PR1*AWW_72_PR1)} 
+!zrc@ goal set2RU_72_PR1  {RU_72_PR1 < RUFR_72_PR1*AWR_72_PR1 + RUFO_72_PR1*AWO_72_PR1 + RUFW_72_PR1*AWW_72_PR1} 
+! applied water  = awr + awo
+goal setAW_72_PR1         {AW_72_PR1 = AWR_72_PR1 + AWO_72_PR1 + AWW_72_PR1} 
+! riparian losse = factor * aw
+goal setRP_72_PR1         {RP_72_PR1 = AW_72_PR1 * RPF_72_PR1} 
+
+
+!==============================
+! 72_PR2 - Kesterson, Freitas, & Blue Goose units of San Luis NWR, China Island unit of North Grassland - Refuge
+!==============================
+! deliveries
+goal setEV_XCC033_72_PR2  {EV_XCC033_72_PR2 = D_XCC033_72_PR2*EVF_XCC033_72_PR2}
+goal setEV_72_PR2         {EV_72_PR2        = EV_XCC033_72_PR2}
+
+goal setDP_XCC033_72_PR2  {DP_XCC033_72_PR2 = D_XCC033_72_PR2*DPF_XCC033_72_PR2}
+goal setDP_72_PR2         {DP_72_PR2        = DP_XCC033_72_PR2}
+
+goal setOS_XCC033_72_PR2  {OS_XCC033_72_PR2 = D_XCC033_72_PR2*OSF_XCC033_72_PR2}
+goal setOS_72_PR2         {OS_72_PR2        = OS_XCC033_72_PR2}
+
+goal setLF_XCC033_72_PR2  {LF_XCC033_72_PR2 = D_XCC033_72_PR2*LFF_XCC033_72_PR2}
+goal setLF_72_PR2         {LF_72_PR2        = LF_XCC033_72_PR2}
+
+goal setDL_XCC033_72_PR2  {DL_XCC033_72_PR2 = EV_XCC033_72_PR2 + DP_XCC033_72_PR2 + LF_XCC033_72_PR2 + OS_XCC033_72_PR2}
+goal setDL_72_PR2         {DL_72_PR2        = EV_72_PR2 + DP_72_PR2 + LF_72_PR2 + OS_72_PR2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR2        {RU_72_PR2 = min(TW_72_PR2,RUFR_72_PR2*AWR_72_PR2 + RUFO_72_PR2*AWO_72_PR2 + RUFW_72_PR2*AWW_72_PR2)} 
+!zrc@ goal set2RU_72_PR2  {RU_72_PR2 < RUFR_72_PR2*AWR_72_PR2 + RUFO_72_PR2*AWO_72_PR2 + RUFW_72_PR2*AWW_72_PR2} 
+! applied water  = awr + awo
+goal setAW_72_PR2         {AW_72_PR2 = AWR_72_PR2 + AWO_72_PR2 + AWW_72_PR2} 
+! riparian losse = factor * aw
+goal setRP_72_PR2         {RP_72_PR2 = AW_72_PR2 * RPF_72_PR2}
+
+
+!==============================
+! 72_PR3 - West Bear Ck and San Luis units of San Luis NWR - Refuge
+!==============================
+! deliveries
+goal setEV_ARY010_72_PR3  {EV_ARY010_72_PR3 = D_ARY010_72_PR3*EVF_ARY010_72_PR3}
+goal setEV_72_PR3         {EV_72_PR3        = EV_ARY010_72_PR3}
+
+goal setDP_ARY010_72_PR3  {DP_ARY010_72_PR3 = D_ARY010_72_PR3*DPF_ARY010_72_PR3}
+goal setDP_72_PR3         {DP_72_PR3        = DP_ARY010_72_PR3}
+
+goal setOS_ARY010_72_PR3  {OS_ARY010_72_PR3 = D_ARY010_72_PR3*OSF_ARY010_72_PR3}
+goal setOS_72_PR3         {OS_72_PR3        = OS_ARY010_72_PR3}
+
+goal setLF_ARY010_72_PR3  {LF_ARY010_72_PR3 = D_ARY010_72_PR3*LFF_ARY010_72_PR3}
+goal setLF_72_PR3         {LF_72_PR3        = LF_ARY010_72_PR3}
+
+goal setDL_ARY010_72_PR3  {DL_ARY010_72_PR3 = EV_ARY010_72_PR3 + DP_ARY010_72_PR3 + LF_ARY010_72_PR3 + OS_ARY010_72_PR3}
+goal setDL_72_PR3         {DL_72_PR3        = EV_72_PR3 + DP_72_PR3 + LF_72_PR3 + OS_72_PR3}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR3        {RU_72_PR3 = min(TW_72_PR3,RUFR_72_PR3*AWR_72_PR3 + RUFO_72_PR3*AWO_72_PR3 + RUFW_72_PR3*AWW_72_PR3)} 
+!zrc@ goal set2RU_72_PR3  {RU_72_PR3 < RUFR_72_PR3*AWR_72_PR3 + RUFO_72_PR3*AWO_72_PR3 + RUFW_72_PR3*AWW_72_PR3} 
+! applied water  = awr + awo
+goal setAW_72_PR3         {AW_72_PR3 = AWR_72_PR3 + AWO_72_PR3 + AWW_72_PR3} 
+! riparian losse = factor * aw
+goal setRP_72_PR3         {RP_72_PR3 = AW_72_PR3 * RPF_72_PR3} 
+
+
+!==============================
+! 72_PR4 - Los Banos WA, Salt Slouth and Gadwall units of North Grassland - Refuge
+!==============================
+! deliveries
+goal setEV_XCC033_72_PR4  {EV_XCC033_72_PR4 = D_XCC033_72_PR4*EVF_XCC033_72_PR4}
+goal setEV_ARY010_72_PR4  {EV_ARY010_72_PR4 = D_ARY010_72_PR4*EVF_ARY010_72_PR4}
+goal setEV_72_PR4         {EV_72_PR4        = EV_XCC033_72_PR4 + EV_ARY010_72_PR4}
+
+goal setDP_XCC033_72_PR4  {DP_XCC033_72_PR4 = D_XCC033_72_PR4*DPF_XCC033_72_PR4}
+goal setDP_ARY010_72_PR4  {DP_ARY010_72_PR4 = D_ARY010_72_PR4*DPF_ARY010_72_PR4}
+goal setDP_72_PR4         {DP_72_PR4        = DP_XCC033_72_PR4 + DP_ARY010_72_PR4}
+
+goal setOS_XCC033_72_PR4  {OS_XCC033_72_PR4 = D_XCC033_72_PR4*OSF_XCC033_72_PR4}
+goal setOS_ARY010_72_PR4  {OS_ARY010_72_PR4 = D_ARY010_72_PR4*OSF_ARY010_72_PR4}
+goal setOS_72_PR4         {OS_72_PR4        = OS_XCC033_72_PR4 + OS_ARY010_72_PR4}
+
+goal setLF_XCC033_72_PR4  {LF_XCC033_72_PR4 = D_XCC033_72_PR4*LFF_XCC033_72_PR4}
+goal setLF_ARY010_72_PR4  {LF_ARY010_72_PR4 = D_ARY010_72_PR4*LFF_ARY010_72_PR4}
+goal setLF_72_PR4         {LF_72_PR4        = LF_XCC033_72_PR4 + LF_ARY010_72_PR4}
+
+goal setDL_XCC033_72_PR4  {DL_XCC033_72_PR4  = EV_XCC033_72_PR4 + DP_XCC033_72_PR4 + LF_XCC033_72_PR4 + OS_XCC033_72_PR4}
+goal setDL_ARY010_72_PR4  {DL_ARY010_72_PR4  = EV_ARY010_72_PR4 + DP_ARY010_72_PR4 + LF_ARY010_72_PR4 + OS_ARY010_72_PR4}
+goal setDL_72_PR4         {DL_72_PR4         = EV_72_PR4 + DP_72_PR4 + LF_72_PR4 + OS_72_PR4}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR4        {RU_72_PR4 = min(TW_72_PR4,RUFR_72_PR4*AWR_72_PR4+ RUFO_72_PR4*AWO_72_PR4 + RUFW_72_PR4*AWW_72_PR4)} 
+!zrc@ goal set2RU_72_PR4  {RU_72_PR4 < RUFR_72_PR4*AWR_72_PR4+ RUFO_72_PR4*AWO_72_PR4 + RUFW_72_PR4*AWW_72_PR4} 
+! applied water  = awr + awo
+goal setAW_72_PR4         {AW_72_PR4 = AWR_72_PR4+ AWO_72_PR4 + AWW_72_PR4} 
+! riparian losse = factor * aw 
+goal setRP_72_PR4         {RP_72_PR4 = AW_72_PR4* RPF_72_PR4} 
+
+
+!==============================
+! 72_PR5 - Grassland WD North - Refuge
+!==============================
+! deliveries
+goal setEV_XCC054_72_PR5  {EV_XCC054_72_PR5 = D_XCC054_72_PR5*EVF_XCC054_72_PR5}
+goal setEV_VLW008_72_PR5  {EV_VLW008_72_PR5 = D_VLW008_72_PR5*EVF_VLW008_72_PR5}
+goal setEV_72_PR5         {EV_72_PR5        = EV_XCC054_72_PR5 + EV_VLW008_72_PR5}
+
+goal setDP_XCC054_72_PR5  {DP_XCC054_72_PR5 = D_XCC054_72_PR5*DPF_XCC054_72_PR5}
+goal setDP_VLW008_72_PR5  {DP_VLW008_72_PR5 = D_VLW008_72_PR5*DPF_VLW008_72_PR5}
+goal setDP_72_PR5         {DP_72_PR5        = DP_XCC054_72_PR5 + DP_VLW008_72_PR5}
+
+goal setOS_XCC054_72_PR5  {OS_XCC054_72_PR5 = D_XCC054_72_PR5*OSF_XCC054_72_PR5}
+goal setOS_VLW008_72_PR5  {OS_VLW008_72_PR5 = D_VLW008_72_PR5*OSF_VLW008_72_PR5}
+goal setOS_72_PR5         {OS_72_PR5        = OS_XCC054_72_PR5 + OS_VLW008_72_PR5}
+
+goal setLF_XCC054_72_PR5  {LF_XCC054_72_PR5 = D_XCC054_72_PR5*LFF_XCC054_72_PR5}
+goal setLF_VLW008_72_PR5  {LF_VLW008_72_PR5 = D_VLW008_72_PR5*LFF_VLW008_72_PR5}
+goal setLF_72_PR5         {LF_72_PR5        = LF_XCC054_72_PR5 + LF_VLW008_72_PR5}
+
+goal setDL_XCC054_72_PR5   {DL_XCC054_72_PR5 = EV_XCC054_72_PR5 + DP_XCC054_72_PR5 + OS_XCC054_72_PR5 + LF_XCC054_72_PR5}
+goal setDL_VLW008_72_PR5   {DL_VLW008_72_PR5 = EV_VLW008_72_PR5 + DP_VLW008_72_PR5 + OS_VLW008_72_PR5 + LF_VLW008_72_PR5}
+goal setDL_72_PR5         {DL_72_PR5        = EV_72_PR5 + DP_72_PR5 + LF_72_PR5 + OS_72_PR5}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR5        {RU_72_PR5 = min(TW_72_PR5,RUFR_72_PR5*AWR_72_PR5+ RUFO_72_PR5*AWO_72_PR5 + RUFW_72_PR5*AWW_72_PR5)} 
+!zrc@ goal set2RU_72_PR5  {RU_72_PR5 < RUFR_72_PR5*AWR_72_PR5+ RUFO_72_PR5*AWO_72_PR5 + RUFW_72_PR5*AWW_72_PR5} 
+! applied water  = awr + awo
+goal setAW_72_PR5         {AW_72_PR5 = AWR_72_PR5 + AWO_72_PR5 + AWW_72_PR5} 
+! riparian losse = factor * aw 
+goal setRP_72_PR5         {RP_72_PR5 = AW_72_PR5* RPF_72_PR5} 
+
+
+!==============================
+! 72_PR6 - Grassland WD South - Refuge
+!==============================
+! deliveries
+goal setEV_XCC025_72_PR6  {EV_XCC025_72_PR6 = D_XCC025_72_PR6*EVF_XCC025_72_PR6}
+goal setEV_ARY010_72_PR6  {EV_ARY010_72_PR6 = D_ARY010_72_PR6*EVF_ARY010_72_PR6}
+goal setEV_72_PR6         {EV_72_PR6        = EV_XCC025_72_PR6 + EV_ARY010_72_PR6}
+
+goal setDP_XCC025_72_PR6  {DP_XCC025_72_PR6 = D_XCC025_72_PR6*DPF_XCC025_72_PR6}
+goal setDP_ARY010_72_PR6  {DP_ARY010_72_PR6 = D_ARY010_72_PR6*DPF_ARY010_72_PR6}
+goal setDP_72_PR6         {DP_72_PR6        = DP_XCC025_72_PR6 + DP_ARY010_72_PR6}
+
+goal setOS_XCC025_72_PR6  {OS_XCC025_72_PR6 = D_XCC025_72_PR6*OSF_XCC025_72_PR6}
+goal setOS_ARY010_72_PR6  {OS_ARY010_72_PR6 = D_ARY010_72_PR6*OSF_ARY010_72_PR6}
+goal setOS_72_PR6         {OS_72_PR6        = OS_XCC025_72_PR6 + OS_ARY010_72_PR6}
+
+goal setLF_XCC025_72_PR6  {LF_XCC025_72_PR6 = D_XCC025_72_PR6*LFF_XCC025_72_PR6}
+goal setLF_ARY010_72_PR6  {LF_ARY010_72_PR6 = D_ARY010_72_PR6*LFF_ARY010_72_PR6}
+goal setLF_72_PR6         {LF_72_PR6        = LF_XCC025_72_PR6 + LF_ARY010_72_PR6}
+
+goal setDL_XCC025_72_PR6  {DL_XCC025_72_PR6 = EV_XCC025_72_PR6 + DP_XCC025_72_PR6 + LF_XCC025_72_PR6 + OS_XCC025_72_PR6}
+goal setDL_ARY010_72_PR6  {DL_ARY010_72_PR6 = EV_ARY010_72_PR6 + DP_ARY010_72_PR6 + LF_ARY010_72_PR6 + OS_ARY010_72_PR6}
+goal setDL_72_PR6         {DL_72_PR6        = EV_72_PR6 + DP_72_PR6 + LF_72_PR6 + OS_72_PR6}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_72_PR6        {RU_72_PR6 = min(TW_72_PR6,RUFR_72_PR6*AWR_72_PR6+ RUFO_72_PR6*AWO_72_PR6 + RUFW_72_PR6*AWW_72_PR6)} 
+!zrc@ goal set2RU_72_PR6  {RU_72_PR6 < RUFR_72_PR6*AWR_72_PR6+ RUFO_72_PR6*AWO_72_PR6 + RUFW_72_PR6*AWW_72_PR6} 
+! applied water  = awr + awo
+goal setAW_72_PR6         {AW_72_PR6 = AWR_72_PR6 + AWO_72_PR6 + AWW_72_PR6} 
+! riparian losse = factor * aw 
+goal setRP_72_PR6         {RP_72_PR6 = AW_72_PR6* RPF_72_PR6} 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 73_NA 
+!==============================
+!73_NA -- no surface deliveries
+goal setAW_73_NA          {AW_73_NA = AWR_73_NA+ AWO_73_NA} 
+
+
+!==============================
+! 73_NU 
+!==============================
+!73_NU -- no surface deliveries
+
+
+!==============================
+! 73_PA1 - San Luis WD - Ag
+!==============================
+! deliveries
+goal setEV_CAA087_73_PA1  {EV_CAA087_73_PA1 = D_CAA087_73_PA1*EVF_CAA087_73_PA1}
+goal setEV_DMC070_73_PA1  {EV_DMC070_73_PA1 = D_DMC070_73_PA1*EVF_DMC070_73_PA1}
+goal setEV_73_PA1         {EV_73_PA1        = EV_CAA087_73_PA1 + EV_DMC070_73_PA1}
+
+goal setDP_CAA087_73_PA1  {DP_CAA087_73_PA1 = D_CAA087_73_PA1*DPF_CAA087_73_PA1}
+goal setDP_DMC070_73_PA1  {DP_DMC070_73_PA1 = D_DMC070_73_PA1*DPF_DMC070_73_PA1}
+goal setDP_73_PA1         {DP_73_PA1        = DP_CAA087_73_PA1 + DP_DMC070_73_PA1}
+
+goal setOS_CAA087_73_PA1  {OS_CAA087_73_PA1 = D_CAA087_73_PA1*OSF_CAA087_73_PA1}
+goal setOS_DMC070_73_PA1  {OS_DMC070_73_PA1 = D_DMC070_73_PA1*OSF_DMC070_73_PA1}
+goal setOS_73_PA1         {OS_73_PA1        = OS_CAA087_73_PA1 + OS_DMC070_73_PA1}
+
+goal setLF_CAA087_73_PA1  {LF_CAA087_73_PA1 = D_CAA087_73_PA1*LFF_CAA087_73_PA1}
+goal setLF_DMC070_73_PA1  {LF_DMC070_73_PA1 = D_DMC070_73_PA1*LFF_DMC070_73_PA1}
+goal setLF_73_PA1         {LF_73_PA1        = LF_CAA087_73_PA1 + LF_DMC070_73_PA1}
+
+goal setDL_CAA087_73_PA1  {DL_CAA087_73_PA1 = EV_CAA087_73_PA1 + DP_CAA087_73_PA1 + LF_CAA087_73_PA1 + OS_CAA087_73_PA1}
+goal setDL_DMC070_73_PA1  {DL_DMC070_73_PA1 = EV_DMC070_73_PA1 + DP_DMC070_73_PA1 + LF_DMC070_73_PA1 + OS_DMC070_73_PA1}
+goal setDL_73_PA1         {DL_73_PA1        = EV_73_PA1 + DP_73_PA1 + LF_73_PA1 + OS_73_PA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_73_PA1        {RU_73_PA1 = min(TW_73_PA1,RUFR_73_PA1*AWR_73_PA1+ RUFO_73_PA1*AWO_73_PA1)} 
+!zrc@ goal set2RU_73_PA1  {RU_73_PA1 < RUFR_73_PA1*AWR_73_PA1+ RUFO_73_PA1*AWO_73_PA1} 
+! applied water  = awr + awo
+goal setAW_73_PA1         {AW_73_PA1 = AWR_73_PA1+ AWO_73_PA1} 
+! riparian losse = factor * aw 
+goal setRP_73_PA1         {RP_73_PA1 = AW_73_PA1* RPF_73_PA1} 
+
+
+!==============================
+! 73_PA2 - Eagle Field WD, Mercy Springs WD, Oro Loma WD - Ag
+!==============================
+! deliveries
+goal setEV_DMC105_73_PA2  {EV_DMC105_73_PA2 = D_DMC105_73_PA2*EVF_DMC105_73_PA2}
+goal setEV_73_PA2         {EV_73_PA2        = EV_DMC105_73_PA2}
+
+goal setDP_DMC105_73_PA2  {DP_DMC105_73_PA2 = D_DMC105_73_PA2*DPF_DMC105_73_PA2}
+goal setDP_73_PA2         {DP_73_PA2        = DP_DMC105_73_PA2}
+
+goal setOS_DMC105_73_PA2  {OS_DMC105_73_PA2 = D_DMC105_73_PA2*OSF_DMC105_73_PA2}
+goal setOS_73_PA2         {OS_73_PA2        = OS_DMC105_73_PA2}
+
+goal setLF_DMC105_73_PA2  {LF_DMC105_73_PA2 = D_DMC105_73_PA2*LFF_DMC105_73_PA2}
+goal setLF_73_PA2         {LF_73_PA2        = LF_DMC105_73_PA2}
+
+goal setDL_DMC105_73_PA2  {DL_DMC105_73_PA2 = EV_DMC105_73_PA2 + DP_DMC105_73_PA2 + LF_DMC105_73_PA2 + OS_DMC105_73_PA2}
+goal setDL_73_PA2         {DL_73_PA2        = EV_73_PA2 + DP_73_PA2 + LF_73_PA2 + OS_73_PA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_73_PA2        {RU_73_PA2 = min(TW_73_PA2,RUFR_73_PA2*AWR_73_PA2 + RUFO_73_PA2*AWO_73_PA2)} 
+!zrc@ goal set2RU_73_PA2  {RU_73_PA2 < RUFR_73_PA2*AWR_73_PA2 + RUFO_73_PA2*AWO_73_PA2} 
+! applied water  = awr + awo
+goal setAW_73_PA2         {AW_73_PA2 = AWR_73_PA2 + AWO_73_PA2} 
+! riparian losse = factor * aw
+goal setRP_73_PA2         {RP_73_PA2 = AW_73_PA2 * RPF_73_PA2} 
+
+
+!==============================
+! 73_PA3 - San Luis WD (S), Pacheco WD, Panoche WD - Ag
+!==============================
+! deliveries
+goal setEV_CAA109_73_PA3  {EV_CAA109_73_PA3 = D_CAA109_73_PA3*EVF_CAA109_73_PA3}
+goal setEV_DMC091_73_PA3  {EV_DMC091_73_PA3 = D_DMC091_73_PA3*EVF_DMC091_73_PA3}
+goal setEV_73_PA3         {EV_73_PA3        = EV_CAA109_73_PA3 + EV_DMC091_73_PA3}
+
+goal setDP_CAA109_73_PA3  {DP_CAA109_73_PA3 = D_CAA109_73_PA3*DPF_CAA109_73_PA3}
+goal setDP_DMC091_73_PA3  {DP_DMC091_73_PA3 = D_DMC091_73_PA3*DPF_DMC091_73_PA3}
+goal setDP_73_PA3         {DP_73_PA3        = DP_CAA109_73_PA3 + DP_DMC091_73_PA3}
+
+goal setOS_CAA109_73_PA3  {OS_CAA109_73_PA3 = D_CAA109_73_PA3*OSF_CAA109_73_PA3}
+goal setOS_DMC091_73_PA3  {OS_DMC091_73_PA3 = D_DMC091_73_PA3*OSF_DMC091_73_PA3}
+goal setOS_73_PA3         {OS_73_PA3        = OS_CAA109_73_PA3 + OS_DMC091_73_PA3}
+
+goal setLF_CAA109_73_PA3  {LF_CAA109_73_PA3 = D_CAA109_73_PA3*LFF_CAA109_73_PA3}
+goal setLF_DMC091_73_PA3  {LF_DMC091_73_PA3 = D_DMC091_73_PA3*LFF_DMC091_73_PA3}
+goal setLF_73_PA3         {LF_73_PA3        = LF_CAA109_73_PA3 + LF_DMC091_73_PA3}
+
+goal setDL_CAA109_73_PA3  {DL_CAA109_73_PA3 = EV_CAA109_73_PA3 + DP_CAA109_73_PA3 + LF_CAA109_73_PA3 + OS_CAA109_73_PA3}
+goal setDL_DMC091_73_PA3  {DL_DMC091_73_PA3 = EV_DMC091_73_PA3 + DP_DMC091_73_PA3 + LF_DMC091_73_PA3 + OS_DMC091_73_PA3}
+goal setDL_73_PA3         {DL_73_PA3        = EV_73_PA3 + DP_73_PA3 + LF_73_PA3 + OS_73_PA3}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_73_PA3        {RU_73_PA3 = min(TW_73_PA3,RUFR_73_PA3*AWR_73_PA3 + RUFO_73_PA3*AWO_73_PA3)} 
+!zrc@ goal set2RU_73_PA3    {RU_73_PA3 < RUFR_73_PA3*AWR_73_PA3 + RUFO_73_PA3*AWO_73_PA3} 
+! applied water  = awr + awo
+goal setAW_73_PA3         {AW_73_PA3 = AWR_73_PA3+ AWO_73_PA3} 
+! riparian losse = factor * aw 
+goal setRP_73_PA3         {RP_73_PA3 = AW_73_PA3* RPF_73_PA3} 
+
+
+!==============================
+! 73_XA - Firebaugh Canal Company - Ag
+!==============================
+! deliveries
+goal setEV_MDOTA_73_XA    {EV_MDOTA_73_XA   = D_MDOTA_73_XA  *EVF_MDOTA_73_XA }
+goal setEV_DMC111_73_XA   {EV_DMC111_73_XA  = D_DMC111_73_XA *EVF_DMC111_73_XA }
+goal setEV_73_XA          {EV_73_XA         = EV_MDOTA_73_XA  + EV_DMC111_73_XA }
+
+goal setDP_MDOTA_73_XA    {DP_MDOTA_73_XA   = D_MDOTA_73_XA  *DPF_MDOTA_73_XA }
+goal setDP_DMC111_73_XA   {DP_DMC111_73_XA  = D_DMC111_73_XA *DPF_DMC111_73_XA }
+goal setDP_73_XA          {DP_73_XA         = DP_MDOTA_73_XA  + DP_DMC111_73_XA }
+
+goal setOS_MDOTA_73_XA    {OS_MDOTA_73_XA   = D_MDOTA_73_XA  *OSF_MDOTA_73_XA }
+goal setOS_DMC111_73_XA   {OS_DMC111_73_XA  = D_DMC111_73_XA *OSF_DMC111_73_XA }
+goal setOS_73_XA          {OS_73_XA         = OS_MDOTA_73_XA  + OS_DMC111_73_XA }
+
+goal setLF_MDOTA_73_XA    {LF_MDOTA_73_XA   = D_MDOTA_73_XA  *LFF_MDOTA_73_XA }
+goal setLF_DMC111_73_XA   {LF_DMC111_73_XA  = D_DMC111_73_XA *LFF_DMC111_73_XA }
+goal setLF_73_XA          {LF_73_XA         = LF_MDOTA_73_XA  + LF_DMC111_73_XA }
+
+goal setDL_MDOTA_73_XA    {DL_MDOTA_73_XA   = EV_MDOTA_73_XA   + DP_MDOTA_73_XA  + LF_MDOTA_73_XA  + OS_MDOTA_73_XA }
+goal setDL_DMC111_73_XA   {DL_DMC111_73_XA  = EV_DMC111_73_XA  + DP_DMC111_73_XA  + LF_DMC111_73_XA  + OS_DMC111_73_XA }
+goal setDL_73_XA          {DL_73_XA         = EV_73_XA  + DP_73_XA  + LF_73_XA  + OS_73_XA }
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_73_XA         {RU_73_XA  = min(TW_73_XA,RUFR_73_XA *AWR_73_XA + RUFO_73_XA *AWO_73_XA)} 
+!zrc@ goal set2RU_73_XA   {RU_73_XA  < RUFR_73_XA *AWR_73_XA + RUFO_73_XA *AWO_73_XA } 
+! applied water  = awr + awo
+goal setAW_73_XA          {AW_73_XA  = AWR_73_XA + AWO_73_XA } 
+! riparian losse = factor * aw 
+goal setRP_73_XA          {RP_73_XA  = AW_73_XA * RPF_73_XA } 
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 90_PA1 - Westlands WD I - Ag
+!==============================
+! deliveries
+goal setEV_CAA109_90_PA1  {EV_CAA109_90_PA1 = D_CAA109_90_PA1*EVF_CAA109_90_PA1}
+goal setEV_CAA143_90_PA1  {EV_CAA143_90_PA1 = D_CAA143_90_PA1*EVF_CAA143_90_PA1}
+goal setEV_CAA155_90_PA1  {EV_CAA155_90_PA1 = D_CAA155_90_PA1*EVF_CAA155_90_PA1}
+goal setEV_CAA172_90_PA1  {EV_CAA172_90_PA1 = D_CAA172_90_PA1*EVF_CAA172_90_PA1}
+goal setEV_MDOTA_90_PA1   {EV_MDOTA_90_PA1  = D_MDOTA_90_PA1 *EVF_MDOTA_90_PA1}
+goal setEV_90_PA1         {EV_90_PA1        = EV_CAA109_90_PA1 + EV_CAA143_90_PA1 + EV_CAA155_90_PA1 + EV_CAA172_90_PA1 + EV_MDOTA_90_PA1}
+
+goal setDP_CAA109_90_PA1  {DP_CAA109_90_PA1 = D_CAA109_90_PA1*DPF_CAA109_90_PA1}
+goal setDP_CAA143_90_PA1  {DP_CAA143_90_PA1 = D_CAA143_90_PA1*DPF_CAA143_90_PA1}
+goal setDP_CAA155_90_PA1  {DP_CAA155_90_PA1 = D_CAA155_90_PA1*DPF_CAA155_90_PA1}
+goal setDP_CAA172_90_PA1  {DP_CAA172_90_PA1 = D_CAA172_90_PA1*DPF_CAA172_90_PA1}
+goal setDP_MDOTA_90_PA1   {DP_MDOTA_90_PA1  = D_MDOTA_90_PA1 *DPF_MDOTA_90_PA1}
+goal setDP_90_PA1         {DP_90_PA1        = DP_CAA109_90_PA1 + DP_CAA143_90_PA1 + DP_CAA155_90_PA1 + DP_CAA172_90_PA1 + DP_MDOTA_90_PA1}
+
+goal setOS_CAA109_90_PA1  {OS_CAA109_90_PA1 = D_CAA109_90_PA1*OSF_CAA109_90_PA1}
+goal setOS_CAA143_90_PA1  {OS_CAA143_90_PA1 = D_CAA143_90_PA1*OSF_CAA143_90_PA1}
+goal setOS_CAA155_90_PA1  {OS_CAA155_90_PA1 = D_CAA155_90_PA1*OSF_CAA155_90_PA1}
+goal setOS_CAA172_90_PA1  {OS_CAA172_90_PA1 = D_CAA172_90_PA1*OSF_CAA172_90_PA1}
+goal setOS_MDOTA_90_PA1   {OS_MDOTA_90_PA1  = D_MDOTA_90_PA1 *OSF_MDOTA_90_PA1}
+goal setOS_90_PA1         {OS_90_PA1        = OS_CAA109_90_PA1 + OS_CAA143_90_PA1 + OS_CAA155_90_PA1 + OS_CAA172_90_PA1 + OS_MDOTA_90_PA1}
+
+goal setLF_CAA109_90_PA1  {LF_CAA109_90_PA1 = D_CAA109_90_PA1*LFF_CAA109_90_PA1}
+goal setLF_CAA143_90_PA1  {LF_CAA143_90_PA1 = D_CAA143_90_PA1*LFF_CAA143_90_PA1}
+goal setLF_CAA155_90_PA1  {LF_CAA155_90_PA1 = D_CAA155_90_PA1*LFF_CAA155_90_PA1}
+goal setLF_CAA172_90_PA1  {LF_CAA172_90_PA1 = D_CAA172_90_PA1*LFF_CAA172_90_PA1}
+goal setLF_MDOTA_90_PA1   {LF_MDOTA_90_PA1  = D_MDOTA_90_PA1 *LFF_MDOTA_90_PA1}
+goal setLF_90_PA1         {LF_90_PA1        = LF_CAA109_90_PA1 + LF_CAA143_90_PA1 + LF_CAA155_90_PA1 + LF_CAA172_90_PA1 + LF_MDOTA_90_PA1}
+
+goal setDL_CAA109_90_PA1  {DL_CAA109_90_PA1 = EV_CAA109_90_PA1 + DP_CAA109_90_PA1 + LF_CAA109_90_PA1 + OS_CAA109_90_PA1}
+goal setDL_CAA143_90_PA1  {DL_CAA143_90_PA1 = EV_CAA143_90_PA1 + DP_CAA143_90_PA1 + LF_CAA143_90_PA1 + OS_CAA143_90_PA1}
+goal setDL_CAA155_90_PA1  {DL_CAA155_90_PA1 = EV_CAA155_90_PA1 + DP_CAA155_90_PA1 + LF_CAA155_90_PA1 + OS_CAA155_90_PA1}
+goal setDL_CAA172_90_PA1  {DL_CAA172_90_PA1 = EV_CAA172_90_PA1 + DP_CAA172_90_PA1 + LF_CAA172_90_PA1 + OS_CAA172_90_PA1}
+goal setDL_MDOTA_90_PA1   {DL_MDOTA_90_PA1  = EV_MDOTA_90_PA1  + DP_MDOTA_90_PA1  + LF_MDOTA_90_PA1  + OS_MDOTA_90_PA1}
+goal setDL_90_PA1         {DL_90_PA1        = EV_90_PA1 + DP_90_PA1 + LF_90_PA1 + OS_90_PA1}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_90_PA1        {RU_90_PA1 = min(TW_90_PA1,RUFR_90_PA1*AWR_90_PA1 + RUFO_90_PA1*AWO_90_PA1)} 
+!zrc@ goal set2RU_90_PA1  {RU_90_PA1 < RUFR_90_PA1*AWR_90_PA1 + RUFO_90_PA1*AWO_90_PA1} 
+! applied water  = awr + awo
+goal setAW_90_PA1         {AW_90_PA1 = AWR_90_PA1 + AWO_90_PA1} 
+! riparian losse = factor * aw 
+goal setRP_90_PA1         {RP_90_PA1 = AW_90_PA1 * RPF_90_PA1} 
+
+
+
+!==============================
+! 90_PA2 - Westlands WD II - Ag
+!==============================
+! deliveries
+goal setEV_CAA143_90_PA2  {EV_CAA143_90_PA2 = D_CAA143_90_PA2*EVF_CAA143_90_PA2}
+goal setEV_90_PA2         {EV_90_PA2        = EV_CAA143_90_PA2}
+
+goal setDP_CAA143_90_PA2  {DP_CAA143_90_PA2 = D_CAA143_90_PA2*DPF_CAA143_90_PA2}
+goal setDP_90_PA2         {DP_90_PA2        = DP_CAA143_90_PA2}
+
+goal setOS_CAA143_90_PA2  {OS_CAA143_90_PA2 = D_CAA143_90_PA2*OSF_CAA143_90_PA2}
+goal setOS_90_PA2         {OS_90_PA2        = OS_CAA143_90_PA2}
+
+goal setLF_CAA143_90_PA2  {LF_CAA143_90_PA2 = D_CAA143_90_PA2*LFF_CAA143_90_PA2}
+goal setLF_90_PA2         {LF_90_PA2        = LF_CAA143_90_PA2}
+
+goal setDL_CAA143_90_PA2  {DL_CAA143_90_PA2 = EV_CAA143_90_PA2 + DP_CAA143_90_PA2 + LF_CAA143_90_PA2 + OS_CAA143_90_PA2}
+goal setDL_90_PA2         {DL_90_PA2        = EV_90_PA2 + DP_90_PA2 + LF_90_PA2 + OS_90_PA2}
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_90_PA2        {RU_90_PA2 = min(TW_90_PA2,RUFR_90_PA2*AWR_90_PA2 + RUFO_90_PA2*AWO_90_PA2)} 
+!zrc@ goal set2RU_90_PA2  {RU_90_PA2 < RUFR_90_PA2*AWR_90_PA2 + RUFO_90_PA2*AWO_90_PA2} 
+! applied water  = awr + awo
+goal setAW_90_PA2         {AW_90_PA2 = AWR_90_PA2 + AWO_90_PA2} 
+! riparian losse = factor * aw
+goal setRP_90_PA2         {RP_90_PA2 = AW_90_PA2 * RPF_90_PA2} 
+
+
+
+!==============================
+! 90_PU - Avenal Coalinga Huron - M&I
+!==============================
+goal setEL_CAA143_90_PU   {EL_CAA143_90_PU = D_CAA143_90_PU  * EF_CAA143_90_PU}
+goal setSL_CAA143_90_PU   {SL_CAA143_90_PU = D_CAA143_90_PU  * SF_CAA143_90_PU}
+goal setDL_CAA143_90_PU   {DL_CAA143_90_PU = EL_CAA143_90_PU + SL_CAA143_90_PU}
+  
+goal setEL_CAA156_90_PU   {EL_CAA156_90_PU = D_CAA156_90_PU  * EF_CAA156_90_PU}
+goal setSL_CAA156_90_PU   {SL_CAA156_90_PU = D_CAA156_90_PU  * SF_CAA156_90_PU}
+goal setDL_CAA156_90_PU   {DL_CAA156_90_PU = EL_CAA156_90_PU + SL_CAA156_90_PU}
+
+goal setEL_CAA165_90_PU   {EL_CAA165_90_PU = D_CAA165_90_PU  * EF_CAA165_90_PU}
+goal setSL_CAA165_90_PU   {SL_CAA165_90_PU = D_CAA165_90_PU  * SF_CAA165_90_PU}
+goal setDL_CAA165_90_PU   {DL_CAA165_90_PU = EL_CAA165_90_PU + SL_CAA165_90_PU}
+
+goal setDL_90_PU          {DL_90_PU        = DL_CAA143_90_PU + DL_CAA156_90_PU + DL_CAA165_90_PU}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 91_PA - Mendota Pool Contractors - Ag
+!==============================
+! deliveries
+goal setEV_MDOTA_91_PA    {EV_MDOTA_91_PA   = D_MDOTA_91_PA *EVF_MDOTA_91_PA }
+goal setEV_91_PA          {EV_91_PA         = EV_MDOTA_91_PA }
+ 
+goal setDP_MDOTA_91_PA    {DP_MDOTA_91_PA   = D_MDOTA_91_PA *DPF_MDOTA_91_PA }
+goal setDP_91_PA          {DP_91_PA         = DP_MDOTA_91_PA }
+
+goal setOS_MDOTA_91_PA    {OS_MDOTA_91_PA   = D_MDOTA_91_PA *OSF_MDOTA_91_PA }
+goal setOS_91_PA          {OS_91_PA         = OS_MDOTA_91_PA }
+
+goal setLF_MDOTA_91_PA    {LF_MDOTA_91_PA   = D_MDOTA_91_PA *LFF_MDOTA_91_PA }
+goal setLF_91_PA          {LF_91_PA         = LF_MDOTA_91_PA }
+
+goal setDL_MDOTA_91_PA    {DL_MDOTA_91_PA   = EV_MDOTA_91_PA  + DP_MDOTA_91_PA  + LF_MDOTA_91_PA  + OS_MDOTA_91_PA }
+goal setDL_91_PA          {DL_91_PA         = EV_91_PA  + DP_91_PA  + LF_91_PA  + OS_91_PA }
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_91_PA         {RU_91_PA  = min(TW_91_PA,RUFR_91_PA *AWR_91_PA  + RUFO_91_PA *AWO_91_PA)} 
+!zrc@ goal set2RU_91_PA   {RU_91_PA  < RUFR_91_PA *AWR_91_PA  + RUFO_91_PA *AWO_91_PA} 
+! applied water  = awr + awo
+goal setAW_91_PA          {AW_91_PA  = AWR_91_PA  + AWO_91_PA } 
+! riparian losse = factor * aw
+goal setRP_91_PA          {RP_91_PA  = AW_91_PA  * RPF_91_PA } 
+
+
+
+!==============================
+! 91_PR - Mendota WA - Refuge
+!==============================
+! deliveries
+goal setEV_MDOTA_91_PR    {EV_MDOTA_91_PR   = D_MDOTA_91_PR *EVF_MDOTA_91_PR }
+goal setEV_91_PR          {EV_91_PR         = EV_MDOTA_91_PR }
+ 
+goal setDP_MDOTA_91_PR    {DP_MDOTA_91_PR   = D_MDOTA_91_PR *DPF_MDOTA_91_PR }
+goal setDP_91_PR          {DP_91_PR         = DP_MDOTA_91_PR }
+
+goal setOS_MDOTA_91_PR    {OS_MDOTA_91_PR   = D_MDOTA_91_PR *OSF_MDOTA_91_PR }
+goal setOS_91_PR          {OS_91_PR         = OS_MDOTA_91_PR }
+
+goal setLF_MDOTA_91_PR    {LF_MDOTA_91_PR   = D_MDOTA_91_PR *LFF_MDOTA_91_PR }
+goal setLF_91_PR          {LF_91_PR         = LF_MDOTA_91_PR }
+
+goal setDL_MDOTA_91_PR    {DL_MDOTA_91_PR   = EV_MDOTA_91_PR  + DP_MDOTA_91_PR  + LF_MDOTA_91_PR  + OS_MDOTA_91_PR }
+goal setDL_91_PR          {DL_91_PR         = EV_91_PR  + DP_91_PR  + LF_91_PR  + OS_91_PR }
+
+! reuse < sum of tailwater and canal seepage to drains
+! reuse < (rufr * awr) + (rufo * awo)
+goal set1RU_91_PR         {RU_91_PR  = min(TW_91_PR,RUFR_91_PR *AWR_91_PR  + RUFO_91_PR *AWO_91_PR + RUFW_91_PR*AWW_91_PR)} 
+!zrc@ goal set2RU_91_PR   {RU_91_PR  < RUFR_91_PR *AWR_91_PR  + RUFO_91_PR *AWO_91_PR + RUFW_91_PR*AWW_91_PR} 
+! applied water  = awr + awo
+goal setAW_91_PR          {AW_91_PR  = AWR_91_PR  + AWO_91_PR + AWW_91_PR} 
+! riparian losse = factor * aw
+goal setRP_91_PR          {RP_91_PR  = AW_91_PR  * RPF_91_PR } 

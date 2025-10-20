@@ -1,0 +1,320 @@
+/*
+ CALCULATE OPERATIONAL SPILLS
+
+Operational spills account for surface water that is delivered, but not used "on field".
+This water returns to the system via return flows.
+
+Several different conceptual models were used in Calsim-II to represent operational
+spills.  For consistency, those models were adopted for Calsim-III.
+
+****************************Conceptual Model #1************************************
+
+Operational spills are calculated based upon a 10% non-recoverable loss (NRL) factor 
+and 75% delivery efficiency using the equation:
+
+Operational Spills = Deliveries * (1-(1.1 * 0.75))
+
+****************************Conceptual Model #2************************************
+
+Operational spills are defined in a lookup table and dependant upon water year type.
+In most cases, operational spills do not occur unless the applied water demand > 0.
+ 
+Original formulation: C. Olson (MWH) April 2007
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 60S		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 60S_NA1  
+!============================== 
+! No surface deliveries
+
+
+!==============================
+! 60S_NA2  
+!============================== 
+! No surface deliveries
+
+
+!==============================
+! 60S_PA1 - Stockton East WD - Ag
+!============================== 
+!Operational spills are defined as 10 cfs in CalsimII, regardless of demand.
+goal setOS_60S_PA1_cs2 {
+    lhs OS_60S_PA1_cs2
+    case deliveries_req {
+        condition (AWR_60S_PA1+AWO_60S_PA1) > 0.
+        rhs 10.}
+    case otherwise {
+        condition always
+        rhs 0.0 }
+}
+! OLD -- goal setOS_60S_PA1 {OS_60S_PA1 = 10.0}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 61      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 61_PA1 - Oakdale ID, North of Stanislaus River - Ag 
+!==============================
+goal setOS_SSJ004_61_PA1  {OS_SSJ004_61_PA1 = D_SSJ004_61_PA1 * OSF_SSJ004_61_PA1}
+goal setOS_61_PA1         {OS_61_PA1        = OS_SSJ004_61_PA1}
+
+!==============================
+! 61_PA2 - Oakdale ID, South of Stanislaus River - Ag
+!==============================
+goal setOS_OAK020_61_PA2  {OS_OAK020_61_PA2 = D_OAK020_61_PA2 * OSF_OAK020_61_PA2}
+goal setOS_61_PA2         {OS_61_PA2        = OS_OAK020_61_PA2}
+goal setOS_61_PA2_a       {OS_61_PA2_a      = OS_61_PA2 * 0.35}
+goal setOS_61_PA2_b       {OS_61_PA2_b      = OS_61_PA2 * 0.30}
+goal setOS_61_PA2_c       {OS_61_PA2_c      = OS_61_PA2 * 0.25}
+goal setOS_61_PA2_d       {OS_61_PA2_d      = OS_61_PA2 * 0.10}
+
+!==============================
+! 61_PA3 - South San Joaquin ID - Ag
+!==============================
+goal setOS_WDWRD_61_PA3   {OS_WDWRD_61_PA3  = D_WDWRD_61_PA3 * OSF_WDWRD_61_PA3}
+goal setOS_61_PA3         {OS_61_PA3        = OS_WDWRD_61_PA3}
+!goal setOS_61_PA3_a       {OS_61_PA3_a     = OS_61_PA3 * 0.00}
+!goal setOS_61_PA3_b       {OS_61_PA3_b     = OS_61_PA3 * 0.00}
+
+
+!==============================
+! 61_NA1 - East of Modesto ID and Oakdale ID - Ag
+!==============================
+!GW supply only
+
+
+!==============================
+! 61_NA2 - Modesto ID - Ag
+!==============================
+! Operational spills are defined in lookup table, according to water year type.
+! No spills occur if there is no demand (AW) at the demand unit.
+!
+
+goal setOS_OAK020_61_NA2  {OS_OAK020_61_NA2  = D_OAK020_61_NA2 * OSF_OAK020_61_NA2}
+goal setOS_RFS61B_61_NA2  {OS_RFS61B_61_NA2  = D_RFS61B_61_NA2 * OSF_RFS61B_61_NA2}
+goal setOS_MDSTO_61_NA2   {OS_MDSTO_61_NA2   = D_MDSTO_61_NA2  * OSF_MDSTO_61_NA2 }
+goal setOS_61_NA2         {OS_61_NA2         = OS_OAK020_61_NA2 + OS_RFS61B_61_NA2 + OS_MDSTO_61_NA2}
+goal setOS_61_NA2_a       {OS_61_NA2_a       = 0.13 * OS_61_NA2} ! Splits for returns 
+goal setOS_61_NA2_b       {OS_61_NA2_b       = 0.20 * OS_61_NA2} ! (fractions based on splits of old table values)
+goal setOS_61_NA2_c       {OS_61_NA2_c       = 0.30 * OS_61_NA2}
+goal setOS_61_NA2_d       {OS_61_NA2_d       = 0.13 * OS_61_NA2}
+goal setOS_61_NA2_e       {OS_61_NA2_e       = 0.24 * OS_61_NA2}
+
+
+!==============================
+! 61_NA3 - Tuolumne River Diversions (north bank) - Riparian Ag
+!============================== 
+goal setOS_TUO047_61_NA3 {OS_TUO047_61_NA3 = D_TUO047_61_NA3 * OSF_TUO047_61_NA3}
+goal setOS_TUO015_61_NA3 {OS_TUO015_61_NA3 = D_TUO015_61_NA3 * OSF_TUO015_61_NA3}
+goal setOS_61_NA3        {OS_61_NA3 = OS_TUO047_61_NA3 + OS_TUO015_61_NA3}
+
+
+!==============================
+! 61_NA4 - Stanislaus River Diversions - Riparian Ag
+!==============================
+goal setOS_STS030_61_NA4 {OS_STS030_61_NA4 = D_STS030_61_NA4 * OSF_STS030_61_NA4}
+goal setOS_61_NA4        {OS_61_NA4 = OS_STS030_61_NA4}
+
+
+!==============================
+! 61_NA5 - East Bank of SJR, Tuolumne to Stanislaus - Riparian Ag
+!==============================
+goal setOS_SJR081_61_NA5 {OS_SJR081_61_NA5 = OSF_SJR081_61_NA5 * D_SJR081_61_NA5}
+goal setOS_RFS61D_61_NA5 {OS_RFS61D_61_NA5 = OSF_RFS61D_61_NA5 * D_RFS61D_61_NA5}
+goal setOS_61_NA5        {OS_61_NA5        = OS_SJR081_61_NA5  + OS_RFS61D_61_NA5}
+goal setOS_61_NA5_a      {OS_61_NA5_a      < OS_SJR081_61_NA5}
+goal setOS_61_NA5_b      {OS_61_NA5_b      < OS_RFS61D_61_NA5}
+
+!==============================
+! 61_NA6 - East Bank of SJR, Downstream of Stanislaus - Riparian Ag
+!==============================
+goal setOS_STS004_61_NA6 {OS_STS004_61_NA6 = D_STS004_61_NA6 * OSF_STS004_61_NA6}
+goal setOS_61_NA6        {OS_61_NA6 = OS_STS004_61_NA6}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 62      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 62_NA1 - East of Turlock, DAU 209 - Ag
+!==============================
+! GW supply only
+
+
+!==============================
+! 62_NA2 - Merced River Diversions (north bank) - Riparian Ag
+!==============================
+goal setOS_MCD050_62_NA2 {OS_MCD050_62_NA2 = D_MCD050_62_NA2 * OSF_MCD050_62_NA2}
+goal setOS_62_NA2        {OS_62_NA2 = OS_MCD050_62_NA2}
+
+
+!==============================
+! 62_NA3 - Turlock ID - Ag
+!==============================
+!Operational spills are defined in lookup table, according to water year type.
+!No spills occur if there is no demand (AW) at the demand unit.
+
+
+goal setOS_TRLCK_62_NA3   {OS_TRLCK_62_NA3   = D_TRLCK_62_NA3  * OSF_TRLCK_62_NA3 }
+goal setOS_62_NA3         {OS_62_NA3         = OS_TRLCK_62_NA3 }
+goal setOS_62_NA3_a       {OS_62_NA3_a       = 0.08 * OS_62_NA3} ! Splits for returns 
+goal setOS_62_NA3_b       {OS_62_NA3_b       = 0.11 * OS_62_NA3} ! (fractions based on constant splits of old table values)
+goal setOS_62_NA3_c       {OS_62_NA3_c       = 0.81 * OS_62_NA3}
+
+
+!==============================
+! 62_NA4 - Tuolumne River Diversions (south bank) - Riparian Ag
+!==============================
+goal setOS_TUO047_62_NA4 {OS_TUO047_62_NA4 = D_TUO047_62_NA4 * OSF_TUO047_62_NA4}
+goal setOS_TUO015_62_NA4 {OS_TUO015_62_NA4 = D_TUO015_62_NA4 * OSF_TUO015_62_NA4}
+goal setOS_62_NA4        {OS_62_NA4 = OS_TUO047_62_NA4 + OS_TUO015_62_NA4}
+
+
+
+!==============================
+! 62_NA5 - East Bank of SJR, Merced to Tuolumne - Riparian Ag
+!==============================
+goal setOS_SJR114_62_NA5 {OS_SJR114_62_NA5 = D_SJR114_62_NA5 * OSF_SJR114_62_NA5}
+goal setOS_62_NA5        {OS_62_NA5 = OS_SJR114_62_NA5}
+
+
+!==============================
+! 62_NA6 - Merced ID (north of Merced River) - Ag
+!==============================
+goal setOS_MCD055_62_NA6 {OS_MCD055_62_NA6 = D_MCD055_62_NA6 * OSF_MCD055_62_NA6}
+goal setOS_62_NA6        {OS_62_NA6 = OS_MCD055_62_NA6}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 63      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 63_PR1 - Arena Plains Unit of Merced NWR - Refuge
+!==============================
+goal setOS_ESC000_63_PR1 {OS_ESC000_63_PR1 = D_ESC005_63_PR1 * OSF_ESC000_63_PR1}
+goal setOS_63_PR1        {OS_63_PR1 = OS_ESC000_63_PR1}
+
+
+!==============================
+! 63_PR2 - Merced and Lone Tree Units of Merced NWR - Refuge
+!==============================
+goal setOS_DED010_63_PR2 {OS_DED010_63_PR2 = D_DED010_63_PR2 * OSF_DED010_63_PR2}
+goal setOS_63_PR2        {OS_63_PR2 = OS_DED010_63_PR2}
+
+
+!==============================
+! 63_PR3 - East Bear Unit of San Luis NWR - Refuge
+!==============================
+goal setOS_EBP048_63_PR3 {OS_EBP048_63_PR3 = D_EBP048_63_PR3 * OSF_EBP048_63_PR3}
+goal setOS_63_PR3        {OS_63_PR3 = OS_EBP048_63_PR3}
+
+
+!==============================
+! 63_NA1 - East of Merced ID, DAU 211 - Ag
+!==============================
+! GW supply only
+
+
+!==============================
+! 63_NA2 - Merced River Diversions (south bank) - Riparian Ag
+!==============================
+goal setOS_MCD042_63_NA2  {OS_MCD042_63_NA2 = D_MCD042_63_NA2 * OSF_MCD042_63_NA2} 
+goal setOS_63_NA2         {OS_63_NA2 = OS_MCD042_63_NA2}
+
+
+!==============================
+! 63_NA3 - Merced ID (south of Merced River) - Ag
+!==============================
+goal setOS_MID021_63_NA3  {OS_MID021_63_NA3 = D_MID021_63_NA3 * OSF_MID021_63_NA3}
+goal setOS_63_NA3         {OS_63_NA3 = OS_MID021_63_NA3}
+
+
+
+!==============================
+! 63_NA4 - West of Merced ID and Non District Areas in DAU 210 & 212 - Ag
+!==============================
+goal setOS_MCD002_63_NA4  {OS_MCD002_63_NA4 = D_MCD002_63_NA4 * OSF_MCD002_63_NA4}
+goal setOS_MCD021_63_NA4  {OS_MCD021_63_NA4 = D_MCD021_63_NA4 * OSF_MCD021_63_NA4}
+goal setOS_MID021_63_NA4  {OS_MID021_63_NA4 = D_MID021_63_NA4 * OSF_MID021_63_NA4}
+goal setOS_ESC020_63_NA4  {OS_ESC020_63_NA4 = D_ESC020_63_NA4 * OSF_ESC020_63_NA4}
+goal setOS_63_NA4         {OS_63_NA4        = OS_MCD002_63_NA4 + OS_MCD021_63_NA4 + OS_MID021_63_NA4 + OS_ESC020_63_NA4}
+
+!==============================
+! 63_NA5 - El Nido Irrigation District
+!==============================
+goal setOS_DED025_63_NA5  {OS_DED025_63_NA5 = D_DED025_63_NA5 * OSF_DED025_63_NA5}
+goal setOS_MPS020_63_NA5  {OS_MPS020_63_NA5 = D_MPS020_63_NA5 * OSF_MPS020_63_NA5}
+goal setOS_63_NA5         {OS_63_NA5        = OS_DED025_63_NA5 + OS_MPS020_63_NA5}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 64      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!==============================
+! 64_PA1 - Madera ID - Ag
+!==============================
+!Operational spills are defined in lookup table, according to water year type.
+!No spills occur if there is no demand (AW) at the demand unit.
+
+
+goal setOS_DBC014_64_PA1   {OS_DBC014_64_PA1 = D_DBC014_64_PA1 * OSF_DBC014_64_PA1}
+goal setOS_FRS036_64_PA1   {OS_FRS036_64_PA1 = D_FRS036_64_PA1 * OSF_FRS036_64_PA1}
+goal setOS_MDC006_64_PA1   {OS_MDC006_64_PA1 = D_MDC006_64_PA1 * OSF_MDC006_64_PA1}
+goal setOS_MDC032_64_PA1   {OS_MDC032_64_PA1 = D_MDC032_64_PA1 * OSF_MDC032_64_PA1}
+goal setOS_64_PA1          {OS_64_PA1        = OS_DBC014_64_PA1 + OS_FRS036_64_PA1 + OS_MDC006_64_PA1 + OS_MDC032_64_PA1}
+
+
+
+
+
+!==============================
+! 64_PA2 - Chowchilla ID - Ag
+!==============================
+!Operational spills are defined in lookup table, according to water year type.
+!No spills occur if there is no demand (AW) at the demand unit.
+
+
+goal setOS_CHW017_64_PA2   {OS_CHW017_64_PA2 = D_CHW017_64_PA2 * OSF_CHW017_64_PA2}
+goal setOS_ASL013_64_PA2   {OS_ASL013_64_PA2 = D_ASL013_64_PA2 * OSF_ASL013_64_PA2}
+goal setOS_BRS018_64_PA2   {OS_BRS018_64_PA2 = D_BRS018_64_PA2 * OSF_BRS018_64_PA2}
+goal setOS_64_PA2          {OS_64_PA2        = OS_CHW017_64_PA2 + OS_ASL013_64_PA2 + OS_BRS018_64_PA2}
+
+
+
+
+!==============================
+! 64_PA3 - Gravelly Ford and Rocky Creek Water Districts - Ag
+!==============================
+goal setOS_MDC006_64_PA3   {OS_MDC006_64_PA3 = D_MDC006_64_PA3 * OSF_MDC006_64_PA3}
+goal setOS_SJR227_64_PA3   {OS_SJR227_64_PA3 = D_SJR227_64_PA3 * OSF_SJR227_64_PA3}
+goal setOS_64_PA3          {OS_64_PA3        = OS_MDC006_64_PA3 + OS_SJR227_64_PA3}
+
+
+!==============================
+! 64_XA - Columbia Canal Co. (Exchange Contractor) - Ag
+!==============================
+!zrc@ goal setOS_MDOTA_64_XA     {OS_MDOTA_64_XA   = D_MDOTA_64_XA  * OSF_MDOTA_64_XA }
+!zrc@ goal setOS_64_XA           {OS_64_XA         = OS_MDOTA_64_XA}
+
+
+!==============================
+! 64_NA1 - East of Madera ID and Non District DAU 213 - Ag
+!==============================
+! No Spill - GW supply only
+
+
+!==============================
+! 64_NA2 - West of Madera ID and Chowchilla ID - Ag
+!==============================
+goal setOS_EBP016_64_NA2   {OS_EBP016_64_NA2 = D_EBP016_64_NA2 * OSF_EBP016_64_NA2}
+goal setOS_RFS64_64_NA2    {OS_RFS64_64_NA2  = D_RFS64_64_NA2  * OSF_RFS64_64_NA2}
+goal setOS_64_NA2          {OS_64_NA2 = OS_EBP016_64_NA2 + OS_RFS64_64_NA2}

@@ -1,0 +1,24 @@
+
+!Get the required Sac flow for ESTIMATED exports
+define JPReqSac {
+  case NoSalinityControlPossible{
+    condition abs(JP_m_sv) <= 0.001 .and. int(JP_b_sv) == 0
+    value 0.}
+  case NegSlope{
+    condition JP_m_sv <= 0.0
+    value 0.}
+  /*case highcost{
+    condition JP_Sac_ZeroExp_sv2 >= ANNcap
+    value 0.}*/
+  case NegCarriage{
+    condition JP_m_sv >= 1.0
+    value 0.}
+  case control{
+    condition month >=Oct .and. month <=Jan .or. month >= Apr .and. month <= Sep
+    value max(0., (EstTotExpTD-JP_b_sv)/JP_m_sv)}
+  case other {
+    condition  always
+    value 0.}
+}
+define JPReqSacDV {alias JPReqSac kind 'FLOW' units 'CFS'}
+

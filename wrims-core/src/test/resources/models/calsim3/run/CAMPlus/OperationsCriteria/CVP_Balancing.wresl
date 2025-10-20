@@ -1,0 +1,283 @@
+! CVP operation of reservoirs drawn from discussions with CVO staff and developed with 
+! consultation with Levi Brekke.
+
+! General goals are to provide a May storage target (to provide cold water pool for 
+! temperature based in-stream flow requirements) and a September storage target.
+! A second goal is to provide reservoir balancing to ensure equal refill potential.
+
+! Ryan Wilbur 12-14-03
+
+! trinity:
+! May:
+define S_Trnty_May_hi {std kind 'Penalty' units 'TAF'}
+define S_Trnty_May_lo {std kind 'Penalty' units 'TAF'}
+define S_Trnty_Maytarget {select TRI_LO from CAM_CVP where month=8,wyt=wyt_SAC}
+define S_TrntyMaytarget {alias S_Trnty_Maytarget kind 'Storage' units 'TAF'}
+goal(fm) S_Trnty_May_tar {
+	lhs S_Trnty_Maytarget + S_Trnty_May_hi - S_Trnty_May_lo
+	case May{
+		condition mv($m)==May
+		rhs S_Trnty($m)		
+	}
+}
+! Sep:
+define S_Trnty_Sep_hi {std kind 'Penalty' units 'TAF'}
+define S_Trnty_Sep_lo {std kind 'Penalty' units 'TAF'}
+define S_Trnty_Septarget {select TRI_LO from CAM_CVP where month=12,wyt=wyt_SAC}
+define S_TrntySeptarget {alias S_Trnty_Septarget kind 'Storage' units 'TAF'}
+goal(fm) S_Trnty_Sep_tar {
+	lhs S_Trnty_Septarget + S_Trnty_Sep_hi - S_Trnty_Sep_lo
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_Trnty($m)
+	}
+}
+
+!whiskeytown:
+define S_WKYTN_Sep_hi {std kind 'Penalty' units 'TAF'}
+define S_WKYTN_Sep_lo {std kind 'Penalty' units 'TAF'}
+define S_WKYTN_Septarget {case dry{condition wyt_SAC==5 value 180} case other{condition always value 235}}
+define S_WKYTNSeptarget {alias S_WKYTN_Septarget kind 'Storage' units 'TAF'}
+goal(fm) S_WKYTN_Sep_tar {
+	lhs S_WKYTN_Septarget + S_WKYTN_Sep_hi - S_WKYTN_Sep_lo
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_WKYTN($m)
+	}
+}
+
+! shasta:
+! End-of-May: < 3 MAF bad in any year; > 4 MAF good in any year
+! need cumulative Mey-Sep releases of 1.0 to 1.1 MAF in dry/critical years
+! End-of-Sep: 2.4 MAF in W/AN; 2 MAF in BN; 1.8 MAF in D; 1.6 MAF in C.
+! May:
+define S_Shsta_May_hi {std kind 'Penalty' units 'TAF'}
+define S_Shsta_May_lo {std kind 'Penalty' units 'TAF'}
+define S_Shsta_Maytarget {select SHA from CAM_CVP where month=8,wyt=wyt_SAC}
+define S_ShstaMaytarget {alias S_Shsta_Maytarget kind 'Storage' units 'TAF'}
+goal(fm) S_Shsta_May_tar {
+	lhs S_Shsta_Maytarget + S_Shsta_May_hi - S_Shsta_May_lo
+	case May{
+		condition mv($m)==May
+		rhs S_Shsta($m)
+	}
+}
+! Sep:
+define S_Shsta_Sep_hi {std kind 'Penalty' units 'TAF'}
+define S_Shsta_Sep_lo {std kind 'Penalty' units 'TAF'}
+define S_Shsta_Septarget {select SHA from CAM_CVP where month=12,wyt=wyt_SAC}
+!define S_Shsta_Septarget {select Sha from CAM_PF3 where month=12,year=wateryear}
+define S_ShstaSeptarget {alias S_Shsta_Septarget kind 'Storage' units 'TAF'}
+goal(fm) S_Shsta_Sep_tar {
+	lhs S_Shsta_Septarget + S_Shsta_Sep_hi - S_Shsta_Sep_lo
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_Shsta($m)
+	}
+}
+
+! folsom:
+! End-of-May: <0.6MAF bad in any year; >0.9MAF good in any year
+! need cumulative Mey-Sep releases of 0.3 MAF in dry/critical years
+! End-of-Sep: 0.5 MAF in W/AN; 0.25 MAF in C.
+! May:
+define S_Folsm_May_hi {std kind 'Penalty' units 'TAF'}
+define S_Folsm_May_lo {std kind 'Penalty' units 'TAF'}
+define S_Folsm_Maytarget {select FOL from CAM_CVP where month=8,wyt=wyt_SAC}
+define S_FolsmMaytarget {alias S_Folsm_Maytarget kind 'Storage' units 'TAF'}
+goal(fm) S_Folsm_May_tar {
+	lhs S_Folsm_Maytarget + S_Folsm_May_hi - S_Folsm_May_lo
+	case May{
+		condition mv($m)==May
+		rhs S_Folsm($m)
+	}
+}
+! Sep:
+define S_Folsm_Sep_hi {std kind 'Penalty' units 'TAF'}
+define S_Folsm_Sep_lo {std kind 'Penalty' units 'TAF'}
+define S_Folsm_Septarget {select FOL from CAM_CVP where month=12,wyt=wyt_SAC}
+!define S_Folsm_Septarget {select Fol from CAM_PF3 where month=12,year=wateryear}
+define S_FolsmSeptarget {alias S_Folsm_Septarget kind 'Storage' units 'TAF'}
+goal(fm) S_Folsm_Sep_tar {
+	lhs S_Folsm_Septarget + S_Folsm_Sep_hi - S_Folsm_Sep_lo
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_Folsm($m)
+	}
+}
+
+! cvp san luis:
+define S_SLUIS_CVP_Dec_hi {std kind 'PENALTY' units 'TAF'}
+define S_SLUIS_CVP_Dec_lo {std kind 'PENALTY' units 'TAF'}
+define S_SLUIS_CVP_Dectarget {value 100.}
+!define S_SLUIS_CVP_Dectarget {select CVPSL from CAM_PF3 where month=3,year=wateryear+1}
+define S_SLUIS_CVPDectarget {alias S_SLUIS_CVP_Dectarget kind 'Storage' units 'TAF'}
+goal(fm) S_SLUIS_CVP_Dec_tar {
+	lhs S_SLUIS_CVP_Dectarget + S_SLUIS_CVP_Dec_hi - S_SLUIS_CVP_Dec_lo
+	case Dec{
+		condition mv($m)==Dec
+		rhs S_SLUIS_CVP($m)
+
+	}
+}
+
+!******************************************************************************
+! reservoir balancing:
+! Attempt to balance Shasta and Folsom reservoir storage.
+! refill potential ratio = (storage - target)/average_annual_inflow
+! Assign weights for the deviation of Shasta and Folsom refill potential ratio not being equal.
+! Reservoir balancing is higher priority than meeting May/Sep targets and SOD demands.
+
+! goal			weight
+! res unequal balancing	-20000
+! res below targets	-10000
+! res above targets	-100
+! demands		1000
+
+!May:
+define S_Trnty_May_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define S_Shsta_May_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define S_Folsm_May_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define Diff_T_S_May {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define Diff_F_S_May {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+
+goal(fm) setS_TrntyMay_Ratio {
+	lhs S_Trnty_May_Ratio
+	case May{
+		condition mv($m)==May
+		rhs S_Trnty($m)/1200. - S_Trnty_Maytarget/1200.
+	} 
+}
+goal(fm) setS_ShstaMay_Ratio {
+	lhs S_Shsta_May_Ratio 
+	case May{
+		condition mv($m)==May
+		rhs S_Shsta($m)/5500. - S_Shsta_Maytarget/5500.	
+	}
+}
+goal(fm) setS_FolsmMay_Ratio {
+	lhs S_Folsm_May_Ratio
+	case May{
+		condition mv($m)==May
+		rhs S_Folsm($m)/2600. - S_Folsm_Maytarget/2600.
+	}
+}
+
+goal setDiff_T_S_May {Diff_T_S_May = S_Shsta_May_Ratio - S_Trnty_May_Ratio}
+goal setDiff_F_S_May {Diff_F_S_May = S_Shsta_May_Ratio - S_Folsm_May_Ratio}
+
+goal setDiff_T_S_May2 {lhs S_Shsta_May_Ratio - S_Trnty_May_Ratio
+                       rhs 0.
+                       lhs<rhs penalty  15000
+                       lhs>rhs penalty -15000}
+goal setDiff_F_S_May2 {lhs S_Shsta_May_Ratio - S_Folsm_May_Ratio
+                       rhs 0.
+                       lhs<rhs penalty  15010
+                       lhs>rhs penalty -15010}
+
+!Sep:
+define S_Trnty_Sep_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define S_Shsta_Sep_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define S_Folsm_Sep_Ratio {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define Diff_T_S_Sep {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+define Diff_F_S_Sep {lower -999999 upper 999999 kind 'Ratio' units 'TAF'}
+       
+goal(fm) setS_TrntySep_Ratio {
+	lhs S_Trnty_Sep_Ratio 
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_Trnty($m)/1200. - S_Trnty_Septarget/1200.	
+	}
+}
+goal(fm) setS_ShstaSep_Ratio {
+	lhs S_Shsta_Sep_Ratio 
+	case Sep{
+		condition mv($m)==Sep
+		rhs S_Shsta($m)/5500. - S_Shsta_Septarget/5500.
+	}
+}
+goal(fm) setS_FolsmSep_Ratio {
+	lhs S_Folsm_Sep_Ratio 
+	case JanSep{
+		condition mv($m)==Sep
+		rhs S_Folsm($m)/2600. - S_Folsm_Septarget/2600.	
+	}
+}
+
+goal setDiff_T_S_Sep {Diff_T_S_Sep = S_Shsta_Sep_Ratio - S_Trnty_Sep_Ratio}
+goal setDiff_F_S_Sep {Diff_F_S_Sep = S_Shsta_Sep_Ratio - S_Folsm_Sep_Ratio}
+
+goal setDiff_T_S_Sep2 {lhs S_Shsta_Sep_Ratio - S_Trnty_Sep_Ratio 
+                       rhs 0.
+                       lhs<rhs penalty  20000
+                       lhs>rhs penalty -20000}
+goal setDiff_F_S_Sep2 {lhs S_Shsta_Sep_Ratio - S_Folsm_Sep_Ratio 
+                       rhs 0.
+                       lhs<rhs penalty  20010
+                       lhs>rhs penalty -20010}
+
+!******************************************************************************
+!set trinity import (clear creek tunnel):
+/*define CCT_Jan {select flow from CAM_Trinity_Import where month= 4,wyt=wyt_SAC}
+define CCT_Feb {select flow from CAM_Trinity_Import where month= 5,wyt=wyt_SAC}
+define CCT_Mar {select flow from CAM_Trinity_Import where month= 6,wyt=wyt_SAC}
+define CCT_Apr {select flow from CAM_Trinity_Import where month= 7,wyt=wyt_SAC}
+define CCT_May {select flow from CAM_Trinity_Import where month= 8,wyt=wyt_SAC}
+define CCT_Jun {select flow from CAM_Trinity_Import where month= 9,wyt=wyt_SAC}
+define CCT_Jul {select flow from CAM_Trinity_Import where month=10,wyt=wyt_SAC}
+define CCT_Aug {select flow from CAM_Trinity_Import where month=11,wyt=wyt_SAC}
+define CCT_Sep {select flow from CAM_Trinity_Import where month=12,wyt=wyt_SAC}
+define CCT_Oct {select flow from CAM_Trinity_Import where month= 1,wyt=wyt_SAC}
+define CCT_Nov {select flow from CAM_Trinity_Import where month= 2,wyt=wyt_SAC}
+define CCT_Dec {select flow from CAM_Trinity_Import where month= 3,wyt=wyt_SAC}
+goal setCCT_Jan {D1_MIN_Jan = CCT_Jan*cfs_taf( 4-month)}
+goal setCCT_Feb {D1_MIN_Feb = CCT_Feb*cfs_taf( 5-month)}
+goal setCCT_Mar {D1_MIN_Mar = CCT_Mar*cfs_taf( 6-month)}
+goal setCCT_Apr {D1_MIN_Apr = CCT_Apr*cfs_taf( 7-month)}
+goal setCCT_May {D1_MIN_May = CCT_May*cfs_taf( 8-month)}
+goal setCCT_Jun {D1_MIN_Jun = CCT_Jun*cfs_taf( 9-month)}
+goal setCCT_Jul {D1_MIN_Jul = CCT_Jul*cfs_taf(10-month)}
+goal setCCT_Aug {D1_MIN_Aug = CCT_Aug*cfs_taf(11-month)}
+goal setCCT_Sep {D1_MIN_Sep = CCT_Sep*cfs_taf(12-month)}
+goal setCCT_Oct {D1_MIN_Oct = CCT_Oct*cfs_taf( 1-month)}
+goal setCCT_Nov {D1_MIN_Nov = CCT_Nov*cfs_taf( 2-month)}
+goal setCCT_Dec {D1_MIN_Dec = CCT_Dec*cfs_taf( 3-month)}*/
+
+define D1_total {/*!data from ryan's first attempt:
+                 case a{condition int(wyt)==1 value 0.3908*S_Trnty_pre+192.97}
+                 case b{condition int(wyt)==2 value 0.4029*S_Trnty_pre+26.979}
+                 case c{condition int(wyt)==3 value 0.5486*S_Trnty_pre-119.79}
+                 case d{condition int(wyt)==4 value 0.3779*S_Trnty_pre+185.0}
+                 case e{condition always      value 0.4664*S_Trnty_pre+18.32}*/
+                 
+                 !data from hongbing's multiple regression:
+                 value  wyt_SAC*50.86 + S_Trnty_pre*0.45 - 328.36 + 
+                        (I1_Jan +
+                         I1_Feb +
+                         I1_Mar +
+                         I1_Apr +
+                         I1_May +
+                         I1_Jun +
+                         I1_Jul +
+                         I1_Aug +
+                         I1_Sep +
+                         I1_Oct +
+                         I1_Nov +
+                         I1_Dec)*0.26}
+
+goal setD1 {lhs (sum(i= monthFromJan, fm, 1) D1_fm(i)) rhs D1_total lhs>rhs penalty 99999. lhs<rhs penalty 99999. }
+
+/*goal setCCT_Jan {D1_Jan <  250.*cfs_taf( 4-month)}	    
+goal setCCT_Feb {D1_Feb <  250.*cfs_taf( 5-month)}
+goal setCCT_Mar {D1_Mar <  250.*cfs_taf( 6-month)}
+goal setCCT_Apr {D1_Apr <  250.*cfs_taf( 7-month)}
+goal setCCT_May {D1_May <  250.*cfs_taf( 8-month)}
+goal setCCT_Jun {D1_Jun < 3300.*cfs_taf( 9-month)}
+goal setCCT_Jul {D1_Jul < 3300.*cfs_taf(10-month)}
+goal setCCT_Aug {D1_Aug < 3300.*cfs_taf(11-month)}
+goal setCCT_Sep {D1_Sep < 3300.*cfs_taf(12-month)}
+goal setCCT_Oct {D1_Oct < 2500.*cfs_taf( 1-month)}
+goal setCCT_Nov {D1_Nov <  250.*cfs_taf( 2-month)}
+goal setCCT_Dec {D1_Dec <  250.*cfs_taf( 3-month)}*/
+			       
+			       

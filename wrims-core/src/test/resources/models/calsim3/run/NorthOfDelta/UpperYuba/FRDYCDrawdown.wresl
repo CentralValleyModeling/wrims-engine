@@ -1,0 +1,72 @@
+/*
+Constraints-FRDYCDrawdown.wresl; Code initially written on 05/02/2014 by M. Z. Ejeta
+Modified by M. Lionberger 1/15/2018
+CalSim 3.0 System File
+
+Purpose: Gradual drawdown of Fordyce Lake to implement FERC Requirements
+
+Fordyce Lake is operated in order to gradually draw down high storage in late spring for accessibility to Fordyce dam. 
+This drawdown is made such that no additional spill is made at Lake Spaulding when transferring water from Fordyce Lake to Lake Spaulding. 
+The end of water year carryover target storage for minimum flow requirement below Fordyce Reservoir is 7,500 to 10,000 acre-feet. 
+To the extent that there is a storage space available in Lake Spaulding for the water transfer, release is made from Fordyce dam 
+until the storage in Fordyce Lake is lowered to 29,000 acre-feet. After the storage in Fordyce Lake reaches 29,000 acre-feet, 
+the subsequent release rate is determined by calculating the difference between 29,000 acre-feet and the end of year target storage of 7,500 
+to 10,000 acre-feet. The amount is apportioned equally and released until the end of year target pool level is reached (FERC 2013). 
+
+To implement this operational rule in CalSim 3.0, the month of May is when the drawdown operation begins. The end of water year target 
+storage is taken as 8,750 acre-feet, which is the average of 7,500 and 10,000 acre-feet; 
+The dead storage level for May in the Yuba system's HEC-5 model is 4,000 acre-feet. 
+
+M. Lionberger revisions
+Fordyce draw down typically begins in June, instead of May.
+Fordyce draw down typically coincides with the water delivery season, through the end of October, instead of December.
+Modified the bottom storage target to 5 TAF instead of 8.75 TAF, based on historical storage record.  
+A set of sensitivity runs with and without FRDYCDDHigh showed no difference in the results. Removed code from the module.
+
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! FORDYCE LAKE DRAWDOWN    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/*
+goal FRDYCDDHigh {
+     lhs S_FRDYC 
+     	case DDHigh {
+     	     condition month==MAY .and. S_FRDYC(-1) + I_FRDYC >29.0 .and. S_SPLDG(-1) + I_SPLDG*cfs_taf + I_SFY048*cfs_taf < S_SPLDGLevel5 
+     	     rhs min(S_FRDYCLevel5,max(29.0, S_FRDYC(-1)+ I_FRDYC*cfs_taf - max(0,(S_SPLDGLevel5 - I_SPLDG*cfs_taf - I_SFY048*cfs_taf - S_SPLDG(-1)))))
+     	     lhs>rhs constrain
+     	     lhs<rhs penalty 0}
+     	     }
+*/
+/*  
+goal FRDYCDDProrate_JUN_SEP {
+     lhs S_FRDYC 
+		case DDProrate {
+			condition month>=JUN .and. month<=SEP .and. wateryear<EndWY
+			rhs max(8.75,S_FRDYC(-1) + I_FRDYC*cfs_taf - max(0,(S_FRDYC(-1) + (sum(i=0,13-month,1)I_FRDYC(i)*cfs_taf(i)) - 8.75)/(13-month+1)
+			)) 	! Drawdown to occur gradually when the storage in Fordyce Lake is less than 29
+     	     lhs>rhs constrain
+     	     lhs<rhs penalty 0}
+			 }
+/*
+goal FRDYCDDProrate_JUN_SEP_EndWY {
+     lhs S_FRDYC 
+		case DDProrate {
+			condition month>=JUN .and. month<=SEP .and. wateryear==EndWY
+			rhs max(8.75,S_FRDYC(-1) + I_FRDYC*cfs_taf - max(0,(S_FRDYC(-1) + (sum(i=0,12-month,1)I_FRDYC(i)*cfs_taf(i)) - 8.75)))/(12-month+1)
+				! Drawdown to occur gradually when the storage in Fordyce Lake is less than 29
+     	     lhs>rhs constrain
+     	     lhs<rhs penalty 0}
+			 }
+*/
+/* 
+goal FRDYCDDProrate_OCT {
+     lhs S_FRDYC 
+		case DDProrate {
+			condition month==OCT
+			rhs S_FRDYC(-1) - E_FRDYC - MF_FRDYC_BUFF
+     	     lhs>rhs constrain
+     	     lhs<rhs penalty 0}
+			 }			 
+*/
+define FRDYCDLevel3Setdv {alias FRDYCDLevel3Set kind 'debug' units 'TAF'}
+!define debuglast {alias max(10.0,min(29.0,S_FRDYC(-1) + I_FRDYC*cfs_taf - max(0,(S_FRDYC(-1) + (sum(i=0,13-month,1)I_FRDYC(i)*cfs_taf(i)) - 10.0)/(13-month+1)))) kind 'debug' units 'TAF'}

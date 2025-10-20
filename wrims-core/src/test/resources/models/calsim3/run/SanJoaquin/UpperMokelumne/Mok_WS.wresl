@@ -1,0 +1,81 @@
+! MokelumneWS.wresl
+
+/*
+define prevdistJVID {
+    case October {
+        condition month == OCT
+        select JVID from Mok_demands where month=12}
+    case otherwise {
+        condition always
+        select JVID from Mok_demands where month=month-1}
+        }
+*/
+
+
+!******************************************************************************
+! Amador and Calaveras County diversions from above Pardee Reservoir
+!******************************************************************************
+
+!define AnnualAMADR {value 16.15}
+!define AnnualCPUD  {value  3.7} !From EBMUDSIM. Diverted under Application A5648F, Permit 16338. Max diversion 2,130 acre-feet. max diversion rate 15 cfs.
+!define AnnualCACWD  {value  4.4} !From EBMUDSIM.
+
+
+
+/*
+Amador WA demands on the North Fork Mokelumne River and its tributaries are represented by demand unit AMADR_NU.
+Diversions are reported to the State Water Board under water right permit 17579 (Application 5647-B) and statement of water use Sxxxxxx.
+Total average annual diversions from 2008-2012, which are assumed to be representative of existing demands, 9.1 TAF (AWA and RMC, 2016).
+The assumed annual demand at the river, for modeling purposes, is assumed to be 9.05 TAF/year.
+The monthly demand pattern is based on reported river diversions
+
+From 2001 to 2010, annual water use under Amador WA's pre-1914 water right for AWS has varied between xxx – yyyy acre-feet.
+The assumed annual demand at the river, for modeling purposes, is assumed to be 8.00 TAF/year. 
+
+From 2001 to 2010, annual water use under Amador WA's existing water right permit (Permit 17579) for CAWP has varied between 950 – 1,138 acre-feet.
+The assumed annual demand at the river, for modeling purposes, is assumed to be 1.05 TAF/year.
+*/
+define AnnualAMADR_AWS  {value 8.000}
+define AnnualAMADR_CAWP {value 1.050}
+define AnnualAMADR      {value AnnualAMADR_AWS + AnnualAMADR_CAWP}
+
+/*
+Calaveras PUD demands on the South Fork Mokelumne River are represented by demand unit MHILL_NU. Diversions are reported to the State Water Board
+under S025267 (pre-1914 water right) and water right permit 16338. Annual diversions from 2010-2015 range from 0.9 to 1.9 TAF.
+Treated water demands at the Jeff Davis Water Treatment Plant are approximately 500 MGD or 1.5 TAF/year (ECORP, 2017).
+Assuming a 25% storage and conveyance loss, the assumed annual demand at the river is approximately 2.0 TAF/year.
+The monthly demand pattern is based on reported river diversions and not demand at the Jeff Davis WTP, to incorporate the effect of local district storage.
+*/
+define AnnualCPUD  {value  2.0}
+
+/*
+Calaveras WD demands on the Middle Fork Mokelumne River and its tributaries are represented by demand unit WSPNT_NU.
+Diversions are reported to the State Water Board under water right permit 15452 (Application 5648D).
+Annual diversions from 2010-2015 range from 0.1 to 0.3 TAF. The assumed annual demand at the river, for modeling purposes,
+is assumed to be 0.2 TAF/year. The monthly demand pattern is based on reported river diversion is given below and partly reflects the availability of water.
+*/
+define AnnualCACWD  {value  0.2}
+
+define distAMADR_AWS  {select AMDR_AWS  from Mok_demands where month=month}
+define distAMADR_CAWP {select AMDR_CAWP from Mok_demands where month=month}
+define distCPUD       {select CPUD      from Mok_demands where month=month}
+define distCACWD       {select CACWD      from Mok_demands where month=month}
+
+define demand_AMADR_AWS  {value AnnualAMADR_AWS * distAMADR_AWS  * taf_cfs}
+define demand_AMADR_CAWP {value AnnualAMADR_CAWP * distAMADR_CAWP * taf_cfs}
+define demand_AMADR      {value demand_AMADR_AWS + demand_AMADR_CAWP}
+define demand_CPUD 	 {value AnnualCPUD  * distCPUD * taf_cfs}
+define demand_CACWD 	 {value AnnualCACWD  * distCACWD * taf_cfs}
+
+define demand_AMADR_AWS_  {alias demand_AMADR_AWS kind 'debug' units 'CFS'}
+define demand_AMADR_CAWP_ {alias demand_AMADR_CAWP kind 'debug' units 'CFS'}
+define demand_CPUD_       {alias demand_CPUD kind 'debug' units 'CFS'}
+define demand_CACWD_       {alias demand_CACWD kind 'debug' units 'CFS'}
+
+goal set_D_TGC003_AMADR_NU {D_TGC003_AMADR_NU < demand_AMADR_CAWP}
+goal set_D_TBAUD_AMADR_NU  {D_TBAUD_AMADR_NU  < demand_AMADR_AWS}
+goal set_D_SFM005_MHILL_NU {D_SFM005_MHILL_NU < demand_CPUD}
+goal set_D_MFM007_WSPNT_NU {D_MFM007_WSPNT_NU + D_BCM003_WSPNT_NU < demand_CACWD}
+goal set_D_BCM003_WSPNT_NU {D_BCM003_WSPNT_NU = 0.} !Bear Creek hydrology has not yet been developed
+
+

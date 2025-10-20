@@ -1,0 +1,12 @@
+!!! This code implements the BDCP assumption to maintain limited flushing for south Delta water quality.
+!!! During Jul - Sep south delta exports are preferred to pump up to 3,000 cfs before diverting from north.
+
+goal Prefer_TD_Exports {
+    lhs  C_DMC000_CVP_IF + C_CAA003_SWP_IF
+    case JulSep {
+         condition     month>=JUL .and. month<=SEP
+         rhs           C_DMC000_CVP[SETUP] + C_CAA003_SWP[SETUP] - 3000.
+         lhs<rhs       penalty 0.
+         lhs>rhs       penalty 1000.
+    }
+}

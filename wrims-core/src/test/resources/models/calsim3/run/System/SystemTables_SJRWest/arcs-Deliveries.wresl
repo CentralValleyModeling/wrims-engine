@@ -1,0 +1,697 @@
+/*
+CALSIM III SYSTEM FILE
+ARCS-DELIVERIES.WRESL
+
+
+NAMING TAKES THE FOLLOWING FORMS:
+DG_{Demand Unit}    - Total (Gross) Surface diversion
+DN_{Demand Unit}    - Net Surface Delivery, reduced by conveyance losses
+GP_{Demand Unit}    - Total Groundwater Pumping
+GPmin_{Demand Unit} - Minimum Groundwater Pumping
+AW_{Demand Unit}    - Total Applied Water
+UD_{Demand Unit}    - Urban demand
+GP_WBATotal_{WBA}   - Total groundwater pumping within a water budget area
+
+Original formulation: C. Olson (MWH) April 2007
+Edited ADraper, MWH, 11/17/09
+*/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 50      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! 50_PA1
+define  DN_SJR062_50_PA1 {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DN_DMC021_50_PA1 {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DN_RFS71A_50_PA1 {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DN_50_PA1        {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DG_50_PA1        {std kind 'SW_DELIVERY-GROSS' units 'CFS'}
+define  RU_50_PA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_50_PA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}
+define  TW_50_PA1        {timeseries kind 'TAILWATER' units 'TAF' convert 'CFS'} 
+define  AW_50_PA1        {std kind 'APPLIED-WATER'         units 'CFS'}         
+define  AWO_50_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_50_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 50_PU
+define  DN_50_PU         {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DG_50_PU         {std kind 'SW_DELIVERY-GROSS' units 'CFS'}
+define  UD_50_PU         {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 71      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! 71_PA1
+define  DN_DMC030_71_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA2
+define  DN_SJR082_71_PA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_DMC034_71_PA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA3
+define  DN_DMC034_71_PA3 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA3        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA3        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA3        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA3        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA3        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA3        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA4
+define  DN_DMC044_71_PA4 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_SJR096_71_PA4 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA4        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA4        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA4        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA4        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA4        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA4        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA4       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA4       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA5
+define  DN_DMC044_71_PA5 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA5        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA5        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA5        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA5        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA5        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA5        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA5       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA5       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA6
+define  DN_DMC064_71_PA6 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA6        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA6        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA6        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA6        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA6        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA6        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA6       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA6       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PA8
+define  DN_DMC011_71_PA8 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_PA8        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PA8        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_PA8        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_PA8        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_PA8        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_PA8        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_PA8       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_PA8       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_NA1
+define  DN_SJR102_71_NA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_NA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_NA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_NA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_NA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_NA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_NA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_NA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_NA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_NA2
+define  DN_SJR090_71_NA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_71_NA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_NA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_71_NA2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_71_NA2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_71_NA2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_71_NA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_71_NA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_71_NA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+
+! 71_PU1
+define  DN_71_PU1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PU1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  UD_71_PU1        {timeseries kind 'URBAN-DEMAND'   units 'TAF' convert 'CFS'} 
+
+
+! 71_PU2
+define  DN_71_PU2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_71_PU2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  UD_71_PU2        {timeseries kind 'URBAN-DEMAND'   units 'TAF' convert 'CFS'}
+
+
+! 71_NU -- no surface deliveries
+define  UD_71_NU         {timeseries kind 'URBAN-DEMAND'   units 'TAF' convert 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 72      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 72_NA1
+define  DN_SJR116_72_NA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_NA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_NA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_NA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_NA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_NA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_NA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_NA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_NA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 72_NA2 -- no surface deliveries
+define  DN_72_NA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_NA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  AW_72_NA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_NA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_NA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 72_PA
+define  DN_XCC025_72_PA  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PA         {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PA         {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PA         {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PA         {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PA         {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PA         {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 72_XA1
+define  DN_ARY010_72_XA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_XA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_XA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_XA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_XA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_XA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_XA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_XA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_XA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 72_XA2
+define  DN_XCC010_72_XA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_XA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_XA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_XA2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_XA2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_XA2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_XA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_XA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_XA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 72_XA3
+define  DN_XCC054_72_XA3 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_XA3        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_XA3        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_XA3        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_XA3        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_XA3        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_XA3        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_XA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_XA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}  
+
+! 72_PR1
+define  DN_VLW008_72_PR1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PR1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+/* 
+define  AWW_72_PR1_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR1_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR1_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR1_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR1_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR1_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR1_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR1_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR1_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR1_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR1_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR1_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR1_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR1_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR1_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR1_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR1_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR1_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR1_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR1_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR1_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR1_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR1_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR1_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+*/
+
+! 72_PR2
+define  DN_XCC033_72_PR2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PR2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}        
+/* 
+define  AWW_72_PR2_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR2_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR2_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR2_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR2_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR2_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR2_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR2_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR2_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR2_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR2_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR2_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR2_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR2_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR2_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR2_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR2_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR2_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR2_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR2_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR2_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR2_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR2_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR2_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+*/
+
+! 72_PR3
+define  DN_ARY010_72_PR3 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PR3        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR3        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR3        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR3        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR3        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR3        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+/* 
+define  AWW_72_PR3_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR3_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR3_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR3_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR3_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR3_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR3_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR3_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR3_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR3_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR3_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR3_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR3_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR3_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR3_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR3_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR3_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR3_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR3_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR3_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR3_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR3_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR3_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR3_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+*/
+! 72_PR4
+define  DN_XCC033_72_PR4 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_ARY010_72_PR4 {std kind 'SW_DELIVERY-NET'       units 'CFS'}
+define  DN_72_PR4        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR4        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR4        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR4        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR4        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR4        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR4       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR4       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR4       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}      
+/*
+define  AWW_72_PR4_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR4_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR4_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR4_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR4_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR4_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR4_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR4_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR4_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR4_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR4_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR4_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR4_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR4_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR4_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR4_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR4_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR4_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR4_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR4_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR4_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR4_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR4_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR4_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+ */
+! 72_PR5          
+define  DN_XCC054_72_PR5 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_VLW008_72_PR5 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PR5        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR5        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR5        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR5        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR5        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR5        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR5       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR5       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR5       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}   
+ /* 
+define  AWW_72_PR5_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR5_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR5_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR5_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR5_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR5_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR5_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR5_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR5_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR5_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR5_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR5_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR5_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR5_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR5_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR5_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR5_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR5_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR5_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR5_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR5_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR5_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR5_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR5_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+*/
+! 72_PR6
+define  DN_ARY010_72_PR6 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_XCC025_72_PR6 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_72_PR6        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_72_PR6        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_72_PR6        {std kind 'REUSE'                 units 'CFS'}
+define  RP_72_PR6        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_72_PR6        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_72_PR6        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_72_PR6       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_72_PR6       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_72_PR6       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+/* 
+define  AWW_72_PR6_PERMA{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_72_PR6_SEMIP{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_72_PR6_SEASO{timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_72_PR6_PERMA {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_72_PR6_SEMIP {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_72_PR6_SEASO {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_72_PR6_PERMA {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_72_PR6_SEMIP {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_72_PR6_SEASO {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_72_PR6_PERMA {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_72_PR6_SEMIP {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_72_PR6_SEASO {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_72_PR6_PERMA {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_72_PR6_SEMIP {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_72_PR6_SEASO {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_72_PR6_PERMA {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_72_PR6_SEMIP {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_72_PR6_SEASO {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+!@jmg 2017.07.17 - setting TWS variables to be unbounded - lets them be negative so 
+!                  we can see how potentially out of balance the refuge hydrology is
+!define  TWS_72_PR6_PERMA{std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+!define  TWS_72_PR63_SEMIP{std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+!define  TWS_72_PR6_SEASO{std kind        'Refuge-Storage'   units 'TAF'}
+define  TWS_72_PR6_PERMA{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_72_PR6_SEMIP{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_72_PR6_SEASO{upper unbounded lower unbounded kind        'Refuge-Storage'   units 'TAF'}
+*/
+! 72_NU -- no surface deliveries
+define  UD_72_NU        {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+! 72_PU
+define  UD_72_PU        {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}   
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 73      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 73_NA -- no surface deliveries
+define  DN_73_NA        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_73_NA        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  AW_73_NA        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_73_NA       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_73_NA       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 73_PA1
+define  DN_DMC070_73_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA087_73_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_73_PA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_73_PA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_73_PA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_73_PA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_73_PA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_73_PA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_73_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_73_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 73_PA2
+define  DN_DMC105_73_PA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_73_PA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_73_PA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_73_PA2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_73_PA2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_73_PA2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_73_PA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_73_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_73_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'} 
+ 
+! 73_PA3
+define  DN_DMC091_73_PA3 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA109_73_PA3 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_73_PA3        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_73_PA3        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_73_PA3        {std kind 'REUSE'                 units 'CFS'}
+define  RP_73_PA3        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_73_PA3        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_73_PA3        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_73_PA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_73_PA3       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'} 
+
+! 73_XA
+define  DN_DMC111_73_XA  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_MDOTA_73_XA   {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_73_XA         {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_73_XA         {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_73_XA         {std kind 'REUSE'                 units 'CFS'}
+define  RP_73_XA         {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_73_XA         {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_73_XA         {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_73_XA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_73_XA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 73_NU -- no surface deliveries
+define  UD_73_NU         {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 90      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! 90_PA1
+define  DN_CAA109_90_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA143_90_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA155_90_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA172_90_PA1 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_MDOTA_90_PA1  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_90_PA1        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_90_PA1        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_90_PA1        {std kind 'REUSE'                 units 'CFS'}
+define  RP_90_PA1        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_90_PA1        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_90_PA1        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_90_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_90_PA1       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'} 
+
+! 90_PA2
+define  DN_CAA143_90_PA2 {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_90_PA2        {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_90_PA2        {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_90_PA2        {std kind 'REUSE'                 units 'CFS'}
+define  RP_90_PA2        {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_90_PA2        {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_90_PA2        {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_90_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_90_PA2       {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 90_PU
+define  DN_CAA143_90_PU  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA156_90_PU  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_CAA165_90_PU  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_90_PU         {std kind 'SW_DELIVERY-NET' units 'CFS'}            
+define  DG_90_PU         {std kind 'SW_DELIVERY-GROSS' units 'CFS'}
+define  UD_90_PU         {timeseries kind 'URBAN-DEMAND' units 'TAF' convert 'CFS'}
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! WBA 91                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 91_PA
+define  DN_MDOTA_91_PA   {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_91_PA         {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_91_PA         {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_91_PA         {std kind 'REUSE'                 units 'CFS'}
+define  RP_91_PA         {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_91_PA         {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_91_PA         {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_91_PA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_91_PA        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+
+! 91_PR
+define  DN_MDOTA_91_PR   {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DN_91_PR         {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_91_PR         {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define  RU_91_PR         {std kind 'REUSE'                 units 'CFS'}
+define  RP_91_PR         {std kind 'RIPARIAN-MISC-ET'      units 'CFS'}     
+define  TW_91_PR         {timeseries kind 'TAILWATER'      units 'TAF' convert 'CFS'}
+define  AW_91_PR         {std kind 'APPLIED-WATER'         units 'CFS'}
+define  AWO_91_PR        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWR_91_PR        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+define  AWW_91_PR        {timeseries kind 'APPLIED-WATER'  units 'TAF' convert 'CFS'}
+/* 
+define  AWW_91_PR_PERMA {timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'} 
+define  AWW_91_PR_SEMIP {timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+define  AWW_91_PR_SEASO {timeseries kind 'APPLIED-WATER'    units 'TAF' convert 'CFS'}
+
+define  PR_91_PR_PERMA  {timeseries kind 'PR'               units 'TAF' convert 'CFS'} 
+define  PR_91_PR_SEMIP  {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+define  PR_91_PR_SEASO  {timeseries kind 'PR'               units 'TAF' convert 'CFS'}
+
+define  ET_91_PR_PERMA  {timeseries kind 'ET'               units 'TAF' convert 'CFS'} 
+define  ET_91_PR_SEMIP  {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+define  ET_91_PR_SEASO  {timeseries kind 'ET'               units 'TAF' convert 'CFS'}
+
+define  DP_91_PR_PERMA  {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'} 
+define  DP_91_PR_SEMIP  {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+define  DP_91_PR_SEASO  {timeseries kind 'DEEP-PERCOLATION' units 'TAF' convert 'CFS'}
+
+define  SR_91_PR_PERMA  {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'} 
+define  SR_91_PR_SEMIP  {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+define  SR_91_PR_SEASO  {timeseries kind 'SURFACE-RUNOFF'   units 'TAF' convert 'CFS'}
+
+define  TW_91_PR_PERMA  {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'} 
+define  TW_91_PR_SEMIP  {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+define  TW_91_PR_SEASO  {timeseries kind 'RETURN-FLOW'      units 'TAF' convert 'CFS'}
+
+define  TWS_91_PR_PERMA {std kind        'Refuge-Storage'   units 'TAF'}  ! TWS = total refuge water storage
+define  TWS_91_PR_SEMIP {std kind        'Refuge-Storage'   units 'TAF'}  !     = ponded water storage + soil water storage 
+define  TWS_91_PR_SEASO {std kind        'Refuge-Storage'   units 'TAF'}
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Kern-Pixley !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! DEM_D_CAA239_CVPRF_PRF based on the annual level 2 amount and the average monthly delivery pattern 2016-2020. This is a placeholder for future land-use based demands.
+! Delivery information from Sonya Nechanicky (Reclamation) in e-mail 01/27/21 to N. Parker. 
+define  DN_D_CAA239_CVPRF_prf  {std kind 'SW_DELIVERY-NET'       units 'CFS'}            
+define  DG_D_CAA239_CVPRF_prf  {std kind 'SW_DELIVERY-GROSS'     units 'CFS'}
+define dem_D_CAA239_CVPRF_prf  {timeseries kind 'demand-cvp-rf' units 'taf'}
+
+define WTS_deliv {std kind 'FLOW-DELIVERY' UNITS 'CFS'} ! Used to pull transfers immediately out of SWP San Luis
+
+goal setWTS_deliv {
+	lhs WTS_deliv
+	case SJRcycles {
+		condition cyclenum < cn_GW_INITIAL
+		rhs 0.}}
+
+

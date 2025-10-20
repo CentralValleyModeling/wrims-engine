@@ -1,0 +1,50 @@
+! DWSP_COSMA_Ops.wresl
+!
+! constraints for operations of the Delta Water Supply Project for City of 
+! Stockton Metropolitan Area.  
+
+
+!*************  define arc splits for DWSP diversion D_SJR028_WTPDWS  *********
+
+!1485 water
+define D_SJR028_WTPDWS_1 {std kind 'FLOW-DELIVERY' units 'CFS'} 
+!area of origin water
+define D_SJR028_WTPDWS_2 {std kind 'FLOW-DELIVERY' units 'CFS'} 
+
+goal setD_SJR028_WTPDWS {D_SJR028_WTPDWS = D_SJR028_WTPDWS_1 + D_SJR028_WTPDWS_2 } 
+
+
+!***********DWSP diversion*************
+!source of 1485 water
+
+define COSMA_WWTP_PerMonth  !monthly WWTP release
+        { select Mon_Per from COSMA_WWTP_PerMonth where month = month }
+
+!    goal setR_STWWTP_SJR042   { R_STWWTP_SJR042 = Ann_WWTP * taf_cfs * COSMA_WWTP_PerMonth }
+goal setD_SJR028_WTPDWS_1{ D_SJR028_WTPDWS_1 < R_STWWTP_SJR042 } !section 1484 diversion = WWTP effulent
+
+!no Area-of-origin water (different than the DWSP s12) (Phase 2 set to zero)
+goal setD_SJR028_WTPDWS_2 {D_SJR028_WTPDWS_2 = 0.0}
+
+define DWSP_WTP_MGD { value 30.0 } ! infrastructure change (30 MGD plant)
+
+goal set_DWSP_WTP { D_SJR028_WTPDWS < DWSP_WTP_MGD*1.547 }
+
+!Fish and Wildlife Service Biological Opinion
+
+define DWSP_Bio_Limit {case March   {condition month == Mar value 47.*(1.*15.+16.*0.5)/31.} !50 percent pumping reduction from March 15 to April 15
+                       case April   {condition month == Apr value 47.*(0.5*15.+15.*0.)/30.} !50 percent pumping reduction from March 15 to April 15, no pumping from April 15 to May 20
+                       case mMay    {condition month == May value 47.*(0.*20.+11.*0.5)/31.} !No pumping till May 20, 50 percent reduction from May 21 to June 20
+                       case June    {condition month == Jun value 47.*(0.5*20.+10.*1.)/30.} !50 percent reduction till June 20
+                       case Otherwise {condition always value 47.}                  
+}
+
+goal setDWSP_Bio_Limit {D_SJR028_WTPDWS < DWSP_Bio_Limit}
+
+/***********SEWD WTP*************/
+!SEWD WTP capacity 
+define SEWD_cap_MGD {value 65.}         ! Permitted Capacity is 65 MGD (Actual capacity might be between 60 and 62 MGD)
+
+goal setD_WTPWDH_60S_NU1 {D_WTPWDH_60S_NU1 < SEWD_cap_MGD*1.547}
+
+

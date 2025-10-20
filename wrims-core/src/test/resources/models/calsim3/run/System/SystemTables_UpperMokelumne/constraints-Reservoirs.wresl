@@ -1,0 +1,81 @@
+/*
+Constraints-Reservoirs.wresl
+*/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Upper Bear Reservoir, Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                              
+goal S_UBEARZone1   {S_UBEAR_1 < S_UBEARlevel1}                                                                        
+goal S_UBEARZone2   {S_UBEAR_2 < S_UBEARlevel2-S_UBEARlevel1}                                                              
+goal S_UBEARZone3   {S_UBEAR_3 < S_UBEARlevel3-S_UBEARlevel2}                                                              
+goal S_UBEARZone4   {S_UBEAR_4 < S_UBEARlevel4-S_UBEARlevel3}                                                              
+goal S_UBEARZone5   {S_UBEAR_5 < S_UBEARlevel5-S_UBEARlevel4}   
+goal S_UBEARZone6   {S_UBEAR_6 < S_UBEARlevel6-S_UBEARlevel5}                                                                 
+goal storage_UBEAR  {S_UBEAR=S_UBEAR_1+S_UBEAR_2+S_UBEAR_3+S_UBEAR_4+S_UBEAR_5+S_UBEAR_6}                                                       
+                      
+goal area_UBEAR     {A_UBEAR=A_UBEARlast+1000*coefev_UBEAR*S_UBEAR-1000*coefev_UBEAR*S_UBEAR(-1)}                                        
+goal setevap_UBEAR  {E_UBEAR*cfs_af=(ER_UBEAR/24)*A_UBEARlast+(ER_UBEAR/24)*A_UBEAR}                                         
+goal maxrelease_UBEAR   {C_UBEAR<relcap_UBEAR} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Lower Bear Reservoir, Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                              
+goal S_LBEARZone1   {S_LBEAR_1 < S_LBEARlevel1}                                                                        
+!goal S_LBEARZone2   {S_LBEAR_2 < S_LBEARlevel2-S_LBEARlevel1}                                                              
+!goal S_LBEARZone3   {S_LBEAR_3 < S_LBEARlevel3-S_LBEARlevel2}                                                              
+!goal S_LBEARZone4   {S_LBEAR_4 < S_LBEARlevel4-S_LBEARlevel3}        
+!goal S_LBEARZone5   {S_LBEAR_5 < S_LBEARlevel5-S_LBEARlevel4}                                                     
+goal S_LBEARZone6   {S_LBEAR_6 < S_LBEARlevel6-S_LBEARlevel5}                                                              
+goal storage_LBEAR_1  {S_LBEAR=S_LBEAR_1+S_LBEAR_2+S_LBEAR_3+S_LBEAR_4+S_LBEAR_5+S_LBEAR_6}
+goal storage_LBEAR_2  {S_LBEAR<S_LBEARlevel5}                                                        
+                      
+goal area_LBEAR     {A_LBEAR=A_LBEARlast+1000*coefev_LBEAR*S_LBEAR-1000*coefev_LBEAR*S_LBEAR(-1)}                                        
+goal setevap_LBEAR  {E_LBEAR*cfs_af=(ER_LBEAR/24)*A_LBEARlast+(ER_LBEAR/24)*A_LBEAR}                                         
+goal maxrelease_LBEAR   {C_LBEAR<relcap_LBEAR} 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Salt Springs Reservoir - Upper Mokelumne Watershed     !!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                        
+goal S_SLTSPZone1   {S_SLTSP_1 < S_SLTSPlevel1}                                                                        
+!goal S_SLTSPZone2   {S_SLTSP_2 < S_SLTSPlevel2-S_SLTSPlevel1}                                                              
+!goal S_SLTSPZone3   {S_SLTSP_3 < S_SLTSPlevel3-S_SLTSPlevel2}                                                              
+!goal S_SLTSPZone4   {S_SLTSP_4 < S_SLTSPlevel4-S_SLTSPlevel3}          
+!goal S_SLTSPZone5   {S_SLTSP_5 < S_SLTSPlevel5-S_SLTSPlevel4}                                                       
+goal S_SLTSPZone6   {S_SLTSP_6 < S_SLTSPlevel6-S_SLTSPlevel5}                                                              
+goal storage_SLTSP_1  {S_SLTSP=S_SLTSP_1+S_SLTSP_2+S_SLTSP_3+S_SLTSP_4+S_SLTSP_5+S_SLTSP_6}
+goal storage_SLTSP_2  {S_SLTSP<S_SLTSPlevel5}                                                     
+         
+goal area_SLTSP     {A_SLTSP=A_SLTSPlast+1000*coefev_SLTSP*S_SLTSP-1000*coefev_SLTSP*S_SLTSP(-1)}                                        
+goal setevap_SLTSP  {E_SLTSP*cfs_af=(ER_SLTSP/24)*A_SLTSPlast+(ER_SLTSP/24)*A_SLTSP}                                         
+goal maxrelease_SLTSP   {C_SLTSP<relcap_SLTSP}
+
+! PGEStorage Levels - for Lodi Decree
+!define PGEStorage  {std kind 'STORAGE' units 'TAF'}
+goal setPGEStorageZone1 {PGEStorage_1 = S_LBEAR_1 + S_SLTSP_1}
+goal setPGEStorageZone2 {PGEStorage_2 = S_LBEAR_2 + S_SLTSP_2}
+goal setPGEStorageZone3 {PGEStorage_3 = S_LBEAR_3 + S_SLTSP_3}
+goal setPGEStorageZone4 {PGEStorage_4 = S_LBEAR_4 + S_SLTSP_4}
+goal setPGEStorageZone5 {PGEStorage_5 = S_LBEAR_5 + S_SLTSP_5}
+goal setPGEStorageZone6 {PGEStorage_6 = S_LBEAR_6 + S_SLTSP_6}
+!goal setPGEStorage {PGEStorage = S_LBEAR + S_SLTSP}
+
+!goal setPGEStorage_1  {PGEStorage_1 < PGEStorage_Level1} 
+!goal setPGEStorage_2  {PGEStorage_2 < PGEStorage_Level2-PGEStorage_Level1}
+!goal setPGEStorage_3  {PGEStorage_3 < PGEStorage_Level3-PGEStorage_Level2} 
+!goal setPGEStorage_4  {PGEStorage_4 < PGEStorage_Level4-PGEStorage_Level3} 
+!goal setPGEStorage_5  {PGEStorage_5 < PGEStorage_Level5-PGEStorage_Level4}
+goal setPGESotrage_all {PGEStorage=PGEStorage_1+PGEStorage_2+PGEStorage_3+PGEStorage_4+PGEStorage_5+PGEStorage_6}  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Upper Blue, Lower Blue, Twin, and Meadow Lakes - Upper Mokelumne Watershed !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                        
+goal S_BLUMDZone1   {S_BLUMD_1 < S_BLUMDlevel1}                                                                        
+goal S_BLUMDZone2   {S_BLUMD_2 < S_BLUMDlevel2-S_BLUMDlevel1}                                                              
+goal S_BLUMDZone3   {S_BLUMD_3 < S_BLUMDlevel3-S_BLUMDlevel2}                                                              
+goal S_BLUMDZone4   {S_BLUMD_4 < S_BLUMDlevel4-S_BLUMDlevel3}                                                              
+goal S_BLUMDZone5   {S_BLUMD_5 < S_BLUMDlevel5-S_BLUMDlevel4}        
+goal S_BLUMDZone6   {S_BLUMD_6 < S_BLUMDlevel6-S_BLUMDlevel5}                                                      
+goal storage_BLUMD  {S_BLUMD=S_BLUMD_1+S_BLUMD_2+S_BLUMD_3+S_BLUMD_4+S_BLUMD_5+S_BLUMD_6}   
+
+

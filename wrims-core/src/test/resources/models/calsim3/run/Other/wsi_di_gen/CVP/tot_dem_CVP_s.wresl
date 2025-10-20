@@ -1,0 +1,108 @@
+!***************************************************************************************************************************************
+!<license>
+!    Copyright (C) 2017, 2018 State of California, Department of Water Resources. This file is part of the CalSim 3.
+
+!    The CalSim 3 is free software: !<license>
+
+!    you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+!    Software Foundation, either version 3 of the License, or(at your option) any later version.
+
+!    CalSim 3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+!    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+!    You should have received a copy of the GNU General Public License along with CalSim 3.  If not, see <http://www.gnu.org/licenses>.
+!</license>
+!****************************************************************************************************************************************
+!This file determines the reduced "System" demand after the "System" percent delivery has been determined.
+
+define red_dem_pag {alias dem_totcvps_pag * perdel_cvpag_sys kind 'demand-reduced' units 'taf'}
+
+define red_dem_pmi {alias dem_totcvps_pmi * perdel_cvpmi_sys kind 'demand-reduced' units 'taf'}
+
+define red_dem_pex {alias dem_totcvps_pex * perdel_cvpex_s kind 'demand-reduced' units 'taf'}  !@jmg 2017.11.28 - changed perdel_cvpex_sys to perdel_cvpex_s
+
+define red_dem_prf {alias dem_totcvps_prf * perdel_cvprf_sys kind 'demand-reduced' units 'taf'}
+!****************************************************************************************************************************************
+
+! This file calculates the sum of the actual deliveries for each type (AG, MI,
+! Refuge and Exchange) from March to the month prior to the current model month.
+! Only values for model month March - August are used.
+
+! This file is used to calculate the Actual DI to be used in the curve generation procedure.
+
+
+! ================================= AG Deliveries ================================
+
+define cvpdem_pag {  ! Annual Sum of Reduced Demands for AG
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) red_dem_pag(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+
+! ============================== MI Deliveries =================================
+
+define cvpdem_pmi { ! Annual Sum of Reduced Demands for MI
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) red_dem_pmi(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+
+! =============================== Exchange Deliveries ============================
+
+define cvpdem_pex { ! Annual Sum of Reduced Demands for EX
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) red_dem_pex(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+! ================================= Refuge Deliveries =============================
+
+define cvpdem_prf { ! Annual Sum of Reduced Demands for REF
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       sum(i=-1,-12,-1) red_dem_prf(i) }
+
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+! ================================= Loss Deliveries =============================
+
+define cvpdem_pls { ! Annual Sum of Reduced Demands for LS
+
+       case      MAR  {
+       condition month == MAR .and. wateryear > bgnWY
+       value     anncvpCL_pls_s }
+       
+       case      otherwise {
+       condition always
+       value     0 }
+       }
+
+
+! ============================== Total Reduced Demand for SOD =======================
+
+define tot_dem_cvp_s {value cvpdem_pag + cvpdem_pmi + cvpdem_pex + cvpdem_prf + cvpdem_pls} 
