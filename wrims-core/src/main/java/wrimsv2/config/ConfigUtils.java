@@ -796,7 +796,7 @@ public class ConfigUtils {
         ControlData.numberRestartFiles = Integer.parseInt(configMap.get("numberrestartfiles"));
         logger.info("NumberRestartFiles:    " + ControlData.numberRestartFiles);
 
-        ControlData.vHecLib = 6;  // Integer.parseInt(configMap.get("versionhecdssoutput"));
+        ControlData.vHecLib = Integer.parseInt(configMap.get("versionhecdssoutput"));
         logger.info("VersionHecDssOutput:    " + ControlData.vHecLib);
 
         ControlData.databaseURL = configMap.get("databaseurl");
@@ -995,6 +995,7 @@ public class ConfigUtils {
         configMap.put("unchangeGWRestart".toLowerCase(), "no");
         configMap.put("GenSVCatalog".toLowerCase(), "yes");
         configMap.put("vHecLib".toLowerCase(), "6");
+        configMap.put("versionhecdssoutput".toLowerCase(), "6");
         return configMap;
     }
 
