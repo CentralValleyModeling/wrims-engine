@@ -97,7 +97,12 @@ public class PreRunModel {
             ControlData.currCycleIndex = i;
             processExternal();
         }
-        new LoadAllDll(ControlData.allDll);
+        ArrayList<Path> allDllPaths = new ArrayList<>();
+        Path externalDir = Path.of(FilePaths.mainDirectory).resolve("external");
+        for (String dll : ControlData.allDll) {
+            allDllPaths.add(externalDir.resolve(dll));
+        }
+        new LoadAllDll(allDllPaths);
         System.out.println("Loading dlls done");
 
         if (ControlData.outputType == 1) {
