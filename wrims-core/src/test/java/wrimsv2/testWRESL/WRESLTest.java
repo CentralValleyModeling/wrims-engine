@@ -28,6 +28,8 @@ final class WRESLTest {
     @ParameterizedTest
     void testCycleNumber(String numOfCyclesStr) throws RecognitionException, IOException {
 
+    	StudyUtils.useWreslPlus=true;
+    	
     	String mainFilePath= "C:\\9.3.1_danube_adj\\Run\\mainCS3_ReOrg_UWplusVF.wresl";   	
     	int numOfCycles=Integer.parseInt(numOfCyclesStr);
     	
@@ -42,6 +44,8 @@ final class WRESLTest {
     @ParameterizedTest
     void testCycleName(String cycleName) throws RecognitionException, IOException {
 
+    	StudyUtils.useWreslPlus=true;
+    	
     	String mainFilePath = "C:\\9.3.1_danube_adj\\Run\\mainCS3_ReOrg_UWplusVF.wresl";   	
     	int cycleIndex=1;
     	
