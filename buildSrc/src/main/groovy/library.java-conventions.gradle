@@ -35,8 +35,7 @@ dependencies {
 }
 
 tasks.register('copyDependencies', Copy) {
-    from(configurations.runtimeClasspath) {
-    }
+    from(configurations.runtimeClasspath) {}
     into 'build/tmp/libs'
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
@@ -47,7 +46,6 @@ tasks.register('tattletaleReport', JavaExec) {
     description = "Generates a JBoss Tattletale report for ${project.name}."
     classpath = configurations.tattletale
     mainClass = 'org.jboss.tattletale.Main'
-
     args = [
             "${layout.buildDirectory.asFile.get()}/tmp/libs#${layout.buildDirectory.asFile.get()}/libs",
             "${layout.buildDirectory.asFile.get()}/reports/tattletale"
@@ -60,4 +58,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('smokeTest', Test) {
+    description = 'Runs tests annotated with @SmokeTest'
+    group = 'verification'
+    useJUnitPlatform {
+        includeTags 'SmokeTest'
+    }
 }

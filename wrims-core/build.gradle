@@ -17,6 +17,12 @@ sourceSets {
     }
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 configurations{
     windows_x64
 }
@@ -115,6 +121,19 @@ tasks.register('getNatives', Sync) { syncTask ->
     syncTask.into file("${buildDir}/tmp/x64")
 }
 
+tasks.named('test') {
+    dependsOn tasks.named('getNatives')
+    useJUnitPlatform {
+        excludeTags 'SmokeTest'
+    }
+}
+
+tasks.named('smokeTest') {
+    dependsOn tasks.named('getNatives')
+    systemProperty "java.library.path", file("${buildDir}/tmp/x64")
+    jvmArgs "-Xmx4g", "-Xss512m"
+}
+
 tasks.named('sourcesJar') {
     dependsOn tasks.named('generateGrammarSource')
 }
@@ -123,4 +142,13 @@ tasks.named('build') {
     dependsOn tasks.named('copyDependencies')
 }
 
+tasks.register("printJavaVersion") {
+    group = "verification" // optional, organizes tasks in Gradle
+    description = "Prints the Java version Gradle is using"
+
+    doLast {
+        println "Gradle is using Java: ${System.getProperty('java.version')}"
+        println "Java home: ${System.getProperty('java.home')}"
+    }
+}
 
