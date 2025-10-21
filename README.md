@@ -81,11 +81,48 @@ The current configuration checks for updates to dependencies weekly.
 Dependabot will automatically create pull requests for dependency updates, which can then be reviewed and merged by the specified reviewers.
 It is currently configured to check for updates to Gradle dependencies and GitHub Actions workflows.
 
-The default reviewers for dependency update pull requests are configured in the `dependabot.yml` file as well.
-To add or change reviewers, edit the `reviewers` section of the file for the appropriate package ecosystem.
-
-The currently configured reviewers are:
-- @hxiedwr
-- @dwr-zroy
+The default reviewers for dependency update pull requests are configured in the `.github/CODEOWNERS` file.
 
 More information about configuring Dependabot can be found in the [Dependabot configuration documentation](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates).
+
+## Understanding Dependabot Scheduling and PR Timing
+
+---
+
+### 1. Dependabot schedules are *best-effort*, not precise
+
+* When you set `schedule.interval` and `schedule.time`, that’s treated as “run sometime around this time,” not a strict cron.
+* GitHub’s docs note that it may not start exactly at the scheduled time—there’s a job queue that can be earlier or later depending on load.
+* Seeing 9:20, 10:20, etc. is pretty normal—it’s the system spreading out runs.
+
+---
+
+### 2. Multiple runs at once
+
+Dependabot sometimes makes multiple attempts in quick succession when:
+
+* It detects multiple ecosystems (npm, gradle, docker, etc.) → one job per ecosystem.
+* It encounters errors and retries.
+* It had a backlog (maybe your repo was newly enabled) and caught up with several updates in bursts.
+
+---
+
+### 3. PR creation is **delayed from the update check**
+
+Dependabot does two phases:
+
+1. **Update check** (scans for new versions, resolves manifests).
+2. **PR creation/update** (opens or rebases PRs).
+
+The scan might happen in the morning, but PR creation often lags until later (sometimes hours). 
+GitHub queues PR creation separately, and sometimes updates don’t get turned into visible PRs until 
+the following day (especially for large dependency graphs).
+
+---
+
+### 4. Midnight PRs
+
+That lines up with GitHub’s backend batching → Dependabot may only generate or finalize PRs after 
+internal processing finishes. You’ll often see the “Dependabot created a PR” timestamp not match when the update job ran.
+
+---
