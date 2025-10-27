@@ -76,7 +76,23 @@ public class ControllerDebug extends Thread {
 		safeResume();
 	}
 
-	private void pauseHereUntilResumed() {
+	/**
+	 * Returns true if a pause has been requested and the controller is in paused state.
+	 * This exposes state without leaking the underlying AtomicBoolean.
+	 */
+	public boolean isPaused() {
+		return paused.get();
+	}
+
+	/**
+	 * Returns true if a terminate has been requested.
+	 * This exposes state without leaking the underlying AtomicBoolean.
+	 */
+	public boolean isTerminated() {
+		return terminated.get();
+	}
+
+	void pauseHereUntilResumed() {
 		synchronized (pauseLock) {
 			while (paused.get() && !terminated.get()) {
 				try {
