@@ -10,6 +10,7 @@ package wrimsv2.testWRESL;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
 
@@ -24,17 +25,20 @@ import wrimsv2.wreslparser.elements.StudyUtils;
 
 final class WRESLTest {
 
+	private static StudyDataSet sds;
+	
+	@BeforeAll
+	static void compileWRESL() throws RecognitionException, IOException{
+		StudyUtils.useWreslPlus=true;
+    	String mainFilePath= "C:\\9.3.1_danube_adj\\Run\\mainCS3_ReOrg_UWplusVF.wresl";   	
+		sds = StudyUtils.checkStudy(mainFilePath);
+	}
+	
     @CsvSource({"38"})
     @ParameterizedTest
     void testCycleNumber(String numOfCyclesStr) throws RecognitionException, IOException {
-
-    	StudyUtils.useWreslPlus=true;
     	
-    	String mainFilePath= "C:\\9.3.1_danube_adj\\Run\\mainCS3_ReOrg_UWplusVF.wresl";   	
     	int numOfCycles=Integer.parseInt(numOfCyclesStr);
-    	
-    	StudyDataSet sds = StudyUtils.checkStudy(mainFilePath);
-    	
     	int numOfCyclesInModel = sds.getModelList().size();
 
     	assertTrue(numOfCyclesInModel==numOfCycles, "Number of cycles in the study is  "+numOfCycles);
@@ -42,15 +46,8 @@ final class WRESLTest {
 	
     @CsvSource({"GENTables"})
     @ParameterizedTest
-    void testCycleName(String cycleName) throws RecognitionException, IOException {
-
-    	StudyUtils.useWreslPlus=true;
-    	
-    	String mainFilePath = "C:\\9.3.1_danube_adj\\Run\\mainCS3_ReOrg_UWplusVF.wresl";   	
+    void testCycleName(String cycleName) throws RecognitionException, IOException {    	
     	int cycleIndex=1;
-    	
-    	StudyDataSet sds = StudyUtils.checkStudy(mainFilePath);
-    	
     	String cycleNameInModel = sds.getModelList().get(cycleIndex-1);
 
     	assertTrue(cycleNameInModel.equalsIgnoreCase(cycleName), "Cycle "+cycleIndex+" is named "+cycleName);
