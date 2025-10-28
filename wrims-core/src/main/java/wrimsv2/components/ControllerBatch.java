@@ -6,12 +6,25 @@ import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.config.ConfigUtils;
-import wrimsv2.evaluator.*;
+import wrimsv2.evaluator.AssignPastCycleVariable;
+import wrimsv2.evaluator.CsvOperation;
+import wrimsv2.evaluator.DssOperation;
+import wrimsv2.evaluator.PreEvaluator;
+import wrimsv2.evaluator.TimeOperation;
+import wrimsv2.evaluator.ValueEvaluatorParser;
+import wrimsv2.evaluator.WeightEval;
 import wrimsv2.hdf5.HDF5Writer;
 import wrimsv2.ilp.ILP;
 import wrimsv2.launch.LaunchConfiguration;
-import wrimsv2.solver.*;
+import wrimsv2.solver.Cbc0Solver;
+import wrimsv2.solver.CbcSolver;
+import wrimsv2.solver.Clp0Solver;
+import wrimsv2.solver.ClpSolver;
 import wrimsv2.solver.Gurobi.GurobiSolver;
+import wrimsv2.solver.InitialXASolver;
+import wrimsv2.solver.LPSolveSolver;
+import wrimsv2.solver.SetXALog;
+import wrimsv2.solver.XASolver;
 import wrimsv2.solver.mpmodel.MPModel;
 import wrimsv2.solver.ortools.OrToolsSolver;
 import wrimsv2.sql.DataBaseProfile;
@@ -25,8 +38,17 @@ import wrimsv2.wreslplus.elements.ParserUtils;
 import wrimsv2.wreslplus.elements.Tools;
 import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 public class ControllerBatch {
 
