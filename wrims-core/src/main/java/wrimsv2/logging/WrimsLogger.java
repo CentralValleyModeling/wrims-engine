@@ -16,7 +16,7 @@ public class WrimsLogger extends Logger {
     }
 
     /**
-     * Factory method for getting a WrimsLogger instance with custom handler & formatter.
+     * Factory method for getting a WrimsLogger instance with custom handler and formatter.
      */
     public static WrimsLogger getLogger(String name) {
         // Java’s LogManager keeps one Logger per name — retrieve or create
