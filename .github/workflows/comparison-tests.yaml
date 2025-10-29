@@ -14,7 +14,10 @@ jobs:
   comparison-tests:
     runs-on:
       - self-hosted
-      - compute-test
+      - azure
+      - comparison-runner
+    env:
+      WRIMS_AZURE_SAS: ${{ secrets.WRIMS_AZURE_SAS }}
 
     steps:
       - uses: actions/checkout@v2
@@ -36,10 +39,10 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Clean & Run Comparison Tests
+      - name: Clean & Run Azure Compute Tests
         run: |
           ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
-          ./gradlew testReport -PconfigFilePath="testProjects/CalLite4.1_TF/Test_02.config" -PinputFilePath="testProjects/callite_version_check_dss6_6.inp" -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
+          ./gradlew runAzureCucumberTests -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"          
 
       - name: Upload Comparison Report
         if: always()
@@ -47,5 +50,5 @@ jobs:
         with:
           name: comparison-report
           path: |
-            ./wrims-comparison-test/build/testProjects/*.pdf
-            ./wrims-comparison-test/build/testProjects/*VALIDATION*
+            ./wrims-comparison-test/build/testProjects/**/*.pdf
+            ./wrims-comparison-test/build/testProjects/**/*VALIDATION*
