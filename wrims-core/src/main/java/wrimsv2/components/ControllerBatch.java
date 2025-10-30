@@ -1004,7 +1004,7 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-
+                            noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
