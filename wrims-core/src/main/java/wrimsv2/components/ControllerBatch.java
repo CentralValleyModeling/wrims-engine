@@ -373,7 +373,13 @@ public class ControllerBatch {
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
-						}
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
+                        }
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
@@ -766,6 +772,12 @@ public class ControllerBatch {
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
 						}
 						if (ControlData.outputType==1){
 							if (ControlData.isOutputCycle && isSelectedCycleOutput){
@@ -992,7 +1004,13 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1271,6 +1289,12 @@ public class ControllerBatch {
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1421,6 +1445,12 @@ public class ControllerBatch {
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1644,6 +1674,12 @@ public class ControllerBatch {
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
+                            ControlData.currCycleIndex=0;
+                            ILP.loggingLpSolve=false;
+                            ILP.loggingCplexLp=true;
+                            ILP.loggingAllCycles=true;
+                            ILP.logging=false;
+                            ILP.loggingVariableValue=false;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
