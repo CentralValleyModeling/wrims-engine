@@ -377,8 +377,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
                         }
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -776,8 +776,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
 						}
 						if (ControlData.outputType==1){
 							if (ControlData.isOutputCycle && isSelectedCycleOutput){
@@ -1009,8 +1009,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1293,8 +1293,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1449,8 +1449,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1678,8 +1678,8 @@ public class ControllerBatch {
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
-                            ILP.logging=false;
-                            ILP.loggingVariableValue=false;
+                            ILP.logging=true;
+                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
