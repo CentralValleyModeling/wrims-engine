@@ -56,7 +56,7 @@ import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class ControllerBatch {
-	
+	private boolean firstresimulate = true;
 	public boolean enableProgressLog = false;
 	public boolean enableConfigProgress = false;
 	private boolean runCompleted = false;
@@ -372,7 +372,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+							//noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
@@ -771,7 +779,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+							//noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
@@ -1004,7 +1020,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-                            noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
@@ -1288,7 +1312,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+							//noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
@@ -1444,7 +1476,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+							//noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
@@ -1673,7 +1713,15 @@ public class ControllerBatch {
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+							//noError=false;
                             ControlData.currCycleIndex=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
