@@ -382,8 +382,8 @@ public class ControllerBatch {
                             infeasCyclIndex=i;
                             i=-1;
                             Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
+                            ILP.loggingLpSolve=true;
+                            ILP.loggingCplexLp=false;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
