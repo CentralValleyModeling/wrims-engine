@@ -56,7 +56,7 @@ import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class ControllerBatch {
-    private int infeasCyclIndex= -100;
+    private boolean firstresimulate = true;
     public boolean enableProgressLog = false;
     public boolean enableConfigProgress = false;
     private boolean runCompleted = false;
@@ -365,28 +365,37 @@ public class ControllerBatch {
                         noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         int cycleI=i+1;
                         if (Error.error_solving.size()<1){
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            Error.writeSolvingErrorFile("Error_solving.txt");
-                            Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            ControlData.currCycleIndex=0;
                             i=-1;
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
+                            ILP.loggingLpSolve=true;
+                            ILP.loggingCplexLp=false;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
+                            // clear error state so rerun doesn’t immediately fall back here
+                            Error.error_solving.clear();
+
+                            // do NOT advance time or write outputs on this iteration
+                            continue;
                         }
+                        //int cycleI=i+1;
                         String strCycleI=cycleI+"";
                         boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
                         if (ControlData.outputType==1){
@@ -770,21 +779,24 @@ public class ControllerBatch {
 
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         if (Error.error_solving.size()<1){
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            //Error.writeSolvingErrorFile("Error_solving.txt");
-                            //Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            //ControlData.currCycleIndex=0;
+                            i=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
@@ -1003,28 +1015,33 @@ public class ControllerBatch {
                         noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         int cycleI=i+1;
                         if (Error.error_solving.size()<1){
+
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            //Error.writeSolvingErrorFile("Error_solving.txt");
-                            //Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            //ControlData.currCycleIndex=0;
+                            i=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
                         }
+                        //int cycleI=i+1;
                         String strCycleI=cycleI+"";
                         boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
                         if (ControlData.outputType==1){
@@ -1286,28 +1303,33 @@ public class ControllerBatch {
                         noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         int cycleI=i+1;
                         if (Error.error_solving.size()<1){
+
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            //Error.writeSolvingErrorFile("Error_solving.txt");
-                            //Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            //ControlData.currCycleIndex=0;
+                            i=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
                         }
+                        //int cycleI=i+1;
                         String strCycleI=cycleI+"";
                         boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
                         if (ControlData.outputType==1){
@@ -1448,28 +1470,32 @@ public class ControllerBatch {
                         noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         int cycleI=i+1;
                         if (Error.error_solving.size()<1){
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            //Error.writeSolvingErrorFile("Error_solving.txt");
-                            //Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            //ControlData.currCycleIndex=0;
+                            i=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
                         }
+                        //int cycleI=i+1;
                         String strCycleI=cycleI+"";
                         boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
                         if (ControlData.outputType==1){
@@ -1683,28 +1709,32 @@ public class ControllerBatch {
                         noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 
                         if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
-
                         int cycleI=i+1;
                         if (Error.error_solving.size()<1){
                             ControlData.isPostProcessing=true;
                             mds.processAlias();
                             if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-                        }else if (infeasCyclIndex==i) {
-                            //Error.writeSolvingErrorFile("Error_solving.txt");
-                            //Error.writeErrorLog();
-                            noError=false;
                         }else{
                             Error.writeSolvingErrorFile("Error_solving.txt");
                             Error.writeErrorLog();
-                            noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
+                            if (firstresimulate) {
+                                firstresimulate=false;
+                                noError =true;
+
+                            } else {
+                                noError=false;
+
+                            }
+                            //noError=false;
+                            //ControlData.currCycleIndex=0;
+                            i=0;
                             ILP.loggingLpSolve=false;
                             ILP.loggingCplexLp=true;
                             ILP.loggingAllCycles=true;
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
                         }
+                        //int cycleI=i+1;
                         String strCycleI=cycleI+"";
                         boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
                         if (ControlData.outputType==1){
