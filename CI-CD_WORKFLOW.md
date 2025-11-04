@@ -10,20 +10,20 @@ A Continuous Integration / Continuous Deployment (CI/CD) pipeline was establishe
 
 ## Planning
 
-During the planning phase, we gather requirements and coordinate on features, issues, and improvements. We use GitHub Discussions to record designs and decisions, and GitHub issues and projects to capture and track progress.
+During the **Planning** phase, we gather requirements and coordinate on features, issues, and improvements. We use GitHub Discussions to record designs and decisions, and GitHub issues and projects to capture and track progress.
 
 ## Development
 
-The development phase begins with work being assigned and tracked through GitHub issues. A developer then creates a new branch and opens a pull request before startig development in their local copy of the branch. As work progresses, changes are committed and pushed to the remote repository.
+The **Development** phase begins with work being assigned and tracked through GitHub issues. Before starting development, a developer creates a new branch, adds an intial commit to this new branch, pushes the new branch to the remote repository, and creates a new pull request from the new branch into the `main` branch. This pull request contains the initial commit in the new branch and makes it differ from the `main` branch. Then development starts in their local copy of this branch. As work progresses, changes are committed and pushed to the remote repository.
 
 ## Code Review
 
-The code review phase is an iterative process in which pull requests undergo both peer review and automated checks with SonarQube Cloud and Dependabot. Feedback from peer reviewers may require revisions, after which the work re-enters the review cycle. Once the changes pass both peer and automated reviews, the pull request is merged into the main branch.
+The **Code Review** phase is an iterative process in which pull requests undergo both peer review and automated checks with SonarQube Cloud. Feedback from peer reviewers may require revisions, after which the work re-enters the review cycle. Once the changes pass both peer and automated reviews, the pull request is merged into the main branch.
 
 ## Quality Assurance
 
-Quality Assurance serves as the final acceptannce step, using both manual testing and automated comparison testing to verify that the system behaves as expected. If issues are identified, the work returns to the development phase for revision. As part of this process, tests document test cases, procedures, and results, strengthening regression testing and long-term quality.
+The **Quality Assurance** phase serves as the final acceptance step, using both manual testing and automated comparison testing to verify that the system behaves as expected. This phase is also a continuous process that takes place on every merge of new code. If issues are identified, the work returns to the development phase for revision. As part of this process, testers document test cases, test procedures, and test run results, strengthening regression testing and long-term quality. Dependabot also checks for dependency updates on the main branch and creates pull requests with the appropriate version updates.
 
 ## Release
 
-In the Release phase, stable builds of `wrims-engine` and `wrims-gui` are packaged and published through GitHub. Using GitHub Releases, we tag versions, attach compiled artifacts or installers, and make them available for users and stakeholders. This ensures that only tested and approved versions are distributed, providing a clear history of official releases.
+In the **Release** phase, stable builds of `wrims-engine` and `wrims-gui` are packaged and published through GitHub. Using GitHub Releases, we tag versions, attach compiled artifacts or installers, and make them available for users and stakeholders. This ensures that only tested and approved versions are distributed, providing a clear history of official releases.
