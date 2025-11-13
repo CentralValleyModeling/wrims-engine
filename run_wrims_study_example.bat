@@ -15,7 +15,7 @@ REM Add the external libraries to the PATH. Do not change.
 set PATH=%PATH%;%PROJECT_DIR%\Run\External
 
 REM Set the main class to run. This is the entry point for the WRIMS application. Do not change when running from wrims-engine root.
-set MAIN_CLASS=wrimsv2.components.ControllerBatch
+set MAIN_CLASS=wrims.engine.core.components.ControllerBatch
 set WRIMS_CORE_JAR="wrims-core\build\libs\*"
 set WRIMS_CORE_DEPENDENCIES="wrims-core\build\tmp\libs\*"
 
