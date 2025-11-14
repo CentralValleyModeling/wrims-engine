@@ -1,10 +1,10 @@
 @echo off
 REM PROJECT SETTINGS: PROJECT_DIR, and CONFIG_FILE variables as needed.
-set "PROJECT_DIR=C:\Users\hzamanis\Documents\Projects\calsim3-dcr-main_base"
-set CONFIG_FILE=__study.config
+set PROJECT_DIR=J:\wrims\projects\dcr2023
+set CONFIG_FILE=study.config
 
 REM Set the JAVA_HOME environment variable to the path of your java 21 JDK
-set JAVA_HOME="C:\Program Files\Java\jdk-21"
+set JAVA_HOME="J:\java\jdk\jdk_21.0.8_temurin"
 
 set temp_wrims2=".\foo"
 

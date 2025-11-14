@@ -369,7 +369,7 @@ public class ControllerBatch {
 						
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						
-						int cycleI=i+1;
+
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
@@ -391,6 +391,7 @@ public class ControllerBatch {
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
 						}
+                        int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
 						if (ControlData.outputType==1){
@@ -1009,7 +1010,7 @@ public class ControllerBatch {
 						
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						
-						int cycleI=i+1;
+
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
@@ -1031,6 +1032,7 @@ public class ControllerBatch {
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
 						}
+                        int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
 						if (ControlData.outputType==1){
@@ -1293,7 +1295,7 @@ public class ControllerBatch {
 						
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						
-						int cycleI=i+1;
+
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
@@ -1315,6 +1317,7 @@ public class ControllerBatch {
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
 						}
+                        int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
 						if (ControlData.outputType==1){
@@ -1456,7 +1459,7 @@ public class ControllerBatch {
 						
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						
-						int cycleI=i+1;
+
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
@@ -1478,6 +1481,7 @@ public class ControllerBatch {
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
 						}
+                        int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
 						if (ControlData.outputType==1){
@@ -1692,7 +1696,7 @@ public class ControllerBatch {
 						
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						
-						int cycleI=i+1;
+
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
@@ -1714,6 +1718,7 @@ public class ControllerBatch {
                             ILP.logging=true;
                             ILP.loggingVariableValue=true;
 						}
+                        int cycleI=i+1;
 						String strCycleI=cycleI+"";
 						boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
 						if (ControlData.outputType==1){
