@@ -226,10 +226,7 @@ public class ComputeTestUtils {
             throw new IllegalStateException("Expected natives directory does not exist: " + libDir);
         }
         try (var stream = Files.list(libDir)) {
-            boolean hasDll = stream
-                    .filter(Files::isRegularFile)
-                    .map(p -> p.getFileName().toString().toLowerCase(Locale.ROOT))
-                    .anyMatch(name -> name.endsWith(".dll"));
+            boolean hasDll = hasDll(libDir, "");
             if (!hasDll) {
                 throw new IllegalStateException("No .dll files found under: " + libDir);
             }
