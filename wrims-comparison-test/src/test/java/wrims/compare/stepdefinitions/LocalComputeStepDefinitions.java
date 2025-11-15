@@ -3,6 +3,7 @@ package wrims.compare.stepdefinitions;
 import io.cucumber.java.PendingException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import wrims.compare.utils.ComputeTestUtils;
 import wrims.compare.utils.LocalFileUtils;
 
@@ -43,7 +44,7 @@ public class LocalComputeStepDefinitions {
         }
         try {
             Path configFilePath = localProjectPath.resolve(configFileName);
-            //if a copy the file from resources/comparisonInputFiles/{configFile} to projectDir.getParent()
+            //Check for local override file. If found, copy to the extracted working directory
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("configFiles/" + configFileName);
             if (resourceStream != null) {
                 Files.copy(resourceStream, configFilePath, StandardCopyOption.REPLACE_EXISTING);
