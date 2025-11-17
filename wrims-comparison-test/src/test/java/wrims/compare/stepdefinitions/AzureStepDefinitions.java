@@ -1,8 +1,6 @@
 package wrims.compare.stepdefinitions;
 
-import io.cucumber.java.PendingException;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import wrims.compare.utils.AzureUtils;
@@ -20,10 +18,7 @@ public class AzureStepDefinitions {
 
 
 
-    @When("I extract the zip file to a temporary directory")
-    public void iExtractTheZipFileToATemporaryDirectory() {
 
-    }
 
 
     @Then("Compare the results using input file {string} and output files named {string}")

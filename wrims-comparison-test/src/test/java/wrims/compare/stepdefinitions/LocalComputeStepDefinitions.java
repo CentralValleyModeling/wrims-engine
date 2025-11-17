@@ -1,9 +1,7 @@
 package wrims.compare.stepdefinitions;
 
-import io.cucumber.java.PendingException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
 import wrims.compare.utils.ComputeTestUtils;
 import wrims.compare.utils.LocalFileUtils;
 
@@ -13,8 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-
-import static java.nio.file.Files.createDirectories;
 
 public class LocalComputeStepDefinitions {
 
