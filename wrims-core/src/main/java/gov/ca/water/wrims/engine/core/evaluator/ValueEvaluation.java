@@ -1,5 +1,5 @@
 package gov.ca.water.wrims.engine.core.evaluator;
-import gov.ca.water.wrims.engine.core.external.ExternalFunction;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
