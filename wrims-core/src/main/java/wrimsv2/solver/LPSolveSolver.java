@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.solverdata.*;
@@ -20,7 +22,7 @@ import wrimsv2.wreslparser.elements.Tools;
 import lpsolve.*;
 
 public class LPSolveSolver {
-	
+    private static final Logger logger = LoggerFactory.getLogger(LPSolveSolver.class);
 	public static Map <String, Double> varDoubleMap;
 	private static LpSolve solver;
 	private static String lpFilePath;
@@ -54,11 +56,9 @@ public class LPSolveSolver {
 		      origcolName = new ArrayList<String>();
 				for (int i = 1; i <= solver.getNorigColumns(); i++) {
 					
-					//System.out.println(i + ":"+solver.getOrigcolName(i));
 					//varDoubleMap.put(solver.getOrigcolName(i), solver.getVarPrimalresult(i+rn));
 					
 					origcolName.add(solver.getOrigcolName(i));
-					//System.out.println(solver.getOrigcolName(i)+" : "+solver.getVarPrimalresult(i+rn));
 			    }
 		      
 		    }
@@ -80,9 +80,7 @@ public class LPSolveSolver {
 			      modelStatus = solver.solve();		      
 			      
 				  while ( (modelStatus!=LpSolve.OPTIMAL) && (i<=numberOfRetries) )	{
-					  
-					  //System.out.println("LpSolve Error: "+solver.getStatustext(modelStatus));
-					  
+
 					  
 					  //for (int i=1;i<=numberOfRetries; i++) {  
 					  
@@ -90,7 +88,7 @@ public class LPSolveSolver {
 						  solver = LpSolve.readLp(lpFilePath, LpSolve.CRITICAL, "test_prob");
 						  
 						  try {
-							  System.out.println("! Retry with LpSolve config named: Retry"+ i);
+							  logger.info("! Retry with LpSolve config named: Retry"+ i);
 							  solver.readParams(configFile, "-h Retry"+i);
 							  modelStatus = solver.solve();
 							  i++;
@@ -155,15 +153,12 @@ public class LPSolveSolver {
 		int rn = solver.getNorigRows();
 		int cn = solver.getNorigColumns();
 		
-		//System.out.println("solver.getNorigColumns():" + cn);
-		//System.out.println("solver.getNorigRows():" + rn);
-		
 		for (int i = 1; i <= cn; i++) {
 			
-			//System.out.println(i + ":"+solver.getOrigcolName(i));
+
 			//varDoubleMap.put(solver.getOrigcolName(i), solver.getVarPrimalresult(i+rn));
 			varDoubleMap.put(origcolName.get(i-1), solver.getVarPrimalresult(i+rn));
-			//System.out.println(solver.getOrigcolName(i)+" : "+solver.getVarPrimalresult(i+rn));
+
 			
 			// TODO: add the following line before sending the problem to the solver using direct link. 
 			// it's too late here. need to assign value.
@@ -199,7 +194,7 @@ public class LPSolveSolver {
 			} catch (Exception e) {
 				//value = 0;  // TODO: warning!! needs work here!!
 				
-				//System.out.println(" This dvName not found: "+ dvName);
+
 				//continue;
 				try {
 					value = (Double) dvar.getData().getData(); // use whatever is in the container.
@@ -238,8 +233,8 @@ public class LPSolveSolver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.lpsolve_objective);
-			System.out.println("Assign Dvar Done.");
+			logger.info("Objective Value: "+ControlData.lpsolve_objective);
+			logger.info("Assign Dvar Done.");
 		}
 	}
 	public static void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String multName){

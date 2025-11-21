@@ -1,9 +1,13 @@
 package wrimsv2.sql.socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.Socket;
 
 public class Client {
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 	private Socket socket = null;
 	private ObjectOutputStream outputStream = null;
 	private boolean isConnected = false;
@@ -33,7 +37,7 @@ public class Client {
 				}
 			}
 		}
-		System.out.println("Server Client Connected");
+		logger.info("Server Client Connected");
 	}
 
 	public boolean sendFile() {
@@ -64,7 +68,7 @@ public class Client {
 				return false;
 			}
 		} else {
-			System.out.println("path specified is not pointing to a file");
+			logger.error("path specified is not pointing to a file");
 			fileEvent.setStatus("Error");
 			closeSocket();
 			return false;
@@ -72,7 +76,7 @@ public class Client {
 
 		try {
 			outputStream.writeObject(fileEvent);
-			System.out.println("CSV Committing Done");
+			logger.info("CSV Committing Done");
 			Thread.sleep(3000);
 			
 		    InputStream is = socket.getInputStream();
@@ -82,7 +86,7 @@ public class Client {
 		    br.close();
 		    isr.close();
 		    is.close();
-		    System.out.println("CSV Downloading Done");
+		    logger.info("CSV Downloading Done");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {

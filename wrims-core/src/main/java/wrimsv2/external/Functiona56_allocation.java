@@ -4,11 +4,15 @@
 
 package wrimsv2.external;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 
 public class Functiona56_allocation extends ExternalFunction {
-	private final boolean DEBUG = false;
+    private static final Logger logger = LoggerFactory.getLogger(Functiona56_allocation.class);
+    private final boolean DEBUG = false;
 	private float[] _allocation;
 	public final int ARRAY_SIZE = 31;
 
@@ -31,8 +35,8 @@ public class Functiona56_allocation extends ExternalFunction {
 			float result = a56_allocation(calc, contractor);
 			
 			if (DEBUG) {
-				System.out.println("*************A56_Allocation call**************");
-				System.out.println("result = " + result);
+				logger.info("*************A56_Allocation call**************");
+				logger.info("result = " + result);
 			}
 
 			// push the result on the Stack
@@ -170,70 +174,70 @@ public class Functiona56_allocation extends ExternalFunction {
 			int calc = ((Number) param1).intValue();
 			
 			if (DEBUG) {
-				System.out.println("*************A56_Allocation call**************");
-				System.out.println("calc = " + calc);
-				System.out.println("contractor = " + contractor);
-				System.out.println("spill = " + spill);
-				System.out.println("ta_1 = " + ta_1);
-				System.out.println("req_1 = " + req_1);
-				System.out.println("ta_2 = " + ta_2);
-				System.out.println("req_2 = " + req_2);
-				System.out.println("ta_3 = " + ta_3);
-				System.out.println("req_3 = " + req_3);
-				System.out.println("ta_4 = " + ta_4);
-				System.out.println("req_4 = " + req_4);
-				System.out.println("ta_5 = " + ta_5);
-				System.out.println("req_5 = " + req_5);
-				System.out.println("ta_6 = " + ta_6);
-				System.out.println("req_6 = " + req_6);
-				System.out.println("ta_7 = " + ta_7);
-				System.out.println("req_7 = " + req_7);
-				System.out.println("ta_8 = " + ta_8);
-				System.out.println("req_8 = " + req_8);
-				System.out.println("ta_9 = " + ta_9);
-				System.out.println("req_9 = " + req_9);
-				System.out.println("ta_10 = " + ta_10);
-				System.out.println("req_10 = " + req_10);
-				System.out.println("ta_11 = " + ta_11);
-				System.out.println("req_11 = " + req_11);
-				System.out.println("ta_12 = " + ta_12);
-				System.out.println("req_12 = " + req_12);
-				System.out.println("ta_13 = " + ta_13);
-				System.out.println("req_13 = " + req_13);
-				System.out.println("ta_14 = " + ta_14);
-				System.out.println("req_14 = " + req_14);
-				System.out.println("ta_15 = " + ta_15);
-				System.out.println("req_15 = " + req_15);
-				System.out.println("ta_16 = " + ta_16);
-				System.out.println("req_16 = " + req_16);
-				System.out.println("ta_17 = " + ta_17);
-				System.out.println("req_17 = " + req_17);
-				System.out.println("ta_18 = " + ta_18);
-				System.out.println("req_18 = " + req_18);
-				System.out.println("ta_19 = " + ta_19);
-				System.out.println("req_19 = " + req_19);
-				System.out.println("ta_20 = " + ta_20);
-				System.out.println("req_20 = " + req_20);
-				System.out.println("ta_21 = " + ta_21);
-				System.out.println("req_21 = " + req_21);
-				System.out.println("ta_22 = " + ta_22);
-				System.out.println("req_22 = " + req_22);
-				System.out.println("ta_23 = " + ta_23);
-				System.out.println("req_23 = " + req_23);
-				System.out.println("ta_24 = " + ta_24);
-				System.out.println("req_24 = " + req_24);
-				System.out.println("ta_25 = " + ta_25);
-				System.out.println("req_25 = " + req_25);
-				System.out.println("ta_26 = " + ta_26);
-				System.out.println("req_26 = " + req_26);
-				System.out.println("ta_27 = " + ta_27);
-				System.out.println("req_27 = " + req_27);
-				System.out.println("ta_28 = " + ta_28);
-				System.out.println("req_28 = " + req_28);
-				System.out.println("ta_29 = " + ta_29);
-				System.out.println("req_29 = " + req_29);
-				System.out.println("ta_30 = " + ta_30);
-				System.out.println("req_30 = " + req_30);				
+				logger.info("*************A56_Allocation call**************");
+				logger.info("calc = " + calc);
+				logger.info("contractor = " + contractor);
+				logger.info("spill = " + spill);
+				logger.info("ta_1 = " + ta_1);
+				logger.info("req_1 = " + req_1);
+				logger.info("ta_2 = " + ta_2);
+				logger.info("req_2 = " + req_2);
+				logger.info("ta_3 = " + ta_3);
+				logger.info("req_3 = " + req_3);
+				logger.info("ta_4 = " + ta_4);
+				logger.info("req_4 = " + req_4);
+				logger.info("ta_5 = " + ta_5);
+				logger.info("req_5 = " + req_5);
+				logger.info("ta_6 = " + ta_6);
+				logger.info("req_6 = " + req_6);
+				logger.info("ta_7 = " + ta_7);
+				logger.info("req_7 = " + req_7);
+				logger.info("ta_8 = " + ta_8);
+				logger.info("req_8 = " + req_8);
+				logger.info("ta_9 = " + ta_9);
+				logger.info("req_9 = " + req_9);
+				logger.info("ta_10 = " + ta_10);
+				logger.info("req_10 = " + req_10);
+				logger.info("ta_11 = " + ta_11);
+				logger.info("req_11 = " + req_11);
+				logger.info("ta_12 = " + ta_12);
+				logger.info("req_12 = " + req_12);
+				logger.info("ta_13 = " + ta_13);
+				logger.info("req_13 = " + req_13);
+				logger.info("ta_14 = " + ta_14);
+				logger.info("req_14 = " + req_14);
+				logger.info("ta_15 = " + ta_15);
+				logger.info("req_15 = " + req_15);
+				logger.info("ta_16 = " + ta_16);
+				logger.info("req_16 = " + req_16);
+				logger.info("ta_17 = " + ta_17);
+				logger.info("req_17 = " + req_17);
+				logger.info("ta_18 = " + ta_18);
+				logger.info("req_18 = " + req_18);
+				logger.info("ta_19 = " + ta_19);
+				logger.info("req_19 = " + req_19);
+				logger.info("ta_20 = " + ta_20);
+				logger.info("req_20 = " + req_20);
+				logger.info("ta_21 = " + ta_21);
+				logger.info("req_21 = " + req_21);
+				logger.info("ta_22 = " + ta_22);
+				logger.info("req_22 = " + req_22);
+				logger.info("ta_23 = " + ta_23);
+				logger.info("req_23 = " + req_23);
+				logger.info("ta_24 = " + ta_24);
+				logger.info("req_24 = " + req_24);
+				logger.info("ta_25 = " + ta_25);
+				logger.info("req_25 = " + req_25);
+				logger.info("ta_26 = " + ta_26);
+				logger.info("req_26 = " + req_26);
+				logger.info("ta_27 = " + ta_27);
+				logger.info("req_27 = " + req_27);
+				logger.info("ta_28 = " + ta_28);
+				logger.info("req_28 = " + req_28);
+				logger.info("ta_29 = " + ta_29);
+				logger.info("req_29 = " + req_29);
+				logger.info("ta_30 = " + ta_30);
+				logger.info("req_30 = " + req_30);
 			}
 	
 			float result = a56_allocation(calc, contractor, spill, ta_1, req_1, ta_2, req_2, ta_3,
@@ -244,8 +248,8 @@ public class Functiona56_allocation extends ExternalFunction {
 				req_26, ta_27, req_27, ta_28, req_28, ta_29, req_29, ta_30, req_30);
 			
 			if (DEBUG) {
-				System.out.println("*************A56_Allocation call**************");
-				System.out.println("result = " + result);
+				logger.info("*************A56_Allocation call**************");
+				logger.info("result = " + result);
 			}
 
 			// push the result on the Stack

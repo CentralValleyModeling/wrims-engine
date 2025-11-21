@@ -11,6 +11,8 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.apache.commons.io.FileUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.wreslparser.elements.LogUtils;
 import wrimsv2.wreslplus.elements.IncFileSimple;
 import wrimsv2.wreslplus.elements.LookupTableSimple;
@@ -19,7 +21,8 @@ import wrimsv2.wreslplus.grammar.IncFileFinderLexer;
 import wrimsv2.wreslplus.grammar.IncFileFinderParser;
 
 public class IncFileCollector {
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(IncFileCollector.class);
 	public static LinkedHashSet<String> incFileList_all;
 	public static LinkedHashSet<String> lookupTableList_all;
 	public static int number_of_errors;
@@ -95,11 +98,6 @@ public class IncFileCollector {
 		ifs_array.add(new IncFileSimple(mainFilePath));
 
 		searchIncFiles(ifs_array);
-		
-//		for (String s: lookupTableList_all){
-//			System.out.println(s);
-//		}
-		
 	}
 		
 	public static void searchIncFiles(ArrayList<IncFileSimple> ifs_array){
@@ -212,7 +210,7 @@ public class IncFileCollector {
 			//String relativePath = ResourceUtils.getRelativePath(s, baseDir, File.separator);
 			int idx = s.indexOf(":");
 			String absPathWithoutDrive = s.substring(idx+1);
-			//System.out.println(absPathWithoutDrive);
+			logger.debug(absPathWithoutDrive);
 			
 			try {
 				File targetPath = new File(targetDir,absPathWithoutDrive);

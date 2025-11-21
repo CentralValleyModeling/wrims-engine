@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import org.apache.commons.io.FilenameUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.solver.mpmodel.MPModel;
 import wrimsv2.solver.mpmodel.MPModelUtils;
 import wrimsv2.solver.ortools.OrToolsSolver;
 
 public class Detector {
-
+    private static final Logger logger = LoggerFactory.getLogger(Detector.class);
 	private DetectorWorkflow dwf = null;
 	
 	public static void main(String[] args) throws Exception {
@@ -50,7 +52,7 @@ public class Detector {
 			rp.close();
 		} else {
 			
-			System.out.println("no alternative solution detected.");
+			logger.warn("no alternative solution detected.");
 		}
 
 		// detect("examples\\simple1\\run\\=ILP=\\simple1_cbc.config\\mpmodel\\1921_10_c01.mpm");

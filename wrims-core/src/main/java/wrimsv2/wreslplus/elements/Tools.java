@@ -23,6 +23,8 @@ import java.util.StringTokenizer;
 
 import com.google.common.collect.HashBasedTable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Goal;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.Param;
@@ -33,7 +35,10 @@ import wrimsv2.wreslparser.elements.StudyUtils;
 
 
 public class Tools {
-	public static String strip(String s) {
+
+    private static final Logger logger = LoggerFactory.getLogger(Tools.class);
+
+    public static String strip(String s) {
 		if (s==null)  return null; 
 		return s.substring(1, s.length() - 1);
 	}
@@ -43,49 +48,35 @@ public class Tools {
 		String canonicalPath_lowercase=null;
 		
 		try {
-			
-			canonicalPath_lowercase = new File(filePath).getCanonicalPath().toLowerCase(); 
-		
+			canonicalPath_lowercase = new File(filePath).getCanonicalPath().toLowerCase();
 		} catch (IOException e) {
-			
-	        e.printStackTrace();
+            logger.error("IOException encountered when parsing file path", e);
 	        LogUtils.errMsg("IOException: " + filePath);
 	    }
-		
 		return canonicalPath_lowercase;
-		
 	}
 	
 	public static HashSet<String> findAllOffspring (String fileName, final Map<String,HashSet<String>> kidMap){
-		
 		HashSet<String> out = new HashSet<String>();
-		
-		if (!kidMap.keySet().contains(fileName)) return out;
-		
-		out.addAll(kidMap.get(fileName));
-		
-		for (String kid : kidMap.get(fileName)) {
+		if (!kidMap.containsKey(fileName)) return out;
 
+        out.addAll(kidMap.get(fileName));
+		for (String kid : kidMap.get(fileName)) {
 			out.addAll(findAllOffspring(kid, kidMap));
-			
 		}
 		return out;
 	}
 	
-	// TODO: move to Tools
 	// be careful, the map is modified in this function
 	public static void findFileHierarchy(ArrayList<HashSet<String>> hierarchySetList, Map<String,HashSet<String>> toBeSorted) {
-		
-		//System.out.println("hierarchySetList"+hierarchySetList);
+
+        logger.debug("hierarchySetList = {}", hierarchySetList);
 		
 		if (!toBeSorted.isEmpty()) {
-					
 			HashSet<String> c = new HashSet<String>();
 			Set<String> toBeSorted_keySet = new HashSet<String>(toBeSorted.keySet());
 			for (String s : toBeSorted_keySet){
-				
-				//System.out.println("%%% s: "+s);
-				
+
 				// TODO: inefficient. needs rewrite
 				HashSet<String> ttt = new HashSet<String>();
 				for (HashSet<String> ss : hierarchySetList){ ttt.addAll(ss); }
@@ -96,9 +87,7 @@ public class Tools {
 			}
 			hierarchySetList.add(c);
 			findFileHierarchy(hierarchySetList, toBeSorted);
-		
 		}
-		
 	}
 
 	//TODO: this can be optimized for memory

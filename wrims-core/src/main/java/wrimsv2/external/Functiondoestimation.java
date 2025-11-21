@@ -122,7 +122,7 @@ public class Functiondoestimation extends ExternalFunction{
         Tensor result = runner.fetch("StatefulPartitionedCall_2:0").run().get(0);
         float[][] out = new float[1][1];
         result.copyTo(out);
-        //System.out.println("results: " + out[0][0]);
+
         model.close();
         return out[0][0];
 	}

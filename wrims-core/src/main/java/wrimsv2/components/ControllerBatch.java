@@ -17,6 +17,8 @@ import mil.army.usace.hec.metadata.Interval;
 import mil.army.usace.hec.metadata.IntervalFactory;
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.Param;
@@ -56,7 +58,7 @@ import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class ControllerBatch {
-	
+	private static final Logger logger = LoggerFactory.getLogger(ControllerBatch.class);
 	public boolean enableProgressLog = false;
 	public boolean enableConfigProgress = false;
 	private boolean runCompleted = false;
@@ -87,7 +89,7 @@ public class ControllerBatch {
 			StudyDataSet sds = parse();
 			long afterParsing = Calendar.getInstance().getTimeInMillis();
 			ControlData.t_parse=(int) (afterParsing-startTimeInMillis);
-			System.out.println("Parsing Time is "+ControlData.t_parse/60000+"min"+Math.round((ControlData.t_parse/60000.0-ControlData.t_parse/60000)*60)+"sec");
+			logger.info("Parsing Time is "+ControlData.t_parse/60000+"min"+Math.round((ControlData.t_parse/60000.0-ControlData.t_parse/60000)*60)+"sec");
 			
 			if (StudyUtils.total_errors+Error.getTotalError()==0 && !StudyUtils.compileOnly){
 				if (!StudyUtils.loadParserData && !FilePaths.fullMainPath.endsWith(".par")){
@@ -107,14 +109,14 @@ public class ControllerBatch {
 				if (ControlData.showTimeUsage) TimeUsage.showTimeUsage();
 				long endTimeInMillis = Calendar.getInstance().getTimeInMillis();
 				int runPeriod=(int) (endTimeInMillis-startTimeInMillis);
-				System.out.println("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
+				logger.info("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
 				ILP.writeNoteLn("Total time", "(sec): "+                        Math.round(runPeriod/1000.0));
 				ILP.writeNoteLn("Total time", "(min): "+                        Math.round(runPeriod/1000.0/60));
 				ILP.writeNoteLn("Total time", "(sec): "+                        Math.round(runPeriod/1000.0), ILP._noteFile_timeusage);
 				ILP.writeNoteLn("Total time", "(min): "+                        Math.round(runPeriod/1000.0/60), ILP._noteFile_timeusage);
 				runCompleted = true;
 			} else {
-				System.out.println("=================Run ends with errors=================");
+				logger.info("=================Run ends with errors=================");
 			}
 			
 		} catch (RecognitionException e) {
@@ -229,9 +231,9 @@ public class ControllerBatch {
 		
 		if (Error.getTotalError()>0){
 			
-			System.out.println("============================================");
-			System.out.println("Total errors in the config file: "+Error.getTotalError());
-			System.out.println("============================================");
+			logger.info("============================================");
+			logger.info("Total errors in the config file: "+Error.getTotalError());
+			logger.info("============================================");
 
 			return null;
 			
@@ -263,7 +265,7 @@ public class ControllerBatch {
 	
 	
 	public void runModel(StudyDataSet sds){
-		System.out.println("==============Run Study Start============");
+		logger.info("==============Run Study Start============");
 		
 		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
 			runModelGurobi(sds);
@@ -287,10 +289,10 @@ public class ControllerBatch {
 		WeightEval.outputWtTableAR();
 		
 		if (Error.getTotalError()>0){
-			System.out.println("=================Run ends with errors====");
+			logger.info("=================Run ends with errors====");
 			System.exit(1);
 		} else {
-			System.out.println("=================Run ends!================");
+			logger.info("=================Run ends!================");
 		}
 	}
 	public void runModelXA(StudyDataSet sds){
@@ -299,7 +301,7 @@ public class ControllerBatch {
 		
 		new InitialXASolver();
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			logger.info("Model run exits due to error.");
 			System.exit(1);
 		}
 		
@@ -364,11 +366,11 @@ public class ControllerBatch {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -384,7 +386,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");		
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						try{
 							if (enableConfigProgress) {
@@ -423,7 +425,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){
@@ -757,11 +759,11 @@ public class ControllerBatch {
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -774,7 +776,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						try{
 							if (enableConfigProgress) {
@@ -816,7 +818,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){
@@ -978,7 +980,7 @@ public class ControllerBatch {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							
 		            		ILP.writeObjValue_Gurobi();
@@ -988,7 +990,7 @@ public class ControllerBatch {
 		            		
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -1004,7 +1006,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						try{
 							if (enableConfigProgress) {
@@ -1043,7 +1045,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){
@@ -1255,7 +1257,7 @@ public class ControllerBatch {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							
 							if (ILP.logging) {
@@ -1266,7 +1268,7 @@ public class ControllerBatch {
 							}
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -1282,7 +1284,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
@@ -1300,7 +1302,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){
@@ -1346,7 +1348,7 @@ public class ControllerBatch {
 		ClpSolver.init(false); 
 
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			logger.info("Model run exits due to error.");
 			System.exit(1);
 		}
 		ArrayList<ValueEvaluatorParser> modelConditionParsers=sds.getModelConditionParsers();
@@ -1412,11 +1414,11 @@ public class ControllerBatch {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -1432,7 +1434,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						try{
 							if (enableConfigProgress) {
@@ -1471,7 +1473,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){
@@ -1540,7 +1542,7 @@ public class ControllerBatch {
 		
 		CbcSolver.init(false, sds); 	if (ControlData.cbc_debug_routeXA || ControlData.cbc_debug_routeCbc) {new InitialXASolver();}
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			logger.info("Model run exits due to error.");
 			System.exit(1);
 		}
 		
@@ -1616,7 +1618,7 @@ public class ControllerBatch {
 							if (Error.error_solving.size() > 0) {
 								String msg = "XA solving error.";
 								ILP.writeNoteLn("", msg);
-								System.out.println("" + msg);
+								logger.info("" + msg);
 								Error.writeErrorLog();
 								Error.error_solving.clear();
 							}
@@ -1635,11 +1637,11 @@ public class ControllerBatch {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -1655,7 +1657,7 @@ public class ControllerBatch {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						try{
 							if (enableConfigProgress) {
@@ -1707,7 +1709,7 @@ public class ControllerBatch {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (TimeOperation.isMonthlyInterval(ControlData.timeStep)){

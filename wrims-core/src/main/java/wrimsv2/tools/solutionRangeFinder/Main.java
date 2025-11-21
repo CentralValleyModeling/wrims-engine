@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import org.apache.commons.io.FilenameUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.solver.mpmodel.MPModel;
 import wrimsv2.solver.mpmodel.MPModelUtils;
 import wrimsv2.solver.ortools.OrToolsSolver;
 
 public class Main {
-
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 	public static void main(String[] args) throws Exception {
 
 		String searchVarsFilePath = "D:\\search_vars.txt";
@@ -42,7 +44,7 @@ public class Main {
 					}
 				}
 				DetectorParam.searchVarList = variablesList;
-				System.out.println(variablesList);
+				logger.info(variablesList.toString());
 
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
@@ -80,7 +82,7 @@ public class Main {
 			rp.close();
 		} else {
 
-			System.out.println("no alternative solution detected.");
+			logger.warn("no alternative solution detected.");
 		}
 
 	}

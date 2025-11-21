@@ -13,6 +13,8 @@ import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
@@ -27,7 +29,7 @@ import wrimsv2.evaluator.TimeOperation;
 import wrimsv2.tools.General;
 
 public class HDF5Writer {
-	
+    private static final Logger logger = LoggerFactory.getLogger(HDF5Writer.class);
 	private static boolean hasDvarAliasLookup=false;
 	private static String[] dvAsLookupNames;
 	private static String[] dvAsLookupKinds;
@@ -92,7 +94,7 @@ public class HDF5Writer {
 		String[] dailyDateStr={TimeOperation.dssTimeEndDay(date.getYear()+1900, date.getMonth()+1, date.getDate())};										
 		
 		if (fid<0){
-			System.out.println("Failed to generate HDF5 file.");
+			logger.error("Failed to generate HDF5 file.");
 		}else{
 			try {
 				gidPartA=HDF5Util.locateGroup(fid, gPartA);
@@ -414,7 +416,7 @@ public class HDF5Writer {
 	}
 	
 	public static void writeTimestepDvarAlias(){
-		System.out.println("write dvar and alias to HDF5 file");
+		logger.info("write dvar and alias to HDF5 file");
 		listMonthlyTimestepDvarAlias();
 		writeMonthlyTimestepDvarAlias();
 		listDailyTimestepDvarAlias();

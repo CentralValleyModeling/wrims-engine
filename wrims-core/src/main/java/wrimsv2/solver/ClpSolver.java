@@ -13,6 +13,8 @@ import org.coinor.clp.SWIGTYPE_p_double;
 import org.coinor.clp.SWIGTYPE_p_int;
 import org.coinor.clp.jClp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.wresldata.WeightElement;
@@ -25,7 +27,7 @@ import wrimsv2.evaluator.DssOperation;
 import wrimsv2.evaluator.EvalConstraint;
 
 public class ClpSolver {
-	
+    private static final Logger logger = LoggerFactory.getLogger(ClpSolver.class);
 	public static int errorCode = 99;  // 12: error in dvar value
 	public static Map <String, Double> varDoubleMap;
 	private static SWIGTYPE_p_ClpSimplex model;
@@ -89,12 +91,12 @@ public class ClpSolver {
 		
 		if (modelStatus==1) { 
 			// re-solve with relaxed tolerance
-			System.out.println("Relax tolerance to 1e-7");
+			logger.warn("Relax tolerance to 1e-7");
 			modelStatus=solve(1e-7, useLpFile);
 		} 
 		if (modelStatus==1) { 
 			// re-solve with relaxed tolerance
-			System.out.println("Relax tolerance to 5e-7");
+			logger.warn("Relax tolerance to 5e-7");
 			modelStatus=solve(5e-6, useLpFile);
 		} 
 //		status:		
@@ -109,7 +111,7 @@ public class ClpSolver {
 			ControlData.clp_cbc_objective = getObjValue();
 			collectDvar(); 
 			assignDvar();
-			//System.out.println("obj: "+getObjValue());
+			;
 		}
 		
 		resetModel(useLpFile);
@@ -141,7 +143,7 @@ public class ClpSolver {
 	private static void getSolverInformation(int modelStatus){
 		
 		errorCode=modelStatus;
-		System.out.println("clp error code: "+modelStatus);
+		logger.error("clp error code: "+modelStatus);
 		switch (modelStatus){
 			case 1: Error.addSolvingError("Primal infeasible.");break; 
 			case 2: Error.addSolvingError("Dual infeasible (unbounded).");break; 
@@ -210,8 +212,7 @@ public class ClpSolver {
 					String multName=(String)multIterator.next();
 					
 					// check for inefficient zero coef  
-					//if (multMap.get(multName).getData().doubleValue()==0.) System.out.println("zero coef found in setting up constraint!");
-					
+
 					if (!dvarMap.containsKey(multName)){ 
 						dvKeys.add(multName);
 						jClp.resize(model, jClp.getNumRows(model), dvKeys.size());
@@ -256,8 +257,7 @@ public class ClpSolver {
 			while(weightIterator.hasNext()){
 				String weightName=(String)weightIterator.next();
 				
-				//if (weightMap.get(weightName).getValue()==0.) System.out.println("zero coef found in obj function!");
-				
+
 				jClp.setObjectiveCoefficient(model, dvKeys.indexOf(weightName), weightMap.get(weightName).getValue());
 			}
 		}
@@ -295,25 +295,25 @@ public class ClpSolver {
 		
 		
 		 //tuning
-		 //System.out.println("Tuning \n\nDefault primal Tolerance is "+jClp.primalTolerance(model)+"\n");
+		 ;
 		 jClp.setPrimalTolerance(model,tolerance);
-		 //System.out.println("Primal Tolerance Changed to "+jClp.primalTolerance(model)+"\n");
-		 //System.out.println("Max Seconds: "+jClp.maximumSeconds(model) + "\t" + "Max Iterations: "+ jClp.maximumIterations(model)+"\n");
-		 //System.out.println("model Status is "+ jClp.problemStatus(model)+"\n");
+		 ;
+		 ;
+		 ;
 	     
 		 
 		 
 		 if (!useLpFile) jClp.setOptimizationDirection(model, -1); //change minimization or maximization
 		 //jClp.scaling(model,1); // turn scaling on or off
 		 
-		 //System.out.println("crash = "+jClp.crash(model,2.0,0)+"\n"); 
+		 ;
 		 
 		 //jClp.setFactorizationFrequency(model,200); //set factorization frequency
-		 //System.out.println("dual bound = "+ jClp.dualBound(model) +"\n"); //get dual bound
-		 //System.out.println("infeasibility cost = "+ jClp.infeasibilityCost(model) +"\n");
+		 ; //get dual bound
+
 		 
 		 //jClp.setFactorizationFrequency(model,200); //set factorization frequency	 
-		 //System.out.println("fact. freq. = "+jClp.factorizationFrequency(model) +"\n");
+
 		 
 		// jClp.setPrimalColumnAlgorithmSteepest(model,1); //pricing method
 		
@@ -340,14 +340,13 @@ public class ClpSolver {
 		//sol = jClp.getColSolution(model);
 		
 		for (int i = 0; i < ColumnSize; i++){
-			//System.out.println(jClp.getColumnName(model,i)+" = "+jClp.jarray_double_getitem(sol,i));
+
 			varDoubleMap.put(jClp.getColumnName(model,i), jClp.jarray_double_getitem(jClp.getColSolution(model),i));
 //			if (jClp.getColumnName(model,i).equalsIgnoreCase("Putah_WYT_sv")) {
 //				
-//				System.out.println("Putah_WYT_sv:" + jClp.jarray_double_getitem(sol,i) );
-//				//System.out.println("Putah_WYT_sv:" + (float)jClp.jarray_double_getitem(sol,i) );
+//
 //				//double n = (float)jClp.jarray_double_getitem(sol,i);
-//				//System.out.println("Putah_WYT_sv:" + n );
+//
 //				//varDoubleMap.put(jClp.getColumnName(model,i), n);
 //			}
 		}
@@ -425,8 +424,8 @@ public class ClpSolver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.clp_cbc_objective);
-			System.out.println("Assign Dvar Done.");
+			logger.info("Objective Value: "+ControlData.clp_cbc_objective);
+			logger.info("Assign Dvar Done.");
 		}
 	}
 	

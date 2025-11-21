@@ -9,6 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.common.collect.HashBasedTable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.External;
@@ -35,7 +37,8 @@ import wrimsv2.wreslplus.elements.WeightTable;
 import wrimsv2.wreslplus.elements.WeightTemp;
 
 public class ToWreslData {
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(ToWreslData.class);
 	// < relative file path, svar name, svar object >
 	private static HashBasedTable<String,String,Svar> fileSvMap; 
 	private static HashBasedTable<String,String,Dvar> fileDvMap; 
@@ -173,8 +176,6 @@ public class ToWreslData {
 		
 		// don't sort svList. order matters in evaluator
 		o.svList = new ArrayList<String>(seq.svIncFileList_post);
-		//System.out.println("ToWreslData => m.svIncFileList_post"+m.svIncFileList_post);
-		//System.out.println("ToWreslData => m.svList"+m.svList);
 		//o.svList = new ArrayList<String>(m.svList);
 
 		o.gList = new ArrayList<String>(seq.glIncFileList_post);
@@ -598,8 +599,8 @@ public class ToWreslData {
 			o.fromWresl = s.fromWresl;
 			o.line = s.line;
 		} catch (Exception e) {
-			System.out.println("#### error");
-			System.out.println("svarName: "+s.id);
+			logger.error("#### error");
+			logger.error("svarName: "+s.id);
 		}
 		o.kind = s.kind;
 		o.units = s.units;
@@ -609,7 +610,7 @@ public class ToWreslData {
 		o.neededVarInCycleSet = s.neededVarInCycleSet;
 		o.needVarFromEarlierCycle = s.needVarFromEarlierCycle;
 		//o.dependants.removeAll(Param.reservedSet);
-		//System.out.println(s.dependants);
+		logger.debug(s.dependants.toString());
 		
 		o.caseCondition = s.caseCondition;
 		//o.caseCondition = Tools.replace_with_space(o.caseCondition);
@@ -621,7 +622,6 @@ public class ToWreslData {
 		o.caseExpression = Tools.replace_seperator(o.caseExpression);
 		//o.caseExpression = Tools.add_space_between_logical(o.caseExpression);
 		
-		//System.out.println(o.caseExpression);
 		return o;
 		
 	}	
@@ -633,8 +633,8 @@ public class ToWreslData {
 			o.fromWresl = s.fromWresl;
 			o.line = s.line;
 		} catch (Exception e) {
-			System.out.println("#### error");
-			System.out.println("svarName: "+s.id);
+			logger.info("#### error");
+			logger.info("svarName: "+s.id);
 		}
 		o.kind = s.kind;
 		o.units = s.units;
@@ -644,7 +644,7 @@ public class ToWreslData {
 		o.neededVarInCycleSet = s.neededVarInCycleSet;
 		o.needVarFromEarlierCycle = s.needVarFromEarlierCycle;
 		//o.dependants.removeAll(Param.reservedSet);
-		//System.out.println(s.dependants);
+		logger.debug(s.dependants.toString());
 		
 		o.caseCondition = s.caseCondition;
 		//o.caseCondition = Tools.replace_with_space(o.caseCondition);
@@ -656,7 +656,7 @@ public class ToWreslData {
 		o.caseExpression = Tools.replace_seperator(o.caseExpression);
 		//o.caseExpression = Tools.add_space_between_logical(o.caseExpression);
 		
-		//System.out.println(o.caseExpression);
+		logger.debug(o.caseExpression.toString());
 		//o.timeArraySize = s.timeArraySize;
 		
 		return o;
@@ -759,12 +759,12 @@ public class ToWreslData {
 			om.put(s,o);
 		}
 
-		//System.out.println("ToWreslData: w.subgroupMap.keySet(): "+w.subgroupMap.keySet());
+		logger.debug("ToWreslData: w.subgroupMap.keySet(): "+w.subgroupMap.keySet());
 		for (String k : w.subgroupMap.keySet()) {
 			
 			for (String s: w.subgroupMap.get(k).varList) {
 				
-				System.out.println("ToWreslData: w.subgroupMap.varList: "+w.subgroupMap.get(k).varList);
+				logger.info("ToWreslData: w.subgroupMap.varList: "+w.subgroupMap.get(k).varList);
 				
 				WeightElement o = new WeightElement();
 			
@@ -805,8 +805,7 @@ public class ToWreslData {
 		o.neededVarInCycleSet = g.neededVarInCycleSet;
 		o.needVarFromEarlierCycle = g.needVarFromEarlierCycle;
 		o.expressionDependants.removeAll(Param.reservedSet);
-		//System.out.println(s.dependants);
-		
+
 		o.caseCondition = g.caseCondition;
 		//o.caseCondition = Tools.replace_with_space(o.caseCondition);
 		o.caseCondition = Tools.replace_seperator(o.caseCondition);
@@ -819,8 +818,7 @@ public class ToWreslData {
 		
 		o.dvarWeightMapList = g.dvarWeightMapList;
 		o.dvarSlackSurplusList = g.dvarSlackSurplusList;
-		//System.out.println(o.caseExpression);
-		
+
 		o.timeArraySize = g.timeArraySize;
 		return o;
 		

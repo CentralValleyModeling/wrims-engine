@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.solver.mpmodel.MPModel;
 
@@ -13,7 +15,7 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 
 public class OrToolsSolver {
-
+    private static final Logger logger = LoggerFactory.getLogger(OrToolsSolver.class);
 	// private static String solverType = "CLP_LINEAR_PROGRAMMING";
 	// private static String mpSolverType = "CBC_MIXED_INTEGER_PROGRAMMING";
 	// private static String mpSolverType = "GLPK_MIXED_INTEGER_PROGRAMMING";
@@ -137,7 +139,7 @@ public class OrToolsSolver {
 
 		// objective value.
 		if (verbosity > 0)
-			System.out.println("Optimal objective value = " + solver.objectiveValue());
+			logger.info("Optimal objective value = " + solver.objectiveValue());
 
 		// post solution.
 		solution = new LinkedHashMap<String, Double>();
@@ -148,7 +150,7 @@ public class OrToolsSolver {
 
 			double v = _solverVarMap.get(varName).solutionValue();
 			if (verbosity > 1)
-				System.out.println(varName + " = " + v);
+				logger.info(varName + " = " + v);
 			solution.put(varName, v);
 		}
 
@@ -189,7 +191,7 @@ public class OrToolsSolver {
 			for (String varName : sortedkeys) {
 				double v = _solverVarMap.get(varName).solutionValue();
 				if (verbosity > 1)
-					System.out.println(varName + " = " + v);
+					logger.info(varName + " = " + v);
 				solution.put(varName, v);
 			}
 			

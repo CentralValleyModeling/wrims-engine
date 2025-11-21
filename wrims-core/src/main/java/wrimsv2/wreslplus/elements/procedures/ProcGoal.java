@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.wreslplus.elements.DvarTemp;
 import wrimsv2.wreslplus.elements.GoalCase;
@@ -16,6 +18,8 @@ import wrimsv2.wreslplus.elements.StudyTemp;
 import wrimsv2.wreslplus.elements.WeightTemp;
 
 public class ProcGoal {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcGoal.class);
 
 	private ProcGoal() {
 	}
@@ -95,8 +99,8 @@ public class ProcGoal {
 	
 				String slackName = o.get("slackName");
 				String surplusName = o.get("surplusName");
-				// System.out.println(slackName);
-				// System.out.println(surplusName);
+				logger.debug(slackName);
+				logger.debug(surplusName);
 	
 				g2.slackList.add(slackName);
 				g2.surplusList.add(surplusName);
@@ -134,7 +138,7 @@ public class ProcGoal {
 						mObj.ssWeightMap_noCase.put(slackName, w);
 					
 					}
-					// System.out.println(slackName+":"+g2.ruleType+":"+d.condition);
+                    logger.debug("{}:{}", slackName, d.condition);
 				}
 				if (surplusName != null) {
 					WeightTemp w = new WeightTemp();
@@ -164,8 +168,8 @@ public class ProcGoal {
 						mObj.ssWeightMap_noCase.put(surplusName, w);
 						
 					}
-					
-					// System.out.println(surplusName+":"+g2.ruleType+":"+d.condition);
+
+                    logger.debug("{}:{}", surplusName, d.condition);
 				}
 	
 				g2.dvarWeightMapList.add(weightMap);
@@ -254,30 +258,7 @@ public class ProcGoal {
 	
 		}
 		else if (ProcGoal.isFree(gt) && ProcGoal.isFree(lt)) {
-	
 			caseExpression = " 1 > 0 ";
-		
-			// default to general treatment, that is, 
-			// lhs + slack - surplus = rhs with zero weight on lhs and rhs 
-			
-//			surplusName = "surplus__" + goalName + "_" + caseNumber;
-//			surplusWeight = gt;
-//			if (goal.timeArraySize.equals("0")){
-//				lhs_m = lhs + "-" + surplusName;
-//			}else{
-//				lhs_m = lhs + "-" + surplusName+"($m)";
-//			}
-//			
-//			slackName = "slack__" + goalName + "_" + caseNumber;
-//			slackWeight = lt;
-//			if (goal.timeArraySize.equals("0")){
-//				lhs_m = lhs_m + "+" + slackName;
-//			}else{
-//				lhs_m = lhs_m + "+" + slackName+"($m)";
-//			}
-//			relation = "=";
-//			caseExpression = lhs_m + " = " + cm.rhs;
-	
 		}
 		else if (ProcGoal.isFree(lt)) {
 	

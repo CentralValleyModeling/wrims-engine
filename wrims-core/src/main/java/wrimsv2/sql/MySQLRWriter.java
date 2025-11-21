@@ -17,6 +17,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.FilePaths;
 import wrimsv2.evaluator.CsvOperation;
@@ -27,7 +29,7 @@ import wrimsv2.evaluator.DssOperation;
 import wrimsv2.evaluator.TimeOperation;
 
 public class MySQLRWriter{
-	
+    private static final Logger logger = LoggerFactory.getLogger(MySQLRWriter.class);
 	private String JDBC_DRIVER = "com.mysql.jdbc.Driver";       
     private String tableName = ControlData.sqlGroup;                 //input 
 	private String scenarioTableName="Scenario";
@@ -76,27 +78,27 @@ public class MySQLRWriter{
 			}
 			
 			Class.forName(JDBC_DRIVER);
-			System.out.println("Connecting to a selected database...");
+			logger.info("Connecting to a selected database...");
 			conn = DriverManager.getConnection(URL, ControlData.USER, ControlData.PASS);
 			stmt = conn.createStatement();
 			String sql="CREATE DATABASE IF NOT EXISTS "+database;
 			stmt.executeUpdate(sql);
 			sql="USE "+database;
 			stmt.executeUpdate(sql);
-			System.out.println("Connected database successfully");
+			logger.info("Connected database successfully");
 		} catch (ClassNotFoundException e) {
 			System.err.println("Failed to load database. Please install the database driver.");
-			System.out.println("Model run terminated.");
+			logger.info("Model run terminated.");
 			System.exit(1);
 		} catch (SQLException e) {
 			System.err.println("Failed to connect to the database. Please check your database URL and user profile.");
-			System.out.println("Model run terminated.");
+			logger.info("Model run terminated.");
 			System.exit(1);
 		}
 	}
 	
 	public void setScenarioIndex(){
-		System.out.println("Setting scenario index...");
+		logger.info("Setting scenario index...");
 		try {
 			stmt = conn.createStatement();
 			String sql = "CREATE TABLE IF NOT EXISTS "+scenarioTableName + " (ID Integer NOT NULL, Table_Name VarChar(40), Scenario VarChar(80), Part_A VarChar(20), Part_F VarChar(30), PRIMARY KEY(ID))";
@@ -129,7 +131,7 @@ public class MySQLRWriter{
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Set scenario index");
+		logger.info("Set scenario index");
 	}
 	
 	public void createScenarioCSV(){
@@ -161,7 +163,7 @@ public class MySQLRWriter{
 	}
 	
 	public void createTable(){
-		System.out.println("Creating table in given database...");
+		logger.info("Creating table in given database...");
 		try {
 			stmt = conn.createStatement();
 			String sql = "CREATE TABLE IF NOT EXISTS "+tableName + " (ID int, PartA VarChar(40), PartF VarChar(40), Timestep VarChar(8), Units VarChar(20), Date_Time DATE, Variable VarChar(40), Kind VarChar(30), Value Double)";
@@ -176,7 +178,7 @@ public class MySQLRWriter{
 				sql="DROP INDEX Variable_Index ON "+tableName;
 				stmt.executeUpdate(sql);
 			}
-			System.out.println("Created table in given database");
+			logger.info("Created table in given database");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -184,11 +186,11 @@ public class MySQLRWriter{
 	
 	public void deleteOldData(){
 		try {
-			System.out.println("Deleting old data in table...");
+			logger.info("Deleting old data in table...");
 			Statement statement = conn.createStatement();
 			String sql="DELETE FROM "+tableName+" WHERE ID="+scenarioIndex;
 			stmt.executeUpdate(sql);
-			System.out.println("Deleted old data in table");
+			logger.info("Deleted old data in table");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -207,11 +209,11 @@ public class MySQLRWriter{
 	
 	public void writeData(){
 		try {
-			System.out.println("Importing output into table...");
+			logger.info("Importing output into table...");
 			stmt = conn.createStatement();
 			String sql = "LOAD DATA LOCAL INFILE '"+csvMySQLPath+"' INTO TABLE " + tableName + " CHARACTER SET UTF8 FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES";
 			stmt.executeUpdate(sql);
-			System.out.println("Imported output into table");
+			logger.info("Imported output into table");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
@@ -219,7 +221,7 @@ public class MySQLRWriter{
 	
 	public void createIndex(){
 		try {
-			System.out.println("Creating Table Index...");
+			logger.info("Creating Table Index...");
 			stmt = conn.createStatement();
 			String sql = "SELECT COUNT(*) as rowcount FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema = '"+database+"' AND table_name='"+tableName+"' AND index_name = 'Variable_Index'"; 
 			ResultSet rs = stmt.executeQuery(sql);
@@ -230,7 +232,7 @@ public class MySQLRWriter{
 				sql="CREATE INDEX Variable_Index ON "+tableName+" (ID, Variable)";
 				stmt.executeUpdate(sql);
 			}
-			System.out.println("Created Table Index");
+			logger.info("Created Table Index");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

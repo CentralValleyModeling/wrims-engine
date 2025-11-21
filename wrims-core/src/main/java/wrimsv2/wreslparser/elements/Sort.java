@@ -115,9 +115,7 @@ public class Sort {
 		Set<String> out = new HashSet<String>();
 		
 		for ( Map.Entry<String, Set<String>>  e : varDependentMap.entrySet() ) {
-			
-			//System.out.println(" *** before: " + e.getKey());
-			
+
 			if (e.getValue().size()==0) {
 				
 				out.add(e.getKey());

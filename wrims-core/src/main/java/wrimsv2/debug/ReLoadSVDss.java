@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.External;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
@@ -24,12 +26,13 @@ import wrimsv2.evaluator.DssOperation;
 import wrimsv2.external.LoadAllDll;
 
 public class ReLoadSVDss {
+    private static final Logger logger = LoggerFactory.getLogger(ReLoadSVDss.class);
 	public ReLoadSVDss(StudyDataSet sds){
 		ControlData.currStudyDataSet=sds;
 				
 		if (!(new File(FilePaths.fullSvarFilePath)).exists()){ 
-			System.out.println("Error: Svar file "+ FilePaths.fullSvarFilePath+" doesn't exist.");
-			System.out.println("=======Run Complete Unsuccessfully=======");
+			logger.error("Error: Svar file "+ FilePaths.fullSvarFilePath+" doesn't exist.");
+			logger.info("=======Run Complete Unsuccessfully=======");
 			System.exit(0);
 		}
 		try {
@@ -52,7 +55,6 @@ public class ReLoadSVDss {
 		Iterator iterator=tsKeySet.iterator();
 		while(iterator.hasNext()){
 			String tsName=(String)iterator.next();
-			//System.out.println("Reading svar timeseries "+tsName);
 			//To Do: in the svar class, add flag to see if svTS has been loaded
 			if (!DataTimeSeries.lookSvDss.contains(tsName)){
 				ArrayList<String> timeStepList=tsTimeStepMap.get(tsName);
@@ -66,6 +68,6 @@ public class ReLoadSVDss {
 				}
 			}
 		}
-		System.out.println("Timeseries Reading Done.");
+		logger.info("Timeseries Reading Done.");
 	}
 }

@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.solverdata.*;
@@ -28,7 +30,7 @@ import wrimsv2.wreslparser.elements.Tools;
 import lpsolve.*;
 
 public class Clp0Solver {
-	
+    private static final Logger logger = LoggerFactory.getLogger(Clp0Solver.class);
 	public static int errorCode;  // 11 : error in batch // 12: error in dvar value
 	public static Map <String, Double> varDoubleMap;
 	private static String lpFilePath;
@@ -77,7 +79,7 @@ public class Clp0Solver {
 			if (!msg.startsWith("optimal")) {
 				String note = msg+"\n"+"Retry with "+tolerance2;
 				ControlData.clp_cbc_note = note;
-				System.out.println(ILP.getYearMonthCycle()+": "+note);
+				logger.info(ILP.getYearMonthCycle()+": "+note);
 				msg=callClp(arg_lpPath, arg_soluDir, arg_soluName, tolerance2);
 			}
 			
@@ -115,7 +117,6 @@ public class Clp0Solver {
 		Runtime rt = Runtime.getRuntime();
 		//String toPass = "cmd /c start /min \"Clp0 solver\" " + batchPath + " " + args1 +" "+ args2 +" "+ args3;
 		String directCall = clpPath+" "+arg_lpPath+" "+tolerance+" -solv -directory "+arg_soluDir+" -solu "+arg_soluName ;
-		//System.out.println(directCall);
 		Process proc = rt.exec(directCall);
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -215,8 +216,8 @@ public class Clp0Solver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.clp_cbc_objective);
-			System.out.println("Assign Dvar Done.");
+			logger.info("Objective Value: "+ControlData.clp_cbc_objective);
+			logger.info("Assign Dvar Done.");
 		}
 	}
 

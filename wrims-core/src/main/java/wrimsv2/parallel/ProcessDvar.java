@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -21,7 +23,8 @@ import wrimsv2.evaluator.ValueEvaluatorParser;
 import wrimsv2.tools.General;
 
 public class ProcessDvar extends RecursiveTask<Integer>{
- 
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcessDvar.class);
 	private int threshold;
 	private int start;
 	private int end;
@@ -87,7 +90,7 @@ public class ProcessDvar extends RecursiveTask<Integer>{
     	for (int ii=start; ii<=end; ii++){
 			String dvName = dvList.get(ii);
 			ControlData.currEvalName=dvName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing dvar "+dvName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing dvar {}", dvName);
 			Dvar dvar=dvMap.get(dvName);
 		
 			ValueEvaluatorParser evaluator=dvar.lowerBoundParser;

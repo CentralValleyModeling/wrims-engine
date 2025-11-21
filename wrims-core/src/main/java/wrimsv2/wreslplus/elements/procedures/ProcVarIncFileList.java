@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.wreslparser.elements.LogUtils;
 import wrimsv2.wreslplus.elements.ModelTemp;
@@ -15,6 +17,8 @@ import wrimsv2.wreslplus.elements.WeightSubgroup;
 import wrimsv2.wreslplus.elements.WeightTable;
 
 public class ProcVarIncFileList {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcVarIncFileList.class);
 
 	private ProcVarIncFileList() {
 	}
@@ -85,8 +89,8 @@ public class ProcVarIncFileList {
 			
 			// f is a include model
 			if (st!=null && st.incModelList_effective.contains(f)) {
-			
-				//System.out.println("# before:"+mt.svIncFileList);
+
+                logger.debug("# before: {}", mt.svIncFileList);
 				
 				String model_label = Param.model_label+f;
 				
@@ -110,7 +114,7 @@ public class ProcVarIncFileList {
 				
 				mt.glIncFileList.remove(index_5);
 				mt.glIncFileList.addAll(index_5, st.modelMap.get(f).glIncFileList_post);
-				//System.out.println("# after:"+mt.svIncFileList);
+                logger.debug("# after: {}", mt.svIncFileList);
 				
 			} 
 			

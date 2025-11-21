@@ -19,6 +19,8 @@ import org.antlr.runtime.TokenStream;
 import com.sunsetsoft.xa.Optimizer;
 import com.sunsetsoft.xa.XAException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -37,7 +39,9 @@ import wrimsv2.evaluator.EvaluatorLexer;
 import wrimsv2.evaluator.EvaluatorParser;
 
 public class XASolver {
-	int modelStatus;
+    private static final Logger logger = LoggerFactory.getLogger(XASolver.class);
+
+    int modelStatus;
 	
 	public XASolver(){
 		long t1 = Calendar.getInstance().getTimeInMillis();
@@ -47,11 +51,11 @@ public class XASolver {
 		setWeights();
 		
 		int ci=ControlData.currCycleIndex+1;
-		if (ControlData.showRunTimeMessage) System.out.println("XA Solver: Solving "+ControlData.currMonth+"/"+ControlData.currDay+"/"+ControlData.currYear+" Cycle "+ci+" ["+ControlData.currCycleName+"]");
+		if (ControlData.showRunTimeMessage) logger.info("XA Solver: Solving "+ControlData.currMonth+"/"+ControlData.currDay+"/"+ControlData.currYear+" Cycle "+ci+" ["+ControlData.currCycleName+"]");
 		ControlData.xasolver.solveWithInfeasibleAnalysis("Output console:");
 		
 		modelStatus=ControlData.xasolver.getModelStatus();
-		if (ControlData.showRunTimeMessage) System.out.println("Model status: "+modelStatus);
+		if (ControlData.showRunTimeMessage) logger.info("Model status: "+modelStatus);
 		if (modelStatus>=2)	getSolverInformation();
 		if (Error.error_solving.size()<1) assignDvar(); 
 		long t2 = Calendar.getInstance().getTimeInMillis();
@@ -59,10 +63,7 @@ public class XASolver {
 	}
 	
 	public void getSolverInformation(){
-		System.out.println("Solver status: "+ControlData.xasolver.getSolverStatus());
-		//System.out.println("Exception: "+ControlData.xasolver.getExceptionCode());
-		//System.out.println("Message: "+ControlData.xasolver.getMessage());
-		//System.out.println("Return code: "+ControlData.xasolver.getRc());
+		logger.info("Solver status: "+ControlData.xasolver.getSolverStatus());
 		
 		switch (modelStatus){
 		    case 2: Error.addSolvingError("Integer Solution (not proven the optimal integer solution).");break; 
@@ -81,7 +82,7 @@ public class XASolver {
 	}
 	
 	public void setDVars(){
-		if (ControlData.showRunTimeMessage) System.out.println("XA Solver: Setting dvars");
+		if (ControlData.showRunTimeMessage) logger.info("XA Solver: Setting dvars");
 		
 		Map<String, Dvar> dvarMap = SolverData.getDvarMap();
 		for (int i=0; i<=1; i++){
@@ -109,7 +110,7 @@ public class XASolver {
 	}
 
 	public void setWeights(){
-		if (ControlData.showRunTimeMessage) System.out.println("XA Solver: Setting weights");
+		if (ControlData.showRunTimeMessage) logger.info("XA Solver: Setting weights");
 		
 		Map<String, WeightElement> weightMap = SolverData.getWeightMap();
 		for (int i=0; i<=1; i++){
@@ -137,7 +138,7 @@ public class XASolver {
 	}
 	
 	private void setConstraints() {
-		if (ControlData.showRunTimeMessage) System.out.println("XA Solver: Setting constraints");
+		if (ControlData.showRunTimeMessage) logger.info("XA Solver: Setting constraints");
 		
 		Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
 		Map<String, Dvar> dvarMap=SolverData.getDvarMap();
@@ -179,7 +180,7 @@ public class XASolver {
 	}
 	
 	public void assignDvar(){
-		if (ControlData.showRunTimeMessage) System.out.println("XA Solver: Assigning dvars\' values");
+		if (ControlData.showRunTimeMessage) logger.info("XA Solver: Assigning dvars\' values");
 		
 		Map<String, Map<String, IntDouble>> varCycleValueMap=ControlData.currStudyDataSet.getVarCycleValueMap();
 		Map<String, Map<String, IntDouble>> varTimeArrayCycleValueMap=ControlData.currStudyDataSet.getVarTimeArrayCycleValueMap();
@@ -232,8 +233,8 @@ public class XASolver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.xasolver.getObjective());
-			System.out.println("Assign Dvar Done.");
+			logger.info("Objective Value: "+ControlData.xasolver.getObjective());
+			logger.info("Assign Dvar Done.");
 		}
 	}
 	

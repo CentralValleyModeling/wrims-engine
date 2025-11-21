@@ -5,22 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Date;
-import java.util.Properties;
 
 import org.antlr.runtime.RecognitionException;
 import org.apache.commons.io.FilenameUtils;
-//import org.codehaus.jackson.JsonGenerationException;
-//import org.codehaus.jackson.JsonParseException;
-//import org.codehaus.jackson.map.JsonMappingException;
-//import org.codehaus.jackson.map.ObjectMapper;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.*;
 import wrimsv2.components.BuildProps;
 import wrimsv2.components.ControlData;
@@ -35,6 +29,7 @@ import wrimsv2.wreslplus.elements.procedures.ToWreslData;
 
 public class StudyUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(StudyUtils.class);
 	public static int config_errors = 0;
 	public static int total_errors = 0;
 	public static boolean loadParserData=false;
@@ -173,7 +168,7 @@ public class StudyUtils {
 
 	public static StudyDataSet loadObject(String objFilePath) {
 
-		System.out.println("Loading precompiled parser data: "+objFilePath);
+		logger.info("Loading precompiled parser data: "+objFilePath);
 		
 		return readObj(objFilePath);
 

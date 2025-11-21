@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.solver.mpmodel.MPModelUtils;
 import wrimsv2.solver.mpmodel.MPModel;
@@ -16,7 +18,7 @@ import wrimsv2.solver.ortools.OrToolsSolver;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class DetectorWorkflow {
-
+    private static final Logger logger = LoggerFactory.getLogger(DetectorWorkflow.class);
 	private MPModel originalModel = null;
 	// private String mpmodelDir = null;
 	// private String mpmodelFile_withoutExt = "";
@@ -80,20 +82,19 @@ public class DetectorWorkflow {
 			MPModelUtils.toLpSolve(originalModel, DetectorParam.lpsDir, DetectorParam.lpsFileNamePrepend
 					+ "_original.lps");
 		// solve original model
-		System.out.println("solve original model...");
+		logger.info("solve original model...");
 		int originalModelReturnCode = aSolver.solve(originalModel);
 		if (originalModelReturnCode != 0) {
 			aSolver.delete();
 			isOriginalValidated = false;
 			return isOriginalValidated;
 		} else {
-			System.out.println("solving success for original model!");
+			logger.info("solving success for original model!");
 			isOriginalValidated = true;
 		}
 
 		originalModel.solution = aSolver.solution;
 		originalModel.objValue = aSolver.solver.objectiveValue();
-		// System.out.println("Original:   "+originalModel.solution);
 
 		aSolver.delete();
 		return isOriginalValidated;
@@ -122,19 +123,18 @@ public class DetectorWorkflow {
 		if (DetectorParam.lpsLogging)
 			MPModelUtils.toLpSolve(baseModel, DetectorParam.lpsDir, DetectorParam.lpsFileNamePrepend + "_base.lps");
 
-		System.out.println("solve base model...");
+		logger.info("solve base model...");
 		int baseModelReturnCode = aSolver.solve(baseModel);
 		if (baseModelReturnCode != 0) {
 			aSolver.delete();
 			isBaseValidated = false;
 			return isBaseValidated;
 		} else {
-			System.out.println("solving success for base model!");
+			logger.info("solving success for base model!");
 		}
 
 		baseModel.solution = aSolver.solution;
 		baseModel.objValue = aSolver.solver.objectiveValue();
-		// System.out.println("SearchBase: "+baseModel.solution);
 
 		aSolver.delete();
 
@@ -200,8 +200,6 @@ public class DetectorWorkflow {
 			return DetectorParam.otherErrors; // not integrated
 
 		// all_vars_to_search = varsGroup.varsPool;
-		//
-		// System.out.println("all_vars_to_search:" + all_vars_to_search);
 
 		//List<String> g1searchVars = new ArrayList<String>(varsGroup.notUpperVertexVars_number.subList(0, 3));
 		//List<String> g2searchVars = new ArrayList<String>(varsGroup.notLowerVertexVars_number.subList(0, 3));
@@ -227,9 +225,9 @@ public class DetectorWorkflow {
 
 		// find solution ranges
 		if (group1Solutions.size() == 0) {
-			System.out.println(" no alt solution found in group1");
+			logger.warn(" no alt solution found in group1");
 		} else {
-			System.out.println(" alt solution found in group1");
+			logger.info(" alt solution found in group1");
 			varRange_group1 = Misc.findVarsRange(group1Solutions);
 		}
 
@@ -257,12 +255,12 @@ public class DetectorWorkflow {
 
 		// find solution ranges
 		if (group2Solutions.size() == 0) {
-			System.out.println(" no alt solution found in group2");
+			logger.warn(" no alt solution found in group2");
 		} else {
 			varRange_group2 = Misc.findVarsRange(group2Solutions);
 		}
 		if (varRange_group2.size() > 0) {
-			System.out.println(" alt solution found in group2");
+			logger.info(" alt solution found in group2");
 			varRange_allGroups.add(varRange_group2);
 		}
 		// ============= end group 2 search ==============
@@ -271,7 +269,7 @@ public class DetectorWorkflow {
 		LinkedHashMap<String, double[]> varRange_all = null;
 
 		if (varRange_allGroups.size() > 0) {
-			System.out.println("update vars range...");
+			logger.info("update vars range...");
 			varRange_all = Misc.updateVarsRange(varRange_allGroups);
 		} else {
 			return DetectorParam.altSolutionNotFound; // no alt solutions found

@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -23,7 +25,7 @@ import wrimsv2.evaluator.WeightEval;
 import wrimsv2.tools.General;
 
 public class ProcessWeightSurplusSlack extends RecursiveTask<Integer>{
- 
+    private static final Logger logger = LoggerFactory.getLogger(ProcessWeightSurplusSlack.class);
 	private int threshold;
 	private int start;
 	private int end;
@@ -77,7 +79,7 @@ public class ProcessWeightSurplusSlack extends RecursiveTask<Integer>{
     	for (int ii=start; ii<=end; ii++){
     		String wtSlackSurplusName= usedWtSlackSurplusDvList.get(ii);
     		ControlData.currEvalName=wtSlackSurplusName;
-    		if (ControlData.showRunTimeMessage) System.out.println("Processing weight "+wtSlackSurplusName);
+    		if (ControlData.showRunTimeMessage) logger.info("Processing weight "+wtSlackSurplusName);
    			WeightElement wtSlackSurplus=wtSlackSurplusMap.get(wtSlackSurplusName);
    			ValueEvaluatorParser evaluator=wtSlackSurplus.weightParser;
    			ParallelVars prvs = new ParallelVars();

@@ -380,7 +380,6 @@ public class AmplWriter {
 		// for dynamic slack surplus vars
 		for (String ss :ControlData.currModelDataSet.usedWtSlackSurplusList) {			
 			
-			//System.out.println("ss:"+ss);
 			outFile.print("var "+ss.toUpperCase() + " >= 0 ; \n");
 			
 		}

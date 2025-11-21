@@ -11,6 +11,8 @@ import org.antlr.runtime.tree.BufferedTreeNodeStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.wresldata.Svar;
@@ -19,7 +21,9 @@ import wrimsv2.components.Error;
 import wrimsv2.components.IntDouble;
 
 public class PreEvaluatorTree {
-	private ArrayList<String> svList;
+
+    private static final Logger logger = LoggerFactory.getLogger(PreEvaluatorTree.class);
+    private ArrayList<String> svList;
 	private Map<String, Svar> svMap;
 
 	public PreEvaluatorTree(StudyDataSet sds ){
@@ -36,7 +40,7 @@ public class PreEvaluatorTree {
 
 	public void preEvaluateSvar(){
 		for (String svName: svList){
-			System.out.println("PreEvaluate svar "+svName);
+            logger.info("PreEvaluate svar {}", svName);
 			Svar svar=svMap.get(svName);
 			ArrayList<String> caseCondition=svar.caseCondition;
 			int i=-1;

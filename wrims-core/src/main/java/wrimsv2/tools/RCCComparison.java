@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
@@ -24,6 +26,7 @@ import wrimsv2.components.IntDouble;
 import wrimsv2.evaluator.EvalConstraint;
 
 public class RCCComparison {
+    private static final Logger logger = LoggerFactory.getLogger(RCCComparison.class);
 	private int cycle=1;
 	private String cycleName;
 	private BufferedWriter out;
@@ -101,7 +104,7 @@ public class RCCComparison {
 			out1.close();
 		}catch (Exception e){
 			e.printStackTrace();
-			System.out.println(gName);
+			logger.error(gName, e);
 		}
 		
 		dvarMap=SolverData.getDvarMap();
@@ -140,8 +143,7 @@ public class RCCComparison {
 			}
 			out2.close();
 		}catch (Exception e){
-			e.printStackTrace();
-			System.out.println(gName);
+			logger.error(gName, e);
 		}
 	}
 	

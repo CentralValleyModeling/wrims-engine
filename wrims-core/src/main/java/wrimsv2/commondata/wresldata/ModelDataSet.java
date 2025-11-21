@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.IntDouble;
@@ -34,7 +36,8 @@ import wrimsv2.components.Error;
 
 
 public class ModelDataSet implements Serializable {
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(ModelDataSet.class);
 	private static final long serialVersionUID = 1L;
 	// / weight table   // <objName,  <itemName, value>>
 	public ArrayList<String> wtList = new ArrayList<String>();
@@ -117,27 +120,27 @@ public class ModelDataSet implements Serializable {
 		resetSlackSurplusWeight(); // this clears slack and surplus vars
 		long t1 = Calendar.getInstance().getTimeInMillis();
 		processTimeseries();
-		if (ControlData.showRunTimeMessage) System.out.println("Process Timeseries Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Timeseries Done.");
 		long t2 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_ts=ControlData.t_ts+(int) (t2-t1);
 		processSvar();
-		if (ControlData.showRunTimeMessage) System.out.println("Process Svar Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Svar Done.");
 		long t3 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_svar=ControlData.t_svar+(int) (t3-t2);
 		processDvar();	
-		if (ControlData.showRunTimeMessage) System.out.println("Process Dvar Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Dvar Done.");
 		long t4 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_dvar=ControlData.t_dvar+(int) (t4-t3);
 		processGoal();	
-		if (ControlData.showRunTimeMessage) System.out.println("Process Goal Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Goal Done.");
 		long t5 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_goal=ControlData.t_goal+(int) (t5-t4);
 		processWeight();
-		if (ControlData.showRunTimeMessage) System.out.println("Process Weight Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Weight Done.");
 		long t6 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_wt=ControlData.t_wt+(int) (t6-t5);
 		processWeightSlackSurplus();
-		if (ControlData.showRunTimeMessage) System.out.println("Process Weight Slack Surplus Done.");
+		if (ControlData.showRunTimeMessage) logger.info("Process Weight Slack Surplus Done.");
 		long t7 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_wtss=ControlData.t_wtss+(int) (t7-t6);
 	}
@@ -185,7 +188,7 @@ public class ModelDataSet implements Serializable {
 		String model=ControlData.currCycleName;
 		for (String svName: svList){
 			ControlData.currEvalName=svName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing svar "+svName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing svar "+svName);
 			Svar svar=svMap.get(svName);
 			ArrayList<ValueEvaluatorParser> caseConditions=svar.caseConditionParsers;
 			ParallelVars prvs = new ParallelVars();
@@ -390,7 +393,7 @@ public class ModelDataSet implements Serializable {
 		String model=ControlData.currCycleName;
 		for (String asName: asList){
 			ControlData.currEvalName=asName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing alias "+asName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing alias "+asName);
 			Alias alias=asMap.get(asName);
 			
 			ValueEvaluatorParser evaluator = alias.expressionParser;

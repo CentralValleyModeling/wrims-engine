@@ -1,12 +1,15 @@
 package wrimsv2.tools;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DiffObjects {
-
+    private static final Logger logger = LoggerFactory.getLogger(DiffObjects.class);
 	public static boolean compareObjects(Object o1, Object o2) {        
         try {
             List<Field> fields1 = getFields(o1);
@@ -20,14 +23,14 @@ public class DiffObjects {
                     	if (field1.get(o1)==null && field2.get(o2)==null){
                     		
                     	}else if (field1.get(o1)==null && field2.get(o2)!=null){
-                    		System.out.println("Value of sds1 for field " + field1 + " is null but the value " + field2.get(o2) + " for field " + field2);
+                    		logger.info("Value of sds1 for field " + field1 + " is null but the value " + field2.get(o2) + " for field " + field2);
                             return false;
                     	}else if (field1.get(o1)==null && field2.get(o2)!=null){
-                    		System.out.println("Value " + field1.get(o1) + " for field " + field1 + " but value of sds2 for field " + field2+" is null");
+                    		logger.info("Value " + field1.get(o1) + " for field " + field1 + " but value of sds2 for field " + field2+" is null");
                             return false;
                     	}else{
                     		if (!field1.get(o1).equals(field2.get(o2))) {
-                    			System.out.println("Value " + field1.get(o1) + " for field " + field1 + " does not match the value " + field2.get(o2) + " for field " + field2);
+                    			logger.info("Value " + field1.get(o1) + " for field " + field1 + " does not match the value " + field2.get(o2) + " for field " + field2);
                     			return false;
                     		}
                     	}
@@ -36,7 +39,7 @@ public class DiffObjects {
                     }
                 }
                 if (!found) {
-                    System.out.println("Field " + field1 + " has not been found in the object " + o2.getClass());
+                    logger.info("Field " + field1 + " has not been found in the object " + o2.getClass());
                     return false;
                 } else {
                     fields2.remove(field2Temp);
@@ -44,7 +47,7 @@ public class DiffObjects {
             }
             if (fields2.size() > 0) {
                 for (Field field : fields2) {
-                    System.out.println("Field " + field + " has not been found in the object " + o1.getClass());
+                    logger.info("Field " + field + " has not been found in the object " + o1.getClass());
                 }
             }
             return true;

@@ -76,7 +76,6 @@ public class Functionget_req_do extends ExternalFunction{
 			while (diff > gmtol) {
 				nit = nit + 1;
 				if (nit > 50) {
-					// System.out.println("Newton-Raphson error - exceeded 50 iterations");
 					System.exit(1);
 				}
 				YY = (QOLD * (float)Math.exp(-gmdT * (QOLD - Gavg) / gbeta) / G_o - (QOLD / G_o - 1.0f) 

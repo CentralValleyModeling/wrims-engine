@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,17 +11,15 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Param;
@@ -34,7 +31,6 @@ import wrimsv2.components.Error;
 import wrimsv2.components.FilePaths;
 import wrimsv2.evaluator.EvalConstraint;
 import wrimsv2.solver.CbcSolver;
-import wrimsv2.solver.Clp0Solver;
 import wrimsv2.solver.LPSolveSolver;
 import wrimsv2.solver.Gurobi.GurobiSolver;
 import wrimsv2.solver.mpmodel.MPModel;
@@ -44,7 +40,7 @@ import wrimsv2.wreslparser.elements.Tools;
 // for LpSolve select 1.Rows 2.Cols 3.Elimeq2 in Presolve
 
 public class ILP {
-
+    private static final Logger logger = LoggerFactory.getLogger(ILP.class);
 	private static String _mpModelDir;
 	private static String _lpSolveDir;
 	private static String _cplexLpDir;
@@ -773,7 +769,7 @@ public class ILP {
 		writeNoteLn(msg, _noteFile);
 		if (printToScreen) {
 			if (isErr) { System.err.println(msg);}
-			else {System.out.println(msg);};
+			else {logger.error(msg);};
 		}
 	}
 	
@@ -1091,10 +1087,10 @@ public class ILP {
 			if (loggingVariableValueRound) v = Math.round(v);
 			if (loggingVariableValueRound10) {v = Math.round(v/10)*10;}
 			// TODO: improve speed
-//			System.out.println("svarFile:"+svarFile.toString());
-//			System.out.println("svName:"+svName);
-//			System.out.println("v:"+v);
-//			System.out.println("df:"+df.toString());
+//			logger.info("svarFile:"+svarFile.toString());
+//			logger.info("svName:"+svName);
+//			logger.info("v:"+v);
+//			logger.info("df:"+df.toString());
 			if (v!=0) {
 				svarFile.print(svName + ":  " + String.format("%23s", df.format(v)) +"\n"  );
 			} else {
@@ -1122,7 +1118,6 @@ public class ILP {
 		Thread thread = new Thread(){
 			public void run(){
 				try {
-					//System.out.println("tasklist.exe /fi \"PID eq "+ControlData.pid+"\" > \""+ _ilpDir.getAbsolutePath()+"\\Note_memory.log\"");
 					ProcessBuilder builder = new ProcessBuilder("tasklist.exe", "/nh", "/fi", "\"PID", "eq", ControlData.pid+"\"");
 					Process process = builder.start();
 					InputStream stdout = process.getInputStream();

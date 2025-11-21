@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.External;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
@@ -41,7 +43,9 @@ import wrimsv2.hdf5.HDF5Writer;
 import wrimsv2.wreslparser.elements.StudyUtils;
 
 public class PreRunModel {
-	public PreRunModel(StudyDataSet sds){
+	private static final Logger logger = LoggerFactory.getLogger(PreRunModel.class);
+
+    public PreRunModel(StudyDataSet sds){
 		setGenTableDir();
 		setSelectedOutputCycles();
 		if (ControlData.ovOption != 0){
@@ -77,13 +81,13 @@ public class PreRunModel {
 		}
 
 		if (!(new File(FilePaths.fullInitFilePath)).exists()){
-			System.out.println("Error: Initial file "+ FilePaths.fullInitFilePath+" doesn't exist.");
-			System.out.println("=======Run Complete Unsuccessfully=======");
+			logger.error("Error: Initial file "+ FilePaths.fullInitFilePath+" doesn't exist.");
+			logger.info("=======Run Complete Unsuccessfully=======");
 			System.exit(1);
 		}
 		if (!(new File(FilePaths.fullSvarFilePath)).exists()){
-			System.out.println("Error: Svar file "+ FilePaths.fullSvarFilePath+" doesn't exist.");
-			System.out.println("=======Run Complete Unsuccessfully=======");
+			logger.error("Error: Svar file "+ FilePaths.fullSvarFilePath+" doesn't exist.");
+			logger.info("=======Run Complete Unsuccessfully=======");
 			System.exit(1);
 		}
 		ControlData.allTsMap=sds.getTimeseriesMap();
@@ -119,13 +123,13 @@ public class PreRunModel {
 			processExternal();
 		}
 		new LoadAllDll(ControlData.allDll);
-		System.out.println("Loading dlls done");
+		logger.info("Loading dlls done");
 
 		if (ControlData.outputType==1){
-			System.out.println("Create HDF5 output data structure.");
+			logger.info("Create HDF5 output data structure.");
 			HDF5Writer.createDataStructure();
 			HDF5Writer.listCycleStaticSv(sds);
-			System.out.println("HDF5 output data structure is created.");
+			logger.info("HDF5 output data structure is created.");
 		}
 
 		if (!ControlData.unchangeGWRestart) setGroundwaterInitFile();
@@ -139,7 +143,7 @@ public class PreRunModel {
 		Iterator iterator=tsKeySet.iterator();
 		while(iterator.hasNext()){
 			String tsName=(String)iterator.next();
-			//System.out.println("Reading svar timeseries "+tsName);
+			logger.debug("Reading svar timeseries "+tsName);
 			//To Do: in the svar class, add flag to see if svTS has been loaded
 			if (!DataTimeSeries.lookSvDss.contains(tsName)){
 				ArrayList<String> timeStepList=tsTimeStepMap.get(tsName);
@@ -153,7 +157,7 @@ public class PreRunModel {
 				}
 			}
 		}
-		System.out.println("Timeseries Reading Done.");
+		logger.info("Timeseries Reading Done.");
 	}
 
 	public void	initialDvarAliasTS(){
@@ -187,7 +191,7 @@ public class PreRunModel {
 				}
 			}
 		}
-		//System.out.println("Load dlls for Cycle "+(ControlData.currCycleIndex+1)+" done");
+		logger.debug("Load dlls for Cycle "+(ControlData.currCycleIndex+1)+" done");
 	}
 
 	public void setSelectedOutputCycles(){
@@ -266,7 +270,7 @@ public class PreRunModel {
 		ControlData.ovPartBC=new HashMap<String, String>();
 		File ovFile = new File (ControlData.ovFile);
 		if (!ovFile.exists()){
-			System.out.println("Output variable file doesn't exist. All the timeseries will be written to the csv file.");
+			logger.warn("Output variable file doesn't exist. All the timeseries will be written to the csv file.");
 			ControlData.ovOption=0;
 			return;
 		}
@@ -275,7 +279,7 @@ public class PreRunModel {
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs));
 		    String line=br.readLine();
 		    if (br == null) {
-		    	System.out.println("Output variable file doesn't contain data. All the timeseries will be written to the csv file.");
+		    	logger.warn("Output variable file doesn't contain data. All the timeseries will be written to the csv file.");
 		    };
 			while((line=br.readLine()) !=null){
 		    	line=line.replace(" ", "").replace("\t",  "").toUpperCase();
@@ -288,12 +292,10 @@ public class PreRunModel {
 		    br.close();
 		    fs.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("Output variable file doesn't exist. All the timeseries will be written to the csv file.");
+			logger.error("Output variable file doesn't exist. All the timeseries will be written to the csv file.", e);
 			ControlData.ovOption=0;
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Output variable file has errors. All the timeseries will be written to the csv file.");
+			logger.error("Output variable file has errors. All the timeseries will be written to the csv file.", e);
 			ControlData.ovOption=0;
 		}
 	}

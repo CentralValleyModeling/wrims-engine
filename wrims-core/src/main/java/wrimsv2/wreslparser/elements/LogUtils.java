@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.Param;
@@ -16,6 +20,7 @@ import wrimsv2.components.ControlData;
 
 public class LogUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(LogUtils.class);
 	public static PrintWriter _logFile;
 	
 	public static void closeLogFile(){
@@ -185,9 +190,9 @@ public class LogUtils {
 
 	public static void titleMsg(String msg){
 
-		System.out.println("============================================");
-		System.out.println(msg);
-		System.out.println("============================================");
+		logger.info("============================================");
+		logger.info(msg);
+		logger.info("============================================");
 		
 		_logFile.println("============================================");
 		_logFile.println(msg);
@@ -198,10 +203,10 @@ public class LogUtils {
 
 	public static void parsingSummaryMsg(String msg, int errors){
 
-		System.out.println("============================================");
-		System.out.println(msg);
-		System.out.println("Total errors: "+errors);
-		System.out.println("============================================");
+		logger.info("============================================");
+		logger.info(msg);
+		logger.info("Total errors: "+errors);
+		logger.info("============================================");
 		
 		_logFile.println("============================================");
 		_logFile.println(msg);
@@ -212,15 +217,15 @@ public class LogUtils {
 	}
 	
 	public static void criticalMsg(String msg){
-
-		System.out.println(msg);
+        Marker mark = MarkerFactory.getMarker("CRITICAL");
+		logger.info(mark, msg);
 		_logFile.println(msg);
 		_logFile.flush();
 	}	
 	
 	public static void importantMsg(String msg){
-
-		if (ControlData.showWreslLog) System.out.println(msg);
+        Marker mark = MarkerFactory.getMarker("IMPORTANT");
+		if (ControlData.showWreslLog) logger.info(mark, msg);
 		_logFile.println(msg);
 		_logFile.flush();
 	}
@@ -240,10 +245,8 @@ public class LogUtils {
 	}
 	
 	public static void normalMsg(String msg){
-		
 		if (Param.printLevel>1){
-
-			if (ControlData.showWreslLog) System.out.println(msg);
+			if (ControlData.showWreslLog) logger.info(msg);
 			_logFile.println(msg);
 
 		}
@@ -251,7 +254,7 @@ public class LogUtils {
 
 	public static void consoleMsgOnly(String msg){
 
-		if (ControlData.showWreslLog) System.out.println(msg);
+		if (ControlData.showWreslLog) logger.info(msg); // TODO, setup specific appender for console only
 		
 	}	
 
@@ -259,7 +262,7 @@ public class LogUtils {
 		
 		 StudyParser.total_warnings++;
 
-		if (ControlData.showWreslLog) System.out.println("# Warning: "+msg);
+		if (ControlData.showWreslLog) logger.warn("# Warning: "+msg);
 		 _logFile.println("# Warning: "+msg);
 		 _logFile.flush();
 		
@@ -267,7 +270,7 @@ public class LogUtils {
 	
 	public static void warningMsgLocation(String filePath, int lineNumber, String msg){
 
-		if (ControlData.showWreslLog) System.out.println( "("+filePath+":"+lineNumber+") "+msg );
+		if (ControlData.showWreslLog) logger.info( "("+filePath+":"+lineNumber+") "+msg );
 		 _logFile.println("# Warning: " + "("+filePath+":"+lineNumber+") "+msg );
 		 _logFile.flush();
 		
@@ -277,7 +280,7 @@ public class LogUtils {
 		
 		 StudyParser.total_errors++;
 
-		if (ControlData.showWreslLog) System.out.println("# Error: "+msg);
+		if (ControlData.showWreslLog) logger.info("# Error: "+msg);
 		 _logFile.println("# Error: "+msg);
 		 _logFile.flush();
 		 
@@ -324,10 +327,10 @@ public class LogUtils {
 		errMsg(msg + " in files: ");
 
 		String sp = "  ";
-		if (ControlData.showWreslLog) System.out.println(sp + file1);
+		if (ControlData.showWreslLog) logger.error(sp + file1);
 		_logFile.println(sp + file1);
 		printTree(file1, reverseMap, sp);
-		if (ControlData.showWreslLog) System.out.println(sp + file2);
+		if (ControlData.showWreslLog) logger.error(sp + file2);
 		_logFile.println(sp + file2);
 		printTree(file2, reverseMap, sp);
 		
@@ -342,21 +345,12 @@ public class LogUtils {
 			level = level + "--";
 			Set<String> parents = reverseMap.get(f);
 			for (String s : parents) {
-				if (ControlData.showWreslLog) System.out.println(" "+level + "> "+ s);
+				if (ControlData.showWreslLog) logger.info(" "+level + "> "+ s);
 				_logFile.println(" "+level + "> "+ s);
 
 				printTree(s, reverseMap, level);
 
 			}
-
-		}	
-
-
-	}	
-	
-	
-	
-	
-	
+		}
+	}
 }
-	

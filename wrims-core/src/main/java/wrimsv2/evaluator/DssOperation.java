@@ -1,5 +1,7 @@
 package wrimsv2.evaluator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Timeseries;
@@ -26,6 +28,7 @@ import java.util.Set;
 
 public class DssOperation {
 
+    private static final Logger logger = LoggerFactory.getLogger(DssOperation.class);
 	private static int savedStartMonthlyTimestep;
 	private static int savedEndMonthlyTimestep;
 	private static int totalSavedMonthlyTimestep;
@@ -325,7 +328,7 @@ public class DssOperation {
 	}
 
 	public static void writeInitDvarAliasToDSS() {
-		System.out.println("writing initial data for dvar and alias to dv dss");
+		logger.info("writing initial data for dvar and alias to dv dss");
 		Set initSet=DataTimeSeries.dvAliasInit.keySet();
 		Iterator iterator = initSet.iterator();
 		while(iterator.hasNext()){
@@ -362,12 +365,12 @@ public class DssOperation {
 				//ControlData.writer.storeTimeSeriesData(pathName, startJulmin, ds, storeFlags);
 			}
 		}
-		System.out.println("initial data for dvar and alias written to dv dss");
+		logger.info("initial data for dvar and alias written to dv dss");
 	}
 
 	public static void writeDVAliasToDSS() {
 		long t1 = Calendar.getInstance().getTimeInMillis();
-		System.out.println("writing dvar and alias to dv dss");
+		logger.info("writing dvar and alias to dv dss");
 		Set dvAliasSet=DataTimeSeries.dvAliasTS.keySet();
 		Iterator iterator = dvAliasSet.iterator();
 		while(iterator.hasNext()){
@@ -420,7 +423,7 @@ public class DssOperation {
 		System.gc();
 
 		if (ControlData.isOutputCycle) writeDVAliasCycleDataToDSS();
-		System.out.println("dvar and alias written to dv dss");
+		logger.info("dvar and alias written to dv dss");
 		long t2 = Calendar.getInstance().getTimeInMillis();
 		ControlData.t_writeDss=ControlData.t_writeDss+(int) (t2-t1);
 	}
@@ -497,7 +500,7 @@ public class DssOperation {
 	}
 
 	public static void saveInitialData(HecDss dss, String fileName){
-		System.out.println("write initial data for dvar and alias to "+fileName);
+		logger.info("write initial data for dvar and alias to "+fileName);
 		Set initSet=DataTimeSeries.dvAliasInit.keySet();
 		Iterator iterator = initSet.iterator();
 		while(iterator.hasNext()){
@@ -537,7 +540,7 @@ public class DssOperation {
 	}
 
 	public static void saveDVInitialData(HecDss dss, String fileName){
-		System.out.println("write initial data for dvar and alias to "+fileName);
+		logger.info("write initial data for dvar and alias to "+fileName);
 		Set initSet=DataTimeSeries.dvAliasInit.keySet();
 		Iterator iterator = initSet.iterator();
 		while(iterator.hasNext()){
@@ -574,11 +577,11 @@ public class DssOperation {
 			}
 			//writer.storeTimeSeriesData(pathName, startJulmin, ds, storeFlags);
 		}
-		System.out.println("Initial file saved.");
+		logger.info("Initial file saved.");
 	}
 
 	public static void saveSVInitialData(HecDss dss, String fileName){
-		System.out.println("write initial data for svar to "+fileName);
+		logger.info("write initial data for svar to "+fileName);
 		Set initSet=DataTimeSeries.svInit.keySet();
 		Iterator iterator = initSet.iterator();
 		Map<String, Timeseries> allTsMap = ControlData.allTsMap;
@@ -657,11 +660,11 @@ public class DssOperation {
 			}
 			//writer.storeTimeSeriesData(pathName, startJulmin, dd, storeFlags);
 		}
-		System.out.println("Initial file saved.");
+		logger.info("Initial file saved.");
 	}
 
 	public static void saveDvarData(HecDss dss, String fileName){
-		System.out.println("write dvar and alias to "+fileName);
+		logger.info("write dvar and alias to "+fileName);
 
 		savedEndMonthlyTimestep=savedTimeStep("1MON", ControlData.currYear, ControlData.currMonth, ControlData.currDay);
 		savedEndDailyTimestep=savedTimeStep("1DAY", ControlData.currYear, ControlData.currMonth, ControlData.currDay);
@@ -726,7 +729,7 @@ public class DssOperation {
 
 		if (ControlData.isOutputCycle) saveDvarCycleData(dss, fileName);
 
-		System.out.println("Dvar file saved.");
+		logger.info("Dvar file saved.");
 	}
 
 	public static void saveDvarCycleData(HecDss dss, String fileName){
@@ -795,7 +798,7 @@ public class DssOperation {
 	}
 
 	public static void saveSvarTSData(HecDss dss, String fileName){
-		System.out.println("write svar timeseries to "+fileName);
+		logger.info("write svar timeseries to "+fileName);
 		Set svTsSet=DataTimeSeries.svTS.keySet();
 		Iterator iterator = svTsSet.iterator();
 		Map<String, Timeseries> allTsMap = ControlData.allTsMap;
@@ -874,7 +877,7 @@ public class DssOperation {
 			}
 			//writer.storeTimeSeriesData(pathName, startJulmin, dd, storeFlags);
 		}
-		System.out.println("Svar file saved.");
+		logger.info("Svar file saved.");
 	}
 
 	public static int savedTimeStep(String timeStep, int year, int month, int day){

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.commondata.wresldata.StudyDataSet;
@@ -16,14 +18,13 @@ import wrimsv2.wreslplus.elements.StudyTemp;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class Warmstart {
-
+    private static final Logger logger = LoggerFactory.getLogger(Warmstart.class);
 	public static void collectIntegerDV_1(StudyTemp st) {
 			// TODO: put result in control data.
 			ControlData.currStudyDataSet.cycIntDvMap = new HashMap<Integer,LinkedHashSet<String>>();		
 			ControlData.currStudyDataSet.allIntDv = new LinkedHashSet<String>();
 			
 			
-			//System.out.println("st.seqList: "+st.seqList);
 			for (String k: st.seqList){
 				SequenceTemp seq = st.seqMap.get(k);
 				int cyc = st.modelList_effective.indexOf(seq.model);
@@ -36,17 +37,11 @@ public class Warmstart {
 					ControlData.currStudyDataSet.allIntDv.addAll(intDVSet);
 				}
 				
-				//System.out.println(st.seqMap.get(k).dvList);
 			}
-			//System.out.println("st.modelList_effective: "+st.modelList_effective);
-			
 			
 			
 			for (int c: ControlData.currStudyDataSet.cycIntDvMap.keySet()){
-				System.out.println("cycle: "+c+"\n"+ControlData.currStudyDataSet.cycIntDvMap.get(c));
-				System.out.println();
-				System.out.println();
-				//System.out.println(ControlData.cycIntDvMap.get(c));
+				logger.info("cycle: "+c+"\n"+ControlData.currStudyDataSet.cycIntDvMap.get(c));
 			}
 			
 			// find first cyc with int
@@ -113,14 +108,12 @@ public class Warmstart {
 					} else {
 						cycWarmStart.remove(cycWarmStart.size()-1);
 					}
-					//System.out.println("stop: "+stop);
-					
+
 					start = Procedures.findWarmStart(stop, nCyc); if (start<nCyc-1) cycWarmStart.add(start);
-					//System.out.println("start: "+start);
 				}
 				
 				
-				if (cycWarmStart.size()!=cycWarmStop.size()) System.out.println("*** Error in warm setting.");
+				if (cycWarmStart.size()!=cycWarmStop.size()) logger.error("*** Error in warm setting.");
 				
 				ControlData.cycWarmStart = cycWarmStart;
 				ControlData.cycWarmStop = cycWarmStop;
@@ -133,9 +126,8 @@ public class Warmstart {
 				
 			}
 			
-			System.out.println("cycWarmStart: "+ControlData.cycWarmStart);
-	//		System.out.println("cycWarmStop: "+ControlData.cycWarmStop);
-			System.out.println("cycWarmUse: " + ControlData.cycWarmUse);
+			logger.info("cycWarmStart: "+ControlData.cycWarmStart);
+			logger.info("cycWarmUse: " + ControlData.cycWarmUse);
 			
 			String w = ControlData.cycWarmStart.toString() + "\n" + ControlData.cycWarmUse.toString() + "\n";
 			for (int c : ControlData.currStudyDataSet.cycIntDvMap.keySet()) {
@@ -152,7 +144,7 @@ public class Warmstart {
 			sd.allIntDv = new LinkedHashSet<String>();
 			
 			
-			//System.out.println("st.seqList: "+st.seqList);
+
 			for (String k: sd.getModelList()){		
 				int cyc = sd.getModelList().indexOf(k);
 				if (cyc>=0){
@@ -168,20 +160,9 @@ public class Warmstart {
 					sd.allIntDv.addAll(intDVSet);
 				}
 				
-				//System.out.println(st.seqMap.get(k).dvList);
-			}
-			//System.out.println("st.modelList_effective: "+st.modelList_effective);
-			
-			
-			
-//			for (int c: ControlData.cycIntDvMap.keySet()){
-//				System.out.println("cycle: "+c+"\n"+ControlData.cycIntDvMap.get(c));
-//				System.out.println();
-//				System.out.println();
-//			}
-			
 
-			
+			}
+
 			int nCyc = sd.cycIntDvMap.size();
 			
 			int firstCycWarmStart=9999;
@@ -214,14 +195,14 @@ public class Warmstart {
 					} else {
 						cycWarmStart.remove(cycWarmStart.size()-1);
 					}
-					//System.out.println("stop: "+stop);
+
 					
 					start = Procedures.findWarmStart(stop, nCyc, sd); if (start<nCyc-1) cycWarmStart.add(start);
-					//System.out.println("start: "+start);
+
 				}
 				
 				
-				if (cycWarmStart.size()!=cycWarmStop.size()) System.out.println("*** Error in warm setting.");
+				if (cycWarmStart.size()!=cycWarmStop.size()) logger.error("*** Error in warm setting.");
 				
 				ControlData.cycWarmStart = cycWarmStart;
 				ControlData.cycWarmStop = cycWarmStop;
@@ -234,9 +215,8 @@ public class Warmstart {
 				
 			}
 			
-			System.out.println("cycWarmStart: "+ControlData.cycWarmStart);
-	//		System.out.println("cycWarmStop: "+ControlData.cycWarmStop);
-			System.out.println("cycWarmUse: " + ControlData.cycWarmUse);
+			logger.info("cycWarmStart: "+ControlData.cycWarmStart);
+			logger.info("cycWarmUse: " + ControlData.cycWarmUse);
 			
 			if (ControlData.cycWarmStart != null && ControlData.cycWarmUse != null) {
 
@@ -285,14 +265,14 @@ public class Warmstart {
 				} else {
 					cycWarmStart.remove(cycWarmStart.size()-1);
 				}
-				//System.out.println("stop: "+stop);
+
 				
 				start = Procedures.findWarmStart(stop, nCyc, sd); if (start<nCyc-1) cycWarmStart.add(start);
-				//System.out.println("start: "+start);
+
 			}
 			
 			
-			if (cycWarmStart.size()!=cycWarmStop.size()) System.out.println("*** Error in warm setting.");
+			if (cycWarmStart.size()!=cycWarmStop.size()) logger.error("*** Error in warm setting.");
 			
 			ControlData.cycWarmStart = cycWarmStart;
 			ControlData.cycWarmStop = cycWarmStop;
@@ -305,9 +285,8 @@ public class Warmstart {
 			
 		}
 		
-		System.out.println("cycWarmStart: "+ControlData.cycWarmStart);
-//		System.out.println("cycWarmStop: "+ControlData.cycWarmStop);
-		System.out.println("cycWarmUse: " + ControlData.cycWarmUse);
+		logger.info("cycWarmStart: "+ControlData.cycWarmStart);
+		logger.info("cycWarmUse: " + ControlData.cycWarmUse);
 		
 		if (ControlData.cycWarmStart != null && ControlData.cycWarmUse != null) {
 

@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.FilePaths;
 import wrimsv2.evaluator.CondensedReferenceCacheAndRead;
@@ -34,7 +36,7 @@ import wrimsv2.evaluator.CondensedReferenceCacheAndRead.CondensedReferenceCache;
 import wrimsv2.hdf5.DSSHDF5Converter;
 
 public class DssToSQLDatabase {
-
+    private static final Logger logger = LoggerFactory.getLogger(DssToSQLDatabase.class);
 	public static String dssInfoFilePath="";
 	private ArrayList<String[]> dssFilePathArr=new ArrayList<String[]> ();
 	
@@ -114,13 +116,13 @@ public class DssToSQLDatabase {
 	}
 	
 	public void dssReader(String[] dssFilePaths){
-		System.out.println("Reading DV, SV, and Init Dss Files...");
+		logger.info("Reading DV, SV, and Init Dss Files...");
 		DataTimeSeries.dvAliasTS = readDssDataFixLength(dssFilePaths[0]);
-		System.out.println("Reading DV Dss File Done");
+		logger.info("Reading DV Dss File Done");
 		DataTimeSeries.svTS = readDssData(dssFilePaths[1]);
-		System.out.println("Reading SV Dss File Done");
+		logger.info("Reading SV Dss File Done");
 		DataTimeSeries.dvAliasInit = readDssData(dssFilePaths[2]);
-		System.out.println("Reading Init Dss File Done");
+		logger.info("Reading Init Dss File Done");
 	}
 	
 	public HashMap<String, DssDataSet>  readDssData(String dssPath){

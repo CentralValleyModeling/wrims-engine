@@ -11,6 +11,8 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.TokenStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.components.ControlData;
 import wrimsv2.evaluator.ValueEvaluatorLexer;
@@ -28,6 +30,8 @@ import wrimsv2.wreslplus.elements.WeightTable;
 import wrimsv2.components.Error;
 
 public class ProcIfIncItemGroup {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcIfIncItemGroup.class);
 
 	private ProcIfIncItemGroup() {
 	}
@@ -254,9 +258,7 @@ public class ProcIfIncItemGroup {
 				//if (vep.evalCondition) return ret;
 				
 			} catch (Exception e) {
-				// TODO: handle exception
-				System.out.println(" Error in processing conditional include ...");
-				
+				logger.error(" Error in processing conditional include ...", e);
 				ret.add(false);
 				
 			} finally {

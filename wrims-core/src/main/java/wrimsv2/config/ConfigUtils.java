@@ -214,7 +214,6 @@ public class ConfigUtils {
 		} catch (IOException e){
 			Error.addConfigError("Invalid file path in config file");
 			Error.writeErrorLog();
-			//logger.info("Invalid file path");
 			e.printStackTrace();
 		}
 		
@@ -778,7 +777,6 @@ public class ConfigUtils {
 					if (sf.exists()) {					
 						LPSolveSolver.configFile = sf.getCanonicalPath();
 					} else {
-						//logger.error("#: LpSolveConfigFile not found: " + f);
 						Error.addConfigError("LpSolveConfigFile not found: " + f);
 						Error.writeErrorLog();
 					}
@@ -802,7 +800,6 @@ public class ConfigUtils {
 					LPSolveSolver.numberOfRetries = Integer.parseInt(s);
 					
 				} catch (Exception e) {
-					//logger.error("#: LpSolveNumberOfRetries not recognized: " + s);
 					Error.addConfigError("LpSolveNumberOfRetries not recognized: " + s);
 					Error.writeErrorLog();
 					

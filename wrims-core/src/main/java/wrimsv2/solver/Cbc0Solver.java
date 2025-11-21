@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.solverdata.*;
@@ -24,7 +26,7 @@ import wrimsv2.ilp.ILP;
 import wrimsv2.solver.cbc.FilePassingUtils;
 
 public class Cbc0Solver {
-	
+    private static final Logger logger = LoggerFactory.getLogger(Cbc0Solver.class);
 	public static int errorCode;  // 11 : error in batch // 12: error in dvar value
 	public static Map <String, Double> varDoubleMap;
 	private static String lpFilePath;
@@ -60,13 +62,13 @@ public class Cbc0Solver {
 		
 		double time_second = (endT-beginT)/1000.;
 		
-		//System.out.println(FilenameUtils.getBaseName(soluPath));
+		logger.debug(FilenameUtils.getBaseName(soluPath));
 		if (time_second > 1.0) {
 			String mname = FilenameUtils.getBaseName(soluPath);
 		
 			ILP.writeNoteLn(mname, " time(sec): "+time_second);
-			//System.out.println(ILP.getYearMonthCycle()+": "+time_second);
-			System.out.println(mname+": "+time_second);
+            logger.debug("{}: {}", ILP.getYearMonthCycle(), time_second);
+            logger.info("{}: {}", mname, time_second);
 			
 		}
 	
@@ -89,14 +91,7 @@ public class Cbc0Solver {
 		try {
 
 			callExe(arg_lpPath, arg_soluDir, arg_soluName, tolerance1);
-			
-//			if (!isOptimal) {
-//				//System.out.println("msg:"+msg);
-//				String note = "Retry with "+tolerance2;
-//				ControlData.clp_cbc_note = note;
-//				System.out.println(ILP.getYearMonthCycle()+": "+note);
-//				callExe(arg_lpPath, arg_soluDir, arg_soluName, tolerance2);
-//			}
+
 			
 			errorCode=FilePassingUtils.parseReturnFile(soluPath);
 
@@ -135,7 +130,7 @@ public class Cbc0Solver {
 
 		//String directCall = cbcPath+" "+arg_lpPath+" "+tolerance+" -solv -directory "+arg_soluDir+" -solu "+arg_soluName ;
 		String directCall = cbcPath+" "+arg_lpPath+" "+" -solv -directory "+arg_soluDir+" -solu "+arg_soluName ;
-		//System.out.println(directCall);
+		logger.debug(directCall);
 		Process proc = rt.exec(directCall);
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -146,28 +141,8 @@ public class Cbc0Solver {
 		String last3Line="";
 		String last4Line="";
 		while ((line = reader.readLine()) != null){
-			//if (line.isEmpty()) continue;
-			//allLines = allLines+"\n"+line;
-			//if (line.toLowerCase().contains("optimal")) {
-			//	isOptimal=true;
-			//}
-//			System.out.println("line: "+line);	
-//			last4Line=last3Line;
-//			last3Line=last2Line;
-//			last2Line=lastLine;
-//			lastLine=line;
 			continue;
 		}
-
-		
-//		if (!isOptimal) {
-//			System.out.println("============== Error ===============");
-//			System.out.println(allLines);
-//		}
-		//int exitVal = proc.waitFor();  // TODO: exitVal not works
-
-		//return last2Line.toLowerCase();
-		//return isOptimal;
 	}	
 	
 	
@@ -254,8 +229,8 @@ public class Cbc0Solver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.clp_cbc_objective);
-			System.out.println("Assign Dvar Done.");
+            logger.debug("Objective Value: {}", ControlData.clp_cbc_objective);
+			logger.info("Assign Dvar Done.");
 		}
 	}
 

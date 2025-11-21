@@ -12,6 +12,8 @@ import java.util.Map;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
@@ -30,7 +32,7 @@ import wrimsv2.wreslparser.elements.StudyUtils;
 import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 
 public class ControllerSG {
-	
+	private static final Logger logger = LoggerFactory.getLogger(ControllerSG.class);
 	public ControllerSG() {
 		long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		setControlData();
@@ -45,13 +47,13 @@ public class ControllerSG {
 				runModel(sds);
 			}
 		} catch (RecognitionException e) {
-			e.printStackTrace();
+			logger.error("RecognitionException when parsing, pre-evaluating, or running model", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+            logger.error("IOException when parsing, pre-evaluating, or running model", e);
 		}
 		long endTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		int runPeriod=(int) (endTimeInMillis-startTimeInMillis);
-		System.out.println("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
+		logger.info("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
 	}
 	
 	public ControllerSG(String[] args) {
@@ -67,14 +69,14 @@ public class ControllerSG {
 				new PreEvaluator(sds);
 				runModel(sds);
 			}
-		} catch (RecognitionException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        } catch (RecognitionException e) {
+            logger.error("RecognitionException when parsing, pre-evaluating, or running model", e);
+        } catch (IOException e) {
+            logger.error("IOException when parsing, pre-evaluating, or running model", e);
+        }
 		long endTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		int runPeriod=(int) (endTimeInMillis-startTimeInMillis);
-		System.out.println("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
+		logger.info("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
 		System.exit(0);
 	}
 	
@@ -194,15 +196,15 @@ public class ControllerSG {
 	}
 	
 	public void runModel(StudyDataSet sds){
-		System.out.println("=============Prepare Run Study===========");
+		logger.info("=============Prepare Run Study===========");
 		new PreRunModel(sds);
-		System.out.println("==============Run Study Start============");
+		logger.info("==============Run Study Start============");
 		if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG") ){
 			runModelXA(sds);
 		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")){
 			runModelCbc(sds);
 		}
-		System.out.println("=================Run ends!================");
+		logger.info("=================Run ends!================");
 	}
 	
 	public void runModelXA(StudyDataSet sds){
@@ -211,7 +213,7 @@ public class ControllerSG {
 		
 		new InitialXASolver();
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			logger.error("Model run exits due to error.");
 			System.exit(1);
 		}
 		ArrayList<ValueEvaluatorParser> modelConditionParsers=sds.getModelConditionParsers();
@@ -270,11 +272,11 @@ public class ControllerSG {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -288,7 +290,7 @@ public class ControllerSG {
 								HDF5Writer.writeOneCycleSv(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 						//if (ControlData.currTimeStep==0 && ControlData.currCycleIndex==2) new RCCComparison();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
@@ -306,7 +308,7 @@ public class ControllerSG {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (ControlData.timeStep.equals("1MON")){
@@ -343,7 +345,7 @@ public class ControllerSG {
 		
 		CbcSolver.init(false, sds); 	if (ControlData.cbc_debug_routeXA || ControlData.cbc_debug_routeCbc) {new InitialXASolver();}
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			logger.error("Model run exits due to error.");
 			System.exit(1);
 		}
 		ArrayList<ValueEvaluatorParser> modelConditionParsers=sds.getModelConditionParsers();
@@ -408,7 +410,7 @@ public class ControllerSG {
 							if (Error.error_solving.size() > 0) {
 								String msg = "XA solving error.";
 								ILP.writeNoteLn("", msg);
-								System.out.println("" + msg);
+								logger.info("" + msg);
 								Error.writeErrorLog();
 								Error.error_solving.clear();
 							}
@@ -427,11 +429,11 @@ public class ControllerSG {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -445,7 +447,7 @@ public class ControllerSG {
 								HDF5Writer.writeOneCycleSv(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (Error.error_evaluation.size()>=1) noError=false;
 
 						
@@ -490,8 +492,7 @@ public class ControllerSG {
 								String wa_xa_str = "";
 								for (String s : ControlData.watchList) {
 									if (ControlData.currModelDataSet.dvList.contains(s)){
-									
-										//System.out.println(s);
+										logger.debug("ControlData.watchList member: {}", s);
 										wa_cbc = CbcSolver.varDoubleMap.get(s);
 										wa_xa  = ControlData.xasolver.getColumnActivity(s);
 										wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
@@ -575,7 +576,7 @@ public class ControllerSG {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
 						if (ControlData.timeStep.equals("1MON")){

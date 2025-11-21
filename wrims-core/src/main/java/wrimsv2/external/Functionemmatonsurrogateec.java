@@ -2,6 +2,8 @@ package wrimsv2.external;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.TimeUsage;
 import calsim.surrogate.AggregateMonths;
 import calsim.surrogate.DailyToSurrogate;
@@ -17,7 +19,8 @@ import calsim.surrogate.examples.EmmatonExampleTensorFlowANN;
 import calsim.surrogate.examples.SalinitySurrogateManager;
 
 public class Functionemmatonsurrogateec extends ExternalFunction{
-	private final boolean DEBUG = false;
+    private static final Logger logger = LoggerFactory.getLogger(Functionemmatonsurrogateec.class);
+    private final boolean DEBUG = false;
 	private static int cpuTime=0;
 	private static int nCalls=0;
 	private SalinitySurrogateManager ssm;
@@ -128,14 +131,14 @@ public class Functionemmatonsurrogateec extends ExternalFunction{
 		double[][] smscg1 = { smscg };
 		
 		if (DEBUG){
-			System.out.println("sac " + Arrays.toString(sac));
-			System.out.println("exp " + Arrays.toString(exp));
-			System.out.println("dcc " + Arrays.toString(dcc));
-			System.out.println("net_dcd " + Arrays.toString(net_dcd));
-			System.out.println("sjr " + Arrays.toString(sjr));
-			System.out.println("smscg " + Arrays.toString(smscg));
-			System.out.println("Month " + month);
-			System.out.println("Year " + year);
+			logger.info("sac " + Arrays.toString(sac));
+			logger.info("exp " + Arrays.toString(exp));
+			logger.info("dcc " + Arrays.toString(dcc));
+			logger.info("net_dcd " + Arrays.toString(net_dcd));
+			logger.info("sjr " + Arrays.toString(sjr));
+			logger.info("smscg " + Arrays.toString(smscg));
+			logger.info("Month " + month);
+			logger.info("Year " + year);
 		}
 		
 		ArrayList<double[][]> floatInput = new ArrayList<double[][]>();

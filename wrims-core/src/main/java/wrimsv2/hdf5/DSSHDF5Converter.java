@@ -25,6 +25,8 @@ import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.ControllerBatch;
@@ -45,7 +47,7 @@ import wrimsv2.launch.LaunchConfiguration;
 import wrimsv2.wreslparser.elements.StudyUtils;
 
 public class DSSHDF5Converter {
-
+    private static final Logger logger = LoggerFactory.getLogger(DSSHDF5Converter.class);
 	private static ArrayList<String> svLookupNames = new ArrayList<String>();
 	private static ArrayList<String> svLookupKinds = new ArrayList<String>();
 	private static ArrayList<String> svLookupUnits = new ArrayList<String>();
@@ -107,7 +109,7 @@ public class DSSHDF5Converter {
 	public void process(){
 		convertSVFile();
 		convertInitFile();
-		System.out.println("Conversion done");
+		logger.info("Conversion done");
 	}
 	
 	public void convertSVFile(){
@@ -127,10 +129,10 @@ public class DSSHDF5Converter {
 		svLookupIndex = new ArrayList<Integer>();
 		svIndex=0;
 		
-		System.out.println("Read Svar Dss File");
+		logger.info("Read Svar Dss File");
 		readMonthlySVDssFile();
 		readDailySVDssFile();
-		System.out.println("Write Svar HDF5 File");
+		logger.info("Write Svar HDF5 File");
 		createSVHDF5DataStructure();
 		createSVLookup();
 		listMonthlySVHDF5File();
@@ -577,7 +579,7 @@ public class DSSHDF5Converter {
 		svFid=HDF5Util.locateFile(svH5FileName);
 		
 		if (svFid<0){
-			System.out.println("Failed to generate HDF5 file.");
+			logger.error("Failed to generate HDF5 file.");
 		}else{
 			try {
 				svGidPartA=HDF5Util.locateGroup(svFid, ControlData.partA);
@@ -668,7 +670,7 @@ public class DSSHDF5Converter {
 		initFid=HDF5Util.locateFile(initH5FileName);
 		
 		if (initFid<0){
-			System.out.println("Failed to generate HDF5 file.");
+			logger.error("Failed to generate HDF5 file.");
 		}else{
 			try {
 				initGidPartA=HDF5Util.locateGroup(initFid, ControlData.partA);
@@ -973,10 +975,10 @@ public class DSSHDF5Converter {
 		initLookupIndex = new ArrayList<Integer>();
 		initIndex=0;
 
-		System.out.println("Read Initial Dss File");
+		logger.info("Read Initial Dss File");
 		readMonthlyInitDssFile();
 		readDailyInitDssFile();
-		System.out.println("Write Initial HDF5 File");
+		logger.info("Write Initial HDF5 File");
 		createInitHDF5DataStructure();
 		createInitLookup();
 		listMonthlyInitHDF5File();

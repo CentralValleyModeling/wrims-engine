@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.External;
@@ -17,6 +19,7 @@ import wrimsv2.commondata.wresldata.WeightElement;
 
 public class SimulationDataSet
 {
+    private static final Logger logger = LoggerFactory.getLogger(SimulationDataSet.class);
   public String currentAbsolutePath;
   public String currentAbsoluteParent;
 
@@ -141,7 +144,7 @@ public class SimulationDataSet
   {
     boolean b = false;
 
-    if (s == null) System.out.println("Fatal error!!! SimulationDataSet is null in file: " + filePath);
+    if (s == null) logger.error("Fatal error!!! SimulationDataSet is null in file: " + filePath);
 
     for (String e : s.wtList) {
       if (this.wtList.contains(e)) {
@@ -513,7 +516,7 @@ public class SimulationDataSet
 
   public SimulationDataSet dePrioritize(SimulationDataSet laterFileData, String filePath_forErrorMessage, Map<String, Set<String>> reverseMap)
   {
-    if (laterFileData == null) System.out.println("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
+    if (laterFileData == null) logger.error("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
 
     if (hasDuplicateIn(laterFileData, filePath_forErrorMessage, reverseMap))
       overwrite(laterFileData);
@@ -526,7 +529,7 @@ public class SimulationDataSet
 
   public SimulationDataSet prioritize_append(SimulationDataSet laterFileData, String filePath_forErrorMessage, Map<String, Set<String>> reverseMap)
   {
-    if (laterFileData == null) System.out.println("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
+    if (laterFileData == null) logger.error("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
 
     if (hasDuplicateIn(laterFileData, filePath_forErrorMessage, reverseMap)) {
       remove(laterFileData);
@@ -537,7 +540,7 @@ public class SimulationDataSet
 
   public SimulationDataSet prioritize_prepend(SimulationDataSet laterFileData, String filePath_forErrorMessage, Map<String, Set<String>> reverseMap)
   {
-    if (laterFileData == null) System.out.println("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
+    if (laterFileData == null) logger.error("Fatal error!!! SimulationDataSet is null in file: " + filePath_forErrorMessage);
 
     if (hasDuplicateIn(laterFileData, filePath_forErrorMessage, reverseMap)) {
       remove(laterFileData);

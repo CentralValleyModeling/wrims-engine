@@ -16,15 +16,16 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
 
-
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Param;
 import wrimsv2.wreslparser.grammar.WreslTreeLexer;
 import wrimsv2.wreslparser.grammar.WreslTreeParser;
 import wrimsv2.wreslparser.grammar.WreslTreeWalker;
 
 public class FileParser {
-	
+	private static final Logger logger = LoggerFactory.getLogger(FileParser.class);
+
 	private static CharStream stream;	
 	public String scope;
 	public String kind;
@@ -266,7 +267,7 @@ public class FileParser {
 	    catch(Exception e) {
 	         //e.printStackTrace();
 	         
-	         System.out.println("File not found: "+ inputFilePath);
+	         logger.error("File not found: "+ inputFilePath);
 	         return null;
 	         //System.exit(1);
 	         

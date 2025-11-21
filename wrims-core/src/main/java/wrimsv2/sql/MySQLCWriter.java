@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.FilePaths;
 import wrimsv2.evaluator.DataTimeSeries;
@@ -21,6 +23,8 @@ import wrimsv2.evaluator.DssOperation;
 import wrimsv2.evaluator.TimeOperation;
 
 public class MySQLCWriter {
+
+    private static final Logger logger = LoggerFactory.getLogger(MySQLCWriter.class);
 	
 	private String JDBC_DRIVER = "com.mysql.jdbc.Driver";       
 	
@@ -65,30 +69,30 @@ public class MySQLCWriter {
 			}
 			
 			Class.forName(JDBC_DRIVER);
-			System.out.println("Connecting to a selected database...");
+			logger.info("Connecting to a selected database...");
 			conn = DriverManager.getConnection(URL, ControlData.USER, ControlData.PASS);
 			stmt = conn.createStatement();
 			String sql="CREATE DATABASE IF NOT EXISTS "+database;
 			stmt.executeUpdate(sql);
 			sql="USE "+database;
 			stmt.executeUpdate(sql);
-			System.out.println("Connected database successfully");
+			logger.info("Connected database successfully");
 		} catch (ClassNotFoundException e) {
-			System.err.println("Failed to load database. Please install the database driver.");
-			System.out.println("Model run terminated.");
+			logger.error("Failed to load database. Please install the database driver.", e);
+			logger.info("Model run terminated.");
 			System.exit(1);
 		} catch (SQLException e) {
-			System.err.println("Failed to connect to the database. Please check your database URL and user profile.");
-			System.out.println("Model run terminated.");
+			logger.error("Failed to connect to the database. Please check your database URL and user profile.", e);
+			logger.info("Model run terminated.");
 			System.exit(1);
 		}
 	}
 		   
 	public void deleteTablesIfExist(){
-		System.out.println("Deleting old table...");
+		logger.info("Deleting old table...");
 		deleteTablesByNames(monthlyTableName);	
 		deleteTablesByNames(dailyTableName);	
-		System.out.println("Deleted old table");
+		logger.info("Deleted old table");
 		
 	}
 	
@@ -115,7 +119,7 @@ public class MySQLCWriter {
 	}
 	
 	public void createTables(){
-		System.out.println("Creating tables in given database...");
+		logger.info("Creating tables in given database...");
 		try {
 			stmt = conn.createStatement();
 			monthlyEntriesArr=new ArrayList<ArrayList<String>>();
@@ -197,17 +201,17 @@ public class MySQLCWriter {
 			for (int i=0; i<dailyEntriesArr.size(); i++){
 				stmt.executeUpdate(sqlDailyArr.get(i));
 			}
-			System.out.println("Created tables in given database");	
+			logger.info("Created tables in given database");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void writeData(){
-		System.out.println("Writing output in table...");
+		logger.info("Writing output in table...");
 		writeMonthlyData();
 		writeDailyData();
-		System.out.println("Wrote output in table");
+		logger.info("Wrote output in table");
 	}
 	
 	public void writeMonthlyData(){

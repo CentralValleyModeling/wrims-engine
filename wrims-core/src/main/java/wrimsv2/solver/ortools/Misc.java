@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Param;
@@ -25,7 +27,7 @@ import wrimsv2.solver.mpmodel.MPModel;
 
 public class Misc {
 
-	
+    private static final Logger logger = LoggerFactory.getLogger(Misc.class);
 	protected static void setConstraints(MPModel m) {
 		Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
 		Map<String, Dvar> dvarMap=SolverData.getDvarMap();
@@ -66,7 +68,7 @@ public class Misc {
 				if (multMap.size()==0) {
 					
 					if ( lb <= 0 && 0 <= ub) {
-						System.out.println("Constraint: "+constraintName+" is removed.");
+						logger.info("Constraint: "+constraintName+" is removed.");
 						continue; // skip to next constraint without adding this to lp
 					} else {
 						Error.addSolvingError("Infeasible solution caused by constraint named: "+constraintName); break;
@@ -151,8 +153,7 @@ public class Misc {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			//System.out.println("Objective Value: "+ControlData.xasolver.getObjective());
-			System.out.println("Assign Dvar Done.");
+			logger.info("Assign Dvar Done.");
 		}
 	}
 	
@@ -214,7 +215,7 @@ public class Misc {
 	}
 	
 	protected static void getSolverInformation(int modelStatus){
-		System.out.println("Solver status: "+modelStatus);
+		logger.info("Solver status: "+modelStatus);
 		
 		switch (modelStatus){
 		    case 2: Error.addSolvingError("Integer Solution (not proven the optimal integer solution).");break; 

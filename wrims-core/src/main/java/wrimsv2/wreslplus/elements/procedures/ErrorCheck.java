@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.Error;
 import wrimsv2.commondata.wresldata.Dvar;
@@ -26,67 +28,29 @@ import wrimsv2.wreslplus.elements.WeightSubgroup;
 import wrimsv2.wreslplus.elements.WeightTable;
 
 public class ErrorCheck {
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(ErrorCheck.class);
 	
 	private ErrorCheck(){}
 
-//	// these dvars are from slack and surplus of weight group deviation penalty
-//	public static boolean checkDeviationSlackSurplus(ArrayList<String> dvList_monitored, Map<String, Dvar> dvMap) {
-//		
-//		ArrayList<String> errorList = new ArrayList<String>();
-//		
-//		for (String x : dvList_monitored){
-//			
-//			double v = (Double) dvMap.get(x).getData().getData();
-//			
-//			if (v > Param.deviationSlackSurplusTolerance) {
-//				
-//				errorList.add(x);
-//				
-//			}			
-//			
-//		}
-//		
-//		if (errorList.size()>0) {
-//			
-//			Error.addDeviationError( " Deviation slack and surplus are not zero: "+errorList); 
-//			Error.writeDeviationErrorFile("Error_deviation.txt");
-//			return true;
-//			
-//		}
-//		
-//		return false;
-//			
-//	}	
-
 	// these dvars are from slack and surplus of weight group deviation penalty
 	public static boolean checkDeviationSlackSurplus(Map<String,Double> deviationSS_toleranceMap, Map<String, Dvar> dvMap) {
-		
-		ArrayList<String> errorList = new ArrayList<String>();
-		
+		ArrayList<String> errorList = new ArrayList<>();
 		for (String x : deviationSS_toleranceMap.keySet()){
-			
 			double v = (Double) dvMap.get(x).getData().getData();
-			
 			if (v > deviationSS_toleranceMap.get(x)) {
-				
 				errorList.add(x);
-				Error.addDeviationError( "Tolerance of ["+ deviationSS_toleranceMap.get(x) +"] exceeded by deviation slack and surplus: ["+x+"]"); 
-				
-			}			
-			
+				Error.addDeviationError( "Tolerance of ["+ deviationSS_toleranceMap.get(x) +"] exceeded by deviation slack and surplus: ["+x+"]");
+			}
 		}
 		
-		if (errorList.size()>0) {
-			
+		if (!errorList.isEmpty()) {
 			Error.writeDeviationErrorFile("Error_deviation.txt");
 			Error.writeErrorLog();
 			return true;
-			
 		}
 		
 		return false;
-			
 	}
 	
 	// TODO: this process alias only. need to expand to other types
@@ -101,55 +65,10 @@ public class ErrorCheck {
 	}
 	
 	public static void checkVarUsedBeforeDefined(SequenceTemp seqObj) {
-		
-/*		for (String key : seqObj.asMap.keySet()) {
-
-			AliasTemp asObj = seqObj.asMap.get(key);
-			
-			Set<String> temp = new HashSet<String>(asObj.dependants);
-			temp.removeAll(seqObj.tsList);
-			temp.removeAll(seqObj.asMap.keySet());
-			temp.removeAll(seqObj.dvList);
-			temp.removeAll(seqObj.svMap.keySet());
-			temp.removeAll(asObj.dependants_parameter);
-			asObj.dependants_unknown = temp;	
-			
-			if (asObj.dependants_unknown.size()>0){
-				String msg = "In model ["+seqObj.model+"] variable(s) not defined before use: "+asObj.dependants_unknown+" in Alias ["+asObj.id+"]";
-				LogUtils.errMsgLocation(asObj.fromWresl, asObj.line, msg);
-			}
-	
-		}	
-		
-		
-		for (String key : seqObj.glMap.keySet()) {
-
-			GoalTemp glObj = seqObj.glMap.get(key);
-			
-			Set<String> temp = new HashSet<String>(glObj.dependants);
-			temp.removeAll(seqObj.tsList);
-			temp.removeAll(seqObj.asMap.keySet());
-			temp.removeAll(seqObj.dvList);
-			temp.removeAll(seqObj.svMap.keySet());
-			temp.removeAll(seqObj.exList);
-			temp.removeAll(glObj.dependants_parameter);
-			glObj.dependants_unknown = temp;
-				
-			if (glObj.dependants_unknown.size()>0){
-				String msg = "In model ["+seqObj.model+"] variable(s) not defined before use: "+glObj.dependants_unknown+" in Goal ["+glObj.id+"]";
-				LogUtils.errMsgLocation(glObj.fromWresl, glObj.line, msg);
-			}
-	
-		}
-		*/
-
 		for (int i=0; i<seqObj.svIncFileList_post.size(); i++) {
-
 			String key = seqObj.svIncFileList_post.get(i);
-
 			SvarTemp svObj = seqObj.svMap.get(key);
-			
-			Set<String> temp = new HashSet<String>(svObj.dependants);
+			Set<String> temp = new HashSet<>(svObj.dependants);
 			temp.removeAll(seqObj.tsList);
 			temp.removeAll(seqObj.asMap.keySet());
 			temp.removeAll(seqObj.dvList);
@@ -157,152 +76,99 @@ public class ErrorCheck {
 			temp.removeAll(seqObj.exList);
 			temp.removeAll(svObj.dependants_parameter);
 			svObj.dependants_unknown = temp;
-			
-				
-			if (svObj.dependants_unknown.size()>0){
+
+			if (!svObj.dependants_unknown.isEmpty()){
 				String msg = "In Sequence: ["+seqObj.id+"] Svar: ["+ svObj.id + "] has unknown variable(s): "+svObj.dependants_unknown;
 				LogUtils.errMsgLocation(svObj.fromWresl, svObj.line, msg);
-			
-			
 			} else {
-				
 				for (String dep: svObj.dependants_svar){
-					
 					if ( seqObj.svIncFileList_post.indexOf(dep)> i){
 						String msg = "In Sequence: ["+seqObj.id+"] Svar: ["+ svObj.id + "] has variable(s) not defined before use: "+dep;
 						LogUtils.errMsgLocation(svObj.fromWresl, svObj.line, msg);
 					}
-					
 				}
-				
 			}
-	
-		}		
-		
+		}
 	}
 
 	public static boolean checkIncModelNotExistIgnoreCase (StudyTemp s){
-		
-		ArrayList<String> modelList_lowercase = new ArrayList<String>();
-		
-		modelList_lowercase.addAll(Tools.allToLowerCase(s.modelList));
-		
-		//System.out.println("modelList_lowercase:"+modelList_lowercase);
-		
+        ArrayList<String> modelList_lowercase = new ArrayList<>(Tools.allToLowerCase(s.modelList));
+
+        logger.debug("modelList_lowercase: {}", modelList_lowercase);
 		for (ModelTemp mt: s.modelMap.values()){
-			
 			for ( String incM: mt.incModelList) {
-				
 				if ( !modelList_lowercase.contains(incM.toLowerCase())) {
-					
 					LogUtils.errMsg("Include model ["+ incM +"] not exist in model ["+mt.id+"].");
-					
 					return true;
 				}
-						
 			}
-			
 		}
 		
 		return false;
-		
 	}
 
 	public static int checkSequenceHasUniqueModel (StudyTemp s){
-		
 		ArrayList<String> modelList = new ArrayList<String>();
-		
-		//modelList_lowercase.addAll(Tools.allToLowerCase(s.modelList));
-		
-		
 		for (SequenceTemp seq: s.seqMap.values()){
-			
 			modelList.add(seq.model.toLowerCase());
-			
 		}
 		
 		ArrayList<String> modelDup = findDuplicatesIgnoreCase(modelList);
-		
 		for (String m:modelDup){
 			LogUtils.errMsg("Each sequence must define unique model. ["+ m +"] is used in multiple sequences.");
 		}
-		return modelDup.size();
-		
 
-		
+		return modelDup.size();
 	}
 	
 	public static int checkModelRedefinedIgnoreCase (StudyTemp s){
-		
 		ArrayList<String> modelDup = findDuplicatesIgnoreCase(s.modelList);
-		
-		//System.out.println("modelDup:"+modelDup);
-		
+        logger.debug("modelDup: {}", modelDup);
 		for (String m:modelDup){
 			LogUtils.errMsg("Model ["+ m +"] redefined in main file.");
 		}
 		return modelDup.size();
-		
 	}
 	
 	public static int checkModelRedefined (StudyTemp s){
-		
 		ArrayList<String> modelDup = findDuplicates(s.modelList);
-		
-		//System.out.println("modelDup:"+modelDup);
-		
+        logger.debug("modelDup: {}", modelDup);
 		for (String m:modelDup){
 			LogUtils.errMsg("Model ["+ s.modelMap.get(m).id +"] redefined in main file.");
 		}
 		return modelDup.size();
-		
 	}
 	
 	public static int checkVarRedefined (StudyTemp s){
-		
 		// check modelList itself
 		// check item duplicates with model names
-		
-		
-		// 
 		int totalDup=0;
 		for (String k: s.modelList){
-			
 			ModelTemp m = s.modelMap.get(k);
-			
 			totalDup += checkVarRedefined(m, s);
-			
 		}
 		
 		return totalDup;
-
 	}	
 
 	public static int checkVarRedefined (ModelTemp m, StudyTemp st){
-				
-		
 		// check dvar list duplicates
 		ArrayList<String> dvDup = findDuplicates(m.dvList);
 		
-		if (dvDup.size()>0) {
+		if (!dvDup.isEmpty()) {
 			m.dvList = removeDuplicates(m.dvList);
-		
 			for (String s: dvDup){
 				DvarTemp dvO = m.dvMap.get(s);
-				//LogUtils.errMsg("Dvar ["+dvO.id+"] redefined in file ["+ dvO.fromWresl +"].");
+                logger.error("Dvar [{}] redefined in file [{}].", dvO.id, dvO.fromWresl);
 				String msg = "Dvar ["+dvO.id+"] redefined";
 				LogUtils.errMsgLocation(dvO.fromWresl, dvO.line, msg);
 			}
 		}		
 
 		// check svar defined in initial statement
-		
 		ArrayList<String> svDup_initialStatement = new ArrayList<String>(st.controlDataParameterMap.keySet());
-		
 		svDup_initialStatement.retainAll(m.svList);
-
-		if (svDup_initialStatement.size()>0) {
-		
+		if (!svDup_initialStatement.isEmpty()) {
 			for (String s: svDup_initialStatement){
 				SvarTemp svO = m.svMap.get(s);
 				String msg = "Svar ["+svO.id+"] redefined in initial statement and model statement";
@@ -312,13 +178,11 @@ public class ErrorCheck {
 		
 		// check svar list duplicates
 		ArrayList<String> svDup = findDuplicates(m.svList);
-		
-		if (svDup.size()>0) {
+		if (!svDup.isEmpty()) {
 			m.svList = removeDuplicates(m.svList);
-		
 			for (String s: svDup){
 				SvarTemp svO = m.svMap.get(s);
-				//LogUtils.errMsg("Svar ["+svO.id+"] redefined in file ["+ svO.fromWresl +"].");
+                logger.error("Svar [{}] redefined in file [{}].", svO.id, svO.fromWresl);
 				String msg = "Svar ["+svO.id+"] redefined";
 				LogUtils.errMsgLocation(svO.fromWresl, svO.line, msg);
 			}
@@ -326,13 +190,10 @@ public class ErrorCheck {
 		
 		// TODO: check incFile list duplicates
 
-		
 		// check wTable var duplicates
 		ArrayList<String> wvDup = findDuplicates(m.wvList_post);
-		
-		if (wvDup.size()>0) {
+		if (!wvDup.isEmpty()) {
 			m.wvList_post = removeDuplicates(m.wvList_post);
-		
 			for (String s: wvDup){
 				LogUtils.errMsg("Weight redefined: "+s+" in file: unknown.");
 			}
@@ -340,8 +201,7 @@ public class ErrorCheck {
 
 		// check item list duplicates
 		ArrayList<String> itemDup = findDuplicates(m.itemList);
-		
-		if (itemDup.size()>0) {
+		if (!itemDup.isEmpty()) {
 			m.itemList = removeDuplicates(m.itemList);
 		
 			for (String s: itemDup){
@@ -617,17 +477,13 @@ public class ErrorCheck {
 		unknowns.removeAll(seqObj.dvList);
 		unknowns.removeAll(seqObj.dvList_fromAlias);
 		
-//		System.out.println("###  seqObj.wvList:"+seqObj.wvList);
-//		System.out.println("###  seqObj.dvList:"+seqObj.dvList);
-//		System.out.println("###  seqObj.dvList_fromAlias:"+seqObj.dvList_fromAlias);
+        logger.debug("###  seqObj.wvList:"+seqObj.wvList);
+        logger.debug("###  seqObj.dvList:"+seqObj.dvList);
+        logger.debug("###  seqObj.dvList_fromAlias:"+seqObj.dvList_fromAlias);
 		
 		if (unknowns.size()>0) {
-			
-			LogUtils.errMsg(" Weight variables "+unknowns+" are not defined as Dvar; or are not defined as Alias and show up as terms in Goal.");	
-			
-			
+			LogUtils.errMsg(" Weight variables "+unknowns+" are not defined as Dvar; or are not defined as Alias and show up as terms in Goal.");
 		}
-		
 	}
 
 	public static boolean checkInitialVarInConfigNotDeclaredInWresl(StudyTemp st) {

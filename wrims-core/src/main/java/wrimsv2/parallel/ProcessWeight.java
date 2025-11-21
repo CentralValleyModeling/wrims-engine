@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -23,7 +25,8 @@ import wrimsv2.evaluator.WeightEval;
 import wrimsv2.tools.General;
 
 public class ProcessWeight extends RecursiveTask<Integer>{
- 
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcessWeight.class);
 	private int threshold;
 	private int start;
 	private int end;
@@ -79,7 +82,7 @@ public class ProcessWeight extends RecursiveTask<Integer>{
     	for (int ii=start; ii<=end; ii++){
     		String wtName=wtList.get(ii);
 			ControlData.currEvalName=wtName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing weight "+wtName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing weight "+wtName);
 			WeightElement wt=wtMap.get(wtName);
 			ValueEvaluatorParser evaluator=wt.weightParser;
 			ParallelVars prvs = new ParallelVars();

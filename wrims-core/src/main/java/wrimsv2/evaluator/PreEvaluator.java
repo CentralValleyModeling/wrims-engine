@@ -5,9 +5,10 @@ import java.util.Map;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Goal;
@@ -15,13 +16,10 @@ import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.wresldata.Svar;
 import wrimsv2.commondata.wresldata.WeightElement;
-import wrimsv2.components.ControlData;
-import wrimsv2.components.Error;
-import wrimsv2.components.IntDouble;
-import wrimsv2.components.VariableTimeStep;
 
 public class PreEvaluator {
-	private ArrayList<String> svList;
+	private static final Logger logger = LoggerFactory.getLogger(PreEvaluator.class);
+    private ArrayList<String> svList;
 	private Map<String, Svar> svMap;
 	private ArrayList<String> gList;
 	private Map<String, Goal> gMap;
@@ -68,7 +66,7 @@ public class PreEvaluator {
 	public void preEvaluateModelCondition(StudyDataSet sds){
 		 ArrayList<ValueEvaluatorParser> modelConditionParsers=new ArrayList<ValueEvaluatorParser>(); 
 		for (String modelCondition: modelConditionList){
-			//System.out.println("PreEvaluate model condition"+modelCondition);
+			logger.debug("PreEvaluate model condition"+modelCondition);
 			String evalString="c: "+modelCondition;
 			ANTLRStringStream stream = new ANTLRStringStream(evalString);
 			ValueEvaluatorLexer lexer = new ValueEvaluatorLexer(stream);
@@ -80,7 +78,7 @@ public class PreEvaluator {
 	
 	public void preEvaluateWeight(){
 		for (String wtName: wtList){
-			//System.out.println("PreEvaluate weight "+wtName);
+            logger.debug("PreEvaluate weight {}", wtName);
 			WeightElement weight=wtMap.get(wtName);
 			
 			String evalString="v: "+weight.weight;
@@ -99,7 +97,7 @@ public class PreEvaluator {
 	
 	public void preEvaluateWeightSlackSurplus(){
 		for (String wtSlackSurplusName: wtSlackSurplusList){
-			//System.out.println("PreEvaluate weight slack surplus"+wtName);
+			logger.debug("PreEvaluate weight slack surplus {}", wtSlackSurplusName);
 			WeightElement weightSlackSurplus=wtSlackSurplusMap.get(wtSlackSurplusName);
 			
 			String evalString="v: "+weightSlackSurplus.weight;
@@ -118,7 +116,7 @@ public class PreEvaluator {
 	
 	public void preEvaluateAlias(){
 		for (String asName: asList){
-			//System.out.println("PreEvaluate alias "+asName);
+            logger.debug("PreEvaluate alias {}", asName);
 			Alias alias=asMap.get(asName);
 			
 			String evalString="v: "+alias.expression;
@@ -137,7 +135,7 @@ public class PreEvaluator {
 	
 	public void preEvaluateDvar(){
 		for (String dvName: dvList){
-			//System.out.println("PreEvaluate dvar "+dvName);
+			logger.debug("PreEvaluate dvar "+dvName);
 			Dvar dvar=dvMap.get(dvName);
 			
 			String evalString="v: "+dvar.upperBound;
@@ -162,7 +160,7 @@ public class PreEvaluator {
 
 	public void preEvaluateGoal(){
 		for (String gName: gList){
-			//System.out.println("PreEvaluate constraint "+gName);
+			logger.debug("PreEvaluate constraint "+gName);
 			Goal goal=gMap.get(gName);
 			ArrayList<String> caseCondition=goal.caseCondition;
 			int i=-1;
@@ -194,7 +192,7 @@ public class PreEvaluator {
 	
 	public void preEvaluateSvar(){
 		for (String svName: svList){
-			//System.out.println("PreEvaluate svar "+svName);
+			logger.debug("PreEvaluate svar "+svName);
 			Svar svar=svMap.get(svName);
 			ArrayList<String> caseCondition=svar.caseCondition;
 			int i=-1;

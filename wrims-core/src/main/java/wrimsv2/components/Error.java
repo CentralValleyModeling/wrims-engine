@@ -5,7 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.External;
@@ -19,92 +23,49 @@ import wrimsv2.wreslparser.elements.StudyUtils;
 import wrimsv2.wreslparser.elements.Tools;
 
 public class Error {
-	public static ArrayList<String>   error_grammer = new ArrayList<String> ();
+	public static ArrayList<String> error_grammar = new ArrayList<String> ();
 	public static ArrayList<String>   error_evaluation= new ArrayList<String> ();
 	public static ArrayList<String>   error_solving=new ArrayList<String>();
 	public static ArrayList<String>   error_engine=new ArrayList<String>();
 	public static ArrayList<String>   error_config=new ArrayList<String>();
 	public static ArrayList<String>   error_initial=new ArrayList<String>();
 	public static ArrayList<String>   error_deviation=new ArrayList<String>();
-	
-	public static void writeGrammerErrorFile(String fileName){
-		
-		String errorFileFullPath=FilePaths.mainDirectory+fileName;
-		try{
-			FileWriter errorFile = new FileWriter(errorFileFullPath);
-			PrintWriter out = new PrintWriter(errorFile);
 
-			for (int i=0; i<error_grammer.size(); i++){
-				out.println(error_grammer.get(i));
-			}
-			out.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+    private static final Logger logger = LoggerFactory.getLogger(Error.class);
+
+    public static void writeErrorFileFromArray(String fileName, ArrayList<String> array) {
+        String errorFileFullPath = FilePaths.mainDirectory + fileName;
+        try {
+            FileWriter fileWriter = new FileWriter(errorFileFullPath);
+            PrintWriter out = new PrintWriter(fileWriter);
+            for (String s : array) {
+                out.println(s);
+            }
+            out.close();
+        } catch (IOException e){
+            String message = String.format("IOException encountered while writing file: %s", errorFileFullPath);
+            logger.error(message, e);
+        }
+    }
+
+	public static void writeGrammarErrorFile(String fileName){
+		writeErrorFileFromArray(fileName, error_grammar);
 	}
 	
 	public static void writeEvaluationErrorFile(String fileName){
-		
-		String errorFileFullPath=FilePaths.mainDirectory+fileName;
-		try{
-			FileWriter errorFile = new FileWriter(errorFileFullPath);
-			PrintWriter out = new PrintWriter(errorFile);
-
-			for (int i=0; i<error_evaluation.size(); i++){
-				out.println(error_evaluation.get(i));
-			}
-			out.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+		writeErrorFileFromArray(fileName, error_evaluation);
 	}
 	
 	public static void writeSolvingErrorFile(String fileName){
-		
-		String errorFileFullPath=FilePaths.mainDirectory+fileName;
-		try{
-			FileWriter errorFile = new FileWriter(errorFileFullPath);
-			PrintWriter out = new PrintWriter(errorFile);
-
-			for (int i=0; i<error_solving.size(); i++){
-				out.println(error_solving.get(i));
-			}
-			out.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+		writeErrorFileFromArray(fileName, error_solving);
 	}
 	
 	public static void writeConfigErrorFile(String fileName){
-		
-		String errorFileFullPath=FilePaths.mainDirectory+fileName;
-		try{
-			FileWriter errorFile = new FileWriter(errorFileFullPath);
-			PrintWriter out = new PrintWriter(errorFile);
-
-			for (int i=0; i<error_config.size(); i++){
-				out.println(error_config.get(i));
-			}
-			out.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+		writeErrorFileFromArray(fileName, error_config);
 	}
 	
 	public static void writeDeviationErrorFile(String fileName){
-		
-		String errorFileFullPath=FilePaths.mainDirectory+fileName;
-		try{
-			FileWriter errorFile = new FileWriter(errorFileFullPath);
-			PrintWriter out = new PrintWriter(errorFile);
-
-			for (int i=0; i<error_deviation.size(); i++){
-				out.println(error_deviation.get(i));
-			}
-			out.close();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
+        writeErrorFileFromArray(fileName, error_deviation);
 	}
 	
 	public static void writeErrorLog(){
@@ -114,7 +75,6 @@ public class Error {
 	    PrintWriter errorLogFile;
 	    try {
 			errorLogFile = Tools.openFile(ilpDir.getAbsolutePath(), "Error_"+ControlData.dateTimeAppend+".log");
-			
 			errorLogFile.println("==================");
 			if (ControlData.currEvalTypeIndex!=8){
 				errorLogFile.println(ILP.getYearMonthCycle());
@@ -122,22 +82,18 @@ public class Error {
 				errorLogFile.println("Initial processing");
 			}
 			errorLogFile.println("==================");
-			for (int i=0; i<error_config.size(); i++){
-				errorLogFile.println(error_config.get(i));
-			}
-			for (int i=0; i<error_initial.size(); i++){
-				errorLogFile.println(error_initial.get(i));
-			}
-			for (int i=0; i<error_evaluation.size(); i++){
-				errorLogFile.println(error_evaluation.get(i));
-			}
-			for (int i=0; i<error_solving.size(); i++){
-				errorLogFile.println(error_solving.get(i));
-			}
-			for (int i=0; i<error_deviation.size(); i++){
-				errorLogFile.println(error_deviation.get(i));
-			}
-
+            List<ArrayList<String>> arrays = Arrays.asList(
+                    error_config,
+                    error_initial,
+                    error_evaluation,
+                    error_solving,
+                    error_deviation
+            );
+            for (ArrayList<String> a : arrays) {
+                for (String s : a) {
+                    errorLogFile.println(s);
+                }
+            }
 			errorLogFile.close();
 		}
 		catch (IOException e) {
@@ -145,6 +101,8 @@ public class Error {
 			e.printStackTrace();
 		}
 	}
+
+
 	
 	public static void addEvaluationError(String error){
 		ModelDataSet mds = ControlData.currModelDataSet;
@@ -248,7 +206,7 @@ public class Error {
 	public static int getTotalError(){
 		return Error.error_engine.size()+
 				 Error.error_evaluation.size()+
-				 Error.error_grammer.size()+
+				 Error.error_grammar.size()+
 				 Error.error_solving.size()+
 				 Error.error_config.size()+
 				 Error.error_initial.size()+
@@ -258,7 +216,7 @@ public class Error {
 	public static void clear(){
 		Error.error_engine = new ArrayList<String>();
 		Error.error_evaluation = new ArrayList<String>();
-		Error.error_grammer = new ArrayList<String>();
+		Error.error_grammar = new ArrayList<String>();
 		Error.error_solving = new ArrayList<String>();
 		Error.error_config = new ArrayList<String>();
 		Error.error_initial = new ArrayList<String>();

@@ -15,6 +15,8 @@ import org.antlr.runtime.RecognitionException;
 // import com.sun.java.util.collections.Collection;
 // import com.sun.java.util.collections.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Goal;
@@ -28,7 +30,8 @@ import wrimsv2.evaluator.ValueEvaluatorParser;
 import wrimsv2.tools.General;
 
 public class ProcessConstraint extends RecursiveTask<Integer>{
- 
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcessConstraint.class);
 	private int threshold;
 	private int start;
 	private int end;
@@ -89,7 +92,7 @@ public class ProcessConstraint extends RecursiveTask<Integer>{
     	for (int ii=start; ii<=end; ii++){
     		String goalName=gList.get(ii);
 			ControlData.currEvalName=goalName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing constraint "+goalName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing constraint "+goalName);
 			Goal goal=gMap.get(goalName);
 			ArrayList<ValueEvaluatorParser> caseConditions=goal.caseConditionParsers;
 			

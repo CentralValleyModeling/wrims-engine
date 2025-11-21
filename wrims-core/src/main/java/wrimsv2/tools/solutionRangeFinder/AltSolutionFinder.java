@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.solver.mpmodel.MPModel;
 import wrimsv2.solver.mpmodel.MPModelUtils;
 import wrimsv2.solver.ortools.OrToolsSolver;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class AltSolutionFinder {
-
+    private static final Logger logger = LoggerFactory.getLogger(AltSolutionFinder.class);
 	
 	// required
 	private String id;
@@ -58,17 +60,17 @@ public class AltSolutionFinder {
 		
 		for ( String sv: searchVars) {
 			i++;
-			System.out.println(id+" seach: "+i+": "+sv);
+			logger.info(id+" seach: "+i+": "+sv);
 									
 			LinkedHashMap<String, Double> searchObjFunc = new LinkedHashMap<String, Double>();
 			searchObjFunc.put(sv, (double)searchObjSign);
 			double searchObjOffset = asfModel.solution.get(sv)*searchObjSign;
 						
 			
-			System.out.println("Var to search:  "+sv);
+			logger.info("Var to search:  "+sv);
 
-			System.out.println("searchObjFunc: "+searchObjFunc);
-			System.out.println("searchObjOffset: "+searchObjOffset);
+			logger.info("searchObjFunc: "+searchObjFunc);
+			logger.info("searchObjOffset: "+searchObjOffset);
 			
 			sSolver.refreshObjFunc(searchObjFunc);
 			
@@ -84,8 +86,8 @@ public class AltSolutionFinder {
 				if (DetectorParam.continueOnErrors) continue;
 			}
 
-			System.out.println("obj value: "+sSolver.solver.objectiveValue());
-			if (DetectorParam.showSolutionInConsole) System.out.println("solution: "+sSolver.solution);
+			logger.info("obj value: "+sSolver.solver.objectiveValue());
+			if (DetectorParam.showSolutionInConsole) logger.info("solution: "+sSolver.solution);
 
 			// TODO: simplify this
 			boolean hasNewObjValue = false;
@@ -97,7 +99,7 @@ public class AltSolutionFinder {
 				hasNewObjValue = sSolver.solver.objectiveValue() * searchObjSign < searchObjOffset * searchObjSign;
 			}
 			
-			System.out.println("New solution found? "+hasNewObjValue);	
+			logger.info("New solution found? "+hasNewObjValue);
 			
 			if (hasNewObjValue) {
 				

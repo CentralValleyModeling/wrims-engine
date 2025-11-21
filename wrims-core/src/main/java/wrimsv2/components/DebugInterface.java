@@ -32,6 +32,8 @@ import org.antlr.runtime.TokenStream;
 
 // import com.sun.java.util.collections.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
@@ -82,7 +84,8 @@ import wrimsv2.wreslplus.elements.procedures.ProcIfIncItemGroup;
 import wrimsv2.wreslplus.elements.procedures.ProcWeight;
 
 public class DebugInterface {
-	private ServerSocket requestSocket;
+	private static final Logger logger = LoggerFactory.getLogger(DebugInterface.class);
+    private ServerSocket requestSocket;
 	private Socket requestConnection;
 	private ServerSocket eventSocket;
 	private Socket eventConnection;
@@ -138,7 +141,7 @@ public class DebugInterface {
 				}
 			}while (isDebugging);
 		} catch (IOException e){
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}		
 		
 		finally{
@@ -354,7 +357,7 @@ public class DebugInterface {
 				ControlData.dvDss.close();
 				terminateCode=1;
 			}
-			System.out.println("Terminated");
+			logger.info("Terminated");
 			try {
 				sendRequest("terminated");
 			} catch (IOException e) {
@@ -364,7 +367,7 @@ public class DebugInterface {
 			isDebugging=false;
 		}else if (request.equals("suspend")) {
 			controllerDebug.suspend();
-			System.out.println("suspended");
+			logger.info("suspended");
 			try {
 				sendRequest("suspended");
 				sendEvent("suspended");
@@ -441,7 +444,7 @@ public class DebugInterface {
 						sendEvent("totalcycle#"+controllerDebug.totalCycles);
 						new PreEvaluator(sds);
 					}else{
-						System.out.println("The change of your code has errors.");
+						logger.error("The change of your code has errors.");
 						sendEvent("terminate");
 					}
 				} catch (RecognitionException e) {
@@ -499,7 +502,7 @@ public class DebugInterface {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("Output cycle data to Dss file is turned on");
+			logger.info("Output cycle data to Dss file is turned on");
 		}else if(request.equals("OutputCycleDataToDssOff")){
 			ControlData.isOutputCycle=false;
 			try {
@@ -508,7 +511,7 @@ public class DebugInterface {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("Output cycle data to Dss file is turned off");
+			logger.info("Output cycle data to Dss file is turned off");
 		}else if(request.equals("OutputAllCyclesOn")){
 			ControlData.outputAllCycles=true;
 			try {
@@ -517,7 +520,7 @@ public class DebugInterface {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println("All cycles are selected");
+			logger.info("All cycles are selected");
 		}else if(request.equals("OutputAllCyclesOff")){
 			ControlData.outputAllCycles=false;
 			try {
@@ -535,7 +538,7 @@ public class DebugInterface {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (!ControlData.outputAllCycles) System.out.println("Cycles "+ControlData.selectedCycleOutput.replace("\'", "")+" are selected");
+			if (!ControlData.outputAllCycles) logger.info("Cycles "+ControlData.selectedCycleOutput.replace("\'", "")+" are selected");
 			setSelectedOutputCycles();
 		}else if(request.startsWith("ShowRunTimeMessage:")){
 			int index=request.indexOf(":");
@@ -544,7 +547,7 @@ public class DebugInterface {
 				ControlData.showRunTimeMessage=true;
 				try {
 					sendRequest("Run time messages shown");
-					System.out.println("Run time messages shown");
+					logger.info("Run time messages shown");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -553,7 +556,7 @@ public class DebugInterface {
 				ControlData.showRunTimeMessage=false;
 				try {
 					sendRequest("Run time messages disabled");
-					System.out.println("Run time messages disabled");
+					logger.info("Run time messages disabled");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -566,7 +569,7 @@ public class DebugInterface {
 				ControlData.printGWFuncCalls=true;
 				try {
 					sendRequest("Print groundwater function calls on");
-					System.out.println("Print groundwater function calls on");
+					logger.info("Print groundwater function calls on");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -575,7 +578,7 @@ public class DebugInterface {
 				ControlData.printGWFuncCalls=false;
 				try {
 					sendRequest("Print groundwater function calls off");
-					System.out.println("Print groundwater function calls off");
+					logger.info("Print groundwater function calls off");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -588,7 +591,7 @@ public class DebugInterface {
 				ILP.loggingUsageMemeory=true;
 				try {
 					sendRequest("Track memory usage on");
-					System.out.println("Track memory usage on");
+					logger.info("Track memory usage on");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -597,7 +600,7 @@ public class DebugInterface {
 				ILP.loggingUsageMemeory=false;
 				try {
 					sendRequest("Track memory usage off");
-					System.out.println("Track memory usage off");
+					logger.info("Track memory usage off");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -658,7 +661,7 @@ public class DebugInterface {
 			CbcSolver.solve_2_primalT = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -668,7 +671,7 @@ public class DebugInterface {
 			ControlData.relationTolerance = Math.max(CbcSolver.solve_2_primalT_relax*10, 1e-6);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -677,7 +680,7 @@ public class DebugInterface {
 			CbcSolver.solve_whs_primalT = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -686,7 +689,7 @@ public class DebugInterface {
 			CbcSolver.integerT = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -695,7 +698,7 @@ public class DebugInterface {
 			CbcSolver.integerT_check = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -704,7 +707,7 @@ public class DebugInterface {
 			ControlData.zeroTolerance = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -713,7 +716,7 @@ public class DebugInterface {
 			CbcSolver.cbcHintRelaxPenalty = Double.parseDouble(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -722,7 +725,7 @@ public class DebugInterface {
 			CbcSolver.cbcHintTimeMax = Integer.parseInt(requestParts[1]);
 			try {
 				sendRequest(request+" set");
-				System.out.println(request+" set");
+				logger.info(request+" set");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -2394,7 +2397,7 @@ public class DebugInterface {
 		String solverName=requestParts[1];
 		String log=requestParts[2];
 		new CloseCurrentSolver(ControlData.solverName);
-		System.out.println("Change solver to "+solverName);
+		logger.info("Change solver to "+solverName);
 		if (solverName.equals("XA")){
 			new InitialXASolver();
 			if (log.equals("None")){
@@ -2404,7 +2407,7 @@ public class DebugInterface {
 				ILP.loggingCplexLp=false;
 				ILP.loggingVariableValue=false;
 				ControlData.solverName="XA";
-				System.out.println("Log file turn off");
+				logger.info("Log file turn off");
 			}else if (log.equals("Log")){
 				SetXALog.enableXALog();
 				ILP.logging=true;
@@ -2413,7 +2416,7 @@ public class DebugInterface {
 				ILP.loggingVariableValue=true;
 				ControlData.solverName="XALOG";
 				ILP.initializeIlp();
-				System.out.println("Log file turn on");
+				logger.info("Log file turn on");
 			}		
 		}else if(solverName.equals("LPSolve")){
 			ControlData.solverName="LPSolve";
@@ -2422,11 +2425,11 @@ public class DebugInterface {
 			if (log.equals("None")){
 				ILP.logging=false;
 				ILP.loggingVariableValue=false;
-				System.out.println("Log file turn off");
+				logger.info("Log file turn off");
 			}else if (log.equals("Log")){
 				ILP.logging=true;
 				ILP.loggingVariableValue=true;
-				System.out.println("Log file turn on");
+				logger.info("Log file turn on");
 			}
 			ILP.initializeIlp();
 			ChangeSolver.loadLPSolveConfigFile();
@@ -2437,11 +2440,11 @@ public class DebugInterface {
 			if (log.equals("None")){
 				ILP.logging=false;
 				ILP.loggingVariableValue=false;
-				System.out.println("Log file turn off");
+				logger.info("Log file turn off");
 			}else if (log.equals("Log")){
 				ILP.logging=true;
 				ILP.loggingVariableValue=true;
-				System.out.println("Log file turn on");
+				logger.info("Log file turn on");
 			}
 			ILP.getIlpDir();
 			ILP.initializeIlp();
@@ -2463,27 +2466,27 @@ public class DebugInterface {
 				ILP.loggingVariableValue=false;
 				ControlData.cbc_debug_routeXA = false;
 				ControlData.cbc_debug_routeCbc = false;
-				System.out.println("Log file turned off");
+				logger.info("Log file turned off");
 			}else if (log.equals("Log")){
 				ILP.logging=true;
 				ILP.loggingVariableValue=true;
 				ControlData.cbc_debug_routeXA = false;
 				ControlData.cbc_debug_routeCbc = false;
-				System.out.println("Log file turned on");
+				logger.info("Log file turned on");
 			}else if (log.equals("xa_cbc")){
 				ILP.logging=true;
 				ILP.loggingVariableValue=true;
 				ControlData.cbc_debug_routeXA = false;	
 				ControlData.cbc_debug_routeCbc = true;
 				new InitialXASolver();
-				System.out.println("CBC route turned on");
+				logger.info("CBC route turned on");
 			}else if (log.equals("cbc_xa")){
 				ILP.logging=true;
 				ILP.loggingVariableValue=true;
 				ControlData.cbc_debug_routeXA = true;
 				ControlData.cbc_debug_routeCbc = false;
 				new InitialXASolver();
-				System.out.println("XA route turned on");
+				logger.info("XA route turned on");
 			}
 			if (ControlData.useCbcWarmStart || ControlData.cbcCheckIntErr || ControlData.cbc_debug_routeCbc || ControlData.cbc_debug_routeXA){
 				if (ControlData.solverName.equalsIgnoreCase("Cbc")  || ControlData.solverName.equalsIgnoreCase("Cbc1")){

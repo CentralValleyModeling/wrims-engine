@@ -326,8 +326,7 @@ public class Procedures {
 			if (allDepInGoals.contains(aKey)) {
 
 			AliasTemp a = seqObj.asMap.get(aKey);
-			//System.out.println(aKey+":"+a.noSolver);
-			if (!a.noSolver){ 
+			if (!a.noSolver){
 			
 				a.isMovedToDvar = true;
 
@@ -482,7 +481,6 @@ public class Procedures {
 		///// skip mainFile
 		toBeSorted.remove(st.relativePath);
 		
-		//System.out.println("st.noKid"+st.noKid);
 		st.fileGroupOrder.add(st.noKid);
 		
 		

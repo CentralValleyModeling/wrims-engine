@@ -15,6 +15,8 @@ import java.util.Date;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
@@ -56,7 +58,8 @@ import wrimsv2.wreslplus.elements.Tools;
 import wrimsv2.wreslplus.elements.procedures.ErrorCheck;
 
 public class ControllerDebug extends Thread {
-	private DebugInterface di;
+    private static final Logger logger = LoggerFactory.getLogger(ControllerDebug.class);
+    private DebugInterface di;
 	public int debugYear;
 	public int debugMonth;
 	public int debugDay;
@@ -205,9 +208,9 @@ public class ControllerDebug extends Thread {
 	}
 	
 	public void runModel(StudyDataSet sds){
-		System.out.println("=============Prepare Run Study===========");
+		logger.info("=============Prepare Run Study===========");
 		new PreRunModel(sds);
-		System.out.println("==============Run Study Start============");
+		logger.info("==============Run Study Start============");
 		if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG") || ControlData.solverName.equalsIgnoreCase("CBC") || ControlData.solverName.equalsIgnoreCase("Gurobi")){
 			runModelSolvers(sds);
 		}else{
@@ -217,7 +220,7 @@ public class ControllerDebug extends Thread {
 			return;
 		}
 		if (ControlData.showTimeUsage) TimeUsage.showTimeUsage();
-		System.out.println("=================Run ends!================");
+		logger.info("=================Run ends!================");
 	}
 	
 	public void runModelSolvers(StudyDataSet sds){
@@ -234,7 +237,7 @@ public class ControllerDebug extends Thread {
 		if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG")) {
 			new InitialXASolver();
 			if (Error.getTotalError()>0){
-				System.out.println("Model run suspends due to error.");
+				logger.error("Model run suspends due to error.");
 				di.handleRequest("suspend");
 			}
 		}else if (ControlData.solverName.equalsIgnoreCase("CBC")){
@@ -341,7 +344,7 @@ public class ControllerDebug extends Thread {
 								if (Error.error_solving.size() > 0) {
 									String msg = "XA solving error.";
 									ILP.writeNoteLn("", msg);
-									System.out.println("" + msg);
+									logger.info("" + msg);
 									Error.writeErrorLog();
 									Error.error_solving.clear();
 								}
@@ -399,11 +402,11 @@ public class ControllerDebug extends Thread {
 						ILP.closeIlpFile();
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 								
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) logger.info("Solving Done.");
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) logger.info("Assign Alias Done.");
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
@@ -416,7 +419,7 @@ public class ControllerDebug extends Thread {
 						}
 						if (ILP.loggingUsageMemeory) ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
 						//ILP.logUsageMemory(ControlData.currYear, ControlData.currMonth, ControlData.currDay, ControlData.currCycleIndex);
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done. ("+model+")");
 						if (CbcSolver.intLog && ControlData.solverName.equalsIgnoreCase("CBC")) {
 							CbcSolver.logIntCheck(sds);	
 						}
@@ -437,7 +440,7 @@ public class ControllerDebug extends Thread {
 								HDF5Writer.skipOneCycle(mds, cycleI);
 							}
 						}
-						System.out.println("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" skipped. ("+model+")");
+						logger.info("Cycle "+cycleI+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" skipped. ("+model+")");
 						new AssignPastCycleVariable();
 						deferPause(modelIndex);
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
@@ -539,7 +542,7 @@ public class ControllerDebug extends Thread {
 			if (ControlData.currYear==debugYear && ControlData.currMonth==debugMonth && i==debugCycle-1){
 				try {
 					di.sendEvent("suspended!"+debugYear+"#"+debugMonth+"#"+debugDay+"#"+debugCycle);
-					System.out.println("paused");
+					logger.info("paused");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -549,7 +552,7 @@ public class ControllerDebug extends Thread {
 			if (ControlData.currYear==debugYear && ControlData.currMonth==debugMonth && ControlData.currDay==debugDay && i==debugCycle-1){
 				try {
 					di.sendEvent("suspended!"+debugYear+"#"+debugMonth+"#"+debugDay+"#"+debugCycle);
-					System.out.println("paused");
+					logger.info("paused");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -560,7 +563,7 @@ public class ControllerDebug extends Thread {
 			try {
 				int cycle=ControlData.currCycleIndex+1;
 				di.sendEvent("suspended!"+ControlData.currYear+"#"+ControlData.currMonth+"#"+ControlData.currDay+"#"+cycle);
-				System.out.println("Error! Paused");
+				logger.error("Error! Paused");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -629,8 +632,8 @@ public class ControllerDebug extends Thread {
 		if (condition){
 			try {
 				di.sendEvent("suspended!"+debugYear+"#"+debugMonth+"#"+debugDay+"#"+debugCycle);
-				System.out.println("conditional breakpoint of " + conditionalBreakpoint + " reached");
-				System.out.println("paused");
+				logger.info("conditional breakpoint of " + conditionalBreakpoint + " reached");
+				logger.info("paused");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

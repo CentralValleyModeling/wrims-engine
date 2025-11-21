@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -24,7 +26,7 @@ import wrimsv2.evaluator.ValueEvaluatorParser;
 import wrimsv2.evaluator.WeightEval;
 
 public class ProcessTimeseries extends RecursiveTask<Integer>{
- 
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTimeseries.class);
 	private int threshold;
 	private int start;
 	private int end;
@@ -76,7 +78,7 @@ public class ProcessTimeseries extends RecursiveTask<Integer>{
     	for (int ii=start; ii<=end; ii++){
     		String tsName=tList.get(ii);
 			ControlData.currEvalName=tsName;
-			if (ControlData.showRunTimeMessage) System.out.println("Processing timeseries "+tsName);
+			if (ControlData.showRunTimeMessage) logger.info("Processing timeseries "+tsName);
 			Timeseries ts=tMap.get(tsName);
 			ts.setData(new IntDouble(Evaluation.timeseries(tsName),false));
 		}		

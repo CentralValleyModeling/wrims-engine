@@ -15,6 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.antlr.runtime.RecognitionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.ModelDataSet;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.wresldata.WeightElement;
@@ -26,7 +28,9 @@ import wrimsv2.ilp.ILP;
 import wrimsv2.parallel.ParallelVars;
 
 public class WeightEval {
-	private static double minw=1.0;
+
+    private static final Logger logger = LoggerFactory.getLogger(WeightEval.class);
+    private static double minw=1.0;
 	private static double maxw=1.0;
 	private static ArrayList<String> minwva=new ArrayList<String>();
 	private static ArrayList<String> maxwva=new ArrayList<String>();
@@ -393,15 +397,15 @@ public class WeightEval {
 		}
 		if (size>0)	{
 			System.out.print(variedwList.get(size-1)+" ");
-			System.out.println("have variable(s) in the weight and were excluded from the evaluation of the maximum and minimum weights.");
+			logger.info("have variable(s) in the weight and were excluded from the evaluation of the maximum and minimum weights.");
 		}
 		for (int i=0; i<maxwva.size(); i++){
-			System.out.println("The maximum weight is "+maxwva.get(i)+" with a value of "+maxw+" and appear in Cycle "+maxCa.get(i)+".");
-			System.out.println("The maximum weight source code location is at "+maxPa.get(i)+" .");
+			logger.info("The maximum weight is "+maxwva.get(i)+" with a value of "+maxw+" and appear in Cycle "+maxCa.get(i)+".");
+			logger.info("The maximum weight source code location is at "+maxPa.get(i)+" .");
 		}
 		for (int i=0; i<minwva.size(); i++){
-			System.out.println("The minimum weight is "+minwva.get(i)+" with a value of "+minw+" and appear in Cycle "+minCa.get(i)+".");
-			System.out.println("The minimum weight source code location is at "+minPa.get(i)+" .");
+			logger.info("The minimum weight is "+minwva.get(i)+" with a value of "+minw+" and appear in Cycle "+minCa.get(i)+".");
+			logger.info("The minimum weight source code location is at "+minPa.get(i)+" .");
 		}
 	}
 	

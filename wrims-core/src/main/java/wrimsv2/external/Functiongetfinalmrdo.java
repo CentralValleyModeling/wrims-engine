@@ -147,7 +147,7 @@ public class Functiongetfinalmrdo extends ExternalFunction{
         } */
         //WRITE(17,100) 'YEAR = ',wyear, 'MONTH = ',month
         //100 FORMAT(1x,a,i4,1x,a,i2)
-        //System.out.println(" YEAR = " + wyear + " MONTH = " + month);
+
 
 //        DO i=1,daysin        // automatically done in Java
 //          Qout(i) = 0.0
@@ -205,7 +205,7 @@ public class Functiongetfinalmrdo extends ExternalFunction{
 
 			//WRITE(17,110)	'DAY = ',i,Qout(i),' control = ',control(i)
 			//110 FORMAT(1x,a,i2,2x,f16.2,2x,a,a)
-			//System.out.println(" DAY = " + i + "  " + Qout[i] + "  control = " + control[i]); // TO DO: 16.2 format
+			 // TO DO: 16.2 format
 		}
 
 		//determine what G-model is controling for each month
@@ -227,7 +227,6 @@ public class Functiongetfinalmrdo extends ExternalFunction{
         if(rs >= 5) Gcontrol = "Rock_Slough";
 //        if(month /= lastmonth) WRITE(18,111) wyear,month,Gcontrol
         //111 FORMAT(i4,x,i2,x,a)
-        //if(month != _lastmonth) System.out.println(wyear + " " + month + " " + Gcontrol);
         _lastmonth = month;
         mrdo = sum(Qout)/daysin;
 

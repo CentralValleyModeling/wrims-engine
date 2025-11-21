@@ -34,6 +34,8 @@ import org.antlr.runtime.TokenStream;
 import com.sunsetsoft.xa.Optimizer;
 import com.sunsetsoft.xa.XAException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.ModelDataSet;
@@ -53,7 +55,7 @@ import wrimsv2.evaluator.EvaluatorParser;
 import gurobi.*;
 
 public class GurobiSolver {
-	
+    private static final Logger logger = LoggerFactory.getLogger(GurobiSolver.class);
 	int modelStatus;
 	static GRBEnv    env;
 	static GRBModel  model;
@@ -139,8 +141,7 @@ public class GurobiSolver {
 	      if (optimstatus == GRB.Status.OPTIMAL) {
 	    	  
 	        double objval = model.get(GRB.DoubleAttr.ObjVal);
-	        //System.out.println("Optimal objective: " + objval);
-	        
+
 	        
 	        GRBVar[] allVars = model.getVars();
 	      //  String[] allVarNames = model.get(GRB.StringAttr.VarName,allVars);
@@ -156,7 +157,6 @@ public class GurobiSolver {
 	      } else if (optimstatus == GRB.Status.INFEASIBLE) {
 	    	  
 	    	  Error.addSolvingError("Model is infeasible"); 
-	          //System.out.println("Model is infeasible");
 
 	        // Compute and write out IIS
 	    	  String IISFilePath = new File(FilePaths.mainDirectory, "Gurobi_infeasible.ilp").getAbsolutePath();
@@ -164,7 +164,6 @@ public class GurobiSolver {
 	    	  model.write(IISFilePath);
 	      } else if (optimstatus == GRB.Status.UNBOUNDED) {
 	    	  Error.addSolvingError("Model is unbounded"); 
-	          //System.out.println("Model is unbounded");
 	      } else {
 	    	  Error.addSolvingError("Optimization was stopped with status = "
                     + optimstatus);
@@ -274,7 +273,6 @@ public class GurobiSolver {
 			} catch (Exception e) {
 				//value = 0;  // TODO: warning!! needs work here!!
 				
-				//System.out.println(" This dvName not found: "+ dvName);
 				//continue;
 				try {
 					value = (Double) dvar.getData().getData(); // use whatever is in the container.
@@ -313,8 +311,8 @@ public class GurobiSolver {
 		}
 		
 		if (ControlData.showRunTimeMessage) {
-			System.out.println("Objective Value: "+ControlData.lpsolve_objective);
-			System.out.println("Assign Dvar Done.");
+			logger.info("Objective Value: "+ControlData.lpsolve_objective);
+			logger.info("Assign Dvar Done.");
 		}
 	}
 
@@ -325,7 +323,7 @@ public class GurobiSolver {
 		
 		for (int i = 0; i < lpResult.varValues.length; i++) {
 			
-			//System.out.println(lpResult.varNames[i]+":"+lpResult.varValues[i]);
+
 			varDoubleMap.put(lpResult.varNames[i], lpResult.varValues[i]);
 			
 			// TODO: add the following line before sending the problem to the solver using direct link. 
@@ -339,32 +337,32 @@ public class GurobiSolver {
 	private void checkStatus() throws GRBException {
 	      int status = model.get(GRB.IntAttr.Status);
 	      if (status == GRB.Status.UNBOUNDED) {
-	        System.out.println("The model cannot be solved "
+	        logger.error("The model cannot be solved "
 	            + "because it is unbounded");
 	        return;
 	      }
 	      if (status == GRB.Status.OPTIMAL) {
-	        System.out.println("The optimal objective is " +
+	        logger.info("The optimal objective is " +
 	            model.get(GRB.DoubleAttr.ObjVal));
 	        return;
 	      }
 	      if (status != GRB.Status.INF_OR_UNBD && 
 	          status != GRB.Status.INFEASIBLE    ) {
-	        System.out.println("Optimization was stopped with status " + status);
+	        logger.info("Optimization was stopped with status " + status);
 	        return;
 	      }
 
 	      // do IIS
-	      System.out.println("The model is infeasible; computing IIS");
+	      logger.error("The model is infeasible; computing IIS");
 	      LinkedList<String> removed = new LinkedList<String>();
 
 	      // Loop until we reduce to a model that can be solved
 	      while (true) {
 	        model.computeIIS();
-	        System.out.println("\nThe following constraint cannot be satisfied:");
+	        logger.warn("\nThe following constraint cannot be satisfied:");
 	        for (GRBConstr c : model.getConstrs()) {
 	          if (c.get(GRB.IntAttr.IISConstr) == 1) {
-	            System.out.println(c.get(GRB.StringAttr.ConstrName));
+	            logger.warn(c.get(GRB.StringAttr.ConstrName));
 	            // Remove a single constraint from the model
 	            removed.add(c.get(GRB.StringAttr.ConstrName));
 	            model.remove(c);
@@ -372,12 +370,11 @@ public class GurobiSolver {
 	          }
 	        }
 
-	        System.out.println();
 	        model.optimize();
 	        status = model.get(GRB.IntAttr.Status);
 
 	        if (status == GRB.Status.UNBOUNDED) {
-	          System.out.println("The model cannot be solved "
+	          logger.error("The model cannot be solved "
 	              + "because it is unbounded");
 	          return;
 	        }
@@ -386,18 +383,17 @@ public class GurobiSolver {
 	        }
 	        if (status != GRB.Status.INF_OR_UNBD &&
 	            status != GRB.Status.INFEASIBLE    ) {
-	          System.out.println("Optimization was stopped with status " +
+	          logger.info("Optimization was stopped with status " +
 	              status);
 	          return;
 	        }
 	      }
 
-	      System.out.println("\nThe following constraints were removed "
+	      logger.warn("\nThe following constraints were removed "
 	          + "to get a feasible LP:");
 	      for (String s : removed) {
-	        System.out.print(s + " ");
+	        logger.warn(s + " ");
 	      }
-	      System.out.println();
 		}
 	
 	private void Output() throws GRBException {
@@ -411,7 +407,7 @@ public class GurobiSolver {
 			System.out.print(dvName + ": " + dvar.getData().getData() +"\n");
 		}
 		
-		System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+		logger.info("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
 	}
 	public static void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String multName){
 		Dvar dvar=new Dvar();

@@ -11,6 +11,8 @@ import java.util.Set;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.External;
@@ -27,7 +29,7 @@ public class WriteCSV {
 	  
 	  //static Map<String, List<String>> mapStringList = new HashMap<String, List<String>>();
 	  //private static PrintWriter out;
-	
+      private static final Logger logger = LoggerFactory.getLogger(WriteCSV.class);
 	  public static String sequence_header ="CYCLE,CONDITION,TIMESTEP";
 	  public static String weight_header ="DVAR,TIME_ARRAY_SIZE,CONDITION,WEIGHT";
 	  public static String external_header ="FUNCTION,FILE,FROM_WRESL_FILE";
@@ -427,7 +429,7 @@ public class WriteCSV {
 		    for (String k: keys ){
 		    	
 			    
-			    if (! wtMap.containsKey(k)) System.out.println("##### not exist in wtMap:"+k);
+			    if (! wtMap.containsKey(k)) logger.info("##### not exist in wtMap:"+k);
 			    
 			    
 		    	//out.print(k);

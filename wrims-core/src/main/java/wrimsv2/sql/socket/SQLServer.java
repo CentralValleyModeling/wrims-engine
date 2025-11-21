@@ -1,5 +1,8 @@
 package wrimsv2.sql.socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +14,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class SQLServer {
+    private static final Logger logger = LoggerFactory.getLogger(SQLServer.class);
 	private ServerSocket serverSocket = null;
 	private Socket socket = null;
 	private ObjectInputStream inputStream = null;
@@ -32,7 +36,7 @@ public class SQLServer {
 		try {
 			serverSocket = new ServerSocket(port);
 			while (true){
-				System.out.println("waiting...");
+				logger.info("waiting...");
 				socket = serverSocket.accept();
 				inputStream = new ObjectInputStream(socket.getInputStream());
 				downloadFile();
@@ -62,7 +66,7 @@ public class SQLServer {
 		try {
 			fileEvent = (FileEvent) inputStream.readObject();
 			if (fileEvent.getStatus().equalsIgnoreCase("Error")) {
-				System.out.println("Error occurred");
+				logger.error("Error occurred");
 			}
 			String outputFile = fileEvent.getDestinationDirectory() + fileEvent.getFilename();
 			if (!new File(fileEvent.getDestinationDirectory()).exists()) {
@@ -83,7 +87,7 @@ public class SQLServer {
 	        OutputStreamWriter osw = new OutputStreamWriter(os);
 	        BufferedWriter bw = new BufferedWriter(osw);
 	        bw.write(returnMessage);
-	        System.out.println("Message sent to the client is "+returnMessage);
+	        logger.info("Message sent to the client is "+returnMessage);
 	        bw.flush();
 	        bw.close();
 	        osw.close();

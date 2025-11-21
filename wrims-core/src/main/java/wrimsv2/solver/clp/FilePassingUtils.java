@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.StudyDataSet;
 import wrimsv2.commondata.solverdata.*;
@@ -25,7 +27,7 @@ import wrimsv2.wreslparser.elements.Tools;
 import lpsolve.*;
 
 public class FilePassingUtils {
-
+    private static final Logger logger = LoggerFactory.getLogger(FilePassingUtils.class);
 	public static int solverErrorCode;// 0:no problem 1: not optimal 2: other errors
 	public static String solverMessage = "";
 	public static Double objective_value;
@@ -147,10 +149,6 @@ public class FilePassingUtils {
 			line = line.trim();
 			line = line.replace('\t', ' ');
 
-			// System.out.println(line);
-
-			// System.out.println(line);
-
 			String[] splited = line.split("\\s+");
 
 			if (splited.length < 3)
@@ -162,8 +160,6 @@ public class FilePassingUtils {
 
 			String value = splited[2];
 
-			// System.out.println("dvar: "+key+" value:"+value+"\n");
-			//System.out.println(line);
 			varDoubleMap.put(key, Double.parseDouble(value));
 
 			// break at the line "End Config"
@@ -180,12 +176,12 @@ public class FilePassingUtils {
 		String p = "D:\\ucd\\example\\solutionExample.txt";
 		parseReturnFile(p);
 
-		System.out.println("solver message:"+solverMessage);
-		System.out.println("error code:"+solverErrorCode);
-		System.out.println("obj value:"+objective_value);
+		logger.info("solver message:"+solverMessage);
+		logger.info("error code:"+solverErrorCode);
+		logger.info("obj value:"+objective_value);
 		
 		for (String key : varDoubleMap.keySet()) {
-			System.out.println(key + ":" + varDoubleMap.get(key));
+			logger.info(key + ":" + varDoubleMap.get(key));
 		}
 
 	}

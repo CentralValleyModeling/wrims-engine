@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.solverdata.SolverData;
 import wrimsv2.commondata.wresldata.WeightElement;
 import wrimsv2.components.ControlData;
@@ -13,7 +15,7 @@ import wrimsv2.components.IntDouble;
 import wrimsv2.evaluator.EvalConstraint;
 
 public class CheckWeightSlackSurplus {
-	
+    private static final Logger logger = LoggerFactory.getLogger(CheckWeightSlackSurplus.class);
 	public CheckWeightSlackSurplus(){
 		CopyOnWriteArrayList<String> usedWeightSlackSurplusCollection = ControlData.currModelDataSet.usedWtSlackSurplusList;
 		Map<String, WeightElement> weightSlackSurplusMap=SolverData.getWeightSlackSurplusMap();
@@ -37,14 +39,14 @@ public class CheckWeightSlackSurplus {
 				}else{
 					if (weightSlackSurplusMap.containsKey(multiplierName)){
 						if (multiplierName.startsWith("surlus__") || multiplierName.startsWith("slack__")){
-							System.out.println(multiplierName+" is not in weight table!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+							logger.error(multiplierName+" is not in weight table!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 						}
 					}
 				}
 			}
 		}
 		if (usedWeightSlackSurplusCollection.size()>0){
-			System.out.println(usedWeightSlackSurplusCollection+" is not used in constraint!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			logger.error(usedWeightSlackSurplusCollection+" is not used in constraint!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		}
 	}
 }

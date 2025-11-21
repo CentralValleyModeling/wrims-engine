@@ -9,6 +9,8 @@ import java.util.Set;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.commondata.wresldata.Alias;
 import wrimsv2.commondata.wresldata.Dvar;
 import wrimsv2.commondata.wresldata.Timeseries;
@@ -22,7 +24,7 @@ import wrimsv2.evaluator.TimeOperation;
 import wrimsv2.parallel.ParallelVars;
 
 public class HDF5Reader {
-	
+    private static final Logger logger = LoggerFactory.getLogger(HDF5Reader.class);
 	private static int svFid=-1;
 	private static int initFid=-1;
 	private static int svGidPartA=-1;
@@ -76,7 +78,7 @@ public class HDF5Reader {
 			readTimestepData(1);
 			assignTimeseries();
 			closeFileAndGroup(1);
-			System.out.println("Timeseries Reading Done.");
+			logger.info("Timeseries Reading Done.");
 		}
 	}
 	

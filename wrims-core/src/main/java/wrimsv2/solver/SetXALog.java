@@ -6,10 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.components.ControlData;
 import wrimsv2.components.FilePaths;
 
 public class SetXALog {
+    private static final Logger logger = LoggerFactory.getLogger(SetXALog.class);
 	static boolean isConfigRead=false; 
 	static String line="set sortName YES MPSX Yes Set FreqLog :01";
 	
@@ -22,7 +25,7 @@ public class SetXALog {
 				br = new BufferedReader(fr);
 				line = br.readLine();
 				isConfigRead=true;
-				System.out.println("Retrieve XA configuation from xa_config.dat file");
+				logger.info("Retrieve XA configuation from xa_config.dat file");
 				ControlData.xasolver.setCommand( "set debug no ToRcc Yes FileName  "+FilePaths.mainDirectory+"  Output "+FilePaths.mainDirectory+"\\xa.log "+line);
 				br.close();
 				fr.close();

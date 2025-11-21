@@ -5,11 +5,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wrimsv2.wreslparser.elements.LogUtils;
 import wrimsv2.wreslplus.elements.StudyTemp;
 import wrimsv2.wreslplus.elements.Tools;
 
 public class ProcMainFile {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcMainFile.class);
 
 	private ProcMainFile() {
 	}
@@ -21,7 +25,7 @@ public class ProcMainFile {
 			
 			ArrayList<String> kids = st.modelMap.get(f).incModelList;
 			
-			//System.out.println("st.modelMap.get(f).incModelList: "+st.modelMap.get(f).incModelList);
+			logger.debug("st.modelMap.get(f).incModelList: "+st.modelMap.get(f).incModelList);
 			
 			if (kids==null){
 				st.noKid_incModel.add(f);			
@@ -96,7 +100,7 @@ public class ProcMainFile {
 				
 				incM = incM.toLowerCase();
 				
-				//System.out.println("inc models: "+incM);
+				logger.debug("inc models: "+incM);
 				
 				if (!st.modelList.contains(incM)){
 					
