@@ -284,7 +284,7 @@ public class ValueEvaluation {
 		Class function;
 		IntDouble result;
 		try {
-			function = Class.forName("gov.ca.water.wrims.engine.core.external.Function"+ident);
+			function = Class.forName("wrimsv2.external.Function"+ident);
 		
 			Stack stack = new Stack();
 
@@ -364,7 +364,7 @@ public class ValueEvaluation {
 			if (ControlData.allExternalFunctionMap.containsKey(ident)){
 				ef=ControlData.allExternalFunctionMap.get(ident);
 			}else{
-				function = Class.forName("gov.ca.water.wrims.engine.core.external.Function"+ident);
+				function = Class.forName("wrimsv2.external.Function" + ident);
 				ef = (ExternalFunction)function.newInstance();
 				ControlData.allExternalFunctionMap.put(ident, ef);
 			}

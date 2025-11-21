@@ -91,7 +91,7 @@ public class ILP {
 	
 	public static ArrayList<String> intList = null;
 	
-	private ILP() {
+	protected ILP() {
 		
 	}
 

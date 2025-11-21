@@ -47,7 +47,8 @@ public class GenerateCompileFiles {
 					out.println("javac -cp . gov\\ca\\water\\wrims\\engine\\core\\external\\Function"+functionName+".java");
 				}
 				out.println("javah -jni gov.ca.water.wrims.engine.core.external.Function"+functionName);
-				out.println("gcc -c -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I\""+currentDirectory+"/../jdk/include\"  -I\""+currentDirectory+"/../jdk/include/win32\" wrims_external_Function"+functionName+".c");
+
+				out.println("gcc -c -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I\""+currentDirectory+"/../jdk/include\"  -I\""+currentDirectory+"/../jdk/include/win32\" gov_ca_water_wrims_engine_core_external_Function"+functionName+".c");
 			}
 			String compileString="gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -shared "; 
 			while (dfi.hasNext()){
@@ -55,7 +56,7 @@ public class GenerateCompileFiles {
 				String fortranDllName=dllDlls.get(dllName);
 				String[] functions=dllFunctions.get(dllName);
 				for (int i=0; i<functions.length; i++){
-					compileString=compileString+"wrims_external_Function"+functions[i]+".o ";
+					compileString=compileString+"gov_ca_water_wrims_engine_core_external_Function"+functions[i]+".o ";
 				}
 				compileString=compileString+"-o "+dllName+".dll -L./ "+fortranDllName+".dll";
 				out.println(compileString);
@@ -252,7 +253,7 @@ public class GenerateCompileFiles {
 	}
 	
 	public static void generateCFile(String functionName){
-		String cFileFullPath=workingDir+"wrims_external_Function"+functionName+".c";
+		String cFileFullPath=workingDir+"gov_ca_water_wrims_engine_core_external_Function"+functionName+".c";
 		String functionType=functionTypes.get(functionName);
 		String[] variableNames=functionVariableNames.get(functionName);
 		String[] variableTypes=functionVariableTypes.get(functionName);
@@ -260,7 +261,7 @@ public class GenerateCompileFiles {
 			FileWriter cFile = new FileWriter(cFileFullPath, false);
 			PrintWriter out = new PrintWriter(cFile);
 			out.println("#include <jni.h>");
-			out.println("#include \"wrims_external_Function"+functionName+".h\"");
+			out.println("#include \"gov_ca_water_wrims_engine_core_external_Function"+functionName+".h\"");
 			out.println();
 			String externalString="extern "+functionType+" "+functionName.toUpperCase()+"(";
 			String variableType;
@@ -312,15 +313,15 @@ public class GenerateCompileFiles {
 			String modifiedFunctionName=functionName.replaceAll("_", "_1");
 			String exportString="";
 			if (functionType.startsWith("int[]")){
-				exportString="JNIEXPORT jintArray JNICALL Java_wrims_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
+				exportString="JNIEXPORT jintArray JNICALL Java_gov_ca_water_wrims_engine_core_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
 			}else if (functionType.startsWith("float[]")){
-				exportString="JNIEXPORT jfloatArray JNICALL Java_wrims_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
+				exportString="JNIEXPORT jfloatArray JNICALL Java_gov_ca_water_wrims_engine_core_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
 			}else if (functionType.startsWith("double[]")){
-				exportString="JNIEXPORT jdoubleArray JNICALL Java_wrims_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
+				exportString="JNIEXPORT jdoubleArray JNICALL Java_gov_ca_water_wrims_engine_core_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
 			}else if (functionType.equals("void")){
-				exportString="JNIEXPORT void JNICALL Java_wrims_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
+				exportString="JNIEXPORT void JNICALL Java_gov_ca_water_wrims_engine_core_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
 			}else{
-				exportString="JNIEXPORT j"+functionType+" JNICALL Java_wrims_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
+				exportString="JNIEXPORT j"+functionType+" JNICALL Java_gov_ca_water_wrims_engine_core_external_Function"+modifiedFunctionName+"_"+modifiedFunctionName+"(JNIEnv *env, jobject obj, ";
 			}
 			for (int i=0; i<variableNames.length-1; i++){
 				if (variableTypes[i].startsWith("int[]")){

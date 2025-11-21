@@ -12,7 +12,6 @@ import gov.ca.water.wrims.engine.core.commondata.wresldata.StudyDataSet;
 import gov.ca.water.wrims.engine.core.components.ControlData;
 import gov.ca.water.wrims.engine.core.components.Error;
 import gov.ca.water.wrims.engine.core.components.IntDouble;
-import gov.ca.water.wrims.engine.core.external.*;
 import gov.ca.water.wrims.engine.core.external.ExternalFunction;
 import gov.ca.water.wrims.engine.core.hdf5.HDF5Reader;
 import gov.ca.water.wrims.engine.core.parallel.ParallelVars;
@@ -481,7 +480,7 @@ public class Evaluation {
 		Class function;
 		IntDouble result;
 		try {
-			function = Class.forName("gov.ca.water.wrims.engine.core.external.Function"+ident);
+			function = Class.forName("wrimsv2.external.Function"+ident);
 		
 			Stack stack = new Stack();
 
@@ -534,7 +533,7 @@ public class Evaluation {
 			
 		Class function;
 		try {
-			function = Class.forName("gov.ca.water.wrims.engine.core.external.Function"+ident);
+			function = Class.forName("wrimsv2.external.Function"+ident);
 		
 			Stack stack = new Stack();
 			for (int i=0; i<eeArray.size(); i++){
