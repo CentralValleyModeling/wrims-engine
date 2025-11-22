@@ -166,3 +166,29 @@ To set up SonarQube analysis in your IDE, follow these steps:
 4. **Run Analysis:**
    - You can now run SonarQube analysis directly from your IDE.
    - The plugin will provide real-time feedback on code quality and potential issues as you write code.
+
+---
+
+# Package Naming Changes
+
+## Current Name Changes
+
+The package names for this project were recently changed. 
+
+The group ID was changed from `gov.ca.dwr` to `gov.ca.water` to match the publicly available webpage.
+
+The top-level package name was changed from `wrimsv2` to `wrims.engine` for a fully-qualified name of 
+`gov.ca.water.wrims.engine`. It did not previously include the group ID in the name.
+
+The `wrims` package was renamed to `core` for a fully-qualified name of `gov.ca.water.wrims.engine.core`.
+
+## Legacy CalLite Support and Facade Classes
+
+The current implementation of CalLite uses libraries and native code that is compiled with the package
+name of `wrimsv2.external`. As a result, renaming the native function classes could not be achieved without breaking
+WRIMS compatibility with existing projects and the CalLite code. As a result, the necessary classes have been left
+in the previous package path within this project. The necessary helper classes have been moved to the new package 
+locations, but have had facade classes added to allow for their utilization from the `wrimsv2.external` classes.
+
+This change allows for successful class loading for native code. However, the CalLite library and projects using it
+should eventually be updated to use the new pathing. This includes the ANN DLLs that are used to run the modelling processes.
