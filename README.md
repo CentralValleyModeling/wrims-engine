@@ -190,5 +190,6 @@ WRIMS compatibility with existing projects and the CalLite code. As a result, th
 in the previous package path within this project. The necessary helper classes have been moved to the new package 
 locations, but have had facade classes added to allow for their utilization from the `wrimsv2.external` classes.
 
-This change allows for successful class loading for native code. However, the CalLite library and projects using it
-should eventually be updated to use the new pathing. This includes the ANN DLLs that are used to run the modelling processes.
+This change allows for successful class loading for native code. However, the CalLite library, other dependencies,
+and projects using them should eventually be updated to use the new canonical package naming. 
+This includes the ANN DLLs that are used to run the modelling processes.
