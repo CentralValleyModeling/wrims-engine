@@ -26,62 +26,73 @@ import wrimsv2.wreslplus.elements.ParamTemp;
 import wrimsv2.wreslplus.elements.ParserUtils;
 import wrimsv2.wreslplus.grammar.WreslPlusParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConfigUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 	private static Map<String, String> argsMap;
+	public static LinkedHashMap<String, ParamTemp> paramMap = new LinkedHashMap<>();
+	public static Map<String, String> configMap = new HashMap<>();
 
-	public static LinkedHashMap<String, ParamTemp> paramMap = new LinkedHashMap<String, ParamTemp>();
-	
-	public static Map<String, String> configMap = new HashMap<String, String>();
+    /**Utility method to log the values of configuration files with a consistent width
+     *
+     * @param key the name of the configuration setting
+     * @param value the value of the configuration setting
+     */
+    private static void logValue(String key, String value) {
+        int width = 25;
+        if (key.length() > width) {
+            width = key.length();
+        }
+        key = String.format("%" + width + "s", key);
+        String message = String.format("%s: %s", key, value);
+        logger.info(message);
+    }
+
+    private static void logValue(String key, Boolean value) {
+        logValue(key, String.format("%b", value));
+    }
+
+    private static void logValue(String key, Integer value) {
+        logValue(key, String.format("%d", value));
+    }
+
+    private static void logValue(String key, Double value) {
+        logValue(key, String.format("%e", value));
+    }
 
 	public static void loadArgs(String[] args) {
-
 		// for Error.log header
-		ControlData.currEvalTypeIndex=8;
+		ControlData.currEvalTypeIndex = 8;
 		
 		// print version number then exit
 		if (args.length==1 && args[0].equalsIgnoreCase("-version") ) {
-		
-			System.out.println("WRIMS "+new BuildProps().getVN());
+            logValue("WRIMS", new BuildProps().getVN());
 			System.exit(0);
 		}
-		
-		
-		
-		argsMap = new HashMap<String, String>();
 
+		argsMap = new HashMap<>();
 		for (int i = 0; i < args.length; i++) {
-
 			try {
-				String key = args[i].substring(0, args[i].indexOf("="));
-				String val = args[i].substring(args[i].indexOf("=") + 1, args[i].length());
-				val=val.replaceAll("\"", "");
-
-				argsMap.put(key.toLowerCase(), val); 
-
+				String key = args[i].substring(0, args[i].indexOf("=")).toLowerCase();
+				String val = args[i].substring(args[i].indexOf("=") + 1).replaceAll("\"", "");
+				argsMap.put(key, val);
 			}
 			catch (Exception e) {
-				System.out.println("Example: ");
-				System.out.println("-config=\"D:\\test\\example.config\"");
-//				System.out.println("Example: ");
-//				System.out.println("-mainwresl=\"C:\\study\\main.wresl\"");
+				logger.error("Example: \n-config=\"D:\\test\\example.config\"");
 				System.exit(1);
 			}
-
-			//System.out.println(argsMap);
-
 		}
 
-
-		
 		// load config file
-		if (argsMap.keySet().contains("-config")) {
-			
+		if (argsMap.containsKey("-config")) {
 			String configFilePath = FilenameUtils.removeExtension(argsMap.get("-config"))+".config";
 			argsMap.put("-config", configFilePath);
 			
-			System.out.println("\nWARNING!! Config file and RUN directory must be placed in the same folder! \n");
-			System.out.println("Loading config file: "+argsMap.get("-config"));
+			logger.warn("Config file and RUN directory must be placed in the same folder!");
+            logger.info("Loading config file:\t{}", argsMap.get("-config"));
 			StudyUtils.configFilePath = argsMap.get("-config");
 			loadConfig(StudyUtils.configFilePath);
 			if (Error.getTotalError()>0) {
@@ -89,40 +100,33 @@ public class ConfigUtils {
 			}
 			
 		// compile to serial object named *.par
-		} else if (argsMap.keySet().contains("-mainwresl")) {
-
-			System.out.println("Compiling main wresl file: "+argsMap.get("-mainwresl"));
+		} else if (argsMap.containsKey("-mainwresl")) {
+            logger.info("Compiling main wresl file:\t{}", argsMap.get("-mainwresl"));
 			StudyUtils.compileOnly = true;
 			FilePaths.setMainFilePaths(argsMap.get("-mainwresl"));
 
 		} else if (argsMap.keySet().contains("-mainwreslplus")) {
-
-			System.out.println("Compiling main wresl file: "+argsMap.get("-mainwreslplus"));
+            logger.info("Compiling main wresl+ file:\t{}", argsMap.get("-mainwreslplus"));
 			StudyUtils.compileOnly = true;
 			StudyUtils.useWreslPlus=true;
 			FilePaths.setMainFilePaths(argsMap.get("-mainwreslplus"));
 
-		}else {
-			System.out.println("Example: ");
-			System.out.println("-config=\"D:\\test\\example.config\"");
-//			System.out.println("Example: ");
-//			System.out.println("-mainwresl=\"C:\\study\\main.wresl\"");
+		} else {
+            logger.error("Example: \n-config=\"D:\\test\\example.config\"");
 			System.exit(1);
 		}
-
 	}
+
 
 	private static void loadConfig(String configFile) {
 		
 		//StudyUtils.config_errors = 0; // reset
 		String k=null;
 
-		configMap = new HashMap<String, String>();
-
+		configMap = new HashMap<>();
 		configMap = checkConfigFile(configFile);
 		
 		String mainfile = configMap.get("mainfile").toLowerCase();
-		
 		String mainFilePath = "";
 		
 		if (mainfile.contains(":")){
@@ -148,33 +152,29 @@ public class ConfigUtils {
 		else {
 			Error.addConfigError("Invalid main file extension: " + configMap.get("mainfile"));
 			Error.writeErrorLog();
-			//System.out.println("Invalid main file extension: " + configMap.get("mainfile"));
-			//System.out.println("Specify either *.wresl or *.par");
-			//System.exit(1);
 		}
 
 		// FilePaths.mainDirectory = configMap.get("maindir");
-		System.out.println("MainFile:       "+FilePaths.fullMainPath);
+        logValue("MainFile", FilePaths.fullMainPath);
 		
-		// CbcLibName // default is jCbc and it's not used for version selection
+		// CbcLibName - default is jCbc, and it's not used for version selection
 		k = "cbclibname";
-		if (configMap.keySet().contains(k)){
-			
+		if (configMap.containsKey(k)){
 			CbcSolver.cbcLibName = configMap.get(k);
 		}
 		// need to know jCbc version to determine solving options 
 		System.loadLibrary(CbcSolver.cbcLibName);
-		System.out.println("CbcLibName: "+CbcSolver.cbcLibName);
+        logValue("CbcLibName", CbcSolver.cbcLibName);
 		
 		try {
-			
-			if (configMap.get("groundwaterdir").length()>0) {
-				if (configMap.get("groundwaterdir").contains(":")){
-					FilePaths.groundwaterDir =  new File(configMap.get("groundwaterdir")).getCanonicalPath()+File.separator;
+            String gwDir = configMap.get("groundwaterdir");
+			if (gwDir.isEmpty()) {
+				if (gwDir.contains(":")){
+					FilePaths.groundwaterDir =  new File(gwDir).getCanonicalPath()+File.separator;
 				} else { 
-					FilePaths.groundwaterDir =  new File(StudyUtils.configDir, configMap.get("groundwaterdir")).getCanonicalPath()+File.separator;
+					FilePaths.groundwaterDir =  new File(StudyUtils.configDir, gwDir).getCanonicalPath()+File.separator;
 				}
-				System.out.println("GroundWaterDir: "+FilePaths.groundwaterDir);
+                logValue("GroundWaterDir",  FilePaths.groundwaterDir);
 			} else {
 				FilePaths.groundwaterDir = "None";
 			}
@@ -184,7 +184,7 @@ public class ConfigUtils {
 			} else {
 				FilePaths.setSvarFilePaths(new File(StudyUtils.configDir, configMap.get("svarfile")).getCanonicalPath());
 			}
-			System.out.println("SvarFile:       "+FilePaths.fullSvarFilePath);
+            logValue("SvarFile", FilePaths.fullSvarFilePath);
 			
 			if (configMap.get("svarfile2").equals("")){
 				FilePaths.setSvarFile2Paths("");
@@ -194,7 +194,7 @@ public class ConfigUtils {
 				} else {
 					FilePaths.setSvarFile2Paths(new File(StudyUtils.configDir, configMap.get("svarfile2")).getCanonicalPath());
 				}
-				System.out.println("SvarFile2:       "+FilePaths.fullSvarFile2Path);
+				logValue("SvarFile2", FilePaths.fullSvarFile2Path);
 			}
 			
 			if (configMap.get("initfile").contains(":")){
@@ -202,19 +202,19 @@ public class ConfigUtils {
 			} else {
 				FilePaths.setInitFilePaths(new File(StudyUtils.configDir, configMap.get("initfile")).getCanonicalPath());
 			}
-			System.out.println("InitFile:       "+FilePaths.fullInitFilePath);
+			logValue("InitFile", FilePaths.fullInitFilePath);
 			
 			if (configMap.get("dvarfile").contains(":")) {
 				FilePaths.setDvarFilePaths(new File(configMap.get("dvarfile")).getCanonicalPath());
 			} else {
 				FilePaths.setDvarFilePaths(new File(StudyUtils.configDir, configMap.get("dvarfile")).getCanonicalPath());
 			}
-			System.out.println("DvarFile:       "+FilePaths.fullDvarDssPath);
-		
+			logValue("DvarFile",FilePaths.fullDvarDssPath);
+
 		} catch (IOException e){
 			Error.addConfigError("Invalid file path in config file");
 			Error.writeErrorLog();
-			//System.out.println("Invalid file path");
+			//logger.info("Invalid file path");
 			e.printStackTrace();
 		}
 		
@@ -227,7 +227,7 @@ public class ConfigUtils {
 		}
 		if (configMap.get("lookupsubdir").length()>0 ){
 			FilePaths.lookupSubDirectory = configMap.get("lookupsubdir");
-			System.out.println("LookupSubDir:   "+FilePaths.lookupSubDirectory);
+			logValue("LookupSubDir", FilePaths.lookupSubDirectory);
 		}
 		//ControlData.showWreslLog = !(configMap.get("showwresllog").equalsIgnoreCase("no"));
 		
@@ -251,17 +251,17 @@ public class ConfigUtils {
 		ControlData.currMonth = ControlData.startMonth;
 		ControlData.currDay = ControlData.startDay;
 		
-		System.out.println("TimeStep:       "+ControlData.timeStep);
-		System.out.println("SvarAPart:      "+ControlData.partA);
-		System.out.println("SvarFPart:      "+ControlData.svDvPartF);
-		System.out.println("InitFPart:      "+ControlData.initPartF);
-		System.out.println("StartYear:      "+ControlData.startYear);
-		System.out.println("StartMonth:     "+ControlData.startMonth);
-		System.out.println("StartDay:       "+ControlData.startDay);
-		System.out.println("StopYear:       "+ControlData.endYear);
-		System.out.println("StopMonth:      "+ControlData.endMonth);
-		System.out.println("StopDay:        "+ControlData.endDay);
-		System.out.println("Solver:         "+ControlData.solverName);
+		logValue("TimeStep", ControlData.timeStep);
+		logValue("SvarAPart", ControlData.partA);
+		logValue("SvarFPart", ControlData.svDvPartF);
+		logValue("InitFPart", ControlData.initPartF);
+		logValue("StartYear", ControlData.startYear);
+		logValue("StartMonth", ControlData.startMonth);
+		logValue("StartDay", ControlData.startDay);
+		logValue("StopYear", ControlData.endYear);
+		logValue("StopMonth", ControlData.endMonth);
+		logValue("StopDay", ControlData.endDay);
+		logValue("Solver", ControlData.solverName);
 		
 		final String[] solvers = {"xa","xalog","clp0","clp1","clp","lpsolve","gurobi","cbc0","cbc1","cbc"};
 
@@ -270,7 +270,7 @@ public class ConfigUtils {
 			Error.writeErrorLog();
 		 } else if (ControlData.solverName.toLowerCase().contains("cbc")) {
 			 CbcSolver.cbcVersion = jCbc.getVersion();
-			 System.out.println("CbcVersion: "+CbcSolver.cbcVersion);
+			 logValue("CbcVersion", CbcSolver.cbcVersion);
 			 if (CbcSolver.cbcVersion.contains("2.9.9")) {
 				 CbcSolver.usejCbc2021 = true; 
 				 if (CbcSolver.cbcVersion.contains("2.9.9.2")) {
@@ -282,8 +282,8 @@ public class ConfigUtils {
 				 CbcSolver.cbcViolationCheck = true; // can overwrite
 				 ControlData.useCbcWarmStart = false; //  cannot overwrite
 			 }
-			 System.out.println("Cbc2021: "+CbcSolver.usejCbc2021);
-			 System.out.println("Cbc2021a: "+CbcSolver.usejCbc2021a);
+			 logValue("Cbc2021", CbcSolver.usejCbc2021);
+			 logValue("Cbc2021a", CbcSolver.usejCbc2021a);
 		 }
 		
 		// SendAliasToDvar default is false
@@ -300,7 +300,7 @@ public class ConfigUtils {
 			}
 			
 		}
-		System.out.println("SendAliasToDvar: "+ControlData.sendAliasToDvar);
+		logValue("SendAliasToDvar", ControlData.sendAliasToDvar);
 		
 		
 		// PrefixInitToDvarFile
@@ -318,7 +318,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.writeInitToDVOutput = true;
 		}
-		System.out.println("PrefixInitToDvarFile: "+ControlData.writeInitToDVOutput);
+		logValue("PrefixInitToDvarFile", ControlData.writeInitToDVOutput);
 
 		// SolveCompare
 		k = "solvecompare";
@@ -340,8 +340,8 @@ public class ConfigUtils {
 			ControlData.cbc_debug_routeXA = false;
 			ControlData.cbc_debug_routeCbc = false;	
 		}
-		System.out.println("SolveCompare (use XA solution as base): "+ControlData.cbc_debug_routeXA);
-		System.out.println("SolveCompare (use Cbc solution as base): "+ControlData.cbc_debug_routeCbc);
+		logValue("SolveCompare (XA-base)", ControlData.cbc_debug_routeXA);
+		logValue("SolveCompare (CBC-base)", ControlData.cbc_debug_routeCbc);
 
 		// watch variable
 		if (configMap.keySet().contains("watch")){
@@ -349,7 +349,7 @@ public class ConfigUtils {
 			String s = configMap.get("watch").toLowerCase();
 			ControlData.watchList = s.split(",");
 			
-			System.out.println("Watch: "+Arrays.toString(ControlData.watchList));
+			logValue("Watch", Arrays.toString(ControlData.watchList));
 
 		}
 		
@@ -362,11 +362,11 @@ public class ConfigUtils {
 			try {
 				ControlData.watchList_tolerance = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("watchT: Error reading config value");
+				logger.error("watchT: Error reading config value");
 			}
 			
 		}
-		System.out.println("watchT: "+ControlData.watchList_tolerance);
+		logValue("watchT", ControlData.watchList_tolerance);
 
 		// CbcDebugObjDiff // default is false
 		k = "cbcdebugobjdiff";
@@ -382,7 +382,7 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.debugObjDiff = false;	
 		}
-		System.out.println("CbcDebugObjDiff: "+CbcSolver.debugObjDiff);			
+		logValue("CbcDebugObjDiff", CbcSolver.debugObjDiff);
 		
 		// CbcObjLog // default is true
 		k = "cbcobjlog";
@@ -398,7 +398,7 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.logObj = true;
 		}
-		System.out.println("CbcObjLog: "+CbcSolver.logObj);		
+		logValue("CbcObjLog", CbcSolver.logObj);
 		
 		// CbcLogNativeLp // default is false
 		k = "cbclognativelp";
@@ -414,7 +414,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.cbcLogNativeLp = false;
 		}
-		System.out.println("CbcLogNativeLp: "+ControlData.cbcLogNativeLp);
+		logValue("CbcLogNativeLp", ControlData.cbcLogNativeLp);
 		
 		// CbcWarmStart // default is false
 		k = "cbcwarmstart";
@@ -432,7 +432,7 @@ public class ConfigUtils {
 		if (CbcSolver.usejCbc2021) { 
 			ControlData.useCbcWarmStart = true;
 		}
-		System.out.println("CbcWarmStart: "+ControlData.useCbcWarmStart);
+		logValue("CbcWarmStart", ControlData.useCbcWarmStart);
 		
 		// CbcViolationCheck  default {cbc2021:false, otherwise:true}
 		k = "cbcviolationcheck";
@@ -447,7 +447,7 @@ public class ConfigUtils {
 			} 
 			
 		}
-		System.out.println("CbcViolationCheck: "+CbcSolver.cbcViolationCheck);		
+		logValue("CbcViolationCheck", CbcSolver.cbcViolationCheck);
 
 		
 		// CbcSolveFunction // default is SolveFull
@@ -470,7 +470,7 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.solvFunc=CbcSolver.solvFull;	
 		}
-		System.out.println("CbcSolveFunction: "+CbcSolver.solvFunc);
+		logValue("CbcSolveFunction", CbcSolver.solvFunc);
 				
 		// CbcToleranceZero // default is 1e-11 ControlData.zeroTolerance
 		k = "cbctolerancezero";
@@ -481,11 +481,11 @@ public class ConfigUtils {
 			try {
 				ControlData.zeroTolerance = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcToleranceZero: Error reading config value");
+				logger.error("CbcToleranceZero: Error reading config value");
 			}
 			
 		}
-		System.out.println("CbcToleranceZero: "+ControlData.zeroTolerance);
+		logValue("CbcToleranceZero", ControlData.zeroTolerance);
 		
 		
 		// CbcToleranceInteger default 1e-9
@@ -497,11 +497,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.integerT = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcToleranceInteger: Error reading config value");
+				logger.error("CbcToleranceInteger: Error reading config value");
 			}
 			
 		}
-		System.out.println("CbcToleranceInteger: "+CbcSolver.integerT);
+		logValue("CbcToleranceInteger", CbcSolver.integerT);
 
 		// CbcLowerBoundZeroCheck default max(solve_2_primalT_relax*10, 1e-6)
 		k = "cbclowerboundzerocheck";
@@ -512,11 +512,10 @@ public class ConfigUtils {
 			try {
 				CbcSolver.lowerBoundZero_check = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcLowerBoundZeroCheck: Error reading config value");
+				logger.error("CbcLowerBoundZeroCheck:  reading config value");
 			}
-			
 		}
-		System.out.println("CbcLowerBoundZeroCheck: "+CbcSolver.lowerBoundZero_check);		
+		logValue("CbcLowerBoundZeroCheck", CbcSolver.lowerBoundZero_check);
 
 		// CbcToleranceIntegerCheck default 1e-8
 		k = "cbctoleranceintegercheck";
@@ -527,11 +526,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.integerT_check = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcToleranceIntegercheck: Error reading config value");
+				logger.error("CbcToleranceIntegercheck:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcToleranceIntegercheck: "+CbcSolver.integerT_check);			
+		logValue("CbcToleranceIntegercheck", CbcSolver.integerT_check);
 		
 		// CbcSolutionRounding  default is true
 		k = "cbcsolutionrounding";
@@ -549,7 +548,7 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.cbcSolutionRounding = true;
 		}
-		System.out.println("CbcSolutionRounding: "+CbcSolver.cbcSolutionRounding);		
+		logValue("CbcSolutionRounding", CbcSolver.cbcSolutionRounding);
 
 		// CbcViolationRetry  default is true
 		k = "cbcviolationretry";
@@ -567,38 +566,8 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.cbcViolationRetry = true;
 		}
-		System.out.println("CbcViolationRetry: "+CbcSolver.cbcViolationRetry);		
-		
-		
-//		// XAIntegerT
-//		k = "xaintegert";
-//		if (configMap.keySet().contains(k)){
-//			
-//			String s = configMap.get(k);			
-//			
-//			try {
-//				ControlData.xaIntegerT = Double.parseDouble(s);
-//			} catch (NumberFormatException e) {
-//				System.out.println("XAIntegerT: Error reading config value");
-//			}
-//			
-//		}
-//		System.out.println("XAIntegerT: "+ControlData.xaIntegerT);
-		
-		
-//		// xasort // default is unknown
-//		k = "xasort";
-//		if (configMap.keySet().contains(k)){
-//			
-//			String s = configMap.get(k).toLowerCase();
-//			
-//			if (s.equals("yes")||s.equals("no")||s.equals("col")||s.equals("row")){
-//				ControlData.xaSort=s;	
-//			} else {
-//				System.out.println("XASort: No | Yes | Row | Col");;
-//			}
-//		}
-//		System.out.println("XASort: "+ControlData.xaSort);
+		logValue("CbcViolationRetry", CbcSolver.cbcViolationRetry);
+
 
 		// CbcHintTimeMax // default is 100 sec
 		k = "cbchinttimemax";
@@ -609,26 +578,23 @@ public class ConfigUtils {
 			try {
 				CbcSolver.cbcHintTimeMax = Integer.parseInt(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcHintTimeMax: Error reading config value");
+				logger.error("CbcHintTimeMax:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcHintTimeMax: "+CbcSolver.cbcHintTimeMax);
+		logValue("CbcHintTimeMax", CbcSolver.cbcHintTimeMax);
 		
 		// CbcHintRelaxPenalty // default is 9000
 		k = "cbchintrelaxpenalty";
 		if (configMap.keySet().contains(k)){
-			
-			String s = configMap.get(k);			
-			
+			String s = configMap.get(k);
 			try {
 				CbcSolver.cbcHintRelaxPenalty = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcHintRelaxPenalty: Error reading config value");
+				logger.error("CbcHintRelaxPenalty:  reading config value");
 			}
-			
 		}
-		System.out.println("CbcHintRelaxPenalty: "+CbcSolver.cbcHintRelaxPenalty);
+        logValue("CbcHintRelaxPenalty", CbcSolver.cbcHintRelaxPenalty);
 
 		
 		// CbcTolerancePrimal // default is 1e-9
@@ -640,11 +606,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.solve_2_primalT = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcTolerancePrimal: Error reading config value");
+				logger.error("CbcTolerancePrimal:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcTolerancePrimal: "+CbcSolver.solve_2_primalT);
+        logValue("CbcTolerancePrimal", CbcSolver.solve_2_primalT);
 
 		// CbcTolerancePrimalRelax // default is 1e-7
 		k = "cbctoleranceprimalrelax";
@@ -655,11 +621,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.solve_2_primalT_relax = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcTolerancePrimalRelax: Error reading config value");
+				logger.error("CbcTolerancePrimalRelax:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcTolerancePrimalRelax: "+CbcSolver.solve_2_primalT_relax);
+        logValue("CbcTolerancePrimalRelax", CbcSolver.solve_2_primalT_relax);
 		ControlData.relationTolerance = Math.max(CbcSolver.solve_2_primalT_relax*10, 1e-6);
 		
 		// CbcSolveWhsPrimalT // default is 1e-9
@@ -671,11 +637,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.solve_whs_primalT = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcToleranceWarmPrimal: Error reading config value");
+				logger.error("CbcToleranceWarmPrimal:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcToleranceWarmPrimal: "+CbcSolver.solve_whs_primalT);
+        logValue("CbcToleranceWarmPrimal", CbcSolver.solve_whs_primalT);
 
 		// CbcLogStartDate // default is 999900
 		k = "cbclogstartdate";
@@ -686,11 +652,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.cbcLogStartDate = Integer.parseInt(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcLogStartDate: Error reading config value");
+				logger.error("CbcLogStartDate:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcLogStartDate: "+CbcSolver.cbcLogStartDate);
+        logValue("CbcLogStartDate", CbcSolver.cbcLogStartDate);
 
 		// CbcLogStopDate // default is 999900
 		k = "cbclogstopdate";
@@ -701,11 +667,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.cbcLogStopDate = Integer.parseInt(s);
 			} catch (NumberFormatException e) {
-				System.out.println("CbcLogStopDate: Error reading config value");
+				logger.error("CbcLogStopDate:  reading config value");
 			}
 			
 		}
-		System.out.println("CbcLogStopDate: "+CbcSolver.cbcLogStopDate);
+        logValue("CbcLogStopDate", CbcSolver.cbcLogStopDate);
 		
 		// LogIfObjDiff
 		k = "logifobjdiff";
@@ -716,11 +682,11 @@ public class ConfigUtils {
 			try {
 				CbcSolver.log_if_obj_diff = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("LogIfObjDiff: Error reading config value");
+				logger.error("LogIfObjDiff:  reading config value");
 			}
 			
 		}
-		System.out.println("LogIfObjDiff: "+CbcSolver.log_if_obj_diff);
+        logValue("LogIfObjDiff", CbcSolver.log_if_obj_diff);
 		
 		// RecordIfObjDiff
 		k = "recordifobjdiff";
@@ -731,50 +697,48 @@ public class ConfigUtils {
 			try {
 				CbcSolver.record_if_obj_diff = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println("RecordIfObjDiff: Error reading config value");
+				logger.error("RecordIfObjDiff:  reading config value");
 			}
 			
 		}
-		System.out.println("RecordIfObjDiff: "+CbcSolver.record_if_obj_diff);
+        logValue("RecordIfObjDiff", CbcSolver.record_if_obj_diff);
 
 		k = "CbcWhsScaling"; //default is true
 		CbcSolver.whsScaling = readBoolean(configMap, k, true);
-		System.out.println(k+": "+CbcSolver.whsScaling);
+        logValue(k, CbcSolver.whsScaling);
 
 		k = "CbcWhsSafe"; //default is false
 		CbcSolver.whsSafe = readBoolean(configMap, k, false);
-		System.out.println(k+": "+CbcSolver.whsSafe);
+        logValue(k, CbcSolver.whsSafe);
 		
 		k = "CbcDebugDeviation"; //default is false
 		CbcSolver.debugDeviation = readBoolean(configMap, k, false);
-		System.out.println(k+": "+CbcSolver.debugDeviation);
+        logValue(k, CbcSolver.debugDeviation);
 		
 		if (CbcSolver.debugDeviation){
 			
 			k = "CbcDebugDeviationMin"; // default is 200
 			CbcSolver.debugDeviationMin = readDouble(configMap, k, 200);
-			System.out.println(k+": "+CbcSolver.debugDeviationMin);
+            logValue(k, CbcSolver.debugDeviationMin);
 		
 			k = "CbcDebugDeviationWeightMin"; // default is 5E5
 			CbcSolver.debugDeviationWeightMin = readDouble(configMap, k, 5E5);
-			System.out.println(k+": "+CbcSolver.debugDeviationWeightMin);
+            logValue(k, CbcSolver.debugDeviationWeightMin);
 			
 			k = "CbcDebugDeviationWeightMultiply"; // default is 100
 			CbcSolver.debugDeviationWeightMultiply = readDouble(configMap, k, 100);
-			System.out.println(k+": "+CbcSolver.debugDeviationWeightMultiply);
+            logValue(k, CbcSolver.debugDeviationWeightMultiply);
 			
 			k = "CbcDebugDeviationFindMissing"; //default is false
 			CbcSolver.debugDeviationFindMissing = readBoolean(configMap, k, false);
-			System.out.println(k+": "+CbcSolver.debugDeviationFindMissing);
+            logValue(k, CbcSolver.debugDeviationFindMissing);
 		
 		}
 		
 		// Warm2ndSolveFunction // default is Solve2
 		k = "warm2ndsolvefunction";
-		if (configMap.keySet().contains(k)){
-			
+		if (configMap.containsKey(k)){
 			String s = configMap.get(k);
-			
 			if (s.equalsIgnoreCase("solve3")){
 				CbcSolver.warm_2nd_solvFunc=CbcSolver.solv3;		
 			} else {
@@ -783,13 +747,11 @@ public class ConfigUtils {
 		}else{
 			CbcSolver.warm_2nd_solvFunc=CbcSolver.solv2;		
 		}
-		System.out.println("Warm2ndSolveFunction: "+CbcSolver.warm_2nd_solvFunc);
+        logValue("Warm2ndSolveFunction", CbcSolver.warm_2nd_solvFunc);
 
 		// ParserCheckVarUndefined
-		if (configMap.keySet().contains("parsercheckvarundefined")){
-			
+		if (configMap.containsKey("parsercheckvarundefined")){
 			String s = configMap.get("parsercheckvarundefined");
-			
 			if (s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("true")){
 				StudyUtils.parserCheckVarUndefined = true;	
 			} else if (s.equalsIgnoreCase("no") || s.equalsIgnoreCase("false")){
@@ -800,7 +762,7 @@ public class ConfigUtils {
 		}else{
 			StudyUtils.parserCheckVarUndefined = true;
 		}
-		System.out.println("ParserCheckVarUndefined: "+StudyUtils.parserCheckVarUndefined);
+        logValue("ParserCheckVarUndefined", StudyUtils.parserCheckVarUndefined);
 		
 		
 		if (ControlData.solverName.equalsIgnoreCase("lpsolve")) {
@@ -816,7 +778,7 @@ public class ConfigUtils {
 					if (sf.exists()) {					
 						LPSolveSolver.configFile = sf.getCanonicalPath();
 					} else {
-						//System.out.println("#Error: LpSolveConfigFile not found: " + f);
+						//logger.error("#: LpSolveConfigFile not found: " + f);
 						Error.addConfigError("LpSolveConfigFile not found: " + f);
 						Error.writeErrorLog();
 					}
@@ -824,40 +786,32 @@ public class ConfigUtils {
 				} catch (Exception e) {
 					Error.addConfigError("LpSolveConfigFile not found: " + f);
 					Error.writeErrorLog();
-					//System.out.println("#Error: LpSolveConfigFile not found: " + f);
-					e.printStackTrace();
+					logger.error("Error encountered when attempting to parse LpSolveConfigFile", e);
 				}
 			} else {
 				Error.addConfigError("LpSolveConfigFile not defined. ");
 				Error.writeErrorLog();
-				//System.out.println("#Error: LpSolveConfigFile not defined. ");
 			}
-		
-			System.out.println("LpSolveConfigFile:   "+LPSolveSolver.configFile);
+            logValue("LpSolveConfigFile", LPSolveSolver.configFile);
 			
 			
 			// LpSolveNumberOfRetries default is 0 retry
 			if (configMap.keySet().contains("lpsolvenumberofretries")){
-				
 				String s = configMap.get("lpsolvenumberofretries");
-				
 				try {
 					LPSolveSolver.numberOfRetries = Integer.parseInt(s);
 					
 				} catch (Exception e) {
-					//System.out.println("#Error: LpSolveNumberOfRetries not recognized: " + s);
+					//logger.error("#: LpSolveNumberOfRetries not recognized: " + s);
 					Error.addConfigError("LpSolveNumberOfRetries not recognized: " + s);
 					Error.writeErrorLog();
 					
 				}				
 			}
-			System.out.println("LpSolveNumberOfRetries: "+LPSolveSolver.numberOfRetries);
-			
-			
+            logValue("LpSolveNumberOfRetries", LPSolveSolver.numberOfRetries);
 		}
 		
 		// processed only for ILP
-		
 		// TODO: lpsolve and ilp log is binded. need to enable direct linking instead of reading file
 		if(ControlData.solverName.equalsIgnoreCase("XALOG")){
 			configMap.put("ilplog","yes");
@@ -880,14 +834,11 @@ public class ConfigUtils {
 		
 		String strIlpLog = configMap.get("ilplog");
 		if (strIlpLog.equalsIgnoreCase("yes") || strIlpLog.equalsIgnoreCase("true")) {
-
 			ILP.logging = true;
 			// IlpLogAllCycles
 			// default is false
 			if (configMap.keySet().contains("ilplogallcycles")) {
-
 				String s = configMap.get("ilplogallcycles");
-
 				if (s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("true")) {
 					ILP.loggingAllCycles = true;
 				}
@@ -901,9 +852,7 @@ public class ConfigUtils {
 			// IlpLogVarValue
 			// default is false
 			if (configMap.keySet().contains("ilplogvarvalue")) {
-
 				String s = configMap.get("ilplogvarvalue");
-
 				if (s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("true")) {
 					ILP.loggingVariableValue = true;
 				}
@@ -918,9 +867,7 @@ public class ConfigUtils {
 			// ilplogvarvalueround
 			// default is false
 			if (configMap.keySet().contains("ilplogvarvalueround")) {
-
 				String s = configMap.get("ilplogvarvalueround");
-
 				if (s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("true")) {
 					ILP.loggingVariableValueRound = true;
 				} else {
@@ -966,26 +913,26 @@ public class ConfigUtils {
 
 				if (s.toLowerCase().contains("cplexlp")) {
 					ILP.loggingCplexLp = true;
-					System.out.println("IlpLogFormat:           " + "CplexLp");
+					logValue("IlpLogFormat",  "CplexLp");
 				} 
 				if (s.toLowerCase().contains("mpmodel")) {
 					ILP.loggingMPModel = true;
-					System.out.println("IlpLogFormat:           " + "MPModel");
+					logValue("IlpLogFormat",  "MPModel");
 				} 
 				if (s.toLowerCase().contains("ampl")) {
 					ILP.loggingAmpl = true;
-					System.out.println("IlpLogFormat:           " + "Ampl");
+					logValue("IlpLogFormat",  "Ampl");
 				} 
 				if (s.toLowerCase().contains("lpsolve")) {
 					ILP.loggingLpSolve = true;
-					System.out.println("IlpLogFormat:           " + "LpSolve");
+					logValue("IlpLogFormat",  "LpSolve");
 				} 
 			}
 
-			System.out.println("IlpLog:                 " + ILP.logging);
-			System.out.println("IlpLogAllCycles:        " + ILP.loggingAllCycles);
-			System.out.println("IlpLogVarValue:         " + ILP.loggingVariableValue);
-			System.out.println("IlpLogMaximumFractionDigits: " + ILP.maximumFractionDigits);
+			logValue("IlpLog",  ILP.logging);
+			logValue("IlpLogAllCycles",  ILP.loggingAllCycles);
+			logValue("IlpLogVarValue",  ILP.loggingVariableValue);
+			logValue("IlpLogMaximumFractionDigits",  ILP.maximumFractionDigits);
 
 		}
 		
@@ -995,7 +942,7 @@ public class ConfigUtils {
 		}else{
 			ILP.loggingUsageMemeory = false;
 		}
-		System.out.println("IlpLogUsageMemory:      " + ILP.loggingUsageMemeory);
+		logValue("IlpLogUsageMemory",  ILP.loggingUsageMemeory);
 		
 		String s = configMap.get("wreslplus");
 		
@@ -1006,14 +953,14 @@ public class ConfigUtils {
 		} else {
 			StudyUtils.useWreslPlus  = false;	
 		}
-		System.out.println("WreslPlus:         " + StudyUtils.useWreslPlus);
+		logValue("WreslPlus",  StudyUtils.useWreslPlus);
 		
 		String enableProgressLog = configMap.get("enableprogresslog");
 		
 		if (enableProgressLog.equalsIgnoreCase("yes") || enableProgressLog.equalsIgnoreCase("true")){
 			ControlData.enableProgressLog = true;
 		} 		
-		System.out.println("enableProgressLog:         " + ControlData.enableProgressLog);
+		logValue("enableProgressLog",  ControlData.enableProgressLog);
 		
 		String allowSvTsInit = configMap.get("allowsvtsinit");
 		if (allowSvTsInit.equalsIgnoreCase("yes") || allowSvTsInit.equalsIgnoreCase("true")){
@@ -1021,7 +968,7 @@ public class ConfigUtils {
 		} else {
 			ControlData.allowSvTsInit  = false;	
 		}
-		System.out.println("AllowSvTsInit:    " + ControlData.allowSvTsInit);
+		logValue("AllowSvTsInit",  ControlData.allowSvTsInit);
 		
 		String allRestartFiles = configMap.get("allrestartfiles");
 		if (allRestartFiles.equalsIgnoreCase("yes") || allRestartFiles.equalsIgnoreCase("true")){
@@ -1029,19 +976,19 @@ public class ConfigUtils {
 		} else {
 			ControlData.allRestartFiles  = false;	
 		}
-		System.out.println("AllRestartFiles:    " + ControlData.allRestartFiles);
+		logValue("AllRestartFiles",  ControlData.allRestartFiles);
 		
 		ControlData.numberRestartFiles = Integer.parseInt(configMap.get("numberrestartfiles"));
-		System.out.println("NumberRestartFiles:    " + ControlData.numberRestartFiles);
+		logValue("NumberRestartFiles",  ControlData.numberRestartFiles);
 		
 		ControlData.vHecLib = Integer.parseInt(configMap.get("versionhecdssoutput"));
-		System.out.println("VersionHecDssOutput:    " + ControlData.vHecLib);
+		logValue("VersionHecDssOutput",  ControlData.vHecLib);
 
 		ControlData.databaseURL = configMap.get("databaseurl");
 		ControlData.sqlGroup = configMap.get("sqlgroup");
 		ControlData.ovOption = Integer.parseInt(configMap.get("ovoption"));
 		ControlData.ovFile = configMap.get("ovfile");
-		System.out.println("ovOption:    " + ControlData.ovOption);
+		logValue("ovOption",  ControlData.ovOption);
 		
 		String outputCycleDataToDss = configMap.get("outputcycledatatodss");
 		if (outputCycleDataToDss.equalsIgnoreCase("yes") || outputCycleDataToDss.equalsIgnoreCase("true")){
@@ -1049,7 +996,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.isOutputCycle=false;
 		}
-		System.out.println("OutputCycleDataToDSS:    " + ControlData.isOutputCycle);
+		logValue("OutputCycleDataToDSS",  ControlData.isOutputCycle);
 		
 		String outputAllCycleData = configMap.get("outputallcycledata");
 		if (outputAllCycleData.equalsIgnoreCase("yes") || outputAllCycleData.equalsIgnoreCase("true")){
@@ -1057,10 +1004,10 @@ public class ConfigUtils {
 		}else{
 			ControlData.outputAllCycles=false;
 		}
-		System.out.println("OutputAllCycleData:    " + ControlData.outputAllCycles);
+		logValue("OutputAllCycleData",  ControlData.outputAllCycles);
 		
 		ControlData.selectedCycleOutput = configMap.get("selectedcycleoutput");
-		System.out.println("SelectedOutputCycles:    " + ControlData.selectedCycleOutput);
+		logValue("SelectedOutputCycles",  ControlData.selectedCycleOutput);
 		
 		String showRunTimeMessage = configMap.get("showruntimemessage");
 		if (showRunTimeMessage.equalsIgnoreCase("yes") || showRunTimeMessage.equalsIgnoreCase("true")){
@@ -1068,7 +1015,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.showRunTimeMessage=false;
 		}
-		System.out.println("ShowRunTimeMessage:    " + ControlData.showRunTimeMessage);
+		logValue("ShowRunTimeMessage",  ControlData.showRunTimeMessage);
 		
 		String printGWFuncCalls = configMap.get("printgwfunccalls");
 		if (printGWFuncCalls.equalsIgnoreCase("yes") || printGWFuncCalls.equalsIgnoreCase("true")){
@@ -1076,19 +1023,19 @@ public class ConfigUtils {
 		}else{
 			ControlData.printGWFuncCalls=false;
 		}
-		System.out.println("PrintGWFuncCalls:    " + ControlData.printGWFuncCalls);
+		logValue("PrintGWFuncCalls",  ControlData.printGWFuncCalls);
 		
 		k = "NameSorting"; //default is false
 		ControlData.isNameSorting = readBoolean(configMap, k, false);
-		System.out.println(k+": "+ControlData.isNameSorting);
+		logValue(k, ControlData.isNameSorting);
 		
 		k = "YearOutputSection";
 		ControlData.yearOutputSection = (int)Math.round(readDouble(configMap, k, -1));
-		System.out.println(k+": "+ControlData.yearOutputSection);
+		logValue(k, ControlData.yearOutputSection);
 		
 		k = "MonthMemorySection";
 		ControlData.monMemSection = (int)Math.round(readDouble(configMap, k, -1));
-		System.out.println(k+": "+ControlData.monMemSection);
+		logValue(k, ControlData.monMemSection);
 		
 		String unchangeGWRestart = configMap.get("unchangegwrestart");
 		if (unchangeGWRestart.equalsIgnoreCase("yes") || unchangeGWRestart.equalsIgnoreCase("true")){
@@ -1096,7 +1043,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.unchangeGWRestart=false;
 		}
-		System.out.println("KeepGWRestartatStartDate:    " + ControlData.unchangeGWRestart);
+		logValue("KeepGWRestartatStartDate",  ControlData.unchangeGWRestart);
 		
 		String genSVCatalog = configMap.get("gensvcatalog");
 		if (genSVCatalog.equalsIgnoreCase("yes") || genSVCatalog.equalsIgnoreCase("true")){
@@ -1104,94 +1051,7 @@ public class ConfigUtils {
 		}else{
 			ControlData.genSVCatalog=false;
 		}
-		System.out.println("GenSVCatalog:                " + ControlData.genSVCatalog);
-		
-		//if (Error.getTotalError()<1) readParameter(configFile);
-		
-//		if (Error.getTotalError()<1 && paramMap.size()>0) { 
-//			System.out.println("--------------------------------------------");
-//			for (String k: paramMap.keySet()){	
-//				ParamTemp pt = paramMap.get(k);
-//				System.out.println("Parameter::   "+k+": "+pt.expression );
-//			}
-//		}
-		
-		
-		
-		
-//		if (configMap.keySet().contains("lpsolveparamheader")){
-//			
-//			String s = configMap.get("lpsolveparamheader");
-//			
-//			String delimiter = "[\\+]";  
-//			String [] pheaders =  s.split(delimiter);
-//			
-//			//LPSolveSolver.paramHeader = new ArrayList<String>();
-//			
-//			System.out.println( "s:"+s);
-//			
-//			for (int i=1;i<=pheaders.length;i++){
-//				System.out.println( pheaders[i-1]);
-//			}
-//			
-//			for (int i=1;i<=pheaders.length;i++){
-//				
-//				String h = pheaders[i-1];		
-//				
-//				LPSolveSolver.paramHeader.add(h);
-//				
-//				//System.out.println("LpSolveParamFile: "+pf);
-//				switch (i){
-//					case 1 : System.out.println("default LpSolveParamHeader: "+h); break;
-//					case 2 : System.out.println("2nd try LpSolveParamHeader: "+h); break;
-//					case 3 : System.out.println("3rd try LpSolveParamHeader: "+h); break;
-//					default : System.out.println( i+"th try LpSolveParamHeader: "+h); break;
-//				}
-//				
-//			}
-//			
-//
-//		}
-		//System.out.println("Ignored... SetAmplOption:   option presolve_eps 1e-13;");
-		
-		
-		
-		// System.out.println("gw: "+FilePaths.groundwaterDir);
-		// System.out.println("svd: "+FilePaths.svarDssDirectory);
-		// System.out.println("sv: "+FilePaths.svarDssFile);
-		// System.out.println("initD: "+FilePaths.initDssDirectory);
-		// System.out.println("init: "+FilePaths.initDssFile);
-		//
-		//
-		// System.out.println(FilePaths.mainDirectory);
-		// System.out.println(FilePaths.groundwaterDir);
-		// System.out.println(FilePaths.csvFolderName);
-		//
-		// System.out.println(ControlData.svDvPartF);
-		// System.out.println(ControlData.initPartF);
-		// System.out.println(ControlData.partA);
-		// System.out.println(ControlData.partE);
-		// System.out.println(ControlData.timeStep);
-		//
-		// System.out.println(ControlData.startYear);
-		// System.out.println(ControlData.startMonth);
-		// System.out.println(ControlData.startDay);
-		//
-		// System.out.println(ControlData.endYear);
-		// System.out.println(ControlData.endMonth);
-		// System.out.println(ControlData.endDay);
-		//
-		// System.out.println(ControlData.solverName);
-		// System.out.println(ControlData.currYear);
-		// System.out.println(ControlData.currMonth);
-		// System.out.println(ControlData.currDay);
-		// System.out.println(ControlData.writeDssStartYear);
-		// System.out.println(ControlData.writeDssStartMonth);
-		// System.out.println(ControlData.writeDssStartDay);
-		//
-		// System.out.println(ControlData.totalTimeStep);
-		// System.exit(0);
-
+		logValue("GenSVCatalog",  ControlData.genSVCatalog);
 	}
 
 	private static Map<String, String> checkConfigFile(String configFilePath) {
@@ -1224,19 +1084,15 @@ public class ConfigUtils {
 
 				line = line.trim();
 				line = line.replace('\t', ' ');
-				//System.out.println(line);
-				if (line.indexOf("#") > -1) {
+				if (line.contains("#")) {
 					line = line.substring(0, line.indexOf("#"));
 					line = line.trim();
 				}
-				if (line.indexOf(" ") < 0) continue;
+				if (!line.contains(" ")) continue;
 				if (line.lastIndexOf(" ") + 1 >= line.length()) continue;
 				if (line.length() < 5) continue;
-				
-				//System.out.println(line);
 
 				String key = line.substring(0, line.indexOf(" "));
-
 				String value = line.substring(key.length(), line.length());
 
 				value = value.trim();
@@ -1340,10 +1196,8 @@ public class ConfigUtils {
 			mf.getCanonicalPath();
 		}
 		catch (IOException e) {
-
-			Error.addConfigError("Main file not found: "+mf.getAbsolutePath());
+			Error.addConfigError("Main file not found: " + mf.getAbsolutePath());
 			Error.writeErrorLog();
-	
 		}
 		
 		return configMap;
@@ -1403,7 +1257,6 @@ public class ConfigUtils {
 	
 				line = line.trim();
 				line = line.replace('\t', ' ');
-				//System.out.println(line);
 				if (line.indexOf("#") > -1) {
 					line = line.substring(0, line.indexOf("#"));
 					line = line.trim();
@@ -1411,9 +1264,7 @@ public class ConfigUtils {
 				if (line.indexOf(" ") < 0) continue;
 				if (line.lastIndexOf(" ") + 1 >= line.length()) continue;
 				if (line.length() < 5) continue;
-				
-				//System.out.println(line);
-	
+
 				String key = line.substring(0, line.indexOf(" "));
 	
 				String value = line.substring(key.length(), line.length());
@@ -1434,7 +1285,6 @@ public class ConfigUtils {
 			
 				if (key.equalsIgnoreCase("begin") & value.equalsIgnoreCase("initial") ) {
 					isParameter = true;
-					System.out.println("--------------------------------------------");
 					continue;
 				}
 				
@@ -1450,7 +1300,7 @@ public class ConfigUtils {
 					pt.id = key;
 					pt.expression = value.toLowerCase();
 					
-					System.out.println("Initial variable::  "+pt.id.toLowerCase()+": "+pt.expression );
+					logger.info("Initial variable:\t{}: {}", pt.id.toLowerCase(), pt.expression);
 					
 					try {
 						//pt.dependants = checkExpression(pt.expression);
@@ -1507,86 +1357,9 @@ public class ConfigUtils {
 			try {
 				returnV = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
-				System.out.println(name+": Error reading config value");
+				logger.error("{}:  reading config value", name);
 			}
 		}	
 		return returnV;
 	}
-
-	// private static void loadConfig2(String loadFile) throws IOException {
-	//
-	// try {
-	// XmlDocument doc = XmlDocument.createXmlDocument(
-	// new FileInputStream(loadFile), false);
-	// fromXml(doc.getDocumentElement());
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// throw new IOException("Invalid config file: " + loadFile);
-	// }
-	//
-	// }
-
-	// private static void fromXml(Element se) {
-	//
-	// _parserdataversion = se.getAttribute("parserdataversion");
-	// _groundwaterfolder = se.getAttribute("groundwaterfolder");
-	// _wreslfile = se.getAttribute("wreslfile");
-	// _svfile = se.getAttribute("svfile");
-	// _dvfile = se.getAttribute("dvfile");
-	// _initfile = se.getAttribute("initfile");
-	//
-	// _svfileapart = se.getAttribute("svfileapart");
-	// _svfilefpart = se.getAttribute("svfilefpart");
-	// _initfilefpart = se.getAttribute("initfilefpart");
-	//
-	// String startMonth = se.getAttribute("startmo");
-	// String startYear = se.getAttribute("startyr");
-	// String stopMonth = se.getAttribute("stopmo");
-	// String stopYear = se.getAttribute("stopyr");
-	//
-	// try {
-	//
-	// _startmo = TimeOperation.monthValue(startMonth.toLowerCase());
-	// _startyr = Integer.parseInt(startYear);
-	// _stopmo = TimeOperation.monthValue(stopMonth.toLowerCase());
-	// _stopyr = Integer.parseInt(stopYear);
-	//
-	//
-	// } catch (Exception e) {
-	// System.out.println(e.getMessage());
-	// }
-	//
-	//
-	// FilePaths.setMainFilePaths(_wreslfile);
-	// FilePaths.groundwaterDir= _groundwaterfolder;
-	// FilePaths.setSvarDssPaths(_svfile);
-	// FilePaths.setInitDssPaths(_initfile);
-	// FilePaths.setDvarDssPaths(_dvfile);
-	// FilePaths.csvFolderName = "";
-	//
-	// ControlData.svDvPartF = _svfilefpart;
-	// ControlData.initPartF = _initfilefpart;
-	// ControlData.partA = _svfileapart;
-	// ControlData.partE = _ts;
-	// ControlData.timeStep = _ts;
-	//
-	// ControlData.startYear = _startyr;
-	// ControlData.startMonth = _startmo;
-	// ControlData.startDay = TimeOperation.numberOfDays(_startmo, _startyr);
-	//
-	// ControlData.endYear = _stopyr;
-	// ControlData.endMonth = _stopmo;
-	// ControlData.endDay = TimeOperation.numberOfDays(_stopmo, _stopyr);
-	//
-	// ControlData.solverName= _solver;
-	// ControlData.currYear=ControlData.startYear;
-	// ControlData.currMonth=ControlData.startMonth;
-	// ControlData.currDay=ControlData.startDay;
-	// ControlData.writeDssStartYear=ControlData.startYear;
-	// ControlData.writeDssStartMonth=ControlData.startMonth;
-	// ControlData.writeDssStartDay=ControlData.startDay;
-	//
-	// ControlData.totalTimeStep = ControllerBatch.getTotalTimeStep();
-	// }
-
 }
