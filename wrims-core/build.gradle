@@ -4,6 +4,7 @@ plugins{
     id 'library.deps-conventions'
     id 'library.java-conventions'
     id 'library.publishing-conventions'
+    id 'jacoco'
 }
 
 sourceSets {
@@ -128,6 +129,23 @@ tasks.named('sourcesJar') {
 
 tasks.named('build') {
     dependsOn tasks.named('copyDependencies')
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = false
+    }
 }
 
 
