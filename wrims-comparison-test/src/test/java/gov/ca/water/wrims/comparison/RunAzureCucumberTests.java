@@ -1,4 +1,4 @@
-package wrims.compare;
+package gov.ca.water.wrims.comparison;
 
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;

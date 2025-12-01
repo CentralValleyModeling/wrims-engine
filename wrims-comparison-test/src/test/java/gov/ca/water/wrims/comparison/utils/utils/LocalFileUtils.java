@@ -1,4 +1,4 @@
-package wrims.compare.utils;
+package gov.ca.water.wrims.comparison.utils.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
