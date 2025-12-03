@@ -19,5 +19,5 @@ set MAIN_CLASS=gov.ca.water.wrims.engine.core.components.ControllerBatch
 set WRIMS_CORE_JAR="wrims-core\build\libs\*"
 set WRIMS_CORE_DEPENDENCIES="wrims-core\build\tmp\libs\*"
 
-%JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -cp "%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%" %MAIN_CLASS% -config=%PROJECT_DIR%\%CONFIG_FILE%
+%JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -Dproject.dir="%PROJECT_DIR%" -cp "%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%" %MAIN_CLASS% -config=%PROJECT_DIR%\%CONFIG_FILE%
 pause
