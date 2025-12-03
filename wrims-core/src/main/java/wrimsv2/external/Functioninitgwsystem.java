@@ -1,10 +1,8 @@
 package wrimsv2.external;
 
-import java.io.File;
 import java.util.*;
 
 import wrimsv2.components.ControlData;
-import wrimsv2.components.DebugInterface;
 import wrimsv2.components.FilePaths;
 import wrimsv2.components.VariableTimeStep;
 import wrimsv2.ilp.ILP;

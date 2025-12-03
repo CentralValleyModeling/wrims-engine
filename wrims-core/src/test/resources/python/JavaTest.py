@@ -1,7 +1,7 @@
 import java
 
 System = java.type("java.lang.System")
-MyCustomClass = java.type("graalpy.MyCustomClass")  # Adjust
+MyCustomClass = java.type("gov.ca.water.wrims.engine.graalpy.MyCustomClass")  # Adjust
 
 class JavaTest:
     def __str__(self):
