@@ -378,5 +378,6 @@ public class StudyUtils {
 		kryo.register(WeightSubgroup.class);
 		kryo.register(WeightTable.class);
 		kryo.register(WeightTemp.class);
+        kryo.register(java.util.LinkedHashSet.class);
 	}
 }
