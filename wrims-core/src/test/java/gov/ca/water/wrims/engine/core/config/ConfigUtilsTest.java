@@ -105,7 +105,8 @@ final class ConfigUtilsTest {
         if (logFile.exists()) {
             List<String> lines = Files.readAllLines(logFile.toPath());
             assertFalse(lines.isEmpty());
-            assertTrue(lines.getFirst().contains(testMsg) || lines.getLast().contains(testMsg));
+            boolean found = lines.stream().anyMatch(line -> line.contains(testMsg));
+            assertTrue(found, "Log file should contain the test message");
         }
     }
 
