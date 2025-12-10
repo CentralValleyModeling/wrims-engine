@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.antlr.runtime.RecognitionException;
 
@@ -54,6 +55,56 @@ import gov.ca.water.wrims.engine.core.wreslplus.elements.Tools;
 import gov.ca.water.wrims.engine.core.wreslplus.elements.procedures.ErrorCheck;
 
 public class ControllerDebug extends Thread {
+	private final Object pauseLock = new Object();
+	private final AtomicBoolean paused = new AtomicBoolean(false);
+	private final AtomicBoolean terminated = new AtomicBoolean(false);
+
+	public void requestPause() {
+		paused.set(true);
+	}
+
+	public void safeResume() {
+		synchronized (pauseLock) {
+			paused.set(false);
+			pauseLock.notifyAll();
+		}
+	}
+
+	public void requestTerminate() {
+		terminated.set(true);
+		// Ensure any waiting pause is released
+		safeResume();
+	}
+
+	/**
+	 * Returns true if a pause has been requested and the controller is in paused state.
+	 * This exposes state without leaking the underlying AtomicBoolean.
+	 */
+	public boolean isPaused() {
+		return paused.get();
+	}
+
+	/**
+	 * Returns true if a terminate has been requested.
+	 * This exposes state without leaking the underlying AtomicBoolean.
+	 */
+	public boolean isControllerTerminated() {
+		return terminated.get();
+	}
+
+	void pauseHereUntilResumed() {
+        paused.set(true);
+		synchronized (pauseLock) {
+			while (paused.get() && !terminated.get()) {
+				try {
+					pauseLock.wait();
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					break;
+				}
+			}
+		}
+	}
 	private DebugInterface di;
 	public int debugYear;
 	public int debugMonth;
@@ -251,14 +302,14 @@ public class ControllerDebug extends Thread {
 		VariableTimeStep.initialCycleStartDate();
 		VariableTimeStep.setCycleEndDate(sds);
 		int sectionI=0;
-		while (VariableTimeStep.checkEndDate(ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear, ControlData.endDay, ControlData.endMonth, ControlData.endYear)<=0 && noError){
+		while (VariableTimeStep.checkEndDate(ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear, ControlData.endDay, ControlData.endMonth, ControlData.endYear)<=0 && noError && !terminated.get()){
 			if (ControlData.solverName.equalsIgnoreCase("XALOG")) SetXALog.enableXALog();
 			ClearValue.clearValues(modelList, modelDataSetMap);
 			sds.clearVarTimeArrayCycleValueMap();
 			sds.clearVarCycleIndexByTimeStep();
 			modelIndex=0;
 			prepareInitialTimeStep();
-			while (modelIndex<modelList.size()  && noError){  
+			while (modelIndex<modelList.size()  && noError && !terminated.get()){
 				int cycleI=modelIndex+1;
 				String strCycleI=cycleI+"";
 				boolean isSelectedCycleOutput=General.isSelectedCycleOutput(strCycleI);
@@ -272,7 +323,7 @@ public class ControllerDebug extends Thread {
 				VariableTimeStep.setCycleTimeStep(sds);
 				VariableTimeStep.setCurrentDate(sds, ControlData.cycleStartDay, ControlData.cycleStartMonth, ControlData.cycleStartYear);
 				
-				while(VariableTimeStep.checkEndDate(ControlData.currDay, ControlData.currMonth, ControlData.currYear, ControlData.cycleEndDay, ControlData.cycleEndMonth, ControlData.cycleEndYear)<0 && noError){
+				while(VariableTimeStep.checkEndDate(ControlData.currDay, ControlData.currMonth, ControlData.currYear, ControlData.cycleEndDay, ControlData.cycleEndMonth, ControlData.cycleEndYear)<0 && noError && !terminated.get()){
 					ValueEvaluatorParser modelCondition=modelConditionParsers.get(modelIndex);
 					boolean condition=false;
 					try{
@@ -476,27 +527,47 @@ public class ControllerDebug extends Thread {
 			VariableTimeStep.setCycleEndDate(sds);
 		}
 		new CloseCurrentSolver(ControlData.solverName);
-
-		if (ControlData.yearOutputSection<0 && ControlData.writeInitToDVOutput) DssOperation.writeInitDvarAliasToDSS();
-		if (ControlData.yearOutputSection<0) DssOperation.writeDVAliasToDSS();
-		ControlData.dvDss.close();
-		if (ControlData.outputType==1){
-			HDF5Writer.createDvarAliasLookup();
-			HDF5Writer.writeTimestepData();
-			HDF5Writer.writeCyclesDvAlias();
-			HDF5Writer.closeDataStructure();
-		}else if (ControlData.outputType==2){
-			mySQLCWriter.process();
-		}else if (ControlData.outputType==3){
-			mySQLRWriter.process();
-		}else if (ControlData.outputType==4){
-			sqlServerRWriter.process();
-		}else if (ControlData.outputType==5){
-			CsvOperation co = new CsvOperation();
-			co.ouputCSV(FilePaths.fullCsvPath, 0);
-		}
 		
-		WeightEval.outputWtTableAR();
+		if (!terminated.get()) {
+			if (ControlData.yearOutputSection<0 && ControlData.writeInitToDVOutput) DssOperation.writeInitDvarAliasToDSS();
+			if (ControlData.yearOutputSection<0) DssOperation.writeDVAliasToDSS();
+			try {
+				if (ControlData.dvDss != null) {
+					ControlData.dvDss.close();
+				}
+			} catch (Exception ignored) {
+				// ignore on termination/cleanup
+			}
+			if (ControlData.outputType==1){
+				HDF5Writer.createDvarAliasLookup();
+				HDF5Writer.writeTimestepData();
+				HDF5Writer.writeCyclesDvAlias();
+				HDF5Writer.closeDataStructure();
+			}else if (ControlData.outputType==2){
+				mySQLCWriter.process();
+			}else if (ControlData.outputType==3){
+				mySQLRWriter.process();
+			}else if (ControlData.outputType==4){
+				sqlServerRWriter.process();
+			}else if (ControlData.outputType==5){
+				CsvOperation co = new CsvOperation();
+				co.ouputCSV(FilePaths.fullCsvPath, 0);
+			}
+			
+			WeightEval.outputWtTableAR();
+		} else {
+			// minimal defensive cleanup on termination
+			try {
+				if (ControlData.dvDss != null) {
+					ControlData.dvDss.close();
+				}
+			} catch (Exception ignored) {
+			}
+			try {
+				HDF5Writer.closeDataStructure();
+			} catch (Exception ignored) {
+			}
+		}
 	}
 	
 	public void prepareInitialTimeStep(){
@@ -541,7 +612,7 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				this.suspend();
+				pauseHereUntilResumed();
 			}
 		}else{
 			if (ControlData.currYear==debugYear && ControlData.currMonth==debugMonth && ControlData.currDay==debugDay && i==debugCycle-1){
@@ -551,7 +622,7 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				this.suspend();
+				pauseHereUntilResumed();
 			}
 		}
 		if (Error.getTotalError()>0){
@@ -562,7 +633,7 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			this.suspend();
+			pauseHereUntilResumed();
 		}else{
 			checkConditionalBreakpoint();
 		}
@@ -632,7 +703,7 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			this.suspend();
+			pauseHereUntilResumed();
 		}
 	}
 
