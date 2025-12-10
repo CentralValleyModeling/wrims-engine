@@ -53,6 +53,7 @@ final class ConfigUtilsTest {
         loggerConfig.removeAppender(appender.getName());
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         ctx.updateLoggers();
+		System.clearProperty("project.dir");
     }
 
     @Test
