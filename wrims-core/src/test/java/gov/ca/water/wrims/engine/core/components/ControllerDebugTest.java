@@ -101,7 +101,7 @@ public class ControllerDebugTest {
         // It should finish quickly after terminate
         t.join(2000);
         assertFalse(t.isAlive(), "Thread should have unblocked and finished after requestTerminate()");
-        assertTrue(controller.isTerminated(), "terminated should be true after requestTerminate()");
+        assertTrue(controller.isControllerTerminated(), "terminated should be true after requestTerminate()");
         // paused may be cleared by safeResume called within requestTerminate
         assertFalse(controller.isPaused(), "paused should be false after requestTerminate() triggers safeResume()");
     }

@@ -88,11 +88,12 @@ public class ControllerDebug extends Thread {
 	 * Returns true if a terminate has been requested.
 	 * This exposes state without leaking the underlying AtomicBoolean.
 	 */
-	public boolean isTerminated() {
+	public boolean isControllerTerminated() {
 		return terminated.get();
 	}
 
 	void pauseHereUntilResumed() {
+        paused.set(true);
 		synchronized (pauseLock) {
 			while (paused.get() && !terminated.get()) {
 				try {
@@ -534,7 +535,7 @@ public class ControllerDebug extends Thread {
 				if (ControlData.dvDss != null) {
 					ControlData.dvDss.close();
 				}
-			} catch (Throwable t) {
+			} catch (Exception ignored) {
 				// ignore on termination/cleanup
 			}
 			if (ControlData.outputType==1){
@@ -560,11 +561,11 @@ public class ControllerDebug extends Thread {
 				if (ControlData.dvDss != null) {
 					ControlData.dvDss.close();
 				}
-			} catch (Throwable t) {
+			} catch (Exception ignored) {
 			}
 			try {
 				HDF5Writer.closeDataStructure();
-			} catch (Throwable t) {
+			} catch (Exception ignored) {
 			}
 		}
 	}
@@ -611,7 +612,6 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				paused.set(true);
 				pauseHereUntilResumed();
 			}
 		}else{
@@ -622,7 +622,6 @@ public class ControllerDebug extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				paused.set(true);
 				pauseHereUntilResumed();
 			}
 		}
@@ -634,7 +633,6 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			paused.set(true);
 			pauseHereUntilResumed();
 		}else{
 			checkConditionalBreakpoint();
@@ -705,7 +703,6 @@ public class ControllerDebug extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			paused.set(true);
 			pauseHereUntilResumed();
 		}
 	}

@@ -372,7 +372,7 @@ public class DebugInterface {
 			}
 			isDebugging=false;
 		}else if (request.equals("suspend")) {
-   controllerDebug.requestPause();
+            controllerDebug.requestPause();
 			System.out.println("suspended");
 			try {
 				sendRequest("suspended");
