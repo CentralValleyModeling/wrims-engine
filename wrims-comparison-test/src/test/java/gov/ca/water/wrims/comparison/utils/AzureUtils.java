@@ -1,4 +1,4 @@
-package gov.ca.water.wrims.comparison.utils.utils;
+package gov.ca.water.wrims.comparison.utils;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;

@@ -1,9 +1,9 @@
-package gov.ca.water.wrims.comparison.stepdefinitions.stepdefinitions;
+package gov.ca.water.wrims.comparison.stepdefinitions;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import gov.ca.water.wrims.comparison.utils.utils.ComputeTestUtils;
-import gov.ca.water.wrims.comparison.utils.utils.LocalFileUtils;
+import gov.ca.water.wrims.comparison.utils.ComputeTestUtils;
+import gov.ca.water.wrims.comparison.utils.LocalFileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

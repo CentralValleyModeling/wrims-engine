@@ -1,4 +1,4 @@
-package gov.ca.water.wrims.comparison.utils.utils;
+package gov.ca.water.wrims.comparison.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
