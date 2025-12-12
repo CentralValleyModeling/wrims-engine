@@ -261,6 +261,8 @@ public class ControllerBatch {
 	public void runModel(StudyDataSet sds){
 		System.out.println("==============Run Study Start============");
 		
+		runModelILP(sds);
+		/*
 		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
 			runModelGurobi(sds);
 		} else if (ControlData.solverName.equalsIgnoreCase("Glpk")){
@@ -279,7 +281,7 @@ public class ControllerBatch {
 			Error.addConfigError("Solver name not recognized: "+ControlData.solverName);
 			Error.writeErrorLog();
 		}
-
+		*/
 		WeightEval.outputWtTableAR();
 		
 		if (Error.getTotalError()>0){
