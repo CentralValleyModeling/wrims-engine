@@ -52,7 +52,7 @@ import gov.ca.water.wrims.engine.core.wreslplus.elements.procedures.ErrorCheck;
 import gov.ca.water.wrims.engine.core.wreslplus.elements.Tools;
 
 public class ControllerBatch {
-	
+	private int infeasCyclIndex= -100;
 	public boolean enableProgressLog = false;
 	public boolean enableConfigProgress = false;
 	private boolean runCompleted = false;
