@@ -185,6 +185,7 @@ public class ILP {
 		_amplDir = new File(_ilpDir, "ampl").getAbsolutePath();
 		// TODO: write ampl command file "option presolve_eps 1e-13;"
 
+		setVarDir();
 		if (ILP.loggingVariableValue) setVarDir();
 		setMaximumFractionDigits();
 		createNoteFile();
