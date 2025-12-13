@@ -3,55 +3,137 @@
 
     <Properties>
         <Property name="STANDARD_PATTERN">%d{ISO8601} %-5level [%t] [%c{1}] - %msg%n</Property>
-        <Property name="USER_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</Property>
+        <Property name="DETAILED_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} [%M:%L] - %msg%n</Property>
+        <Property name="USER_PATTERN">%d{HH:mm:ss} %-5level - %msg%n</Property>
         <Property name="WRIMS_LOG_DIR">${sys:user.home}/.wrims/logs</Property>
+        <Property name="CBC_LOG_DIR">${WRIMS_LOG_DIR}/cbc</Property>
     </Properties>
 
     <Appenders>
-        <!-- Console Appender -->
-        <Console name="CONSOLE" target="SYSTEM_OUT" follow="true">
+        <!-- Console Appender - Simplified Output -->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="${USER_PATTERN}"/>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
-        <!-- Async wrapper for console -->
-        <Async name="CONSOLE-ASYNC">
-            <AppenderRef ref="CONSOLE"/>
-        </Async>
 
-
-        <!-- File Appender - Project Directory -->
-        <File name="FILE" fileName="${sys:project.dir}/${date:yyyy-MM-dd_HH-mm-ss}.log">
-            <PatternLayout pattern="${STANDARD_PATTERN}"/>
-        </File>
-
-        <!-- Async wrapper for file -->
-        <Async name="FILE-ASYNC">
-            <AppenderRef ref="FILE"/>
-        </Async>
-
-        <!-- File Appender - WRIMS Directory-->
-        <RollingFile name="FILE-WRIMS" fileName="${WRIMS_LOG_DIR}/wrims-engine.log" filePattern="${WRIMS_LOG_DIR}/wrims-engine-%d{yyyy-MM-dd}.log" append="true">
+        <!-- CBC Solver Main Log (INFO and above) -->
+        <RollingFile name="CBC-MAIN"
+                     fileName="${CBC_LOG_DIR}/cbc-main.log"
+                     filePattern="${CBC_LOG_DIR}/cbc-main-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
             <PatternLayout pattern="${STANDARD_PATTERN}"/>
             <Policies>
-                <TimeBasedTriggeringPolicy interval="1" />
-                <DefaultRolloverStrategy />
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
+            <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
-        <!-- Async wrapper for file -->
-        <Async name="FILE-WRIMS-ASYNC">
-            <AppenderRef ref="FILE-WRIMS"/>
+        <!-- CBC Solver Detailed Log (DEBUG/TRACE level) -->
+        <RollingFile name="CBC-DETAIL"
+                     fileName="${CBC_LOG_DIR}/cbc-detail.log"
+                     filePattern="${CBC_LOG_DIR}/cbc-detail-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="${DETAILED_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+            <Filters>
+                <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <!-- CBC Solver Performance Log -->
+        <RollingFile name="CBC-PERF"
+                     fileName="${CBC_LOG_DIR}/cbc-perf.log"
+                     filePattern="${CBC_LOG_DIR}/cbc-perf-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Error Log (Separate File) -->
+        <RollingFile name="CBC-ERROR"
+                     fileName="${CBC_LOG_DIR}/cbc-error.log"
+                     filePattern="${CBC_LOG_DIR}/cbc-error-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="90"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <!-- Async Appenders -->
+        <Async name="ASYNC-CBC-MAIN">
+            <AppenderRef ref="CBC-MAIN"/>
         </Async>
+        <Async name="ASYNC-CBC-DETAIL">
+            <AppenderRef ref="CBC-DETAIL"/>
+        </Async>
+        <Async name="ASYNC-CBC-PERF">
+            <AppenderRef ref="CBC-PERF"/>
+        </Async>
+        <Async name="ASYNC-CBC-ERROR">
+            <AppenderRef ref="CBC-ERROR"/>
+        </Async>
+
+        <!-- WRIMS Overall Log -->
+        <RollingFile name="WRIMS-MAIN"
+                     fileName="${WRIMS_LOG_DIR}/wrims-main.log"
+                     filePattern="${WRIMS_LOG_DIR}/wrims-main-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <Async name="ASYNC-WRIMS-MAIN">
+            <AppenderRef ref="WRIMS-MAIN"/>
+        </Async>
+
     </Appenders>
 
-
     <Loggers>
-        <Root level="DEBUG">
-            <AppenderRef ref="FILE-WRIMS-ASYNC"/>
+        <!-- Root logger -->
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="ASYNC-WRIMS-MAIN"/>
         </Root>
 
-        <Logger name="gov.ca.water.wrims.engine.core" level="INFO" additivity="true">
-            <AppenderRef ref="CONSOLE-ASYNC" />
-            <AppenderRef ref="FILE-ASYNC" />
+        <!-- wrimsv2 package -->
+        <Logger name="wrimsv2" level="INFO" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="ASYNC-WRIMS-MAIN"/>
         </Logger>
+
+        <!-- CbcSolver Main Log (INFO and above) -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver" level="TRACE" additivity="false">
+            <AppenderRef ref="ASYNC-CBC-MAIN"/>
+            <AppenderRef ref="ASYNC-CBC-ERROR"/>
+            <AppenderRef ref="ASYNC-CBC-PERF"/>
+            <AppenderRef ref="ASYNC-CBC-DETAIL"/>
+            <AppenderRef ref="CONSOLE"/>
+
+        </Logger>
+
+
+        <!-- Performance Monitoring Log -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver$PerfTimer" level="TRACE" additivity="false">
+            <AppenderRef ref="ASYNC-CBC-PERF"/>
+            <AppenderRef ref="CONSOLE"/>
+
+        </Logger>
+
     </Loggers>
 </Configuration>

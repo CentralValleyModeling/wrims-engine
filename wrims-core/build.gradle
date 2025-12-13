@@ -1,5 +1,4 @@
-
-plugins{
+plugins {
     id 'antlr'
     id 'library.deps-conventions'
     id 'library.java-conventions'
@@ -8,31 +7,38 @@ plugins{
 }
 
 sourceSets {
-    src {
+    main {
         antlr {
-            srcDir "src/main/antlr/"
+            srcDir "src/main/antlr"
         }
         java {
-            srcDirs "src/main/java/", "generated-src"
+            srcDir "src/main/java"
+            // IMPORTANT:
+            // Do NOT add "generated-src" manually.
+            // The Gradle ANTLR plugin automatically adds:
+            //   build/generated-src/antlr/main
+            // to the main source set.
         }
     }
 }
 
-configurations{
+configurations {
     windows_x64
 }
 
 dependencies {
-    windows_x64(libs.javaHeclib){artifact {type = 'zip'}}
+    // --- native bundles (zip) ---
+    windows_x64(libs.javaHeclib) { artifact { type = 'zip' } }
     windows_x64 libs.run.libs
-}
 
-dependencies {
+    // --- platform/bom ---
     api(platform(project(":wrims-engine-bom")))
     api libs.hec.monolith
 
+    // --- ANTLR codegen tool dependency (generator) ---
     antlr libs.antlr
 
+    // --- main deps ---
     implementation libs.guava
     implementation libs.commons.io
     implementation libs.xstream
@@ -42,29 +48,17 @@ dependencies {
     implementation libs.jep
     implementation libs.libtensorflow
 
-    // dependency ont testng exists in main as well as in test
+    // dependency on testng exists in main as well as in test
     implementation libs.testng
 
-    // It's not obvious which version of hdf-java is needed.
-    // The packages in the local jars are
-    // ncsa.hdf.hdf5lib
-    // ncsa.hdf.object
-    // ncsa.hdf.object.h5
-    // implementation 'org.hdfgroup:hdf-java:2.6' from 2010 is present
-    // at
+    // HDF5 local jar
     implementation libs.jarhdf5
 
-    // The oldest implementation of Google's linearsolver in mavencentral appears to be
-    // implementation 'com.google.ortools:ortools-java:8.2.9004'
-    // from 20 April 2021.
-    // The local jar file contents are from 2013, so we'll use the local jar
-    // until we verify that a newer version will work.
+    // OR-Tools / local linearsolver jar
     implementation libs.linearsolver
-//    implementation('com.google.ortools:linearsolver:2013-01-10')
+    // implementation('com.google.ortools:linearsolver:2013-01-10')
 
-    // The oldest implementation of gurobi in a maven repository appears to be
-    // from 2014. We'll use the local jar (2012) until we verify that a newer version
-    // will work.
+    // local jars
     implementation libs.gurobi
     implementation libs.jcbc
     implementation libs.lpsolve55j
@@ -82,29 +76,36 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
     runtimeOnly 'com.lmax:disruptor:4.0.0'
 
+    // --- ANTLR runtime (required at compile time for generated Lexer/Parser base classes) ---
+    // If your BOM/libs already provides it, replace this with the libs alias.
+    implementation 'org.antlr:antlr4-runtime:4.13.1'
 }
 
 // This moves .tokens files into the same generated-src files with the .java files
-tasks.withType(AntlrTask) {
+tasks.withType(AntlrTask).configureEach {
     if (name.startsWith('generate')) {
         doLast {
             logger.info("Copying .tokens files to corresponding java folders")
+
             copy {
                 from "${buildDir}/generated-src/antlr/main"
                 include '*Evaluator*.tokens'
                 into "${buildDir}/generated-src/antlr/main/gov/ca/water/wrims/engine/core/evaluator/"
             }
+
             copy {
                 from "${buildDir}/generated-src/antlr/main"
                 include 'WreslTree*.tokens'
                 into "${buildDir}/generated-src/antlr/main/gov/ca/water/wrims/engine/core/wreslparser/grammar/"
             }
-            copy{
+
+            copy {
                 from "${buildDir}/generated-src/antlr/main"
                 include 'IncFileFinder.tokens'
                 include 'WreslPlus.tokens'
                 into "${buildDir}/generated-src/antlr/main/gov/ca/water/wrims/engine/core/wreslplus/grammar/"
             }
+
             delete "${buildDir}/generated-src/antlr/main/*.tokens"
         }
     }
@@ -126,7 +127,9 @@ tasks.register('getNatives', Sync) { syncTask ->
 tasks.named('sourcesJar') {
     dependsOn tasks.named('generateGrammarSource')
 }
-
+tasks.named('sourcesJar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 tasks.named('build') {
     dependsOn tasks.named('copyDependencies')
 }
@@ -147,5 +150,3 @@ jacocoTestReport {
         html.required = false
     }
 }
-
-
