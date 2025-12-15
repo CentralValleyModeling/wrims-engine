@@ -19,6 +19,44 @@ dependencies {
     windows_x64 libs.run.libs
     testProjects libs.cal.lite.test
     comparisonReport libs.system.summary.report.tool
+
+    // Ensure the report tool is available on the test JVM classpath for utility launchers
+    testRuntimeOnly libs.system.summary.report.tool
+
+    // Cucumber JVM for Java with JUnit Platform engine
+    testImplementation libs.bundles.cucumber
+
+
+    // Azure Storage Blob for downloading project files from public container
+    testImplementation(libs.azure.storage.blob)
+}
+
+// Load environment variables for the test task from a local file if present
+// This file is intentionally git-ignored: see .gitignore rule /wrims-comparison-test/.env.*
+def envFile = file("$projectDir/.env.cucumber")
+
+tasks.register('getNatives', Sync) { syncTask ->
+    syncTask.from configurations.windows_x64.collect { zipTree(it) }
+    syncTask.into file("$buildDir/lib")
+}
+
+tasks.withType(Test).configureEach {
+    // Ensure native libraries (e.g., jCbc.dll) are available under build/lib before tests run
+    dependsOn("getNatives")
+
+    if (envFile.exists()) {
+        logger.lifecycle("Loading test environment from ${envFile}")
+        envFile.readLines()
+            .findAll { it && !it.startsWith('#') }
+            .each { line ->
+                def idx = line.indexOf('=')
+                if (idx > 0) {
+                    def k = line.substring(0, idx).trim()
+                    def v = line.substring(idx + 1).trim().replaceAll('^[\"\']|[\"\']$', '')
+                    environment k, v
+                }
+            }
+    }
 }
 
 tasks.register("testExecute", JavaExec) {
@@ -35,7 +73,37 @@ tasks.register("testExecute", JavaExec) {
     systemProperty "java.library.path", "${compareDirName}/Run/external;$buildDir/lib"
 
     jvmArgs "-Xmx4096m", "-Xss1024K", "-XX:+CreateMinidumpOnCrash"
+
+    doFirst {
+        def wd = file(workingDir as String).absolutePath
+        def cpFiles = classpath?.files ?: []
+        def cpPath = classpath?.asPath
+        def jvm = (jvmArgs ?: []).join(' ')
+        def sysProps = (systemProperties ?: [:]).collect { k, v -> "-D${k}=${v}" }.join(' ')
+        def mainCls = (mainClass instanceof Provider) ? mainClass.get() : mainClass
+        def argsLine = (args ?: []).collect { it.toString().contains(' ') ? '"' + it + '"' : it }.join(' ')
+        def javaExe = new File(System.getProperty('java.home'), "bin${File.separator}java").absolutePath
+        def envPath = (environment?.get('PATH') ?: System.getenv('PATH'))
+
+        logger.lifecycle("--- testExecute JavaExec details ---")
+        logger.lifecycle("workingDir: ${wd}")
+        logger.lifecycle("mainClass: ${mainCls}")
+        logger.lifecycle("classpath entries (${cpFiles.size()}):")
+        cpFiles.each { f -> logger.lifecycle("  - ${f}") }
+        logger.lifecycle("java.class.path (asPath): ${cpPath}")
+        logger.lifecycle("jvmArgs: ${jvm}")
+        logger.lifecycle("systemProperties: ${systemProperties}")
+        logger.lifecycle("JAVA_HOME: ${System.getProperty('java.home')}")
+        logger.lifecycle("java.library.path: ${systemProperties?.get('java.library.path')}")
+        logger.lifecycle("PATH: ${envPath}")
+
+        def fullCmd = "\"${javaExe}\" ${jvm} ${sysProps} -cp \"${cpPath}\" ${mainCls} ${argsLine}".trim()
+        logger.lifecycle("Full JavaExec command:")
+        logger.lifecycle(fullCmd)
+        logger.lifecycle("--- end JavaExec details ---")
+    }
 }
+
 
 tasks.register("executeDcr2023", JavaExec) {
     group = "compute-tests"
@@ -78,11 +146,6 @@ tasks.register("testReport", JavaExec) {
     }
 }
 
-tasks.register('getNatives', Sync) { syncTask ->
-    syncTask.from configurations.windows_x64.collect { zipTree(it) }
-    syncTask.into file("$buildDir/lib")
-}
-
 tasks.register('getTestProjects', Sync) { syncTask ->
     syncTask.from configurations.testProjects.collect { zipTree(it) }
     syncTask.into file("$buildDir/testProjects")
@@ -96,5 +159,38 @@ publishing {
                 extension 'pdf'
             }
         }
+    }
+}
+
+// Runs only the compare_calList_41_TF.feature using a dedicated JUnit Platform suite test
+tasks.register("runAzureCucumberTests", Test) {
+    group = "verification"
+    description = "Runs the compare_calList_41_TF.feature via JUnit suite"
+
+    // Ensure native DLLs are prepared
+    dependsOn("getNatives")
+
+    // Use JUnit Platform
+    useJUnitPlatform()
+
+    // Execute only the suite test class
+    filter {
+        includeTestsMatching "gov.ca.water.wrims.comparison.RunAzureCucumberTests"
+    }
+
+    // Show test output
+    testLogging {
+        showStandardStreams = true
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Make the default test task skip Azure
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    filter {
+        // Do not fail the build when filters exclude all tests (e.g., Azure suite excluded)
+        setFailOnNoMatchingTests(false)
+        excludeTestsMatching "gov.ca.water.wrims.comparison.RunAzureCucumberTests"
     }
 }
