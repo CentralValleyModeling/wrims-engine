@@ -143,7 +143,7 @@ public class ComputeTestUtils {
         cmd.add("-Djava.library.path=" + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
         cmd.add("-cp");
         cmd.add(classpath);
-        cmd.add("wrimsv2.components.ControllerBatch");
+        cmd.add("gov.ca.water.wrims.engine.core.components.ControllerBatch");
         cmd.add("-config=" + configFile.toAbsolutePath());
 
         ProcessBuilder pb = new ProcessBuilder(cmd);
