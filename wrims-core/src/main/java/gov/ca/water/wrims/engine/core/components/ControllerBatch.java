@@ -754,8 +754,6 @@ public class ControllerBatch {
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
 						}else if (infeasCyclIndex==i) {
-							//Error.writeSolvingErrorFile("Error_solving.txt");
-							//Error.writeErrorLog();
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
@@ -992,9 +990,7 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else if (infeasCyclIndex==i) {
-							//Error.writeSolvingErrorFile("Error_solving.txt");
-							//Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {	
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
@@ -1283,8 +1279,6 @@ public class ControllerBatch {
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
 						}else if (infeasCyclIndex==i) {
-							//Error.writeSolvingErrorFile("Error_solving.txt");
-							//Error.writeErrorLog();
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
@@ -1445,8 +1439,6 @@ public class ControllerBatch {
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
 						}else if (infeasCyclIndex==i) {
-							//Error.writeSolvingErrorFile("Error_solving.txt");
-							//Error.writeErrorLog();
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
@@ -1680,8 +1672,6 @@ public class ControllerBatch {
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
 						}else if (infeasCyclIndex==i) {
-							//Error.writeSolvingErrorFile("Error_solving.txt");
-							//Error.writeErrorLog();
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
