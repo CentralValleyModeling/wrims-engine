@@ -262,26 +262,7 @@ public class ControllerBatch {
 		System.out.println("==============Run Study Start============");
 		
 		runModelILP(sds);
-		/*
-		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
-			runModelGurobi(sds);
-		} else if (ControlData.solverName.equalsIgnoreCase("Glpk")){
-			runModelOrTools(sds, "GLPK_MIXED_INTEGER_PROGRAMMING");	
-		} else if (ControlData.solverName.equalsIgnoreCase("Clp")){
-			runModelClp(sds);	
-		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")&&(ControlData.cbc_debug_routeXA||ControlData.cbc_debug_routeCbc)){
-			runModelCbc(sds);
-		} else if (ILP.logging){
-			runModelILP(sds);
-		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")){
-			runModelCbc(sds);
-	    } else if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG") ){
-			runModelXA(sds);
-		} else {
-			Error.addConfigError("Solver name not recognized: "+ControlData.solverName);
-			Error.writeErrorLog();
-		}
-		*/
+		
 		WeightEval.outputWtTableAR();
 		
 		if (Error.getTotalError()>0){
