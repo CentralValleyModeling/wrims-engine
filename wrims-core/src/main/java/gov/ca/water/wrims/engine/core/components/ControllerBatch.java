@@ -62,6 +62,21 @@ public class ControllerBatch {
 	
 	public ControllerBatch() {} // do nothing
 	
+	private void enableInfeasibilityLogging(int cycleIndex) {
+		// dump error to file
+		Error.writeSolvingErrorFile("Error_solving.txt");
+		Error.writeErrorLog();
+		// keep track of when infeasibility occurs
+		infeasCyclIndex = cycleIndex;
+		Error.error_solving = new ArrayList();
+		// Enable logging for infeasibility
+		ILP.loggingLpSolve = false;
+		ILP.loggingCplexLp = true;
+		ILP.loggingAllCycles = true;
+		ILP.logging = true;
+		ILP.loggingVariableValue = true;
+	}
+	
 	public ControllerBatch(String[] args) {
 		long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		try {
@@ -349,21 +364,14 @@ public class ControllerBatch {
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
 						}else if (infeasCyclIndex==i) {
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
-                            i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
+                            i=-1;                           
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -756,17 +764,10 @@ public class ControllerBatch {
 						}else if (infeasCyclIndex==i) {
 							noError=false;
 						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
                             i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
 						}
 						if (ControlData.outputType==1){
 							if (ControlData.isOutputCycle && isSelectedCycleOutput){
@@ -993,17 +994,10 @@ public class ControllerBatch {
 						}else if (infeasCyclIndex==i) {	
 							noError=false;
 						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
                             i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1281,17 +1275,10 @@ public class ControllerBatch {
 						}else if (infeasCyclIndex==i) {
 							noError=false;
 						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
                             i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1441,17 +1428,10 @@ public class ControllerBatch {
 						}else if (infeasCyclIndex==i) {
 							noError=false;
 						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
                             i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1674,17 +1654,10 @@ public class ControllerBatch {
 						}else if (infeasCyclIndex==i) {
 							noError=false;
 						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
+							enableInfeasibilityLogging(i);
 							Error.writeErrorLog();
 							noError=true;
-                            infeasCyclIndex=i;
                             i=-1;
-                            Error.error_solving=new ArrayList();
-                            ILP.loggingLpSolve=false;
-                            ILP.loggingCplexLp=true;
-                            ILP.loggingAllCycles=true;
-                            ILP.logging=true;
-                            ILP.loggingVariableValue=true;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
