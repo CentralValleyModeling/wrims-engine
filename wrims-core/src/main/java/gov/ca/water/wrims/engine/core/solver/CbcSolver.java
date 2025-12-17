@@ -325,15 +325,15 @@ public class CbcSolver {
 		dvIntPredict = new ArrayList<String>();
 
         // Configure warm start settings
-        if (wrimsv2.components.ControlData.useCbcWarmStart) {
-            if (wrimsv2.components.ControlData.cycWarmStart != null) {
-                if (wrimsv2.components.ControlData.cycWarmStart.contains(wrimsv2.components.ControlData.currCycleIndex)) {
+        if (gov.ca.water.wrims.engine.core.components.ControlData.useCbcWarmStart) {
+            if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart != null) {
+                if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
                     saveWarm = true;
                     logger.debug("Configured to save warm start solution for this cycle");
                 } else {
                     saveWarm = false;
                 }
-                if (wrimsv2.components.ControlData.cycWarmUse.contains(wrimsv2.components.ControlData.currCycleIndex)) {
+                if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmUse.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
                     useWarm = true;
                     logger.debug("Configured to use warm start solution for this cycle");
                 } else {
@@ -358,8 +358,8 @@ public class CbcSolver {
                 modelName, useLpFile, currDate, isLogging);
 
         if (useLpFile) {
-            logger.info("Loading model from LP file: {}", wrimsv2.ilp.ILP.cplexLpFilePath);
-            jCbc.readLp(solver, wrimsv2.ilp.ILP.cplexLpFilePath);
+            logger.info("Loading model from LP file: {}", gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath);
+            jCbc.readLp(solver, gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath);
             logger.info("LP file loaded successfully");
 
 		} else {
@@ -391,13 +391,13 @@ public class CbcSolver {
 
             if (usejCbc2021 && false) {
                 logger.debug("Using 2021 version for variable setup");
-                setDVars2021(wrimsv2.components.ControlData.cbcLogNativeLp);
+                setDVars2021(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp);
             } else {
                 logger.debug("Using standard version for variable setup");
-                setDVars(wrimsv2.components.ControlData.cbcLogNativeLp || isLogging, "");
+                setDVars(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
             }
-            setConstraints(wrimsv2.components.ControlData.cbcLogNativeLp || isLogging, "");
-            if (wrimsv2.components.ControlData.cbcLogNativeLp || isLogging) {
+            setConstraints(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
+            if (gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging) {
                 logger.debug("Writing CBC LP file for debugging");
                 writeCbcLp("", false);
             }
@@ -405,7 +405,7 @@ public class CbcSolver {
 
         jCbc.setModelName(solver, modelName);
         long creationTime = creationTimer.stop();
-        wrimsv2.components.ControlData.solverCreationTime_cbc += creationTime / 1000.0;
+        gov.ca.water.wrims.engine.core.components.ControlData.solverCreationTime_cbc += creationTime / 1000.0;
         performanceStats.recordModelCreationTime(creationTime);
 
 
@@ -432,30 +432,30 @@ public class CbcSolver {
         double time_second = (endT - beginT) / 1000.;
         long solveTime = solveTimer.stop();
 
-        wrimsv2.components.ControlData.solverTime_cbc += time_second;
-        wrimsv2.components.ControlData.solverTime_cbc_this = time_second;
+        gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc += time_second;
+        gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this = time_second;
         performanceStats.recordSolverTime(solveTime);
         performanceStats.incrementProblemsSolved();
 
         logger.info("Solver execution completed: {} seconds", time_second);
 
-        if (wrimsv2.components.ControlData.writeCbcSolvingTime) {
-            wrimsv2.ilp.ILP.writeNoteLn(jCbc.getModelName(solver), " " + time_second);
+        if (gov.ca.water.wrims.engine.core.components.ControlData.writeCbcSolvingTime) {
+            gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(jCbc.getModelName(solver), " " + time_second);
         }
 
         int status = solveResult[0];
         int status2 = solveResult[1];
 
-        if (wrimsv2.components.Error.error_solving.size() < 1) {
-            wrimsv2.components.ControlData.clp_cbc_objective = getObjValue();
+        if (gov.ca.water.wrims.engine.core.components.Error.error_solving.size() < 1) {
+            gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective = getObjValue();
 
-            logger.info("Solver objective value: {}", wrimsv2.components.ControlData.clp_cbc_objective);
+            logger.info("Solver objective value: {}", gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective);
 
             if (CbcSolver.logObj) {
-                wrimsv2.ilp.ILP.writeNoteLn(wrimsv2.ilp.ILP.getYearMonthCycle(), "" + wrimsv2.components.ControlData.clp_cbc_objective, wrimsv2.ilp.ILP._noteFile_cbc_obj);
-                wrimsv2.ilp.ILP.writeNoteLn(wrimsv2.ilp.ILP.getYearMonthCycle(),
-                        "" + CbcSolver.solveName + "," + String.format("%8.2f", wrimsv2.components.ControlData.solverTime_cbc_this),
-                        wrimsv2.ilp.ILP._noteFile_cbc_time);
+                gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(), "" + gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective, gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_obj);
+                gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(),
+                        "" + CbcSolver.solveName + "," + String.format("%8.2f", gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this),
+                        gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_time);
             }
 
             // Collect variable results
@@ -490,7 +490,7 @@ public class CbcSolver {
                         if (diff > integerT_check) {
                             intErr = true;
                             logger.warn("Integer variable violation detected: {} = {} (should be integer, error: {})", k, v, diff);
-                            wrimsv2.components.Error.addSolvingError("int violation:::" + k + ":" + v);
+                            gov.ca.water.wrims.engine.core.components.Error.addSolvingError("int violation:::" + k + ":" + v);
                         } else if (cbcSolutionRounding) {
                             varDoubleMap.put(k, rounded);
                             logger.trace("Integer variable rounded: {}: {} -> {}", k, v, rounded);
@@ -499,7 +499,7 @@ public class CbcSolver {
                 }
                 if (intErr) {
                     reloadAndWriteLp("_intViolation", true, true);
-                    wrimsv2.components.Error.addSolvingError("Integer Violation! Please contact developers for this issue.");
+                    gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Integer Violation! Please contact developers for this issue.");
                 }
                 for (String k : dMap.keySet()) {
                     if (varDoubleMap.containsKey(k)) {
@@ -509,7 +509,7 @@ public class CbcSolver {
                             if (v < -lowerBoundZero_check) {
                                 lowerboundErr = true;
                                 logger.warn("Lower bound violation detected: {} = {} < 0 (allowed threshold: {})", k, v, lowerBoundZero_check);
-                                wrimsv2.components.Error.addSolvingError("lowerbound violation:::" + k + ":" + v);
+                                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("lowerbound violation:::" + k + ":" + v);
                             } else if (cbcSolutionRounding && v < 0) {
                                 varDoubleMap.put(k, 0.0);
                                 logger.trace("Lower bound adjustment: {}: {} -> 0.0", k, v);
@@ -520,7 +520,7 @@ public class CbcSolver {
 
                 if (lowerboundErr) {
                     reloadAndWriteLp("_lbViolation", true, true);
-                    wrimsv2.components.Error.addSolvingError("Lowerbound Violation! Please contact developers for this issue.");
+                    gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Lowerbound Violation! Please contact developers for this issue.");
                 }
 
                 violationTimer.stopAndLogInfo();
@@ -537,7 +537,7 @@ public class CbcSolver {
             logger.debug("Assigning variable values to data structures");
             PerfTimer assignTimer = new PerfTimer("Variable Assignment");
 
-            if (!wrimsv2.components.ControlData.cbc_debug_routeXA) assignDvar();
+            if (!gov.ca.water.wrims.engine.core.components.ControlData.cbc_debug_routeXA) assignDvar();
 
             assignTimer.stopAndLogInfo();
         }
@@ -721,7 +721,7 @@ public class CbcSolver {
 
         long totalEndTime = System.currentTimeMillis();
         long totalDuration = totalEndTime - totalStartTime;
-        wrimsv2.components.ControlData.t_cbc = wrimsv2.components.ControlData.t_cbc + (int) totalDuration;
+        gov.ca.water.wrims.engine.core.components.ControlData.t_cbc = gov.ca.water.wrims.engine.core.components.ControlData.t_cbc + (int) totalDuration;
 
         logger.info("==================== Problem Solving Session Complete ====================");
         logger.info("Total processing time: {} ms", totalDuration);
@@ -739,19 +739,19 @@ public class CbcSolver {
 
         try {
             SolverData.getDvarMap().keySet().retainAll(originalDvarKeys);
-            int sizeA = wrimsv2.components.ControlData.currModelDataSet.dvList.size();
-            int sizeB = wrimsv2.components.ControlData.currModelDataSet.dvTimeArrayList.size();
+            int sizeA = gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.size();
+            int sizeB = gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvTimeArrayList.size();
 
             dvBiMap.clear();
             dvBiMapArray = new ArrayList<String>();
 
             for (int i = 0; i < sizeA; i++) {
-                dvBiMap.put(i, wrimsv2.components.ControlData.currModelDataSet.dvList.get(i));
-                dvBiMapArray.add(i, wrimsv2.components.ControlData.currModelDataSet.dvList.get(i));
+                dvBiMap.put(i, gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.get(i));
+                dvBiMapArray.add(i, gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.get(i));
             }
             for (int i = 0; i < sizeB; i++) {
-                dvBiMap.put(i + sizeA, wrimsv2.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
-                dvBiMapArray.add(wrimsv2.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
+                dvBiMap.put(i + sizeA, gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
+                dvBiMapArray.add(gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
             }
             dvBiMapInverse = dvBiMap.inverse();
 
@@ -783,15 +783,15 @@ public class CbcSolver {
 		// restore original state
         try {
             SolverData.getDvarMap().keySet().retainAll(originalDvarKeys);
-            int sizeA = wrimsv2.components.ControlData.currModelDataSet.dvList.size();
-            int sizeB = wrimsv2.components.ControlData.currModelDataSet.dvTimeArrayList.size();
+            int sizeA = gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.size();
+            int sizeB = gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvTimeArrayList.size();
 
             dvBiMap.clear();
             for (int i = 0; i < sizeA; i++) {
-                dvBiMap.put(i, wrimsv2.components.ControlData.currModelDataSet.dvList.get(i));
+                dvBiMap.put(i, gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.get(i));
             }
             for (int i = 0; i < sizeB; i++) {
-                dvBiMap.put(i + sizeA, wrimsv2.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
+                dvBiMap.put(i + sizeA, gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvTimeArrayList.get(i));
             }
             dvBiMapInverse = dvBiMap.inverse();
 
@@ -880,16 +880,16 @@ public class CbcSolver {
 
         switch (status) {
             case 0:
-                wrimsv2.components.Error.addSolvingError("Infeasible.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Infeasible.");
                 break;
             case 1:
-                wrimsv2.components.Error.addSolvingError("Stopped by user.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped by user.");
                 break;
             case 2:
-                wrimsv2.components.Error.addSolvingError("Other errors.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Other errors.");
                 break;
             default:
-                wrimsv2.components.Error.addSolvingError("Status:" + status);
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Status:" + status);
                 break;
         }
 		
@@ -905,28 +905,28 @@ public class CbcSolver {
 
         switch (status2) {
             case 1:
-                wrimsv2.components.Error.addSolvingError("Linear relaxation not feasible.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Linear relaxation not feasible.");
                 break;
             case 2:
-                wrimsv2.components.Error.addSolvingError("Stopped on gap.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped on gap.");
                 break;
             case 3:
-                wrimsv2.components.Error.addSolvingError("Stopped on nodes.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped on nodes.");
                 break;
             case 4:
-                wrimsv2.components.Error.addSolvingError("Stopped on time.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped on time.");
                 break;
             case 5:
-                wrimsv2.components.Error.addSolvingError("Stopped on user event.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped on user event.");
                 break;
             case 6:
-                wrimsv2.components.Error.addSolvingError("Stopped on solutions.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Stopped on solutions.");
                 break;
             case 7:
-                wrimsv2.components.Error.addSolvingError("Linear relaxation unbounded.");
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Linear relaxation unbounded.");
                 break;
             default:
-                wrimsv2.components.Error.addSolvingError("Status2:" + status2);
+                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Status2:" + status2);
                 break;
         }
     }
@@ -1179,19 +1179,19 @@ public class CbcSolver {
 
                 if (ec.getSign().equals("=")) {
                     GT = -ec.getEvalExpression().getValue().getData().doubleValue();
-                    if (Math.abs(GT) < wrimsv2.components.ControlData.zeroTolerance) {
+                    if (Math.abs(GT) < gov.ca.water.wrims.engine.core.components.ControlData.zeroTolerance) {
                         GT = 0;
                     }
                     LT = GT;
                 } else if (ec.getSign().equals("<") || ec.getSign().equals("<=")) {
                     GT = -maxValue;
                     LT = -ec.getEvalExpression().getValue().getData().doubleValue();
-                    if (Math.abs(LT) < wrimsv2.components.ControlData.zeroTolerance) {
+                    if (Math.abs(LT) < gov.ca.water.wrims.engine.core.components.ControlData.zeroTolerance) {
                         LT = 0;
                     }
                 } else if (ec.getSign().equals(">")) {
                     GT = -ec.getEvalExpression().getValue().getData().doubleValue();
-                    if (Math.abs(GT) < wrimsv2.components.ControlData.zeroTolerance) {
+                    if (Math.abs(GT) < gov.ca.water.wrims.engine.core.components.ControlData.zeroTolerance) {
                         GT = 0;
                     }
                     LT = maxValue;
@@ -1428,12 +1428,12 @@ public class CbcSolver {
         int ci = ControlData.currCycleIndex + 1;
 
         logger.info("CBC Standard Solve: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                modelName, solvFunc, wrimsv2.components.ControlData.currYear, wrimsv2.components.ControlData.currMonth,
-                wrimsv2.components.ControlData.currDay, ci, wrimsv2.components.ControlData.currCycleName);
+                modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
+                gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 
         logger.info("CBC Solver: Solving {}/{}/{} Cycle {} [{}]",
-                wrimsv2.components.ControlData.currMonth, wrimsv2.components.ControlData.currDay,
-                wrimsv2.components.ControlData.currYear, ci, wrimsv2.components.ControlData.currCycleName);
+                gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
+                gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 
 			int status = -99;
 			int status2 = -99;
@@ -1649,12 +1649,12 @@ public class CbcSolver {
             int ci=ControlData.currCycleIndex + 1;
 
             logger.info("CBC 2021 Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                    modelName, solvFunc, wrimsv2.components.ControlData.currYear, wrimsv2.components.ControlData.currMonth,
-                    wrimsv2.components.ControlData.currDay, ci, wrimsv2.components.ControlData.currCycleName);
+                    modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
+                    gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 
             logger.info("CBC Solver2021: Solving {}/{}/{} Cycle {} [{}]",
-                    wrimsv2.components.ControlData.currMonth, wrimsv2.components.ControlData.currDay,
-                    wrimsv2.components.ControlData.currYear, ci, wrimsv2.components.ControlData.currCycleName);
+                    gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
+                    gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 			
 			int status=-99;
 			int status2=-99;
@@ -2175,7 +2175,7 @@ public class CbcSolver {
 	    timer.stopAndLogInfo();
         logger.info("Variable assignment complete: total {} variables assigned", assignedCount);
 
-        logger.info("Objective Value: {}", wrimsv2.components.ControlData.clp_cbc_objective);
+        logger.info("Objective Value: {}", gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective);
         logger.info("Variable assignment completed.");
 }
 	public static void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String dvName, boolean isNoteCbc, String append){
@@ -2271,7 +2271,7 @@ public class CbcSolver {
 				}
 				Tools.quickLog(label + ".intVars", c);
                 logger.debug("Integer variables logged: {} variables",
-                        wrimsv2.components.ControlData.currStudyDataSet.cycIntDvMap.get(wrimsv2.components.ControlData.currCycleIndex).size());
+                        gov.ca.water.wrims.engine.core.components.ControlData.currStudyDataSet.cycIntDvMap.get(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex).size());
             }
 		}	
 	}
@@ -2322,7 +2322,7 @@ public class CbcSolver {
 					wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
 					wa_xa_str += String.format("%14.3f",  wa_xa) + "  ";
 
-                    if (Math.abs(wa_xa - wa_cbc) > wrimsv2.components.ControlData.watchList_tolerance) {
+                    if (Math.abs(wa_xa - wa_cbc) > gov.ca.water.wrims.engine.core.components.ControlData.watchList_tolerance) {
                         recordLP = true;
                         logger.warn("Watch variable difference exceeds tolerance: {} (CBC={}, XA={}, difference={})",
                                 s, wa_cbc, wa_xa, Math.abs(wa_xa - wa_cbc));
@@ -2581,12 +2581,12 @@ public class CbcSolver {
         int ci=ControlData.currCycleIndex+1;
 
         logger.info("CBC 2021a Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                modelName, solvFunc, wrimsv2.components.ControlData.currYear, wrimsv2.components.ControlData.currMonth,
-                wrimsv2.components.ControlData.currDay, ci, wrimsv2.components.ControlData.currCycleName);
+                modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
+                gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 
         logger.info("CBC Solver2021a: Solving {}/{}/{} Cycle {} [{}]",
-                wrimsv2.components.ControlData.currMonth, wrimsv2.components.ControlData.currDay,
-                wrimsv2.components.ControlData.currYear, ci, wrimsv2.components.ControlData.currCycleName);
+                gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
+                gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
 
         int status=-99;
 		int status2=-99;
