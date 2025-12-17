@@ -168,7 +168,7 @@ public class ConfigUtils {
 
         try {
             String gwDir = configMap.get("groundwaterdir");
-            if (gwDir.isEmpty()) {
+            if (!gwDir.isEmpty()) {
                 if (gwDir.contains(":")){
                     FilePaths.groundwaterDir =  new File(gwDir).getCanonicalPath()+File.separator;
                 } else {
