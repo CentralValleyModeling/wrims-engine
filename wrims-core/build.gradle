@@ -7,7 +7,7 @@ plugins {
 }
 
 sourceSets {
-    main {
+    src {
         antlr {
             srcDir "src/main/antlr"
         }
@@ -76,9 +76,6 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
     runtimeOnly 'com.lmax:disruptor:4.0.0'
 
-    // --- ANTLR runtime (required at compile time for generated Lexer/Parser base classes) ---
-    // If your BOM/libs already provides it, replace this with the libs alias.
-    implementation 'org.antlr:antlr4-runtime:4.13.1'
 }
 
 // This moves .tokens files into the same generated-src files with the .java files
@@ -127,9 +124,7 @@ tasks.register('getNatives', Sync) { syncTask ->
 tasks.named('sourcesJar') {
     dependsOn tasks.named('generateGrammarSource')
 }
-tasks.named('sourcesJar') {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
+
 tasks.named('build') {
     dependsOn tasks.named('copyDependencies')
 }
