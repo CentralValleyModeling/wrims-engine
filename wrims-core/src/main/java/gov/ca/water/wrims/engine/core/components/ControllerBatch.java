@@ -52,7 +52,7 @@ import gov.ca.water.wrims.engine.core.wreslplus.elements.procedures.ErrorCheck;
 import gov.ca.water.wrims.engine.core.wreslplus.elements.Tools;
 
 public class ControllerBatch {
-	
+	private int infeasCyclIndex= -100;
 	public boolean enableProgressLog = false;
 	public boolean enableConfigProgress = false;
 	private boolean runCompleted = false;
@@ -61,6 +61,21 @@ public class ControllerBatch {
 	private SQLServerRWriter sqlServerRWriter;
 	
 	public ControllerBatch() {} // do nothing
+	
+	private void enableInfeasibilityLogging(int cycleIndex) {
+		// dump error to file
+		Error.writeSolvingErrorFile("Error_solving.txt");
+		Error.writeErrorLog();
+		// keep track of when infeasibility occurs
+		infeasCyclIndex = cycleIndex;
+		Error.error_solving = new ArrayList();
+		// Enable logging for infeasibility
+		ILP.loggingLpSolve = false;
+		ILP.loggingCplexLp = true;
+		ILP.loggingAllCycles = true;
+		ILP.logging = true;
+		ILP.loggingVariableValue = true;
+	}
 	
 	public ControllerBatch(String[] args) {
 		long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
@@ -261,25 +276,8 @@ public class ControllerBatch {
 	public void runModel(StudyDataSet sds){
 		System.out.println("==============Run Study Start============");
 		
-		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
-			runModelGurobi(sds);
-		} else if (ControlData.solverName.equalsIgnoreCase("Glpk")){
-			runModelOrTools(sds, "GLPK_MIXED_INTEGER_PROGRAMMING");	
-		} else if (ControlData.solverName.equalsIgnoreCase("Clp")){
-			runModelClp(sds);	
-		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")&&(ControlData.cbc_debug_routeXA||ControlData.cbc_debug_routeCbc)){
-			runModelCbc(sds);
-		} else if (ILP.logging){
-			runModelILP(sds);
-		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")){
-			runModelCbc(sds);
-	    } else if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG") ){
-			runModelXA(sds);
-		} else {
-			Error.addConfigError("Solver name not recognized: "+ControlData.solverName);
-			Error.writeErrorLog();
-		}
-
+		runModelILP(sds);
+		
 		WeightEval.outputWtTableAR();
 		
 		if (Error.getTotalError()>0){
@@ -365,10 +363,15 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+						}else if (infeasCyclIndex==i) {
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=false;
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
-							noError=false;
+							noError=true;
+                            i=-1;                           
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -758,10 +761,13 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
-							Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {
 							noError=false;
+						}else{
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=true;
+                            i=-1;
 						}
 						if (ControlData.outputType==1){
 							if (ControlData.isOutputCycle && isSelectedCycleOutput){
@@ -977,18 +983,21 @@ public class ControllerBatch {
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						if (Error.error_solving.size()<1){
 							
-		            		ILP.writeObjValue_Gurobi();
-		            		if (ILP.loggingVariableValue) ILP.writeDvarValue_Gurobi();
-		            		
-		            		ILP.closeIlpFile();
+		            	
+		            	
+		            	
+		            	
 		            		
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
-							Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {	
 							noError=false;
+						}else{
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=true;
+                            i=-1;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1263,10 +1272,13 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
-							Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {
 							noError=false;
+						}else{
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=true;
+                            i=-1;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1413,10 +1425,13 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
-							Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {
 							noError=false;
+						}else{
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=true;
+                            i=-1;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";
@@ -1636,10 +1651,13 @@ public class ControllerBatch {
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
-						}else{
-							Error.writeSolvingErrorFile("Error_solving.txt");
-							Error.writeErrorLog();
+						}else if (infeasCyclIndex==i) {
 							noError=false;
+						}else{
+							enableInfeasibilityLogging(i);
+							Error.writeErrorLog();
+							noError=true;
+                            i=-1;
 						}
 						int cycleI=i+1;
 						String strCycleI=cycleI+"";

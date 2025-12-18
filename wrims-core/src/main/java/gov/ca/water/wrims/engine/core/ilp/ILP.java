@@ -179,12 +179,13 @@ public class ILP {
 		_ilpRootDir = new File(FilePaths.mainDirectory, "=ILP=");  
 	    _ilpDir = new File(_ilpRootDir.getAbsolutePath(), StudyUtils.configFileName); 
 	    
-		if (ILP.loggingMPModel)  _mpModelDir = new File(_ilpDir, "mpmodel").getAbsolutePath();
-	    if (ILP.loggingLpSolve)  _lpSolveDir = new File(_ilpDir, "lpsolve").getAbsolutePath();
-		if (ILP.loggingCplexLp)  _cplexLpDir = new File(_ilpDir, "cplexlp").getAbsolutePath();
-		if (ILP.loggingAmpl)     _amplDir = new File(_ilpDir, "ampl").getAbsolutePath();
+		_mpModelDir = new File(_ilpDir, "mpmodel").getAbsolutePath();
+		_lpSolveDir = new File(_ilpDir, "lpsolve").getAbsolutePath();
+		_cplexLpDir = new File(_ilpDir, "cplexlp").getAbsolutePath();
+		_amplDir = new File(_ilpDir, "ampl").getAbsolutePath();
 		// TODO: write ampl command file "option presolve_eps 1e-13;"
 
+		setVarDir();
 		if (ILP.loggingVariableValue) setVarDir();
 		setMaximumFractionDigits();
 		createNoteFile();
