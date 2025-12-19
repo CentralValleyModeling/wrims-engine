@@ -5,6 +5,7 @@
         <Property name="STANDARD_PATTERN">%d{ISO8601} %-5level [%t] [%c{1}] - %msg%n</Property>
         <Property name="USER_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</Property>
         <Property name="WRIMS_LOG_DIR">${sys:user.home}/.wrims/logs</Property>
+        <Property name="WRIMS_FALLBACK_LOG_DIR">${sys:user.home}/.wrims/logs/runs</Property>
 
         <!-- solver-only additions -->
         <Property name="DETAILED_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} [%M:%L] - %msg%n</Property>
@@ -30,8 +31,8 @@
             <AppenderRef ref="CONSOLE"/>
         </Async>
 
-        <!-- File Appender - Project Directory (falls back to WRIMS_LOG_DIR when sys:project.dir is not set) -->
-        <File name="FILE" fileName="${sys:project.dir:-${WRIMS_LOG_DIR}}/${date:yyyy-MM-dd_HH-mm-ss}.log">
+        <!-- File Appender - Project Directory (falls back to WRIMS_FALLBACK_LOG_DIR when sys:project.dir is not set) -->
+        <File name="FILE" fileName="${sys:project.dir:-${WRIMS_FALLBACK_LOG_DIR}}/${date:yyyy-MM-dd_HH-mm-ss}.log">
             <PatternLayout pattern="${STANDARD_PATTERN}"/>
         </File>
 
