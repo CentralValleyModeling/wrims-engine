@@ -35,7 +35,6 @@ final class ConfigUtilsTest {
 
     @BeforeEach
     void setUp() {
-        System.setProperty("project.dir", ""); // needs to be set for logging to work as intended
         appender = new CapturingAppender();
 
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
@@ -53,7 +52,6 @@ final class ConfigUtilsTest {
         loggerConfig.removeAppender(appender.getName());
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         ctx.updateLoggers();
-		System.clearProperty("project.dir");
     }
 
     @Test
