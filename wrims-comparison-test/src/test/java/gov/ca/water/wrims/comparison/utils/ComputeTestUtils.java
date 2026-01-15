@@ -130,6 +130,33 @@ public class ComputeTestUtils {
                 cpEntries.add(abs + File.separator + "*");
             });
         }
+        // Also include wrims-core build outputs so ControllerBatch is resolvable on CI
+        try {
+            Path coreLibsA = Paths.get("..", "wrims-core", "build", "libs").toAbsolutePath();
+            Path coreClassesA = Paths.get("..", "wrims-core", "build", "classes", "java", "main").toAbsolutePath();
+            Path coreLibsB = Paths.get("wrims-core", "build", "libs").toAbsolutePath();
+            Path coreClassesB = Paths.get("wrims-core", "build", "classes", "java", "main").toAbsolutePath();
+            // Prefer sibling module paths; fall back to project-root style if needed
+            Path[] extraDirs = new Path[] { coreLibsA, coreClassesA, coreLibsB, coreClassesB };
+            int added = 0;
+            for (Path p : extraDirs) {
+                if (p != null && Files.isDirectory(p)) {
+                    String abs = p.toAbsolutePath().toString();
+                    // Add dir and wildcard for jars
+                    cpEntries.add(abs);
+                    cpEntries.add(abs + File.separator + "*");
+                    added++;
+                }
+            }
+            if (added > 0) {
+                final int addedCount = added;
+                LOGGER.info(() -> "[Compute] Added wrims-core build outputs to classpath (dirs found=" + addedCount + ")");
+            } else {
+                LOGGER.fine("[Compute] wrims-core build outputs not found; relying on Run/external only");
+            }
+        } catch (Exception ignore) {
+            LOGGER.fine("[Compute] Error while probing wrims-core build outputs: " + ignore.getMessage());
+        }
         String baseClasspath = String.join(sep, cpEntries);
         String classpath = onCi ? baseClasspath : baseClasspath + sep + currentCp;
         LOGGER.info(() -> "[Compute] CI detected: " + onCi + "; classpath length=" + classpath.length());
