@@ -133,11 +133,13 @@ public class ComputeTestUtils {
         // Also include wrims-core build outputs so ControllerBatch is resolvable on CI
         try {
             Path coreLibsA = Paths.get("..", "wrims-core", "build", "libs").toAbsolutePath();
+            Path coreLibsTmpA = Paths.get("..", "wrims-core", "build", "tmp", "libs").toAbsolutePath();
             Path coreClassesA = Paths.get("..", "wrims-core", "build", "classes", "java", "main").toAbsolutePath();
             Path coreLibsB = Paths.get("wrims-core", "build", "libs").toAbsolutePath();
+            Path coreLibsTmpB = Paths.get("wrims-core", "build", "tmp", "libs").toAbsolutePath();
             Path coreClassesB = Paths.get("wrims-core", "build", "classes", "java", "main").toAbsolutePath();
             // Prefer sibling module paths; fall back to project-root style if needed
-            Path[] extraDirs = new Path[] { coreLibsA, coreClassesA, coreLibsB, coreClassesB };
+            Path[] extraDirs = new Path[] { coreLibsA, coreLibsTmpA, coreClassesA, coreLibsB, coreLibsTmpB, coreClassesB };
             int added = 0;
             for (Path p : extraDirs) {
                 if (p != null && Files.isDirectory(p)) {
