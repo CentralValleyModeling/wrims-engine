@@ -117,6 +117,7 @@ public class ComputeTestUtils {
         String currentCp = System.getProperty("java.class.path");
         String sep = File.pathSeparator;
 
+        boolean onCi = System.getenv("GITHUB_ACTIONS") != null || "true".equalsIgnoreCase(System.getenv("CI"));
         // Build a recursive classpath including all subdirectories under Run/external
         List<String> cpEntries = new ArrayList<>();
         // Include jars directly under external
@@ -129,20 +130,21 @@ public class ComputeTestUtils {
                 cpEntries.add(abs + File.separator + "*");
             });
         }
-        String classpath = String.join(sep, cpEntries) + sep + currentCp;
+        String baseClasspath = String.join(sep, cpEntries);
+        String classpath = onCi ? baseClasspath : baseClasspath + sep + currentCp;
+        LOGGER.info(() -> "[Compute] CI detected: " + onCi + "; classpath length=" + classpath.length());
+        LOGGER.fine(() -> "[Compute] Included current JVM classpath: " + (!onCi));
 
         // Resolve absolute path to this module's build/lib that contains native DLLs (getNatives output)
         Path moduleBuildLib = Paths.get("build", "lib").toAbsolutePath();
 
-        // Build command
+        // Build command (omit -cp and rely on CLASSPATH env to reduce command length on Windows)
         List<String> cmd = new ArrayList<>();
         cmd.add(javaExe);
         cmd.add(XMX_PARAM);
         cmd.add(XSS_PARAM);
         cmd.add("-XX:+CreateMinidumpOnCrash");
         cmd.add("-Djava.library.path=" + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
-        cmd.add("-cp");
-        cmd.add(classpath);
         cmd.add("gov.ca.water.wrims.engine.core.components.ControllerBatch");
         cmd.add("-config=" + configFile.toAbsolutePath());
 
@@ -155,6 +157,8 @@ public class ComputeTestUtils {
         String pathEnv = System.getenv("PATH");
         String newPath = joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib) + (pathEnv != null ? ";" + pathEnv : "");
         pb.environment().put("PATH", newPath);
+        // Move long classpath to environment to shorten command line
+        pb.environment().put("CLASSPATH", classpath);
 
         LOGGER.info(() -> "[Compute] Launching ControllerBatch with config: " + safePath(configFile));
         LOGGER.info(() -> "[Compute] Working dir: " + String.valueOf(pb.directory()));
@@ -166,6 +170,7 @@ public class ComputeTestUtils {
         LOGGER.info(() -> "[Compute] java.library.path: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
         // Avoid logging full PATH env; log only the head we set
         LOGGER.fine(() -> "[Compute] PATH enriched with: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
+        LOGGER.fine(() -> "[Compute] CLASSPATH length: " + classpath.length());
         try {
             boolean hasJCbc = hasDll(externalDir, "jCbc") || hasDll(moduleBuildLib, "jCbc");
             LOGGER.info(() -> "[Compute] jCbc present in libs: " + hasJCbc);
