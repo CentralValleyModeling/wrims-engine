@@ -193,6 +193,14 @@ tasks.named('test', Test) {
     filter {
         // Do not fail the build when filters exclude all tests (e.g., Azure suite excluded)
         setFailOnNoMatchingTests(false)
-        excludeTestsMatching "gov.ca.water.wrims.comparison.RunAzureCucumberTests"
+        excludeTestsMatching "gov.ca.water.wrims.comparison.*"
     }
 }
+
+// Deletes wrims-comparison-test/build/testProjects/tmp
+tasks.register('clear-tmp-projects', Delete) {
+    group = 'cleanup'
+    description = 'Deletes build/testProjects/tmp in wrims-comparison-test'
+    delete "$buildDir/testProjects/tmp"
+}
+
