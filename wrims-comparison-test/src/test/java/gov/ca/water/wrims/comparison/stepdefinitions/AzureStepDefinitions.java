@@ -1,4 +1,5 @@
 package gov.ca.water.wrims.comparison.stepdefinitions;
+import io.cucumber.java.PendingException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,6 +10,7 @@ import gov.ca.water.wrims.comparison.utils.LocalFileUtils;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -122,5 +124,16 @@ public class AzureStepDefinitions {
         LOGGER.info(() -> "Downloaded project to: " + safePath(projectFilePath));
         extractedProjectDir = LocalFileUtils.extractZipFile(projectFilePath);
         LOGGER.info(() -> "Extracted project directory: " + safePath(extractedProjectDir));
+    }
+
+    @Given("Project folder named {string} is set as the current project")
+    public void projectFolderNamedIsSetAsTheCurrentProject(String projectFolderName) {
+        //set the extractedProjectDir to the specified folder within the extracted directory
+        Path projectPath = Paths.get("build", "testProjects", "tmp", projectFolderName);
+        if (!Files.exists(projectPath)) {
+            LOGGER.severe("Extracted project directory is not available");
+            throw new IllegalStateException("Extracted project directory not available. Run the extract step and verify the project folder name is correct.");
+        }
+        this.extractedProjectDir = projectPath;
     }
 }

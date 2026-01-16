@@ -86,25 +86,27 @@ final class ConfigUtilsTest {
     }
 
     @Test
-    void loggingOutputFileTest() throws IOException {
+    void loggingOutputFileTest() throws IOException, InterruptedException {
         Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
         String testMsg = "Test output to file";
         logger.info(testMsg);
 
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         Configuration config = ctx.getConfiguration();
-        // "FILE" is the name of the appender defined in log4j2.xml
         FileAppender fileAppender = config.getAppender("FILE");
-
         assertNotNull(fileAppender);
 
-        String fileName = fileAppender.getFileName();
-        File logFile = new File(fileName);
+        File logFile = new File(fileAppender.getFileName());
 
+        // If file exists, poll for the message (accounting for async appender)
         if (logFile.exists()) {
-            List<String> lines = Files.readAllLines(logFile.toPath());
-            assertFalse(lines.isEmpty());
-            boolean found = lines.stream().anyMatch(line -> line.contains(testMsg));
+            boolean found = false;
+            long deadline = System.currentTimeMillis() + 5000; // up to 5s
+            while (System.currentTimeMillis() < deadline && !found) {
+                List<String> lines = Files.readAllLines(logFile.toPath());
+                found = lines.stream().anyMatch(line -> line.contains(testMsg));
+                if (!found) Thread.sleep(50);
+            }
             assertTrue(found, "Log file should contain the test message");
         }
     }
