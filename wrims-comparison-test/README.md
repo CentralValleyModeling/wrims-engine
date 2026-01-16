@@ -23,8 +23,11 @@ It orchestrates downloading example projects, running batch computes, and genera
     - `comparison/`
         - Features that compare outputs to reference results, e.g.:
             - `compare_calLite_41_TF_results.feature`
-    - `comparisonInputFiles/`
-        - Inputs for the comparison report tool, e.g. `callite_version_check_dss6_6.inp`.
+- `src/test/resources/comparisonInputFiles/`
+    - Inputs for the comparison report tool, inp files stored here will automatically override input files 
+    - stored a downloaded project zip at run time so developers can override inputs without modifying the zip
+    - when running the azure compute tests. e.g.:
+      - `callite_version_check_dss6_6.inp`.
 - `src/test/java/gov/ca/water/wrims/comparison/`
     - `RunAzureCucumberTests.java` — JUnit Platform suite to run the Azure feature(s).
     - `stepdefinitions/` — Cucumber step definitions used by the features.
@@ -34,7 +37,8 @@ It orchestrates downloading example projects, running batch computes, and genera
         - `ComputeTestUtils.java` — helper methods for launching compute/report tasks.
 - Build outputs (generated at runtime):
     - `build/lib/` — unzipped native libraries required by compute.
-    - `build/testProjects/` — unzipped sample projects and generated outputs.
+    - `build/testProjects/` — downloaded project zip files are cached here.
+    - `build/testProjects/tmp` — unzipped sample projects and generated outputs.
         - Example outputs:
             - `Callite_update_compare_6_6.pdf` (comparison report)
             - `Callite_update_compare_6_6_VALIDATION_FAILURES.csv` (only on validation failures)
@@ -56,6 +60,7 @@ It orchestrates downloading example projects, running batch computes, and genera
     - Default test task; excludes the Azure suite.
 - `clear-tmp-projects` (type `Delete`)
     - Deletes `build/testProjects/tmp` within this module.
+    - Useful for cleaning up extracted projects without deleting cached zips.
 
 ---
 
