@@ -69,43 +69,45 @@ public class AzureUtils {
     private static String retrieveSasToken(Optional<String> providedSas) {
         // If caller provided an Optional token and it's non-empty, use it.
         if (providedSas != null && providedSas.isPresent() && providedSas.get() != null && !providedSas.get().isBlank()) {
-            LOGGER.fine("Using SAS token provided via method parameter (value redacted).");
+            LOGGER.info("Using SAS token provided via method parameter (value redacted).");
             return normalizeSas(providedSas.get());
         }
 
-        String sas = System.getProperty("wrims.azure.sas");
+        // Prioritize .env.cucumber first to make local project configuration take precedence
+        String sas = loadSasFromEnvFile();
         if (sas != null && !sas.isBlank()) {
-            LOGGER.fine("Using SAS token from system property 'wrims.azure.sas' (value redacted).");
+            LOGGER.info("Using SAS token from .env.cucumber file (value redacted).");
             return normalizeSas(sas);
         }
-        // Obtain SAS token from system properties or environment variables
+
+        // Next, system properties (explicit JVM overrides)
+        sas = System.getProperty("wrims.azure.sas");
+        if (sas != null && !sas.isBlank()) {
+            LOGGER.info("Using SAS token from system property 'wrims.azure.sas' (value redacted).");
+            return normalizeSas(sas);
+        }
         sas = System.getProperty("azure.blob.sas");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.fine("Using SAS token from system property 'azure.blob.sas' (value redacted).");
+            LOGGER.info("Using SAS token from system property 'azure.blob.sas' (value redacted).");
             return normalizeSas(sas);
         }
+
+        // Finally, environment variables
         sas = System.getenv("WRIMS_AZURE_SAS");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.fine("Using SAS token from env 'WRIMS_AZURE_SAS' (value redacted).");
+            LOGGER.info("Using SAS token from env 'WRIMS_AZURE_SAS' (value redacted).");
             return normalizeSas(sas);
         }
         sas = System.getenv("AZURE_BLOB_SAS");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.fine("Using SAS token from env 'AZURE_BLOB_SAS' (value redacted).");
+            LOGGER.info("Using SAS token from env 'AZURE_BLOB_SAS' (value redacted).");
             return normalizeSas(sas);
         }
 
-        // Fallback: try to read from a local .env.cucumber file if running outside Gradle
-        sas = loadSasFromEnvFile();
-        if (sas != null && !sas.isBlank()) {
-            LOGGER.fine("Using SAS token from .env.cucumber file (value redacted).");
-            return normalizeSas(sas);
-        }
-
-        LOGGER.severe("Azure Blob SAS token not provided via parameters, system properties, environment, or .env.cucumber file.");
+        LOGGER.severe("Azure Blob SAS token not provided via parameters, .env.cucumber, system properties, or environment.");
         throw new IllegalStateException(
-                "Azure Blob SAS token not provided. Set one of: -Dwrims.azure.sas, -Dazure.blob.sas, " +
-                        "or environment variables WRIMS_AZURE_SAS / AZURE_BLOB_SAS.");
+                "Azure Blob SAS token not provided. Set one of: .env.cucumber (AZURE_BLOB_SAS or WRIMS_AZURE_SAS), " +
+                        "-Dwrims.azure.sas, -Dazure.blob.sas, or environment variables WRIMS_AZURE_SAS / AZURE_BLOB_SAS.");
     }
 
     private static String normalizeSas(String sas) {
