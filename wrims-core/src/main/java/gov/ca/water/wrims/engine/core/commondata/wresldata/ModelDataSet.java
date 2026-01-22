@@ -34,14 +34,14 @@ import gov.ca.water.wrims.engine.core.components.Error;
 
 
 public class ModelDataSet implements Serializable {
-	
+    private static final ForkJoinPool pool = new ForkJoinPool();
 	private static final long serialVersionUID = 1L;
 	// / weight table   // <objName,  <itemName, value>>
-	public ArrayList<String> wtList = new ArrayList<String>();
-	public ArrayList<String> wtTimeArrayList = new ArrayList<String>();
-	public ArrayList<String> wtSlackSurplusList = new ArrayList<String>();
-	public CopyOnWriteArrayList<String> usedWtSlackSurplusList = new CopyOnWriteArrayList<String>();
-	public CopyOnWriteArrayList<String> usedWtSlackSurplusDvList = new CopyOnWriteArrayList<String>();
+	public ArrayList<String> wtList = new ArrayList<>();
+	public ArrayList<String> wtTimeArrayList = new ArrayList<>();
+	public ArrayList<String> wtSlackSurplusList = new ArrayList<>();
+	public CopyOnWriteArrayList<String> usedWtSlackSurplusList = new CopyOnWriteArrayList<>();
+	public CopyOnWriteArrayList<String> usedWtSlackSurplusDvList = new CopyOnWriteArrayList<>();
 
 //	public ArrayList<String> wtList_global = new ArrayList<String>();
 //	public ArrayList<String> wtList_local = new ArrayList<String>();
@@ -49,10 +49,10 @@ public class ModelDataSet implements Serializable {
 	public Map<String, WeightElement> wtSlackSurplusMap = new HashMap<String, WeightElement>();	
 
 	// / external function structure
-	public ArrayList<String> exList = new ArrayList<String>();
-	public ArrayList<String> exList_global = new ArrayList<String>();
-	public ArrayList<String> exList_local = new ArrayList<String>();
-	public Map<String, External> exMap = new HashMap<String, External>();
+	public ArrayList<String> exList = new ArrayList<>();
+	public ArrayList<String> exList_global = new ArrayList<>();
+	public ArrayList<String> exList_local = new ArrayList<>();
+	public Map<String, External> exMap = new HashMap<>();
 	
 	
 //    //  / sv, ts, and dv list
@@ -62,15 +62,15 @@ public class ModelDataSet implements Serializable {
 //	public ArrayList<String> svTsList = new ArrayList<String>();
 	
 	// / svar timeseries data structure
-	public ArrayList<String> tsList = new ArrayList<String>();
-	public ArrayList<String> tsList_global = new ArrayList<String>();
-	public ArrayList<String> tsList_local = new ArrayList<String>();
-	public Map<String, Timeseries> tsMap = new HashMap<String, Timeseries>();
+	public ArrayList<String> tsList = new ArrayList<>();
+	public ArrayList<String> tsList_global = new ArrayList<>();
+	public ArrayList<String> tsList_local = new ArrayList<>();
+	public Map<String, Timeseries> tsMap = new HashMap<>();
 	
 	// / svar data structure
-	public Set<String> svSet_unknown = new HashSet<String>();
-	public ArrayList<String> svList = new ArrayList<String>();
-	public ArrayList<String> svList_global = new ArrayList<String>();
+	public Set<String> svSet_unknown = new HashSet<>();
+	public ArrayList<String> svList = new ArrayList<>();
+	public ArrayList<String> svList_global = new ArrayList<>();
 	public ArrayList<String> svList_local = new ArrayList<String>();
 	public Map<String, Svar> svMap = new HashMap<String, Svar>();
 	public Map<String, Svar> svFutMap = new HashMap<String, Svar>();
@@ -155,7 +155,6 @@ public class ModelDataSet implements Serializable {
 		ControlData.currEvalTypeIndex=7;
 		wtTimeArrayList = new ArrayList<String>();
 		ProcessWeight pw = new ProcessWeight(wtList, wtMap, solverWtMap, wtTimeArrayList, 0, wtList.size()-1);
-		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(pw);
 	}
 	
@@ -167,7 +166,6 @@ public class ModelDataSet implements Serializable {
 		ConcurrentHashMap<String, WeightElement> solverWeightSlackSurplusMap=SolverData.getWeightSlackSurplusMap();
 		ControlData.currEvalTypeIndex=7;
 		ProcessWeightSurplusSlack pwss = new ProcessWeightSurplusSlack(usedWtSlackSurplusDvList, wtSlackSurplusMap, solverWeightSlackSurplusMap, 0, usedWtSlackSurplusDvList.size()-1);
-		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(pwss);
 	}
 	
@@ -339,7 +337,6 @@ public class ModelDataSet implements Serializable {
 		Map<String, Timeseries> tsMap =mds.tsMap;
 		ControlData.currEvalTypeIndex=5;
 		ProcessTimeseries pt = new ProcessTimeseries(tsList, tsMap, 0, tsList.size()-1);
-		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(pt);
 	}
 	
@@ -358,7 +355,6 @@ public class ModelDataSet implements Serializable {
 		ArrayList<String> varCycleIndexList = sds.getVarCycleIndexList();
 		ArrayList<String> dvarTimeArrayCycleIndexList = sds.getDvarTimeArrayCycleIndexList();
 		ProcessDvar pd = new ProcessDvar(dvList, dvMap, solverDvarMap, timeArrayDvList, dvTimeArrayList, dvarUsedByLaterCycle, dvarTimeArrayUsedByLaterCycle, varCycleIndexList, dvarTimeArrayCycleIndexList, 0, dvList.size()-1);
-		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(pd);
 	}
 	
@@ -371,7 +367,6 @@ public class ModelDataSet implements Serializable {
 		ConcurrentHashMap<String, EvalConstraint> solverGMap=SolverData.getConstraintDataMap();
 		gTimeArrayList = new ArrayList<String>();
 		ProcessConstraint pc = new ProcessConstraint(gList, gMap, solverGMap, gTimeArrayList, usedWtSlackSurplusList, usedWtSlackSurplusDvList, 0, gList.size()-1);
-		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(pc);
 	}
 	
