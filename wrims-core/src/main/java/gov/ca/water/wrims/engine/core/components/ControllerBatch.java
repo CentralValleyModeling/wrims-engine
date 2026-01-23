@@ -549,6 +549,9 @@ public class ControllerBatch {
 		} else if (ControlData.solverName.toLowerCase().contains("xa")) {
 			ControlData.solverType = Param.SOLVER_XA; //default
 			new InitialXASolver();
+		} else if (ControlData.solverName.equalsIgnoreCase("Gurobi")) {
+			ControlData.solverType = Param.SOLVER_GUROBI;
+			GurobiSolver.initialize();	
 		} else {
 			Error.addConfigError("Solver name not recognized: "+ControlData.solverName);
 			Error.writeErrorLog();
@@ -734,7 +737,22 @@ public class ControllerBatch {
 				            			ILP.writeDvarValue_Clp0_Cbc0(ClpSolver.varDoubleMap);
 				            		}
 				            	}
-				            }					            			        	
+				            }
+						} else if (ControlData.solverType == Param.SOLVER_GUROBI.intValue()) {
+							// Gurobi solver
+							ILP.closeCplexLpFile(); 
+							GurobiSolver.setLp(ILP.cplexLpFilePath);
+							GurobiSolver.solve();
+							
+							if (Error.error_solving.size()<1) {
+								if (ILP.logging) {
+									ILP.reOpenCplexLpFile(true);
+									ILP.writeObjValue_Gurobi();
+									if (ILP.loggingVariableValue) {
+										ILP.writeDvarValue_Gurobi();
+									}
+								}
+							}					            			        	
 				            
 				        } else {
 
@@ -856,6 +874,8 @@ public class ControllerBatch {
 			CbcSolver.close();
 		} else if (ControlData.solverType == Param.SOLVER_CLP1 || ControlData.solverType == Param.SOLVER_CLP) {
 			ClpSolver.close();
+		} else if (ControlData.solverType == Param.SOLVER_GUROBI) {
+			GurobiSolver.dispose();	
 		} else {
 			ControlData.xasolver.close();
 		}
