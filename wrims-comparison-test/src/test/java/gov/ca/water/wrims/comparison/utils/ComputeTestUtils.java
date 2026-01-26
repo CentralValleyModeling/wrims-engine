@@ -58,7 +58,7 @@ public class ComputeTestUtils {
         cmd.add("-Djava.library.path=" + moduleBuildLib.toString());
         cmd.add("-cp");
         cmd.add(currentCp);
-        cmd.add("gov.ca.dwr.callite.Batch");
+        cmd.add("gov.ca.water.ssrt.Batch");
         cmd.add(inputFile.toAbsolutePath().toString());
 
         ProcessBuilder pb = new ProcessBuilder(cmd);
@@ -68,7 +68,7 @@ public class ComputeTestUtils {
         String newPath = moduleBuildLib.toString() + (pathEnv != null ? ";" + pathEnv : "");
         pb.environment().put("PATH", newPath);
 
-        LOGGER.info("[Report] Launching gov.ca.dwr.callite.Batch");
+        LOGGER.info("[Report] Launching gov.ca.water.ssrt.Batch");
         LOGGER.info(() -> "[Report] Working dir: " + safePath(workingDir));
         LOGGER.info(() -> "[Report] Input file: " + safePath(inputFile));
         LOGGER.info(() -> "[Report] java.library.path: " + safePath(moduleBuildLib));
