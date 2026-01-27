@@ -1,23 +1,24 @@
 package gov.ca.water.wrims.comparison.stepdefinitions;
-import io.cucumber.java.PendingException;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import gov.ca.water.wrims.comparison.utils.AzureUtils;
 import gov.ca.water.wrims.comparison.utils.ComputeTestUtils;
 import gov.ca.water.wrims.comparison.utils.LocalFileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+
 
 public class AzureStepDefinitions {
 
-    private static final Logger LOGGER = Logger.getLogger(AzureStepDefinitions.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStepDefinitions.class.getName());
 
     Path extractedProjectDir;
 
@@ -48,40 +49,40 @@ public class AzureStepDefinitions {
      */
     private Path resolveAndApplyResourceOverride(Path baseDir, String relativeFile, String resourceFolder) {
         Path resolved = baseDir.resolve(relativeFile);
-        LOGGER.fine(() -> "Resolved path for " + relativeFile + ": " + safePath(resolved));
+        LOGGER.atTrace().setMessage(() -> "Resolved path for " + relativeFile + ": " + safePath(resolved)).log();
         try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourceFolder + "/" + relativeFile)) {
             if (resourceStream != null) {
                 Files.copy(resourceStream, resolved, StandardCopyOption.REPLACE_EXISTING);
-                LOGGER.info(() -> "Loaded override file from resources (" + resourceFolder + ") into " + safePath(resolved));
+                LOGGER.atInfo().setMessage(() -> "Loaded override file from resources (" + resourceFolder + ") into " + safePath(resolved)).log();
             } else {
-                LOGGER.fine(() -> "No override resource found under '" + resourceFolder + "' for " + relativeFile + "; using existing file if present.");
+                LOGGER.atTrace().setMessage(() -> "No override resource found under '" + resourceFolder + "' for " + relativeFile + "; using existing file if present.").log();
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Failed to apply resource override for " + relativeFile + " from folder '" + resourceFolder + "': " + ex.getMessage(), ex);
+            LOGGER.atWarn().setMessage("Failed to apply resource override for " + relativeFile + " from folder '" + resourceFolder + "': " + ex.getMessage()).setCause(ex).log();
         }
         return resolved;
     }
 
     @Then("Compare the results using input file {string} and output files named {string}")
     public void compareTheResultsUsingInputFileAndOutputFilesNamed(String configFile, String outputFileName) {
-        LOGGER.info(() -> "Starting report comparison. configFile=" + configFile + ", outputFileName=" + outputFileName);
+        LOGGER.atInfo().setMessage(() -> "Starting report comparison. configFile=" + configFile + ", outputFileName=" + outputFileName).log();
         try {
             Path configFilePath = resolveAndApplyResourceOverride(extractedProjectDir, configFile, "comparisonInputFiles");
-            LOGGER.fine(() -> "Resolved comparison input path: " + safePath(configFilePath));
+            LOGGER.atTrace().setMessage(() -> "Resolved comparison input path: " + safePath(configFilePath)).log();
 
             int exit = ComputeTestUtils.runReport(extractedProjectDir, configFilePath, outputFileName);
-            LOGGER.info(() -> "Report tool exit code=" + exit + "; outputFileName=" + outputFileName);
+            LOGGER.atInfo().setMessage(() -> "Report tool exit code=" + exit + "; outputFileName=" + outputFileName).log();
             if (exit != 0 && exit != 2) { // historically 2 may indicate validation diffs for reports
-                LOGGER.severe("Report tool failed with non-success exit code: " + exit);
+                LOGGER.atError().setMessage("Report tool failed with non-success exit code: " + exit).log();
                 throw new IllegalStateException("ControllerBatch exited with code " + exit);
             }
             if(exit == 2) {
-                LOGGER.warning("Report comparison found differences. Failing the step. Output files prefix: " + outputFileName);
+                LOGGER.atWarn().setMessage("Report comparison found differences. Failing the step. Output files prefix: " + outputFileName).log();
                 throw new IllegalStateException("Report comparison found differences in output files: " + outputFileName);
             }
-            LOGGER.info("Report comparison completed successfully with no differences.");
+            LOGGER.atInfo().setMessage("Report comparison completed successfully with no differences.").log();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed during report comparison step: " + e.getMessage(), e);
+            LOGGER.atError().setMessage("Failed during report comparison step: " + e.getMessage()).setCause(e).log();
             throw new RuntimeException("Failed to execute project compute: " + e.getMessage(), e);
         }
     }
@@ -89,29 +90,29 @@ public class AzureStepDefinitions {
     @When("Execute the project named {string} compute using config file {string}")
     public void executeTheProjectNamedComputeUsingConfigFile(String projectName, String configFileName) {
         if (this.extractedProjectDir == null || !Files.exists(this.extractedProjectDir)) {
-            LOGGER.severe("Extracted project directory is not available; did you run the extract step?");
+            LOGGER.atError().setMessage("Extracted project directory is not available; did you run the extract step?").log();
             throw new IllegalStateException("Extracted project directory not available. Run the extract step first.");
         }
-        LOGGER.info(() -> "Starting compute execution. projectName=" + projectName + ", configFileName=" + configFileName);
+        LOGGER.atInfo().setMessage(() -> "Starting compute execution. projectName=" + projectName + ", configFileName=" + configFileName).log();
         try {
             Path extractedWorkingDir = extractedProjectDir.resolve(projectName);
             Path configFilePath = resolveAndApplyResourceOverride(extractedWorkingDir, configFileName, "configFiles");
-            LOGGER.fine(() -> "Resolved workingDir=" + safePath(extractedWorkingDir) + ", configPath=" + safePath(configFilePath));
+            LOGGER.atTrace().setMessage(() -> "Resolved workingDir=" + safePath(extractedWorkingDir) + ", configPath=" + safePath(configFilePath)).log();
 
             if(!configFilePath.toFile().exists()) {
-                LOGGER.severe("Config file not found at: " + safePath(configFilePath));
+                LOGGER.atError().setMessage("Config file not found at: " + safePath(configFilePath)).log();
                 throw new IllegalStateException("Config file not found at: " + configFilePath.toAbsolutePath());
             }
 
             int exit = ComputeTestUtils.runControllerBatch(extractedWorkingDir, configFilePath);
-            LOGGER.info(() -> "ControllerBatch exit code=" + exit);
+            LOGGER.atInfo().setMessage(() -> "ControllerBatch exit code=" + exit).log();
             if (exit != 0) {
-                LOGGER.severe("ControllerBatch failed with non-success exit code: " + exit);
+                LOGGER.atError().setMessage("ControllerBatch failed with non-success exit code: " + exit).log();
                 throw new IllegalStateException("ControllerBatch exited with code " + exit);
             }
-            LOGGER.info("ControllerBatch completed successfully.");
+            LOGGER.atInfo().setMessage("ControllerBatch completed successfully.").log();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to execute project compute: " + e.getMessage(), e);
+            LOGGER.atError().setMessage("Failed to execute project compute: " + e.getMessage()).setCause(e).log();
             throw new RuntimeException("Failed to execute project compute: " + e.getMessage(), e);
         }
     }
@@ -119,11 +120,11 @@ public class AzureStepDefinitions {
     @Given("Download and extract the project zip file named {string} from Azure blob store {string}")
     public void downloadAndExtractTheProjectZipFileNamedFromAzureBlobStore(String projectFileName, String azureBlobContainerUrl) throws Throwable {
         String safeUrl = sanitizeUrl(azureBlobContainerUrl);
-        LOGGER.info(() -> "Starting Azure download. projectFileName=" + projectFileName + ", containerUrl=" + safeUrl);
+        LOGGER.atInfo().setMessage(() -> "Starting Azure download. projectFileName=" + projectFileName + ", containerUrl=" + safeUrl).log();
         Path projectFilePath = AzureUtils.downloadAzureProject(projectFileName, azureBlobContainerUrl, null);
-        LOGGER.info(() -> "Downloaded project to: " + safePath(projectFilePath));
+        LOGGER.atInfo().setMessage(() -> "Downloaded project to: " + safePath(projectFilePath)).log();
         extractedProjectDir = LocalFileUtils.extractZipFile(projectFilePath);
-        LOGGER.info(() -> "Extracted project directory: " + safePath(extractedProjectDir));
+        LOGGER.atInfo().setMessage(() -> "Extracted project directory: " + safePath(extractedProjectDir)).log();
     }
 
     @Given("Project folder named {string} is set as the current project")
@@ -131,7 +132,7 @@ public class AzureStepDefinitions {
         //set the extractedProjectDir to the specified folder within the extracted directory
         Path projectPath = Paths.get("build", "testProjects", "tmp", projectFolderName);
         if (!Files.exists(projectPath)) {
-            LOGGER.severe("Extracted project directory is not available");
+            LOGGER.atError().setMessage("Extracted project directory is not available").log();
             throw new IllegalStateException("Extracted project directory not available. Run the extract step and verify the project folder name is correct.");
         }
         this.extractedProjectDir = projectPath;

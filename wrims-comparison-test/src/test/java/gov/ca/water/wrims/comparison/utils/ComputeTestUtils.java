@@ -1,5 +1,8 @@
 package gov.ca.water.wrims.comparison.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -11,12 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ComputeTestUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(ComputeTestUtils.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComputeTestUtils.class);
 
     public static final String XMX_PARAM = "-Xmx4096m";
     public static final String XSS_PARAM = "-Xss1024K";
@@ -68,35 +69,37 @@ public class ComputeTestUtils {
         String newPath = moduleBuildLib.toString() + (pathEnv != null ? ";" + pathEnv : "");
         pb.environment().put("PATH", newPath);
 
-        LOGGER.info("[Report] Launching gov.ca.water.ssrt.Batch");
-        LOGGER.info(() -> "[Report] Working dir: " + safePath(workingDir));
-        LOGGER.info(() -> "[Report] Input file: " + safePath(inputFile));
-        LOGGER.info(() -> "[Report] java.library.path: " + safePath(moduleBuildLib));
+        LOGGER.atInfo()
+                .setMessage("Launching gov.ca.dwr.ssrt.Batch")
+                .addKeyValue("workingDir", () -> safePath(workingDir))
+                .addKeyValue("inputFile", () -> safePath(inputFile))
+                .addKeyValue("moduleBuildLib", () -> safePath(moduleBuildLib))
+                .log();
 
         Process p = pb.start();
         try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
             String line;
             while ((line = r.readLine()) != null) {
-                LOGGER.info("[Report] " + line);
+                LOGGER.atInfo().setMessage("captured from {}: {}").addArgument(p.pid()).addArgument(line).log();
             }
         }
         long timeoutMinutes = 60;
         if (!p.waitFor(timeoutMinutes, TimeUnit.MINUTES)) {
             p.destroyForcibly();
-            LOGGER.severe("[Report] Report generation timed out after " + timeoutMinutes + " minutes");
+            LOGGER.atError().setMessage("Report generation timed out after {} minutes").addArgument(timeoutMinutes).log();
             throw new IllegalStateException("Report generation timed out after " + timeoutMinutes + " minutes");
         }
         int exit = p.exitValue();
-        LOGGER.info("[Report] Exit code: " + exit);
+        LOGGER.atInfo().setMessage("Exit code: {}").addArgument(exit).log();
 
         // Mirror Gradle outputs for visibility
         Path pdf = Paths.get("build", "testReports", outputFileName).toAbsolutePath();
         Path csv = Paths.get("build", "testReports", outputFileName+"_VALIDATION_FAILURES.csv").toAbsolutePath();
         if (Files.exists(pdf)) {
-            LOGGER.info(() -> "[Report] PDF output: " + safePath(pdf));
+            LOGGER.atInfo().setMessage(" PDF output: " + safePath(pdf)).log();
         }
         if (exit == 2 && Files.exists(csv)) {
-            LOGGER.info(() -> "[Report] Validation failures CSV: " + safePath(csv));
+            LOGGER.atInfo().setMessage("Validation failures CSV: " + safePath(csv)).log();
         }
         return exit;
     }
@@ -152,17 +155,17 @@ public class ComputeTestUtils {
             }
             if (added > 0) {
                 final int addedCount = added;
-                LOGGER.info(() -> "[Compute] Added wrims-core build outputs to classpath (dirs found=" + addedCount + ")");
+                LOGGER.atInfo().setMessage("Added wrims-core build outputs to classpath (dirs found=" + addedCount + ")").log();
             } else {
-                LOGGER.fine("[Compute] wrims-core build outputs not found; relying on Run/external only");
+                LOGGER.trace("wrims-core build outputs not found; relying on Run/external only");
             }
-        } catch (Exception ignore) {
-            LOGGER.fine("[Compute] Error while probing wrims-core build outputs: " + ignore.getMessage());
+        } catch (Exception e) {
+            LOGGER.atTrace().setMessage("Error while probing wrims-core build outputs").setCause(e).log();
         }
         String baseClasspath = String.join(sep, cpEntries);
         String classpath = onCi ? baseClasspath : baseClasspath + sep + currentCp;
-        LOGGER.info(() -> "[Compute] CI detected: " + onCi + "; classpath length=" + classpath.length());
-        LOGGER.fine(() -> "[Compute] Included current JVM classpath: " + (!onCi));
+        LOGGER.atInfo().setMessage("CI detected: " + onCi + "; classpath length=" + classpath.length()).log();
+        LOGGER.atTrace().setMessage( "Included current JVM classpath: " + (!onCi)).log();
 
         // Resolve absolute path to this module's build/lib that contains native DLLs (getNatives output)
         Path moduleBuildLib = Paths.get("build", "lib").toAbsolutePath();
@@ -189,22 +192,22 @@ public class ComputeTestUtils {
         // Move long classpath to environment to shorten command line
         pb.environment().put("CLASSPATH", classpath);
 
-        LOGGER.info(() -> "[Compute] Launching ControllerBatch with config: " + safePath(configFile));
-        LOGGER.info(() -> "[Compute] Working dir: " + String.valueOf(pb.directory()));
-        LOGGER.info(() -> "[Compute] Classpath entries from Run/external (including subdirs): " + cpEntries.size());
+        LOGGER.atInfo().setMessage("Launching ControllerBatch with config: {}").addArgument(safePath(configFile)).log();
+        LOGGER.atInfo().setMessage("Working dir: {}").addArgument(pb.directory()).log();
+        LOGGER.atInfo().setMessage("Classpath entries from Run/external (including subdirs): {}").addArgument(cpEntries.size()).log();
         for (int i = 0; i < Math.min(10, cpEntries.size()); i++) {
             final int idx = i;
-            LOGGER.fine(() -> "[Compute][cp] " + cpEntries.get(idx));
+            LOGGER.atTrace().setMessage("classpath item {}: {}").addArgument(idx).addArgument(cpEntries.get(idx)).log();
         }
-        LOGGER.info(() -> "[Compute] java.library.path: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
+        LOGGER.atInfo().setMessage("java.library.path: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib)).log();
         // Avoid logging full PATH env; log only the head we set
-        LOGGER.fine(() -> "[Compute] PATH enriched with: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
-        LOGGER.fine(() -> "[Compute] CLASSPATH length: " + classpath.length());
+        LOGGER.atTrace().setMessage( "PATH enriched with: " + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib)).log();
+        LOGGER.atTrace().setMessage( "CLASSPATH length: " + classpath.length()).log();
         try {
             boolean hasJCbc = hasDll(externalDir, "jCbc") || hasDll(moduleBuildLib, "jCbc");
-            LOGGER.info(() -> "[Compute] jCbc present in libs: " + hasJCbc);
-        } catch (IOException ignore) {
-            LOGGER.log(Level.FINE, "[Compute] Error while checking jCbc presence: " + ignore.getMessage(), ignore);
+            LOGGER.atInfo().setMessage("jCbc present in libs: " + hasJCbc).log();
+        } catch (IOException e) {
+            LOGGER.atTrace().setMessage("Error while checking jCbc presence").setCause(e).log();
         }
 
         Process p = pb.start();
@@ -212,18 +215,18 @@ public class ComputeTestUtils {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
             String line;
             while ((line = r.readLine()) != null) {
-                LOGGER.info("[Controller] " + line);
+                LOGGER.atInfo().setMessage("captured from {}: {}").addArgument(p.pid()).addArgument(line).log();
             }
         }
         // Wait with generous timeout
         long timeoutMinutes = 120;
         if (!p.waitFor(timeoutMinutes, TimeUnit.MINUTES)) {
             p.destroyForcibly();
-            LOGGER.severe("[Compute] ControllerBatch timed out after " + timeoutMinutes + " minutes");
+            LOGGER.atError().setMessage("ControllerBatch timed out after " + timeoutMinutes + " minutes").log();
             throw new IllegalStateException("ControllerBatch timed out after " + timeoutMinutes + " minutes");
         }
         int exit = p.exitValue();
-        LOGGER.info("[Compute] ControllerBatch exit code: " + exit);
+        LOGGER.atInfo().setMessage("ControllerBatch exit code: " + exit).log();
         return exit;
     }
 
@@ -239,7 +242,7 @@ public class ComputeTestUtils {
             if (p == null) continue;
             String s = p.toString();
             if (s == null || s.isBlank()) continue;
-            if (sb.length() > 0) sb.append(delimiter);
+            if (!sb.isEmpty()) sb.append(delimiter);
             sb.append(p.toString());
         }
         return sb.toString();
@@ -272,9 +275,9 @@ public class ComputeTestUtils {
             if (!hasDll) {
                 throw new IllegalStateException("No .dll files found under: " + safePath(libDir));
             }
-            LOGGER.fine(() -> "[Compute] verifyNatives: found native DLLs under " + safePath(libDir));
+            LOGGER.atTrace().setMessage( "verifyNatives: found native DLLs under " + safePath(libDir)).log();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to inspect natives directory: " + safePath(libDir) + ": " + e.getMessage(), e);
+            LOGGER.atError().setMessage("Failed to inspect natives directory: {}").addArgument(safePath(libDir)).setCause(e).log();
             throw new IllegalStateException("Failed to inspect natives directory: " + e.getMessage(), e);
         }
     }
