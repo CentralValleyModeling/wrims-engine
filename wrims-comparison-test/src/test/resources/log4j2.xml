@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <Properties>
+        <Property name="STANDARD_PATTERN">%d{ISO8601} %-5level [%t] [%c{1}] - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="CONSOLE" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+        </Console>
+
+        <!-- Async wrapper for console -->
+        <Async name="CONSOLE-ASYNC">
+            <AppenderRef ref="CONSOLE"/>
+        </Async>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="ERROR">
+            <AppenderRef ref="CONSOLE-ASYNC"/>
+        </Root>
+
+        <Logger name="gov.ca.water.wrims.comparison" level="DEBUG" additivity="false">
+            <AppenderRef ref="CONSOLE-ASYNC"/>
+        </Logger>
+
+    </Loggers>
+</Configuration>

@@ -9,31 +9,31 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AzureUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(AzureUtils.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
 
     public static Path downloadAzureProject(String projectFileName, String azureBlobUrl, Optional<String> sasToken) throws IOException {
         // Resolve download target under this module's build directory
         Path targetDir = Paths.get("build", "testProjects");
         Files.createDirectories(targetDir);
         Path targetFile = targetDir.resolve(projectFileName);
-        LOGGER.fine(() -> "Target download directory: " + safePath(targetDir));
-        LOGGER.fine(() -> "Resolved target file path: " + safePath(targetFile));
+        LOGGER.atTrace().setMessage("Target download directory: " + safePath(targetDir)).log();
+        LOGGER.atTrace().setMessage("Resolved target file path: " + safePath(targetFile)).log();
 
         //Check if the target file already exists
         if (targetFile.toFile().exists()) {
-            LOGGER.info(() -> "Project zip file already exists locally at: " + safePath(targetFile));
+            LOGGER.atInfo().setMessage(() -> "Project zip file already exists locally at: " + safePath(targetFile)).log();
             return targetFile;
         }
 
         // Build the blob URL for the project file
         String blobUrl = (azureBlobUrl == null ? "" : azureBlobUrl) + projectFileName;
         String safeBlobUrl = sanitizeUrl(blobUrl);
-        LOGGER.info(() -> "Preparing to download from Azure Blob. blobUrl=" + safeBlobUrl);
+        LOGGER.atInfo().setMessage(() -> "Preparing to download from Azure Blob. blobUrl=" + safeBlobUrl).log();
 
         //Load or retrieve the sas token
         String sas = retrieveSasToken(sasToken);
@@ -46,7 +46,7 @@ public class AzureUtils {
                     .sasToken(sas)
                     .buildClient();
 
-            LOGGER.info(() -> "Starting Azure blob download to: " + safePath(targetFile));
+            LOGGER.atInfo().setMessage(() -> "Starting Azure blob download to: " + safePath(targetFile)).log();
 
             // Overwrite if it already exists to ensure latest copy
             blobClient.downloadToFile(targetFile.toString(), true);
@@ -54,13 +54,13 @@ public class AzureUtils {
             // Basic verification: ensure file exists and is non-empty
             long size = Files.exists(targetFile) ? Files.size(targetFile) : 0L;
             if (size <= 0L) {
-                LOGGER.severe(() -> "Downloaded file is missing or empty for URL: " + safeBlobUrl);
+                LOGGER.atError().setMessage(() -> "Downloaded file is missing or empty for URL: " + safeBlobUrl).log();
                 throw new IllegalStateException("Failed to download blob: " + safeBlobUrl);
             }
-            LOGGER.info(() -> "Azure blob download complete. Bytes received=" + size + ", file=" + safePath(targetFile));
+            LOGGER.atInfo().setMessage(() -> "Azure blob download complete. Bytes received=" + size + ", file=" + safePath(targetFile)).log();
             return targetFile;
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Azure blob download failed for URL: " + safeBlobUrl + ": " + e.getMessage(), e);
+            LOGGER.atError().setMessage("Azure blob download failed for URL: " + safeBlobUrl + ": " + e.getMessage()).setCause(e).log();
             if (e instanceof IOException) throw (IOException) e;
             throw new IOException("Azure blob download failed: " + e.getMessage(), e);
         }
@@ -69,42 +69,42 @@ public class AzureUtils {
     private static String retrieveSasToken(Optional<String> providedSas) {
         // If caller provided an Optional token and it's non-empty, use it.
         if (providedSas != null && providedSas.isPresent() && providedSas.get() != null && !providedSas.get().isBlank()) {
-            LOGGER.info("Using SAS token provided via method parameter (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token provided via method parameter (value redacted).").log();
             return normalizeSas(providedSas.get());
         }
 
         // Prioritize .env.cucumber first to make local project configuration take precedence
         String sas = loadSasFromEnvFile();
         if (sas != null && !sas.isBlank()) {
-            LOGGER.info("Using SAS token from .env.cucumber file (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token from .env.cucumber file (value redacted).").log();
             return normalizeSas(sas);
         }
 
         // Next, system properties (explicit JVM overrides)
         sas = System.getProperty("wrims.azure.sas");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.info("Using SAS token from system property 'wrims.azure.sas' (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token from system property 'wrims.azure.sas' (value redacted).").log();
             return normalizeSas(sas);
         }
         sas = System.getProperty("azure.blob.sas");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.info("Using SAS token from system property 'azure.blob.sas' (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token from system property 'azure.blob.sas' (value redacted).").log();
             return normalizeSas(sas);
         }
 
         // Finally, environment variables
         sas = System.getenv("WRIMS_AZURE_SAS");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.info("Using SAS token from env 'WRIMS_AZURE_SAS' (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token from env 'WRIMS_AZURE_SAS' (value redacted).").log();
             return normalizeSas(sas);
         }
         sas = System.getenv("AZURE_BLOB_SAS");
         if (sas != null && !sas.isBlank()) {
-            LOGGER.info("Using SAS token from env 'AZURE_BLOB_SAS' (value redacted).");
+            LOGGER.atInfo().setMessage("Using SAS token from env 'AZURE_BLOB_SAS' (value redacted).").log();
             return normalizeSas(sas);
         }
 
-        LOGGER.severe("Azure Blob SAS token not provided via parameters, .env.cucumber, system properties, or environment.");
+        LOGGER.atError().setMessage("Azure Blob SAS token not provided via parameters, .env.cucumber, system properties, or environment.").log();
         throw new IllegalStateException(
                 "Azure Blob SAS token not provided. Set one of: .env.cucumber (AZURE_BLOB_SAS or WRIMS_AZURE_SAS), " +
                         "-Dwrims.azure.sas, -Dazure.blob.sas, or environment variables WRIMS_AZURE_SAS / AZURE_BLOB_SAS.");
@@ -136,7 +136,7 @@ public class AzureUtils {
             if (p == null) continue;
             if (Files.exists(p)) {
                 try {
-                    LOGGER.fine(() -> "Attempting to load SAS token from env file: " + safePath(p));
+                    LOGGER.atTrace().setMessage("Attempting to load SAS token from env file: " + safePath(p)).log();
                     List<String> lines = Files.readAllLines(p);
                     for (String line : lines) {
                         if (line == null) continue;
@@ -148,16 +148,16 @@ public class AzureUtils {
                         String val = line.substring(idx + 1).trim();
                         val = val.replaceAll("^[\"']|[\"']$", "");
                         if ("WRIMS_AZURE_SAS".equalsIgnoreCase(key) || "AZURE_BLOB_SAS".equalsIgnoreCase(key)) {
-                            LOGGER.fine("Found SAS token entry in env file (value redacted).");
+                            LOGGER.atTrace().setMessage("Found SAS token entry in env file (value redacted).").log();
                             return val;
                         }
                     }
                 } catch (IOException ex) {
-                    LOGGER.log(Level.FINE, "Failed reading env file for SAS at " + safePath(p) + ": " + ex.getMessage(), ex);
+                    LOGGER.atTrace().setMessage("Failed reading env file for SAS at " + safePath(p) + ": " + ex.getMessage()).setCause(ex).log();
                     // ignore and try next candidate
                 }
             } else {
-                LOGGER.fine(() -> "Env file not found at: " + safePath(p));
+                LOGGER.atTrace().setMessage("Env file not found at: " + safePath(p)).log();
             }
         }
         return null;
