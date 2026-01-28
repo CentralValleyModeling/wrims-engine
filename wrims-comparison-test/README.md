@@ -102,16 +102,16 @@ From repository root (where `gradlew.bat` resides):
 
 - Run only the Azure Cucumber suite:
 ```
-./gradlew.bat :wrims-engine:wrims-comparison-test:runAzureCucumberTests
+./gradlew.bat :wrims-comparison-test:runAzureCucumberTests
 ```
 - Ensure `.env.cucumber` exists or pass a token explicitly, e.g.:
 ```
-./gradlew.bat :wrims-engine:wrims-comparison-test:runAzureCucumberTests -Dwrims.azure.sas="sv=...&sig=..."
+./gradlew.bat :wrims-comparison-test:runAzureCucumberTests -Dwrims.azure.sas="sv=...&sig=..."
 ```
 
 - Generate compute and comparison report locally (CalLite example):
 ```
-./gradlew.bat :wrims-engine:wrims-comparison-test:testReport
+./gradlew.bat :wrims-comparison-test:testReport
 ```
 - Outputs:
     - `wrims-engine/wrims-comparison-test/build/testProjects/Callite_update_compare_6_6.pdf`
@@ -119,7 +119,7 @@ From repository root (where `gradlew.bat` resides):
 
 - Clear temporary extracted projects:
 ```
-./gradlew.bat :wrims-engine:wrims-comparison-test:clear-tmp-projects
+./gradlew.bat :wrims-comparison-test:clear-tmp-projects
 ```
 
 ---
