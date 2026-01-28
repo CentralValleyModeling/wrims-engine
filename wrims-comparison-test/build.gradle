@@ -10,14 +10,6 @@ configurations{
     comparisonReport
 }
 
-// JDK 21+ resolution for Lookup library bug: Issue #194
-configurations.configureEach {
-    resolutionStrategy.dependencySubstitution {substitution ->
-        substitution.substitute(module("mil.army.usace.hec:lookup")).using(module(libs.lookup.compat.get().toString()))
-                .because("WRIMS uses upstream NetBeans Lookup for Java 21 Compatibility.")
-    }
-}
-
 dependencies {
     implementation(project(":wrims-core")){
         exclude group: "org.testng"

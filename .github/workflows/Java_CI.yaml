@@ -31,6 +31,12 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Ensure old Lookup library is not resolved
+        run: |
+          ./gradlew :wrims-core:dependencyInsight --dependency lookup --configuration runtimeClasspath \
+            -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}" \
+            | grep -F "mil.army.usace.hec:lookup" && exit 1 || exit 0
+
       - name: Build with Gradle
         run: |
           ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}"
