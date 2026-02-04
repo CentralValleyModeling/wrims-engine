@@ -174,6 +174,8 @@ public class ComputeTestUtils {
         cmd.add(XSS_PARAM);
         cmd.add("-XX:+CreateMinidumpOnCrash");
         cmd.add("-Djava.library.path=" + joinPaths(";", externalDir.toAbsolutePath(), moduleBuildLib));
+        // Set project.dir for Log4j2 file appender - use the project directory (compareDir)
+        cmd.add("-Dproject.dir=" + compareDir.toAbsolutePath().toString());
         cmd.add("gov.ca.water.wrims.engine.core.components.ControllerBatch");
         cmd.add("-config=" + configFile.toAbsolutePath());
 
