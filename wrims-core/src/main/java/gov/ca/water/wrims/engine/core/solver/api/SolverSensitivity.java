@@ -18,7 +18,7 @@ public interface SolverSensitivity extends Solver {
     
     /**
      * Gets the slack value for a constraint.
-     * Slack = RHS - LHS for <= constraints (positive when constraint is not tight)
+     * Slack = RHS - LHS for &lt;= constraints (positive when constraint is not tight)
      * 
      * @param constraintName name of the constraint
      * @return slack value, or NaN if not available
@@ -27,7 +27,7 @@ public interface SolverSensitivity extends Solver {
     
     /**
      * Gets the surplus value for a constraint.
-     * Surplus = LHS - RHS for >= constraints (positive when constraint is not tight)
+     * Surplus = LHS - RHS for &gt;= constraints (positive when constraint is not tight)
      * 
      * @param constraintName name of the constraint
      * @return surplus value, or NaN if not available

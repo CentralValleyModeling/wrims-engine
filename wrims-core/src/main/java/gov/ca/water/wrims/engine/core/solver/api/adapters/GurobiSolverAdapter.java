@@ -247,11 +247,7 @@ public class GurobiSolverAdapter implements SolverSensitivity {
     @Override
     public void close() {
         if (model != null) {
-            try {
-                model.dispose();
-            } catch (GRBException e) {
-                // Ignore dispose errors
-            }
+            model.dispose();
             model = null;
         }
     }

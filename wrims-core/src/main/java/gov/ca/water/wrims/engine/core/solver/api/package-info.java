@@ -66,6 +66,7 @@
  * 
  * <h2>Sensitivity Analysis Support</h2>
  * <table border="1">
+ *   <caption>Solver Sensitivity Analysis Support Matrix</caption>
  *   <tr><th>Solver</th><th>Slack/Surplus</th><th>Dual Values</th><th>Reduced Cost</th></tr>
  *   <tr><td>Gurobi</td><td>✓ Full</td><td>✓ Full</td><td>✓ Full</td></tr>
  *   <tr><td>CBC</td><td>✓ Limited</td><td>✓ Limited</td><td>✓ Limited</td></tr>
