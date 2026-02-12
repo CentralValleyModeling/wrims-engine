@@ -9,8 +9,6 @@ on:
   push:
     tags:
       - '*'
-env:
-  DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
 
 jobs:
 
@@ -21,6 +19,8 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Verify token access to wrims-engine-dependencies
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         shell: bash
         run: |
           curl --fail -i -u "dwr-wrims-build:$DEP_TOKEN" \
@@ -34,16 +34,21 @@ jobs:
           cache: 'gradle'
 
       - name: Ensure old Lookup library is not resolved
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         shell: bash
         run: |
-          ./gradlew -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN \
+          ./gradlew -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN" \
             :wrims-core:dependencyInsight --dependency lookup --configuration runtimeClasspath \
             | grep -qE "^mil\.army\.usace\.hec:lookup:[^:\s]+$" && exit 1 || exit 0
 
       - name: Build with Gradle
+        shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         run: |
-          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
-          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
 
       - name: Upload Core jar
         if: startsWith(github.ref, 'refs/tags/')
@@ -54,9 +59,12 @@ jobs:
             ./wrims-core/build/libs/*.jar
 
       - name: Generate tattletale-reports
+        shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         run: |
-          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
-          ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4.0.0
@@ -66,10 +74,13 @@ jobs:
             ./*/build/reports/**
 
       - name: Publish package
+        shell: bash
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
+        run: ./gradlew publish -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+
 
   comparison-tests:
     if: startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'RC')
@@ -83,6 +94,8 @@ jobs:
 
       - name: Verify token access to wrims-engine-dependencies
         shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         run: |
           curl --fail -i -u "dwr-wrims-build:$DEP_TOKEN" \
             https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/com.google.ortools/linearsolver/2013-01-10/linearsolver-2013-01-10.jar
@@ -95,9 +108,12 @@ jobs:
           cache: 'gradle'
 
       - name: Clean & Run Comparison Tests
+        shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         run: |
-          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
-          ./gradlew testReport -PconfigFilePath="testProjects/CalLite4.1_TF/Test_02.config" -PinputFilePath="testProjects/callite_version_check_dss6_6.inp" -PcvmUserId="dwr-wrims-build" -PcvmPassword=$DEP_TOKEN
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew testReport -PconfigFilePath="testProjects/CalLite4.1_TF/Test_02.config" -PinputFilePath="testProjects/callite_version_check_dss6_6.inp" -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
 
       - name: Upload Comparison Report
         if: always()
