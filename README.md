@@ -1,3 +1,9 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CentralValleyModeling_wrims-engine&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=CentralValleyModeling_wrims-engine)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=CentralValleyModeling_wrims-engine&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=CentralValleyModeling_wrims-engine)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=CentralValleyModeling_wrims-engine&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=CentralValleyModeling_wrims-engine)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=CentralValleyModeling_wrims-engine&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=CentralValleyModeling_wrims-engine)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=CentralValleyModeling_wrims-engine&metric=coverage)](https://sonarcloud.io/summary/new_code?id=CentralValleyModeling_wrims-engine)
+
 # :steam_locomotive: WRIMS Engine
 
 The compute engine for the **W**ater **R**esource **I**ntegrated **M**odeling System.
