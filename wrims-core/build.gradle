@@ -113,6 +113,16 @@ publishing {
     }
 }
 
+tasks.register("createBuildPropertiesFile", WriteProperties) { t ->
+    outputFile(layout.buildDirectory.dir("resources/main").map {
+        it.file("gov/ca/water/wrims/engine/build.properties")
+    })
+    comment = "this file is automatically created at build time, edits will be overwritten"
+    property("version", project.version)
+    property("gradle.version", gradle.gradleVersion)
+    property("build.time", new Date().toString())
+}
+
 tasks.register('getNatives', Sync) { syncTask ->
     syncTask.from configurations.windows_x64.collect { zipTree(it) }
     syncTask.into file("${buildDir}/tmp/x64")
@@ -124,6 +134,10 @@ tasks.named('sourcesJar') {
 
 tasks.named('build') {
     dependsOn tasks.named('copyDependencies')
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('createBuildPropertiesFile')
 }
 
 jacoco {
