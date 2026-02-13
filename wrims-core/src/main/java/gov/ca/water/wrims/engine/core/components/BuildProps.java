@@ -1,33 +1,27 @@
 package gov.ca.water.wrims.engine.core.components;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class BuildProps {
-	
-	private Properties buildProps = null;
-	
+    private final Properties properties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildProps.class);
 
-	public BuildProps(){
-		
-		buildProps = new Properties();
-		//buildProps.put("version", "2.0");
-		try {
-			buildProps.load(getClass().getResourceAsStream(
-                "/gov/ca/water/wrims/engine/core/version.props"));
-		} catch (Exception e) {
-			buildProps.put("vn", "NOT BUILT EVER - DEV Env");
-			buildProps.put("buildtime", "" + new Date());
-			//buildProps.put("system", "OS: " + System.getProperty("os.name"));
-			// e.printStackTrace();
-		}
-		
-	}
-	
-	public String getVN() {
-		
-		return buildProps.getProperty("version");
-		
-	}	
+    public BuildProps() {
+        properties = new Properties();
+        String defaultFile = "build.properties";
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(defaultFile);
+        try {
+            properties.load(stream);
+        } catch (NullPointerException | IOException e) {
+            LOGGER.atError().setMessage("could not find default properties file: {}").addArgument(defaultFile).log();
+        }
+    }
 
+    public String getVN() {
+        return properties.getProperty("version");
+    }
 }
