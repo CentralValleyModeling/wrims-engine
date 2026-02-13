@@ -46,6 +46,10 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Build with Gradle
+        run: |
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$WRIMS_ENGINE_DEPENDENCIES"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="$WRIMS_ENGINE_DEPENDENCIES"
       - name: Analyze
         id: sonar
         env:
