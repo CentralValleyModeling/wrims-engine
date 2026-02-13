@@ -12,11 +12,12 @@ public class BuildProps {
 
     public BuildProps() {
         properties = new Properties();
-        String defaultFile = "build.properties";
+        String defaultFile = "wrims-engine-build.properties";
         InputStream stream = this.getClass().getClassLoader().getResourceAsStream(defaultFile);
         try {
             properties.load(stream);
         } catch (NullPointerException | IOException e) {
+            LOGGER.atError().setMessage(System.getProperty("java.class.path")).log();
             LOGGER.atError().setMessage("could not find default properties file: {}").addArgument(defaultFile).log();
         }
     }
