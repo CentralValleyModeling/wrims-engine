@@ -26,9 +26,14 @@ dependencies {
     // Cucumber JVM for Java with JUnit Platform engine
     testImplementation libs.bundles.cucumber
 
-
     // Azure Storage Blob for downloading project files from public container
     testImplementation(libs.azure.storage.blob)
+
+    // Logging
+    implementation libs.slf4j
+    implementation libs.slf4j.log4j.bindings
+    implementation libs.log4j
+    runtimeOnly libs.log4j.async
 }
 
 // Load environment variables for the test task from a local file if present
@@ -163,12 +168,13 @@ publishing {
 }
 
 // Runs only the compare_calList_41_TF.feature using a dedicated JUnit Platform suite test
-tasks.register("runAzureCucumberTests", Test) {
+tasks.register("runLocalCucumberTests", Test) {
     group = "verification"
     description = "Runs the compare_calList_41_TF.feature via JUnit suite"
 
     // Ensure native DLLs are prepared
     dependsOn("getNatives")
+
     // Ensure wrims-core artifacts exist when this test task runs
     dependsOn(":wrims-core:assemble")
 
@@ -177,7 +183,7 @@ tasks.register("runAzureCucumberTests", Test) {
 
     // Execute only the suite test class
     filter {
-        includeTestsMatching "gov.ca.water.wrims.comparison.RunAzureCucumberTests"
+        includeTestsMatching "gov.ca.water.wrims.comparison.RunLocalCucumberTest"
     }
 
     // Show test output
@@ -185,6 +191,8 @@ tasks.register("runAzureCucumberTests", Test) {
         showStandardStreams = true
         events "passed", "skipped", "failed"
     }
+
+    systemProperty "java.library.path", file("$buildDir/lib").absolutePath
 }
 
 // Make the default test task skip Azure
