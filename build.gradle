@@ -4,7 +4,6 @@
 plugins {
     id "com.palantir.git-version" version "3.0.0"
     id 'base'
-    id 'org.sonarqube' version '6.3.1.5724'
 }
 
 // This utilizes Git Tag based versioning to set the version of the project based on the current Git Branch or Tag.
@@ -13,17 +12,6 @@ plugins {
 def versionLabel(gitInfo) {
     def tag = gitInfo.lastTag
     return gitInfo.branchName == null ? tag : tag + ".9999"
-}
-
-sonar {
-    properties {
-        property "sonar.projectKey", "CentralValleyModeling_wrims-engine"
-        property "sonar.organization", "dwr-cvm"
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.pullrequest.provider", "GitHub"
-        property "sonar.pullrequest.github.repository", "CentralValleyModeling/wrims-engine"
-        property "sonar.coverage.jacoco.xmlReportPaths", "$rootDir/wrims-core/build/reports/jacoco/test/jacocoTestReport.xml"
-    }
 }
 
 tasks.register('copyDependencies', Copy) {

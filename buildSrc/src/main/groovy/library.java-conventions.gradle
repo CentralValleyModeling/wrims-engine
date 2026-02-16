@@ -3,6 +3,7 @@
 
 plugins {
     id 'java-library'
+    id 'org.sonarqube'
 }
 
 compileJava {
@@ -54,7 +55,18 @@ tasks.register('tattletaleReport', JavaExec) {
     ]
 }
 
-tasks.matching { task -> task.name == "sonar" }.configureEach {
+sonar {
+    properties {
+        property "sonar.projectKey", "CentralValleyModeling_wrims-engine"
+        property "sonar.organization", "dwr-cvm"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.pullrequest.provider", "GitHub"
+        property "sonar.pullrequest.github.repository", "CentralValleyModeling/wrims-engine"
+        property "sonar.coverage.jacoco.xmlReportPaths", "$rootDir/wrims-core/build/reports/jacoco/test/jacocoTestReport.xml"
+    }
+}
+
+tasks.named("sonar").configure {
     dependsOn tasks.named("compileJava")
 }
 
