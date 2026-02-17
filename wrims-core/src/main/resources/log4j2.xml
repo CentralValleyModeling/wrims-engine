@@ -49,14 +49,13 @@
                 <TimeBasedTriggeringPolicy interval="1"/>
                 <DefaultRolloverStrategy/>
             </Policies>
-            <DefaultRolloverStrategy max="50"/>
         </RollingFile>
 
         <Async name="FILE-WRIMS-ASYNC">
             <AppenderRef ref="FILE-WRIMS"/>
         </Async>
 
-        <!-- CBC Solver Main Log (INFO and above) -->
+        <!-- CBC Solver Main Log -->
         <RollingFile name="CBC-MAIN"
                      fileName="${SOLVER_LOG_DIR}/cbc-main.log"
                      filePattern="${SOLVER_LOG_DIR}/cbc-main-%d{yyyy-MM-dd_HH-mm-ss}.log"
@@ -65,16 +64,16 @@
             <Policies>
                 <OnStartupTriggeringPolicy/>
                 <SizeBasedTriggeringPolicy modulate="true" interval="1"/>
-                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="100"/>
+            <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
         <Async name="ASYNC-CBC-MAIN">
             <AppenderRef ref="CBC-MAIN"/>
         </Async>
 
-        <!-- CBC Solver Detailed Log (DEBUG/TRACE level) -->
+        <!-- CBC Solver Detailed Log -->
         <RollingFile name="CBC-DETAIL"
                      fileName="${SOLVER_LOG_DIR}/cbc-detail.log"
                      filePattern="${SOLVER_LOG_DIR}/cbc-detail-%d{yyyy-MM-dd_HH-mm-ss}.log"
@@ -85,7 +84,7 @@
                 <SizeBasedTriggeringPolicy modulate="true" interval="1"/>
                 <SizeBasedTriggeringPolicy size="50 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="100"/>
+            <DefaultRolloverStrategy max="30"/>
             <Filters>
                 <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
@@ -129,6 +128,8 @@
         <!-- CBC Solver main logger: route to CBC files -->
         <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver" level="DEBUG" additivity="false">
             <AppenderRef ref="ASYNC-CBC-MAIN"/>
+            <AppenderRef ref="ASYNC-CBC-ERROR"/>
+            <AppenderRef ref="ASYNC-CBC-PERF"/>
             <AppenderRef ref="ASYNC-CBC-DETAIL"/>
         </Logger>
 
