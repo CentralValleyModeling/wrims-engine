@@ -94,6 +94,29 @@
             <AppenderRef ref="CBC-DETAIL"/>
         </Async>
 
+        <!-- CBC Solver Error Log -->
+        <RollingFile name="CBC-ERROR"
+                     fileName="${SOLVER_LOG_DIR}/cbc-error.log"
+                     filePattern="${SOLVER_LOG_DIR}/cbc-error-%d{yyyy-MM-dd_HH-mm-ss}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="90"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <DefaultRolloverStrategy max="100"/>
+        </RollingFile>
+
+        <Async name="ASYNC-CBC-ERROR">
+            <AppenderRef ref="CBC-ERROR"/>
+        </Async>
+
         <!-- CBC Solver Performance Log -->
         <RollingFile name="CBC-PERF"
                      fileName="${SOLVER_LOG_DIR}/cbc-perf.log"
