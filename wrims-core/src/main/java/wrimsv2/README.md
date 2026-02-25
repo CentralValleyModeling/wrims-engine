@@ -3,7 +3,8 @@
 ## Purpose
 
 **To retain support for legacy code.** This module contains code related to calling the external 
-native functions present in the CalLite ANN interface for the model computation execution. 
+native functions present in the CalLite ANN (Artificial Neural Network) interface for the model 
+computation execution. 
 
 Some of these functions are found in the source of CalLite here: 
 https://github.com/CentralValleyModeling/CalLite/tree/master/Run/External/wrimsv2/external.
