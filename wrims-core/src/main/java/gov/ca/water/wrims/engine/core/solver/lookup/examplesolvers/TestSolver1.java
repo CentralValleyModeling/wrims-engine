@@ -4,6 +4,8 @@ import gov.ca.water.wrims.engine.core.solver.lookup.AbstractSolver;
 import gov.ca.water.wrims.engine.core.solver.lookup.ISolver;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceProviders(value = {
 		@ServiceProvider(service = ISolver.class),
@@ -11,6 +13,7 @@ import org.openide.util.lookup.ServiceProviders;
 })
 public final class TestSolver1 extends AbstractSolver implements ISolver
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestSolver1.class);
 	private Integer x = null;
 	private Integer y = null;
 	private Integer z = null;
@@ -20,18 +23,26 @@ public final class TestSolver1 extends AbstractSolver implements ISolver
 	{
 		x = 1;
 		y = 2;
+		z = 3;
 	}
 
 	@Override
 	public void setLP(String filePath)
 	{
-		System.out.println("Solver 1: " + filePath);
+		LOGGER.atInfo().log("Solver 1: " + filePath);
 	}
 
 	@Override
 	public void solve()
 	{
-		System.out.println(x + " * " + y + " * " + z + " = " + (x * y * z));
+		if (x == null || y == null || z == null)
+		{
+			throw new IllegalStateException("Solver not initialized.");
+		}
+		else
+		{
+			LOGGER.atInfo().log(x + " * " + y + " * " + z + " = " + (x * y * z));
+		}
 	}
 
 	@Override
@@ -39,7 +50,7 @@ public final class TestSolver1 extends AbstractSolver implements ISolver
 	{
 		String solverInfo = this.getClass().getName();
 
-		System.out.println(solverInfo);
+		LOGGER.atInfo().log(solverInfo);
 	}
 
 	@Override
