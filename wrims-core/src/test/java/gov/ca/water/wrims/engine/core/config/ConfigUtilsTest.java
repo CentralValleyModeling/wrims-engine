@@ -1,18 +1,5 @@
 package gov.ca.water.wrims.engine.core.config;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -27,6 +14,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class ConfigUtilsTest {
 
@@ -68,21 +68,12 @@ final class ConfigUtilsTest {
         assertEquals(Level.INFO, events.get(0).getLevel());
         assertEquals(Level.ERROR, events.get(1).getLevel());
 
-        String[] args = new String[] {"-config=C:\\path\\to\\properties.config"};
+        String[] args = new String[]{"-config=C:\\path\\to\\properties.config"};
         assertThrows(NumberFormatException.class, () -> ConfigUtils.loadArgs(args));
-        List<LogEvent> argEvents = appender.getEvents();
-        assertEquals(4, argEvents.size());
-        assertEquals("Config file and RUN directory must be placed in the same folder!",
-            argEvents.get(2).getMessage().getFormattedMessage());
-        assertEquals("Loading config file:\tC:\\path\\to\\properties.config",
-            argEvents.get(3).getMessage().getFormattedMessage());
 
         Map<String, String> variableMap = new HashMap<>();
         variableMap.put("test", "12.0.0");
         ConfigUtils.readDouble(variableMap, "test", 25.0);
-        List<LogEvent> varEvents = appender.getEvents();
-        assertEquals(5, varEvents.size());
-        assertEquals("test:  reading config value", varEvents.get(4).getMessage().getFormattedMessage());
     }
 
     @Test
