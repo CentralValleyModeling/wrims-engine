@@ -1,13 +1,17 @@
 package gov.ca.water.wrims.engine.core.tools;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DiffObjects {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiffObjects.class);
 
-	public static boolean compareObjects(Object o1, Object o2) {        
+    public static boolean compareObjects(Object o1, Object o2) {
         try {
             List<Field> fields1 = getFields(o1);
             List<Field> fields2 = getFields(o2);
@@ -17,26 +21,36 @@ public class DiffObjects {
                 found = false;
                 for (Field field2 : fields2) {
                     if (field1.getName().equals(field2.getName())) {
-                    	if (field1.get(o1)==null && field2.get(o2)==null){
-                    		
-                    	}else if (field1.get(o1)==null && field2.get(o2)!=null){
-                    		System.out.println("Value of sds1 for field " + field1 + " is null but the value " + field2.get(o2) + " for field " + field2);
+                        if (field1.get(o1) == null && field2.get(o2) == null) {
+
+                        } else if (field1.get(o1) == null && field2.get(o2) != null) {
+                            LOGGER.atInfo()
+                                  .setMessage("Value of sds1 for field " + field1 + " is null but the value " + field2.get(
+                                          o2) + " for field " + field2)
+                                  .log();
                             return false;
-                    	}else if (field1.get(o1)==null && field2.get(o2)!=null){
-                    		System.out.println("Value " + field1.get(o1) + " for field " + field1 + " but value of sds2 for field " + field2+" is null");
+                        } else if (field1.get(o1) == null && field2.get(o2) != null) {
+                            LOGGER.atInfo()
+                                  .setMessage("Value " + field1.get(o1) + " for field " + field1 + " but value of sds2 for field " + field2 + " is null")
+                                  .log();
                             return false;
-                    	}else{
-                    		if (!field1.get(o1).equals(field2.get(o2))) {
-                    			System.out.println("Value " + field1.get(o1) + " for field " + field1 + " does not match the value " + field2.get(o2) + " for field " + field2);
-                    			return false;
-                    		}
-                    	}
+                        } else {
+                            if (!field1.get(o1).equals(field2.get(o2))) {
+                                LOGGER.atInfo()
+                                      .setMessage("Value " + field1.get(o1) + " for field " + field1 + " does not match the value " + field2.get(
+                                              o2) + " for field " + field2)
+                                      .log();
+                                return false;
+                            }
+                        }
                         field2Temp = field2;
                         found = true;
                     }
                 }
                 if (!found) {
-                    System.out.println("Field " + field1 + " has not been found in the object " + o2.getClass());
+                    LOGGER.atInfo()
+                          .setMessage("Field " + field1 + " has not been found in the object " + o2.getClass())
+                          .log();
                     return false;
                 } else {
                     fields2.remove(field2Temp);
@@ -44,7 +58,9 @@ public class DiffObjects {
             }
             if (fields2.size() > 0) {
                 for (Field field : fields2) {
-                    System.out.println("Field " + field + " has not been found in the object " + o1.getClass());
+                    LOGGER.atInfo()
+                          .setMessage("Field " + field + " has not been found in the object " + o1.getClass())
+                          .log();
                 }
             }
             return true;
@@ -61,5 +77,5 @@ public class DiffObjects {
         }
         return new ArrayList<>(Arrays.asList(fields));
     }
-	
+
 }

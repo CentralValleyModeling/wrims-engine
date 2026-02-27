@@ -1,262 +1,250 @@
 package gov.ca.water.wrims.engine.core.solver.mpmodel.export;
 
+import gov.ca.water.wrims.engine.core.commondata.wresldata.Param;
+import gov.ca.water.wrims.engine.core.solver.mpmodel.MPModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
-import gov.ca.water.wrims.engine.core.commondata.wresldata.Param;
-import gov.ca.water.wrims.engine.core.solver.mpmodel.MPModel;
-
-
 public class LpSolveExport {
 
-	
-	private LpSolveExport() {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LpSolveExport.class);
 
-	}
+    private LpSolveExport() {
 
-	public static void writeComment(PrintWriter outFile, String msg) {
-		
+    }
 
-		outFile.println("// " + msg );
+    public static void writeComment(PrintWriter outFile, String msg) {
 
-	}	
-	
-	public static void writeObjValue() {
-		
+        outFile.println("// " + msg);
 
-	}
-	
+    }
 
-	public static String writeObj(LinkedHashMap<String, Double> activeWeightMap) {
-		
-		String out = "// objective function\n";
+    public static void writeObjValue() {
 
-		out = out + "max:\n";
+    }
 
-		ArrayList<String> sortedTerm = new ArrayList<String>(activeWeightMap.keySet());
-		
-		Collections.sort(sortedTerm);
+    public static String writeObj(LinkedHashMap<String, Double> activeWeightMap) {
 
-		for (String dvar : sortedTerm) {
+        String out = "// objective function\n";
 
-			double weight = activeWeightMap.get(dvar);
+        out = out + "max:\n";
 
-			if (weight > 0) {
+        ArrayList<String> sortedTerm = new ArrayList<String>(activeWeightMap.keySet());
 
-				out = out + "+ " + weight + " " + dvar + "\n";
+        Collections.sort(sortedTerm);
 
-			}
-			else if (weight < 0) {
-				out = out + weight + " " + dvar + "\n";
+        for (String dvar : sortedTerm) {
 
-			}
+            double weight = activeWeightMap.get(dvar);
 
-		}
-		
-		out = out + ";\n";
-		return out;
+            if (weight > 0) {
 
-	}
+                out = out + "+ " + weight + " " + dvar + "\n";
 
-	public static String writeConstraint(LinkedHashMap<String, LinkedHashMap<String, Double>> constraintLhs, LinkedHashMap<String, double[]> constraintRhs) {
+            } else if (weight < 0) {
+                out = out + weight + " " + dvar + "\n";
 
+            }
 
-		String out ="/* constraint */\n";
+        }
 
+        out = out + ";\n";
+        return out;
 
-		for (String constraintName : constraintLhs.keySet()) {
+    }
 
-			LinkedHashMap<String, Double> lhs_map = constraintLhs.get(constraintName);
-			
-			String lhs = "";
-			
-			// TODO:  this constraint might be always true or always false
-			if (lhs_map.keySet().size()==0) {
-				System.err.println("# Error: check constraint named: "+constraintName);
-			}
-			
-			for (String key: lhs_map.keySet()){
-				
-				lhs =  lhs + " + " + lhs_map.get(key) + " " + key ;
-				
-			}
-			
+    public static String writeConstraint(
+            LinkedHashMap<String, LinkedHashMap<String, Double>> constraintLhs,
+            LinkedHashMap<String, double[]> constraintRhs
+    ) {
 
-			double lb = constraintRhs.get(constraintName)[0];
-			double ub = constraintRhs.get(constraintName)[1];
-			
-			String lbStr = "constraint lb error";
-			String ubStr = "constraint ub error";
-			
-			if ( lb < -Param.inf_assumed ) {
-				lbStr = "";
-			} else {
-				lbStr = lb + " <= "; 
-			}
+        String out = "/* constraint */\n";
 
-			if ( ub > Param.inf_assumed ) {
-				ubStr = "";
-			} else {
-				ubStr = " <= " + ub; 
-			}
-			
-			if (lb == ub) {
-				lbStr = "";
-				ubStr = " = " + ub;
-			}
-			
-			// TODO: what if unbounded
-			
-			out = out + constraintName + ": "+ lbStr + lhs + ubStr + ";\n";
+        for (String constraintName : constraintLhs.keySet()) {
 
-		}
-		
-		return out;
+            LinkedHashMap<String, Double> lhs_map = constraintLhs.get(constraintName);
 
-	}
+            String lhs = "";
 
-	public static String writeDvar(MPModel in) {
-		
-		String out = "/* dvar */\n";
-		
+            // TODO:  this constraint might be always true or always false
+            if (lhs_map.size() == 0) {
+                LOGGER.atError().setMessage("# Error: check constraint named: " + constraintName).log();
+            }
 
-		// number nonstd nonfree
-		ArrayList<String> number_general = new ArrayList<String>(in.var_general);
-		Collections.sort(number_general);
-		
-		// integer nonbinary
-		ArrayList<String> integer_nonbinary = new ArrayList<String>(in.varMap_integer.keySet());
-		integer_nonbinary.removeAll(in.var_int_binary);
-		Collections.sort(integer_nonbinary);
+            for (String key : lhs_map.keySet()) {
 
-		double lb = Param.inf_assumed;
-		double ub = -Param.inf_assumed;
-		
-		String lbStr = "lb error";
-		String ubStr = "ub error";
-		
-		
-		for (String key : number_general) {
-			
-			lb = in.varMap_number.get(key)[0];
-			ub = in.varMap_number.get(key)[1];
-			
-			if ( lb < -Param.inf_assumed ) {
-				lbStr = "";
-			} else {
-				lbStr = lb + " <= "; 
-			}
+                lhs = lhs + " + " + lhs_map.get(key) + " " + key;
 
-			if ( ub > Param.inf_assumed ) {
-				ubStr = "";
-			} else {
-				ubStr = " <= " + ub; 
-			}
-			
-			// TODO: what if unbounded
-			
-			out = out + lbStr + key + ubStr + ";\n";
-		}
-		
-		
-		
+            }
 
-		for (String key : integer_nonbinary) {
+            double lb = constraintRhs.get(constraintName)[0];
+            double ub = constraintRhs.get(constraintName)[1];
 
-			lb = in.varMap_integer.get(key)[0];
-			ub = in.varMap_integer.get(key)[1];
-			
-			if ( lb < -Param.inf_assumed ) {
-				lbStr = "";
-			} else {
-				lbStr = lb + " <= "; 
-			}
+            String lbStr = "constraint lb error";
+            String ubStr = "constraint ub error";
 
-			if ( ub > Param.inf_assumed ) {
-				ubStr = "";
-			} else {
-				ubStr = " <= " + ub; 
-			}
-			
-			// TODO: what if unbounded
-			
-			out = out + lbStr + key + ubStr + ";\n";
-		}
-			
-		if (in.var_free.size() > 0) {
-			out = out + "free\n";
+            if (lb < -Param.inf_assumed) {
+                lbStr = "";
+            } else {
+                lbStr = lb + " <= ";
+            }
 
-			ArrayList<String> var_free_list = new ArrayList<String>(in.var_free);
-			Collections.sort(var_free_list);
-			
-			for (int i = 0; i < var_free_list.size(); i++) {
-				String term = var_free_list.get(i);
+            if (ub > Param.inf_assumed) {
+                ubStr = "";
+            } else {
+                ubStr = " <= " + ub;
+            }
 
-				if (i == 0) {
-					out = out + term;
-				}
-				else {
-					out = out + ", "+term;
-				}
-			}
+            if (lb == ub) {
+                lbStr = "";
+                ubStr = " = " + ub;
+            }
 
-			out = out + ";\n";
-		}
-		
-		if (in.varMap_integer.size() > 0) {
-			
-			if (in.var_int_binary.size()>0) {
-				
-				out = out + "bin\n";
-				
-				ArrayList<String> var_binary_list = new ArrayList<String>(in.var_int_binary);
-				Collections.sort(var_binary_list);				
-				
-				for (int i = 0; i < var_binary_list.size(); i++) {
-					String term = var_binary_list.get(i);
+            // TODO: what if unbounded
 
-					if (i == 0) {
-						out = out + term;
-					}
-					else {
-						out = out + ", "+term;
-					}
-				}
+            out = out + constraintName + ": " + lbStr + lhs + ubStr + ";\n";
 
-				out = out + ";\n";					
-			
-			}
+        }
 
-			
-			if (in.varMap_integer.size() - in.var_int_binary.size()>0) {
-				
-				out = out + "int\n";
-				
-				ArrayList<String> var_int_list = new ArrayList<String>(in.varMap_integer.keySet());
-				var_int_list.removeAll(in.var_int_binary);
-				Collections.sort(var_int_list);				
-				
-				for (int i = 0; i < var_int_list.size(); i++) {
-					String term = var_int_list.get(i);
+        return out;
 
-					if (i == 0) {
-						out = out + term;
-					}
-					else {
-						out = out + ", "+term;
-					}
-				}
+    }
 
-				out = out + ";\n";					
-			
-			}
+    public static String writeDvar(MPModel in) {
 
-		}
-		return out;
+        String out = "/* dvar */\n";
 
+        // number nonstd nonfree
+        ArrayList<String> number_general = new ArrayList<String>(in.var_general);
+        Collections.sort(number_general);
 
-	}	
+        // integer nonbinary
+        ArrayList<String> integer_nonbinary = new ArrayList<String>(in.varMap_integer.keySet());
+        integer_nonbinary.removeAll(in.var_int_binary);
+        Collections.sort(integer_nonbinary);
+
+        double lb = Param.inf_assumed;
+        double ub = -Param.inf_assumed;
+
+        String lbStr = "lb error";
+        String ubStr = "ub error";
+
+        for (String key : number_general) {
+
+            lb = in.varMap_number.get(key)[0];
+            ub = in.varMap_number.get(key)[1];
+
+            if (lb < -Param.inf_assumed) {
+                lbStr = "";
+            } else {
+                lbStr = lb + " <= ";
+            }
+
+            if (ub > Param.inf_assumed) {
+                ubStr = "";
+            } else {
+                ubStr = " <= " + ub;
+            }
+
+            // TODO: what if unbounded
+
+            out = out + lbStr + key + ubStr + ";\n";
+        }
+
+        for (String key : integer_nonbinary) {
+
+            lb = in.varMap_integer.get(key)[0];
+            ub = in.varMap_integer.get(key)[1];
+
+            if (lb < -Param.inf_assumed) {
+                lbStr = "";
+            } else {
+                lbStr = lb + " <= ";
+            }
+
+            if (ub > Param.inf_assumed) {
+                ubStr = "";
+            } else {
+                ubStr = " <= " + ub;
+            }
+
+            // TODO: what if unbounded
+
+            out = out + lbStr + key + ubStr + ";\n";
+        }
+
+        if (in.var_free.size() > 0) {
+            out = out + "free\n";
+
+            ArrayList<String> var_free_list = new ArrayList<String>(in.var_free);
+            Collections.sort(var_free_list);
+
+            for (int i = 0; i < var_free_list.size(); i++) {
+                String term = var_free_list.get(i);
+
+                if (i == 0) {
+                    out = out + term;
+                } else {
+                    out = out + ", " + term;
+                }
+            }
+
+            out = out + ";\n";
+        }
+
+        if (in.varMap_integer.size() > 0) {
+
+            if (in.var_int_binary.size() > 0) {
+
+                out = out + "bin\n";
+
+                ArrayList<String> var_binary_list = new ArrayList<String>(in.var_int_binary);
+                Collections.sort(var_binary_list);
+
+                for (int i = 0; i < var_binary_list.size(); i++) {
+                    String term = var_binary_list.get(i);
+
+                    if (i == 0) {
+                        out = out + term;
+                    } else {
+                        out = out + ", " + term;
+                    }
+                }
+
+                out = out + ";\n";
+
+            }
+
+            if (in.varMap_integer.size() - in.var_int_binary.size() > 0) {
+
+                out = out + "int\n";
+
+                ArrayList<String> var_int_list = new ArrayList<String>(in.varMap_integer.keySet());
+                var_int_list.removeAll(in.var_int_binary);
+                Collections.sort(var_int_list);
+
+                for (int i = 0; i < var_int_list.size(); i++) {
+                    String term = var_int_list.get(i);
+
+                    if (i == 0) {
+                        out = out + term;
+                    } else {
+                        out = out + ", " + term;
+                    }
+                }
+
+                out = out + ";\n";
+
+            }
+
+        }
+        return out;
+
+    }
 
 }

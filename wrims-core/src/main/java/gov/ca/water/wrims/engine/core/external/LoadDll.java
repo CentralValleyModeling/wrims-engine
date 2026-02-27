@@ -1,8 +1,13 @@
 package gov.ca.water.wrims.engine.core.external;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LoadDll {
-	public LoadDll(String dllName){
-		//System.load(System.getenv("WRIMS_v2_path")+dllName);
-		System.loadLibrary(dllName.replace(".dll", ""));
-	}
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoadDll.class);
+
+    public LoadDll(String dllName) {
+        LOGGER.atDebug().setMessage("loading dll: {}").addArgument(dllName).log();
+        System.loadLibrary(dllName.replace(".dll", ""));
+    }
 }

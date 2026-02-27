@@ -1,92 +1,135 @@
 package gov.ca.water.wrims.engine.core.components;
 
+import gov.ca.water.wrims.engine.core.ilp.ILP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import gov.ca.water.wrims.engine.core.ilp.ILP;
-
 public class TimeUsage {
 
-	public static Map<String, Integer> cpuTimeMap = new HashMap<String, Integer>();
-	public static Map<String, Integer> nCallsMap = new HashMap<String, Integer>();
-	
-	public static void showTimeUsage(){
-		System.out.println("Parse Time Usage: "+ControlData.t_parse/60000+"min "+Math.round((ControlData.t_parse/60000.0-ControlData.t_parse/60000)*60)+"sec");
-		System.out.println("Read Timeseries Time Usage: "+ControlData.t_readTs/60000+"min "+Math.round((ControlData.t_readTs/60000.0-ControlData.t_readTs/60000)*60)+"sec");
-		System.out.println("Process Timesereis Time Usage: "+ControlData.t_ts/60000+"min "+Math.round((ControlData.t_ts/60000.0-ControlData.t_ts/60000)*60)+"sec");
-		System.out.println("Process Svar Time Usage: "+ControlData.t_svar/60000+"min "+Math.round((ControlData.t_svar/60000.0-ControlData.t_svar/60000)*60)+"sec");
-		System.out.println("Process Dvar Time Usage: "+ControlData.t_dvar/60000+"min "+Math.round((ControlData.t_dvar/60000.0-ControlData.t_dvar/60000)*60)+"sec");
-		System.out.println("Process Constraint Time Usage: "+ControlData.t_goal/60000+"min "+Math.round((ControlData.t_goal/60000.0-ControlData.t_goal/60000)*60)+"sec");
-		System.out.println("Process Weight Time Usage: "+ControlData.t_wt/60000+"min "+Math.round((ControlData.t_wt/60000.0-ControlData.t_wt/60000)*60)+"sec");
-		System.out.println("Process Weight Surplus Slack Time Usage: "+ControlData.t_wtss/60000+"min "+Math.round((ControlData.t_wtss/60000.0-ControlData.t_wtss/60000)*60)+"sec");
-		System.out.println("Cbc Time Usage: "+ControlData.t_cbc/60000+"min "+Math.round((ControlData.t_cbc/60000.0-ControlData.t_cbc/60000)*60)+"sec");
-		System.out.println("XA Time Usage: "+ControlData.t_xa/60000+"min "+Math.round((ControlData.t_xa/60000.0-ControlData.t_xa/60000)*60)+"sec");
-		System.out.println("Process Alias Time Usage: "+ControlData.t_as/60000+"min "+Math.round((ControlData.t_as/60000.0-ControlData.t_as/60000)*60)+"sec");
-		System.out.println("Write Dss Time Usage: "+ControlData.t_writeDss/60000+"min "+Math.round((ControlData.t_writeDss/60000.0-ControlData.t_writeDss/60000)*60)+"sec");
-		System.out.println("CAM Time Usage: "+ControlData.t_cam/60000+"min "+Math.round((ControlData.t_cam/60000.0-ControlData.t_cam/60000)*60)+"sec");
-		System.out.println("ANN Time Usage: "+ControlData.t_ann/60000+"min "+Math.round((ControlData.t_ann/60000.0-ControlData.t_ann/60000)*60)+"sec");
-		System.out.println("ANN Number of Calls: "+ControlData.n_ann);
-		System.out.println("ANN EC Time Usage: "+ControlData.t_annec/60000+"min "+Math.round((ControlData.t_annec/60000.0-ControlData.t_annec/60000)*60)+"sec");
-		System.out.println("ANN EC Number of Calls: "+ControlData.n_annec);
-		System.out.println("ANN Linegen Time Usage: "+ControlData.t_annlinegen/60000+"min "+Math.round((ControlData.t_annlinegen/60000.0-ControlData.t_annlinegen/60000)*60)+"sec");
-		System.out.println("ANN Linegen Number of Calls: "+ControlData.n_annlinegen);
-		System.out.println("ANN EC Match DSM2 Time Usage: "+ControlData.t_annec_matchdsm2/60000+"min "+Math.round((ControlData.t_annec_matchdsm2/60000.0-ControlData.t_annec_matchdsm2/60000)*60)+"sec");
-		System.out.println("ANN EC Match DSM2 Number of Calls: "+ControlData.n_annec_matchdsm2);
-		System.out.println("ANN X2 Time Usage: "+ControlData.t_annx2/60000+"min "+Math.round((ControlData.t_annx2/60000.0-ControlData.t_annx2/60000)*60)+"sec");
-		System.out.println("ANN X2 Number of Calls: "+ControlData.n_annx2);
-		System.out.println("ANN Get NDO X2 Time Usage: "+ControlData.t_anngetndo_x2/60000+"min "+Math.round((ControlData.t_anngetndo_x2/60000.0-ControlData.t_anngetndo_x2/60000)*60)+"sec");
-		System.out.println("ANN Get NDO X2 Number of Calls: "+ControlData.n_anngetndo_x2);
-		System.out.println("ANN Get NDO X2 Split Time Usage: "+ControlData.t_anngetndo_x2_curmonndosplit/60000+"min "+Math.round((ControlData.t_anngetndo_x2_curmonndosplit/60000.0-ControlData.t_anngetndo_x2_curmonndosplit/60000)*60)+"sec");
-		System.out.println("ANN Get NDO X2 Split Number of Calls: "+ControlData.n_anngetndo_x2_curmonndosplit);
-		Iterator<String> it = cpuTimeMap.keySet().iterator();
-		while (it.hasNext()){
-			String pi=it.next();
-			int cpuTime=cpuTimeMap.get(pi);
-			System.out.println(pi+" Time Usage: "+cpuTime/60000+"min "+Math.round((cpuTime/60000.0-cpuTime/60000)*60)+"sec");
-			if (nCallsMap.containsKey(pi)){
-				int nCalls = nCallsMap.get(pi);
-				System.out.println(pi+" Number of Calls: "+ nCalls);
-			}
-		}
-			
-		ILP.writeNoteLn("Parse Time Usage", ControlData.t_parse/60000+"min "+Math.round((ControlData.t_parse/60000.0-ControlData.t_parse/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Read Timeseries Time Usage", ControlData.t_readTs/60000+"min "+Math.round((ControlData.t_readTs/60000.0-ControlData.t_readTs/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Timesereis Time Usage", ControlData.t_ts/60000+"min "+Math.round((ControlData.t_ts/60000.0-ControlData.t_ts/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Svar Time Usage", ControlData.t_svar/60000+"min "+Math.round((ControlData.t_svar/60000.0-ControlData.t_svar/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Dvar Time Usage", ControlData.t_dvar/60000+"min "+Math.round((ControlData.t_dvar/60000.0-ControlData.t_dvar/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Constraint Time Usage", ControlData.t_goal/60000+"min "+Math.round((ControlData.t_goal/60000.0-ControlData.t_goal/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Weight Time Usage", ControlData.t_wt/60000+"min "+Math.round((ControlData.t_wt/60000.0-ControlData.t_wt/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Weight Surplus Slack Time Usage", ControlData.t_wtss/60000+"min "+Math.round((ControlData.t_wtss/60000.0-ControlData.t_wtss/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Cbc Time Usage", ControlData.t_cbc/60000+"min "+Math.round((ControlData.t_cbc/60000.0-ControlData.t_cbc/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("XA Time Usage", ControlData.t_xa/60000+"min "+Math.round((ControlData.t_xa/60000.0-ControlData.t_xa/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Process Alias Time Usage", ControlData.t_as/60000+"min "+Math.round((ControlData.t_as/60000.0-ControlData.t_as/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("Write Dss Time Usage", ControlData.t_writeDss/60000+"min "+Math.round((ControlData.t_writeDss/60000.0-ControlData.t_writeDss/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("CAM Time Usage", ControlData.t_cam/60000+"min "+Math.round((ControlData.t_cam/60000.0-ControlData.t_cam/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Time Usage", ControlData.t_ann/60000+"min "+Math.round((ControlData.t_ann/60000.0-ControlData.t_ann/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Number of Calls", String.valueOf(ControlData.n_ann), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN EC Time Usage", ControlData.t_annec/60000+"min "+Math.round((ControlData.t_annec/60000.0-ControlData.t_annec/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN EC Number of Calls", String.valueOf(ControlData.n_annec), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Linegen Time Usage", ControlData.t_annlinegen/60000+"min "+Math.round((ControlData.t_annlinegen/60000.0-ControlData.t_annlinegen/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Linegen Number of Calls", String.valueOf(ControlData.n_annlinegen), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN EC Match DSM2 Time Usage", ControlData.t_annec_matchdsm2/60000+"min "+Math.round((ControlData.t_annec_matchdsm2/60000.0-ControlData.t_annec_matchdsm2/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN EC Match DSM2 Number of Calls", String.valueOf(ControlData.n_annec_matchdsm2), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN X2 Time Usage", ControlData.t_annx2/60000+"min "+Math.round((ControlData.t_annx2/60000.0-ControlData.t_annx2/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN X2 Number of Calls", String.valueOf(ControlData.n_annx2), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Get NDO X2 Time Usage", ControlData.t_anngetndo_x2/60000+"min "+Math.round((ControlData.t_anngetndo_x2/60000.0-ControlData.t_anngetndo_x2/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Get NDO X2 Number of Calls", String.valueOf(ControlData.n_anngetndo_x2), ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Get NDO X2 Split Time Usage", ControlData.t_anngetndo_x2_curmonndosplit/60000+"min "+Math.round((ControlData.t_anngetndo_x2_curmonndosplit/60000.0-ControlData.t_anngetndo_x2_curmonndosplit/60000)*60)+"sec", ILP._noteFile_timeusage);
-		ILP.writeNoteLn("ANN Get NDO X2 Split Number of Calls", String.valueOf(ControlData.n_anngetndo_x2_curmonndosplit), ILP._noteFile_timeusage);
-		it = cpuTimeMap.keySet().iterator();
-		while (it.hasNext()){
-			String pi=it.next();
-			int cpuTime=cpuTimeMap.get(pi);
-			ILP.writeNoteLn(pi+" Time Usage", cpuTime/60000+"min "+Math.round((cpuTime/60000.0-cpuTime/60000)*60)+"sec", ILP._noteFile_timeusage);
-			if (nCallsMap.containsKey(pi)){
-				int nCalls = nCallsMap.get(pi);
-				ILP.writeNoteLn(pi+" Number of Calls",  String.valueOf(nCalls), ILP._noteFile_timeusage);
-			}
-		}
-	}
-	
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeUsage.class);
+    public static Map<String, Integer> cpuTimeMap = new HashMap<>();
+    public static Map<String, Integer> nCallsMap = new HashMap<>();
+
+    public static void showTimeUsage() {
+        LOGGER.atInfo().setMessage("Parse Time Usage: " + getTimeString(ControlData.t_parse)).log();
+        LOGGER.atInfo().setMessage("Read Timeseries Time Usage: " + getTimeString(ControlData.t_readTs)).log();
+        LOGGER.atInfo().setMessage("Process Timesereis Time Usage: " + getTimeString(ControlData.t_ts)).log();
+        LOGGER.atInfo().setMessage("Process Svar Time Usage: " + getTimeString(ControlData.t_svar)).log();
+        LOGGER.atInfo().setMessage("Process Dvar Time Usage: " + getTimeString(ControlData.t_dvar)).log();
+        LOGGER.atInfo().setMessage("Process Constraint Time Usage: " + getTimeString(ControlData.t_goal)).log();
+        LOGGER.atInfo().setMessage("Process Weight Time Usage: " + getTimeString(ControlData.t_wt)).log();
+        LOGGER.atInfo()
+              .setMessage("Process Weight Surplus Slack Time Usage: " + getTimeString(ControlData.t_wtss))
+              .log();
+        LOGGER.atInfo().setMessage("Cbc Time Usage: " + getTimeString(ControlData.t_cbc)).log();
+        LOGGER.atInfo().setMessage("XA Time Usage: " + getTimeString(ControlData.t_xa)).log();
+        LOGGER.atInfo().setMessage("Process Alias Time Usage: " + getTimeString(ControlData.t_as)).log();
+        LOGGER.atInfo().setMessage("Write Dss Time Usage: " + getTimeString(ControlData.t_writeDss)).log();
+        LOGGER.atInfo().setMessage("CAM Time Usage: " + getTimeString(ControlData.t_cam)).log();
+        LOGGER.atInfo().setMessage("ANN Time Usage: " + getTimeString(ControlData.t_ann)).log();
+        LOGGER.atInfo().setMessage("ANN Number of Calls: " + ControlData.n_ann).log();
+        LOGGER.atInfo().setMessage("ANN EC Time Usage: " + getTimeString(ControlData.t_annec)).log();
+        LOGGER.atInfo().setMessage("ANN EC Number of Calls: " + ControlData.n_annec).log();
+        LOGGER.atInfo().setMessage("ANN Linegen Time Usage: " + getTimeString(ControlData.t_annlinegen)).log();
+        LOGGER.atInfo().setMessage("ANN Linegen Number of Calls: " + ControlData.n_annlinegen).log();
+        System.out.println("ANN EC Match DSM2 Time Usage: " + ControlData.t_annec_matchdsm2 / 60000 + "min " + Math.round(
+                (ControlData.t_annec_matchdsm2 / 60000.0 - ControlData.t_annec_matchdsm2 / 60000) * 60) + "sec");
+        LOGGER.atInfo().setMessage("ANN EC Match DSM2 Number of Calls: " + ControlData.n_annec_matchdsm2).log();
+        LOGGER.atInfo().setMessage("ANN X2 Time Usage: " + getTimeString(ControlData.t_annx2)).log();
+        LOGGER.atInfo().setMessage("ANN X2 Number of Calls: " + ControlData.n_annx2).log();
+        LOGGER.atInfo().setMessage("ANN Get NDO X2 Time Usage: " + getTimeString(ControlData.t_anngetndo_x2)).log();
+        LOGGER.atInfo().setMessage("ANN Get NDO X2 Number of Calls: " + ControlData.n_anngetndo_x2).log();
+        LOGGER.atInfo().setMessage("ANN Get NDO X2 Split Time Usage: " + getTimeString(ControlData.t_anngetndo_x2_curmonndosplit)).log();
+        LOGGER.atInfo().setMessage("ANN Get NDO X2 Split Number of Calls: " + ControlData.n_anngetndo_x2_curmonndosplit).log();
+
+        Iterator<String> it = cpuTimeMap.keySet().iterator();
+        while (it.hasNext()) {
+            String pi = it.next();
+            int cpuTime = cpuTimeMap.get(pi);
+            LOGGER.atInfo().setMessage(pi + " Time Usage: " + getTimeString(cpuTime)).log();
+            if (nCallsMap.containsKey(pi)) {
+                int nCalls = nCallsMap.get(pi);
+                LOGGER.atInfo().setMessage(pi + " Number of Calls: " + nCalls).log();
+            }
+        }
+
+        ILP.writeNoteLn("Parse Time Usage", getTimeString(ControlData.t_parse), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Read Timeseries Time Usage", getTimeString(ControlData.t_readTs), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Timesereis Time Usage", getTimeString(ControlData.t_ts), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Svar Time Usage", getTimeString(ControlData.t_svar), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Dvar Time Usage", getTimeString(ControlData.t_dvar), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Constraint Time Usage", getTimeString(ControlData.t_goal), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Weight Time Usage", getTimeString(ControlData.t_wt), ILP._noteFile_timeusage);
+        ILP.writeNoteLn(
+                "Process Weight Surplus Slack Time Usage",
+                getTimeString(ControlData.t_wtss),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn("Cbc Time Usage", getTimeString(ControlData.t_cbc), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("XA Time Usage", getTimeString(ControlData.t_xa), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Process Alias Time Usage", getTimeString(ControlData.t_as), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("Write Dss Time Usage", getTimeString(ControlData.t_writeDss), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("CAM Time Usage", getTimeString(ControlData.t_cam), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN Time Usage", getTimeString(ControlData.t_ann), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN Number of Calls", String.valueOf(ControlData.n_ann), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN EC Time Usage", getTimeString(ControlData.t_annec), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN EC Number of Calls", String.valueOf(ControlData.n_annec), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN Linegen Time Usage", getTimeString(ControlData.t_annlinegen), ILP._noteFile_timeusage);
+        ILP.writeNoteLn(
+                "ANN Linegen Number of Calls",
+                String.valueOf(ControlData.n_annlinegen),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn(
+                "ANN EC Match DSM2 Time Usage",
+                getTimeString(ControlData.t_annec_matchdsm2),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn(
+                "ANN EC Match DSM2 Number of Calls",
+                String.valueOf(ControlData.n_annec_matchdsm2),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn("ANN X2 Time Usage", getTimeString(ControlData.t_annx2), ILP._noteFile_timeusage);
+        ILP.writeNoteLn("ANN X2 Number of Calls", String.valueOf(ControlData.n_annx2), ILP._noteFile_timeusage);
+        ILP.writeNoteLn(
+                "ANN Get NDO X2 Time Usage",
+                getTimeString(ControlData.t_anngetndo_x2),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn(
+                "ANN Get NDO X2 Number of Calls",
+                String.valueOf(ControlData.n_anngetndo_x2),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn(
+                "ANN Get NDO X2 Split Time Usage",
+                getTimeString(ControlData.t_anngetndo_x2_curmonndosplit),
+                ILP._noteFile_timeusage
+        );
+        ILP.writeNoteLn(
+                "ANN Get NDO X2 Split Number of Calls",
+                String.valueOf(ControlData.n_anngetndo_x2_curmonndosplit),
+                ILP._noteFile_timeusage
+        );
+        it = cpuTimeMap.keySet().iterator();
+        while (it.hasNext()) {
+            String pi = it.next();
+            int cpuTime = cpuTimeMap.get(pi);
+            ILP.writeNoteLn(pi + " Time Usage", getTimeString(cpuTime), ILP._noteFile_timeusage);
+            if (nCallsMap.containsKey(pi)) {
+                int nCalls = nCallsMap.get(pi);
+                ILP.writeNoteLn(pi + " Number of Calls", String.valueOf(nCalls), ILP._noteFile_timeusage);
+            }
+        }
+    }
+
+    private static String getTimeString(int millis) {
+        return millis / 60000 + "min " + Math.round((millis / 60000.0 - millis / 60000) * 60) + "sec";
+    }
+
 }
