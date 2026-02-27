@@ -25,9 +25,11 @@ import gov.ca.water.wrims.engine.core.solver.InitialXASolver;
 import gov.ca.water.wrims.engine.core.solver.Gurobi.GurobiSolver;
 import gov.ca.water.wrims.engine.core.wreslparser.elements.StudyUtils;
 import gov.ca.water.wrims.engine.core.wreslplus.elements.procedures.ErrorCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Controller {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 	public Controller() {
 		long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		setControlData();
@@ -48,7 +50,7 @@ public class Controller {
 		}
 		long endTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		int runPeriod=(int) (endTimeInMillis-startTimeInMillis);
-		System.out.println("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
+		LOGGER.atInfo().setMessage("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====").log();
 	}
 
 	public Controller(String[] args) {
@@ -68,7 +70,7 @@ public class Controller {
 		}
 		long endTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		int runPeriod=(int) (endTimeInMillis-startTimeInMillis);
-		System.out.println("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====");
+		LOGGER.atInfo().setMessage("=================Run Time is "+runPeriod/60000+"min"+Math.round((runPeriod/60000.0-runPeriod/60000)*60)+"sec====").log();
 	}
 
 	public void setControlData(){
@@ -182,7 +184,7 @@ public class Controller {
 	}
 
 	public void runModel(StudyDataSet sds){
-		System.out.println("==============Run Study Start============");
+		LOGGER.atInfo().setMessage("==============Run Study Start============").log();
 		new PreRunModel(sds);
 		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
 			runModelGurobi(sds);		
@@ -196,10 +198,10 @@ public class Controller {
 		}
 		
 		if (Error.getTotalError()>0){
-			System.out.println("=================Run ends with errors====");
+			LOGGER.atInfo().setMessage("=================Run ends with errors====").log();
 			System.exit(1);
 		} else {
-			System.out.println("=================Run ends!================");
+			LOGGER.atInfo().setMessage("=================Run ends!================").log();
 		}
 	}
 
@@ -209,7 +211,7 @@ public class Controller {
 
 		new InitialXASolver();
 		if (Error.getTotalError()>0){
-			System.out.println("Model run exits due to error.");
+			LOGGER.atInfo().setMessage("Model run exits due to error.").log();
 			System.exit(1);
 		}
 		ArrayList<ValueEvaluatorParser> modelConditionParsers=sds.getModelConditionParsers();
@@ -268,17 +270,17 @@ public class Controller {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Solving Done.").log();
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Assign Alias Done.").log();
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
 						}
-						System.out.println("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.");
+						LOGGER.atInfo().setMessage("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.").log();
 						if (Error.error_evaluation.size()>=1) noError=false;
 						//if (ControlData.currTimeStep==0 && ControlData.currCycleIndex==2) new RCCComparison();
 						//if (ControlData.currYear==1923 && ControlData.currMonth==9) new MultiStepAnalyzer();
@@ -382,7 +384,7 @@ public class Controller {
 						// give error if they are not zero or greater than a small tolerance.
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Solving Done.").log();
 						if (Error.error_solving.size()<1){
 							
 		            		ILP.writeObjValue_Gurobi();
@@ -392,13 +394,13 @@ public class Controller {
 		            		
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Assign Alias Done.").log();
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
 						}
-						System.out.println("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.");
+						LOGGER.atInfo().setMessage("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.").log();
 						if (Error.error_evaluation.size()>=1) noError=false;
 						//if (ControlData.currTimeStep==0 && ControlData.currCycleIndex==1) new RCCComparison();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);
@@ -551,17 +553,17 @@ public class Controller {
 						noError = !ErrorCheck.checkDeviationSlackSurplus(mds.deviationSlackSurplus_toleranceMap, mds.dvMap);
 						
 						
-						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
+						if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Solving Done.").log();
 						if (Error.error_solving.size()<1){
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
-							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
+							if (ControlData.showRunTimeMessage) LOGGER.atInfo().setMessage("Assign Alias Done.").log();
 						}else{
 							Error.writeSolvingErrorFile("Error_solving.txt");
 							Error.writeErrorLog();
 							noError=false;
 						}
-						System.out.println("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.");
+						LOGGER.atInfo().setMessage("Cycle "+(i+1)+" in "+ControlData.currYear+"/"+ControlData.currMonth+"/"+ControlData.currDay+" Done.").log();
 						if (Error.error_evaluation.size()>=1) noError=false;
 						//if (ControlData.currTimeStep==0 && ControlData.currCycleIndex==2) new RCCComparison();
 						ControlData.currTimeStep.set(ControlData.currCycleIndex, ControlData.currTimeStep.get(ControlData.currCycleIndex)+1);

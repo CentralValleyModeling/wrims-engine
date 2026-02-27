@@ -1,13 +1,17 @@
 package gov.ca.water.wrims.engine.graalpy;
 
-public final class MyCustomClass {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public void printTest() {
-        System.out.println("Hello from MyCustomClass!");
-    }
+public final class MyCustomClass {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyCustomClass.class);
 
     public static boolean isAnInteger(Object value) {
         return (value instanceof Integer);
+    }
+
+    public void printTest() {
+        LOGGER.atInfo().setMessage("Hello from MyCustomClass!").log();
     }
 
     public int getAbsoluteDifference(int x, int y) {

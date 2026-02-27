@@ -1,362 +1,360 @@
 package gov.ca.water.wrims.engine.core.wreslparser.elements;
 
+import gov.ca.water.wrims.engine.core.commondata.wresldata.Dvar;
+import gov.ca.water.wrims.engine.core.commondata.wresldata.ModelDataSet;
+import gov.ca.water.wrims.engine.core.commondata.wresldata.Param;
+import gov.ca.water.wrims.engine.core.commondata.wresldata.StudyDataSet;
+import gov.ca.water.wrims.engine.core.components.ControlData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-import gov.ca.water.wrims.engine.core.commondata.wresldata.Dvar;
-import gov.ca.water.wrims.engine.core.commondata.wresldata.ModelDataSet;
-import gov.ca.water.wrims.engine.core.commondata.wresldata.Param;
-import gov.ca.water.wrims.engine.core.commondata.wresldata.StudyDataSet;
-import gov.ca.water.wrims.engine.core.components.ControlData;
-
-
-
 public class LogUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogUtils.class);
+    public static PrintWriter _logFile;
 
-	public static PrintWriter _logFile;
-	
-	public static void closeLogFile(){
-		
-		_logFile.close();		
-	}
+    public static void closeLogFile() {
 
-	public static void setLogFile(String parentDir, String logFileName){
-		
-		try {
-			_logFile = Tools.openFile(parentDir, logFileName);
-			
-		}
-		catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}	
-	}	
-	
-	public static void setLogFile(String logFileName){
-				
-		try {
-			if (logFileName.contains(":")) {
-				_logFile = Tools.openFile(logFileName);
-			} else {
-				_logFile = Tools.openFile(System.getProperty("user.dir"), logFileName);
-			}
-		}
-		catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}	
-	}
-	
-	public static void dvarsList(String msg, ArrayList<String> list_all, ArrayList<String> list_g, ArrayList<String> list_l, Map<String, Dvar> dvMap){
-		
-		String description = "Dvars";
-		
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_all.size()+" "+description+":");
-		LogUtils.importantMsg(msg, list_all, dvMap);
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_g.size()+" global "+description+":");
-		LogUtils.importantMsg(msg, list_g, dvMap);
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_l.size()+" local "+description+":");
-		LogUtils.importantMsg(msg, list_l, dvMap);
-		LogUtils.importantMsg("------------------------------");
-		
-	}
-	
-	public static void dvarsList(String msg, ArrayList<String> list_all, Map<String, Dvar> dvMap){
-		
-		String description = "Dvars";
-		
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_all.size()+" "+description+":");
-		LogUtils.importantMsg(msg, list_all, dvMap);
-		LogUtils.importantMsg("------------------------------");
-		
-	}
-	
-	public static void varsList(String msg, ArrayList<String> list_all, ArrayList<String> list_g, ArrayList<String> list_l, String description){
-		
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_all.size()+" "+description+":");
-		LogUtils.importantMsg(list_all);
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_g.size()+" global "+description+":");
-		LogUtils.importantMsg(list_g);
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_l.size()+" local "+description+":");
-		LogUtils.importantMsg(list_l);
-		LogUtils.importantMsg("------------------------------");
-		
-	}
-	public static void varsList(String msg, ArrayList<String> list_all, String description){
-		
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg(msg+"Include total "+list_all.size()+" "+description+":");
-		LogUtils.importantMsg(list_all);
-		LogUtils.importantMsg("------------------------------");
-	
-	}
+        _logFile.close();
+    }
 
-	public static void seqList(ArrayList<String> list,  Map<Integer, Sequence> seqMap){
-		
-		LogUtils.importantMsg("------------------------------");
-		LogUtils.importantMsg("Include total "+list.size()+" sequences:");
-		for (int i: seqMap.keySet()){
-			LogUtils.importantMsg("Order: "+i+"  Sequence: "+seqMap.get(i).sequenceName+"  Model: "+seqMap.get(i).modelName);
-		}
-		LogUtils.importantMsg("------------------------------");
-	
-	}	
-	
-	public static void fileSummary(SimulationDataSet S){
+    public static void setLogFile(String parentDir, String logFileName) {
 
-		//seqList(S.seqList, S.seqMap);
-		//varsList(S.model_list, "models");
-		varsList("", S.incFileList, S.incFileList_global, S.incFileList_local, "files");
-		varsList("", S.dvList, S.dvList_global, S.dvList_local, "Dvars");
-		varsList("", S.svList, S.svList_global, S.svList_local, "Svars");
-		
-	}	
+        try {
+            _logFile = Tools.openFile(parentDir, logFileName);
 
-	public static void mainFileSummary(StudyConfig studyConfig){
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
 
+    public static void setLogFile(String logFileName) {
 
-		seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
-		//varsList(mainDataSet.model_list, "models");
-		
-		for (Integer i: studyConfig.sequenceMap.keySet()){
-			String modelName = studyConfig.sequenceMap.get(i).modelName;
-			SimulationDataSet M = studyConfig.modelDataMap.get(modelName);
-			LogUtils.importantMsg("#####  Model: "+ modelName);
-			varsList("", M.incFileList, M.incFileList_global, M.incFileList_local, "files");
-			varsList("", M.dvList, M.dvList_global, M.dvList_local, "Dvars");
-			varsList("", M.svList, M.svList_global, M.svList_local, "Svars");
-		}
-	}		
+        try {
+            if (logFileName.contains(":")) {
+                _logFile = Tools.openFile(logFileName);
+            } else {
+                _logFile = Tools.openFile(System.getProperty("user.dir"), logFileName);
+            }
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
 
-	public static void studySummary_details(StudyConfig studyConfig, Map<String, SimulationDataSet> modelDataMap){
+    public static void varsList(String msg, ArrayList<String> list_all, String description) {
 
-		seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_all.size() + " " + description + ":");
+        LogUtils.importantMsg(list_all);
+        LogUtils.importantMsg("------------------------------");
 
-		
-		for (String key: studyConfig.modelList){
-			SimulationDataSet M = modelDataMap.get(key);
-			LogUtils.importantMsg("#####  Model: "+ key);
-			
-			String msg = "Model "+key+" ";
-			varsList(msg, M.incFileList, M.incFileList_global, M.incFileList_local, "files");
-			dvarsList(msg, M.dvList, M.dvList_global, M.dvList_local, M.dvMap);
-			varsList(msg, M.svList, M.svList_global, M.svList_local, "Svars");
-		}
-	}	
-	
-	public static void studySummary(StudyConfig studyConfig, Map<String, SimulationDataSet> modelDataMap){
+    }
 
-		seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
+    public static void importantMsg(String msg) {
 
-		
-		for (String key: studyConfig.modelList){
-			SimulationDataSet M = modelDataMap.get(key);
-			LogUtils.importantMsg("#####  Model: "+ key);
-			
-			String msg = "Model "+key+" ";
-			varsList(msg, M.incFileList, M.incFileList_global, M.incFileList_local, "files");
-			varsList(msg, M.dvList, M.dvList_global, M.dvList_local, "Dvars");
-			varsList(msg, M.svList, M.svList_global, M.svList_local, "Svars");
-		}
-	}	
-	
-	public static void studySummary_details(StudyDataSet sd){
-		
-		for (String key: sd.getModelList()){
-			ModelDataSet M = sd.getModelDataSetMap().get(key);
-			LogUtils.importantMsg("#####  Model: "+ key);
-			
-			String msg = "Model "+key+" ";
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(msg).log();
+        _logFile.println(msg);
+        _logFile.flush();
+    }
 
-			dvarsList(msg, M.dvList, M.dvMap);
+    public static void importantMsg(ArrayList<String> msg) {
 
-		}
-	}	
+        for (String e : msg) {
+            importantMsg(e + "\n");
+        }
+    }
 
-	public static void titleMsg(String msg){
+    public static void fileSummary(SimulationDataSet S) {
 
-		System.out.println("============================================");
-		System.out.println(msg);
-		System.out.println("============================================");
-		
-		_logFile.println("============================================");
-		_logFile.println(msg);
-		_logFile.println("============================================");
-		
-		_logFile.flush();
-	}	
+        //seqList(S.seqList, S.seqMap);
+        //varsList(S.model_list, "models");
+        varsList("", S.incFileList, S.incFileList_global, S.incFileList_local, "files");
+        varsList("", S.dvList, S.dvList_global, S.dvList_local, "Dvars");
+        varsList("", S.svList, S.svList_global, S.svList_local, "Svars");
 
-	public static void parsingSummaryMsg(String msg, int errors){
+    }
 
-		System.out.println("============================================");
-		System.out.println(msg);
-		System.out.println("Total errors: "+errors);
-		System.out.println("============================================");
-		
-		_logFile.println("============================================");
-		_logFile.println(msg);
-		_logFile.println("Total errors: "+errors);
-		_logFile.println("============================================");
-		
-		_logFile.flush();
-	}
-	
-	public static void criticalMsg(String msg){
+    public static void varsList(
+            String msg,
+            ArrayList<String> list_all,
+            ArrayList<String> list_g,
+            ArrayList<String> list_l,
+            String description
+    ) {
 
-		System.out.println(msg);
-		_logFile.println(msg);
-		_logFile.flush();
-	}	
-	
-	public static void importantMsg(String msg){
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_all.size() + " " + description + ":");
+        LogUtils.importantMsg(list_all);
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_g.size() + " global " + description + ":");
+        LogUtils.importantMsg(list_g);
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_l.size() + " local " + description + ":");
+        LogUtils.importantMsg(list_l);
+        LogUtils.importantMsg("------------------------------");
 
-		if (ControlData.showWreslLog) System.out.println(msg);
-		_logFile.println(msg);
-		_logFile.flush();
-	}
+    }
 
-	public static void importantMsg(ArrayList<String> msg){
-		
-		for(String e: msg){
-			importantMsg(e+"\n");
-		}
-	}
+    public static void mainFileSummary(StudyConfig studyConfig) {
 
-	public static void importantMsg(String msg, ArrayList<String> dvList, Map<String, Dvar> dvMap){
-		
-		for(String e: dvList){
-			importantMsg(msg + e + "  kind: "+dvMap.get(e).kind +"\n");
-		}
-	}
-	
-	public static void normalMsg(String msg){
-		
-		if (Param.printLevel>1){
+        seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
+        //varsList(mainDataSet.model_list, "models");
 
-			if (ControlData.showWreslLog) System.out.println(msg);
-			_logFile.println(msg);
+        for (Integer i : studyConfig.sequenceMap.keySet()) {
+            String modelName = studyConfig.sequenceMap.get(i).modelName;
+            SimulationDataSet M = studyConfig.modelDataMap.get(modelName);
+            LogUtils.importantMsg("#####  Model: " + modelName);
+            varsList("", M.incFileList, M.incFileList_global, M.incFileList_local, "files");
+            varsList("", M.dvList, M.dvList_global, M.dvList_local, "Dvars");
+            varsList("", M.svList, M.svList_global, M.svList_local, "Svars");
+        }
+    }
 
-		}
-	}
+    public static void seqList(ArrayList<String> list, Map<Integer, Sequence> seqMap) {
 
-	public static void consoleMsgOnly(String msg){
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg("Include total " + list.size() + " sequences:");
+        for (int i : seqMap.keySet()) {
+            LogUtils.importantMsg("Order: " + i + "  Sequence: " + seqMap.get(i).sequenceName + "  Model: " + seqMap.get(
+                    i).modelName);
+        }
+        LogUtils.importantMsg("------------------------------");
 
-		if (ControlData.showWreslLog) System.out.println(msg);
-		
-	}	
+    }
 
-	public static void warningMsg(String msg){
-		
-		 StudyParser.total_warnings++;
+    public static void studySummary_details(StudyConfig studyConfig, Map<String, SimulationDataSet> modelDataMap) {
 
-		if (ControlData.showWreslLog) System.out.println("# Warning: "+msg);
-		 _logFile.println("# Warning: "+msg);
-		 _logFile.flush();
-		
-	}
-	
-	public static void warningMsgLocation(String filePath, int lineNumber, String msg){
+        seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
 
-		if (ControlData.showWreslLog) System.out.println( "("+filePath+":"+lineNumber+") "+msg );
-		 _logFile.println("# Warning: " + "("+filePath+":"+lineNumber+") "+msg );
-		 _logFile.flush();
-		
-	}
+        for (String key : studyConfig.modelList) {
+            SimulationDataSet M = modelDataMap.get(key);
+            LogUtils.importantMsg("#####  Model: " + key);
 
-	public static void typeRedefinedErrMsg(String msg) throws TypeRedefinedException {
-		
-		 StudyParser.total_errors++;
+            String msg = "Model " + key + " ";
+            varsList(msg, M.incFileList, M.incFileList_global, M.incFileList_local, "files");
+            dvarsList(msg, M.dvList, M.dvList_global, M.dvList_local, M.dvMap);
+            varsList(msg, M.svList, M.svList_global, M.svList_local, "Svars");
+        }
+    }
 
-		if (ControlData.showWreslLog) System.out.println("# Error: "+msg);
-		 _logFile.println("# Error: "+msg);
-		 _logFile.flush();
-		 
-		 throw new TypeRedefinedException();
-		 //if (!Param.debug) System.exit(0);
-	}	
-	
-	public static void errMsgLocation(String filePath, int lineNumber, String msg){
-		
-		 StudyParser.total_errors++;
-		 StudyParser.error_summary.add("# Error: ("+filePath+":"+lineNumber+") "+msg );
-		if (ControlData.showWreslLog) System.err.println( "# Error: ("+filePath+":"+lineNumber+") "+msg );
-		 _logFile.println("# Error: " + "("+filePath+":"+lineNumber+") "+msg );
-		 _logFile.flush();
-		
-	}
-	
-	public static void errMsg(String msg){
-		
-		 StudyParser.total_errors++;
+    public static void dvarsList(
+            String msg,
+            ArrayList<String> list_all,
+            ArrayList<String> list_g,
+            ArrayList<String> list_l,
+            Map<String, Dvar> dvMap
+    ) {
 
-		if (ControlData.showWreslLog) System.err.println("# Error: "+msg);
-		 _logFile.println("# Error: "+msg);
-		 _logFile.flush();
-		
-	}	
+        String description = "Dvars";
 
-	public static void errMsg(String msg, ArrayList<String> list){
-		 
-		 for (String e: list){
-			 errMsg(msg+e); 
-		 }
-		
-	}	
-	
-	public static void errMsg(String msg, String file){
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_all.size() + " " + description + ":");
+        LogUtils.importantMsg(msg, list_all, dvMap);
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_g.size() + " global " + description + ":");
+        LogUtils.importantMsg(msg, list_g, dvMap);
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_l.size() + " local " + description + ":");
+        LogUtils.importantMsg(msg, list_l, dvMap);
+        LogUtils.importantMsg("------------------------------");
 
-		errMsg(msg+" in file: "+file);
-		
-	}
+    }
 
-	public static void errMsg(String msg, String file1, String file2, Map<String, Set<String>> reverseMap) {
+    public static void importantMsg(String msg, ArrayList<String> dvList, Map<String, Dvar> dvMap) {
 
-		errMsg(msg + " in files: ");
+        for (String e : dvList) {
+            importantMsg(msg + e + "  kind: " + dvMap.get(e).kind + "\n");
+        }
+    }
 
-		String sp = "  ";
-		if (ControlData.showWreslLog) System.out.println(sp + file1);
-		_logFile.println(sp + file1);
-		printTree(file1, reverseMap, sp);
-		if (ControlData.showWreslLog) System.out.println(sp + file2);
-		_logFile.println(sp + file2);
-		printTree(file2, reverseMap, sp);
-		
-		 _logFile.flush();
+    public static void studySummary(StudyConfig studyConfig, Map<String, SimulationDataSet> modelDataMap) {
 
-	}
+        seqList(studyConfig.sequenceList, studyConfig.sequenceMap);
 
-	private static void printTree(String f, Map<String, Set<String>> reverseMap, String level) {
+        for (String key : studyConfig.modelList) {
+            SimulationDataSet M = modelDataMap.get(key);
+            LogUtils.importantMsg("#####  Model: " + key);
 
-		// String arrow = ">";
-		if (reverseMap.get(f) != null) {
-			level = level + "--";
-			Set<String> parents = reverseMap.get(f);
-			for (String s : parents) {
-				if (ControlData.showWreslLog) System.out.println(" "+level + "> "+ s);
-				_logFile.println(" "+level + "> "+ s);
+            String msg = "Model " + key + " ";
+            varsList(msg, M.incFileList, M.incFileList_global, M.incFileList_local, "files");
+            varsList(msg, M.dvList, M.dvList_global, M.dvList_local, "Dvars");
+            varsList(msg, M.svList, M.svList_global, M.svList_local, "Svars");
+        }
+    }
 
-				printTree(s, reverseMap, level);
+    public static void studySummary_details(StudyDataSet sd) {
 
-			}
+        for (String key : sd.getModelList()) {
+            ModelDataSet M = sd.getModelDataSetMap().get(key);
+            LogUtils.importantMsg("#####  Model: " + key);
 
-		}	
+            String msg = "Model " + key + " ";
 
+            dvarsList(msg, M.dvList, M.dvMap);
 
-	}	
-	
-	
-	
-	
-	
+        }
+    }
+
+    public static void dvarsList(String msg, ArrayList<String> list_all, Map<String, Dvar> dvMap) {
+
+        String description = "Dvars";
+
+        LogUtils.importantMsg("------------------------------");
+        LogUtils.importantMsg(msg + "Include total " + list_all.size() + " " + description + ":");
+        LogUtils.importantMsg(msg, list_all, dvMap);
+        LogUtils.importantMsg("------------------------------");
+
+    }
+
+    public static void titleMsg(String msg) {
+        LOGGER.atInfo().setMessage(msg).log();
+        _logFile.println("============================================");
+        _logFile.println(msg);
+        _logFile.println("============================================");
+
+        _logFile.flush();
+    }
+
+    public static void parsingSummaryMsg(String msg, int errors) {
+
+        LOGGER.atInfo().setMessage(msg).log();
+        LOGGER.atInfo().setMessage("Total errors: " + errors).log();
+
+        _logFile.println("============================================");
+        _logFile.println(msg);
+        _logFile.println("Total errors: " + errors);
+        _logFile.println("============================================");
+
+        _logFile.flush();
+    }
+
+    public static void criticalMsg(String msg) {
+
+        LOGGER.atInfo().setMessage(msg).log();
+        _logFile.println(msg);
+        _logFile.flush();
+    }
+
+    public static void normalMsg(String msg) {
+
+        if (Param.printLevel > 1) {
+
+            if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(msg).log();
+            _logFile.println(msg);
+
+        }
+    }
+
+    public static void consoleMsgOnly(String msg) {
+
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(msg).log();
+
+    }
+
+    public static void warningMsg(String msg) {
+
+        StudyParser.total_warnings++;
+
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage("# Warning: " + msg).log();
+        _logFile.println("# Warning: " + msg);
+        _logFile.flush();
+
+    }
+
+    public static void warningMsgLocation(String filePath, int lineNumber, String msg) {
+
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage("(" + filePath + ":" + lineNumber + ") " + msg).log();
+        _logFile.println("# Warning: " + "(" + filePath + ":" + lineNumber + ") " + msg);
+        _logFile.flush();
+
+    }
+
+    public static void typeRedefinedErrMsg(String msg) throws TypeRedefinedException {
+
+        StudyParser.total_errors++;
+
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage("# Error: " + msg).log();
+        _logFile.println("# Error: " + msg);
+        _logFile.flush();
+
+        throw new TypeRedefinedException();
+        //if (!Param.debug) System.exit(0);
+    }
+
+    public static void errMsgLocation(String filePath, int lineNumber, String msg) {
+
+        StudyParser.total_errors++;
+        StudyParser.error_summary.add("# Error: (" + filePath + ":" + lineNumber + ") " + msg);
+        if (ControlData.showWreslLog) LOGGER.atError().setMessage("# Error: (" + filePath + ":" + lineNumber + ") " + msg).log();
+        _logFile.println("# Error: " + "(" + filePath + ":" + lineNumber + ") " + msg);
+        _logFile.flush();
+
+    }
+
+    public static void errMsg(String msg, ArrayList<String> list) {
+
+        for (String e : list) {
+            errMsg(msg + e);
+        }
+
+    }
+
+    public static void errMsg(String msg) {
+
+        StudyParser.total_errors++;
+
+        if (ControlData.showWreslLog) LOGGER.atError().setMessage("# Error: " + msg).log();
+        _logFile.println("# Error: " + msg);
+        _logFile.flush();
+
+    }
+
+    public static void errMsg(String msg, String file) {
+
+        errMsg(msg + " in file: " + file);
+
+    }
+
+    public static void errMsg(String msg, String file1, String file2, Map<String, Set<String>> reverseMap) {
+
+        errMsg(msg + " in files: ");
+
+        String sp = "  ";
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(sp + file1).log();
+        _logFile.println(sp + file1);
+        printTree(file1, reverseMap, sp);
+        if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(sp + file2).log();
+        _logFile.println(sp + file2);
+        printTree(file2, reverseMap, sp);
+
+        _logFile.flush();
+
+    }
+
+    private static void printTree(String f, Map<String, Set<String>> reverseMap, String level) {
+
+        // String arrow = ">";
+        if (reverseMap.get(f) != null) {
+            level = level + "--";
+            Set<String> parents = reverseMap.get(f);
+            for (String s : parents) {
+                if (ControlData.showWreslLog) LOGGER.atInfo().setMessage(" " + level + "> " + s).log();
+                _logFile.println(" " + level + "> " + s);
+
+                printTree(s, reverseMap, level);
+
+            }
+
+        }
+
+    }
+
 }
 	

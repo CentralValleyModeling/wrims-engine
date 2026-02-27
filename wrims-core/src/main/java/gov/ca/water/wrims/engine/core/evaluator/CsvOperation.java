@@ -16,9 +16,11 @@ import java.util.Map;
 import java.util.Set;
 
 import gov.ca.water.wrims.engine.core.components.ControlData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CsvOperation {
-	
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvOperation.class);
 	private String slackPrefix="slack__";
 	private String surplusPrefix="surplus__";
 	private Map<String, String> ovPartBC=new HashMap<String, String>();
@@ -29,7 +31,7 @@ public class CsvOperation {
 		}
 		
 		try {
-			System.out.println("Writing data to CSV file...");
+			LOGGER.atInfo().setMessage("Writing data to CSV file...").log();
 			
 			File csvFile= new File(csvLocalPath);
 			csvFile.getParentFile().mkdirs();
@@ -253,14 +255,14 @@ public class CsvOperation {
 			e.printStackTrace();
 		}
 		
-		System.out.println("Wrote data to CSV file");
+		LOGGER.atInfo().setMessage("Wrote data to CSV file").log();
 	}
 	
 	public void procOVFile(){
 		ovPartBC=new HashMap<String, String>();
 		File ovFile = new File (ControlData.ovFile);
 		if (!ovFile.exists()){
-			System.out.println("Output variable file doesn't exist. All the timeseries will be written to the csv file.");
+			LOGGER.atInfo().setMessage("Output variable file doesn't exist. All the timeseries will be written to the csv file.").log();
 			ControlData.ovOption=0;
 			return;
 		}
@@ -269,7 +271,7 @@ public class CsvOperation {
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs));
 		    String line=br.readLine();
 		    if (br == null) {
-		    	System.out.println("Output variable file doesn't contain data. All the timeseries will be written to the csv file.");
+		    	LOGGER.atInfo().setMessage("Output variable file doesn't contain data. All the timeseries will be written to the csv file.").log();
 		    };
 			while((line=br.readLine()) !=null){
 		    	line=line.replace(" ", "").replace("\t",  "").toUpperCase();
@@ -283,11 +285,11 @@ public class CsvOperation {
 		    fs.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			System.out.println("Output variable file doesn't exist. All the timeseries will be written to the csv file.");
+			LOGGER.atInfo().setMessage("Output variable file doesn't exist. All the timeseries will be written to the csv file.").log();
 			ControlData.ovOption=0;
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("Output variable file has errors. All the timeseries will be written to the csv file.");
+			LOGGER.atInfo().setMessage("Output variable file has errors. All the timeseries will be written to the csv file.").log();
 			ControlData.ovOption=0;
 		}
 	}

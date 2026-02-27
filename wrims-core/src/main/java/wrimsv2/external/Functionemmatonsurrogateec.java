@@ -127,14 +127,14 @@ public class Functionemmatonsurrogateec extends ExternalFunction{
 		double[][] smscg1 = { smscg };
 		
 		if (DEBUG){
-			System.out.println("sac " + Arrays.toString(sac));
-			System.out.println("exp " + Arrays.toString(exp));
-			System.out.println("dcc " + Arrays.toString(dcc));
-			System.out.println("net_dcd " + Arrays.toString(net_dcd));
-			System.out.println("sjr " + Arrays.toString(sjr));
-			System.out.println("smscg " + Arrays.toString(smscg));
-			System.out.println("Month " + month);
-			System.out.println("Year " + year);
+			LOGGER.atInfo().setMessage("sac " + Arrays.toString(sac)).log();
+			LOGGER.atInfo().setMessage("exp " + Arrays.toString(exp)).log();
+			LOGGER.atInfo().setMessage("dcc " + Arrays.toString(dcc)).log();
+			LOGGER.atInfo().setMessage("net_dcd " + Arrays.toString(net_dcd)).log();
+			LOGGER.atInfo().setMessage("sjr " + Arrays.toString(sjr)).log();
+			LOGGER.atInfo().setMessage("smscg " + Arrays.toString(smscg)).log();
+			LOGGER.atInfo().setMessage("Month " + month).log();
+			LOGGER.atInfo().setMessage("Year " + year).log();
 		}
 		
 		ArrayList<double[][]> floatInput = new ArrayList<double[][]>();
