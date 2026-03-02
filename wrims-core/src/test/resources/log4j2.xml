@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="TEST_PATTERN">%d{ISO8601} %-5level [%t] [%c{1}] - %msg%n</Property>
+        <Property name="WRIMS_LOG_DIR">${sys:user.home}/.wrims/logs</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="CONSOLE" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${USER_PATTERN}"/>
+        </Console>
+        <!-- Async wrapper for console -->
+        <Async name="CONSOLE-ASYNC">
+            <AppenderRef ref="CONSOLE"/>
+        </Async>
+
+        <!-- File Appender - Project Directory -->
+        <RollingFile
+                name="FILE"
+                fileName="${WRIMS_LOG_DIR}/tests/tests.log"
+                filePattern="${WRIMS_LOG_DIR}/tests/tests-%i.log"
+                append="true">
+            <PatternLayout pattern="${TEST_PATTERN}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="100"/>
+        </RollingFile>
+        <!-- Async wrapper for file -->
+        <Async name="FILE-ASYNC">
+            <AppenderRef ref="FILE"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="CONSOLE-ASYNC" />
+            <AppenderRef ref="FILE-ASYNC" />
+        </Root>
+    </Loggers>
+
+</Configuration>
