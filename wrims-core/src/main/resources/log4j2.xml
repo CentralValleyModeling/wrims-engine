@@ -8,7 +8,7 @@
         <Property name="WRIMS_FALLBACK_LOG_DIR">${sys:user.home}/.wrims/logs/runs</Property>
 
         <!-- solver-only additions -->
-        <Property name="DETAILED_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} [%M:%L] - %msg%n</Property>
+        <Property name="DETAILED_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
 
         <!--
           NOTE:
@@ -26,7 +26,6 @@
             <PatternLayout pattern="${USER_PATTERN}"/>
         </Console>
 
-        <!-- Async wrapper for console -->
         <Async name="CONSOLE-ASYNC">
             <AppenderRef ref="CONSOLE"/>
         </Async>
@@ -36,7 +35,6 @@
             <PatternLayout pattern="${STANDARD_PATTERN}"/>
         </File>
 
-        <!-- Async wrapper for file -->
         <Async name="FILE-ASYNC">
             <AppenderRef ref="FILE"/>
         </Async>
@@ -53,85 +51,46 @@
             </Policies>
         </RollingFile>
 
-        <!-- Async wrapper for WRIMS rolling file -->
         <Async name="FILE-WRIMS-ASYNC">
             <AppenderRef ref="FILE-WRIMS"/>
         </Async>
 
-        <!-- ========================= -->
-        <!-- Solver-only: CBC appenders -->
-        <!-- (written under common SOLVER_LOG_DIR with cbc-* prefix) -->
-        <!-- ========================= -->
 
-        <!-- CBC Solver Main Log (INFO and above) -->
-        <RollingFile name="CBC-MAIN"
-                     fileName="${SOLVER_LOG_DIR}/cbc-main.log"
-                     filePattern="${SOLVER_LOG_DIR}/cbc-main-%d{yyyy-MM-dd}.log"
+        <!-- CBC Solver Detailed Log -->
+        <RollingFile name="CBC"
+                     fileName="${SOLVER_LOG_DIR}/cbc.log"
+                     filePattern="${SOLVER_LOG_DIR}/cbc-%d{yyyy-MM-dd_HH-mm-ss}.log"
                      createOnDemand="true">
-            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <PatternLayout pattern="${DETAILED_PATTERN}"/>
             <Policies>
-                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
-                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
-        <!-- CBC Solver Detailed Log (DEBUG/TRACE level) -->
-        <RollingFile name="CBC-DETAIL"
-                     fileName="${SOLVER_LOG_DIR}/cbc-detail.log"
-                     filePattern="${SOLVER_LOG_DIR}/cbc-detail-%d{yyyy-MM-dd}.log"
-                     createOnDemand="true">
-            <PatternLayout pattern="${DETAILED_PATTERN}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
-                <SizeBasedTriggeringPolicy size="50 MB"/>
-            </Policies>
-            <DefaultRolloverStrategy max="7"/>
-            <Filters>
-                <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-        </RollingFile>
+        <Async name="ASYNC-CBC">
+            <AppenderRef ref="CBC"/>
+        </Async>
+
 
         <!-- CBC Solver Performance Log -->
         <RollingFile name="CBC-PERF"
                      fileName="${SOLVER_LOG_DIR}/cbc-perf.log"
-                     filePattern="${SOLVER_LOG_DIR}/cbc-perf-%d{yyyy-MM-dd}.log"
+                     filePattern="${SOLVER_LOG_DIR}/cbc-perf-%d{yyyy-MM-dd_HH-mm-ss}.log"
                      createOnDemand="true">
             <PatternLayout pattern="${STANDARD_PATTERN}"/>
             <Policies>
-                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="30"/>
+            <DefaultRolloverStrategy max="100"/>
         </RollingFile>
 
-        <!-- CBC Solver Error Log -->
-        <RollingFile name="CBC-ERROR"
-                     fileName="${SOLVER_LOG_DIR}/cbc-error.log"
-                     filePattern="${SOLVER_LOG_DIR}/cbc-error-%d{yyyy-MM-dd}.log"
-                     createOnDemand="true">
-            <PatternLayout pattern="${STANDARD_PATTERN}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
-            </Policies>
-            <DefaultRolloverStrategy max="90"/>
-            <Filters>
-                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-        </RollingFile>
-
-        <!-- Async wrappers for CBC files -->
-        <Async name="ASYNC-CBC-MAIN">
-            <AppenderRef ref="CBC-MAIN"/>
-        </Async>
-        <Async name="ASYNC-CBC-DETAIL">
-            <AppenderRef ref="CBC-DETAIL"/>
-        </Async>
         <Async name="ASYNC-CBC-PERF">
             <AppenderRef ref="CBC-PERF"/>
         </Async>
-        <Async name="ASYNC-CBC-ERROR">
-            <AppenderRef ref="CBC-ERROR"/>
-        </Async>
+
 
     </Appenders>
 
@@ -145,24 +104,14 @@
             <AppenderRef ref="FILE-ASYNC"/>
         </Logger>
 
-        <!-- ========================= -->
-        <!-- Solver-only: CBC loggers   -->
-        <!-- ========================= -->
-
-        <!-- CBC Solver main logger: route to CBC files (and keep console for visibility) -->
-        <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver" level="TRACE" additivity="false">
-            <AppenderRef ref="ASYNC-CBC-MAIN"/>
-            <AppenderRef ref="ASYNC-CBC-ERROR"/>
-            <AppenderRef ref="ASYNC-CBC-PERF"/>
-            <AppenderRef ref="ASYNC-CBC-DETAIL"/>
-            <AppenderRef ref="CONSOLE-ASYNC"/>
+        <!-- CBC Solver main logger: route to CBC files -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver" level="DEBUG" additivity="false">
+            <AppenderRef ref="ASYNC-CBC"/>
         </Logger>
 
-        <!-- PerfTimer: perf file + console -->
-        <Logger name="gov.ca.water.wrims.engine.core.solver.CbcSolver$PerfTimer" level="TRACE" additivity="false">
+        <!-- PerfTimer: performance file -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.PerformanceTimer" level="DEBUG" additivity="false">
             <AppenderRef ref="ASYNC-CBC-PERF"/>
-            <AppenderRef ref="CONSOLE-ASYNC"/>
         </Logger>
-
     </Loggers>
 </Configuration>

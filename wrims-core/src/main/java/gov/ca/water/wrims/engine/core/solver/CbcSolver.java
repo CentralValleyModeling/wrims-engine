@@ -56,30 +56,6 @@ import com.google.common.collect.HashBiMap;
 public class CbcSolver {
 
     private static final Logger logger = LoggerFactory.getLogger(CbcSolver.class);
-    // Performance timer for internal operations and debug
-    private static class PerfTimer {
-        private final String operation;
-        private final long startTime;
-
-        public PerfTimer(String operation) {
-            this.operation = operation;
-            this.startTime = System.currentTimeMillis();
-            logger.debug("Starting operation: {}", operation);
-        }
-
-        public long stop() {
-            long duration = System.currentTimeMillis() - startTime;
-            logger.debug("Operation completed: {}, duration: {} ms", operation, duration);
-            return duration;
-        }
-
-        public void stopAndLogInfo() {
-            long duration = stop();
-            logger.info("{} completed, duration: {} ms", operation, duration);
-        }
-    }
-
-
     // Performance statistics tracking
     private static class PerformanceStats {
         private long totalSolverTime = 0;
@@ -258,7 +234,7 @@ public class CbcSolver {
 	private CbcSolver(){}
 	
 	public static void init(boolean useLpFile, StudyDataSet sds){
-        PerfTimer timer = new PerfTimer("CbcSolver initialization");
+        PerformanceTimer timer = new PerformanceTimer("CbcSolver initialization");
 
 		dvIntMap2021 = new LinkedHashMap<String, Integer>();
 		CbcSolver.useLpFile = useLpFile;
@@ -310,7 +286,7 @@ public class CbcSolver {
             dvBiMapArray = new ArrayList<String>();
         }
         logger.info("CBC Solver initialization complete: useLpFile={}, cbcLibName={}", useLpFile, cbcLibName);
-        timer.stopAndLogInfo();
+        timer.stop();
 	}
 
 	public static void close(){
@@ -346,7 +322,7 @@ public class CbcSolver {
 		modelName = ILP.getYearMonthCycle();
 		ControlData.clp_cbc_objective = null;
 
-        PerfTimer creationTimer = new PerfTimer("CBC Model Creation");
+        PerformanceTimer creationTimer = new PerformanceTimer("CBC Model Creation");
 		
 		model = jCbc.new_jCbcModel();
 		solver = jCbc.new_jOsiClpSolverInterface(); //this is our LP solver!
@@ -411,7 +387,7 @@ public class CbcSolver {
 
         // Start solving process
         logger.info("Starting solving process...");
-        PerfTimer solveTimer = new PerfTimer("Problem Solving");
+        PerformanceTimer solveTimer = new PerformanceTimer("Problem Solving");
 
         long beginT = System.currentTimeMillis();
         int[] solveResult;
@@ -460,7 +436,7 @@ public class CbcSolver {
 
             // Collect variable results
             logger.debug("Collecting variable results");
-            PerfTimer collectTimer = new PerfTimer("Variable Result Collection");
+            PerformanceTimer collectTimer = new PerformanceTimer("Variable Result Collection");
 
             varDoubleMap = new LinkedHashMap<String, Double>();
             dvIntMap = new LinkedHashMap<String, Integer>();
@@ -470,12 +446,12 @@ public class CbcSolver {
                 collectDvar();
             }
 
-            collectTimer.stopAndLogInfo();
+            collectTimer.stop();
 
             // Check for violations
             if (cbcViolationCheck) {
                 logger.debug("Checking for variable violations");
-                PerfTimer violationTimer = new PerfTimer("Violation Check");
+                PerformanceTimer violationTimer = new PerformanceTimer("Violation Check");
 
                 boolean intErr = false;
                 boolean lowerboundErr = false;
@@ -523,7 +499,7 @@ public class CbcSolver {
                     gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Lowerbound Violation! Please contact developers for this issue.");
                 }
 
-                violationTimer.stopAndLogInfo();
+                violationTimer.stop();
             }
 
 			if (isLogging) {
@@ -535,11 +511,11 @@ public class CbcSolver {
 
             // Assign variable values to data structures
             logger.debug("Assigning variable values to data structures");
-            PerfTimer assignTimer = new PerfTimer("Variable Assignment");
+            PerformanceTimer assignTimer = new PerformanceTimer("Variable Assignment");
 
             if (!gov.ca.water.wrims.engine.core.components.ControlData.cbc_debug_routeXA) assignDvar();
 
-            assignTimer.stopAndLogInfo();
+            assignTimer.stop();
         }
 
         // Performance debugging options
@@ -932,7 +908,7 @@ public class CbcSolver {
     }
 	
 	private static void setConstraints(boolean isNoteCbc, String append) {
-        PerfTimer timer = new PerfTimer("Constraint Setup");
+        PerformanceTimer timer = new PerformanceTimer("Constraint Setup");
 
         logger.info("CBC Solver: Setting up constraints...");
 
@@ -955,7 +931,7 @@ public class CbcSolver {
                 }
                 Iterator<String> constraintIterator = constraintCollection.iterator();
 
-			
+
                 while(constraintIterator.hasNext()){
 
                     double GT=-999;
@@ -1000,14 +976,14 @@ public class CbcSolver {
                         // error!!
                         logger.error("Error in CbcSolver: Invalid constraint sign: {}", ec.getSign());
                     }
-			
+
                     LinkedHashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
                     Set multCollection = multMap.keySet();
                     Iterator multIterator = multCollection.iterator();
 
                     index = new int[multMap.keySet().size()];
                     elements = new double[multMap.keySet().size()];
-				
+
                     int j=0;
                     while(multIterator.hasNext()){
                         String multName=(String)multIterator.next();
@@ -1020,7 +996,7 @@ public class CbcSolver {
 
                             addConditionalSlackSurplusToDvarMap(dvarMap, multName, isNoteCbc, append);
                         }
-					
+
                         index[j]=dvBiMapInverse.get(multName);
                         double temp = multMap.get(multName).getData().doubleValue();
                         if(Math.abs(temp)<ControlData.zeroTolerance) {temp=0;
@@ -1042,7 +1018,7 @@ public class CbcSolver {
                     }
                 }
             }
-		
+
             jCbc.addRows(solver,modelObject);
             if (isNoteCbc) Tools.quickLog(modelName + "_" + solveName + "_" + append + ".rows", c);
             long setupTime = timer.stop();
@@ -1284,7 +1260,7 @@ public class CbcSolver {
 	}
     
 	private static void setDVars(boolean isNoteCbc, String append) {
-        PerfTimer timer = new PerfTimer("Variable Setup");
+        PerformanceTimer timer = new PerformanceTimer("Variable Setup");
 
         logger.info("CBC Solver: Setting up decision variables...");
 
@@ -1345,7 +1321,7 @@ public class CbcSolver {
 
 
     private static void setDVars2021(boolean isNoteCbc) {
-        PerfTimer timer = new PerfTimer("Variable Setup (2021 version)");
+        PerformanceTimer timer = new PerformanceTimer("Variable Setup (2021 version)");
 
         logger.info("CBC Solver: Setting up decision variables (2021 version)...");
 
@@ -1396,7 +1372,7 @@ public class CbcSolver {
             logger.error("Failed to set up 2021 variables", e);
             throw new RuntimeException("2021 variable setup failed", e);
         } finally {
-            timer.stopAndLogInfo();
+            timer.report();
         }
     }
 	
@@ -1438,7 +1414,7 @@ public class CbcSolver {
 			int status = -99;
 			int status2 = -99;
 
-            PerfTimer solveTimer = new PerfTimer("Solver Execution");
+            PerformanceTimer solveTimer = new PerformanceTimer("Solver Execution");
 
 			if (solvFunc == solvU){
                 logger.debug("Using solveU solving method");
@@ -1446,7 +1422,7 @@ public class CbcSolver {
 				if (useWarm || saveWarm) {
 					int ii = ControlData.currCycleIndex + 1;
 					//System.out.println(ii + ": use warm");
-	
+
 					if (warmArrayExist) {
 						jCbc.delete_jarray_int(values);
 						jCbc.delete_jarray_string(names);
@@ -1455,7 +1431,7 @@ public class CbcSolver {
 						names = null;
 						warmArrayExist = false;
 					}
-	
+
 					intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
 					names = jCbc.new_jarray_string(intSolSize);
 					values = jCbc.new_jarray_int(intSolSize);
@@ -1469,12 +1445,12 @@ public class CbcSolver {
                     logger.debug("Setting warm start: {} integer variables", intSolSize);
 
                     ret = jCbc.solve_unified(model, solver, names, values, intSolSize, 0);
-					
+
 				} else {
                     logger.debug("Not using warm start");
 					ret = jCbc.solve_unified(model, solver, null, null, 0, 0);
 				}
-	
+
 				solveName=solve_u_ret.get(ret);
 				status = jCbc.status(model);
 				status2 = jCbc.secondaryStatus(model);
@@ -1486,7 +1462,7 @@ public class CbcSolver {
                 solveName="2__";
 				jCbc.setPrimalTolerance(model, solve_2_primalT);
 				jCbc.setIntegerTolerance(model, integerT);
-				jCbc.solve_2(model, solver, 0);	
+				jCbc.solve_2(model, solver, 0);
 				status = jCbc.status(model);
 				status2 = jCbc.secondaryStatus(model);
                 logger.debug("solve2 completed: status={}, secondaryStatus={}", status, status2);
@@ -1496,7 +1472,7 @@ public class CbcSolver {
                 solveName="3__";
 				jCbc.setPrimalTolerance(model, solve_3_primalT);
 				jCbc.setIntegerTolerance(model, integerT);
-				jCbc.solve_3(model, solver, 0);		
+				jCbc.solve_3(model, solver, 0);
 				status = jCbc.status(model);
 				status2 = jCbc.secondaryStatus(model);
                 logger.debug("solve3 completed: status={}, secondaryStatus={}", status, status2);
@@ -1525,8 +1501,8 @@ public class CbcSolver {
 					values = null;
 					names = null;
 					warmArrayExist = false;
-				}			
-				
+				}
+
 				intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
 				names = jCbc.new_jarray_string(intSolSize);
 				values = jCbc.new_jarray_int(intSolSize);
@@ -1537,13 +1513,13 @@ public class CbcSolver {
 					jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
 					k++;
 				}
-				
+
 				solveName="whs";
 				jCbc.setPrimalTolerance(model, solve_whs_primalT);
 				jCbc.setIntegerTolerance(model, integerT);
                 logger.debug("Starting warm start solve (whs)");
                 jCbc.solve_whs(model,solver,names,values,intSolSize,0);
-							
+
 				status = jCbc.status(model);
 				status2 = jCbc.secondaryStatus(model);
                 logger.debug("Warm start solve completed: status={}, secondaryStatus={}", status, status2);
@@ -1559,7 +1535,7 @@ public class CbcSolver {
                         logger.error("Error in warm start backup solving function");
                     }
                 }
-				
+
 			} else {
                 logger.debug("Not using warm start, using backup solving method");
                 if (warm_2nd_solvFunc == solv2) {
@@ -1570,18 +1546,18 @@ public class CbcSolver {
                     logger.error("Error in warm start backup solving function");
 				}
 			}
-	
+
 			status = jCbc.status(model);
 			status2 = jCbc.secondaryStatus(model);
-	
+
 			if (status != 0 || status2 != 0) {
                 logger.warn("Solve failed, using relaxed tolerance for retry");
                 note_msg(" Solve_"+solveName+" infeasible. Use solve_2 with primalT="+solve_2_primalT_relax);
 				reloadProblem(false, "");
-				solve_2(solve_2_primalT_relax, "2R_");	
+				solve_2(solve_2_primalT_relax, "2R_");
 				status = jCbc.status(model);
 				status2 = jCbc.secondaryStatus(model);
-			}	
+			}
 
 			////// check for violation and re-solve with v2.10a
 			int Err_int = 0;
@@ -1591,44 +1567,44 @@ public class CbcSolver {
                 int ColumnSize = jCbc.getNumCols(model);
 					SWIGTYPE_p_double v_ary = jCbc.getColSolution(solver);
 					Map<String, Dvar> dMap = SolverData.getDvarMap();
-					
+
 					for (int j = 0; j < ColumnSize; j++){
 						 //varDoubleMap.put(jCbc.getColName(model,j), jCbc.jarray_double_getitem(jCbc.getColSolution(solver),j));
 						double v = jCbc.jarray_double_getitem(v_ary,j);
 						String k = jCbc.getColName(model,j);
-						
+
 						if (jCbc.isInteger(solver,j) == 1) {
-							if (Math.abs(v-Math.round(v))>integerT_check){	
-								Err_int = 1; 
+							if (Math.abs(v-Math.round(v))>integerT_check){
+								Err_int = 1;
 								ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":intViolation:::" + k + ":" + v,
                                         true, false);
 							}
-						} 
+						}
 						else {
 							Dvar d = dMap.get(k);
 							if (d.lowerBoundValue.doubleValue() == 0 &&  v<-lowerBoundZero_check) {
 								Err_lb = 1;
 								ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":lbViolation:::" + k + ":" + v,
                                         true, false);
-							} 						
+							}
 						}
 					}
 				}
-				
+
 				if (Err_int>0 || Err_lb>0){
                     logger.warn("Violations detected, rewriting LP file");
                     reloadAndWriteLp("_lbViolation", true);
 					if (cbcViolationRetry) {
 						note_msg(" Solve_" + solveName + " has violations. Use callCbc");
 						reloadProblem(false, "");
-						callCbc();	
+						callCbc();
 						status = jCbc.status(model);
 						status2 = jCbc.secondaryStatus(model);
 					}
-				}	
+				}
 			}
 
-            solveTimer.stopAndLogInfo();
+            solveTimer.stop();
 
 
 			if (status != 0 || status2 != 0) {
@@ -1643,7 +1619,7 @@ public class CbcSolver {
             return new int[]{status, status2};
 		}
 
-	
+
 	public static int[] solve_jCbc2021(){
             logger.info("==================== 2021 Solver Start ====================");
             int ci=ControlData.currCycleIndex + 1;
@@ -1659,7 +1635,7 @@ public class CbcSolver {
 			int status=-99;
 			int status2=-99;
 
-            PerfTimer solveTimer = new PerfTimer("2021 Solver Execution");
+            PerformanceTimer solveTimer = new PerformanceTimer("2021 Solver Execution");
 
 			Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
 			a.retainAll(dvIntMap.keySet());
@@ -1769,7 +1745,7 @@ public class CbcSolver {
 				}
 			} // Don't use callCbcR if callCbc has violation
 
-            solveTimer.stopAndLogInfo();
+            solveTimer.stop();
 
             if (status != 0 || status2 != 0) {
                 logger.error("2021 Solver failed with status: {}, {}", status, status2);
@@ -1980,7 +1956,7 @@ public class CbcSolver {
 	}
 
 	private static void collectDvar() {
-        PerfTimer timer = new PerfTimer("Variable Collection");
+        PerformanceTimer timer = new PerformanceTimer("Variable Collection");
         logger.info("CBC Solver: Collecting variable results...");
 
         int ColumnSize = jCbc.getNumCols(model);
@@ -2009,12 +1985,12 @@ public class CbcSolver {
                 varDoubleMap.put(colName, value);
 			}
 		}
-        timer.stopAndLogInfo();
+        timer.stop();
         logger.info("Variable collection complete: total {} variables", varDoubleMap.size());
     }
 
 	private static void collectDvar2021() {
-        PerfTimer timer = new PerfTimer("Variable Collection (2021 version)");
+        PerformanceTimer timer = new PerformanceTimer("Variable Collection (2021 version)");
 
         logger.info("CBC Solver: Collecting variable results (2021 version)...");
 		
@@ -2038,7 +2014,7 @@ public class CbcSolver {
         }
         dvIntMap2021.putAll(dvIntMap);
 
-        timer.stopAndLogInfo();
+        timer.stop();
         logger.info("2021 version variable collection complete: total {} variables, {} integer variables",
                 varDoubleMap.size(), dvIntMap.size());
     }
@@ -2059,7 +2035,7 @@ public class CbcSolver {
 	}
 
 	private static void assignDvar() {
-        PerfTimer timer = new PerfTimer("Variable Assignment");
+        PerformanceTimer timer = new PerformanceTimer("Variable Assignment");
 
         logger.info("CBC Solver: Assigning variable values...");
 
@@ -2069,14 +2045,14 @@ public class CbcSolver {
 		Set<String> dvarTimeArrayUsedByLaterCycle = ControlData.currModelDataSet.dvarTimeArrayUsedByLaterCycle;
 		ArrayList<String> timeArrayDvList = ControlData.currModelDataSet.timeArrayDvList;
 		String modelName=ControlData.currCycleName;
-		
+
 		StudyDataSet sds = ControlData.currStudyDataSet;
 		ArrayList<String> varCycleIndexList = sds.getVarCycleIndexList();
 		ArrayList<String> dvarTimeArrayCycleIndexList = sds.getDvarTimeArrayCycleIndexList();
 		Map<String, Map<String, IntDouble>> varCycleIndexValueMap = sds.getVarCycleIndexValueMap();
-		
+
 		Map<String, Dvar> dvarMap = SolverData.getDvarMap();
-			
+
 		HashSet<String> extraDv = new HashSet<String>(dvarMap.keySet());
 		extraDv.removeAll(varDoubleMap.keySet());
 
@@ -2122,7 +2098,7 @@ public class CbcSolver {
         int assignedCount = 0;
         //TODO: weird bug. need to fix
 		for (String dvName: varDoubleMap.keySet()) {
-			Dvar dvar=dvarMap.get(dvName);		
+			Dvar dvar=dvarMap.get(dvName);
 			double value=varDoubleMap.get(dvName);
 			IntDouble id=new IntDouble(value,false);
 
@@ -2172,7 +2148,7 @@ public class CbcSolver {
             logger.debug("Assigned {} variables", assignedCount);
         }
 
-	    timer.stopAndLogInfo();
+	    timer.stop();
         logger.info("Variable assignment complete: total {} variables assigned", assignedCount);
 
         logger.info("Objective Value: {}", gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective);
@@ -2592,10 +2568,10 @@ public class CbcSolver {
 		int status2=-99;
         int rv = -99;
 
-        PerfTimer solveTimer = new PerfTimer("2021a Solver Execution");
+        PerformanceTimer solveTimer = new PerformanceTimer("2021a Solver Execution");
 
 
-					
+
         Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
         a.retainAll(dvIntMap.keySet());
 
@@ -2613,7 +2589,7 @@ public class CbcSolver {
                 names = null;
                 warmArrayExist = false;
             }
-					
+
             intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
             names = jCbc.new_jarray_string(intSolSize);
             values = jCbc.new_jarray_int(intSolSize);
@@ -2624,7 +2600,7 @@ public class CbcSolver {
                 jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
                 k++;
             }
-				
+
             solveName="whs";
             jCbc.setPrimalTolerance(model, solve_whs_primalT);
             jCbc.setIntegerTolerance(model, integerT);
@@ -2650,7 +2626,7 @@ public class CbcSolver {
             solveName="c__";
             rv = jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
         }
-					
+
 				// for callCbc only
         status = rv;
         status2 = rv;
@@ -2669,7 +2645,7 @@ public class CbcSolver {
             status = jCbc.status(model);
             status2 = jCbc.secondaryStatus(model);
         }
-        solveTimer.stopAndLogInfo();
+        solveTimer.stop();
 
         if (status != 0 || status2 != 0) {
             logger.error("2021a Solver failed with status: {}, {}", status, status2);
