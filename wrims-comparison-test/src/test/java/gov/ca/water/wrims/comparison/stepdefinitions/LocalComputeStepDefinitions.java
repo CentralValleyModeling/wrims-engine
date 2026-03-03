@@ -139,7 +139,10 @@ public class LocalComputeStepDefinitions {
                 Double bVal = base.values[i];
                 if (aVal != null) {  // we aren't checking for date alignment here, don't report nulls
                     Double diff = aVal - bVal;
-                    double percentDiff = diff / bVal;
+                    double percentDiff = Double.MAX_VALUE;  // use infinity as default
+                    if (bVal != 0) {
+                        percentDiff = diff / bVal;
+                    }
                     if (Math.abs(percentDiff) > tol) {
                         badComparisons.add(String.format("path:%s,base:%.3f,alt:%.3f,diff:%.3f,percentDiff:%f", path, bVal, aVal, diff, percentDiff));
                     }
