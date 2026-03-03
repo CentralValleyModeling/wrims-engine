@@ -169,6 +169,7 @@ public class LocalComputeStepDefinitions {
             dss.read(tsc, true);
             found.put(path, tsc);
         }
+        dss.close();
         return found;
     }
 
