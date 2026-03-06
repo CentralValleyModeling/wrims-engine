@@ -1,7 +1,7 @@
 package gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers;
 
-import gov.ca.water.wrims.engine.core.solver.lookup.AbstractSolver;
 import gov.ca.water.wrims.engine.core.solver.lookup.ISolver;
+import gov.ca.water.wrims.engine.core.solver.lookup.SolverTypes;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import org.slf4j.Logger;
@@ -9,14 +9,29 @@ import org.slf4j.LoggerFactory;
 
 @ServiceProviders(value = {
 		@ServiceProvider(service = ISolver.class),
-		@ServiceProvider(service = ISolver.class, position = 0, path = ISolver.LOOKUP_PATH + "test1")
+		@ServiceProvider(service = ISolver.class, position = 500, path = ISolver.LOOKUP_PATH + SolverTypes.CBC),
 })
-public final class TestSolver1 extends AbstractSolver implements ISolver
+public class SolverA_Rev2 implements ISolver
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSolver1.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SolverA_Rev2.class);
+	private static Long loadedId = null;
 	private Integer x = null;
 	private Integer y = null;
 	private Integer z = null;
+
+	public SolverA_Rev2()
+	{
+		if (loadedId == null)
+		{
+			load();
+		}
+	}
+
+	private static void load()
+	{
+		// imitate static library loading procedure
+		loadedId = System.currentTimeMillis();
+	}
 
 	@Override
 	public void init()
@@ -35,7 +50,7 @@ public final class TestSolver1 extends AbstractSolver implements ISolver
 	@Override
 	public void solve()
 	{
-		if (x == null || y == null || z == null)
+		if(x == null || y == null || z == null)
 		{
 			throw new IllegalStateException("Solver not initialized.");
 		}
@@ -46,16 +61,8 @@ public final class TestSolver1 extends AbstractSolver implements ISolver
 	}
 
 	@Override
-	public void getSolverInformation()
+	public ISolver.SolverInfo getSolverInformation()
 	{
-		String solverInfo = this.getClass().getName();
-
-		LOGGER.atInfo().log(solverInfo);
-	}
-
-	@Override
-	public boolean isValid(SolverType type)
-	{
-		return type.equals(SolverType.GUROBI);
+		return new SolverInfo(ISolver.LOOKUP_PATH + SolverTypes.CBC, 500, SolverTypes.CBC, loadedId);
 	}
 }
