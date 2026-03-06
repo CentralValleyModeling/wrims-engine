@@ -1,4 +1,4 @@
-package gov.ca.water.wrims.engine.core.solver.lookup;
+package gov.ca.water.wrims.engine.core.solver.service;
 
 
 import java.util.ArrayList;
@@ -7,12 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gov.ca.water.wrims.engine.core.solver.solvers.Solver;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 
 public final class SolverBroker
 {
-	private static final Map<String, ISolver> solverCache = new HashMap<>();
+	private static final Map<String, Solver> solverCache = new HashMap<>();
 
 	private SolverBroker()
 	{
@@ -36,14 +37,14 @@ public final class SolverBroker
 		return solverCache.containsKey(solverName);
 	}
 
-	public static ISolver findSolver(String solverName)
+	public static Solver findSolver(String solverName)
 	{
 		return findSolver(solverName, CacheMode.CACHE);
 	}
 
-	public static ISolver findSolver(String solverName, CacheMode mode)
+	public static Solver findSolver(String solverName, CacheMode mode)
 	{
-		ISolver retVal = null;
+		Solver retVal = null;
 		if (mode != CacheMode.BYPASS && solverCache.isEmpty())
 		{
 			getAllSolvers(mode);
@@ -54,10 +55,10 @@ public final class SolverBroker
 		}
 		else if (mode != CacheMode.CACHE_ONLY)
 		{
-			String lookupPath = ISolver.LOOKUP_PATH + solverName;
+			String lookupPath = Solver.LOOKUP_PATH + solverName;
 			Lookup lookup = Lookups.forPath(lookupPath);
-			Collection<? extends ISolver> solvers = lookup.lookupAll(ISolver.class);
-			for(ISolver solver : solvers)
+			Collection<? extends Solver> solvers = lookup.lookupAll(Solver.class);
+			for(Solver solver : solvers)
 			{
 				if(solver.getSolverInformation().getLookupName().equals(solverName))
 				{
@@ -73,14 +74,14 @@ public final class SolverBroker
 		return retVal;
 	}
 
-	public static List<ISolver> getAllSolvers()
+	public static List<Solver> getAllSolvers()
 	{
 		return getAllSolvers(CacheMode.CACHE);
 	}
 
-	public static List<ISolver> getAllSolvers(CacheMode mode)
+	public static List<Solver> getAllSolvers(CacheMode mode)
 	{
-		Collection<? extends ISolver> solvers = new ArrayList<>();
+		Collection<? extends Solver> solvers = new ArrayList<>();
 		if (mode != CacheMode.BYPASS && !solverCache.isEmpty())
 		{
 			return solverCache.values().stream().toList();
@@ -88,7 +89,7 @@ public final class SolverBroker
 		else if (mode != CacheMode.CACHE_ONLY)
 		{
 			Lookup lookup = Lookup.getDefault();
-			solvers = lookup.lookupAll(ISolver.class);
+			solvers = lookup.lookupAll(Solver.class);
 			solvers.forEach(solver -> solverCache.put(solver.getSolverInformation().getLookupName(), solver));
 		}
 		return new ArrayList<>(solvers);
