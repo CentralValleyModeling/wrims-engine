@@ -1,5 +1,7 @@
 package gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers;
 
+import java.nio.file.Path;
+
 import gov.ca.water.wrims.engine.core.solver.lookup.ISolver;
 import gov.ca.water.wrims.engine.core.solver.lookup.SolverTypes;
 import org.openide.util.lookup.ServiceProvider;
@@ -23,6 +25,7 @@ public class SolverA_Rev2 extends SolverA implements ISolver
 	@Override
 	public void setLP(String filePath)
 	{
+		filePath = Path.of("/solve/", filePath).toAbsolutePath().toString();
 		LOGGER.atInfo().log("Solver A Revision 2: " + filePath);
 	}
 
@@ -35,7 +38,7 @@ public class SolverA_Rev2 extends SolverA implements ISolver
 		}
 		else
 		{
-			LOGGER.atInfo().log(x + " * " + y + " * " + z + " = " + (x * y * z));
+			LOGGER.atInfo().log(x + " * " + y + " * " + z + "^2 = " + (x * y * (Math.pow(z, 2))));
 		}
 	}
 
