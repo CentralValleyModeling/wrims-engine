@@ -1,7 +1,9 @@
 package gov.ca.water.wrims.engine.core.solver.lookup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers.SolverA;
 import gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers.SolverA_Rev2;
@@ -23,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 final class TestServiceLookup
 {
@@ -124,26 +127,33 @@ final class TestServiceLookup
 			ISolver.SolverInfo info = solver.getSolverInformation();
 			assertNotNull(info);
 
-			if (solver instanceof SolverA)
+			switch(solver)
 			{
-				assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-				assertEquals(SolverTypes.CBC, info.getLookupName());
-				assertEquals(1000, info.getPosition());
-				count++;
-			}
-			else if (solver instanceof SolverA_Rev2)
-			{
-				assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-				assertEquals(SolverTypes.CBC, info.getLookupName());
-				assertEquals(500, info.getPosition());
-				count++;
-			}
-			else if (solver instanceof SolverB)
-			{
-				assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
-				assertEquals(SolverTypes.GUROBI, info.getLookupName());
-				assertEquals(1000, info.getPosition());
-				count++;
+				case SolverA solverA ->
+				{
+					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
+					assertEquals(SolverTypes.CBC, info.getLookupName());
+					assertEquals(1000, info.getPosition());
+					count++;
+				}
+				case SolverA_Rev2 solverARev2 ->
+				{
+					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
+					assertEquals(SolverTypes.CBC, info.getLookupName());
+					assertEquals(500, info.getPosition());
+					count++;
+				}
+				case SolverB solverB ->
+				{
+					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
+					assertEquals(SolverTypes.GUROBI, info.getLookupName());
+					assertEquals(1000, info.getPosition());
+					count++;
+				}
+				default ->
+				{
+					fail(String.format("Unexpected solver type: %s", solver.getClass().getName()));
+				}
 			}
 		}
 		assertEquals(3, count);
@@ -215,6 +225,41 @@ final class TestServiceLookup
 		assertEquals(SolverTypes.GUROBI, info.getLookupName());
 		assertEquals(1000, info.getPosition());
 		assertEquals(uniqueIdentifier, info.getIdentifier(), "Unique identifier should remain the same");
+	}
+
+	@Test
+	void testInstancesGetAll() throws Exception
+	{
+		SolverBroker.clearCache();
+
+		List<ISolver> solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
+		assertFalse(solvers.isEmpty());
+
+		Map<String, Long> uniqueIdentifiers = new HashMap<>();
+
+		solvers.forEach(solver ->
+				uniqueIdentifiers.put(solver.getSolverInformation().getLookupName()
+						+ solver.getSolverInformation().getPosition(), solver.getSolverInformation().getIdentifier()));
+		assertEquals(3, uniqueIdentifiers.size());
+
+		// Verify we're not working on cache
+		SolverBroker.clearCache();
+		assertFalse(SolverBroker.inCache(SolverTypes.GUROBI));
+		assertFalse(SolverBroker.inCache(SolverTypes.CBC));
+
+		Thread.sleep(5000);
+
+		solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
+		assertFalse(solvers.isEmpty());
+
+		for (ISolver solver : solvers)
+		{
+			Long uniqueIdentifier = uniqueIdentifiers.get(solver.getSolverInformation().getLookupName()
+										+ solver.getSolverInformation().getPosition());
+			assertNotNull(uniqueIdentifier);
+			assertEquals(uniqueIdentifier, solver.getSolverInformation().getIdentifier(),
+					"Unique identifier should remain the same");
+		}
 	}
 
 	// Custom Appender to capture events in memory
