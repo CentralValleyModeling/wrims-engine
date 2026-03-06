@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 		@ServiceProvider(service = ISolver.class),
 		@ServiceProvider(service = ISolver.class, position = 1000, path = ISolver.LOOKUP_PATH + SolverTypes.CBC)
 })
-public final class SolverA implements ISolver
+public class SolverA implements ISolver
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SolverA.class);
 	private static Long loadedId;
-	private Integer x = null;
-	private Integer y = null;
-	private Integer z = null;
+	Integer x = null;
+	Integer y = null;
+	Integer z = null;
 
 	public SolverA()
 	{
@@ -42,7 +42,7 @@ public final class SolverA implements ISolver
 	@Override
 	public void setLP(String filePath)
 	{
-		LOGGER.atInfo().log("Solver 1: " + filePath);
+		LOGGER.atInfo().log("Solver A: " + filePath);
 	}
 
 	@Override
@@ -62,5 +62,10 @@ public final class SolverA implements ISolver
 	public SolverInfo getSolverInformation()
 	{
 		return new SolverInfo(ISolver.LOOKUP_PATH + SolverTypes.CBC, 1000, SolverTypes.CBC, loadedId);
+	}
+
+	static long getIdentifier()
+	{
+		return loadedId;
 	}
 }
