@@ -21,10 +21,7 @@ public class SolverA_Rev2 implements ISolver
 
 	public SolverA_Rev2()
 	{
-		if (loadedId == null)
-		{
-			load();
-		}
+		load();
 	}
 
 	private static void load()

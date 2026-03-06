@@ -21,10 +21,7 @@ public final class SolverA implements ISolver
 
 	public SolverA()
 	{
-		if (loadedId == null)
-		{
-			load();
-		}
+		load();
 	}
 
 	private static void load()
