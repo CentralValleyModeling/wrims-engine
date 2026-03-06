@@ -46,6 +46,13 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Download test + coverage reports from Java CI run
+        uses: actions/download-artifact@v4
+        with:
+          name: reports
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Analyze
         id: sonar
         env:

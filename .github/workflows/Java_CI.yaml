@@ -66,6 +66,14 @@ jobs:
           ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
           ./gradlew tattletaleReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
 
+      - name: Generate Jacoco Reports
+        shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
+        run: |
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew jacocoTestReport -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+
       - name: Upload Reports
         uses: actions/upload-artifact@v4.0.0
         with:
