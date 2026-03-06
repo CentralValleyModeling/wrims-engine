@@ -1,7 +1,7 @@
 package gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers;
 
-import gov.ca.water.wrims.engine.core.solver.lookup.AbstractSolver;
 import gov.ca.water.wrims.engine.core.solver.lookup.ISolver;
+import gov.ca.water.wrims.engine.core.solver.lookup.SolverTypes;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import org.slf4j.Logger;
@@ -9,13 +9,28 @@ import org.slf4j.LoggerFactory;
 
 @ServiceProviders(value = {
 		@ServiceProvider(service = ISolver.class),
-		@ServiceProvider(service = ISolver.class, position = 0, path = ISolver.LOOKUP_PATH + "test2")
+		@ServiceProvider(service = ISolver.class, position = 1000, path = ISolver.LOOKUP_PATH + SolverTypes.GUROBI)
 })
-public final class TestSolver2 extends AbstractSolver implements ISolver
+public final class SolverB implements ISolver
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestSolver2.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SolverB.class);
+	private static Long loadedId;
 	private Integer x = null;
 	private Integer y = null;
+
+	public SolverB()
+	{
+		if (loadedId == null)
+		{
+			load();
+		}
+	}
+
+	private static void load()
+	{
+		// imitate static library loading procedure
+		loadedId = System.currentTimeMillis();
+	}
 
 	@Override
 	public void init()
@@ -44,16 +59,8 @@ public final class TestSolver2 extends AbstractSolver implements ISolver
 	}
 
 	@Override
-	public void getSolverInformation()
+	public SolverInfo getSolverInformation()
 	{
-		String solverInfo = this.getClass().getName();
-
-		LOGGER.atInfo().log(solverInfo);
-	}
-
-	@Override
-	public boolean isValid(SolverType type)
-	{
-		return type.equals(SolverType.CBC);
+		return new SolverInfo(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, 1000, SolverTypes.GUROBI, loadedId);
 	}
 }

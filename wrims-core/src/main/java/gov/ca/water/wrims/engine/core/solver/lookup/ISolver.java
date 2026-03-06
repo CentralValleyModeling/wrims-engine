@@ -2,11 +2,6 @@ package gov.ca.water.wrims.engine.core.solver.lookup;
 
 public interface ISolver
 {
-	enum SolverType
-	{
-		CBC, LPSOLVE, ORTOOLS, GUROBI
-	}
-
 	String LOOKUP_PATH = "wrims/solver/";
 
 	void init();
@@ -15,7 +10,40 @@ public interface ISolver
 
 	void solve();
 
-	void getSolverInformation();
+	SolverInfo getSolverInformation();
 
-	boolean isValid(SolverType solverType);
+	class SolverInfo
+	{
+		private String path;
+		private int position;
+		private String lookupName;
+		private long identifier;
+
+		public SolverInfo(String path, int position, String lookupName, long identifier)
+		{
+			this.path = path;
+			this.position = position;
+			this.lookupName = lookupName;
+		}
+
+		public String getPath()
+		{
+			return path;
+		}
+
+		public int getPosition()
+		{
+			return position;
+		}
+
+		public String getLookupName()
+		{
+			return lookupName;
+		}
+
+		public long getIdentifier()
+		{
+			return identifier;
+		}
+	}
 }
