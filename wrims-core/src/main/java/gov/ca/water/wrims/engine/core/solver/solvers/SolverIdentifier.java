@@ -1,0 +1,8 @@
+package gov.ca.water.wrims.engine.core.solver.solvers;
+
+import java.util.UUID;
+
+public abstract class SolverIdentifier
+{
+	abstract UUID getIdentifier();
+}
