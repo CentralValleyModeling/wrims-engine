@@ -39,7 +39,7 @@ public final class SolverB implements ISolver
 	@Override
 	public void setLP(String filePath)
 	{
-		LOGGER.atInfo().log("Solver 2: " + filePath);
+		LOGGER.atInfo().log("Solver B: " + filePath);
 	}
 
 	@Override

@@ -71,7 +71,7 @@ final class TestServiceLookup
 		assertEquals(500, info.getPosition());
 
 		assertNotNull(events);
-		assertEquals("Solver 1: test.solve", events.get(0).getMessage().getFormattedMessage());
+		assertEquals("Solver A Revision 2: test.solve", events.get(0).getMessage().getFormattedMessage());
 		assertEquals("1 * 2 * 3 = 6", events.get(1).getMessage().getFormattedMessage());
 
 		solver = SolverBroker.findSolver(SolverTypes.GUROBI);
@@ -85,7 +85,7 @@ final class TestServiceLookup
 		assertEquals(1000, info.getPosition());
 		assertTrue(events.stream()
 				.anyMatch(log -> log.getMessage().getFormattedMessage()
-						.equalsIgnoreCase("Solver 2: test2.solve")));
+						.equalsIgnoreCase("Solver B: test2.solve")));
 		assertTrue(events.stream()
 				.anyMatch(log -> log.getMessage().getFormattedMessage()
 						.equalsIgnoreCase("1 + 2 = 3")));
@@ -129,18 +129,18 @@ final class TestServiceLookup
 
 			switch(solver)
 			{
-				case SolverA solverA ->
-				{
-					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-					assertEquals(SolverTypes.CBC, info.getLookupName());
-					assertEquals(1000, info.getPosition());
-					count++;
-				}
 				case SolverA_Rev2 solverARev2 ->
 				{
 					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
 					assertEquals(SolverTypes.CBC, info.getLookupName());
 					assertEquals(500, info.getPosition());
+					count++;
+				}
+				case SolverA solverA ->
+				{
+					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
+					assertEquals(SolverTypes.CBC, info.getLookupName());
+					assertEquals(1000, info.getPosition());
 					count++;
 				}
 				case SolverB solverB ->
@@ -151,9 +151,7 @@ final class TestServiceLookup
 					count++;
 				}
 				default ->
-				{
 					fail(String.format("Unexpected solver type: %s", solver.getClass().getName()));
-				}
 			}
 		}
 		assertEquals(3, count);

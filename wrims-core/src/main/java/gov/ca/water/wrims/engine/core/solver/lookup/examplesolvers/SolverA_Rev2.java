@@ -11,37 +11,19 @@ import org.slf4j.LoggerFactory;
 		@ServiceProvider(service = ISolver.class),
 		@ServiceProvider(service = ISolver.class, position = 500, path = ISolver.LOOKUP_PATH + SolverTypes.CBC),
 })
-public class SolverA_Rev2 implements ISolver
+public class SolverA_Rev2 extends SolverA implements ISolver
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SolverA_Rev2.class);
-	private static Long loadedId = null;
-	private Integer x = null;
-	private Integer y = null;
-	private Integer z = null;
 
 	public SolverA_Rev2()
 	{
-		load();
-	}
-
-	private static void load()
-	{
-		// imitate static library loading procedure
-		loadedId = System.currentTimeMillis();
-	}
-
-	@Override
-	public void init()
-	{
-		x = 1;
-		y = 2;
-		z = 3;
+		super();
 	}
 
 	@Override
 	public void setLP(String filePath)
 	{
-		LOGGER.atInfo().log("Solver 1: " + filePath);
+		LOGGER.atInfo().log("Solver A Revision 2: " + filePath);
 	}
 
 	@Override
@@ -60,6 +42,6 @@ public class SolverA_Rev2 implements ISolver
 	@Override
 	public ISolver.SolverInfo getSolverInformation()
 	{
-		return new SolverInfo(ISolver.LOOKUP_PATH + SolverTypes.CBC, 500, SolverTypes.CBC, loadedId);
+		return new SolverInfo(ISolver.LOOKUP_PATH + SolverTypes.CBC, 500, SolverTypes.CBC, getIdentifier());
 	}
 }
