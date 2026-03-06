@@ -20,10 +20,7 @@ public final class SolverB implements ISolver
 
 	public SolverB()
 	{
-		if (loadedId == null)
-		{
-			load();
-		}
+		load();
 	}
 
 	private static void load()
