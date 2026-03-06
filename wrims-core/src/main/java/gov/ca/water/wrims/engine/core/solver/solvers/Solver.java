@@ -1,6 +1,8 @@
-package gov.ca.water.wrims.engine.core.solver.lookup;
+package gov.ca.water.wrims.engine.core.solver.solvers;
 
-public interface ISolver
+import java.util.UUID;
+
+public interface Solver
 {
 	String LOOKUP_PATH = "wrims/solver/";
 
@@ -14,16 +16,17 @@ public interface ISolver
 
 	class SolverInfo
 	{
-		private String path;
-		private int position;
-		private String lookupName;
-		private long identifier;
+		private final String path;
+		private final int position;
+		private final String lookupName;
+		private final UUID identifier;
 
-		public SolverInfo(String path, int position, String lookupName, long identifier)
+		public SolverInfo(String path, int position, String lookupName, UUID identifier)
 		{
 			this.path = path;
 			this.position = position;
 			this.lookupName = lookupName;
+			this.identifier = identifier;
 		}
 
 		public String getPath()
@@ -41,7 +44,7 @@ public interface ISolver
 			return lookupName;
 		}
 
-		public long getIdentifier()
+		public UUID getIdentifier()
 		{
 			return identifier;
 		}

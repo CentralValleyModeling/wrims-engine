@@ -1,13 +1,15 @@
-package gov.ca.water.wrims.engine.core.solver.lookup;
+package gov.ca.water.wrims.engine.core.solver.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers.SolverA;
-import gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers.SolverA_Rev2;
-import gov.ca.water.wrims.engine.core.solver.lookup.examplesolvers.SolverB;
+import gov.ca.water.wrims.engine.core.solver.solvers.Solver;
+import gov.ca.water.wrims.engine.core.solver.solvers.SolverA;
+import gov.ca.water.wrims.engine.core.solver.solvers.ImprovedSolverA;
+import gov.ca.water.wrims.engine.core.solver.solvers.SolverB;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -60,28 +62,30 @@ final class TestServiceLookup
 	{
 		List<LogEvent> events = appender.getEvents();
 
-		ISolver solver = SolverBroker.findSolver(SolverTypes.CBC);
+		Solver solver = SolverBroker.findSolver("CBC_IMPROVED");
 		assertNotNull(solver);
 		solver.init();
 		solver.setLP("test.solve");
 		solver.solve();
-		ISolver.SolverInfo info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-		assertEquals(SolverTypes.CBC, info.getLookupName());
+		Solver.SolverInfo info = solver.getSolverInformation();
+		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
 
 		assertNotNull(events);
-		assertEquals("Solver A Revision 2: test.solve", events.get(0).getMessage().getFormattedMessage());
-		assertEquals("1 * 2 * 3 = 6", events.get(1).getMessage().getFormattedMessage());
+		String formattedMessage = events.getFirst().getMessage().getFormattedMessage();
+		assertTrue(formattedMessage.contains("Improved Solver A: "));
+		assertTrue(formattedMessage.contains("\\solve\\test.solve"));
+		assertEquals("1 * 2 * 3^2 = 18.0", events.get(1).getMessage().getFormattedMessage());
 
-		solver = SolverBroker.findSolver(SolverTypes.GUROBI);
+		solver = SolverBroker.findSolver("GUROBI");
 		assertNotNull(solver);
 		solver.init();
 		solver.setLP("test2.solve");
 		solver.solve();
 		info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
-		assertEquals(SolverTypes.GUROBI, info.getLookupName());
+		assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
+		assertEquals("GUROBI", info.getLookupName());
 		assertEquals(1000, info.getPosition());
 		assertTrue(events.stream()
 				.anyMatch(log -> log.getMessage().getFormattedMessage()
@@ -90,24 +94,24 @@ final class TestServiceLookup
 				.anyMatch(log -> log.getMessage().getFormattedMessage()
 						.equalsIgnoreCase("1 + 2 = 3")));
 
-		solver = SolverBroker.findSolver(SolverTypes.CLP);
+		solver = SolverBroker.findSolver("CLP");
 		assertNull(solver);
 
-		solver = SolverBroker.findSolver(SolverTypes.XA);
+		solver = SolverBroker.findSolver("XA");
 		assertNull(solver);
 	}
 
 	@Test
 	void testSolverOrder()
 	{
-		ISolver solver = SolverBroker.findSolver(SolverTypes.CBC);
+		Solver solver = SolverBroker.findSolver("CBC_IMPROVED");
 		assertNotNull(solver);
 		solver.init();
 		solver.setLP("test.solve");
 		solver.solve();
-		ISolver.SolverInfo info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-		assertEquals(SolverTypes.CBC, info.getLookupName());
+		Solver.SolverInfo info = solver.getSolverInformation();
+		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
 	}
 
@@ -115,38 +119,38 @@ final class TestServiceLookup
 	void testGetAll()
 	{
 		SolverBroker.clearCache();
-		List<ISolver> solvers = SolverBroker.getAllSolvers();
+		List<Solver> solvers = SolverBroker.getAllSolvers();
 		assertNotNull(solvers);
 		assertEquals(3, solvers.size());
 		int count = 0;
 
-		for (ISolver solver : solvers)
+		for (Solver solver : solvers)
 		{
 			assertNotNull(solver);
 
-			ISolver.SolverInfo info = solver.getSolverInformation();
+			Solver.SolverInfo info = solver.getSolverInformation();
 			assertNotNull(info);
 
 			switch(solver)
 			{
-				case SolverA_Rev2 solverARev2 ->
+				case ImprovedSolverA solverARev2 ->
 				{
-					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-					assertEquals(SolverTypes.CBC, info.getLookupName());
+					assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+					assertEquals("CBC_IMPROVED", info.getLookupName());
 					assertEquals(500, info.getPosition());
 					count++;
 				}
 				case SolverA solverA ->
 				{
-					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-					assertEquals(SolverTypes.CBC, info.getLookupName());
+					assertEquals(Solver.LOOKUP_PATH + "CBC", info.getPath());
+					assertEquals("CBC", info.getLookupName());
 					assertEquals(1000, info.getPosition());
 					count++;
 				}
 				case SolverB solverB ->
 				{
-					assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
-					assertEquals(SolverTypes.GUROBI, info.getLookupName());
+					assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
+					assertEquals("GUROBI", info.getLookupName());
 					assertEquals(1000, info.getPosition());
 					count++;
 				}
@@ -161,37 +165,37 @@ final class TestServiceLookup
 	void testSolverCache()
 	{
 		SolverBroker.clearCache();
-		ISolver solver = SolverBroker.findSolver(SolverTypes.CBC, SolverBroker.CacheMode.CACHE_ONLY);
+		Solver solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
 		assertNull(solver);
 
-		solver = SolverBroker.findSolver(SolverTypes.CBC, SolverBroker.CacheMode.BYPASS);
+		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.BYPASS);
 		solver.init();
 		solver.setLP("test.solve");
 		solver.solve();
-		ISolver.SolverInfo info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-		assertEquals(SolverTypes.CBC, info.getLookupName());
+		Solver.SolverInfo info = solver.getSolverInformation();
+		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
 
-		solver = SolverBroker.findSolver(SolverTypes.CBC, SolverBroker.CacheMode.CACHE_ONLY);
+		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
 		assertNull(solver);
 
-		solver = SolverBroker.findSolver(SolverTypes.CBC, SolverBroker.CacheMode.CACHE);
+		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE);
 		solver.init();
 		solver.setLP("test.solve");
 		solver.solve();
 		info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-		assertEquals(SolverTypes.CBC, info.getLookupName());
+		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
 
-		solver = SolverBroker.findSolver(SolverTypes.CBC, SolverBroker.CacheMode.CACHE_ONLY);
+		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
 		solver.init();
 		solver.setLP("test.solve");
 		solver.solve();
 		info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.CBC, info.getPath());
-		assertEquals(SolverTypes.CBC, info.getLookupName());
+		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
+		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
 	}
 
@@ -200,27 +204,27 @@ final class TestServiceLookup
 	{
 		SolverBroker.clearCache();
 
-		ISolver solver = SolverBroker.findSolver(SolverTypes.GUROBI, SolverBroker.CacheMode.BYPASS);
+		Solver solver = SolverBroker.findSolver("GUROBI", SolverBroker.CacheMode.BYPASS);
 		assertNotNull(solver);
 
-		ISolver.SolverInfo info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
-		assertEquals(SolverTypes.GUROBI, info.getLookupName());
+		Solver.SolverInfo info = solver.getSolverInformation();
+		assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
+		assertEquals("GUROBI", info.getLookupName());
 		assertEquals(1000, info.getPosition());
-		long uniqueIdentifier = info.getIdentifier();
+		UUID uniqueIdentifier = info.getIdentifier();
 
 		// Verify we're not working on cache
 		SolverBroker.clearCache();
-		assertFalse(SolverBroker.inCache(SolverTypes.GUROBI));
+		assertFalse(SolverBroker.inCache("GUROBI"));
 
 		Thread.sleep(5000);
 
-		solver = SolverBroker.findSolver(SolverTypes.GUROBI, SolverBroker.CacheMode.BYPASS);
+		solver = SolverBroker.findSolver("GUROBI", SolverBroker.CacheMode.BYPASS);
 		assertNotNull(solver);
 
 		info = solver.getSolverInformation();
-		assertEquals(ISolver.LOOKUP_PATH + SolverTypes.GUROBI, info.getPath());
-		assertEquals(SolverTypes.GUROBI, info.getLookupName());
+		assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
+		assertEquals("GUROBI", info.getLookupName());
 		assertEquals(1000, info.getPosition());
 		assertEquals(uniqueIdentifier, info.getIdentifier(), "Unique identifier should remain the same");
 	}
@@ -230,10 +234,10 @@ final class TestServiceLookup
 	{
 		SolverBroker.clearCache();
 
-		List<ISolver> solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
+		List<Solver> solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
 		assertFalse(solvers.isEmpty());
 
-		Map<String, Long> uniqueIdentifiers = new HashMap<>();
+		Map<String, UUID> uniqueIdentifiers = new HashMap<>();
 
 		solvers.forEach(solver ->
 				uniqueIdentifiers.put(solver.getSolverInformation().getLookupName()
@@ -242,17 +246,18 @@ final class TestServiceLookup
 
 		// Verify we're not working on cache
 		SolverBroker.clearCache();
-		assertFalse(SolverBroker.inCache(SolverTypes.GUROBI));
-		assertFalse(SolverBroker.inCache(SolverTypes.CBC));
+		assertFalse(SolverBroker.inCache("GUROBI"));
+		assertFalse(SolverBroker.inCache("CBC"));
+		assertFalse(SolverBroker.inCache("CBC_IMPROVED"));
 
 		Thread.sleep(5000);
 
 		solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
 		assertFalse(solvers.isEmpty());
 
-		for (ISolver solver : solvers)
+		for (Solver solver : solvers)
 		{
-			Long uniqueIdentifier = uniqueIdentifiers.get(solver.getSolverInformation().getLookupName()
+			UUID uniqueIdentifier = uniqueIdentifiers.get(solver.getSolverInformation().getLookupName()
 										+ solver.getSolverInformation().getPosition());
 			assertNotNull(uniqueIdentifier);
 			assertEquals(uniqueIdentifier, solver.getSolverInformation().getIdentifier(),
