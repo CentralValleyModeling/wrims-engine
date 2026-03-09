@@ -14,10 +14,11 @@ import org.openide.util.lookup.Lookups;
 public final class SolverBroker
 {
 	private static final Map<String, Solver> solverCache = new HashMap<>();
+	private static boolean cacheInitialized = false;
 
 	private SolverBroker()
 	{
-		throw new UnsupportedOperationException( "Cannot instantiate a utility class.");
+		throw new UnsupportedOperationException("Cannot instantiate a utility class.");
 	}
 
 	public enum CacheMode
@@ -30,6 +31,7 @@ public final class SolverBroker
 	public static void clearCache()
 	{
 		solverCache.clear();
+		cacheInitialized = false;
 	}
 
 	public static boolean inCache(String solverName)
@@ -45,15 +47,19 @@ public final class SolverBroker
 	public static Solver findSolver(String solverName, CacheMode mode)
 	{
 		Solver retVal = null;
-		if (mode != CacheMode.BYPASS && solverCache.isEmpty())
+		if(mode != CacheMode.BYPASS && !cacheInitialized)
 		{
 			getAllSolvers(mode);
 		}
-		if (mode != CacheMode.BYPASS && solverCache.containsKey(solverName))
+		if(mode != CacheMode.BYPASS)
 		{
-			return solverCache.get(solverName);
+			Solver cached = solverCache.get(solverName);
+			if(cached != null)
+			{
+				return cached;
+			}
 		}
-		else if (mode != CacheMode.CACHE_ONLY)
+		if(mode != CacheMode.CACHE_ONLY)
 		{
 			String lookupPath = Solver.LOOKUP_PATH + solverName;
 			Lookup lookup = Lookups.forPath(lookupPath);
@@ -63,10 +69,6 @@ public final class SolverBroker
 				if(solver.getSolverInformation().getLookupName().equals(solverName))
 				{
 					retVal = solver;
-					if (mode != CacheMode.BYPASS)
-					{
-						solverCache.put(solverName, solver);
-					}
 					break;
 				}
 			}
@@ -82,15 +84,16 @@ public final class SolverBroker
 	public static List<Solver> getAllSolvers(CacheMode mode)
 	{
 		Collection<? extends Solver> solvers = new ArrayList<>();
-		if (mode != CacheMode.BYPASS && !solverCache.isEmpty())
+		if(mode != CacheMode.BYPASS && cacheInitialized)
 		{
 			return solverCache.values().stream().toList();
 		}
-		else if (mode != CacheMode.CACHE_ONLY)
+		else if(mode != CacheMode.CACHE_ONLY)
 		{
 			Lookup lookup = Lookup.getDefault();
 			solvers = lookup.lookupAll(Solver.class);
 			solvers.forEach(solver -> solverCache.put(solver.getSolverInformation().getLookupName(), solver));
+			cacheInitialized = true;
 		}
 		return new ArrayList<>(solvers);
 	}

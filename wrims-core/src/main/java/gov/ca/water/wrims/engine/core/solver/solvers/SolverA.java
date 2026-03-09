@@ -64,10 +64,10 @@ public class SolverA extends SolverIdentifier implements Solver
 	@Override
 	public SolverInfo getSolverInformation()
 	{
-		return new SolverInfo(Solver.LOOKUP_PATH + SOLVER_TYPE, 1000, SOLVER_TYPE, identifier);
+		return new SolverInfo(Solver.LOOKUP_PATH + SOLVER_TYPE, 1000, SOLVER_TYPE, getIdentifier());
 	}
 
-	UUID getIdentifier()
+	public UUID getIdentifier()
 	{
 		return identifier;
 	}

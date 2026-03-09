@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public abstract class SolverIdentifier
 {
-	abstract UUID getIdentifier();
+	public abstract UUID getIdentifier();
 }

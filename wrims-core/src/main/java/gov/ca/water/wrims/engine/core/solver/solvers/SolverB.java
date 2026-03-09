@@ -64,7 +64,7 @@ public final class SolverB extends SolverIdentifier implements Solver
 		return new SolverInfo(Solver.LOOKUP_PATH + SOLVER_TYPE, 1000, SOLVER_TYPE, getIdentifier());
 	}
 
-	UUID getIdentifier()
+	public UUID getIdentifier()
 	{
 		return identifier;
 	}

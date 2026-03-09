@@ -10,6 +10,7 @@ import gov.ca.water.wrims.engine.core.solver.solvers.Solver;
 import gov.ca.water.wrims.engine.core.solver.solvers.SolverA;
 import gov.ca.water.wrims.engine.core.solver.solvers.ImprovedSolverA;
 import gov.ca.water.wrims.engine.core.solver.solvers.SolverB;
+import gov.ca.water.wrims.engine.core.solver.solvers.SolverIdentifier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -188,6 +189,7 @@ final class TestServiceLookup
 		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
 		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
+		UUID uniqueIdentifier = ((SolverIdentifier) solver).getIdentifier();
 
 		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
 		solver.init();
@@ -197,6 +199,8 @@ final class TestServiceLookup
 		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
 		assertEquals("CBC_IMPROVED", info.getLookupName());
 		assertEquals(500, info.getPosition());
+		assertEquals(uniqueIdentifier, ((SolverIdentifier) solver).getIdentifier(),
+				"Unique identifier should remain the same");
 	}
 
 	@Test
