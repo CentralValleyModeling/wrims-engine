@@ -22,6 +22,7 @@ import org.coinor.cbc.SWIGTYPE_p_int;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import gov.ca.water.wrims.engine.core.commondata.wresldata.Dvar;
 import gov.ca.water.wrims.engine.core.commondata.wresldata.Param;
@@ -42,20 +43,34 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 /**
  * CBC Solver Implementation updates
-        * WARNING: This class uses static state and is NOT thread-safe.
-        * Do not call methods of this class concurrently from multiple threads.
-        * If parallel solving is required, create separate solver instances
-        * or synchronize access to this class.
-        *
-        * Performance characteristics:
-        * - High memory usage due to static model retention*
-        * - Single-threaded solving only
-        * - Not suitable for concurrent solving scenarios Bing 2025/12/09
-*/
+ * WARNING: This class uses static state and is NOT thread-safe.
+ * Do not call methods of this class concurrently from multiple threads.
+ * If parallel solving is required, create separate solver instances
+ * or synchronize access to this class.
+ *
+ * Performance characteristics:
+ * - High memory usage due to static model retention*
+ * - Single-threaded solving only
+ * - Not suitable for concurrent solving scenarios Bing Li 2025/12/09
+ */
 
 public class CbcSolver {
 
     private static final Logger logger = LoggerFactory.getLogger(CbcSolver.class);
+
+    private static void putSolverMdc() {
+        try {
+            MDC.put("solver", "cbc");
+        } catch (Exception ignore) {
+        }
+    }
+
+    private static void clearSolverMdc() {
+        try {
+            MDC.remove("solver");
+        } catch (Exception ignore) {
+        }
+    }
     // Performance statistics tracking
     private static class PerformanceStats {
         private long totalSolverTime = 0;
@@ -86,13 +101,33 @@ public class CbcSolver {
 
         public void logSummary() {
             if (totalProblemsSolved > 0) {
-                logger.info("Performance Statistics Summary:");
-                logger.info("  Total problems solved: {}", totalProblemsSolved);
-                logger.info("  Total solve time: {} ms", totalSolverTime);
-                logger.info("  Total model creation time: {} ms", totalModelCreationTime);
-                logger.info("  Total constraint setup time: {} ms", totalConstraintSetupTime);
-                logger.info("  Total variable setup time: {} ms", totalVariableSetupTime);
-                logger.info("  Average solve time: {} ms", totalSolverTime / totalProblemsSolved);
+                logger.atInfo()
+                        .setMessage("Performance Statistics Summary:")
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Total problems solved: {}")
+                        .addArgument(totalProblemsSolved)
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Total solve time: {} ms")
+                        .addArgument(totalSolverTime)
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Total model creation time: {} ms")
+                        .addArgument(totalModelCreationTime)
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Total constraint setup time: {} ms")
+                        .addArgument(totalConstraintSetupTime)
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Total variable setup time: {} ms")
+                        .addArgument(totalVariableSetupTime)
+                        .log();
+                logger.atInfo()
+                        .setMessage("  Average solve time: {} ms")
+                        .addArgument(totalSolverTime / totalProblemsSolved)
+                        .log();
             }
         }
     }
@@ -102,126 +137,126 @@ public class CbcSolver {
 
     // Variable declarations
     public static LinkedHashMap <String, Double> varDoubleMap;
-	
-	private static SWIGTYPE_p_OsiClpSolverInterface solver; // = jCbc.new_jOsiClpSolverInterface(); //this is our LP solver!
-	private static SWIGTYPE_p_CbcModel model; // = jCbc.new_jCbcModel();// This defines a new empty CbcModel
-	private static SWIGTYPE_p_CoinModel modelObject; 
 
-	private static Map<String, String> iisPossibleConstraintMap;
-	private static Map<String, String> iisPossibleConstraintMap_cumulative;
-	private static Set<String> iisConfirmConstraint;
-	public static Set<String> prioritizeSearchTheseConstraints;
-	private static boolean hasPriorityConstraints = false; // will be assigned to true if above set is not empty.
-	private static Set<String> _pstc;
-	private static int total_relaxed_constraints = 0;
-	
-	//private static LinkedHashSet<String> iisReport;
-	private static LinkedHashMap<Integer, String> iisSlackMap;
-	private static LinkedHashMap<String, String> iisConstraintSignMap;
-	private static LinkedHashMap<String, Double> iisConstraintRHSMap;
-	private static LinkedHashMap<String, int[]> iisConstraintIndexMap;
-	private static LinkedHashMap<String, double[]> iisConstraintElementMap;
-	private static ArrayList<String> iisSlacks;
-	//private static ArrayList<String> iisDvarList;
-	public static double cbcHintRelaxPenalty = 9000;
-	
-	private static  Map<String, Dvar> dvarMap;
-	private static BiMap<Integer, String> dvBiMap;
-	private static ArrayList<String> dvBiMapArray;
-	private static BiMap<String, Integer> dvBiMapInverse;
-	
-	private static  double maxValue = 1e28; //Double.POSITIVE_INFINITY;
-	//public static final double zeroTolerence =  1e-10;
-	public static double solve_2_primalT =  1e-9;        // can read from config cbcTolerancePrimal
-	public static double solve_2_primalT_relax =  1e-7;  // can read from config cbcTolerancePrimalRelax
-	//public static final double solve_2_primalT_relax_most =  1e-4;
-	private static final double solve_3_primalT =  1e-9;
-	//public static final double solve_3_primalT_relax =  1e-7;
-	public static double solve_whs_primalT =  1e-9;      // can read from config cbcToleranceWarmPrimal
-	//public static final Integer cutoff_n =  12;
-	public static double integerT =  1e-9;               // can read from config cbcToleranceInteger
-	public static double integerT_check = 1e-8;          // can read from config cbcToleranceIntegerCheck
-	public static Double lowerBoundZero_check = null;
-	public static final double cbcWriteLpEpsilon = 1e-15; 	
-	public static String cbcLibName = "jCbc";
-	public static String cbcVersion = "None";
-	public static int cbcHintTimeMax = 100; // can read from config CbcHintTimeMax
-	public static boolean usejCbc2021 = false;
-	public static boolean usejCbc2021a = false;
-	public static boolean cbcViolationCheck = true;
-	public static boolean cbcSolutionRounding = true;
-	public static boolean cbcViolationRetry = true;
-	public static int cbcLogStartDate = 999900;
-	public static int cbcLogStopDate  = 999900;	
-	private static boolean isLogging = false;
-	public static boolean debugObjDiff = false;
-	public static double  debugObjDiff_tolerance = 1E5;
-	public static boolean whsScaling = true;
-	public static boolean whsSafe = false;
-	public static boolean debugDeviation = false;
-	public static double  debugDeviationMin = 200;
-	public static double  debugDeviationWeightMin = 99000;	
-	public static double  debugDeviationWeightMultiply = 100;
-	public static boolean  debugDeviationFindMissing = false;
-	public static boolean  debugDeviationWriteWarning = false;
-	private static String modelName;
-	
-	private static Map<String, WeightElement> wm2; 
-	
-	private static boolean useLpFile=false;
-	
-	private static int index[];
-	private static double elements[];
-	
-	private static boolean saveWarm=false;
-	private static boolean useWarm=false;
-	private static final boolean saveIntVars=true;
-	//private static boolean delWarm=false;
+    private static SWIGTYPE_p_OsiClpSolverInterface solver; // = jCbc.new_jOsiClpSolverInterface(); //this is our LP solver!
+    private static SWIGTYPE_p_CbcModel model; // = jCbc.new_jCbcModel();// This defines a new empty CbcModel
+    private static SWIGTYPE_p_CoinModel modelObject;
 
-	private static LinkedHashMap<String, Integer> dvIntMap;
-	private static LinkedHashMap<String, Integer> dvIntMap2021;
-	private static ArrayList<String> dvIntPredict;
-	private static int intVarSize = -99;
-	
-	private static SWIGTYPE_p_std__string names;
-	private static SWIGTYPE_p_int values;
-	private static int intSolSize=0;
-	private static boolean warmArrayExist = false;
-	
-	private static SWIGTYPE_p_std__string names_eachTS;
-	private static SWIGTYPE_p_int values_eachTS;
-	private static int intSolSize_eachTS=0;
-	private static boolean warmArrayExist_eachTS = false;
-	
-	private static SWIGTYPE_p_std__string names_dummy;
-	private static SWIGTYPE_p_int values_dummy;
+    private static Map<String, String> iisPossibleConstraintMap;
+    private static Map<String, String> iisPossibleConstraintMap_cumulative;
+    private static Set<String> iisConfirmConstraint;
+    public static Set<String> prioritizeSearchTheseConstraints;
+    private static boolean hasPriorityConstraints = false; // will be assigned to true if above set is not empty.
+    private static Set<String> _pstc;
+    private static int total_relaxed_constraints = 0;
 
-	// record max(cbc_obj - xa_obj) &  max(xa_obj - cbc_obj)
-	public static double maxObjDiff=0;
-	public static String maxObjDiff_id="";
-	public static double maxObjDiff_minus=0;
-	public static String maxObjDiff_minus_id="";
-	private static HashSet originalDvarKeys=null;
-	
-	public static String solveName="";
-	public static boolean logObj=true;
-	public static boolean intLog=true;
-	public static boolean intViolation=false;
-	
-	public static int solvFunc = 90; // default 
-	public static int warm_2nd_solvFunc = 20; // default 
-	
-	//public static final int solv0 =  0;
-	public static final int solv2 = 20;
-	public static final int solv3 = 30;
-	public static final int solvCallCbc = 50;
-	public static final int solvFull = 90;
-	public static final int solvU = 100;
-	private static boolean next_possible_stuck=false;
-	
-	// record lp
-	public static double record_if_obj_diff = 10000.0;
-	public static double log_if_obj_diff = 500.0;
+    //private static LinkedHashSet<String> iisReport;
+    private static LinkedHashMap<Integer, String> iisSlackMap;
+    private static LinkedHashMap<String, String> iisConstraintSignMap;
+    private static LinkedHashMap<String, Double> iisConstraintRHSMap;
+    private static LinkedHashMap<String, int[]> iisConstraintIndexMap;
+    private static LinkedHashMap<String, double[]> iisConstraintElementMap;
+    private static ArrayList<String> iisSlacks;
+    //private static ArrayList<String> iisDvarList;
+    public static double cbcHintRelaxPenalty = 9000;
+
+    private static  Map<String, Dvar> dvarMap;
+    private static BiMap<Integer, String> dvBiMap;
+    private static ArrayList<String> dvBiMapArray;
+    private static BiMap<String, Integer> dvBiMapInverse;
+
+    private static  double maxValue = 1e28; //Double.POSITIVE_INFINITY;
+    //public static final double zeroTolerence =  1e-10;
+    public static double solve_2_primalT =  1e-9;        // can read from config cbcTolerancePrimal
+    public static double solve_2_primalT_relax =  1e-7;  // can read from config cbcTolerancePrimalRelax
+    //public static final double solve_2_primalT_relax_most =  1e-4;
+    private static final double solve_3_primalT =  1e-9;
+    //public static final double solve_3_primalT_relax =  1e-7;
+    public static double solve_whs_primalT =  1e-9;      // can read from config cbcToleranceWarmPrimal
+    //public static final Integer cutoff_n =  12;
+    public static double integerT =  1e-9;               // can read from config cbcToleranceInteger
+    public static double integerT_check = 1e-8;          // can read from config cbcToleranceIntegerCheck
+    public static Double lowerBoundZero_check = null;
+    public static final double cbcWriteLpEpsilon = 1e-15;
+    public static String cbcLibName = "jCbc";
+    public static String cbcVersion = "None";
+    public static int cbcHintTimeMax = 100; // can read from config CbcHintTimeMax
+    public static boolean usejCbc2021 = false;
+    public static boolean usejCbc2021a = false;
+    public static boolean cbcViolationCheck = true;
+    public static boolean cbcSolutionRounding = true;
+    public static boolean cbcViolationRetry = true;
+    public static int cbcLogStartDate = 999900;
+    public static int cbcLogStopDate  = 999900;
+    private static boolean isLogging = false;
+    public static boolean debugObjDiff = false;
+    public static double  debugObjDiff_tolerance = 1E5;
+    public static boolean whsScaling = true;
+    public static boolean whsSafe = false;
+    public static boolean debugDeviation = false;
+    public static double  debugDeviationMin = 200;
+    public static double  debugDeviationWeightMin = 99000;
+    public static double  debugDeviationWeightMultiply = 100;
+    public static boolean  debugDeviationFindMissing = false;
+    public static boolean  debugDeviationWriteWarning = false;
+    private static String modelName;
+
+    private static Map<String, WeightElement> wm2;
+
+    private static boolean useLpFile=false;
+
+    private static int index[];
+    private static double elements[];
+
+    private static boolean saveWarm=false;
+    private static boolean useWarm=false;
+    private static final boolean saveIntVars=true;
+    //private static boolean delWarm=false;
+
+    private static LinkedHashMap<String, Integer> dvIntMap;
+    private static LinkedHashMap<String, Integer> dvIntMap2021;
+    private static ArrayList<String> dvIntPredict;
+    private static int intVarSize = -99;
+
+    private static SWIGTYPE_p_std__string names;
+    private static SWIGTYPE_p_int values;
+    private static int intSolSize=0;
+    private static boolean warmArrayExist = false;
+
+    private static SWIGTYPE_p_std__string names_eachTS;
+    private static SWIGTYPE_p_int values_eachTS;
+    private static int intSolSize_eachTS=0;
+    private static boolean warmArrayExist_eachTS = false;
+
+    private static SWIGTYPE_p_std__string names_dummy;
+    private static SWIGTYPE_p_int values_dummy;
+
+    // record max(cbc_obj - xa_obj) &  max(xa_obj - cbc_obj)
+    public static double maxObjDiff=0;
+    public static String maxObjDiff_id="";
+    public static double maxObjDiff_minus=0;
+    public static String maxObjDiff_minus_id="";
+    private static HashSet originalDvarKeys=null;
+
+    public static String solveName="";
+    public static boolean logObj=true;
+    public static boolean intLog=true;
+    public static boolean intViolation=false;
+
+    public static int solvFunc = 90; // default
+    public static int warm_2nd_solvFunc = 20; // default
+
+    //public static final int solv0 =  0;
+    public static final int solv2 = 20;
+    public static final int solv3 = 30;
+    public static final int solvCallCbc = 50;
+    public static final int solvFull = 90;
+    public static final int solvU = 100;
+    private static boolean next_possible_stuck=false;
+
+    // record lp
+    public static double record_if_obj_diff = 10000.0;
+    public static double log_if_obj_diff = 500.0;
 
     public static final HashMap<Integer, String> solve_u_ret = new HashMap<Integer, String>() {{
         put(6, "whs");
@@ -229,488 +264,627 @@ public class CbcSolver {
         put(4, "2_r");
         put(1, "inf");
     }};
-	
-	
-	private CbcSolver(){}
-	
-	public static void init(boolean useLpFile, StudyDataSet sds){
-        PerformanceTimer timer = new PerformanceTimer("CbcSolver initialization");
-
-		dvIntMap2021 = new LinkedHashMap<String, Integer>();
-		CbcSolver.useLpFile = useLpFile;
-
-		ILP.getIlpDir();
-		ILP.createNoteFile();
-		
-		if (lowerBoundZero_check == null) {
-			lowerBoundZero_check = Math.max(solve_2_primalT_relax*10, 1e-6);
-		}
-
-        logger.info("CBC Solver Initialization Configuration:");
-        logger.info("  cbcViolationCheck = {}", cbcViolationCheck);
-        logger.info("  lowerBoundZero_check = {}", lowerBoundZero_check);
-        logger.info("  cbcSolutionRounding = {}", cbcSolutionRounding);
-        logger.info("  usejCbc2021 = {}", usejCbc2021);
-        logger.info("  usejCbc2021a = {}", usejCbc2021a);
-        logger.info("  jCbc Version: {}", cbcVersion);
-        logger.info("  whsScaling = {}", whsScaling);
-        logger.info("  whsSafe = {}", whsSafe);
-
-        // Write configuration notes
-		ILP.writeNoteLn("cbcViolationCheck ="+cbcViolationCheck,false,false);
-		ILP.writeNoteLn("lowerBoundZero_check ="+lowerBoundZero_check,false,false);
-		ILP.writeNoteLn("cbcSolutionRounding ="+cbcSolutionRounding,false,false);
-		ILP.writeNoteLn("cbc2021 ="+usejCbc2021,false,false);
-		ILP.writeNoteLn("cbc2021a ="+usejCbc2021a,false,false);
-		ILP.writeNoteLn("jCbc version:", cbcVersion);
-		if (usejCbc2021a) { 
-			jCbc.setWhsScaling(CbcSolver.whsScaling);
-			jCbc.setWhsSafe(CbcSolver.whsSafe); 
-		}
-		ILP.writeNoteLn("cbcWhsScaling ="+CbcSolver.whsScaling,false,false);
-		ILP.writeNoteLn("cbcWhsSafe ="+CbcSolver.whsSafe,false,false);
-
-        dvIntMap = new LinkedHashMap<String, Integer>();
-        int intVarCount = 0;
-        for (String d : sds.allIntDv) {
-            dvIntMap.put(d, 0);
-            intVarCount++;
-        }
-        logger.info("Found {} integer variables in the study dataset", intVarCount);
-		
-		names_dummy = jCbc.new_jarray_string(0); 
-		values_dummy = jCbc.new_jarray_int(0);
-
-        if (!useLpFile) {
-            dvBiMap = HashBiMap.create();
-            dvBiMapArray = new ArrayList<String>();
-        }
-        logger.info("CBC Solver initialization complete: useLpFile={}, cbcLibName={}", useLpFile, cbcLibName);
-        timer.stop();
-	}
-
-	public static void close(){
-        logger.debug("CbcSolver.close() method called");
-        performanceStats.logSummary();
-	}
-	
-	public static void newProblem(){
-        logger.info("==================== New Problem Solving Session ====================");
-        long totalStartTime = System.currentTimeMillis();
-
-		dvIntPredict = new ArrayList<String>();
-
-        // Configure warm start settings
-        if (gov.ca.water.wrims.engine.core.components.ControlData.useCbcWarmStart) {
-            if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart != null) {
-                if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
-                    saveWarm = true;
-                    logger.debug("Configured to save warm start solution for this cycle");
-                } else {
-                    saveWarm = false;
-                }
-                if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmUse.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
-                    useWarm = true;
-                    logger.debug("Configured to use warm start solution for this cycle");
-                } else {
-                    useWarm = false;
-                }
-            }
-        }
-		
-		
-		modelName = ILP.getYearMonthCycle();
-		ControlData.clp_cbc_objective = null;
-
-        PerformanceTimer creationTimer = new PerformanceTimer("CBC Model Creation");
-		
-		model = jCbc.new_jCbcModel();
-		solver = jCbc.new_jOsiClpSolverInterface(); //this is our LP solver!
-		jCbc.assignSolver(model,solver); // Assign the solver to CbcModel
-		int currDate = ControlData.currYear*100 +ControlData.currMonth;
-		isLogging = cbcLogStartDate <= currDate && currDate <=cbcLogStopDate;
-
-        logger.info("New Problem Created: modelName={}, useLPFile={}, currentDate={}, loggingEnabled={}",
-                modelName, useLpFile, currDate, isLogging);
-
-        if (useLpFile) {
-            logger.info("Loading model from LP file: {}", gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath);
-            jCbc.readLp(solver, gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath);
-            logger.info("LP file loaded successfully");
-
-		} else {
-			int sizeA = ControlData.currModelDataSet.dvList.size();
-			int sizeB = ControlData.currModelDataSet.dvTimeArrayList.size();
-
-            logger.debug("Building variable mapping: base variables={}, time series variables={}", sizeA, sizeB);
-
-            for (int i=0; i<sizeA; i++){
-				dvBiMap.put(i,ControlData.currModelDataSet.dvList.get(i));
-				dvBiMapArray.add(ControlData.currModelDataSet.dvList.get(i));	
-			}
-			for (int i=0; i<sizeB; i++){
-				dvBiMap.put(i+sizeA,ControlData.currModelDataSet.dvTimeArrayList.get(i));
-				dvBiMapArray.add(ControlData.currModelDataSet.dvTimeArrayList.get(i));
-			}
-			dvBiMapInverse = dvBiMap.inverse();
-
-            logger.debug("Variable mapping created: total variables={}", dvBiMap.size());
-
-            originalDvarKeys = new HashSet<String>(SolverData.getDvarMap().keySet());
-            logger.debug("Original variable key set size: {}", originalDvarKeys.size());
-
-            dvarMap = SolverData.getDvarMap();
-			wm2 = SolverData.getWeightSlackSurplusMap();
-
-			modelObject = jCbc.new_jCoinModel();
 
 
-            if (usejCbc2021 && false) {
-                logger.debug("Using 2021 version for variable setup");
-                setDVars2021(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp);
-            } else {
-                logger.debug("Using standard version for variable setup");
-                setDVars(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
-            }
-            setConstraints(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
-            if (gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging) {
-                logger.debug("Writing CBC LP file for debugging");
-                writeCbcLp("", false);
-            }
-        }
+    private CbcSolver(){}
 
-        jCbc.setModelName(solver, modelName);
-        long creationTime = creationTimer.stop();
-        gov.ca.water.wrims.engine.core.components.ControlData.solverCreationTime_cbc += creationTime / 1000.0;
-        performanceStats.recordModelCreationTime(creationTime);
+    public static void init(boolean useLpFile, StudyDataSet sds){
+        putSolverMdc();
+        try {
+            PerformanceTimer timer = new PerformanceTimer("CbcSolver initialization");
 
+            dvIntMap2021 = new LinkedHashMap<String, Integer>();
+            CbcSolver.useLpFile = useLpFile;
 
-        // Start solving process
-        logger.info("Starting solving process...");
-        PerformanceTimer solveTimer = new PerformanceTimer("Problem Solving");
+            ILP.getIlpDir();
+            ILP.createNoteFile();
 
-        long beginT = System.currentTimeMillis();
-        int[] solveResult;
-
-        if (usejCbc2021a) {
-            logger.debug("Using jCbc2021a solver");
-            solveResult = solve_jCbc2021a();
-        } else if (usejCbc2021) {
-            logger.debug("Using jCbc2021 solver");
-            solveResult = solve_jCbc2021();
-        } else {
-            logger.debug("Using standard CBC solver");
-            solveResult = solve();
-        }
-
-        long endT = System.currentTimeMillis();
-
-        double time_second = (endT - beginT) / 1000.;
-        long solveTime = solveTimer.stop();
-
-        gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc += time_second;
-        gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this = time_second;
-        performanceStats.recordSolverTime(solveTime);
-        performanceStats.incrementProblemsSolved();
-
-        logger.info("Solver execution completed: {} seconds", time_second);
-
-        if (gov.ca.water.wrims.engine.core.components.ControlData.writeCbcSolvingTime) {
-            gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(jCbc.getModelName(solver), " " + time_second);
-        }
-
-        int status = solveResult[0];
-        int status2 = solveResult[1];
-
-        if (gov.ca.water.wrims.engine.core.components.Error.error_solving.size() < 1) {
-            gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective = getObjValue();
-
-            logger.info("Solver objective value: {}", gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective);
-
-            if (CbcSolver.logObj) {
-                gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(), "" + gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective, gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_obj);
-                gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(),
-                        "" + CbcSolver.solveName + "," + String.format("%8.2f", gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this),
-                        gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_time);
+            if (lowerBoundZero_check == null) {
+                lowerBoundZero_check = Math.max(solve_2_primalT_relax*10, 1e-6);
             }
 
-            // Collect variable results
-            logger.debug("Collecting variable results");
-            PerformanceTimer collectTimer = new PerformanceTimer("Variable Result Collection");
+            logger.atInfo()
+                    .setMessage("CBC Solver Initialization Configuration:")
+                    .log();
+            logger.atInfo()
+                    .setMessage("  cbcViolationCheck = {}")
+                    .addArgument(cbcViolationCheck)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  lowerBoundZero_check = {}")
+                    .addArgument(lowerBoundZero_check)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  cbcSolutionRounding = {}")
+                    .addArgument(cbcSolutionRounding)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  usejCbc2021 = {}")
+                    .addArgument(usejCbc2021)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  usejCbc2021a = {}")
+                    .addArgument(usejCbc2021a)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  jCbc Version: {}")
+                    .addArgument(cbcVersion)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  whsScaling = {}")
+                    .addArgument(whsScaling)
+                    .log();
+            logger.atInfo()
+                    .setMessage("  whsSafe = {}")
+                    .addArgument(whsSafe)
+                    .log();
 
-            varDoubleMap = new LinkedHashMap<String, Double>();
+            // Write configuration notes
+            ILP.writeNoteLn("cbcViolationCheck ="+cbcViolationCheck,false,false);
+            ILP.writeNoteLn("lowerBoundZero_check ="+lowerBoundZero_check,false,false);
+            ILP.writeNoteLn("cbcSolutionRounding ="+cbcSolutionRounding,false,false);
+            ILP.writeNoteLn("cbc2021 ="+usejCbc2021,false,false);
+            ILP.writeNoteLn("cbc2021a ="+usejCbc2021a,false,false);
+            ILP.writeNoteLn("jCbc version:", cbcVersion);
+            if (usejCbc2021a) {
+                jCbc.setWhsScaling(CbcSolver.whsScaling);
+                jCbc.setWhsSafe(CbcSolver.whsSafe);
+            }
+            ILP.writeNoteLn("cbcWhsScaling ="+CbcSolver.whsScaling,false,false);
+            ILP.writeNoteLn("cbcWhsSafe ="+CbcSolver.whsSafe,false,false);
+
             dvIntMap = new LinkedHashMap<String, Integer>();
-            if (usejCbc2021) {
-                collectDvar2021();
-            } else {
-                collectDvar();
+            int intVarCount = 0;
+            for (String d : sds.allIntDv) {
+                dvIntMap.put(d, 0);
+                intVarCount++;
             }
+            logger.atInfo()
+                    .setMessage("Found {} integer variables in the study dataset")
+                    .addArgument(intVarCount)
+                    .log();
 
-            collectTimer.stop();
+            names_dummy = jCbc.new_jarray_string(0);
+            values_dummy = jCbc.new_jarray_int(0);
 
-            // Check for violations
-            if (cbcViolationCheck) {
-                logger.debug("Checking for variable violations");
-                PerformanceTimer violationTimer = new PerformanceTimer("Violation Check");
+            if (!useLpFile) {
+                dvBiMap = HashBiMap.create();
+                dvBiMapArray = new ArrayList<String>();
+            }
+            logger.atInfo()
+                    .setMessage("CBC Solver initialization complete: useLpFile={}, cbcLibName={}")
+                    .addArgument(useLpFile)
+                    .addArgument(cbcLibName)
+                    .log();
+            timer.stop();
+        } finally {
+            clearSolverMdc();
+        }
+    }
 
-                boolean intErr = false;
-                boolean lowerboundErr = false;
+    public static void close(){
+        logger.atDebug()
+                .setMessage("CbcSolver.close() method called")
+                .log();
+        performanceStats.logSummary();
+    }
 
-                Map<String, Dvar> dMap = SolverData.getDvarMap();
-                for (String k : dvIntMap.keySet()) {
-                    if (varDoubleMap.containsKey(k)) {
-                        double v = varDoubleMap.get(k);
-                        double rounded = Math.round(v);
-                        double diff = Math.abs(v - rounded);
+    public static void newProblem(){
+        putSolverMdc();
+        try {
+            logger.atInfo()
+                    .setMessage("==================== New Problem Solving Session ====================")
+                    .log();
+            long totalStartTime = System.currentTimeMillis();
 
-                        if (diff > integerT_check) {
-                            intErr = true;
-                            logger.warn("Integer variable violation detected: {} = {} (should be integer, error: {})", k, v, diff);
-                            gov.ca.water.wrims.engine.core.components.Error.addSolvingError("int violation:::" + k + ":" + v);
-                        } else if (cbcSolutionRounding) {
-                            varDoubleMap.put(k, rounded);
-                            logger.trace("Integer variable rounded: {}: {} -> {}", k, v, rounded);
-                        }
+            dvIntPredict = new ArrayList<String>();
+
+            // Configure warm start settings
+            if (gov.ca.water.wrims.engine.core.components.ControlData.useCbcWarmStart) {
+                if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart != null) {
+                    if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmStart.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
+                        saveWarm = true;
+                        logger.atDebug()
+                                .setMessage("Configured to save warm start solution for this cycle")
+                                .log();
+                    } else {
+                        saveWarm = false;
+                    }
+                    if (gov.ca.water.wrims.engine.core.components.ControlData.cycWarmUse.contains(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex)) {
+                        useWarm = true;
+                        logger.atDebug()
+                                .setMessage("Configured to use warm start solution for this cycle")
+                                .log();
+                    } else {
+                        useWarm = false;
                     }
                 }
-                if (intErr) {
-                    reloadAndWriteLp("_intViolation", true, true);
-                    gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Integer Violation! Please contact developers for this issue.");
+            }
+
+
+            modelName = ILP.getYearMonthCycle();
+            ControlData.clp_cbc_objective = null;
+
+            PerformanceTimer creationTimer = new PerformanceTimer("CBC Model Creation");
+
+            model = jCbc.new_jCbcModel();
+            solver = jCbc.new_jOsiClpSolverInterface(); //this is our LP solver!
+            jCbc.assignSolver(model,solver); // Assign the solver to CbcModel
+            int currDate = ControlData.currYear*100 +ControlData.currMonth;
+            isLogging = cbcLogStartDate <= currDate && currDate <=cbcLogStopDate;
+
+            logger.atInfo()
+                    .setMessage("New Problem Created: modelName={}, useLPFile={}, currentDate={}, loggingEnabled={}")
+                    .addArgument(modelName)
+                    .addArgument(useLpFile)
+                    .addArgument(currDate)
+                    .addArgument(isLogging)
+                    .log();
+
+            if (useLpFile) {
+                logger.atInfo()
+                        .setMessage("Loading model from LP file: {}")
+                        .addArgument(gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath)
+                        .log();
+                jCbc.readLp(solver, gov.ca.water.wrims.engine.core.ilp.ILP.cplexLpFilePath);
+                logger.atInfo()
+                        .setMessage("LP file loaded successfully")
+                        .log();
+
+            } else {
+                int sizeA = ControlData.currModelDataSet.dvList.size();
+                int sizeB = ControlData.currModelDataSet.dvTimeArrayList.size();
+
+                logger.atDebug()
+                        .setMessage("Building variable mapping: base variables={}, time series variables={}")
+                        .addArgument(sizeA)
+                        .addArgument(sizeB)
+                        .log();
+
+                for (int i=0; i<sizeA; i++){
+                    dvBiMap.put(i,ControlData.currModelDataSet.dvList.get(i));
+                    dvBiMapArray.add(ControlData.currModelDataSet.dvList.get(i));
                 }
-                for (String k : dMap.keySet()) {
-                    if (varDoubleMap.containsKey(k)) {
-                        Dvar d = dMap.get(k);
-                        double v = varDoubleMap.get(k);
-                        if (d.lowerBoundValue.doubleValue() == 0) {
-                            if (v < -lowerBoundZero_check) {
-                                lowerboundErr = true;
-                                logger.warn("Lower bound violation detected: {} = {} < 0 (allowed threshold: {})", k, v, lowerBoundZero_check);
-                                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("lowerbound violation:::" + k + ":" + v);
-                            } else if (cbcSolutionRounding && v < 0) {
-                                varDoubleMap.put(k, 0.0);
-                                logger.trace("Lower bound adjustment: {}: {} -> 0.0", k, v);
+                for (int i=0; i<sizeB; i++){
+                    dvBiMap.put(i+sizeA,ControlData.currModelDataSet.dvTimeArrayList.get(i));
+                    dvBiMapArray.add(ControlData.currModelDataSet.dvTimeArrayList.get(i));
+                }
+                dvBiMapInverse = dvBiMap.inverse();
+
+                logger.atDebug()
+                        .setMessage("Variable mapping created: total variables={}")
+                        .addArgument(dvBiMap.size())
+                        .log();
+
+                originalDvarKeys = new HashSet<String>(SolverData.getDvarMap().keySet());
+                logger.atDebug()
+                        .setMessage("Original variable key set size: {}")
+                        .addArgument(originalDvarKeys.size())
+                        .log();
+
+                dvarMap = SolverData.getDvarMap();
+                wm2 = SolverData.getWeightSlackSurplusMap();
+
+                modelObject = jCbc.new_jCoinModel();
+
+
+                if (usejCbc2021 && false) {
+                    logger.atDebug()
+                            .setMessage("Using 2021 version for variable setup")
+                            .log();
+                    setDVars2021(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp);
+                } else {
+                    logger.atDebug()
+                            .setMessage("Using standard version for variable setup")
+                            .log();
+                    setDVars(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
+                }
+                setConstraints(gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging, "");
+                if (gov.ca.water.wrims.engine.core.components.ControlData.cbcLogNativeLp || isLogging) {
+                    logger.atDebug()
+                            .setMessage("Writing CBC LP file for debugging")
+                            .log();
+                    writeCbcLp("", false);
+                }
+            }
+
+            jCbc.setModelName(solver, modelName);
+            long creationTime = creationTimer.stop();
+            gov.ca.water.wrims.engine.core.components.ControlData.solverCreationTime_cbc += creationTime / 1000.0;
+            performanceStats.recordModelCreationTime(creationTime);
+
+
+            // Start solving process
+            logger.atInfo()
+                    .setMessage("Starting solving process...")
+                    .log();
+            PerformanceTimer solveTimer = new PerformanceTimer("Problem Solving");
+
+            long beginT = System.currentTimeMillis();
+            int[] solveResult;
+
+            if (usejCbc2021a) {
+                logger.atDebug()
+                        .setMessage("Using jCbc2021a solver")
+                        .log();
+                solveResult = solve_jCbc2021a();
+            } else if (usejCbc2021) {
+                logger.atDebug()
+                        .setMessage("Using jCbc2021 solver")
+                        .log();
+                solveResult = solve_jCbc2021();
+            } else {
+                logger.atDebug()
+                        .setMessage("Using standard CBC solver")
+                        .log();
+                solveResult = solve();
+            }
+
+            long endT = System.currentTimeMillis();
+
+            double time_second = (endT - beginT) / 1000.;
+            long solveTime = solveTimer.stop();
+
+            gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc += time_second;
+            gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this = time_second;
+            performanceStats.recordSolverTime(solveTime);
+            performanceStats.incrementProblemsSolved();
+
+            logger.atInfo()
+                    .setMessage("Solver execution completed: {} seconds")
+                    .addArgument(time_second)
+                    .log();
+
+            if (gov.ca.water.wrims.engine.core.components.ControlData.writeCbcSolvingTime) {
+                gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(jCbc.getModelName(solver), " " + time_second);
+            }
+
+            int status = solveResult[0];
+            int status2 = solveResult[1];
+
+            if (gov.ca.water.wrims.engine.core.components.Error.error_solving.size() < 1) {
+                gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective = getObjValue();
+
+                logger.atInfo()
+                        .setMessage("Solver objective value: {}")
+                        .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective)
+                        .log();
+
+                if (CbcSolver.logObj) {
+                    gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(), "" + gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective, gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_obj);
+                    gov.ca.water.wrims.engine.core.ilp.ILP.writeNoteLn(gov.ca.water.wrims.engine.core.ilp.ILP.getYearMonthCycle(),
+                            "" + CbcSolver.solveName + "," + String.format("%8.2f", gov.ca.water.wrims.engine.core.components.ControlData.solverTime_cbc_this),
+                            gov.ca.water.wrims.engine.core.ilp.ILP._noteFile_cbc_time);
+                }
+
+                // Collect variable results
+                logger.atDebug()
+                        .setMessage("Collecting variable results")
+                        .log();
+                PerformanceTimer collectTimer = new PerformanceTimer("Variable Result Collection");
+
+                varDoubleMap = new LinkedHashMap<String, Double>();
+                dvIntMap = new LinkedHashMap<String, Integer>();
+                if (usejCbc2021) {
+                    collectDvar2021();
+                } else {
+                    collectDvar();
+                }
+
+                collectTimer.stop();
+
+                // Check for violations
+                if (cbcViolationCheck) {
+                    logger.atDebug()
+                            .setMessage("Checking for variable violations")
+                            .log();
+                    PerformanceTimer violationTimer = new PerformanceTimer("Violation Check");
+
+                    boolean intErr = false;
+                    boolean lowerboundErr = false;
+
+                    Map<String, Dvar> dMap = SolverData.getDvarMap();
+                    for (String k : dvIntMap.keySet()) {
+                        if (varDoubleMap.containsKey(k)) {
+                            double v = varDoubleMap.get(k);
+                            double rounded = Math.round(v);
+                            double diff = Math.abs(v - rounded);
+
+                            if (diff > integerT_check) {
+                                intErr = true;
+                                logger.atWarn()
+                                        .setMessage("Integer variable violation detected: {} = {} (should be integer, error: {})")
+                                        .addArgument(k)
+                                        .addArgument(v)
+                                        .addArgument(diff)
+                                        .log();
+                                gov.ca.water.wrims.engine.core.components.Error.addSolvingError("int violation:::" + k + ":" + v);
+                            } else if (cbcSolutionRounding) {
+                                varDoubleMap.put(k, rounded);
+                                logger.atTrace()
+                                        .setMessage("Integer variable rounded: {}: {} -> {}")
+                                        .addArgument(k)
+                                        .addArgument(v)
+                                        .addArgument(rounded)
+                                        .log();
+                            }
+                        }
+                    }
+                    if (intErr) {
+                        reloadAndWriteLp("_intViolation", true, true);
+                        gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Integer Violation! Please contact developers for this issue.");
+                    }
+                    for (String k : dMap.keySet()) {
+                        if (varDoubleMap.containsKey(k)) {
+                            Dvar d = dMap.get(k);
+                            double v = varDoubleMap.get(k);
+                            if (d.lowerBoundValue.doubleValue() == 0) {
+                                if (v < -lowerBoundZero_check) {
+                                    lowerboundErr = true;
+                                    logger.atWarn()
+                                            .setMessage("Lower bound violation detected: {} = {} < 0 (allowed threshold: {})")
+                                            .addArgument(k)
+                                            .addArgument(v)
+                                            .addArgument(lowerBoundZero_check)
+                                            .log();
+                                    gov.ca.water.wrims.engine.core.components.Error.addSolvingError("lowerbound violation:::" + k + ":" + v);
+                                } else if (cbcSolutionRounding && v < 0) {
+                                    varDoubleMap.put(k, 0.0);
+                                    logger.atTrace()
+                                            .setMessage("Lower bound adjustment: {}: {} -> 0.0")
+                                            .addArgument(k)
+                                            .addArgument(v)
+                                            .log();
+                                }
+                            }
+                        }
+                    }
+
+                    if (lowerboundErr) {
+                        reloadAndWriteLp("_lbViolation", true, true);
+                        gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Lowerbound Violation! Please contact developers for this issue.");
+                    }
+
+                    violationTimer.stop();
+                }
+
+                if (isLogging) {
+                    ILP.setVarFile();
+                    ILP.writeSvarValue();
+                    ILP.findDvarEffective();
+                    ILP.writeDvarValue_Clp0_Cbc0(varDoubleMap);
+                }
+
+                // Assign variable values to data structures
+                logger.atDebug()
+                        .setMessage("Assigning variable values to data structures")
+                        .log();
+                PerformanceTimer assignTimer = new PerformanceTimer("Variable Assignment");
+
+                if (!gov.ca.water.wrims.engine.core.components.ControlData.cbc_debug_routeXA) assignDvar();
+
+                assignTimer.stop();
+            }
+
+            // Performance debugging options
+            if (time_second > 10.0) {
+                logger.atWarn()
+                        .setMessage("Solving time exceeded threshold: {} seconds, writing debug information")
+                        .addArgument(time_second)
+                        .log();
+                reloadAndWriteLp("stuck_"+Math.round(time_second),true);
+                ILP.writeNoteLn(modelName, " "+solveName+" time(sec): "+time_second);
+
+            }
+
+            if (debugObjDiff){
+                logger.atDebug()
+                        .setMessage("Objective difference debugging enabled")
+                        .log();
+                Double thisObj = ControlData.clp_cbc_objective;
+                reloadProblem(false, "");
+                callCbc(solveName);
+                if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
+                    Double cbcObj = getObjValue();
+                    double objDiff = Math.abs(thisObj - cbcObj);
+
+                    if (objDiff > debugObjDiff_tolerance) {
+                        logger.atWarn()
+                                .setMessage("Objective value difference too large: {} > {}")
+                                .addArgument(objDiff)
+                                .addArgument(debugObjDiff_tolerance)
+                                .log();
+                        reloadProblem(false, "");
+                        jCbc.callCbc("-log 0 -primalT 1e-7 -integerT 1e-9 -solve", model);
+                        if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
+                            Double rObj = getObjValue();
+                            double rDiff = Math.abs(thisObj - rObj);
+                            if (rDiff > debugObjDiff_tolerance) {
+                                int ap = (int) Math.round(rDiff / debugObjDiff_tolerance);
+                                reloadAndWriteLp("objErr_" + ap + "_", true);
                             }
                         }
                     }
                 }
-
-                if (lowerboundErr) {
-                    reloadAndWriteLp("_lbViolation", true, true);
-                    gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Lowerbound Violation! Please contact developers for this issue.");
-                }
-
-                violationTimer.stop();
             }
 
-			if (isLogging) {
-				ILP.setVarFile();
-				ILP.writeSvarValue();
-				ILP.findDvarEffective();
-				ILP.writeDvarValue_Clp0_Cbc0(varDoubleMap);			
-			}
+            // debug whs deviation
+            if (debugDeviation && solveName=="whs"){
+                logger.atDebug()
+                        .setMessage("Deviation debugging enabled for whs solve")
+                        .log();
+                // check watchlist for goal name, convert to slack surplus,
+                // if one exceed then
+                // increase penalty see if obj value change
+                // if not then logging
+                Map<String, WeightElement> wm1  = SolverData.getWeightMap();
+                Map<String, WeightElement> wm2  = SolverData.getWeightSlackSurplusMap();
+                Map<String, WeightElement> wm1_ori = new HashMap<String, WeightElement>();
+                Map<String, WeightElement> wm2_ori = new HashMap<String, WeightElement>();
+                boolean firstWrite = true;
 
-            // Assign variable values to data structures
-            logger.debug("Assigning variable values to data structures");
-            PerformanceTimer assignTimer = new PerformanceTimer("Variable Assignment");
+                String missing = "";
 
-            if (!gov.ca.water.wrims.engine.core.components.ControlData.cbc_debug_routeXA) assignDvar();
+                boolean itemExist = false;
+                if (debugDeviationFindMissing) {
+                    missing = ControlData.watchList[0];
+                    if (varDoubleMap.keySet().contains(missing)){
+                        note_msg(missing+": "+varDoubleMap.get(missing));
+                        if (wm1.keySet().contains(missing)){
+                            note_msg(missing+": weight1: "+wm1.get(missing).getValue());
+                        } else if (wm2.keySet().contains(missing)){
+                            note_msg(missing+": weight2: "+wm2.get(missing).getValue());
+                        } else {
+                            note_msg("weight not found");
+                        }
+                        itemExist = true;
+                    }
+                }
 
-            assignTimer.stop();
-        }
+                searchloop:
+                for (String dN: varDoubleMap.keySet()){
+                    if (debugDeviationFindMissing){
+                        if (dN.equalsIgnoreCase(missing)) {
+                            note_msg(missing+": is found.");
+                        }
+                    }
+                    int whichMap=0;
+                    double w=0;
+                    double v=0;
+                    if (dN.startsWith("slack_") || dN.startsWith("surplus_") ) {
+                        v = varDoubleMap.get(dN);
+                        if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
+                            note_msg(missing+": is slack or surplus.");
+                            note_msg(missing+": "+varDoubleMap.get(missing));
+                        }
+                    }
 
-        // Performance debugging options
-        if (time_second > 10.0) {
-            logger.warn("Solving time exceeded threshold: {} seconds, writing debug information", time_second);
-			reloadAndWriteLp("stuck_"+Math.round(time_second),true);			
-			ILP.writeNoteLn(modelName, " "+solveName+" time(sec): "+time_second);
+                    if (v>debugDeviationMin){
 
-		}
-		
-		if (debugObjDiff){
-            logger.debug("Objective difference debugging enabled");
-            Double thisObj = ControlData.clp_cbc_objective;
-			reloadProblem(false, "");
-            callCbc(solveName);
-            if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
-                Double cbcObj = getObjValue();
-                double objDiff = Math.abs(thisObj - cbcObj);
+                        if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
+                            note_msg(missing+": is deviated.");
+                        }
 
-                if (objDiff > debugObjDiff_tolerance) {
-                    logger.warn("Objective value difference too large: {} > {}", objDiff, debugObjDiff_tolerance);
-                    reloadProblem(false, "");
-                    jCbc.callCbc("-log 0 -primalT 1e-7 -integerT 1e-9 -solve", model);
-                    if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
-                        Double rObj = getObjValue();
-                        double rDiff = Math.abs(thisObj - rObj);
-                        if (rDiff > debugObjDiff_tolerance) {
-                            int ap = (int) Math.round(rDiff / debugObjDiff_tolerance);
-                            reloadAndWriteLp("objErr_" + ap + "_", true);
+                        if (wm1.keySet().contains(dN)){
+                            w = wm1.get(dN).getValue();
+                            whichMap =1;
+                        }
+                        else if (wm2.keySet().contains(dN)){
+                            w = wm2.get(dN).getValue();
+                            whichMap =2;
+                        }
+
+                        if (Math.abs(w)>debugDeviationWeightMin){
+                            if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
+                                note_msg(missing+": is weighted more than min.");
+                            }
+                            // write potential issue for once
+                            if (firstWrite && debugDeviationWriteWarning){
+                                reloadAndWriteLp("deviation_warning",true);
+                                note_msg("deviation warning: "+dN);
+                                firstWrite = false;
+                            }
+                            // load original weight, backup original weight, change weight
+                            if (!wm1_ori.isEmpty()) {
+                                wm1.putAll(wm1_ori);
+                            }
+                            if (!wm2_ori.isEmpty()) {
+                                wm2.putAll(wm2_ori);
+                            }
+
+                            WeightElement nwe = new WeightElement();
+                            nwe.setValue(w * debugDeviationWeightMultiply);
+
+                            if (whichMap==1){
+                                wm1_ori.put(dN, wm1.get(dN));
+                                wm1.put(dN, nwe);
+                            } else if (whichMap==2){
+                                wm2_ori.put(dN, wm2.get(dN));
+                                wm2.put(dN, nwe);
+                            }
+
+                            reloadProblem(false,"");
+                            jCbc.setPrimalTolerance(model, solve_whs_primalT);
+                            jCbc.setIntegerTolerance(model, integerT);
+                            jCbc.solve_whs(model,solver,names,values,intSolSize,0);
+                            int statusDev = jCbc.status(model);
+                            int status2Dev = jCbc.secondaryStatus(model);
+
+                            if (statusDev==0 && status2Dev ==0){
+                                //Double tObj = getObjValue();
+                                LinkedHashMap<String, Double> solution = collectDvar2021_simple();
+                                double newV = solution.get(dN);
+                                if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
+                                    note_msg(missing+": test feasible, newV: "+newV);
+                                }
+                                if (Math.abs(newV-v)<2.0){
+                                    // make sure deviation
+                                    reloadProblem(false,"");
+                                    callCbc(solveName);
+                                    if ( jCbc.status(model)==0 && jCbc.secondaryStatus(model)==0){
+                                        //Double tCbcObj = getObjValue();
+                                        LinkedHashMap<String, Double> tCbcsolution = collectDvar2021_simple();
+                                        double newtCbcV = tCbcsolution.get(dN);
+
+                                        if (  Math.abs(newtCbcV)<1.0 ) {
+                                            reloadAndWriteLp("deviation_error_("+dN+")",true);
+                                            note_msg("deviation error: "+dN);
+                                            break searchloop;
+                                        }
+
+                                    } else {
+                                        if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
+                                            note_msg(missing+": test Cbc infeasible");
+                                        }
+                                        note_msg("deviation test Cbc infeasible");
+                                        reloadAndWriteLp("deviation_test_Cbc_infeasible_("+dN+")",true);
+                                    }
+
+                                }
+
+                            } else {
+                                if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
+                                    note_msg(missing+": test infeasible");
+                                }
+                                note_msg("deviation test infeasible");
+                                reloadAndWriteLp("deviation_test_infeasible_(" + dN + ")",true);
+                            }
                         }
                     }
                 }
             }
+
+            long totalEndTime = System.currentTimeMillis();
+            long totalDuration = totalEndTime - totalStartTime;
+            gov.ca.water.wrims.engine.core.components.ControlData.t_cbc = gov.ca.water.wrims.engine.core.components.ControlData.t_cbc + (int) totalDuration;
+
+            logger.atInfo()
+                    .setMessage("==================== Problem Solving Session Complete ====================")
+                    .log();
+            logger.atInfo()
+                    .setMessage("Total processing time: {} ms")
+                    .addArgument(totalDuration)
+                    .log();
+        } finally {
+            clearSolverMdc();
         }
-		
-		// debug whs deviation
-		if (debugDeviation && solveName=="whs"){
-            logger.debug("Deviation debugging enabled for whs solve");
-			// check watchlist for goal name, convert to slack surplus, 
-			// if one exceed then
-			// increase penalty see if obj value change
-			// if not then logging
-			Map<String, WeightElement> wm1  = SolverData.getWeightMap();
-			Map<String, WeightElement> wm2  = SolverData.getWeightSlackSurplusMap();
-			Map<String, WeightElement> wm1_ori = new HashMap<String, WeightElement>();
-			Map<String, WeightElement> wm2_ori = new HashMap<String, WeightElement>();
-			boolean firstWrite = true;
-			
-			String missing = "";
-
-			boolean itemExist = false;
-			if (debugDeviationFindMissing) {
-				missing = ControlData.watchList[0];
-				if (varDoubleMap.keySet().contains(missing)){
-					note_msg(missing+": "+varDoubleMap.get(missing));
-					if (wm1.keySet().contains(missing)){
-						note_msg(missing+": weight1: "+wm1.get(missing).getValue());
-                    } else if (wm2.keySet().contains(missing)){
-						note_msg(missing+": weight2: "+wm2.get(missing).getValue());
-                    } else {
-                        note_msg("weight not found");
-                    }
-					itemExist = true;
-				} 
-			}
-			
-			searchloop:
-            for (String dN: varDoubleMap.keySet()){
-				if (debugDeviationFindMissing){ 
-					if (dN.equalsIgnoreCase(missing)) {
-                        note_msg(missing+": is found.");
-                    }
-				}
-				int whichMap=0;
-				double w=0;
-				double v=0;
-				if (dN.startsWith("slack_") || dN.startsWith("surplus_") ) {
-					v = varDoubleMap.get(dN);	
-					if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
-						note_msg(missing+": is slack or surplus.");
-						note_msg(missing+": "+varDoubleMap.get(missing));	
-					}
-				}	
-			
-				if (v>debugDeviationMin){
-									
-					if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
-						note_msg(missing+": is deviated.");
-					}
-					
-					if (wm1.keySet().contains(dN)){ 
-						w = wm1.get(dN).getValue();
-						whichMap =1;						
-					}
-					else if (wm2.keySet().contains(dN)){ 
-						w = wm2.get(dN).getValue();
-						whichMap =2;						
-					}				
-							
-					if (Math.abs(w)>debugDeviationWeightMin){
-						if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)) {
-							note_msg(missing+": is weighted more than min.");
-						}
-						// write potential issue for once
-						if (firstWrite && debugDeviationWriteWarning){
-							reloadAndWriteLp("deviation_warning",true);
-							note_msg("deviation warning: "+dN);
-							firstWrite = false;
-						}
-						// load original weight, backup original weight, change weight
-						if (!wm1_ori.isEmpty()) {
-                            wm1.putAll(wm1_ori);
-                        }
-						if (!wm2_ori.isEmpty()) {
-                            wm2.putAll(wm2_ori);
-                        }
-						
-						WeightElement nwe = new WeightElement();
-						nwe.setValue(w * debugDeviationWeightMultiply);
-						
-						if (whichMap==1){
-							wm1_ori.put(dN, wm1.get(dN));
-							wm1.put(dN, nwe);
-						} else if (whichMap==2){
-							wm2_ori.put(dN, wm2.get(dN));
-							wm2.put(dN, nwe);
-						}
-					
-						reloadProblem(false,"");
-						jCbc.setPrimalTolerance(model, solve_whs_primalT);
-						jCbc.setIntegerTolerance(model, integerT);
-						jCbc.solve_whs(model,solver,names,values,intSolSize,0);					
-						int statusDev = jCbc.status(model);
-						int status2Dev = jCbc.secondaryStatus(model);
-						
-						if (statusDev==0 && status2Dev ==0){
-							//Double tObj = getObjValue();
-							LinkedHashMap<String, Double> solution = collectDvar2021_simple();
-							double newV = solution.get(dN);
-							if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
-								note_msg(missing+": test feasible, newV: "+newV);
-							} 			
-							if (Math.abs(newV-v)<2.0){
-								// make sure deviation				
-								reloadProblem(false,"");
-								callCbc(solveName);	
-								if ( jCbc.status(model)==0 && jCbc.secondaryStatus(model)==0){
-									//Double tCbcObj = getObjValue();
-									LinkedHashMap<String, Double> tCbcsolution = collectDvar2021_simple();
-									double newtCbcV = tCbcsolution.get(dN);
-									
-									if (  Math.abs(newtCbcV)<1.0 ) {
-										reloadAndWriteLp("deviation_error_("+dN+")",true);
-										note_msg("deviation error: "+dN);
-										break searchloop;
-									}
-									
-								} else {
-									if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
-										note_msg(missing+": test Cbc infeasible");
-									} 
-									note_msg("deviation test Cbc infeasible");
-									reloadAndWriteLp("deviation_test_Cbc_infeasible_("+dN+")",true);
-								}
-								
-							}
-							
-						} else {
-							if (debugDeviationFindMissing && dN.equalsIgnoreCase(missing)){
-								note_msg(missing+": test infeasible");
-							} 
-							note_msg("deviation test infeasible");
-							reloadAndWriteLp("deviation_test_infeasible_(" + dN + ")",true);
-						}
-					}
-				}
-			}
-		}
-
-        long totalEndTime = System.currentTimeMillis();
-        long totalDuration = totalEndTime - totalStartTime;
-        gov.ca.water.wrims.engine.core.components.ControlData.t_cbc = gov.ca.water.wrims.engine.core.components.ControlData.t_cbc + (int) totalDuration;
-
-        logger.info("==================== Problem Solving Session Complete ====================");
-        logger.info("Total processing time: {} ms", totalDuration);
     }
-	
-	public static double getObjValue(){
-        double objValue = jCbc.getObjValue(model) * -1;
-        logger.trace("Retrieved objective value: {}", objValue);
-        return objValue;
-	}
 
-	private static void reloadProblem(boolean isNoteCbc, String append) {
-        logger.debug("Reloading problem: isNoteCbc={}, append={}", isNoteCbc, append);
+    public static double getObjValue(){
+        double objValue = jCbc.getObjValue(model) * -1;
+        logger.atTrace()
+                .setMessage("Retrieved objective value: {}")
+                .addArgument(objValue)
+                .log();
+        return objValue;
+    }
+
+    private static void reloadProblem(boolean isNoteCbc, String append) {
+        logger.atDebug()
+                .setMessage("Reloading problem: isNoteCbc={}, append={}")
+                .addArgument(isNoteCbc)
+                .addArgument(append)
+                .log();
 
 
         try {
@@ -731,7 +905,10 @@ public class CbcSolver {
             }
             dvBiMapInverse = dvBiMap.inverse();
 
-            logger.debug("Variable mapping rebuilt: total variables={}", dvBiMap.size());
+            logger.atDebug()
+                    .setMessage("Variable mapping rebuilt: total variables={}")
+                    .addArgument(dvBiMap.size())
+                    .log();
 
             jCbc.delete_jCbcModel(model);
             model = null;
@@ -746,17 +923,27 @@ public class CbcSolver {
             setConstraints(isNoteCbc, append);
             jCbc.setModelName(solver, modelName);
 
-            logger.debug("Problem reloaded successfully");
+            logger.atDebug()
+                    .setMessage("Problem reloaded successfully")
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to reload problem: isNoteCbc={}, append={}", isNoteCbc, append, e);
+            logger.atError()
+                    .setMessage("Failed to reload problem: isNoteCbc={}, append={}")
+                    .addArgument(isNoteCbc)
+                    .addArgument(append)
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Problem reload failed", e);
         }
     }
-	
-	private static void reloadProblemConfirm(String skipThisConstraint) {
-        logger.debug("Reloading problem for constraint confirmation: skipThisConstraint={}", skipThisConstraint);
 
-		// restore original state
+    private static void reloadProblemConfirm(String skipThisConstraint) {
+        logger.atDebug()
+                .setMessage("Reloading problem for constraint confirmation: skipThisConstraint={}")
+                .addArgument(skipThisConstraint)
+                .log();
+
+        // restore original state
         try {
             SolverData.getDvarMap().keySet().retainAll(originalDvarKeys);
             int sizeA = gov.ca.water.wrims.engine.core.components.ControlData.currModelDataSet.dvList.size();
@@ -784,16 +971,25 @@ public class CbcSolver {
             setConstraintsSkip(skipThisConstraint);
             jCbc.setModelName(solver, modelName);
 
-            logger.debug("Confirmation problem loaded successfully");
+            logger.atDebug()
+                    .setMessage("Confirmation problem loaded successfully")
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to reload confirmation problem: skipThisConstraint={}", skipThisConstraint, e);
+            logger.atError()
+                    .setMessage("Failed to reload confirmation problem: skipThisConstraint={}")
+                    .addArgument(skipThisConstraint)
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Confirmation problem reload failed", e);
         }
     }
-	
-	private static void loadProblemIIS(boolean isFirstTimeRun, Set<String> enforceThisConstraint) {
-        logger.debug("Loading IIS problem: isFirstTimeRun={}, enforceThisConstraint size={}",
-                isFirstTimeRun, enforceThisConstraint.size());
+
+    private static void loadProblemIIS(boolean isFirstTimeRun, Set<String> enforceThisConstraint) {
+        logger.atDebug()
+                .setMessage("Loading IIS problem: isFirstTimeRun={}, enforceThisConstraint size={}")
+                .addArgument(isFirstTimeRun)
+                .addArgument(enforceThisConstraint.size())
+                .log();
         try {
             iisSlackMap = new LinkedHashMap<Integer, String>();
             // restore original state
@@ -824,35 +1020,47 @@ public class CbcSolver {
             setConstraintsIIS(isFirstTimeRun, enforceThisConstraint);
             jCbc.setModelName(solver, modelName+"_iis");
 
-            logger.debug("IIS problem loaded successfully");
+            logger.atDebug()
+                    .setMessage("IIS problem loaded successfully")
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to load IIS problem: isFirstTimeRun={}", isFirstTimeRun, e);
+            logger.atError()
+                    .setMessage("Failed to load IIS problem: isFirstTimeRun={}")
+                    .addArgument(isFirstTimeRun)
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("IIS problem load failed", e);
         }
     }
-	
-	public static void resetModel() {
 
-		jCbc.delete_jCbcModel(model);
-		model = null;
-				
-		if (!useLpFile) {
-			jCbc.delete_jCoinModel(modelObject);
-			dvBiMap.clear();
-			dvBiMapArray = new ArrayList<String>();
-			dvBiMapInverse.clear();
-		}
+    public static void resetModel() {
 
-        logger.debug("CBC model reset completed");
-	}
+        jCbc.delete_jCbcModel(model);
+        model = null;
 
-	private static void getSolverInformation(int status, int status2){
-		
-		// status
-//		 0 if finished (which includes the case when the algorithm is finished because it has been proved infeasible), 
-//		 1 if stopped by user, and 
-//		 2 if difficulties arose.	
-        logger.error("Solver returned abnormal status: status={}, secondaryStatus={}", status, status2);
+        if (!useLpFile) {
+            jCbc.delete_jCoinModel(modelObject);
+            dvBiMap.clear();
+            dvBiMapArray = new ArrayList<String>();
+            dvBiMapInverse.clear();
+        }
+
+        logger.atDebug()
+                .setMessage("CBC model reset completed")
+                .log();
+    }
+
+    private static void getSolverInformation(int status, int status2){
+
+        // status
+//		 0 if finished (which includes the case when the algorithm is finished because it has been proved infeasible),
+//		 1 if stopped by user, and
+//		 2 if difficulties arose.
+        logger.atError()
+                .setMessage("Solver returned abnormal status: status={}, secondaryStatus={}")
+                .addArgument(status)
+                .addArgument(status2)
+                .log();
 
         switch (status) {
             case 0:
@@ -868,8 +1076,8 @@ public class CbcSolver {
                 gov.ca.water.wrims.engine.core.components.Error.addSolvingError("Status:" + status);
                 break;
         }
-		
-		// secondaryStatus	 
+
+        // secondaryStatus
 //		0 search completed with solution
 //		1 linear relaxation not feasible
 //		2 stopped on gap
@@ -906,16 +1114,18 @@ public class CbcSolver {
                 break;
         }
     }
-	
-	private static void setConstraints(boolean isNoteCbc, String append) {
+
+    private static void setConstraints(boolean isNoteCbc, String append) {
         PerformanceTimer timer = new PerformanceTimer("Constraint Setup");
 
-        logger.info("CBC Solver: Setting up constraints...");
+        logger.atInfo()
+                .setMessage("CBC Solver: Setting up constraints...")
+                .log();
 
         try {
-		    Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
-		    String c="quicklog version 1.0\n";
-		    int rowCounter=0; // row index
+            Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
+            String c="quicklog version 1.0\n";
+            int rowCounter=0; // row index
             int equalityCount = 0;
             int inequalityCount = 0;
 
@@ -924,10 +1134,16 @@ public class CbcSolver {
                 if (i==0){
                     constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gList);
                     constraintCollection.retainAll(constraintMap.keySet());
-                    logger.debug("Processing base constraint set, size: {}", constraintCollection.size());
+                    logger.atDebug()
+                            .setMessage("Processing base constraint set, size: {}")
+                            .addArgument(constraintCollection.size())
+                            .log();
                 }else{
                     constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gTimeArrayList);
-                    logger.debug("Processing time series constraint set, size: {}", constraintCollection.size());
+                    logger.atDebug()
+                            .setMessage("Processing time series constraint set, size: {}")
+                            .addArgument(constraintCollection.size())
+                            .log();
                 }
                 Iterator<String> constraintIterator = constraintCollection.iterator();
 
@@ -940,9 +1156,12 @@ public class CbcSolver {
 
                     String constraintName=(String)constraintIterator.next();
                     EvalConstraint ec=constraintMap.get(constraintName);
-                    logger.trace("Processing constraint: name={}, sign={}, RHS={}",
-                            constraintName, ec.getSign(),
-                            ec.getEvalExpression().getValue().getData().doubleValue());
+                    logger.atTrace()
+                            .setMessage("Processing constraint: name={}, sign={}, RHS={}")
+                            .addArgument(constraintName)
+                            .addArgument(ec.getSign())
+                            .addArgument(ec.getEvalExpression().getValue().getData().doubleValue())
+                            .log();
 
                     if (ec.getSign().equals("=")) {
                         GT = -ec.getEvalExpression().getValue().getData().doubleValue();
@@ -974,7 +1193,10 @@ public class CbcSolver {
                     }
                     else {
                         // error!!
-                        logger.error("Error in CbcSolver: Invalid constraint sign: {}", ec.getSign());
+                        logger.atError()
+                                .setMessage("Error in CbcSolver: Invalid constraint sign: {}")
+                                .addArgument(ec.getSign())
+                                .log();
                     }
 
                     LinkedHashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
@@ -1002,10 +1224,10 @@ public class CbcSolver {
                         if(Math.abs(temp)<ControlData.zeroTolerance) {temp=0;
                         }
                         elements[j]=temp;
-    					j++;
-    				}
+                        j++;
+                    }
 
-				    jCbc.addRow(modelObject,multMap.keySet().size(), index, elements, GT, LT, constraintName);
+                    jCbc.addRow(modelObject,multMap.keySet().size(), index, elements, GT, LT, constraintName);
 
                     if (isNoteCbc) {
                         c = c + constraintName + "," + GT + "," + LT + "," + multMap.keySet().size() + ","
@@ -1014,7 +1236,10 @@ public class CbcSolver {
                     rowCounter++;
                     // Report progress every 1000 constraints
                     if (rowCounter % 1000 == 0) {
-                        logger.debug("Processed {} constraints", rowCounter);
+                        logger.atDebug()
+                                .setMessage("Processed {} constraints")
+                                .addArgument(rowCounter)
+                                .log();
                     }
                 }
             }
@@ -1023,39 +1248,49 @@ public class CbcSolver {
             if (isNoteCbc) Tools.quickLog(modelName + "_" + solveName + "_" + append + ".rows", c);
             long setupTime = timer.stop();
             performanceStats.recordConstraintSetupTime(setupTime);
-            logger.info("Constraint setup complete: total {} constraints (equality: {}, inequality: {})",
-                    rowCounter, equalityCount, inequalityCount);
+            logger.atInfo()
+                    .setMessage("Constraint setup complete: total {} constraints (equality: {}, inequality: {})")
+                    .addArgument(rowCounter)
+                    .addArgument(equalityCount)
+                    .addArgument(inequalityCount)
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to set up constraints", e);
+            logger.atError()
+                    .setMessage("Failed to set up constraints")
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Constraint setup failed", e);
         } finally {
             timer.stop();
         }
     }
-	
-	private static void setConstraintsSkip(String skipThisConstraint) {
-        logger.debug("Setting up constraints with skip: skipThisConstraint={}", skipThisConstraint);
+
+    private static void setConstraintsSkip(String skipThisConstraint) {
+        logger.atDebug()
+                .setMessage("Setting up constraints with skip: skipThisConstraint={}")
+                .addArgument(skipThisConstraint)
+                .log();
 
         Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
         int rowCounter = 0;
         int skippedCount = 0;
 
-		for (int i=0; i<=1; i++){
-			ArrayList<String> constraintCollection;
-			if (i==0){
-				constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gList);
-				constraintCollection.retainAll(constraintMap.keySet());
-			}else{
-				constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gTimeArrayList);
-			}
-			Iterator<String> constraintIterator = constraintCollection.iterator();
-		
-			
-			while(constraintIterator.hasNext()){        
-				double GT=-999;
-				double LT= 999;
-				
-				String constraintName=(String)constraintIterator.next();
+        for (int i=0; i<=1; i++){
+            ArrayList<String> constraintCollection;
+            if (i==0){
+                constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gList);
+                constraintCollection.retainAll(constraintMap.keySet());
+            }else{
+                constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gTimeArrayList);
+            }
+            Iterator<String> constraintIterator = constraintCollection.iterator();
+
+
+            while(constraintIterator.hasNext()){
+                double GT=-999;
+                double LT= 999;
+
+                String constraintName=(String)constraintIterator.next();
 
                 if (skipThisConstraint.equalsIgnoreCase(constraintName)) {
                     skippedCount++;
@@ -1063,95 +1298,105 @@ public class CbcSolver {
                     continue;
                 }
 
-				EvalConstraint ec = constraintMap.get(constraintName);
-			
-				if (ec.getSign().equals("=")) {
-					GT = -ec.getEvalExpression().getValue().getData().doubleValue();
-					if(Math.abs(GT)<ControlData.zeroTolerance) {
+                EvalConstraint ec = constraintMap.get(constraintName);
+
+                if (ec.getSign().equals("=")) {
+                    GT = -ec.getEvalExpression().getValue().getData().doubleValue();
+                    if(Math.abs(GT)<ControlData.zeroTolerance) {
                         GT=0;
                     }
-					LT = GT;
-				} else if (ec.getSign().equals("<") || ec.getSign().equals("<=")){
-					GT = -maxValue;
-					LT = -ec.getEvalExpression().getValue().getData().doubleValue();
-					if(Math.abs(LT)<ControlData.zeroTolerance) {
+                    LT = GT;
+                } else if (ec.getSign().equals("<") || ec.getSign().equals("<=")){
+                    GT = -maxValue;
+                    LT = -ec.getEvalExpression().getValue().getData().doubleValue();
+                    if(Math.abs(LT)<ControlData.zeroTolerance) {
                         LT=0;
                     }
-				} else if (ec.getSign().equals(">")){
-					GT = -ec.getEvalExpression().getValue().getData().doubleValue();
-					if(Math.abs(GT)<ControlData.zeroTolerance) {
+                } else if (ec.getSign().equals(">")){
+                    GT = -ec.getEvalExpression().getValue().getData().doubleValue();
+                    if(Math.abs(GT)<ControlData.zeroTolerance) {
                         GT=0;
                     }
-					LT = maxValue;
-				} else {
-					// error!!
-                    logger.error("Error in CbcSolver: Invalid constraint sign: {}", ec.getSign());
-				}
-			
-				HashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
-				Set multCollection = multMap.keySet();
-				Iterator multIterator = multCollection.iterator();				
-				
-				index = new int[multMap.keySet().size()];	
-				elements = new double[multMap.keySet().size()];	
-				
-				int j=0;
-				while(multIterator.hasNext()){
-					String multName=(String)multIterator.next();
-										
-					if (!dvarMap.containsKey(multName)){ 
-						int sizeDv = dvBiMap.size();
-						dvBiMap.put(sizeDv, multName);
-						dvBiMapInverse.put(multName, sizeDv);
-						
-						addConditionalSlackSurplusToDvarMap(dvarMap, multName, false, "");
-					
-					}					
-					
-					index[j]=dvBiMapInverse.get(multName);
-					double temp = multMap.get(multName).getData().doubleValue();
-					if(Math.abs(temp)<ControlData.zeroTolerance) {
+                    LT = maxValue;
+                } else {
+                    // error!!
+                    logger.atError()
+                            .setMessage("Error in CbcSolver: Invalid constraint sign: {}")
+                            .addArgument(ec.getSign())
+                            .log();
+                }
+
+                HashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
+                Set multCollection = multMap.keySet();
+                Iterator multIterator = multCollection.iterator();
+
+                index = new int[multMap.keySet().size()];
+                elements = new double[multMap.keySet().size()];
+
+                int j=0;
+                while(multIterator.hasNext()){
+                    String multName=(String)multIterator.next();
+
+                    if (!dvarMap.containsKey(multName)){
+                        int sizeDv = dvBiMap.size();
+                        dvBiMap.put(sizeDv, multName);
+                        dvBiMapInverse.put(multName, sizeDv);
+
+                        addConditionalSlackSurplusToDvarMap(dvarMap, multName, false, "");
+
+                    }
+
+                    index[j]=dvBiMapInverse.get(multName);
+                    double temp = multMap.get(multName).getData().doubleValue();
+                    if(Math.abs(temp)<ControlData.zeroTolerance) {
                         temp=0;
                     }
-					elements[j] = temp;
-					j++;
-				}
+                    elements[j] = temp;
+                    j++;
+                }
 
                 jCbc.addRow(modelObject, multMap.keySet().size(), index, elements, GT, LT, constraintName);
                 rowCounter++;
-			}
-		}
-		
-		 jCbc.addRows(solver,modelObject);
-        logger.debug("Skipped constraint setup complete: total {} constraints, skipped {} constraints", rowCounter, skippedCount);
+            }
+        }
+
+        jCbc.addRows(solver,modelObject);
+        logger.atDebug()
+                .setMessage("Skipped constraint setup complete: total {} constraints, skipped {} constraints")
+                .addArgument(rowCounter)
+                .addArgument(skippedCount)
+                .log();
     }
-	
-	private static void setConstraintsIIS(boolean firstTimeRun, Set<String> enforceThisConstraint) {
-        logger.debug("Setting up IIS constraints: firstTimeRun={}, enforceThisConstraint size={}",
-                firstTimeRun, enforceThisConstraint.size());
+
+    private static void setConstraintsIIS(boolean firstTimeRun, Set<String> enforceThisConstraint) {
+        logger.atDebug()
+                .setMessage("Setting up IIS constraints: firstTimeRun={}, enforceThisConstraint size={}")
+                .addArgument(firstTimeRun)
+                .addArgument(enforceThisConstraint.size())
+                .log();
 
         Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
-		int total=0;
+        int total=0;
         int enforcedCount = 0;
 
-		for (int i=0; i<=1; i++){
-			ArrayList<String> constraintCollection;
-			if (i==0){
-				constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gList);
-				constraintCollection.retainAll(constraintMap.keySet());
-			} else {
-				constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gTimeArrayList);
-			}
-			Iterator<String> constraintIterator = constraintCollection.iterator();
+        for (int i=0; i<=1; i++){
+            ArrayList<String> constraintCollection;
+            if (i==0){
+                constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gList);
+                constraintCollection.retainAll(constraintMap.keySet());
+            } else {
+                constraintCollection = new ArrayList<String>(ControlData.currModelDataSet.gTimeArrayList);
+            }
+            Iterator<String> constraintIterator = constraintCollection.iterator();
 
-			while(constraintIterator.hasNext()){
+            while(constraintIterator.hasNext()){
                 total++;
-				
-				double GT=-999;
-				double LT= 999;
-				
-				String constraintName=(String)constraintIterator.next();
-				EvalConstraint ec=constraintMap.get(constraintName);
+
+                double GT=-999;
+                double LT= 999;
+
+                String constraintName=(String)constraintIterator.next();
+                EvalConstraint ec=constraintMap.get(constraintName);
 
                 if (ec.getSign().equals("=")) {
                     GT = -ec.getEvalExpression().getValue().getData().doubleValue();
@@ -1172,97 +1417,105 @@ public class CbcSolver {
                     }
                     LT = maxValue;
                 } else {
-                    logger.error("Error in CbcSolver constraint processing: Unknown constraint sign");
+                    logger.atError()
+                            .setMessage("Error in CbcSolver constraint processing: Unknown constraint sign")
+                            .log();
                 }
-			
-				HashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
-				Set multCollection = multMap.keySet();
-				Iterator multIterator = multCollection.iterator();				
-				
-				index = new int[multMap.keySet().size()+2];	
-				elements = new double[multMap.keySet().size()+2];	
-				
-				int j=0;
-				while(multIterator.hasNext()){
-					String multName=(String)multIterator.next();
-										
-					if (!dvarMap.containsKey(multName)){ 
-						int sizeDv = dvBiMap.size();
-						dvBiMap.put(sizeDv, multName);
-						dvBiMapInverse.put(multName, sizeDv);
-						
-						addConditionalSlackSurplusToDvarMap(dvarMap, multName, false, "");
-					}
-					
-					index[j]=dvBiMapInverse.get(multName);
-					double temp = multMap.get(multName).getData().doubleValue();
-					if(Math.abs(temp)<ControlData.zeroTolerance) {
+
+                HashMap<String, IntDouble> multMap = ec.getEvalExpression().getMultiplier();
+                Set multCollection = multMap.keySet();
+                Iterator multIterator = multCollection.iterator();
+
+                index = new int[multMap.keySet().size()+2];
+                elements = new double[multMap.keySet().size()+2];
+
+                int j=0;
+                while(multIterator.hasNext()){
+                    String multName=(String)multIterator.next();
+
+                    if (!dvarMap.containsKey(multName)){
+                        int sizeDv = dvBiMap.size();
+                        dvBiMap.put(sizeDv, multName);
+                        dvBiMapInverse.put(multName, sizeDv);
+
+                        addConditionalSlackSurplusToDvarMap(dvarMap, multName, false, "");
+                    }
+
+                    index[j]=dvBiMapInverse.get(multName);
+                    double temp = multMap.get(multName).getData().doubleValue();
+                    if(Math.abs(temp)<ControlData.zeroTolerance) {
                         temp=0;
                     }
-					elements[j] = temp;
-					j++;
-				}
+                    elements[j] = temp;
+                    j++;
+                }
 
-				if (firstTimeRun) {
-					int[] newIndex = Arrays.copyOfRange(index, 0, index.length - 2);
-					double[] newElements = Arrays.copyOfRange(elements, 0, elements.length - 2);
-					iisConstraintIndexMap.put(constraintName, newIndex);
-					iisConstraintElementMap.put(constraintName, newElements);
-					iisConstraintSignMap.put(constraintName, ec.getSign());
-					iisConstraintRHSMap.put(constraintName, -ec.getEvalExpression().getValue().getData().doubleValue());
-				}
-				// TODO: add index and elements here for IIS
-				String iisNameP = constraintName + "_p";
-				String iisNameN = constraintName + "_n";
-				
-				double coef = 1;
+                if (firstTimeRun) {
+                    int[] newIndex = Arrays.copyOfRange(index, 0, index.length - 2);
+                    double[] newElements = Arrays.copyOfRange(elements, 0, elements.length - 2);
+                    iisConstraintIndexMap.put(constraintName, newIndex);
+                    iisConstraintElementMap.put(constraintName, newElements);
+                    iisConstraintSignMap.put(constraintName, ec.getSign());
+                    iisConstraintRHSMap.put(constraintName, -ec.getEvalExpression().getValue().getData().doubleValue());
+                }
+                // TODO: add index and elements here for IIS
+                String iisNameP = constraintName + "_p";
+                String iisNameN = constraintName + "_n";
 
-				if (hasPriorityConstraints && _pstc.size()>0) {
-					coef = 0;
-					if (_pstc.contains(constraintName)){
+                double coef = 1;
+
+                if (hasPriorityConstraints && _pstc.size()>0) {
+                    coef = 0;
+                    if (_pstc.contains(constraintName)){
                         coef = 1;
                     }
-				}
-				
-				if (enforceThisConstraint.contains(constraintName)){
+                }
+
+                if (enforceThisConstraint.contains(constraintName)){
                     coef = 0;
                     enforcedCount++;
                 }
-					
-				int z = dvBiMap.size();
-				
-				dvBiMap.put(z, iisNameP);
-				dvBiMapInverse.put(iisNameP, z);
-				index[j] = dvBiMapInverse.get(iisNameP);
-				elements[j] = coef;
-				j++;				
-				iisSlackMap.put(z, constraintName);
-				//iisC
-				jCbc.addCol(modelObject, 0, maxValue, cbcHintRelaxPenalty, iisNameP, false); 
-				
-				dvBiMap.put(z+1, iisNameN);
-				dvBiMapInverse.put(iisNameN, z+1);
-				index[j] = dvBiMapInverse.get(iisNameN);
-				elements[j] = -coef;
-				j++;				
-				iisSlackMap.put(z+1, constraintName);
-				jCbc.addCol(modelObject, 0, maxValue, cbcHintRelaxPenalty, iisNameN, false); 
 
-				jCbc.addRow(modelObject,multMap.keySet().size()+2, index, elements, GT, LT, constraintName);
-			}
-		}
-		
-		jCbc.addRows(solver,modelObject);
+                int z = dvBiMap.size();
+
+                dvBiMap.put(z, iisNameP);
+                dvBiMapInverse.put(iisNameP, z);
+                index[j] = dvBiMapInverse.get(iisNameP);
+                elements[j] = coef;
+                j++;
+                iisSlackMap.put(z, constraintName);
+                //iisC
+                jCbc.addCol(modelObject, 0, maxValue, cbcHintRelaxPenalty, iisNameP, false);
+
+                dvBiMap.put(z+1, iisNameN);
+                dvBiMapInverse.put(iisNameN, z+1);
+                index[j] = dvBiMapInverse.get(iisNameN);
+                elements[j] = -coef;
+                j++;
+                iisSlackMap.put(z+1, constraintName);
+                jCbc.addCol(modelObject, 0, maxValue, cbcHintRelaxPenalty, iisNameN, false);
+
+                jCbc.addRow(modelObject,multMap.keySet().size()+2, index, elements, GT, LT, constraintName);
+            }
+        }
+
+        jCbc.addRows(solver,modelObject);
         total_relaxed_constraints = total;
 
-        logger.debug("IIS constraint setup complete: total {} constraints, enforced {} constraints, relaxation coefficient={}",
-                total, enforcedCount, cbcHintRelaxPenalty);
-	}
-    
-	private static void setDVars(boolean isNoteCbc, String append) {
+        logger.atDebug()
+                .setMessage("IIS constraint setup complete: total {} constraints, enforced {} constraints, relaxation coefficient={}")
+                .addArgument(total)
+                .addArgument(enforcedCount)
+                .addArgument(cbcHintRelaxPenalty)
+                .log();
+    }
+
+    private static void setDVars(boolean isNoteCbc, String append) {
         PerformanceTimer timer = new PerformanceTimer("Variable Setup");
 
-        logger.info("CBC Solver: Setting up decision variables...");
+        logger.atInfo()
+                .setMessage("CBC Solver: Setting up decision variables...")
+                .log();
 
         try {
             Map<String, WeightElement> wm1 = SolverData.getWeightMap();
@@ -1271,7 +1524,10 @@ public class CbcSolver {
             int contVarCount = 0;
             double totalWeight = 0;
 
-            logger.debug("Setting up {} variables", dvBiMap.size());
+            logger.atDebug()
+                    .setMessage("Setting up {} variables")
+                    .addArgument(dvBiMap.size())
+                    .log();
 
             for (int i = 0; i < dvBiMap.size(); i++) {
                 String dvName = dvBiMapArray.get(i);
@@ -1286,9 +1542,13 @@ public class CbcSolver {
                 boolean isInteger = dvObj.integer.equalsIgnoreCase(Param.yes);
                 if (isInteger) {
                     intVarCount++;
-                    logger.trace("Integer variable: name={}, lowerBound={}, upperBound={}, weight={}",
-                            dvName, dvObj.lowerBoundValue.doubleValue(),
-                            dvObj.upperBoundValue.doubleValue(), w);
+                    logger.atTrace()
+                            .setMessage("Integer variable: name={}, lowerBound={}, upperBound={}, weight={}")
+                            .addArgument(dvName)
+                            .addArgument(dvObj.lowerBoundValue.doubleValue())
+                            .addArgument(dvObj.upperBoundValue.doubleValue())
+                            .addArgument(w)
+                            .log();
                 } else {
                     contVarCount++;
                 }
@@ -1309,10 +1569,17 @@ public class CbcSolver {
 
             long setupTime = timer.stop();
             performanceStats.recordVariableSetupTime(setupTime);
-            logger.info("Variable setup complete: continuous variables={}, integer variables={}, total weight={}",
-                    contVarCount, intVarCount, totalWeight);
+            logger.atInfo()
+                    .setMessage("Variable setup complete: continuous variables={}, integer variables={}, total weight={}")
+                    .addArgument(contVarCount)
+                    .addArgument(intVarCount)
+                    .addArgument(totalWeight)
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to set up variables", e);
+            logger.atError()
+                    .setMessage("Failed to set up variables")
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("Variable setup failed", e);
         } finally {
             timer.stop();
@@ -1323,7 +1590,9 @@ public class CbcSolver {
     private static void setDVars2021(boolean isNoteCbc) {
         PerformanceTimer timer = new PerformanceTimer("Variable Setup (2021 version)");
 
-        logger.info("CBC Solver: Setting up decision variables (2021 version)...");
+        logger.atInfo()
+                .setMessage("CBC Solver: Setting up decision variables (2021 version)...")
+                .log();
 
         try {
             int intSize = 0;
@@ -1350,7 +1619,11 @@ public class CbcSolver {
                     dvIntPredict.add(dvName);
                     lb = dvIntMap2021.get(dvName);
                     ub = lb;
-                    logger.trace("Integer variable warm start: name={}, fixed value={}", dvName, lb);
+                    logger.atTrace()
+                            .setMessage("Integer variable warm start: name={}, fixed value={}")
+                            .addArgument(dvName)
+                            .addArgument(lb)
+                            .log();
                 } else {
                     lb = dvObj.lowerBoundValue.doubleValue();
                     ub = dvObj.upperBoundValue.doubleValue();
@@ -1367,26 +1640,35 @@ public class CbcSolver {
             if (isNoteCbc) Tools.quickLog(modelName + "_" + solveName + ".cols", c);
             intVarSize = intSize;
 
-            logger.info("2021 version variable setup complete: integer variables={}, total weight={}", intSize, totalWeight);
+            logger.atInfo()
+                    .setMessage("2021 version variable setup complete: integer variables={}, total weight={}")
+                    .addArgument(intSize)
+                    .addArgument(totalWeight)
+                    .log();
         } catch (Exception e) {
-            logger.error("Failed to set up 2021 variables", e);
+            logger.atError()
+                    .setMessage("Failed to set up 2021 variables")
+                    .setCause(e)
+                    .log();
             throw new RuntimeException("2021 variable setup failed", e);
         } finally {
             timer.report();
         }
     }
-	
-	private static void setDVarsIIS() {
-        logger.debug("Setting up IIS variables");
+
+    private static void setDVarsIIS() {
+        logger.atDebug()
+                .setMessage("Setting up IIS variables")
+                .log();
 
         int intVarCount = 0;
         int contVarCount = 0;
 
         for (int i=0; i<dvBiMap.size(); i++){
-			String dvName = dvBiMap.get(i);
-			Dvar dvObj = dvarMap.get(dvName);
-			
-		    jCbc.addCol(modelObject , dvObj.lowerBoundValue.doubleValue(),
+            String dvName = dvBiMap.get(i);
+            Dvar dvObj = dvarMap.get(dvName);
+
+            jCbc.addCol(modelObject , dvObj.lowerBoundValue.doubleValue(),
                     dvObj.upperBoundValue.doubleValue(), 0, dvName,
                     dvObj.integer.equalsIgnoreCase(Param.yes));
 
@@ -1395,610 +1677,817 @@ public class CbcSolver {
             } else {
                 contVarCount++;
             }
-		}
-        logger.debug("IIS variable setup complete: continuous variables={}, integer variables={}", contVarCount, intVarCount);
+        }
+        logger.atDebug()
+                .setMessage("IIS variable setup complete: continuous variables={}, integer variables={}")
+                .addArgument(contVarCount)
+                .addArgument(intVarCount)
+                .log();
     }
-	
-	public static int[] solve(){
-        logger.info("==================== Solving Start ====================");
+
+    public static int[] solve(){
+        logger.atInfo()
+                .setMessage("==================== Solving Start ====================")
+                .log();
         int ci = ControlData.currCycleIndex + 1;
 
-        logger.info("CBC Standard Solve: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
-                gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
+        logger.atInfo()
+                .setMessage("CBC Standard Solve: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]")
+                .addArgument(modelName)
+                .addArgument(solvFunc)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
 
-        logger.info("CBC Solver: Solving {}/{}/{} Cycle {} [{}]",
-                gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
-                gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
+        logger.atInfo()
+                .setMessage("CBC Solver: Solving {}/{}/{} Cycle {} [{}]")
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
 
-			int status = -99;
-			int status2 = -99;
+        int status = -99;
+        int status2 = -99;
 
-            PerformanceTimer solveTimer = new PerformanceTimer("Solver Execution");
+        PerformanceTimer solveTimer = new PerformanceTimer("Solver Execution");
 
-			if (solvFunc == solvU){
-                logger.debug("Using solveU solving method");
-				int ret = 0;
-				if (useWarm || saveWarm) {
-					int ii = ControlData.currCycleIndex + 1;
-					//System.out.println(ii + ": use warm");
+        if (solvFunc == solvU){
+            logger.atDebug()
+                    .setMessage("Using solveU solving method")
+                    .log();
+            int ret = 0;
+            if (useWarm || saveWarm) {
+                int ii = ControlData.currCycleIndex + 1;
+                //System.out.println(ii + ": use warm");
 
-					if (warmArrayExist) {
-						jCbc.delete_jarray_int(values);
-						jCbc.delete_jarray_string(names);
-						intSolSize = 0;
-						values = null;
-						names = null;
-						warmArrayExist = false;
-					}
+                if (warmArrayExist) {
+                    jCbc.delete_jarray_int(values);
+                    jCbc.delete_jarray_string(names);
+                    intSolSize = 0;
+                    values = null;
+                    names = null;
+                    warmArrayExist = false;
+                }
 
-					intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
-					names = jCbc.new_jarray_string(intSolSize);
-					values = jCbc.new_jarray_int(intSolSize);
-					warmArrayExist = true;
-					int k = 0;
-					for (String dvN : ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)) {
-						jCbc.jarray_string_setitem(names, k, dvN);
-						jCbc.jarray_int_setitem(values, k, dvIntMap.get(dvN));
-						k++;
-					}
-                    logger.debug("Setting warm start: {} integer variables", intSolSize);
+                intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
+                names = jCbc.new_jarray_string(intSolSize);
+                values = jCbc.new_jarray_int(intSolSize);
+                warmArrayExist = true;
+                int k = 0;
+                for (String dvN : ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)) {
+                    jCbc.jarray_string_setitem(names, k, dvN);
+                    jCbc.jarray_int_setitem(values, k, dvIntMap.get(dvN));
+                    k++;
+                }
+                logger.atDebug()
+                        .setMessage("Setting warm start: {} integer variables")
+                        .addArgument(intSolSize)
+                        .log();
 
-                    ret = jCbc.solve_unified(model, solver, names, values, intSolSize, 0);
+                ret = jCbc.solve_unified(model, solver, names, values, intSolSize, 0);
 
-				} else {
-                    logger.debug("Not using warm start");
-					ret = jCbc.solve_unified(model, solver, null, null, 0, 0);
-				}
+            } else {
+                logger.atDebug()
+                        .setMessage("Not using warm start")
+                        .log();
+                ret = jCbc.solve_unified(model, solver, null, null, 0, 0);
+            }
 
-				solveName=solve_u_ret.get(ret);
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("solveU completed: returnCode={}, solveName={}, status={}, secondaryStatus={}",
-                        ret, solveName, status, status2);
+            solveName=solve_u_ret.get(ret);
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            logger.atDebug()
+                    .setMessage("solveU completed: returnCode={}, solveName={}, status={}, secondaryStatus={}")
+                    .addArgument(ret)
+                    .addArgument(solveName)
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
 
-            } else if (solvFunc == solv2) {
-                logger.debug("Using solve2 solving method");
-                solveName="2__";
-				jCbc.setPrimalTolerance(model, solve_2_primalT);
-				jCbc.setIntegerTolerance(model, integerT);
-				jCbc.solve_2(model, solver, 0);
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("solve2 completed: status={}, secondaryStatus={}", status, status2);
+        } else if (solvFunc == solv2) {
+            logger.atDebug()
+                    .setMessage("Using solve2 solving method")
+                    .log();
+            solveName="2__";
+            jCbc.setPrimalTolerance(model, solve_2_primalT);
+            jCbc.setIntegerTolerance(model, integerT);
+            jCbc.solve_2(model, solver, 0);
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            logger.atDebug()
+                    .setMessage("solve2 completed: status={}, secondaryStatus={}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
 
-            } else if (solvFunc == solv3) {
-                logger.debug("Using solve3 solving method");
-                solveName="3__";
-				jCbc.setPrimalTolerance(model, solve_3_primalT);
-				jCbc.setIntegerTolerance(model, integerT);
-				jCbc.solve_3(model, solver, 0);
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("solve3 completed: status={}, secondaryStatus={}", status, status2);
+        } else if (solvFunc == solv3) {
+            logger.atDebug()
+                    .setMessage("Using solve3 solving method")
+                    .log();
+            solveName="3__";
+            jCbc.setPrimalTolerance(model, solve_3_primalT);
+            jCbc.setIntegerTolerance(model, integerT);
+            jCbc.solve_3(model, solver, 0);
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            logger.atDebug()
+                    .setMessage("solve3 completed: status={}, secondaryStatus={}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
 
-            } else if (solvFunc == solvCallCbc) {
-                logger.debug("Using callCbc solving method");
-                solveName="cal";
-				jCbc.setIntegerTolerance(model, integerT);
-				jCbc.callCbc("-log 0 -solve", model);
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("callCbc completed: status={}, secondaryStatus={}", status, status2);
+        } else if (solvFunc == solvCallCbc) {
+            logger.atDebug()
+                    .setMessage("Using callCbc solving method")
+                    .log();
+            solveName="cal";
+            jCbc.setIntegerTolerance(model, integerT);
+            jCbc.callCbc("-log 0 -solve", model);
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            logger.atDebug()
+                    .setMessage("callCbc completed: status={}, secondaryStatus={}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
 
-            } else if (solvFunc == solvFull) {
-                logger.debug("Using solveFull solving method");
+        } else if (solvFunc == solvFull) {
+            logger.atDebug()
+                    .setMessage("Using solveFull solving method")
+                    .log();
 
-                Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
-			    a.retainAll(dvIntMap.keySet());
-			    if ((useWarm || saveWarm) && a.size()>2) {
-                    logger.debug("Using warm start solving, integer variable count: {}", a.size());
+            Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
+            a.retainAll(dvIntMap.keySet());
+            if ((useWarm || saveWarm) && a.size()>2) {
+                logger.atDebug()
+                        .setMessage("Using warm start solving, integer variable count: {}")
+                        .addArgument(a.size())
+                        .log();
 
-                    if (warmArrayExist) {
-					jCbc.delete_jarray_int(values);
-					jCbc.delete_jarray_string(names);
-					intSolSize = 0;
-					values = null;
-					names = null;
-					warmArrayExist = false;
-				}
+                if (warmArrayExist) {
+                    jCbc.delete_jarray_int(values);
+                    jCbc.delete_jarray_string(names);
+                    intSolSize = 0;
+                    values = null;
+                    names = null;
+                    warmArrayExist = false;
+                }
 
-				intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
-				names = jCbc.new_jarray_string(intSolSize);
-				values = jCbc.new_jarray_int(intSolSize);
-				warmArrayExist = true;
-				int k=0;
-				for (String dvN: ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)){
-					jCbc.jarray_string_setitem(names,k,dvN);
-					jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
-					k++;
-				}
+                intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
+                names = jCbc.new_jarray_string(intSolSize);
+                values = jCbc.new_jarray_int(intSolSize);
+                warmArrayExist = true;
+                int k=0;
+                for (String dvN: ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)){
+                    jCbc.jarray_string_setitem(names,k,dvN);
+                    jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
+                    k++;
+                }
 
-				solveName="whs";
-				jCbc.setPrimalTolerance(model, solve_whs_primalT);
-				jCbc.setIntegerTolerance(model, integerT);
-                logger.debug("Starting warm start solve (whs)");
+                solveName="whs";
+                jCbc.setPrimalTolerance(model, solve_whs_primalT);
+                jCbc.setIntegerTolerance(model, integerT);
+                logger.atDebug()
+                        .setMessage("Starting warm start solve (whs)")
+                        .log();
                 jCbc.solve_whs(model,solver,names,values,intSolSize,0);
 
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("Warm start solve completed: status={}, secondaryStatus={}", status, status2);
+                status = jCbc.status(model);
+                status2 = jCbc.secondaryStatus(model);
+                logger.atDebug()
+                        .setMessage("Warm start solve completed: status={}, secondaryStatus={}")
+                        .addArgument(status)
+                        .addArgument(status2)
+                        .log();
 
                 if (status != 0 || status2 != 0) {
-                    logger.warn("Warm start solve failed, trying backup solving method");
+                    logger.atWarn()
+                            .setMessage("Warm start solve failed, trying backup solving method")
+                            .log();
                     reloadProblem(true, "");
                     if (warm_2nd_solvFunc == solv2) {
                         solve_2();
                     } else if (warm_2nd_solvFunc == solv3) {
                         solve_3();
                     } else {
-                        logger.error("Error in warm start backup solving function");
+                        logger.atError()
+                                .setMessage("Error in warm start backup solving function")
+                                .log();
                     }
                 }
 
-			} else {
-                logger.debug("Not using warm start, using backup solving method");
+            } else {
+                logger.atDebug()
+                        .setMessage("Not using warm start, using backup solving method")
+                        .log();
                 if (warm_2nd_solvFunc == solv2) {
-					solve_2();
-				} else if (warm_2nd_solvFunc == solv3) {
-					solve_3();
-				} else {
-                    logger.error("Error in warm start backup solving function");
-				}
-			}
-
-			status = jCbc.status(model);
-			status2 = jCbc.secondaryStatus(model);
-
-			if (status != 0 || status2 != 0) {
-                logger.warn("Solve failed, using relaxed tolerance for retry");
-                note_msg(" Solve_"+solveName+" infeasible. Use solve_2 with primalT="+solve_2_primalT_relax);
-				reloadProblem(false, "");
-				solve_2(solve_2_primalT_relax, "2R_");
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-			}
-
-			////// check for violation and re-solve with v2.10a
-			int Err_int = 0;
-            int Err_lb = 0;
-            if (status == 0 && status2 == 0) {
-                logger.debug("Checking solve result for violations");
-                int ColumnSize = jCbc.getNumCols(model);
-					SWIGTYPE_p_double v_ary = jCbc.getColSolution(solver);
-					Map<String, Dvar> dMap = SolverData.getDvarMap();
-
-					for (int j = 0; j < ColumnSize; j++){
-						 //varDoubleMap.put(jCbc.getColName(model,j), jCbc.jarray_double_getitem(jCbc.getColSolution(solver),j));
-						double v = jCbc.jarray_double_getitem(v_ary,j);
-						String k = jCbc.getColName(model,j);
-
-						if (jCbc.isInteger(solver,j) == 1) {
-							if (Math.abs(v-Math.round(v))>integerT_check){
-								Err_int = 1;
-								ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":intViolation:::" + k + ":" + v,
-                                        true, false);
-							}
-						}
-						else {
-							Dvar d = dMap.get(k);
-							if (d.lowerBoundValue.doubleValue() == 0 &&  v<-lowerBoundZero_check) {
-								Err_lb = 1;
-								ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":lbViolation:::" + k + ":" + v,
-                                        true, false);
-							}
-						}
-					}
-				}
-
-				if (Err_int>0 || Err_lb>0){
-                    logger.warn("Violations detected, rewriting LP file");
-                    reloadAndWriteLp("_lbViolation", true);
-					if (cbcViolationRetry) {
-						note_msg(" Solve_" + solveName + " has violations. Use callCbc");
-						reloadProblem(false, "");
-						callCbc();
-						status = jCbc.status(model);
-						status2 = jCbc.secondaryStatus(model);
-					}
-				}
-			}
-
-            solveTimer.stop();
-
-
-			if (status != 0 || status2 != 0) {
-                logger.error("Solve failed with status: {}, {}", status, status2);
-				reloadAndWriteLp("_infeasible", true, true);
-				getSolverInformation(status, status2);
-				iis();
-			}else {
-                logger.info("Solve completed successfully");
-            }
-            logger.info("==================== Solving End ====================");
-            return new int[]{status, status2};
-		}
-
-
-	public static int[] solve_jCbc2021(){
-            logger.info("==================== 2021 Solver Start ====================");
-            int ci=ControlData.currCycleIndex + 1;
-
-            logger.info("CBC 2021 Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                    modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
-                    gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
-
-            logger.info("CBC Solver2021: Solving {}/{}/{} Cycle {} [{}]",
-                    gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
-                    gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
-			
-			int status=-99;
-			int status2=-99;
-
-            PerformanceTimer solveTimer = new PerformanceTimer("2021 Solver Execution");
-
-			Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
-			a.retainAll(dvIntMap.keySet());
-
-            logger.debug("Available warm start integer variables: {}", a.size());
-
-            if ((useWarm || saveWarm) && a.size()>2) {
-                logger.info("Using warm start solving");
-
-				if (warmArrayExist) {
-					jCbc.delete_jarray_int(values);
-					jCbc.delete_jarray_string(names);
-					intSolSize = 0;
-					values = null;
-					names = null;
-					warmArrayExist = false;
-				}			
-				
-				intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
-				names = jCbc.new_jarray_string(intSolSize);
-				values = jCbc.new_jarray_int(intSolSize);
-				warmArrayExist = true;
-				int k = 0;
-				for (String dvN: ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)){
-					jCbc.jarray_string_setitem(names,k,dvN);
-					jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
-					k++;
-				}
-			
-				solveName="whs";
-				jCbc.setPrimalTolerance(model, solve_whs_primalT);
-				jCbc.setIntegerTolerance(model, integerT);
-                logger.debug("Starting warm start solve");
-                jCbc.solve_whs(model,solver,names,values,intSolSize,0);
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-                logger.debug("Warm start solve completed: status={}, secondaryStatus={}", status, status2);
-
-                if (status != 0 || status2 != 0 ) {
-                    logger.warn("Warm start solve failed, trying solve2");
-                    if (isLogging) {
-                        note_msg(" Solve_"+solveName+" infeasible.");
-                    }
-					reloadProblem(false, "");	
-					solve_2();	
-					status = jCbc.status(model);
-					status2 = jCbc.secondaryStatus(model);	
-				} else if (violationCheck(model, modelName, solveName)) {
-                    logger.warn("Warm start solve has tolerance violations, trying solve2");
-                    if (isLogging) {
-                        note_msg(" Solve_"+solveName+" tolerance violation.");
-                    }
-					reloadProblem(true, "");
-					solve_2();	
-					status = jCbc.status(model);
-					status2 = jCbc.secondaryStatus(model);	
-				}
-
-			} else {
-                    logger.info("Not using warm start, using solve2 directly");
                     solve_2();
-					status = jCbc.status(model);
-					status2 = jCbc.secondaryStatus(model);	
-			}
+                } else if (warm_2nd_solvFunc == solv3) {
+                    solve_3();
+                } else {
+                    logger.atError()
+                            .setMessage("Error in warm start backup solving function")
+                            .log();
+                }
+            }
 
-			if (status != 0 || status2 != 0 ) {
-                logger.warn("Solve failed, using relaxed tolerance for retry");
-                note_msg(" Solve_" + solveName + " infeasible. Use solve_2 with primalT=" + solve_2_primalT_relax);
-				reloadProblem(false, "");
-				solve_2(solve_2_primalT_relax, "2R_");	
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);	
-			}// don't use solve2R if solve2 has violation
-	
-			if (status != 0 || status2 != 0 ) {
-                logger.warn("Solve failed, using callCbc for retry");
-                note_msg(jCbc.getModelName(solver) +" Solve_" + solveName
-                        + " infeasible. Use callCbc -primalT 1e-9 -integerT 1e-9 ");
-				reloadProblem(false, "");
-				callCbc();	
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);	
-				if (status==0 && status2==0){
-					status2 = jCbc.Y2_simple(model,solver);
-				}
-			} else if (violationCheck(model, modelName, solveName)) {
-                logger.warn("Solve has violations, using callCbc for retry");
-                reloadProblem(true, "");
-				callCbc();	
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);	
-				if (status==0 && status2==0){
-					status2 = jCbc.Y2_simple(model,solver);
-				}
-			}
-			
-			if (status != 0 || status2 != 0 ) {
-                logger.warn("Solve failed, using relaxed callCbc for retry");
-                note_msg(jCbc.getModelName(solver) + " Solve_"+solveName
-                        + " infeasible. Use callCbc -primalT 1e-7 -integerT 1e-9 ");
-				reloadProblem(false, "");
-				callCbc_R();	
-				status = jCbc.status(model);
-				status2 = jCbc.secondaryStatus(model);
-				if (status==0 && status2==0){
-					status2 = jCbc.Y2_simple(model,solver);
-				}
-			} // Don't use callCbcR if callCbc has violation
-
-            solveTimer.stop();
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
 
             if (status != 0 || status2 != 0) {
-                logger.error("2021 Solver failed with status: {}, {}", status, status2);
-				reloadAndWriteLp("_infeasible", true, true);
-				getSolverInformation(status, status2);
-				iis();
-			} else {
-                logger.info("2021 Solver completed successfully");
+                logger.atWarn()
+                        .setMessage("Solve failed, using relaxed tolerance for retry")
+                        .log();
+                note_msg(" Solve_"+solveName+" infeasible. Use solve_2 with primalT="+solve_2_primalT_relax);
+                reloadProblem(false, "");
+                solve_2(solve_2_primalT_relax, "2R_");
+                status = jCbc.status(model);
+                status2 = jCbc.secondaryStatus(model);
             }
 
-            logger.info("==================== 2021 Solver End ====================");
-            return new int[]{status, status2};
-		}
+            ////// check for violation and re-solve with v2.10a
+            int Err_int = 0;
+            int Err_lb = 0;
+            if (status == 0 && status2 == 0) {
+                logger.atDebug()
+                        .setMessage("Checking solve result for violations")
+                        .log();
+                int ColumnSize = jCbc.getNumCols(model);
+                SWIGTYPE_p_double v_ary = jCbc.getColSolution(solver);
+                Map<String, Dvar> dMap = SolverData.getDvarMap();
 
-	private static void iis() {
-        logger.info("==================== IIS Analysis Start ====================");
-		// final String[] SET_VALUES = new String[]{ "from_omr_np", "compare_omr_p"  };
-		// prioritizeSearchTheseConstraints = new LinkedHashSet<String>(Arrays.asList(SET_VALUES));
-		// end test
-        int pp=0;
-		iisConstraintIndexMap = new LinkedHashMap<String, int[]>();
-		iisConstraintElementMap = new LinkedHashMap<String, double[]>();
-		iisConstraintSignMap = new LinkedHashMap<String, String>();
-		iisConstraintRHSMap = new LinkedHashMap<String, Double>();
-		iisSlacks = new ArrayList<String>();
-		iisPossibleConstraintMap = new LinkedHashMap<String, String>();
-		iisPossibleConstraintMap_cumulative = new LinkedHashMap<String, String>();
-		iisConfirmConstraint = new LinkedHashSet<String>();
-		
-		InfeasibilityAnalysis.procIfsFile();
-		prioritizeSearchTheseConstraints=InfeasibilityAnalysis.constraintSet;
-		if (prioritizeSearchTheseConstraints!=null && prioritizeSearchTheseConstraints.size()>0) {
-			hasPriorityConstraints = true;
-			_pstc = new LinkedHashSet<String>(prioritizeSearchTheseConstraints);
-            logger.info("Priority search constraint set found, size: {}", prioritizeSearchTheseConstraints.size());
+                for (int j = 0; j < ColumnSize; j++){
+                    //varDoubleMap.put(jCbc.getColName(model,j), jCbc.jarray_double_getitem(jCbc.getColSolution(solver),j));
+                    double v = jCbc.jarray_double_getitem(v_ary,j);
+                    String k = jCbc.getColName(model,j);
+
+                    if (jCbc.isInteger(solver,j) == 1) {
+                        if (Math.abs(v-Math.round(v))>integerT_check){
+                            Err_int = 1;
+                            ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":intViolation:::" + k + ":" + v,
+                                    true, false);
+                        }
+                    }
+                    else {
+                        Dvar d = dMap.get(k);
+                        if (d.lowerBoundValue.doubleValue() == 0 &&  v<-lowerBoundZero_check) {
+                            Err_lb = 1;
+                            ILP.writeNoteLn(modelName + ":" + " Solve_" + solveName + ":lbViolation:::" + k + ":" + v,
+                                    true, false);
+                        }
+                    }
+                }
+            }
+
+            if (Err_int>0 || Err_lb>0){
+                logger.atWarn()
+                        .setMessage("Violations detected, rewriting LP file")
+                        .log();
+                reloadAndWriteLp("_lbViolation", true);
+                if (cbcViolationRetry) {
+                    note_msg(" Solve_" + solveName + " has violations. Use callCbc");
+                    reloadProblem(false, "");
+                    callCbc();
+                    status = jCbc.status(model);
+                    status2 = jCbc.secondaryStatus(model);
+                }
+            }
         }
 
-		boolean isFirstTimeRun = true;
-		boolean success = true;
-		long ts = Calendar.getInstance().getTimeInMillis();
-		int tr=0;
-		boolean isConflictFound = false;
-		
-		while (success) {
-			tr =(int) (Calendar.getInstance().getTimeInMillis()-ts)/1000;
-			if (tr>CbcSolver.cbcHintTimeMax) {
-                logger.warn("IIS analysis stopped due to time limit exceeded: {} seconds", CbcSolver.cbcHintTimeMax);
+        solveTimer.stop();
+
+
+        if (status != 0 || status2 != 0) {
+            logger.atError()
+                    .setMessage("Solve failed with status: {}, {}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
+            reloadAndWriteLp("_infeasible", true, true);
+            getSolverInformation(status, status2);
+            iis();
+        }else {
+            logger.atInfo()
+                    .setMessage("Solve completed successfully")
+                    .log();
+        }
+        logger.atInfo()
+                .setMessage("==================== Solving End ====================")
+                .log();
+        return new int[]{status, status2};
+    }
+
+
+    public static int[] solve_jCbc2021(){
+        logger.atInfo()
+                .setMessage("==================== 2021 Solver Start ====================")
+                .log();
+        int ci=ControlData.currCycleIndex + 1;
+
+        logger.atInfo()
+                .setMessage("CBC 2021 Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]")
+                .addArgument(modelName)
+                .addArgument(solvFunc)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
+
+        logger.atInfo()
+                .setMessage("CBC Solver2021: Solving {}/{}/{} Cycle {} [{}]")
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
+
+        int status=-99;
+        int status2=-99;
+
+        PerformanceTimer solveTimer = new PerformanceTimer("2021 Solver Execution");
+
+        Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
+        a.retainAll(dvIntMap.keySet());
+
+        logger.atDebug()
+                .setMessage("Available warm start integer variables: {}")
+                .addArgument(a.size())
+                .log();
+
+        if ((useWarm || saveWarm) && a.size()>2) {
+            logger.atInfo()
+                    .setMessage("Using warm start solving")
+                    .log();
+
+            if (warmArrayExist) {
+                jCbc.delete_jarray_int(values);
+                jCbc.delete_jarray_string(names);
+                intSolSize = 0;
+                values = null;
+                names = null;
+                warmArrayExist = false;
+            }
+
+            intSolSize = ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size();
+            names = jCbc.new_jarray_string(intSolSize);
+            values = jCbc.new_jarray_int(intSolSize);
+            warmArrayExist = true;
+            int k = 0;
+            for (String dvN: ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)){
+                jCbc.jarray_string_setitem(names,k,dvN);
+                jCbc.jarray_int_setitem(values,k,dvIntMap.get(dvN));
+                k++;
+            }
+
+            solveName="whs";
+            jCbc.setPrimalTolerance(model, solve_whs_primalT);
+            jCbc.setIntegerTolerance(model, integerT);
+            logger.atDebug()
+                    .setMessage("Starting warm start solve")
+                    .log();
+            jCbc.solve_whs(model,solver,names,values,intSolSize,0);
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            logger.atDebug()
+                    .setMessage("Warm start solve completed: status={}, secondaryStatus={}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
+
+            if (status != 0 || status2 != 0 ) {
+                logger.atWarn()
+                        .setMessage("Warm start solve failed, trying solve2")
+                        .log();
+                if (isLogging) {
+                    note_msg(" Solve_"+solveName+" infeasible.");
+                }
+                reloadProblem(false, "");
+                solve_2();
+                status = jCbc.status(model);
+                status2 = jCbc.secondaryStatus(model);
+            } else if (violationCheck(model, modelName, solveName)) {
+                logger.atWarn()
+                        .setMessage("Warm start solve has tolerance violations, trying solve2")
+                        .log();
+                if (isLogging) {
+                    note_msg(" Solve_"+solveName+" tolerance violation.");
+                }
+                reloadProblem(true, "");
+                solve_2();
+                status = jCbc.status(model);
+                status2 = jCbc.secondaryStatus(model);
+            }
+
+        } else {
+            logger.atInfo()
+                    .setMessage("Not using warm start, using solve2 directly")
+                    .log();
+            solve_2();
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+        }
+
+        if (status != 0 || status2 != 0 ) {
+            logger.atWarn()
+                    .setMessage("Solve failed, using relaxed tolerance for retry")
+                    .log();
+            note_msg(" Solve_" + solveName + " infeasible. Use solve_2 with primalT=" + solve_2_primalT_relax);
+            reloadProblem(false, "");
+            solve_2(solve_2_primalT_relax, "2R_");
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+        }// don't use solve2R if solve2 has violation
+
+        if (status != 0 || status2 != 0 ) {
+            logger.atWarn()
+                    .setMessage("Solve failed, using callCbc for retry")
+                    .log();
+            note_msg(jCbc.getModelName(solver) +" Solve_" + solveName
+                    + " infeasible. Use callCbc -primalT 1e-9 -integerT 1e-9 ");
+            reloadProblem(false, "");
+            callCbc();
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            if (status==0 && status2==0){
+                status2 = jCbc.Y2_simple(model,solver);
+            }
+        } else if (violationCheck(model, modelName, solveName)) {
+            logger.atWarn()
+                    .setMessage("Solve has violations, using callCbc for retry")
+                    .log();
+            reloadProblem(true, "");
+            callCbc();
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            if (status==0 && status2==0){
+                status2 = jCbc.Y2_simple(model,solver);
+            }
+        }
+
+        if (status != 0 || status2 != 0 ) {
+            logger.atWarn()
+                    .setMessage("Solve failed, using relaxed callCbc for retry")
+                    .log();
+            note_msg(jCbc.getModelName(solver) + " Solve_"+solveName
+                    + " infeasible. Use callCbc -primalT 1e-7 -integerT 1e-9 ");
+            reloadProblem(false, "");
+            callCbc_R();
+            status = jCbc.status(model);
+            status2 = jCbc.secondaryStatus(model);
+            if (status==0 && status2==0){
+                status2 = jCbc.Y2_simple(model,solver);
+            }
+        } // Don't use callCbcR if callCbc has violation
+
+        solveTimer.stop();
+
+        if (status != 0 || status2 != 0) {
+            logger.atError()
+                    .setMessage("2021 Solver failed with status: {}, {}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
+            reloadAndWriteLp("_infeasible", true, true);
+            getSolverInformation(status, status2);
+            iis();
+        } else {
+            logger.atInfo()
+                    .setMessage("2021 Solver completed successfully")
+                    .log();
+        }
+
+        logger.atInfo()
+                .setMessage("==================== 2021 Solver End ====================")
+                .log();
+        return new int[]{status, status2};
+    }
+
+    private static void iis() {
+        logger.atInfo()
+                .setMessage("==================== IIS Analysis Start ====================")
+                .log();
+        // final String[] SET_VALUES = new String[]{ "from_omr_np", "compare_omr_p"  };
+        // prioritizeSearchTheseConstraints = new LinkedHashSet<String>(Arrays.asList(SET_VALUES));
+        // end test
+        int pp=0;
+        iisConstraintIndexMap = new LinkedHashMap<String, int[]>();
+        iisConstraintElementMap = new LinkedHashMap<String, double[]>();
+        iisConstraintSignMap = new LinkedHashMap<String, String>();
+        iisConstraintRHSMap = new LinkedHashMap<String, Double>();
+        iisSlacks = new ArrayList<String>();
+        iisPossibleConstraintMap = new LinkedHashMap<String, String>();
+        iisPossibleConstraintMap_cumulative = new LinkedHashMap<String, String>();
+        iisConfirmConstraint = new LinkedHashSet<String>();
+
+        InfeasibilityAnalysis.procIfsFile();
+        prioritizeSearchTheseConstraints=InfeasibilityAnalysis.constraintSet;
+        if (prioritizeSearchTheseConstraints!=null && prioritizeSearchTheseConstraints.size()>0) {
+            hasPriorityConstraints = true;
+            _pstc = new LinkedHashSet<String>(prioritizeSearchTheseConstraints);
+            logger.atInfo()
+                    .setMessage("Priority search constraint set found, size: {}")
+                    .addArgument(prioritizeSearchTheseConstraints.size())
+                    .log();
+        }
+
+        boolean isFirstTimeRun = true;
+        boolean success = true;
+        long ts = Calendar.getInstance().getTimeInMillis();
+        int tr=0;
+        boolean isConflictFound = false;
+
+        while (success) {
+            tr =(int) (Calendar.getInstance().getTimeInMillis()-ts)/1000;
+            if (tr>CbcSolver.cbcHintTimeMax) {
+                logger.atWarn()
+                        .setMessage("IIS analysis stopped due to time limit exceeded: {} seconds")
+                        .addArgument(CbcSolver.cbcHintTimeMax)
+                        .log();
                 ILP.writeNoteLn("\r\nInfeasibility analysis stopped due to time limit exceeded.", true, true);
-				break;
+                break;
             }
-			
-			iisPossibleConstraintMap_cumulative.putAll(iisPossibleConstraintMap);
 
-			if (hasPriorityConstraints) {				
-				_pstc.removeAll(iisConfirmConstraint);
-				if (_pstc.size()<1) {hasPriorityConstraints = false;
-                    logger.info("All priority constraints have been confirmed");
+            iisPossibleConstraintMap_cumulative.putAll(iisPossibleConstraintMap);
+
+            if (hasPriorityConstraints) {
+                _pstc.removeAll(iisConfirmConstraint);
+                if (_pstc.size()<1) {hasPriorityConstraints = false;
+                    logger.atInfo()
+                            .setMessage("All priority constraints have been confirmed")
+                            .log();
                 }
             }
-			iisPossibleConstraintMap.clear();
-			iisConfirmConstraint.clear();
+            iisPossibleConstraintMap.clear();
+            iisConfirmConstraint.clear();
 
-            logger.debug("Starting IIS solve, attempt {}", pp + 1);
+            logger.atDebug()
+                    .setMessage("Starting IIS solve, attempt {}")
+                    .addArgument(pp + 1)
+                    .log();
             success = iisSolve(isFirstTimeRun, iisPossibleConstraintMap_cumulative.keySet());
-			//isFirstTimeRun=false;
-			
-			if (hasPriorityConstraints) {
-				if (!success || iisPossibleConstraintMap.size()<1){
-                    logger.info("Priority search ended");
-                    ILP.writeNoteLn("End priority search.",true,false);
-					hasPriorityConstraints = false;
-					_pstc = null;
-					success = true;
-					continue;
-				}
-			}
-				
-			if (!success || iisPossibleConstraintMap.size()<1) {
-                logger.info("IIS analysis ended");
-                ILP.writeNoteLn("Infeasibility analysis ended.", true, false);
-				if (iisPossibleConstraintMap_cumulative.size()>0) {
-					if (!isConflictFound) {
-                        logger.warn("The following constraints might cause infeasibility");
-						ILP.writeNoteLn("The following constraints might cause infeasibility.", true, false);
-						for (String c: iisPossibleConstraintMap_cumulative.keySet()){
-							ILP.writeNoteLn(Tools.findGoalLocation(c)+" "+iisPossibleConstraintMap_cumulative.get(c),true,true);
-						}
-					}	
-				}
-                logger.info("==================== IIS Analysis End ====================");
-                return;
-			} else {
-                logger.info("Finding constraints that cause infeasibility...");
-                ILP.writeNoteLn("Finding constraints that cause infeasibility...", true, false);
-			}
+            //isFirstTimeRun=false;
 
-			for (String c : iisPossibleConstraintMap.keySet()){
-                logger.debug("Confirming constraint: {}", c);
-                if(iisSolveConfirm(c)){
-					isConflictFound = true;
-					iisConfirmConstraint.add(c); //pp++; ILP.writeNoteLn("found:"+pp,true,true);
-                    logger.info("Confirmed infeasible constraint: {}", c);
+            if (hasPriorityConstraints) {
+                if (!success || iisPossibleConstraintMap.size()<1){
+                    logger.atInfo()
+                            .setMessage("Priority search ended")
+                            .log();
+                    ILP.writeNoteLn("End priority search.",true,false);
+                    hasPriorityConstraints = false;
+                    _pstc = null;
+                    success = true;
+                    continue;
                 }
-			}
-			
-			if (iisConfirmConstraint.size()>0) {
-                logger.warn("Found {} infeasible constraints", iisConfirmConstraint.size());
+            }
+
+            if (!success || iisPossibleConstraintMap.size()<1) {
+                logger.atInfo()
+                        .setMessage("IIS analysis ended")
+                        .log();
+                ILP.writeNoteLn("Infeasibility analysis ended.", true, false);
+                if (iisPossibleConstraintMap_cumulative.size()>0) {
+                    if (!isConflictFound) {
+                        logger.atWarn()
+                                .setMessage("The following constraints might cause infeasibility")
+                                .log();
+                        ILP.writeNoteLn("The following constraints might cause infeasibility.", true, false);
+                        for (String c: iisPossibleConstraintMap_cumulative.keySet()){
+                            ILP.writeNoteLn(Tools.findGoalLocation(c)+" "+iisPossibleConstraintMap_cumulative.get(c),true,true);
+                        }
+                    }
+                }
+                logger.atInfo()
+                        .setMessage("==================== IIS Analysis End ====================")
+                        .log();
+                return;
+            } else {
+                logger.atInfo()
+                        .setMessage("Finding constraints that cause infeasibility...")
+                        .log();
+                ILP.writeNoteLn("Finding constraints that cause infeasibility...", true, false);
+            }
+
+            for (String c : iisPossibleConstraintMap.keySet()){
+                logger.atDebug()
+                        .setMessage("Confirming constraint: {}")
+                        .addArgument(c)
+                        .log();
+                if(iisSolveConfirm(c)){
+                    isConflictFound = true;
+                    iisConfirmConstraint.add(c); //pp++; ILP.writeNoteLn("found:"+pp,true,true);
+                    logger.atInfo()
+                            .setMessage("Confirmed infeasible constraint: {}")
+                            .addArgument(c)
+                            .log();
+                }
+            }
+
+            if (iisConfirmConstraint.size()>0) {
+                logger.atWarn()
+                        .setMessage("Found {} infeasible constraints")
+                        .addArgument(iisConfirmConstraint.size())
+                        .log();
                 for (String c : iisConfirmConstraint){
-						ILP.writeNoteLn(Tools.findGoalLocation(c)+" "+iisPossibleConstraintMap.get(c),true,true);
-				}
-			}
+                    ILP.writeNoteLn(Tools.findGoalLocation(c)+" "+iisPossibleConstraintMap.get(c),true,true);
+                }
+            }
             isFirstTimeRun = false;
             pp++;
         }
-        logger.info("==================== IIS Analysis End ====================");
+        logger.atInfo()
+                .setMessage("==================== IIS Analysis End ====================")
+                .log();
     }
 
-	private static boolean iisSolveConfirm(String skipThisConstraint) {
-        logger.debug("IIS confirmation solve, skipping constraint: {}", skipThisConstraint);
+    private static boolean iisSolveConfirm(String skipThisConstraint) {
+        logger.atDebug()
+                .setMessage("IIS confirmation solve, skipping constraint: {}")
+                .addArgument(skipThisConstraint)
+                .log();
         boolean success = false;
 
-		reloadProblemConfirm(skipThisConstraint);
-		if (CbcSolver.usejCbc2021a) {
-			jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
-		} else {
-			callCbc();
-		}
-		int s = jCbc.status(model);
-		int s2 = jCbc.secondaryStatus(model);
-
-		if (s == 0 && s2 == 0) {
-			success = true;
-            logger.debug("IIS confirmation solve successful");
+        reloadProblemConfirm(skipThisConstraint);
+        if (CbcSolver.usejCbc2021a) {
+            jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
         } else {
-			success = false;
-            logger.debug("IIS confirmation solve failed: status={}, secondaryStatus={}", s, s2);
+            callCbc();
+        }
+        int s = jCbc.status(model);
+        int s2 = jCbc.secondaryStatus(model);
+
+        if (s == 0 && s2 == 0) {
+            success = true;
+            logger.atDebug()
+                    .setMessage("IIS confirmation solve successful")
+                    .log();
+        } else {
+            success = false;
+            logger.atDebug()
+                    .setMessage("IIS confirmation solve failed: status={}, secondaryStatus={}")
+                    .addArgument(s)
+                    .addArgument(s2)
+                    .log();
         }
 
-		return success;
-	}
-	
-	private static boolean iisSolve(boolean isFirstTimeRun, Set<String> enforceThisConstraint) {
-        logger.debug("IIS solve: isFirstTimeRun={}, enforceThisConstraint size={}",
-                isFirstTimeRun, enforceThisConstraint.size());
-        boolean success = false;
-
-		loadProblemIIS(isFirstTimeRun, enforceThisConstraint);
-
-		if (CbcSolver.usejCbc2021a) {
-			jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
-		} else {
-			callCbc();
-		}
-		int s = jCbc.status(model);
-		int s2 = jCbc.secondaryStatus(model);
-
-		if (s == 0 && s2 == 0) {
-            logger.debug("IIS solve successful, checking slack variables");
-            for (int j : iisSlackMap.keySet()) {
-				String name = iisSlackMap.get(j);
-				String name2 = jCbc.getColName(model, j);
-				// check if name matches
-				if (!name2.substring(0, name2.length() - 2).equalsIgnoreCase(name)) {
-                    logger.warn("Slack variable name mismatch: {} vs {}", jCbc.getColName(model, j), name);
-				} else {
-					// check if solution not zero
-					if (jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j) > 0) {
-                        logger.debug("Found slack constraint: {}", name);
-						int[] index = iisConstraintIndexMap.get(name);
-						double[] coeff = iisConstraintElementMap.get(name);
-						String show = name + ": ";
-						for (int r = 0; r < index.length; r++) {
-							int k = index[r];
-							String var = dvBiMap.get(k);
-							double coef = coeff[r];
-							if (r != 0) {
-								if (coef >= 0) {
-									show = show + " +";
-								} else {
-									show = show + " ";
-								}
-							}
-							
-							String coefPrint = "";
-
-							if(coef==-1){
-								coefPrint = "-";
-							} else if(coef==1){
-								coefPrint = "";
-							} else {
-								coefPrint = Tools.noZerofmt(coef);
-							}
-							show = show + coefPrint + " " + var;
-						}
-						show += " " + iisConstraintSignMap.get(name);
-						show += " " + Tools.noZerofmt(iisConstraintRHSMap.get(name));
-						iisPossibleConstraintMap.put(name, show);
-					}
-				}
-			}
-			success = true;
-		} else {
-            logger.debug("IIS solve failed: status={}, secondaryStatus={}", s, s2);
-            success = false;
-		}
-
-		return success;
-	}
-
-	private static void collectDvar() {
-        PerformanceTimer timer = new PerformanceTimer("Variable Collection");
-        logger.info("CBC Solver: Collecting variable results...");
-
-        int ColumnSize = jCbc.getNumCols(model);
-		varDoubleMap = new LinkedHashMap<String, Double>();
-		dvIntMap = new LinkedHashMap<String, Integer>();
-
-        logger.debug("Collecting {} variables", ColumnSize);
-
-        if (saveWarm||useWarm||saveIntVars) {
-            logger.debug("Saving warm start solution or integer variables");
-			for (int j = 0; j < ColumnSize; j++) {
-                String colName = jCbc.getColName(model, j);
-                double value = jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j);
-                varDoubleMap.put(colName, value);
-
-				 if (jCbc.isInteger(solver,j)==1) {
-                     int intValue = (int) Math.round(value);
-                     dvIntMap.put(colName, intValue);
-                     logger.trace("Integer variable: name={}, value={} (rounded: {})", colName, value, intValue);
-                 }
-			}
-		} else {
-			for (int j = 0; j < ColumnSize; j++){
-                String colName = jCbc.getColName(model, j);
-                double value = jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j);
-                varDoubleMap.put(colName, value);
-			}
-		}
-        timer.stop();
-        logger.info("Variable collection complete: total {} variables", varDoubleMap.size());
+        return success;
     }
 
-	private static void collectDvar2021() {
+    private static boolean iisSolve(boolean isFirstTimeRun, Set<String> enforceThisConstraint) {
+        logger.atDebug()
+                .setMessage("IIS solve: isFirstTimeRun={}, enforceThisConstraint size={}")
+                .addArgument(isFirstTimeRun)
+                .addArgument(enforceThisConstraint.size())
+                .log();
+        boolean success = false;
+
+        loadProblemIIS(isFirstTimeRun, enforceThisConstraint);
+
+        if (CbcSolver.usejCbc2021a) {
+            jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
+        } else {
+            callCbc();
+        }
+        int s = jCbc.status(model);
+        int s2 = jCbc.secondaryStatus(model);
+
+        if (s == 0 && s2 == 0) {
+            logger.atDebug()
+                    .setMessage("IIS solve successful, checking slack variables")
+                    .log();
+            for (int j : iisSlackMap.keySet()) {
+                String name = iisSlackMap.get(j);
+                String name2 = jCbc.getColName(model, j);
+                // check if name matches
+                if (!name2.substring(0, name2.length() - 2).equalsIgnoreCase(name)) {
+                    logger.atWarn()
+                            .setMessage("Slack variable name mismatch: {} vs {}")
+                            .addArgument(jCbc.getColName(model, j))
+                            .addArgument(name)
+                            .log();
+                } else {
+                    // check if solution not zero
+                    if (jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j) > 0) {
+                        logger.atDebug()
+                                .setMessage("Found slack constraint: {}")
+                                .addArgument(name)
+                                .log();
+                        int[] index = iisConstraintIndexMap.get(name);
+                        double[] coeff = iisConstraintElementMap.get(name);
+                        String show = name + ": ";
+                        for (int r = 0; r < index.length; r++) {
+                            int k = index[r];
+                            String var = dvBiMap.get(k);
+                            double coef = coeff[r];
+                            if (r != 0) {
+                                if (coef >= 0) {
+                                    show = show + " +";
+                                } else {
+                                    show = show + " ";
+                                }
+                            }
+
+                            String coefPrint = "";
+
+                            if(coef==-1){
+                                coefPrint = "-";
+                            } else if(coef==1){
+                                coefPrint = "";
+                            } else {
+                                coefPrint = Tools.noZerofmt(coef);
+                            }
+                            show = show + coefPrint + " " + var;
+                        }
+                        show += " " + iisConstraintSignMap.get(name);
+                        show += " " + Tools.noZerofmt(iisConstraintRHSMap.get(name));
+                        iisPossibleConstraintMap.put(name, show);
+                    }
+                }
+            }
+            success = true;
+        } else {
+            logger.atDebug()
+                    .setMessage("IIS solve failed: status={}, secondaryStatus={}")
+                    .addArgument(s)
+                    .addArgument(s2)
+                    .log();
+            success = false;
+        }
+
+        return success;
+    }
+
+    private static void collectDvar() {
+        PerformanceTimer timer = new PerformanceTimer("Variable Collection");
+        logger.atInfo()
+                .setMessage("CBC Solver: Collecting variable results...")
+                .log();
+
+        int ColumnSize = jCbc.getNumCols(model);
+        varDoubleMap = new LinkedHashMap<String, Double>();
+        dvIntMap = new LinkedHashMap<String, Integer>();
+
+        logger.atDebug()
+                .setMessage("Collecting {} variables")
+                .addArgument(ColumnSize)
+                .log();
+
+        if (saveWarm||useWarm||saveIntVars) {
+            logger.atDebug()
+                    .setMessage("Saving warm start solution or integer variables")
+                    .log();
+            for (int j = 0; j < ColumnSize; j++) {
+                String colName = jCbc.getColName(model, j);
+                double value = jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j);
+                varDoubleMap.put(colName, value);
+
+                if (jCbc.isInteger(solver,j)==1) {
+                    int intValue = (int) Math.round(value);
+                    dvIntMap.put(colName, intValue);
+                    logger.atTrace()
+                            .setMessage("Integer variable: name={}, value={} (rounded: {})")
+                            .addArgument(colName)
+                            .addArgument(value)
+                            .addArgument(intValue)
+                            .log();
+                }
+            }
+        } else {
+            for (int j = 0; j < ColumnSize; j++){
+                String colName = jCbc.getColName(model, j);
+                double value = jCbc.jarray_double_getitem(jCbc.getColSolution(solver), j);
+                varDoubleMap.put(colName, value);
+            }
+        }
+        timer.stop();
+        logger.atInfo()
+                .setMessage("Variable collection complete: total {} variables")
+                .addArgument(varDoubleMap.size())
+                .log();
+    }
+
+    private static void collectDvar2021() {
         PerformanceTimer timer = new PerformanceTimer("Variable Collection (2021 version)");
 
-        logger.info("CBC Solver: Collecting variable results (2021 version)...");
-		
-		int ColumnSize = jCbc.getNumCols(model);
-		varDoubleMap = new LinkedHashMap<String, Double>();
-		dvIntMap = new LinkedHashMap<String, Integer>();
+        logger.atInfo()
+                .setMessage("CBC Solver: Collecting variable results (2021 version)...")
+                .log();
 
-        logger.debug("Collecting {} variables (2021 version)", ColumnSize);
+        int ColumnSize = jCbc.getNumCols(model);
+        varDoubleMap = new LinkedHashMap<String, Double>();
+        dvIntMap = new LinkedHashMap<String, Integer>();
+
+        logger.atDebug()
+                .setMessage("Collecting {} variables (2021 version)")
+                .addArgument(ColumnSize)
+                .log();
 
         //int k = 0;
         for (int j = 0; j < ColumnSize; j++){
@@ -2009,475 +2498,632 @@ public class CbcSolver {
             if (jCbc.isInteger(solver, j) == 1) {
                 int intValue = (int) Math.round(value);
                 dvIntMap.put(colName, intValue);
-                logger.trace("Integer variable (2021): name={}, value={} (rounded: {})", colName, value, intValue);
+                logger.atTrace()
+                        .setMessage("Integer variable (2021): name={}, value={} (rounded: {})")
+                        .addArgument(colName)
+                        .addArgument(value)
+                        .addArgument(intValue)
+                        .log();
             }
         }
         dvIntMap2021.putAll(dvIntMap);
 
         timer.stop();
-        logger.info("2021 version variable collection complete: total {} variables, {} integer variables",
-                varDoubleMap.size(), dvIntMap.size());
+        logger.atInfo()
+                .setMessage("2021 version variable collection complete: total {} variables, {} integer variables")
+                .addArgument(varDoubleMap.size())
+                .addArgument(dvIntMap.size())
+                .log();
     }
-	
-	private static LinkedHashMap<String, Double> collectDvar2021_simple() {
-        logger.debug("Simple variable collection (2021 version)");
 
-		int ColumnSize = jCbc.getNumCols(model);
-		LinkedHashMap<String, Double> vMap = new LinkedHashMap<String, Double>();
-		
-		for (int j = 0; j < ColumnSize; j++){
-			 vMap.put(jCbc.getColName(model,j),
-                     jCbc.jarray_double_getitem(jCbc.getColSolution(model),j));
-		}
-        logger.debug("Simple collection complete: {} variables", vMap.size());
+    private static LinkedHashMap<String, Double> collectDvar2021_simple() {
+        logger.atDebug()
+                .setMessage("Simple variable collection (2021 version)")
+                .log();
+
+        int ColumnSize = jCbc.getNumCols(model);
+        LinkedHashMap<String, Double> vMap = new LinkedHashMap<String, Double>();
+
+        for (int j = 0; j < ColumnSize; j++){
+            vMap.put(jCbc.getColName(model,j),
+                    jCbc.jarray_double_getitem(jCbc.getColSolution(model),j));
+        }
+        logger.atDebug()
+                .setMessage("Simple collection complete: {} variables")
+                .addArgument(vMap.size())
+                .log();
         return vMap;
-	
-	}
 
-	private static void assignDvar() {
+    }
+
+    private static void assignDvar() {
         PerformanceTimer timer = new PerformanceTimer("Variable Assignment");
 
-        logger.info("CBC Solver: Assigning variable values...");
+        logger.atInfo()
+                .setMessage("CBC Solver: Assigning variable values...")
+                .log();
 
-		Map<String, Map<String, IntDouble>> varCycleValueMap=ControlData.currStudyDataSet.getVarCycleValueMap();
-		Map<String, Map<String, IntDouble>> varTimeArrayCycleValueMap=ControlData.currStudyDataSet.getVarTimeArrayCycleValueMap();
-		Set<String> dvarUsedByLaterCycle = ControlData.currModelDataSet.dvarUsedByLaterCycle;
-		Set<String> dvarTimeArrayUsedByLaterCycle = ControlData.currModelDataSet.dvarTimeArrayUsedByLaterCycle;
-		ArrayList<String> timeArrayDvList = ControlData.currModelDataSet.timeArrayDvList;
-		String modelName=ControlData.currCycleName;
+        Map<String, Map<String, IntDouble>> varCycleValueMap=ControlData.currStudyDataSet.getVarCycleValueMap();
+        Map<String, Map<String, IntDouble>> varTimeArrayCycleValueMap=ControlData.currStudyDataSet.getVarTimeArrayCycleValueMap();
+        Set<String> dvarUsedByLaterCycle = ControlData.currModelDataSet.dvarUsedByLaterCycle;
+        Set<String> dvarTimeArrayUsedByLaterCycle = ControlData.currModelDataSet.dvarTimeArrayUsedByLaterCycle;
+        ArrayList<String> timeArrayDvList = ControlData.currModelDataSet.timeArrayDvList;
+        String modelName=ControlData.currCycleName;
 
-		StudyDataSet sds = ControlData.currStudyDataSet;
-		ArrayList<String> varCycleIndexList = sds.getVarCycleIndexList();
-		ArrayList<String> dvarTimeArrayCycleIndexList = sds.getDvarTimeArrayCycleIndexList();
-		Map<String, Map<String, IntDouble>> varCycleIndexValueMap = sds.getVarCycleIndexValueMap();
+        StudyDataSet sds = ControlData.currStudyDataSet;
+        ArrayList<String> varCycleIndexList = sds.getVarCycleIndexList();
+        ArrayList<String> dvarTimeArrayCycleIndexList = sds.getDvarTimeArrayCycleIndexList();
+        Map<String, Map<String, IntDouble>> varCycleIndexValueMap = sds.getVarCycleIndexValueMap();
 
-		Map<String, Dvar> dvarMap = SolverData.getDvarMap();
+        Map<String, Dvar> dvarMap = SolverData.getDvarMap();
 
-		HashSet<String> extraDv = new HashSet<String>(dvarMap.keySet());
-		extraDv.removeAll(varDoubleMap.keySet());
+        HashSet<String> extraDv = new HashSet<String>(dvarMap.keySet());
+        extraDv.removeAll(varDoubleMap.keySet());
 
-        logger.debug("Processing {} extra variables", extraDv.size());
+        logger.atDebug()
+                .setMessage("Processing {} extra variables")
+                .addArgument(extraDv.size())
+                .log();
 
         for (String dvName: extraDv) {
-			Dvar dvar = dvarMap.get(dvName);
-			double value=0;
-			if (dvar.lowerBoundValue.doubleValue()>0) {
+            Dvar dvar = dvarMap.get(dvName);
+            double value=0;
+            if (dvar.lowerBoundValue.doubleValue()>0) {
                 value = dvar.lowerBoundValue.doubleValue();
-                logger.trace("Extra variable using lower bound: name={}, value={}", dvName, value);
+                logger.atTrace()
+                        .setMessage("Extra variable using lower bound: name={}, value={}")
+                        .addArgument(dvName)
+                        .addArgument(value)
+                        .log();
             }
-			varDoubleMap.put(dvName, value);
-			IntDouble id = new IntDouble(value, false);
-			dvar.setData(id);
-			if(dvarUsedByLaterCycle.contains(dvName)){
-				varCycleValueMap.get(dvName).put(modelName, id);
-			}else if (dvarTimeArrayUsedByLaterCycle.contains(dvName)){
-				if (varTimeArrayCycleValueMap.containsKey(dvName)){
-					varTimeArrayCycleValueMap.get(dvName).put(modelName, dvar.data);
-				}else{
-					Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
-					cycleValue.put(modelName, dvar.data);
-					varTimeArrayCycleValueMap.put(dvName, cycleValue);
-				}
-			}
-			if (varCycleIndexList.contains(dvName) || dvarTimeArrayCycleIndexList.contains(dvName)){
-				if (varCycleIndexValueMap.containsKey(dvName)){
-					varCycleIndexValueMap.get(dvName).put(modelName, dvar.data);
-				}else{
-					Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
-					cycleValue.put(modelName, dvar.data);
-					varCycleIndexValueMap.put(dvName, cycleValue);
-				}
-			}
-			String entryNameTS=DssOperation.entryNameTS(dvName, ControlData.timeStep);
-			DataTimeSeries.saveDataToTimeSeries(dvName, entryNameTS, value, dvar);
-			if (timeArrayDvList.contains(dvName)){
-				entryNameTS=DssOperation.entryNameTS(dvName+"__fut__0", ControlData.timeStep);
-				DataTimeSeries.saveDataToTimeSeries(entryNameTS, value, dvar, 0);
-			}
-		}
+            varDoubleMap.put(dvName, value);
+            IntDouble id = new IntDouble(value, false);
+            dvar.setData(id);
+            if(dvarUsedByLaterCycle.contains(dvName)){
+                varCycleValueMap.get(dvName).put(modelName, id);
+            }else if (dvarTimeArrayUsedByLaterCycle.contains(dvName)){
+                if (varTimeArrayCycleValueMap.containsKey(dvName)){
+                    varTimeArrayCycleValueMap.get(dvName).put(modelName, dvar.data);
+                }else{
+                    Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
+                    cycleValue.put(modelName, dvar.data);
+                    varTimeArrayCycleValueMap.put(dvName, cycleValue);
+                }
+            }
+            if (varCycleIndexList.contains(dvName) || dvarTimeArrayCycleIndexList.contains(dvName)){
+                if (varCycleIndexValueMap.containsKey(dvName)){
+                    varCycleIndexValueMap.get(dvName).put(modelName, dvar.data);
+                }else{
+                    Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
+                    cycleValue.put(modelName, dvar.data);
+                    varCycleIndexValueMap.put(dvName, cycleValue);
+                }
+            }
+            String entryNameTS=DssOperation.entryNameTS(dvName, ControlData.timeStep);
+            DataTimeSeries.saveDataToTimeSeries(dvName, entryNameTS, value, dvar);
+            if (timeArrayDvList.contains(dvName)){
+                entryNameTS=DssOperation.entryNameTS(dvName+"__fut__0", ControlData.timeStep);
+                DataTimeSeries.saveDataToTimeSeries(entryNameTS, value, dvar, 0);
+            }
+        }
         int assignedCount = 0;
         //TODO: weird bug. need to fix
-		for (String dvName: varDoubleMap.keySet()) {
-			Dvar dvar=dvarMap.get(dvName);
-			double value=varDoubleMap.get(dvName);
-			IntDouble id=new IntDouble(value,false);
+        for (String dvName: varDoubleMap.keySet()) {
+            Dvar dvar=dvarMap.get(dvName);
+            double value=varDoubleMap.get(dvName);
+            IntDouble id=new IntDouble(value,false);
 
-			//TODO: weird bug. need to fix
-			try {
-				dvar.setData(id);
+            //TODO: weird bug. need to fix
+            try {
+                dvar.setData(id);
                 assignedCount++;
             } catch (Exception e) {
-                logger.warn("Variable assignment failed, creating new variable: name={}", dvName, e);
-				dvar=new Dvar();
-				dvar.upperBoundValue = maxValue;
-				dvar.lowerBoundValue = 0.0;
-				dvar.setData(id);
-				dvarMap.put(dvName, dvar);
+                logger.atWarn()
+                        .setMessage("Variable assignment failed, creating new variable: name={}")
+                        .addArgument(dvName)
+                        .setCause(e)
+                        .log();
+                dvar=new Dvar();
+                dvar.upperBoundValue = maxValue;
+                dvar.lowerBoundValue = 0.0;
+                dvar.setData(id);
+                dvarMap.put(dvName, dvar);
                 assignedCount++;
             }
 
-			if(dvarUsedByLaterCycle.contains(dvName)){
-				varCycleValueMap.get(dvName).put(modelName, id);
-			}else if (dvarTimeArrayUsedByLaterCycle.contains(dvName)){
-				if (varTimeArrayCycleValueMap.containsKey(dvName)){
-					varTimeArrayCycleValueMap.get(dvName).put(modelName, dvar.data);
-				} else {
-					Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
-					cycleValue.put(modelName, dvar.data);
-					varTimeArrayCycleValueMap.put(dvName, cycleValue);
-				}
-			}
-			if (varCycleIndexList.contains(dvName) || dvarTimeArrayCycleIndexList.contains(dvName)){
-				if (varCycleIndexValueMap.containsKey(dvName)){
-					varCycleIndexValueMap.get(dvName).put(modelName, dvar.data);
-				} else {
-					Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
-					cycleValue.put(modelName, dvar.data);
-					varCycleIndexValueMap.put(dvName, cycleValue);
-				}
-			}
-			String entryNameTS=DssOperation.entryNameTS(dvName, ControlData.timeStep);
-			DataTimeSeries.saveDataToTimeSeries(dvName, entryNameTS, value, dvar);
-			if (timeArrayDvList.contains(dvName)){
-				entryNameTS=DssOperation.entryNameTS(dvName+"__fut__0", ControlData.timeStep);
-				DataTimeSeries.saveDataToTimeSeries(entryNameTS, value, dvar, 0);
-			}
-		}
+            if(dvarUsedByLaterCycle.contains(dvName)){
+                varCycleValueMap.get(dvName).put(modelName, id);
+            }else if (dvarTimeArrayUsedByLaterCycle.contains(dvName)){
+                if (varTimeArrayCycleValueMap.containsKey(dvName)){
+                    varTimeArrayCycleValueMap.get(dvName).put(modelName, dvar.data);
+                } else {
+                    Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
+                    cycleValue.put(modelName, dvar.data);
+                    varTimeArrayCycleValueMap.put(dvName, cycleValue);
+                }
+            }
+            if (varCycleIndexList.contains(dvName) || dvarTimeArrayCycleIndexList.contains(dvName)){
+                if (varCycleIndexValueMap.containsKey(dvName)){
+                    varCycleIndexValueMap.get(dvName).put(modelName, dvar.data);
+                } else {
+                    Map<String, IntDouble> cycleValue = new HashMap<String, IntDouble>();
+                    cycleValue.put(modelName, dvar.data);
+                    varCycleIndexValueMap.put(dvName, cycleValue);
+                }
+            }
+            String entryNameTS=DssOperation.entryNameTS(dvName, ControlData.timeStep);
+            DataTimeSeries.saveDataToTimeSeries(dvName, entryNameTS, value, dvar);
+            if (timeArrayDvList.contains(dvName)){
+                entryNameTS=DssOperation.entryNameTS(dvName+"__fut__0", ControlData.timeStep);
+                DataTimeSeries.saveDataToTimeSeries(entryNameTS, value, dvar, 0);
+            }
+        }
 
         if (assignedCount % 1000 == 0) {
-            logger.debug("Assigned {} variables", assignedCount);
+            logger.atDebug()
+                    .setMessage("Assigned {} variables")
+                    .addArgument(assignedCount)
+                    .log();
         }
 
-	    timer.stop();
-        logger.info("Variable assignment complete: total {} variables assigned", assignedCount);
+        timer.stop();
+        logger.atInfo()
+                .setMessage("Variable assignment complete: total {} variables assigned")
+                .addArgument(assignedCount)
+                .log();
 
-        logger.info("Objective Value: {}", gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective);
-        logger.info("Variable assignment completed.");
-}
-	public static void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String dvName, boolean isNoteCbc, String append){
+        logger.atInfo()
+                .setMessage("Objective Value: {}")
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.clp_cbc_objective)
+                .log();
+        logger.atInfo()
+                .setMessage("Variable assignment completed.")
+                .log();
+    }
+    public static void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String dvName, boolean isNoteCbc, String append){
 
-        logger.trace("Adding slack/surplus variable to variable map: name={}", dvName);
+        logger.atTrace()
+                .setMessage("Adding slack/surplus variable to variable map: name={}")
+                .addArgument(dvName)
+                .log();
 
         String c="";
-		Dvar dvar=new Dvar();
-		dvar.upperBoundValue = maxValue;
-		dvar.lowerBoundValue = 0.0;
-		dvarMap.put(dvName, dvar);
-		
-		double w = 0;
-		if (wm2.keySet().contains(dvName)){
-			w = -wm2.get(dvName).getValue();
-            logger.trace("Slack/surplus variable weight: name={}, weight={}", dvName, w);
-        }
-		jCbc.addCol(modelObject , 0, maxValue, w, dvName, dvar.integer==Param.yes );
-	    if (isNoteCbc) {
-	    	int isInt = 0;
-	    	if (dvar.integer == Param.yes) isInt = 1;
-	    	c = isInt + "," + dvName + "," + w + ",0,"+ maxValue;
-	    	Tools.quickLog(modelName + "_" + solveName + "_" + append + ".cols", c, true);
-	    }
-	}
-	
-	public static void reloadAndWriteLp(String nameAppend, boolean logMps, boolean logCbc) {
-        logger.debug("Reloading and writing LP file: nameAppend={}, logMps={}, logCbc={}",
-                nameAppend, logMps, logCbc);
+        Dvar dvar=new Dvar();
+        dvar.upperBoundValue = maxValue;
+        dvar.lowerBoundValue = 0.0;
+        dvarMap.put(dvName, dvar);
 
-		String label = modelName + "_" + solveName + "_" + nameAppend;
-		String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
-		reloadProblem(logCbc, nameAppend);
-		jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
-		if(logMps){
-            jCbc.writeMps1(model, oPath+".mps", 1, 2);
+        double w = 0;
+        if (wm2.keySet().contains(dvName)){
+            w = -wm2.get(dvName).getValue();
+            logger.atTrace()
+                    .setMessage("Slack/surplus variable weight: name={}, weight={}")
+                    .addArgument(dvName)
+                    .addArgument(w)
+                    .log();
         }
-		
-		logIntVars(label);
-		
-		ILP.writeNoteLn("CbcTolerancePrimal: "+CbcSolver.solve_2_primalT);
-		ILP.writeNoteLn("CbcTolerancePrimalRelax: "+CbcSolver.solve_2_primalT_relax);
-		ILP.writeNoteLn("CbcToleranceInteger: "+CbcSolver.integerT);
-		ILP.writeNoteLn("CbcToleranceIntegercheck: "+CbcSolver.integerT_check);	
-		ILP.writeNoteLn("CbcToleranceWarmPrimal: "+CbcSolver.solve_whs_primalT);
-		ILP.writeNoteLn("CbcToleranceZero: "+ControlData.zeroTolerance);
-		ILP.writeNoteLn("CbcHintTimeMax: "+CbcSolver.cbcHintTimeMax);
-		ILP.writeNoteLn("CbcHintRelaxPenalty: "+CbcSolver.cbcHintRelaxPenalty);
-		ILP.writeNoteLn("CbcSolutionRounding: "+CbcSolver.cbcSolutionRounding);
-
-        logger.info("LP file written successfully: {}", oPath);
+        jCbc.addCol(modelObject , 0, maxValue, w, dvName, dvar.integer==Param.yes );
+        if (isNoteCbc) {
+            int isInt = 0;
+            if (dvar.integer == Param.yes) isInt = 1;
+            c = isInt + "," + dvName + "," + w + ",0,"+ maxValue;
+            Tools.quickLog(modelName + "_" + solveName + "_" + append + ".cols", c, true);
+        }
     }
-	
-	public static void reloadAndWriteLp(String nameAppend, boolean logCbc) {
-        logger.debug("Reloading and writing LP file: nameAppend={}, logCbc={}", nameAppend, logCbc);
+
+    public static void reloadAndWriteLp(String nameAppend, boolean logMps, boolean logCbc) {
+        logger.atDebug()
+                .setMessage("Reloading and writing LP file: nameAppend={}, logMps={}, logCbc={}")
+                .addArgument(nameAppend)
+                .addArgument(logMps)
+                .addArgument(logCbc)
+                .log();
 
         String label = modelName + "_" + solveName + "_" + nameAppend;
-		String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
-		reloadProblem(logCbc, nameAppend);
-		jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
-		
-		logIntVars(label);
-
-        logger.debug("LP file written: {}", oPath);
-
-	}
-	
-	public static void writeCbcLp(String nameAppend, boolean logMps) {
-        logger.debug("Writing CBC LP file: nameAppend={}, logMps={}", nameAppend, logMps);
-
-        String label = modelName + "_" + solveName + "_" + nameAppend;
-		String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
-		//reloadProblem();
-		jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
-		//jCbc.writeMps(model, oPath);
-		if(logMps){
+        String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
+        reloadProblem(logCbc, nameAppend);
+        jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
+        if(logMps){
             jCbc.writeMps1(model, oPath+".mps", 1, 2);
         }
-		
-		logIntVars(label);
 
-        logger.debug("CBC LP file written: {}", oPath);
+        logIntVars(label);
+
+        ILP.writeNoteLn("CbcTolerancePrimal: "+CbcSolver.solve_2_primalT);
+        ILP.writeNoteLn("CbcTolerancePrimalRelax: "+CbcSolver.solve_2_primalT_relax);
+        ILP.writeNoteLn("CbcToleranceInteger: "+CbcSolver.integerT);
+        ILP.writeNoteLn("CbcToleranceIntegercheck: "+CbcSolver.integerT_check);
+        ILP.writeNoteLn("CbcToleranceWarmPrimal: "+CbcSolver.solve_whs_primalT);
+        ILP.writeNoteLn("CbcToleranceZero: "+ControlData.zeroTolerance);
+        ILP.writeNoteLn("CbcHintTimeMax: "+CbcSolver.cbcHintTimeMax);
+        ILP.writeNoteLn("CbcHintRelaxPenalty: "+CbcSolver.cbcHintRelaxPenalty);
+        ILP.writeNoteLn("CbcSolutionRounding: "+CbcSolver.cbcSolutionRounding);
+
+        logger.atInfo()
+                .setMessage("LP file written successfully: {}")
+                .addArgument(oPath)
+                .log();
     }
-	
-	private static void logIntVars(String label){
-        logger.debug("Logging integer variables: label={}", label);
+
+    public static void reloadAndWriteLp(String nameAppend, boolean logCbc) {
+        logger.atDebug()
+                .setMessage("Reloading and writing LP file: nameAppend={}, logCbc={}")
+                .addArgument(nameAppend)
+                .addArgument(logCbc)
+                .log();
+
+        String label = modelName + "_" + solveName + "_" + nameAppend;
+        String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
+        reloadProblem(logCbc, nameAppend);
+        jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
+
+        logIntVars(label);
+
+        logger.atDebug()
+                .setMessage("LP file written: {}")
+                .addArgument(oPath)
+                .log();
+
+    }
+
+    public static void writeCbcLp(String nameAppend, boolean logMps) {
+        logger.atDebug()
+                .setMessage("Writing CBC LP file: nameAppend={}, logMps={}")
+                .addArgument(nameAppend)
+                .addArgument(logMps)
+                .log();
+
+        String label = modelName + "_" + solveName + "_" + nameAppend;
+        String oPath = new File(ILP.getIlpDir().getAbsoluteFile(), label).getAbsolutePath();
+        //reloadProblem();
+        jCbc.writeLp1(model, oPath, cbcWriteLpEpsilon, 14);
+        //jCbc.writeMps(model, oPath);
+        if(logMps){
+            jCbc.writeMps1(model, oPath+".mps", 1, 2);
+        }
+
+        logIntVars(label);
+
+        logger.atDebug()
+                .setMessage("CBC LP file written: {}")
+                .addArgument(oPath)
+                .log();
+    }
+
+    private static void logIntVars(String label){
+        logger.atDebug()
+                .setMessage("Logging integer variables: label={}")
+                .addArgument(label)
+                .log();
 
         if (ControlData.currStudyDataSet.cycIntDvMap != null) {
-			if (ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size() > 0) {
-				String c = "";
-				for (String dvN : ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)) {
-					c = c + dvN + "," + dvIntMap.get(dvN) + "\n";
-				}
-				Tools.quickLog(label + ".intVars", c);
-                logger.debug("Integer variables logged: {} variables",
-                        gov.ca.water.wrims.engine.core.components.ControlData.currStudyDataSet.cycIntDvMap.get(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex).size());
+            if (ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex).size() > 0) {
+                String c = "";
+                for (String dvN : ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex)) {
+                    c = c + dvN + "," + dvIntMap.get(dvN) + "\n";
+                }
+                Tools.quickLog(label + ".intVars", c);
+                logger.atDebug()
+                        .setMessage("Integer variables logged: {} variables")
+                        .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currStudyDataSet.cycIntDvMap.get(gov.ca.water.wrims.engine.core.components.ControlData.currCycleIndex).size())
+                        .log();
             }
-		}	
-	}
+        }
+    }
 
-	public static void logCbcWatchList(StudyDataSet sds){
-        logger.debug("Logging watch list");
+    public static void logCbcWatchList(StudyDataSet sds){
+        logger.atDebug()
+                .setMessage("Logging watch list")
+                .log();
 
         // write watch var values
-		boolean recordLP = false;
-		boolean recordVar = false;
-		double wa_cbc = 0;
-		double wa_xa  = 0;
-		if (ControlData.watchList != null) {
-			String wa_cbc_str = "";
-			String wa_xa_str = "";
-			for (String s : ControlData.watchList) {
-				if (ControlData.currModelDataSet.dvList.contains(s)){
-					wa_cbc = CbcSolver.varDoubleMap.get(s);
-					wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
-				}
-			}
-			ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_cbc_str, ILP._watchFile_cbc);
-            logger.trace("Watch list logged");
+        boolean recordLP = false;
+        boolean recordVar = false;
+        double wa_cbc = 0;
+        double wa_xa  = 0;
+        if (ControlData.watchList != null) {
+            String wa_cbc_str = "";
+            String wa_xa_str = "";
+            for (String s : ControlData.watchList) {
+                if (ControlData.currModelDataSet.dvList.contains(s)){
+                    wa_cbc = CbcSolver.varDoubleMap.get(s);
+                    wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
+                }
+            }
+            ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_cbc_str, ILP._watchFile_cbc);
+            logger.atTrace()
+                    .setMessage("Watch list logged")
+                    .log();
         }
-	}
-	
-	public static void logCbcDebug(StudyDataSet sds){
+    }
 
-        logger.debug("Logging debug information");
+    public static void logCbcDebug(StudyDataSet sds){
 
-		ILP.findDvarEffective();
-		ILP.setDvarFile("cbc");
-		ILP.writeDvarValue_Clp0_Cbc0(CbcSolver.varDoubleMap);
-		ILP.setDvarFile("xa");
-		ILP.writeDvarValue_XA();
-		
-		boolean recordLP = false;
-		boolean recordVar = false;
-		double wa_cbc = 0;
-		double wa_xa  = 0;
-		if (ControlData.watchList != null) {
-			String wa_cbc_str = "";
-			String wa_xa_str = "";
-			for (String s : ControlData.watchList) {
-				if (ControlData.currModelDataSet.dvList.contains(s)){
-					wa_cbc = CbcSolver.varDoubleMap.get(s);
-					wa_xa  = ControlData.xasolver.getColumnActivity(s);
-					wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
-					wa_xa_str += String.format("%14.3f",  wa_xa) + "  ";
+        logger.atDebug()
+                .setMessage("Logging debug information")
+                .log();
+
+        ILP.findDvarEffective();
+        ILP.setDvarFile("cbc");
+        ILP.writeDvarValue_Clp0_Cbc0(CbcSolver.varDoubleMap);
+        ILP.setDvarFile("xa");
+        ILP.writeDvarValue_XA();
+
+        boolean recordLP = false;
+        boolean recordVar = false;
+        double wa_cbc = 0;
+        double wa_xa  = 0;
+        if (ControlData.watchList != null) {
+            String wa_cbc_str = "";
+            String wa_xa_str = "";
+            for (String s : ControlData.watchList) {
+                if (ControlData.currModelDataSet.dvList.contains(s)){
+                    wa_cbc = CbcSolver.varDoubleMap.get(s);
+                    wa_xa  = ControlData.xasolver.getColumnActivity(s);
+                    wa_cbc_str += String.format("%14.3f", wa_cbc) + "  ";
+                    wa_xa_str += String.format("%14.3f",  wa_xa) + "  ";
 
                     if (Math.abs(wa_xa - wa_cbc) > gov.ca.water.wrims.engine.core.components.ControlData.watchList_tolerance) {
                         recordLP = true;
-                        logger.warn("Watch variable difference exceeds tolerance: {} (CBC={}, XA={}, difference={})",
-                                s, wa_cbc, wa_xa, Math.abs(wa_xa - wa_cbc));
+                        logger.atWarn()
+                                .setMessage("Watch variable difference exceeds tolerance: {} (CBC={}, XA={}, difference={})")
+                                .addArgument(s)
+                                .addArgument(wa_cbc)
+                                .addArgument(wa_xa)
+                                .addArgument(Math.abs(wa_xa - wa_cbc))
+                                .log();
                     }
                 }
             }
-			ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_cbc_str, ILP._watchFile_cbc);
-			ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_xa_str, ILP._watchFile_xa);
-            logger.trace("Watch variable comparison completed");
+            ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_cbc_str, ILP._watchFile_cbc);
+            ILP.writeNoteLn(ILP.getYearMonthCycle(), wa_xa_str, ILP._watchFile_xa);
+            logger.atTrace()
+                    .setMessage("Watch variable comparison completed")
+                    .log();
         }
-		
-		// write int value, time, and obj diff
-		ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ControlData.xasolver.getObjective(), ILP._noteFile_xa_obj);
-		ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ControlData.clp_cbc_objective, ILP._noteFile_cbc_obj);
-		
-		String xa_int = "";
-		String cbc_int = "";
-		if (sds.cycIntDvMap != null) {
-			ArrayList<String> intDVs = new ArrayList<String>(sds.cycIntDvMap.get(ControlData.currCycleIndex));
-			for (String v :sds.allIntDv) {
-				if (intDVs.contains(v)){
-					xa_int  += " "+ Math.round(ControlData.xasolver.getColumnActivity(v));
-					if (Error.getTotalError()==0) {
-						cbc_int += " "+ Math.round(CbcSolver.varDoubleMap.get(v));
-					} else {
-						cbc_int += " ?";
-					}
-				} else {
-					xa_int  += "  ";
-					cbc_int += "  ";
-				}
-			}
-		}
-		
-		// write solve name
-		cbc_int +=  "  "+CbcSolver.solveName;
-		xa_int  +=  "  "+CbcSolver.solveName;
-		
-		if (Error.getTotalError() == 0) {
-			if (recordLP) {
-                logger.warn("Watch variable difference too large, writing LP file");
-                CbcSolver.reloadAndWriteLp("_watch_diff", true, true);
-			}
-			
-			double diff = ControlData.clp_cbc_objective - ControlData.xasolver.getObjective();
-			if (Math.abs(diff) > CbcSolver.record_if_obj_diff) {
-                logger.warn("Objective value difference too large: {} > {}, writing LP file", diff, CbcSolver.record_if_obj_diff);
-                CbcSolver.reloadAndWriteLp("_obj"+Math.round(diff), true, true);
-			}
-			if (Math.abs(diff) > CbcSolver.log_if_obj_diff) {
-				xa_int += "  obj: " + String.format("%16.3f", diff);
-				cbc_int += "  obj: " + String.format("%16.3f", diff);
-				if (diff>CbcSolver.maxObjDiff){
-					CbcSolver.maxObjDiff = diff;
-					CbcSolver.maxObjDiff_id = ILP.getYearMonthCycle();
-                    logger.warn("New maximum objective difference: {} at {}", diff, CbcSolver.maxObjDiff_id);
-                } else if(diff<CbcSolver.maxObjDiff_minus){
-					CbcSolver.maxObjDiff_minus = diff;
-					CbcSolver.maxObjDiff_minus_id = ILP.getYearMonthCycle();
-                    logger.warn("New minimum objective difference: {} at {}", diff, CbcSolver.maxObjDiff_minus_id);
+
+        // write int value, time, and obj diff
+        ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ControlData.xasolver.getObjective(), ILP._noteFile_xa_obj);
+        ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ControlData.clp_cbc_objective, ILP._noteFile_cbc_obj);
+
+        String xa_int = "";
+        String cbc_int = "";
+        if (sds.cycIntDvMap != null) {
+            ArrayList<String> intDVs = new ArrayList<String>(sds.cycIntDvMap.get(ControlData.currCycleIndex));
+            for (String v :sds.allIntDv) {
+                if (intDVs.contains(v)){
+                    xa_int  += " "+ Math.round(ControlData.xasolver.getColumnActivity(v));
+                    if (Error.getTotalError()==0) {
+                        cbc_int += " "+ Math.round(CbcSolver.varDoubleMap.get(v));
+                    } else {
+                        cbc_int += " ?";
+                    }
+                } else {
+                    xa_int  += "  ";
+                    cbc_int += "  ";
                 }
-			}
-		}
-		ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ xa_int, ILP._noteFile_xa_int);
-		ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ cbc_int, ILP._noteFile_cbc_int);
+            }
+        }
 
-        logger.debug("Debug information logging completed");
+        // write solve name
+        cbc_int +=  "  "+CbcSolver.solveName;
+        xa_int  +=  "  "+CbcSolver.solveName;
+
+        if (Error.getTotalError() == 0) {
+            if (recordLP) {
+                logger.atWarn()
+                        .setMessage("Watch variable difference too large, writing LP file")
+                        .log();
+                CbcSolver.reloadAndWriteLp("_watch_diff", true, true);
+            }
+
+            double diff = ControlData.clp_cbc_objective - ControlData.xasolver.getObjective();
+            if (Math.abs(diff) > CbcSolver.record_if_obj_diff) {
+                logger.atWarn()
+                        .setMessage("Objective value difference too large: {} > {}, writing LP file")
+                        .addArgument(diff)
+                        .addArgument(CbcSolver.record_if_obj_diff)
+                        .log();
+                CbcSolver.reloadAndWriteLp("_obj"+Math.round(diff), true, true);
+            }
+            if (Math.abs(diff) > CbcSolver.log_if_obj_diff) {
+                xa_int += "  obj: " + String.format("%16.3f", diff);
+                cbc_int += "  obj: " + String.format("%16.3f", diff);
+                if (diff>CbcSolver.maxObjDiff){
+                    CbcSolver.maxObjDiff = diff;
+                    CbcSolver.maxObjDiff_id = ILP.getYearMonthCycle();
+                    logger.atWarn()
+                            .setMessage("New maximum objective difference: {} at {}")
+                            .addArgument(diff)
+                            .addArgument(CbcSolver.maxObjDiff_id)
+                            .log();
+                } else if(diff<CbcSolver.maxObjDiff_minus){
+                    CbcSolver.maxObjDiff_minus = diff;
+                    CbcSolver.maxObjDiff_minus_id = ILP.getYearMonthCycle();
+                    logger.atWarn()
+                            .setMessage("New minimum objective difference: {} at {}")
+                            .addArgument(diff)
+                            .addArgument(CbcSolver.maxObjDiff_minus_id)
+                            .log();
+                }
+            }
+        }
+        ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ xa_int, ILP._noteFile_xa_int);
+        ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ cbc_int, ILP._noteFile_cbc_int);
+
+        logger.atDebug()
+                .setMessage("Debug information logging completed")
+                .log();
     }
-	
-	public static void main(String argv[]) {
-        logger.info("CbcSolver main method starting");
 
-		System.loadLibrary(cbcLibName); 
+    public static void main(String argv[]) {
+        logger.atInfo()
+                .setMessage("CbcSolver main method starting")
+                .log();
 
-		SWIGTYPE_p_OsiClpSolverInterface solver = jCbc.new_jOsiClpSolverInterface(); 
-		SWIGTYPE_p_CbcModel model = jCbc.new_jCbcModel();
-		jCbc.assignSolver(model, solver); 
+        System.loadLibrary(cbcLibName);
 
-		//jCbc.readLp(solver, "1961_01_c01.lp");
-		jCbc.readLp(solver, "1961_01_c06.lp");
-		jCbc.setModelName(solver, "TestName");
+        SWIGTYPE_p_OsiClpSolverInterface solver = jCbc.new_jOsiClpSolverInterface();
+        SWIGTYPE_p_CbcModel model = jCbc.new_jCbcModel();
+        jCbc.assignSolver(model, solver);
 
-		
-		long beginT = System.currentTimeMillis();
-		
-		jCbc.setPrimalTolerance(model, 1e-06);
-		jCbc.solve_2(model, solver, 3);
-        logger.info("Model name: {}", jCbc.getModelName(solver));
-        logger.info("Solve status: {}, {}", jCbc.status(model), jCbc.secondaryStatus(model));
-
-		long endT = System.currentTimeMillis();
-		
-		double time_second = (endT-beginT)/1000.;
-
-        logger.info("Solve time: {} seconds", time_second);
+        //jCbc.readLp(solver, "1961_01_c01.lp");
+        jCbc.readLp(solver, "1961_01_c06.lp");
+        jCbc.setModelName(solver, "TestName");
 
 
-		if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
-			int nCols = jCbc.getNumCols(model);
+        long beginT = System.currentTimeMillis();
 
-			SWIGTYPE_p_double sol = jCbc.new_jarray_double(nCols);
-			sol = jCbc.getColSolution(solver);
+        jCbc.setPrimalTolerance(model, 1e-06);
+        jCbc.solve_2(model, solver, 3);
+        logger.atInfo()
+                .setMessage("Model name: {}")
+                .addArgument(jCbc.getModelName(solver))
+                .log();
+        logger.atInfo()
+                .setMessage("Solve status: {}, {}")
+                .addArgument(jCbc.status(model))
+                .addArgument(jCbc.secondaryStatus(model))
+                .log();
 
-            logger.info("Solution:");
-            logger.info("Objective Value = {}", jCbc.getObjValue(model));
+        long endT = System.currentTimeMillis();
+
+        double time_second = (endT-beginT)/1000.;
+
+        logger.atInfo()
+                .setMessage("Solve time: {} seconds")
+                .addArgument(time_second)
+                .log();
 
 
-			for (int j = 0; j < nCols; j++) {
-				if (jCbc.isInteger(solver, j) == 1)
-                    logger.info("{} = {}", jCbc.getColName(model, j),
-                            jCbc.jarray_double_getitem(sol, j));
-			}
-		} else if (jCbc.secondaryStatus(model) == 1) {
-            logger.warn("Model Infeasible.");
+        if (jCbc.status(model) == 0 && jCbc.secondaryStatus(model) == 0) {
+            int nCols = jCbc.getNumCols(model);
 
-		} else {
-            logger.error("Solve Error: {}, {}", jCbc.status(model), jCbc.secondaryStatus(model));
-		}
-		jCbc.delete_jCbcModel(model);
-        logger.info("CbcSolver main method ending");
-	}
-	
-	private static void note_msg(String msg) {
-		ILP.writeNoteLn(jCbc.getModelName(solver), msg);
-        logger.info("{} {}", jCbc.getModelName(solver), msg);
-	}
-	
-	private static int solve_2() {
-        logger.debug("Executing solve_2 method");
+            SWIGTYPE_p_double sol = jCbc.new_jarray_double(nCols);
+            sol = jCbc.getColSolution(solver);
+
+            logger.atInfo()
+                    .setMessage("Solution:")
+                    .log();
+            logger.atInfo()
+                    .setMessage("Objective Value = {}")
+                    .addArgument(jCbc.getObjValue(model))
+                    .log();
+
+
+            for (int j = 0; j < nCols; j++) {
+                if (jCbc.isInteger(solver, j) == 1)
+                    logger.atInfo()
+                            .setMessage("{} = {}")
+                            .addArgument(jCbc.getColName(model, j))
+                            .addArgument(jCbc.jarray_double_getitem(sol, j))
+                            .log();
+            }
+        } else if (jCbc.secondaryStatus(model) == 1) {
+            logger.atWarn()
+                    .setMessage("Model Infeasible.")
+                    .log();
+
+        } else {
+            logger.atError()
+                    .setMessage("Solve Error: {}, {}")
+                    .addArgument(jCbc.status(model))
+                    .addArgument(jCbc.secondaryStatus(model))
+                    .log();
+        }
+        jCbc.delete_jCbcModel(model);
+        logger.atInfo()
+                .setMessage("CbcSolver main method ending")
+                .log();
+    }
+
+    private static void note_msg(String msg) {
+        ILP.writeNoteLn(jCbc.getModelName(solver), msg);
+        logger.atInfo()
+                .setMessage("{} {}")
+                .addArgument(jCbc.getModelName(solver))
+                .addArgument(msg)
+                .log();
+    }
+
+    private static int solve_2() {
+        logger.atDebug()
+                .setMessage("Executing solve_2 method")
+                .log();
         int r = -99;
-		r = solve_2(solve_2_primalT, "2__");
-		return r;
-	}
-	
-	private static int solve_2(double priT, String solvName) {
-        logger.debug("Executing solve_2 method: primalTolerance={}, solveName={}", priT, solvName);
-        int r = -99;
-		solveName=solvName;
-		jCbc.setPrimalTolerance(model, priT);
-		jCbc.setIntegerTolerance(model, integerT);
-		r = jCbc.solve_2(model, solver, 0);
-        logger.debug("solve_2 completed: returnCode={}", r);
+        r = solve_2(solve_2_primalT, "2__");
         return r;
-	}
-	
-	private static void solve_3() {
-        logger.debug("Executing solve_3 method");
-        solveName="3__";
-		jCbc.setPrimalTolerance(model, solve_3_primalT);
-		jCbc.setIntegerTolerance(model, integerT);
-		jCbc.solve_3(model, solver, 0);
-        logger.debug("solve_3 completed");
     }
-	
-	private static void callCbc() {
-        logger.debug("Executing callCbc method");
-        callCbc("c__");
-	}
-	
-	private static void callCbc(String solvName) {
-        logger.debug("Executing callCbc method: solveName={}", solvName);
+
+    private static int solve_2(double priT, String solvName) {
+        logger.atDebug()
+                .setMessage("Executing solve_2 method: primalTolerance={}, solveName={}")
+                .addArgument(priT)
+                .addArgument(solvName)
+                .log();
+        int r = -99;
         solveName=solvName;
-		jCbc.callCbc("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model);
-        logger.debug("callCbc completed");
+        jCbc.setPrimalTolerance(model, priT);
+        jCbc.setIntegerTolerance(model, integerT);
+        r = jCbc.solve_2(model, solver, 0);
+        logger.atDebug()
+                .setMessage("solve_2 completed: returnCode={}")
+                .addArgument(r)
+                .log();
+        return r;
+    }
+
+    private static void solve_3() {
+        logger.atDebug()
+                .setMessage("Executing solve_3 method")
+                .log();
+        solveName="3__";
+        jCbc.setPrimalTolerance(model, solve_3_primalT);
+        jCbc.setIntegerTolerance(model, integerT);
+        jCbc.solve_3(model, solver, 0);
+        logger.atDebug()
+                .setMessage("solve_3 completed")
+                .log();
+    }
+
+    private static void callCbc() {
+        logger.atDebug()
+                .setMessage("Executing callCbc method")
+                .log();
+        callCbc("c__");
+    }
+
+    private static void callCbc(String solvName) {
+        logger.atDebug()
+                .setMessage("Executing callCbc method: solveName={}")
+                .addArgument(solvName)
+                .log();
+        solveName=solvName;
+        jCbc.callCbc("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model);
+        logger.atDebug()
+                .setMessage("callCbc completed")
+                .log();
     }
 
     private static void callCbc_R() {
-        logger.debug("Executing callCbc_R method");
+        logger.atDebug()
+                .setMessage("Executing callCbc_R method")
+                .log();
         solveName = "cR_";
         jCbc.callCbc("-log 0 -primalT 1e-7 -integerT 1e-9 -solve", model);
-        logger.debug("callCbc_R completed");
+        logger.atDebug()
+                .setMessage("callCbc_R completed")
+                .log();
     }
-	
-	public static void logIntCheck(StudyDataSet sds){
-        logger.debug("Logging integer variable check");
+
+    public static void logIntCheck(StudyDataSet sds){
+        logger.atDebug()
+                .setMessage("Logging integer variable check")
+                .log();
 
         String cbc_int = "";
         cbc_int +=  ","+CbcSolver.solveName;
-			
+
         if (sds.cycIntDvMap != null && sds.cycIntDvMap.containsKey(ControlData.currCycleIndex)) {
             ArrayList<String> intDVs = new ArrayList<String>(sds.cycIntDvMap.get(ControlData.currCycleIndex));
             Boolean int_violation = false;
@@ -2488,7 +3134,11 @@ public class CbcSolver {
                         cbc_int += ","+ x;
                         if  (Math.abs( Math.round(x)-x)>1E-7) {
                             int_violation=true;
-                            logger.warn("Integer variable check violation: name={}, value={}", v, x);
+                            logger.atWarn()
+                                    .setMessage("Integer variable check violation: name={}, value={}")
+                                    .addArgument(v)
+                                    .addArgument(x)
+                                    .log();
                         }
 
                     } else {
@@ -2500,72 +3150,109 @@ public class CbcSolver {
                 }
             }
             cbc_int = "," + int_violation + cbc_int;
-            logger.debug("Integer variable check completed: int_violation={}", int_violation);
+            logger.atDebug()
+                    .setMessage("Integer variable check completed: int_violation={}")
+                    .addArgument(int_violation)
+                    .log();
         }
 
-			ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ cbc_int, ILP._noteFile_cbc_int_log);
+        ILP.writeNoteLn(ILP.getYearMonthCycle(), ""+ cbc_int, ILP._noteFile_cbc_int_log);
 
-	}
-	
-	public static boolean violationCheck(SWIGTYPE_p_CbcModel model, String modelName, String solveName) {
-        logger.debug("Executing violation check: modelName={}, solveName={}", modelName, solveName);
+    }
+
+    public static boolean violationCheck(SWIGTYPE_p_CbcModel model, String modelName, String solveName) {
+        logger.atDebug()
+                .setMessage("Executing violation check: modelName={}, solveName={}")
+                .addArgument(modelName)
+                .addArgument(solveName)
+                .log();
 
         if (!cbcViolationCheck) {
-            logger.debug("Violation check disabled");
+            logger.atDebug()
+                    .setMessage("Violation check disabled")
+                    .log();
             return false;
         }
 
         boolean violation = false;
         int ColumnSize = jCbc.getNumCols(model);
-		SWIGTYPE_p_double v_ary = jCbc.getColSolution(model);
-		Map<String, Dvar> dMap = SolverData.getDvarMap();
+        SWIGTYPE_p_double v_ary = jCbc.getColSolution(model);
+        Map<String, Dvar> dMap = SolverData.getDvarMap();
 
         int intViolationCount = 0;
         int boundViolationCount = 0;
 
         for (int j = 0; j < ColumnSize; j++){
-			double v = jCbc.jarray_double_getitem(v_ary,j);
-			String k = jCbc.getColName(model,j);
-			
-			if (jCbc.isInteger(model,j)==1) {	 	
-				if (Math.abs(v-Math.round(v))>integerT_check){	
-					violation = true;
+            double v = jCbc.jarray_double_getitem(v_ary,j);
+            String k = jCbc.getColName(model,j);
+
+            if (jCbc.isInteger(model,j)==1) {
+                if (Math.abs(v-Math.round(v))>integerT_check){
+                    violation = true;
                     intViolationCount++;
-                    logger.warn("Integer violation check: name={}, value={} (error: {})", k, v, Math.abs(v - Math.round(v)));
+                    logger.atWarn()
+                            .setMessage("Integer violation check: name={}, value={} (error: {})")
+                            .addArgument(k)
+                            .addArgument(v)
+                            .addArgument(Math.abs(v - Math.round(v)))
+                            .log();
                     ILP.writeNoteLn(modelName+":"+" Solve_"+solveName+":intViolation:::"+k+":"+v, true, false);
 
-				} 
-			} 
-			else {
-				Dvar d = dMap.get(k);
-				if (d.lowerBoundValue.doubleValue() == 0 &&  v<-lowerBoundZero_check){
-					violation = true;
+                }
+            }
+            else {
+                Dvar d = dMap.get(k);
+                if (d.lowerBoundValue.doubleValue() == 0 &&  v<-lowerBoundZero_check){
+                    violation = true;
                     boundViolationCount++;
-                    logger.warn("Lower bound violation check: name={}, value={} < 0 (allowed: {})", k, v, -lowerBoundZero_check);
+                    logger.atWarn()
+                            .setMessage("Lower bound violation check: name={}, value={} < 0 (allowed: {})")
+                            .addArgument(k)
+                            .addArgument(v)
+                            .addArgument(-lowerBoundZero_check)
+                            .log();
                     ILP.writeNoteLn(modelName+":"+" Solve_"+solveName+":lbViolation:::"+k+":"+v, true, false);
-				}
-			}					 				 
-		}
-        logger.debug("Violation check completed: integer violations={}, bound violations={}, total violation={}",
-                intViolationCount, boundViolationCount, violation);
+                }
+            }
+        }
+        logger.atDebug()
+                .setMessage("Violation check completed: integer violations={}, bound violations={}, total violation={}")
+                .addArgument(intViolationCount)
+                .addArgument(boundViolationCount)
+                .addArgument(violation)
+                .log();
         return violation;
-		
-	}
 
-	public static int[] solve_jCbc2021a(){
-        logger.info("==================== 2021a Solver Start ====================");
+    }
+
+    public static int[] solve_jCbc2021a(){
+        logger.atInfo()
+                .setMessage("==================== 2021a Solver Start ====================")
+                .log();
         int ci=ControlData.currCycleIndex+1;
 
-        logger.info("CBC 2021a Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]",
-                modelName, solvFunc, gov.ca.water.wrims.engine.core.components.ControlData.currYear, gov.ca.water.wrims.engine.core.components.ControlData.currMonth,
-                gov.ca.water.wrims.engine.core.components.ControlData.currDay, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
+        logger.atInfo()
+                .setMessage("CBC 2021a Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]")
+                .addArgument(modelName)
+                .addArgument(solvFunc)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
 
-        logger.info("CBC Solver2021a: Solving {}/{}/{} Cycle {} [{}]",
-                gov.ca.water.wrims.engine.core.components.ControlData.currMonth, gov.ca.water.wrims.engine.core.components.ControlData.currDay,
-                gov.ca.water.wrims.engine.core.components.ControlData.currYear, ci, gov.ca.water.wrims.engine.core.components.ControlData.currCycleName);
+        logger.atInfo()
+                .setMessage("CBC Solver2021a: Solving {}/{}/{} Cycle {} [{}]")
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currMonth)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currDay)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currYear)
+                .addArgument(ci)
+                .addArgument(gov.ca.water.wrims.engine.core.components.ControlData.currCycleName)
+                .log();
 
         int status=-99;
-		int status2=-99;
+        int status2=-99;
         int rv = -99;
 
         PerformanceTimer solveTimer = new PerformanceTimer("2021a Solver Execution");
@@ -2575,10 +3262,15 @@ public class CbcSolver {
         Set<String> a=ControlData.currStudyDataSet.cycIntDvMap.get(ControlData.currCycleIndex);
         a.retainAll(dvIntMap.keySet());
 
-        logger.debug("Available warm start integer variables: {}", a.size());
+        logger.atDebug()
+                .setMessage("Available warm start integer variables: {}")
+                .addArgument(a.size())
+                .log();
 
         if ((useWarm || saveWarm) && a.size()>2) {
-            logger.info("Using warm start solving");
+            logger.atInfo()
+                    .setMessage("Using warm start solving")
+                    .log();
 
             if (warmArrayExist) {
 
@@ -2604,16 +3296,24 @@ public class CbcSolver {
             solveName="whs";
             jCbc.setPrimalTolerance(model, solve_whs_primalT);
             jCbc.setIntegerTolerance(model, integerT);
-            logger.debug("Starting warm start solve");
+            logger.atDebug()
+                    .setMessage("Starting warm start solve")
+                    .log();
             rv = jCbc.solve_whs(model,solver,names,values,intSolSize,0);
 
             if (rv != 0) {
                 if (rv == 91 || rv == 92) {
-                    logger.warn("Warm start solve exception: {}, using callCbc", rv);
+                    logger.atWarn()
+                            .setMessage("Warm start solve exception: {}, using callCbc")
+                            .addArgument(rv)
+                            .log();
                     note_msg(" Solve_" + solveName + " exception:" + rv + ". Use callCbc.");
                     reloadProblem(true, "exception" + rv);
                 } else {
-                    logger.warn("Warm start solve failed: {}, using callCbc", rv);
+                    logger.atWarn()
+                            .setMessage("Warm start solve failed: {}, using callCbc")
+                            .addArgument(rv)
+                            .log();
                     note_msg(" Solve_" + solveName + " infeasible. Use callCbc.");
                     reloadProblem(false, "");
                 }
@@ -2622,21 +3322,29 @@ public class CbcSolver {
             }
 
         } else {
-            logger.info("Not using warm start, using callCbc directly");
+            logger.atInfo()
+                    .setMessage("Not using warm start, using callCbc directly")
+                    .log();
             solveName="c__";
             rv = jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
         }
 
-				// for callCbc only
+        // for callCbc only
         status = rv;
         status2 = rv;
         if (rv!=0){
             if (rv==91 || rv==92) {
-                logger.warn("Solve exception: {}, using callCbcR", rv);
+                logger.atWarn()
+                        .setMessage("Solve exception: {}, using callCbcR")
+                        .addArgument(rv)
+                        .log();
                 note_msg(" Solve_"+solveName+" exception:"+rv+". Use callCbcR.");
                 reloadProblem(true, "exception"+rv);
             } else {
-                logger.warn("Solve failed: {}, using callCbcR", rv);
+                logger.atWarn()
+                        .setMessage("Solve failed: {}, using callCbcR")
+                        .addArgument(rv)
+                        .log();
                 note_msg(" Solve_"+solveName+" infeasible. Use callCbcR.");
                 reloadProblem(false, "");
             }
@@ -2648,15 +3356,23 @@ public class CbcSolver {
         solveTimer.stop();
 
         if (status != 0 || status2 != 0) {
-            logger.error("2021a Solver failed with status: {}, {}", status, status2);
+            logger.atError()
+                    .setMessage("2021a Solver failed with status: {}, {}")
+                    .addArgument(status)
+                    .addArgument(status2)
+                    .log();
             reloadAndWriteLp("_infeasible", true, true);
             getSolverInformation(status, status2);
             iis();
         } else {
-            logger.info("2021a Solver completed successfully");
+            logger.atInfo()
+                    .setMessage("2021a Solver completed successfully")
+                    .log();
         }
 
-        logger.info("==================== 2021a Solver End ====================");
+        logger.atInfo()
+                .setMessage("==================== 2021a Solver End ====================")
+                .log();
         return new int[]{status, status2};
     }
 
