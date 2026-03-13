@@ -1,5 +1,6 @@
 package gov.ca.water.wrims.engine.core.solver.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +77,8 @@ final class TestServiceLookup
 		assertNotNull(events);
 		String formattedMessage = events.getFirst().getMessage().getFormattedMessage();
 		assertTrue(formattedMessage.contains("Improved Solver A: "));
-		assertTrue(formattedMessage.contains("\\solve\\test.solve"));
+		String expected = String.format("%1$ssolve%1$stest.solve", File.separator);
+		assertTrue(formattedMessage.contains(expected));
 		assertEquals("1 * 2 * 3^2 = 18.0", events.get(1).getMessage().getFormattedMessage());
 
 		solver = SolverBroker.findSolver("GUROBI");
