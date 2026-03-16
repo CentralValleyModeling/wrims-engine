@@ -74,10 +74,30 @@
         </Async>
 
 
+        <!-- XA Solver Detailed Log -->
+        <RollingFile name="XA"
+                     fileName="${SOLVER_LOG_DIR}/xa.log"
+                     filePattern="${SOLVER_LOG_DIR}/xa-%d{yyyy-MM-dd_HH-mm-ss}.log"
+                     append="true"
+                     createOnDemand="true">
+            <PatternLayout pattern="${DETAILED_PATTERN}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <Async name="ASYNC-XA">
+            <AppenderRef ref="XA"/>
+        </Async>
+
+
         <!-- CBC Solver Performance Log -->
-        <RollingFile name="CBC-PERF"
-                     fileName="${SOLVER_LOG_DIR}/cbc-perf.log"
-                     filePattern="${SOLVER_LOG_DIR}/cbc-perf-%d{yyyy-MM-dd_HH-mm-ss}.log"
+        <RollingFile name="CBC-SOLVER-PERF"
+                     fileName="${SOLVER_LOG_DIR}/cbc-solver-perf.log"
+                     filePattern="${SOLVER_LOG_DIR}/cbc-solver-perf-%d{yyyy-MM-dd_HH-mm-ss}.log"
+                     append="true"
                      createOnDemand="true">
             <PatternLayout pattern="${STANDARD_PATTERN}"/>
             <Policies>
@@ -87,8 +107,27 @@
             <DefaultRolloverStrategy max="100"/>
         </RollingFile>
 
-        <Async name="ASYNC-CBC-PERF">
-            <AppenderRef ref="CBC-PERF"/>
+        <Async name="ASYNC-CBC-SOLVER-PERF">
+            <AppenderRef ref="CBC-SOLVER-PERF"/>
+        </Async>
+
+
+        <!-- XA Solver Performance Log -->
+        <RollingFile name="XA-SOLVER-PERF"
+                     fileName="${SOLVER_LOG_DIR}/xa-solver-perf.log"
+                     filePattern="${SOLVER_LOG_DIR}/xa-solver-perf-%d{yyyy-MM-dd_HH-mm-ss}.log"
+                     append="true"
+                     createOnDemand="true">
+            <PatternLayout pattern="${STANDARD_PATTERN}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="100"/>
+        </RollingFile>
+
+        <Async name="ASYNC-XA-SOLVER-PERF">
+            <AppenderRef ref="XA-SOLVER-PERF"/>
         </Async>
 
 
@@ -109,9 +148,20 @@
             <AppenderRef ref="ASYNC-CBC"/>
         </Logger>
 
-        <!-- PerfTimer: performance file -->
-        <Logger name="gov.ca.water.wrims.engine.core.solver.PerformanceTimer" level="DEBUG" additivity="false">
-            <AppenderRef ref="ASYNC-CBC-PERF"/>
+        <!-- XA Solver main logger: route to XA files -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.XASolver" level="INFO" additivity="false">
+            <AppenderRef ref="ASYNC-XA"/>
         </Logger>
+
+        <!-- PerfTimer: performance files -->
+        <Logger name="gov.ca.water.wrims.engine.core.solver.perf.cbc" level="DEBUG" additivity="false">
+            <AppenderRef ref="ASYNC-CBC-SOLVER-PERF"/>
+        </Logger>
+
+        <Logger name="gov.ca.water.wrims.engine.core.solver.perf.xa" level="DEBUG" additivity="false">
+            <AppenderRef ref="ASYNC-XA-SOLVER-PERF"/>
+        </Logger>
+
+        <Logger name="gov.ca.water.wrims.engine.core.solver.perf.unknown" level="OFF" additivity="false"/>
     </Loggers>
 </Configuration>
