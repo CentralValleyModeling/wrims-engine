@@ -104,7 +104,7 @@ public class XASolver {
 		int equalityConstraintCount = 0;
 		int inequalityConstraintCount = 0;
 
-		PerformanceTimer totalTimer = new PerformanceTimer("XA.total");
+		PerformanceTimer totalTimer = new XaPerformanceTimer("XA.total");
 		PerformanceTimer solveTimer = null;
 
 		if (ControlData.currModelDataSet != null) {
@@ -144,7 +144,7 @@ public class XASolver {
 		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Solving {}/{}/{} Cycle {} [{}]").addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName).log();
 		LOG.atInfo().setMessage("Starting XA solving process...").log();
 
-		solveTimer = new PerformanceTimer("XA.solve");
+		solveTimer = new XaPerformanceTimer("XA.solve");
 		s = Calendar.getInstance().getTimeInMillis();
 		ControlData.xasolver.solveWithInfeasibleAnalysis("Output console:");
 		tSolve = Calendar.getInstance().getTimeInMillis() - s;
