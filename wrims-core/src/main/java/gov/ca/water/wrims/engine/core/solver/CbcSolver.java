@@ -236,7 +236,7 @@ public class CbcSolver {
     private CbcSolver() {}
 
     public static void init(boolean useLpFile, StudyDataSet sds) {
-        PerformanceTimer timer = new PerformanceTimer("CbcSolver initialization");
+        PerformanceTimer timer = new CbcPerformanceTimer("CbcSolver initialization");
 
         dvIntMap2021 = new LinkedHashMap<String, Integer>();
         CbcSolver.useLpFile = useLpFile;
@@ -908,7 +908,7 @@ public class CbcSolver {
     }
 
     private static void setConstraints(boolean isNoteCbc, String append) {
-        PerformanceTimer timer = new PerformanceTimer("Constraint Setup");
+        PerformanceTimer timer = new CbcPerformanceTimer("Constraint Setup");
 
         logger.atInfo().setMessage("CBC Solver: Setting up constraints...").log();
 
@@ -1260,7 +1260,7 @@ public class CbcSolver {
 	}
 
 	private static void setDVars(boolean isNoteCbc, String append) {
-        PerformanceTimer timer = new PerformanceTimer("Variable Setup");
+        PerformanceTimer timer = new CbcPerformanceTimer("Variable Setup");
 
         logger.atInfo().setMessage("CBC Solver: Setting up decision variables...").log();
 
@@ -1321,7 +1321,7 @@ public class CbcSolver {
 
 
     private static void setDVars2021(boolean isNoteCbc) {
-        PerformanceTimer timer = new PerformanceTimer("Variable Setup (2021 version)");
+        PerformanceTimer timer = new CbcPerformanceTimer("Variable Setup (2021 version)");
 
         logger.atInfo().setMessage("CBC Solver: Setting up decision variables (2021 version)...").log();
 
@@ -1956,7 +1956,7 @@ public class CbcSolver {
 	}
 
 	private static void collectDvar() {
-        PerformanceTimer timer = new PerformanceTimer("Variable Collection");
+        PerformanceTimer timer = new CbcPerformanceTimer("Variable Collection");
         logger.atInfo().setMessage("CBC Solver: Collecting variable results...").log();
 
         int ColumnSize = jCbc.getNumCols(model);
@@ -1990,7 +1990,7 @@ public class CbcSolver {
     }
 
 	private static void collectDvar2021() {
-        PerformanceTimer timer = new PerformanceTimer("Variable Collection (2021 version)");
+        PerformanceTimer timer = new CbcPerformanceTimer("Variable Collection (2021 version)");
 
         logger.atInfo().setMessage("CBC Solver: Collecting variable results (2021 version)...").log();
 
@@ -2035,7 +2035,7 @@ logger.atTrace().setMessage("Integer variable (2021): name={}, value={} (rounded
 	}
 
 	private static void assignDvar() {
-        PerformanceTimer timer = new PerformanceTimer("Variable Assignment");
+        PerformanceTimer timer = new CbcPerformanceTimer("Variable Assignment");
 
         logger.atInfo().setMessage("CBC Solver: Assigning variable values...").log();
 
