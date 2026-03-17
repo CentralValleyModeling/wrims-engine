@@ -28,13 +28,13 @@ Previous dependency analysis is documented in:
 
 1. **Standardise on GraalPy** — replace JEP with GraalPy for all Python interoperability.
 2. **Retain and update JEP** — keep JEP but upgrade it to a more recent Maven-available version.
-3. **Maintain the status quo** — keep both integrations as-is without consolidation.
+3. **Maintain the status quo** — keep JEP integration as-is without change.
 
 ## Decision Outcome
 
 **Chosen option: TBD** *(to be decided)*
 
-This ADR is currently in a **Proposed** state. The recommended path is to standardise
+This ADR is currently in a **Proposed** state. The recommended path is to standardize
 on **GraalPy** (Option 1) when adequate test coverage can be established for
 `Functionsuitablehabitat`, to avoid regression risk.
 
@@ -42,7 +42,7 @@ on **GraalPy** (Option 1) when adequate test coverage can be established for
 
 - A single Python runtime reduces dependency complexity.
 - GraalPy is already an existing Gradle dependency in the project.
-- GraalPy is supported by Oracle and has a clear upgrade path.
+- GraalPy is supported by Oracle and has a clear upgrade path with regular releases.
 
 ### Negative Consequences
 
@@ -57,12 +57,17 @@ Example usage is demonstrated in:
 [Pull Request #67](https://github.com/CentralValleyModeling/wrims-engine/pull/67).
 
 #### Pros:
-- Already integrated as a Gradle dependency.
 - Actively maintained by the GraalVM project.
-- Only used in tests today — low impact if issues arise.
+- Java-Python interoperability—GraalPy runs on the JVM, providing a seamless integration 
+without separate processes or native DLLs required.
+- Does not require additional platform-specific DLLs (unlike JEP).
+- Fully managed by Gradle, simplifying dependency management and updates.
+- Sandboxing is supported, allowing for restriction of Python's access to resources and
+reducing potential security risks.
 
 #### Cons:
 - `Functionsuitablehabitat` has no tests to validate a JEP to GraalPy migration.
+- Requires additional effort to migrate existing code.
 
 ### Option 2: Retain and Update JEP
 
@@ -88,17 +93,15 @@ very well interact with this method.
 
 ### Option 3: Maintain the Status Quo
 
-Keep both GraalPy (for tests) and JEP (for `Functionsuitablehabitat`) without change.
+Keep JEP (for `Functionsuitablehabitat`) without change.
 
 #### Pros:
 - Zero effort is required immediately.
-- GraalPy provides modern Python functionality for future use.
 
 #### Cons:
-- Two Python runtimes increase complexity and maintenance burden.
-- JEP may become stale or incompatible with future Java/Python versions. No test coverage
-exists to validate JEP is currently functioning as intended.
-- Requires continued inclusion of an additional DLL file in the WRIMS-GUI project.
+- JEP may become stale or incompatible with future Java/Python versions. 
+- No test coverage exists to validate JEP is currently functioning as intended.
+- Requires continued inclusion of an additional native DLL file in the WRIMS-GUI project.
 
 ## References
 - [GitHub Discussion #82 — Python Dependency Report](https://github.com/CentralValleyModeling/wrims-engine/discussions/82)
