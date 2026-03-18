@@ -64,9 +64,11 @@ without separate processes or native DLLs required.
 - Fully managed by Gradle, simplifying dependency management and updates.
 - Sandboxing is supported, allowing for restriction of Python's access to resources and
 reducing potential security risks.
+- Supports Python 3+.
 
 #### Cons:
 - `Functionsuitablehabitat` has no tests to validate a JEP to GraalPy migration.
+- No test coverage exists to validate JEP is currently functioning as intended.
 - Requires additional effort to migrate existing code.
 
 ### Option 2: Retain and Update JEP
@@ -85,10 +87,14 @@ very well interact with this method.
 #### Pros:
 - Already (assumed) functional for its current use case.
 - A newer version is available via Maven — low migration effort.
+- No additional effort is required to verify CalLite ANN compatibility.
+- Limited impact on existing CalLite models, known to be compatible with all desired Python libraries.
+- Directly embeds CPython into the JVM with Python 3.10+ support.
 
 #### Cons:
 - Requires maintaining a second Python runtime alongside GraalPy.
 - Lacking test coverage to confirm refactor does not introduce regressions.
+- No test coverage exists to validate JEP is currently functioning as intended.
 - Requires continued inclusion of an additional DLL file in the WRIMS-GUI project.
 
 ### Option 3: Maintain the Status Quo
@@ -97,6 +103,10 @@ Keep JEP (for `Functionsuitablehabitat`) without change.
 
 #### Pros:
 - Zero effort is required immediately.
+- Does not impact existing CalLite models.
+- Existing support for desired Python libraries is maintained.
+- Zero regression risk.
+- Directly embeds CPython into the JVM with Python 3.10+ support.
 
 #### Cons:
 - JEP may become stale or incompatible with future Java/Python versions. 
