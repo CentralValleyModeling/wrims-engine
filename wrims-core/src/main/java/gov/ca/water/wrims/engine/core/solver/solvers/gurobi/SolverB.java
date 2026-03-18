@@ -1,8 +1,10 @@
-package gov.ca.water.wrims.engine.core.solver.solvers;
+package gov.ca.water.wrims.engine.core.solver.solvers.gurobi;
 
 import java.util.Objects;
 import java.util.UUID;
 
+import gov.ca.water.wrims.engine.core.solver.service.Solver;
+import gov.ca.water.wrims.engine.core.solver.solvers.shared.SolverIdentifier;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import org.slf4j.Logger;
@@ -56,6 +58,12 @@ public final class SolverB extends SolverIdentifier implements Solver
 		{
 			throw new IllegalStateException("Solver not initialized.");
 		}
+	}
+
+	@Override
+	public void close()
+	{
+		// nothing to do
 	}
 
 	@Override

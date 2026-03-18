@@ -1,4 +1,4 @@
-package gov.ca.water.wrims.engine.core.solver.solvers;
+package gov.ca.water.wrims.engine.core.solver.solvers.shared;
 
 import java.util.UUID;
 

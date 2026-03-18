@@ -1,8 +1,10 @@
-package gov.ca.water.wrims.engine.core.solver.solvers;
+package gov.ca.water.wrims.engine.core.solver.solvers.cbc;
 
 import java.util.Objects;
 import java.util.UUID;
 
+import gov.ca.water.wrims.engine.core.solver.service.Solver;
+import gov.ca.water.wrims.engine.core.solver.solvers.shared.SolverIdentifier;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import org.slf4j.Logger;
@@ -59,6 +61,12 @@ public class SolverA extends SolverIdentifier implements Solver
 		{
 			LOGGER.atInfo().log(x + " * " + y + " * " + z + " = " + (x * y * z));
 		}
+	}
+
+	@Override
+	public void close()
+	{
+		LOGGER.atDebug().log("Closing CBC solver.");
 	}
 
 	@Override

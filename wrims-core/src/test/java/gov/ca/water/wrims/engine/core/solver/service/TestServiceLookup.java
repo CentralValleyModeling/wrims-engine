@@ -2,16 +2,8 @@ package gov.ca.water.wrims.engine.core.solver.service;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-import gov.ca.water.wrims.engine.core.solver.solvers.Solver;
-import gov.ca.water.wrims.engine.core.solver.solvers.SolverA;
-import gov.ca.water.wrims.engine.core.solver.solvers.ImprovedSolverA;
-import gov.ca.water.wrims.engine.core.solver.solvers.SolverB;
-import gov.ca.water.wrims.engine.core.solver.solvers.SolverIdentifier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -121,7 +113,6 @@ final class TestServiceLookup
 	@Test
 	void testGetAll()
 	{
-		SolverBroker.clearCache();
 		List<Solver> solvers = SolverBroker.getAllSolvers();
 		assertNotNull(solvers);
 		assertEquals(3, solvers.size());
@@ -134,23 +125,23 @@ final class TestServiceLookup
 			Solver.SolverInfo info = solver.getSolverInformation();
 			assertNotNull(info);
 
-			switch(solver)
+			switch(solver.getSolverInformation().getLookupName())
 			{
-				case ImprovedSolverA solverARev2 ->
+				case "CBC_IMPROVED" ->
 				{
 					assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
 					assertEquals("CBC_IMPROVED", info.getLookupName());
 					assertEquals(500, info.getPosition());
 					count++;
 				}
-				case SolverA solverA ->
+				case "CBC" ->
 				{
 					assertEquals(Solver.LOOKUP_PATH + "CBC", info.getPath());
 					assertEquals("CBC", info.getLookupName());
 					assertEquals(1000, info.getPosition());
 					count++;
 				}
-				case SolverB solverB ->
+				case "GUROBI" ->
 				{
 					assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
 					assertEquals("GUROBI", info.getLookupName());
@@ -165,109 +156,29 @@ final class TestServiceLookup
 	}
 
 	@Test
-	void testSolverCache()
+	void testInstances()
 	{
-		SolverBroker.clearCache();
-		Solver solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
-		assertNull(solver);
-
-		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.BYPASS);
-		solver.init();
-		solver.setLP("test.solve");
-		solver.solve();
-		Solver.SolverInfo info = solver.getSolverInformation();
-		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
-		assertEquals("CBC_IMPROVED", info.getLookupName());
-		assertEquals(500, info.getPosition());
-
-		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
-		assertNull(solver);
-
-		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE);
-		solver.init();
-		solver.setLP("test.solve");
-		solver.solve();
-		info = solver.getSolverInformation();
-		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
-		assertEquals("CBC_IMPROVED", info.getLookupName());
-		assertEquals(500, info.getPosition());
-		UUID uniqueIdentifier = ((SolverIdentifier) solver).getIdentifier();
-
-		solver = SolverBroker.findSolver("CBC_IMPROVED", SolverBroker.CacheMode.CACHE_ONLY);
-		solver.init();
-		solver.setLP("test.solve");
-		solver.solve();
-		info = solver.getSolverInformation();
-		assertEquals(Solver.LOOKUP_PATH + "CBC_IMPROVED", info.getPath());
-		assertEquals("CBC_IMPROVED", info.getLookupName());
-		assertEquals(500, info.getPosition());
-		assertEquals(uniqueIdentifier, ((SolverIdentifier) solver).getIdentifier(),
-				"Unique identifier should remain the same");
-	}
-
-	@Test
-	void testInstances() throws Exception
-	{
-		SolverBroker.clearCache();
-
-		Solver solver = SolverBroker.findSolver("GUROBI", SolverBroker.CacheMode.BYPASS);
+		Solver solver = SolverBroker.findSolver("GUROBI");
 		assertNotNull(solver);
 
 		Solver.SolverInfo info = solver.getSolverInformation();
 		assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
 		assertEquals("GUROBI", info.getLookupName());
 		assertEquals(1000, info.getPosition());
-		UUID uniqueIdentifier = info.getIdentifier();
-
-		// Verify we're not working on cache
-		SolverBroker.clearCache();
-		assertFalse(SolverBroker.inCache("GUROBI"));
-
-		Thread.sleep(5000);
-
-		solver = SolverBroker.findSolver("GUROBI", SolverBroker.CacheMode.BYPASS);
-		assertNotNull(solver);
-
-		info = solver.getSolverInformation();
-		assertEquals(Solver.LOOKUP_PATH + "GUROBI", info.getPath());
-		assertEquals("GUROBI", info.getLookupName());
-		assertEquals(1000, info.getPosition());
-		assertEquals(uniqueIdentifier, info.getIdentifier(), "Unique identifier should remain the same");
+		assertNotNull(info.getIdentifier());
 	}
 
 	@Test
-	void testInstancesGetAll() throws Exception
+	void testInstancesGetAll()
 	{
-		SolverBroker.clearCache();
-
-		List<Solver> solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
+		List<Solver> solvers = SolverBroker.getAllSolvers();
 		assertFalse(solvers.isEmpty());
-
-		Map<String, UUID> uniqueIdentifiers = new HashMap<>();
-
-		solvers.forEach(solver ->
-				uniqueIdentifiers.put(solver.getSolverInformation().getLookupName()
-						+ solver.getSolverInformation().getPosition(), solver.getSolverInformation().getIdentifier()));
-		assertEquals(3, uniqueIdentifiers.size());
-
-		// Verify we're not working on cache
-		SolverBroker.clearCache();
-		assertFalse(SolverBroker.inCache("GUROBI"));
-		assertFalse(SolverBroker.inCache("CBC"));
-		assertFalse(SolverBroker.inCache("CBC_IMPROVED"));
-
-		Thread.sleep(5000);
-
-		solvers = SolverBroker.getAllSolvers(SolverBroker.CacheMode.BYPASS);
-		assertFalse(solvers.isEmpty());
+    	assertEquals(3, solvers.size());
 
 		for (Solver solver : solvers)
 		{
-			UUID uniqueIdentifier = uniqueIdentifiers.get(solver.getSolverInformation().getLookupName()
-										+ solver.getSolverInformation().getPosition());
-			assertNotNull(uniqueIdentifier);
-			assertEquals(uniqueIdentifier, solver.getSolverInformation().getIdentifier(),
-					"Unique identifier should remain the same");
+			assertNotNull(solver);
+			assertNotNull(solver.getSolverInformation());
 		}
 	}
 

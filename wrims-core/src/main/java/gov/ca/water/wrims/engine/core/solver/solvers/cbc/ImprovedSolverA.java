@@ -1,8 +1,9 @@
-package gov.ca.water.wrims.engine.core.solver.solvers;
+package gov.ca.water.wrims.engine.core.solver.solvers.cbc;
 
 import java.nio.file.Path;
 import java.util.Objects;
 
+import gov.ca.water.wrims.engine.core.solver.service.Solver;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import org.slf4j.Logger;
@@ -41,6 +42,12 @@ public final class ImprovedSolverA extends SolverA implements Solver
 		{
 			LOGGER.atInfo().log(x + " * " + y + " * " + z + "^2 = " + (x * y * (Math.pow(z, 2))));
 		}
+	}
+
+	@Override
+	public void close()
+	{
+		LOGGER.atDebug().log("Closing CBC solver.");
 	}
 
 	@Override

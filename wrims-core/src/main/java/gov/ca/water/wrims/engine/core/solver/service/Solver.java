@@ -1,19 +1,44 @@
-package gov.ca.water.wrims.engine.core.solver.solvers;
+package gov.ca.water.wrims.engine.core.solver.service;
 
 import java.util.UUID;
 
 public interface Solver
 {
+	// The base path to use for the solver lookup
 	String LOOKUP_PATH = "wrims/solver/";
 
+	/**
+	 * Initialize the solver's state
+	 */
 	void init();
 
+	/**
+	 * Set the path to the LP file and solution file
+	 *
+	 * @param filePath path to the LP file
+	 */
 	void setLP(String filePath);
 
+	/**
+	 * run the solver and produce the solution file
+	 */
 	void solve();
 
+	/**
+	 * Close the solver and release any resources. Log statistics for the solver.
+	 */
+	void close();
+
+	/**
+	 * Get information about the solver
+	 *
+	 * @return SolverInfo the solver information
+	 */
 	SolverInfo getSolverInformation();
 
+	/**
+	 * Information about the solver
+	 */
 	class SolverInfo
 	{
 		private final String path;
