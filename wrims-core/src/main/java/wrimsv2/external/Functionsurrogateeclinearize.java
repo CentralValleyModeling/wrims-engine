@@ -2,16 +2,6 @@ package wrimsv2.external;
 
 import java.util.*;
 
-import calsim.surrogate.AggregateMonths;
-import calsim.surrogate.DailyToSurrogate;
-import calsim.surrogate.DailyToSurrogateBlocked;
-import calsim.surrogate.DisaggregateMonths;
-import calsim.surrogate.DisaggregateMonthsDaysToOps;
-import calsim.surrogate.DisaggregateMonthsRepeat;
-import calsim.surrogate.DisaggregateMonthsSpline;
-import calsim.surrogate.Surrogate;
-import calsim.surrogate.SurrogateMonth;
-import calsim.surrogate.TensorWrapper;
 import calsim.surrogate.SalinitySurrogateManager;
 import wrimsv2.components.TimeUsage;
 

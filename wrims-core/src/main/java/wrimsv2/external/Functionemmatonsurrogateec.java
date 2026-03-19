@@ -13,7 +13,6 @@ import calsim.surrogate.DisaggregateMonthsSpline;
 import calsim.surrogate.Surrogate;
 import calsim.surrogate.SurrogateMonth;
 import calsim.surrogate.TensorWrapper;
-import calsim.surrogate.examples.EmmatonExampleTensorFlowANN;
 import calsim.surrogate.examples.SalinitySurrogateManager;
 
 public class Functionemmatonsurrogateec extends ExternalFunction{

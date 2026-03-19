@@ -1,6 +1,9 @@
 [versions]
-hec-monolith = "5.3.5"
-guava = "11.0.2"
+hec-monolith = "6.0.0"
+#dssgui is not used by wrims-engine, but is is being included in the wrims-engine bom and should be kept in sync with hec-monolith for downstream projects.
+dssgui = "3.4.18"
+lookup = "4.0.0"
+guava = "33.4.8-jre"
 commons-io = "2.1"
 xstream = "1.4.3"
 javatuples = "1.2"
@@ -14,21 +17,30 @@ junit_platform = "1.12.2"
 antlr = "3.5.3"
 tattletale = "1.2.0.Beta2"
 jarhdf5 = "2.11.0"
+jarh5obj = "2.11.0"
+jarhdfobj = "2.11.0"
 linearsolver = "2013-01-10"
-gurobi = "5.0"
+gurobi = "11.0.3"
 jcbc = "2021-12-27"
 lpsolve55j = "2009.08.23"
 xaoptimizer = "2016.11.04"
 calsurrogate = "2023.12.25"
 runlibs = "0.1.0"
 callitetest = "0.2.4"
-system-summary-report-tool = "1.0.3"
+system-summary-report-tool = "1.0.5"
 javaHeclib = "7-IU-4-win-x86_64"
-graalvm = "24.2.1"
+graalvm = "25.0.1"
+cucumber = "7.14.0"
+azure-storage-blob = "12.28.0"
+slf4j = "2.0.12"
+log4j = "2.23.1"
+lmax = "4.0.0"
 
 [libraries]
 hec-monolith = { module = "mil.army.usace.hec:hec-monolith", version.ref = "hec-monolith" }
 hec-monolith-bom = { module = "mil.army.usace.hec:hec-monolith-bom", version.ref = "hec-monolith" }
+dssgui = { module = "mil.army.usace.hec:dssgui", version.ref = "dssgui" }
+lookup-compat = { module = "mil.army.usace.hec:lookup-compat", version.ref = "lookup" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 xstream = { module = "com.thoughtworks.xstream:xstream", version.ref = "xstream" }
@@ -47,19 +59,31 @@ antlr = { module = "org.antlr:antlr", version.ref = "antlr" }
 tattletale = { module = "org.jboss.tattletale:tattletale", version.ref = "tattletale"}
 jarhdf5 = { module = "ncsa.hdf.hdf5lib:jarhdf5", version.ref = "jarhdf5" }
 linearsolver = { module = "com.google.ortools:linearsolver", version.ref = "linearsolver" }
-gurobi = { module = "gurobi:gurobi", version.ref = "gurobi" }
+gurobi = { module = "com.gurobi:gurobi", version.ref = "gurobi" }
 jcbc = { module = "gov.ca.dwr:jcbc", version.ref = "jcbc" }
 lpsolve55j = { module = "lpsolve:lpsolve55j", version.ref = "lpsolve55j" }
 xaoptimizer = { module = "com.sunsetsoft.xa:xaoptimizer", version.ref = "xaoptimizer" }
 calsurrogate = { module = "gov.ca.dwr.deltamodeling:calsurrogate", version.ref = "calsurrogate" }
-system-summary-report-tool = { module = "gov.ca.dwr:system-summary-report-tool", version.ref = "system-summary-report-tool"}
+system-summary-report-tool = { module = "gov.ca.water:system-summary-report-tool", version.ref = "system-summary-report-tool"}
 run-libs = { group = "gov.ca.dwr", name = "run-libs", version.ref = "runlibs" }
 cal-lite-test = { group = "gov.ca.dwr", name = "cal_lite_test_01", version.ref = "callitetest" }
 javaHeclib = { module = "mil.army.usace.hec:javaHeclib", version.ref = "javaHeclib" }
 graalvm-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm" }
 graalvm-python = { module = "org.graalvm.polyglot:python", version.ref = "graalvm" }
 graalvm-embedding = { module = "org.graalvm.python:python-embedding", version.ref = "graalvm" }
+azure-storage-blob = { module = "com.azure:azure-storage-blob", version.ref = "azure-storage-blob" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit_5" }
+junit-platform-suite = { module = "org.junit.platform:junit-platform-suite", version.ref = "junit_platform" }
+cucumber-java = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
+cucumber-junit = { module = "io.cucumber:cucumber-junit-platform-engine", version.ref = "cucumber" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j"}
+slf4j-log4j-bindings = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j"}
+log4j = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j"}
+log4j-async = {module = "com.lmax:disruptor", version.ref = "lmax"}
+log4j-test = { module = "org.apache.logging.log4j:log4j-core-test", version.ref = "log4j"}
 
 [bundles]
 junit5 = [ "junit-5-engine", "junit-5-api", "junit-5-params" ]
 junit5Runtime = [ "junit-platform-engine", "junit-platform-launcher" ]
+cucumber = [ "cucumber-java", "cucumber-junit" ]
+log4j = ["log4j", "log4j-async" ,"log4j-test"]

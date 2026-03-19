@@ -1,8 +1,13 @@
 package wrimsv2.external;
 
-public class LoadDll {
-	public LoadDll(String dllName){
-		//System.load(System.getenv("WRIMS_v2_path")+dllName);
-		System.loadLibrary(dllName.replace(".dll", ""));
-	}
+
+/**
+ * @deprecated Retained for compatibility with CalLite code
+ * Facade class referring to the implementation within the `gov.ca.water.wrims.engine` package
+ */
+@Deprecated(since = "2025_11_21")
+public class LoadDll extends gov.ca.water.wrims.engine.core.external.LoadDll {
+    public LoadDll(String s) {
+        super(s);
+    }
 }

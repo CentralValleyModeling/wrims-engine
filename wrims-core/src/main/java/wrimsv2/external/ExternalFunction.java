@@ -1,13 +1,10 @@
 package wrimsv2.external;
 
-import java.io.File;
-import java.util.*;
 
-import wrimsv2.components.FilePaths;
-
-public abstract class ExternalFunction{
-
-	public static String externalDir=FilePaths.mainDirectory+File.separator+"external"+File.separator;
-
-	public abstract void execute(Stack stack);
+/**
+ * @deprecated Retained for compatibility with CalLite code
+ * Facade class referring to the implementation within the `gov.ca.water.wrims.engine` package
+ */
+@Deprecated(since = "2025_11_21")
+public abstract class ExternalFunction extends gov.ca.water.wrims.engine.core.external.ExternalFunction {
 }

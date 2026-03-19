@@ -1,15 +1,11 @@
 package wrimsv2.external;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import wrimsv2.components.Error;
-import wrimsv2.components.FilePaths;
 import jep.Jep;
 import jep.JepConfig;
 import jep.JepException;
