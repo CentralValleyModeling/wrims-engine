@@ -29,15 +29,19 @@ class PerformanceTimer {
         report("start");
     }
 
+    protected Logger getLogger() {
+        return logger;
+    }
+
     public void report(String event) {
         updateDuration();
         LoggingEventBuilder builder;
         if (event.equalsIgnoreCase("error")) {
-            builder = logger.atError();
+            builder = getLogger().atError();
         } else {
-            builder = logger.atInfo();
+            builder = getLogger().atInfo();
         }
-        builder.setMessage("event=\"{}\", {}").addArgument(event).addArgument(this.toString()).log();
+        builder.setMessage("event=\"{}\", {}").addArgument(event).addArgument(toString()).log();
     }
 
     private void updateDuration() {
@@ -47,8 +51,7 @@ class PerformanceTimer {
     public String toString() {
         updateDuration();
         return String.format(
-                "%s(uuid=\"%s\", model_date=\"%s\", cycle=\"%s\", duration=\"%s\", state=\"%s\", operation=\"%s\")",
-                this.getClass().getSimpleName(),
+                "uuid=\"%s\", model_date=\"%s\", cycle=\"%s\", duration=\"%s\", state=\"%s\", operation=\"%s\"",
                 this.id,
                 this.date,
                 this.cycle,
