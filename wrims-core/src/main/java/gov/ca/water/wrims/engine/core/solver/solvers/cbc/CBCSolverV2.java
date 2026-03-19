@@ -17,7 +17,7 @@ public final class CBCSolverV2 extends CBCSolver implements Solver
 	@Override
 	public void solve()
 	{
-		// do something different than CBCSolver
+		// Do something different from CBCSolver V1 here
 		super.solve();
 	}
 
@@ -27,6 +27,7 @@ public final class CBCSolverV2 extends CBCSolver implements Solver
 		// Cleaning up resources for CBC solver version 2
 	}
 
+	// Provide both new and old solver paths, allowing this version to be used explicitly
 	@ServiceProviders(value = {
 			@ServiceProvider(service = SolverFactory.class, position = 500),
 			@ServiceProvider(service = SolverFactory.class, position = 500, path = Solver.LOOKUP_PATH + SOLVER_TYPE, supersedes = {"gov.ca.water.wrims.engine.core.solver.solvers.cbc.CBCSolver"}),

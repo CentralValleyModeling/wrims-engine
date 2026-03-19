@@ -1,7 +1,6 @@
 package gov.ca.water.wrims.engine.core.solver.solvers.cbc;
 
 import java.io.File;
-import java.nio.file.Files;
 
 import gov.ca.water.wrims.engine.core.solver.service.Solver;
 import gov.ca.water.wrims.engine.core.solver.service.SolverContext;
@@ -39,6 +38,7 @@ public class CBCSolver extends WrimsSolver implements Solver
 		// Cleaning up resources for CBC solver
 	}
 
+	// Provide both new and old solver paths, allowing this version to be used explicitly
 	@ServiceProviders(value = {
 			@ServiceProvider(service = SolverFactory.class, position = 1000),
 			@ServiceProvider(service = SolverFactory.class, position = 1000, path = Solver.LOOKUP_PATH + SOLVER_TYPE_V1),

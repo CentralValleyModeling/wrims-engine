@@ -15,6 +15,7 @@ public final class SolverBroker
 		throw new UnsupportedOperationException("Cannot instantiate a utility class.");
 	}
 
+	// Look up a single solver by name, providing the context for solver initialization
 	public static Solver findSolver(String solverName, SolverContext context) throws IllegalArgumentException
 	{
 		String lookupPath = Solver.LOOKUP_PATH + solverName;
@@ -23,13 +24,15 @@ public final class SolverBroker
 		// implementations are global singletons, solvers themselves carry state
 		// It is up to implementations how to load JNI libraries
 		SolverFactory solver = lookup.lookup(SolverFactory.class);
-		if (solver == null)
+		if(solver == null)
 		{
 			throw new IllegalArgumentException("Solver not found: " + solverName);
 		}
 		return solver.create(context);
 	}
 
+	// Look up all available solvers
+	// Retrieves all factories, without instantiating any solver implementations
 	public static List<SolverFactory> findAllSolvers()
 	{
 		Lookup lookup = Lookup.getDefault();
