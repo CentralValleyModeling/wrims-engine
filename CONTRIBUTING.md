@@ -203,3 +203,8 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 
 - Once the pull request has been merged, the issue can be assigned to QA testing to verify that the bug has been addressed.
 - The developer should assign an appropriate reviewer for their work.
+
+### Creating releases
+
+Please note that tagging a release with "RC" in the tag name will trigger a comparison test action run.
+This action will run on the tagged commit and is generally intended as a manually initiated action. 
