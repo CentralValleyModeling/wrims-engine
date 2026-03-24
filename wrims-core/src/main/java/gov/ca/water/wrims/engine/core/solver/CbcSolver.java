@@ -236,7 +236,7 @@ public class CbcSolver {
     private CbcSolver() {}
 
     public static void init(boolean useLpFile, StudyDataSet sds) {
-        PerformanceTimer timer = new CbcPerformanceTimer("CbcSolver initialization");
+        PerformanceTimer timer = new PerformanceTimerCbc("CbcSolver initialization");
 
         dvIntMap2021 = new LinkedHashMap<String, Integer>();
         CbcSolver.useLpFile = useLpFile;
@@ -248,15 +248,19 @@ public class CbcSolver {
             lowerBoundZero_check = Math.max(solve_2_primalT_relax * 10, 1e-6);
         }
 
-        logger.atInfo().setMessage("  CBC Solver Initialization Configuration:").log();
-        logger.atDebug().setMessage("  cbcViolationCheck = {}").addArgument(cbcViolationCheck).log();
-        logger.atDebug().setMessage("  lowerBoundZero_check = {}").addArgument(lowerBoundZero_check).log();
-        logger.atDebug().setMessage("  cbcSolutionRounding = {}").addArgument(cbcSolutionRounding).log();
-        logger.atDebug().setMessage("  usejCbc2021 = {}").addArgument(usejCbc2021).log();
-        logger.atDebug().setMessage("  usejCbc2021a = {}").addArgument(usejCbc2021a).log();
-        logger.atDebug().setMessage("  jCbc Version: {}").addArgument(cbcVersion).log();
-        logger.atDebug().setMessage("  whsScaling = {}").addArgument(whsScaling).log();
-        logger.atDebug().setMessage("  whsSafe = {}").addArgument(whsSafe).log();
+        logger.atInfo()
+          .setMessage("solver configuration: cbcViolationCheck={}, lowerBoundZero_check={}, cbcSolutionRounding={}, usejCbc2021={}, usejCbc2021a={}, cbcVersion={}, whsScaling={}, useLpFile={}, cbcLibName={}")
+          .addArgument(cbcViolationCheck)
+          .addArgument(lowerBoundZero_check)
+          .addArgument(cbcSolutionRounding)
+          .addArgument(usejCbc2021)
+          .addArgument(usejCbc2021a)
+          .addArgument(cbcVersion)
+          .addArgument(whsScaling)
+          .addArgument(whsSafe)
+          .addArgument(useLpFile)
+          .addArgument(cbcLibName)
+          .log();
 
         // Write configuration notes
 		ILP.writeNoteLn("cbcViolationCheck ="+cbcViolationCheck,false,false);
@@ -287,7 +291,6 @@ public class CbcSolver {
             dvBiMap = HashBiMap.create();
             dvBiMapArray = new ArrayList<String>();
         }
-        logger.atInfo().setMessage("CBC Solver initialization complete: useLpFile={}, cbcLibName={}").addArgument(useLpFile).addArgument(cbcLibName).log();
         timer.stop();
     }
 
@@ -297,7 +300,7 @@ public class CbcSolver {
     }
 
     public static void newProblem() {
-        logger.atInfo().setMessage("==================== New Problem Solving Session ====================").log();
+        logger.atDebug().setMessage("==================== New Problem Solving Session ====================").log();
         long totalStartTime = System.currentTimeMillis();
 
         dvIntPredict = new ArrayList<String>();
@@ -331,13 +334,13 @@ public class CbcSolver {
 		int currDate = ControlData.currYear*100 +ControlData.currMonth;
 		isLogging = cbcLogStartDate <= currDate && currDate <=cbcLogStopDate;
 
-        logger.atInfo().setMessage("New Problem Created: modelName={}, useLPFile={}, currentDate={}, loggingEnabled={}")
+        logger.atDebug().setMessage("New Problem Created: modelName={}, useLPFile={}, currentDate={}, loggingEnabled={}")
                 .addArgument(modelName).addArgument(useLpFile).addArgument(currDate).addArgument(isLogging).log();
 
         if (useLpFile) {
-            logger.atInfo().setMessage("Loading model from LP file: {}").addArgument(ILP.cplexLpFilePath).log();
+            logger.atDebug().setMessage("Loading model from LP file: {}").addArgument(ILP.cplexLpFilePath).log();
             jCbc.readLp(solver, ILP.cplexLpFilePath);
-            logger.atInfo().setMessage("LP file loaded successfully").log();
+            logger.atDebug().setMessage("LP file loaded successfully").log();
 
         } else {
             int sizeA = ControlData.currModelDataSet.dvList.size();
@@ -387,7 +390,7 @@ public class CbcSolver {
 
 
         // Start solving process
-        logger.atInfo().setMessage("Starting solving process...").log();
+        logger.atDebug().setMessage("Starting solving process...").log();
         PerformanceTimer solveTimer = new PerformanceTimer("Problem Solving");
 
         long beginT = System.currentTimeMillis();
@@ -414,7 +417,7 @@ public class CbcSolver {
         performanceStats.recordSolverTime(solveTime);
         performanceStats.incrementProblemsSolved();
 
-        logger.atInfo().setMessage("Solver execution completed: {} seconds").addArgument(time_second).log();
+        logger.atDebug().setMessage("Solver execution completed: {} seconds").addArgument(time_second).log();
 
         if (ControlData.writeCbcSolvingTime) {
             ILP.writeNoteLn(jCbc.getModelName(solver), " " + time_second);
@@ -426,7 +429,7 @@ public class CbcSolver {
         if (Error.error_solving.size() < 1) {
             ControlData.clp_cbc_objective = getObjValue();
 
-            logger.atInfo().setMessage("Solver objective value: {}").addArgument(ControlData.clp_cbc_objective).log();
+            logger.atDebug().setMessage("Solver objective value: {}").addArgument(ControlData.clp_cbc_objective).log();
 
             if (CbcSolver.logObj) {
                 ILP.writeNoteLn(ILP.getYearMonthCycle(), "" + ControlData.clp_cbc_objective, ILP._noteFile_cbc_obj);
@@ -699,8 +702,8 @@ public class CbcSolver {
         long totalDuration = totalEndTime - totalStartTime;
         ControlData.t_cbc = ControlData.t_cbc + (int) totalDuration;
 
-        logger.atInfo().setMessage("==================== Problem Solving Session Complete ====================").log();
-        logger.atInfo().setMessage("Total processing time: {} ms").addArgument(totalDuration).log();
+        logger.atDebug().setMessage("==================== Problem Solving Session Complete ====================").log();
+        logger.atDebug().setMessage("Total processing time: {} ms").addArgument(totalDuration).log();
     }
 
 	public static double getObjValue(){
@@ -908,9 +911,9 @@ public class CbcSolver {
     }
 
     private static void setConstraints(boolean isNoteCbc, String append) {
-        PerformanceTimer timer = new CbcPerformanceTimer("Constraint Setup");
+        PerformanceTimer timer = new PerformanceTimerCbc("Constraint Setup");
 
-        logger.atInfo().setMessage("CBC Solver: Setting up constraints...").log();
+        logger.atDebug().setMessage("CBC Solver: Setting up constraints...").log();
 
         try {
 		    Map<String, EvalConstraint> constraintMap = SolverData.getConstraintDataMap();
@@ -1260,9 +1263,9 @@ public class CbcSolver {
 	}
 
 	private static void setDVars(boolean isNoteCbc, String append) {
-        PerformanceTimer timer = new CbcPerformanceTimer("Variable Setup");
+        PerformanceTimer timer = new PerformanceTimerCbc("Variable Setup");
 
-        logger.atInfo().setMessage("CBC Solver: Setting up decision variables...").log();
+        logger.atDebug().setMessage("CBC Solver: Setting up decision variables...").log();
 
         try {
             Map<String, WeightElement> wm1 = SolverData.getWeightMap();
@@ -1321,9 +1324,9 @@ public class CbcSolver {
 
 
     private static void setDVars2021(boolean isNoteCbc) {
-        PerformanceTimer timer = new CbcPerformanceTimer("Variable Setup (2021 version)");
+        PerformanceTimer timer = new PerformanceTimerCbc("Variable Setup (2021 version)");
 
-        logger.atInfo().setMessage("CBC Solver: Setting up decision variables (2021 version)...").log();
+        logger.atDebug().setMessage("CBC Solver: Setting up decision variables (2021 version)...").log();
 
         try {
             int intSize = 0;
@@ -1367,7 +1370,7 @@ public class CbcSolver {
             if (isNoteCbc) Tools.quickLog(modelName + "_" + solveName + ".cols", c);
             intVarSize = intSize;
 
-            logger.atInfo().setMessage("2021 version variable setup complete: integer variables={}, total weight={}").addArgument(intSize).addArgument(totalWeight).log();
+            logger.atDebug().setMessage("2021 version variable setup complete: integer variables={}, total weight={}").addArgument(intSize).addArgument(totalWeight).log();
         } catch (Exception e) {
             logger.error("Failed to set up 2021 variables", e);
             throw new RuntimeException("2021 variable setup failed", e);
@@ -1400,14 +1403,14 @@ public class CbcSolver {
     }
 
 	public static int[] solve(){
-    	logger.atInfo().setMessage("==================== Solving Start ====================").log();
+    	logger.atDebug().setMessage("==================== Solving Start ====================").log();
         int ci = ControlData.currCycleIndex + 1;
 
-        logger.atInfo().setMessage("CBC Standard Solve: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]").addArgument(modelName).addArgument(solvFunc).addArgument(ControlData.currYear).addArgument(ControlData.currMonth)
+        logger.atDebug().setMessage("CBC Standard Solve: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]").addArgument(modelName).addArgument(solvFunc).addArgument(ControlData.currYear).addArgument(ControlData.currMonth)
             .addArgument(ControlData.currDay).addArgument(ci)
             .addArgument(ControlData.currCycleName).log();
 
-        logger.atInfo().setMessage("CBC Solver: Solving {}/{}/{} Cycle {} [{}]")
+        logger.atDebug().setMessage("CBC Solver: Solving {}/{}/{} Cycle {} [{}]")
             .addArgument(ControlData.currMonth).addArgument(ControlData.currDay)
             .addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName).log();
 
@@ -1613,22 +1616,22 @@ public class CbcSolver {
 				getSolverInformation(status, status2);
 				iis();
 			}else {
-                logger.atInfo().setMessage("Solve completed successfully").log();
+                logger.atDebug().setMessage("Solve completed successfully").log();
             }
-            logger.atInfo().setMessage("==================== Solving End ====================").log();
+            logger.atDebug().setMessage("==================== Solving End ====================").log();
             return new int[]{status, status2};
 		}
 
 
     public static int[] solve_jCbc2021() {
-            logger.atInfo().setMessage("==================== 2021 Solver Start ====================").log();
+            logger.atDebug().setMessage("==================== 2021 Solver Start ====================").log();
             int ci = ControlData.currCycleIndex + 1;
 
-            logger.atInfo().setMessage("CBC 2021 Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]")
+            logger.atDebug().setMessage("CBC 2021 Solver: modelName={}, solveFunction={}, date={}-{}-{}, cycle={} [{}]")
                     .addArgument(modelName).addArgument(solvFunc).addArgument(ControlData.currYear).addArgument(ControlData.currMonth)
                     .addArgument(ControlData.currDay).addArgument(ci).addArgument(ControlData.currCycleName).log();
 
-            logger.atInfo().setMessage("CBC Solver2021: Solving {}/{}/{} Cycle {} [{}]")
+            logger.atDebug().setMessage("CBC Solver2021: Solving {}/{}/{} Cycle {} [{}]")
                     .addArgument(ControlData.currMonth).addArgument(ControlData.currDay)
                     .addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName).log();
 
@@ -1643,7 +1646,7 @@ public class CbcSolver {
             logger.atDebug().setMessage("Available warm start integer variables: {}").addArgument(a.size()).log();
 
             if ((useWarm || saveWarm) && a.size()>2) {
-                logger.atInfo().setMessage("Using warm start solving").log();
+                logger.atDebug().setMessage("Using warm start solving").log();
 
 				if (warmArrayExist) {
 					jCbc.delete_jarray_int(values);
@@ -1695,7 +1698,7 @@ public class CbcSolver {
 				}
 
 			} else {
-                    logger.atInfo().setMessage("Not using warm start, using solve2 directly").log();
+                    logger.atDebug().setMessage("Not using warm start, using solve2 directly").log();
                     solve_2();
 					status = jCbc.status(model);
 					status2 = jCbc.secondaryStatus(model);
@@ -1753,10 +1756,10 @@ public class CbcSolver {
 				getSolverInformation(status, status2);
 				iis();
 			} else {
-                logger.atInfo().setMessage("2021 Solver completed successfully").log();
+                logger.atDebug().setMessage("2021 Solver completed successfully").log();
             }
 
-            logger.atInfo().setMessage("==================== 2021 Solver End ====================").log();
+            logger.atDebug().setMessage("==================== 2021 Solver End ====================").log();
             return new int[]{status, status2};
         }
 
@@ -1956,7 +1959,7 @@ public class CbcSolver {
 	}
 
 	private static void collectDvar() {
-        PerformanceTimer timer = new CbcPerformanceTimer("Variable Collection");
+        PerformanceTimer timer = new PerformanceTimerCbc("Variable Collection");
         logger.atInfo().setMessage("CBC Solver: Collecting variable results...").log();
 
         int ColumnSize = jCbc.getNumCols(model);
@@ -1990,7 +1993,7 @@ public class CbcSolver {
     }
 
 	private static void collectDvar2021() {
-        PerformanceTimer timer = new CbcPerformanceTimer("Variable Collection (2021 version)");
+        PerformanceTimer timer = new PerformanceTimerCbc("Variable Collection (2021 version)");
 
         logger.atInfo().setMessage("CBC Solver: Collecting variable results (2021 version)...").log();
 
@@ -2035,7 +2038,7 @@ logger.atTrace().setMessage("Integer variable (2021): name={}, value={} (rounded
 	}
 
 	private static void assignDvar() {
-        PerformanceTimer timer = new CbcPerformanceTimer("Variable Assignment");
+        PerformanceTimer timer = new PerformanceTimerCbc("Variable Assignment");
 
         logger.atInfo().setMessage("CBC Solver: Assigning variable values...").log();
 
@@ -2578,7 +2581,7 @@ logger.atTrace().setMessage("Integer variable (2021): name={}, value={} (rounded
         logger.atDebug().setMessage("Available warm start integer variables: {}").addArgument(a.size()).log();
 
         if ((useWarm || saveWarm) && a.size()>2) {
-            logger.atInfo().setMessage("Using warm start solving").log();
+            logger.atDebug().setMessage("Using warm start solving").log();
 
             if (warmArrayExist) {
 
@@ -2622,7 +2625,7 @@ logger.atTrace().setMessage("Integer variable (2021): name={}, value={} (rounded
             }
 
         } else {
-            logger.atInfo().setMessage("Not using warm start, using callCbc directly").log();
+            logger.atDebug().setMessage("Not using warm start, using callCbc directly").log();
             solveName = "c__";
             rv = jCbc.callCbcJ("-log 0 -primalT 1e-9 -integerT 1e-9 -solve", model, solver);
         }
