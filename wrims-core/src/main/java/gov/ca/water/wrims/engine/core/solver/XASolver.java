@@ -29,50 +29,7 @@ public class XASolver {
 	int assignedDvarCount;
 	double objectiveValue = Double.NaN;
 
-	private static class PerformanceStats {
-		private long totalConstraintSetupMs = 0L;
-		private long totalDvarSetupMs = 0L;
-		private long totalWeightSetupMs = 0L;
-		private long totalSolveMs = 0L;
-		private long totalAssignMs = 0L;
-		private long totalRunMs = 0L;
-		private int totalRuns = 0;
-		private int totalSuccessfulAssignRuns = 0;
-
-		void recordRun(long constraintMs, long dvarMs, long weightMs, long solveMs, long assignMs, long totalMs, boolean assignDone) {
-			totalConstraintSetupMs += constraintMs;
-			totalDvarSetupMs += dvarMs;
-			totalWeightSetupMs += weightMs;
-			totalSolveMs += solveMs;
-			totalAssignMs += assignMs;
-			totalRunMs += totalMs;
-			totalRuns++;
-			if (assignDone) totalSuccessfulAssignRuns++;
-		}
-
-		int getTotalRuns() {
-			return totalRuns;
-		}
-
-		long getAverageSolveMs() {
-			return totalRuns > 0 ? totalSolveMs / totalRuns : 0L;
-		}
-
-		long getAverageRunMs() {
-			return totalRuns > 0 ? totalRunMs / totalRuns : 0L;
-		}
-
-		void logSummary() {
-			if (totalRuns > 0) {
-				LOG.atDebug().setMessage("XA performance summary: runs={} successfulAssignRuns={} totalRunMs={} avgRunMs={} totalSolveMs={} avgSolveMs={} constraintMs={} dvarMs={} weightMs={} assignMs={}")
-					.addArgument(totalRuns).addArgument(totalSuccessfulAssignRuns).addArgument(totalRunMs).addArgument(getAverageRunMs())
-					.addArgument(totalSolveMs).addArgument(getAverageSolveMs()).addArgument(totalConstraintSetupMs).addArgument(totalDvarSetupMs)
-					.addArgument(totalWeightSetupMs).addArgument(totalAssignMs).log();
-			}
-		}
-	}
-
-	private static PerformanceStats performanceStats = new PerformanceStats();
+    private static XaSolverPerformanceStatistics performanceStats = new XaSolverPerformanceStatistics();
 
 	private long lastSetConstraintsMs = 0L;
 	private long lastSetDVarsMs = 0L;
@@ -104,7 +61,7 @@ public class XASolver {
 		int equalityConstraintCount = 0;
 		int inequalityConstraintCount = 0;
 
-		PerformanceTimer totalTimer = new XaPerformanceTimer("XA.total");
+		PerformanceTimer totalTimer = new PerformanceTimerXa("XA.total");
 		PerformanceTimer solveTimer = null;
 
 		if (ControlData.currModelDataSet != null) {
@@ -117,7 +74,7 @@ public class XASolver {
 			if (ControlData.currModelDataSet.gTimeArrayList != null) constraintCount += ControlData.currModelDataSet.gTimeArrayList.size();
 		}
 
-		LOG.atInfo().setMessage("==================== XA Problem Solving Session Start ====================").log();
+		LOG.atDebug().setMessage("==================== XA Problem Solving Session Start ====================").log();
 
 		s = Calendar.getInstance().getTimeInMillis();
 		ControlData.xasolver.loadNewModel();
@@ -127,24 +84,24 @@ public class XASolver {
 		tSetConstraints = lastSetConstraintsMs;
 		equalityConstraintCount = lastEqualityConstraintCount;
 		inequalityConstraintCount = lastInequalityConstraintCount;
-		LOG.atInfo().setMessage("XA constraint setup complete: total={} equality={} inequality={}").addArgument(constraintCount).addArgument(equalityConstraintCount).addArgument(inequalityConstraintCount).log();
+		LOG.atDebug().setMessage("XA constraint setup complete: total={} equality={} inequality={}").addArgument(constraintCount).addArgument(equalityConstraintCount).addArgument(inequalityConstraintCount).log();
 
 		setDVars();
 		tSetDVars = lastSetDVarsMs;
 		integerDvarCount = lastIntegerDvarCount;
 		continuousDvarCount = lastContinuousDvarCount;
-		LOG.atInfo().setMessage("XA dvar setup complete: total={} continuous={} integer={}").addArgument(dvarCount).addArgument(continuousDvarCount).addArgument(integerDvarCount).log();
+		LOG.atDebug().setMessage("XA dvar setup complete: total={} continuous={} integer={}").addArgument(dvarCount).addArgument(continuousDvarCount).addArgument(integerDvarCount).log();
 
 		setWeights();
 		tSetWeights = lastSetWeightsMs;
-		LOG.atInfo().setMessage("XA weight setup complete: total={}").addArgument(weightCount).log();
+		LOG.atDebug().setMessage("XA weight setup complete: total={}").addArgument(weightCount).log();
 
-		LOG.atInfo().setMessage("New XA Problem Created: cycle={} [{}], date={}/{}/{}, solvePath={}").addArgument(ci).addArgument(ControlData.currCycleName).addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(solvePath).log();
+		LOG.atDebug().setMessage("New XA Problem Created: cycle={} [{}], date={}/{}/{}, solvePath={}").addArgument(ci).addArgument(ControlData.currCycleName).addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(solvePath).log();
 
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Solving {}/{}/{} Cycle {} [{}]").addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName).log();
-		LOG.atInfo().setMessage("Starting XA solving process...").log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("XA Solver: Solving {}/{}/{} Cycle {} [{}]").addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName).log();
+		LOG.atDebug().setMessage("Starting XA solving process...").log();
 
-		solveTimer = new XaPerformanceTimer("XA.solve");
+		solveTimer = new PerformanceTimerXa("XA.solve");
 		s = Calendar.getInstance().getTimeInMillis();
 		ControlData.xasolver.solveWithInfeasibleAnalysis("Output console:");
 		tSolve = Calendar.getInstance().getTimeInMillis() - s;
@@ -163,8 +120,8 @@ public class XASolver {
 			LOG.atDebug().setCause(e).setMessage("XA Solver failed to fetch solverStatus after solve").log();
 		}
 
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("Model status: {}").addArgument(modelStatus).log();
-		LOG.atInfo().setMessage("XA solve completed: cycle={} [{}] solvePath={} modelStatus={} solverStatus={} solveMs={}").addArgument(ci).addArgument(ControlData.currCycleName).addArgument(solvePath).addArgument(modelStatus).addArgument(solverStatus).addArgument(tSolve).log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("Model status: {}").addArgument(modelStatus).log();
+		LOG.atDebug().setMessage("XA solve completed: cycle={} [{}] solvePath={} modelStatus={} solverStatus={} solveMs={}").addArgument(ci).addArgument(ControlData.currCycleName).addArgument(solvePath).addArgument(modelStatus).addArgument(solverStatus).addArgument(tSolve).log();
 
 		if (modelStatus>=2) getSolverInformation();
 		if (Error.error_solving.size()<1) {
@@ -173,7 +130,7 @@ public class XASolver {
 			assignDvar();
 			tAssign = Calendar.getInstance().getTimeInMillis() - s;
 			assignDone = true;
-			LOG.atInfo().setMessage("XA variable assignment complete: total {} variables assigned").addArgument(assignedDvarCount).log();
+			LOG.atDebug().setMessage("XA variable assignment complete: total {} variables assigned").addArgument(assignedDvarCount).log();
 		} else {
 			LOG.atDebug().setMessage("XA Solver skipped assignDvar because solvingErrors={}").addArgument(Error.error_solving.size()).log();
 		}
@@ -204,15 +161,15 @@ public class XASolver {
 
 		performanceStats.recordRun(tSetConstraints, tSetDVars, tSetWeights, tSolve, tAssign, t2-t1, assignDone);
 
-		LOG.atInfo().setMessage("XA total processing time: {} ms").addArgument(t2-t1).log();
-		LOG.atInfo().setMessage("XA Solver summary: date={}/{}/{} cycle={} [{}] totalMs={} loadModelMs={} setConstraintsMs={} setDVarsMs={} setWeightsMs={} solveMs={} assignMs={} modelStatus={} solverStatus={} solvingErrors={} assignDone={} dvarCount={} integerDvarCount={} continuousDvarCount={} weightCount={} constraintCount={} equalityConstraintCount={} inequalityConstraintCount={} assignedDvarCount={} objective={} solvePath={} cumulativeRuns={} avgSolveMs={} avgRunMs={}")
+		LOG.atDebug().setMessage("XA total processing time: {} ms").addArgument(t2-t1).log();
+		LOG.atDebug().setMessage("XA Solver summary: date={}/{}/{} cycle={} [{}] totalMs={} loadModelMs={} setConstraintsMs={} setDVarsMs={} setWeightsMs={} solveMs={} assignMs={} modelStatus={} solverStatus={} solvingErrors={} assignDone={} dvarCount={} integerDvarCount={} continuousDvarCount={} weightCount={} constraintCount={} equalityConstraintCount={} inequalityConstraintCount={} assignedDvarCount={} objective={} solvePath={} cumulativeRuns={} avgSolveMs={} avgRunMs={}")
 			.addArgument(ControlData.currMonth).addArgument(ControlData.currDay).addArgument(ControlData.currYear).addArgument(ci).addArgument(ControlData.currCycleName)
 			.addArgument(t2-t1).addArgument(tLoadModel).addArgument(tSetConstraints).addArgument(tSetDVars).addArgument(tSetWeights).addArgument(tSolve).addArgument(tAssign)
 			.addArgument(modelStatus).addArgument(solverStatus).addArgument(Error.error_solving.size()).addArgument(assignDone)
 			.addArgument(dvarCount).addArgument(integerDvarCount).addArgument(continuousDvarCount).addArgument(weightCount).addArgument(constraintCount)
 			.addArgument(equalityConstraintCount).addArgument(inequalityConstraintCount).addArgument(assignedDvarCount).addArgument(objectiveValue)
 			.addArgument(solvePath).addArgument(performanceStats.getTotalRuns()).addArgument(performanceStats.getAverageSolveMs()).addArgument(performanceStats.getAverageRunMs()).log();
-		LOG.atInfo().setMessage("==================== XA Problem Solving Session Complete ====================").log();
+		LOG.atDebug().setMessage("==================== XA Problem Solving Session Complete ====================").log();
 	}
 
 	public static void logPerformanceSummary(){
@@ -243,7 +200,7 @@ public class XASolver {
 
 	public void setDVars(){
 		long s = Calendar.getInstance().getTimeInMillis();
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Setting dvars").log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("XA Solver: Setting dvars").log();
 
 		lastIntegerDvarCount = 0;
 		lastContinuousDvarCount = 0;
@@ -280,7 +237,7 @@ public class XASolver {
 
 	public void setWeights(){
 		long s = Calendar.getInstance().getTimeInMillis();
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Setting weights").log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("XA Solver: Setting weights").log();
 
 		Map<String, WeightElement> weightMap = SolverData.getWeightMap();
 		for (int i=0; i<=1; i++){
@@ -310,7 +267,7 @@ public class XASolver {
 
 	private void setConstraints() {
 		long s = Calendar.getInstance().getTimeInMillis();
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Setting constraints").log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("XA Solver: Setting constraints").log();
 
 		lastEqualityConstraintCount = 0;
 		lastInequalityConstraintCount = 0;
@@ -359,7 +316,7 @@ public class XASolver {
 	}
 
 	public void assignDvar(){
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("XA Solver: Assigning dvars' values").log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("XA Solver: Assigning dvars' values").log();
 
 		Map<String, Map<String, IntDouble>> varCycleValueMap=ControlData.currStudyDataSet.getVarCycleValueMap();
 		Map<String, Map<String, IntDouble>> varTimeArrayCycleValueMap=ControlData.currStudyDataSet.getVarTimeArrayCycleValueMap();
@@ -420,7 +377,7 @@ public class XASolver {
 			LOG.atDebug().setCause(e).setMessage("XA Solver failed to fetch objective after assignDvar").log();
 		}
 
-		if (ControlData.showRunTimeMessage) LOG.atInfo().setMessage("Objective Value: {}. Assign Dvar Done.").addArgument(objectiveValue).log();
+		if (ControlData.showRunTimeMessage) LOG.atDebug().setMessage("Objective Value: {}. Assign Dvar Done.").addArgument(objectiveValue).log();
 	}
 
 	public void addConditionalSlackSurplusToDvarMap(Map<String, Dvar> dvarMap, String multName){

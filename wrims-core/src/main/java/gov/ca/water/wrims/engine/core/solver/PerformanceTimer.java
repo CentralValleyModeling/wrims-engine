@@ -39,7 +39,7 @@ class PerformanceTimer {
         if (event.equalsIgnoreCase("error")) {
             builder = getLogger().atError();
         } else {
-            builder = getLogger().atInfo();
+            builder = getLogger().atDebug();
         }
         builder.setMessage("event=\"{}\", {}").addArgument(event).addArgument(toString()).log();
     }
