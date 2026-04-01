@@ -17,7 +17,7 @@ jobs:
     if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'push'
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6
         env:
           REPO: ${{ github.event.workflow_run.head_repository.full_name }}
           REF: ${{ github.event.workflow_run.head_branch }}
@@ -33,15 +33,15 @@ jobs:
           distribution: temurin
           cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5.0.0
+        uses: gradle/actions/setup-gradle@v6.0.1
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache Gradle packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -66,7 +66,7 @@ jobs:
                   -Dsonar.pullrequest.base=$BASE_BRANCH
       - name: Upload Failure Report
         if: failure()
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: sonar-failure-report
           path: /home/runner/work/wrims-engine/wrims-engine/build/reports/problems/problems-report.html
