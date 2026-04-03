@@ -1,8 +1,10 @@
-WRIMS Engine
-============
+.. _index:
 
-.. note::
-    This documentation is under active development.
+**********
+Site Index
+**********
 
-Contents
---------
+.. toctree::
+    :maxdepth: 2
+
+    WRIMS Engine<home>
