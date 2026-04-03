@@ -6,8 +6,8 @@ project = "wrims-engine"
 copyright = "2026, CA Department of Water Resources"
 author = "Zachary Roy"
 
-release = "0.1"
-version = "0.1.0"
+release = "3.0"
+version = "3.0.0"
 
 # -- General configuration
 
@@ -21,19 +21,31 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    "wrims-docs": ("https://www.sphinx-doc.org/en/master/", None),
-    "wrims-gui": ("https://www.sphinx-doc.org/en/master/", None),
-    "wresl": ("https://www.sphinx-doc.org/en/master/", None),
+    "wrims-docs": (
+        "https://wrims-docs.readthedocs.io/en/latest",
+        None,
+    ),
+    "wrims-gui": (
+        "https://wrims-docs.readthedocs.io/projects/wrims-gui/en/latest",
+        None,
+    ),
+    "wresl": (
+        "https://wrims-docs.readthedocs.io/projects/wresl/en/latest",
+        None,
+    ),
 }
-intersphinx_disabled_reftypes = ["*"]
+intersphinx_disabled_reftypes = ["std:doc", "std:label"]
 
 templates_path = ["_templates"]
 
 # -- Options for HTML output
 
 html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    "navigation_depth": 2,
+}
+github_url = "https://github.com/CentralValleyModeling/wrims-engine"
+
 
 # -- Options for EPUB output
 epub_show_urls = "footnote"
-
-
