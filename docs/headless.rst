@@ -28,6 +28,8 @@ Prerequisites
 Steps
 -----
 
+.. _headless_step_1:
+
 1. Build the ``wrims-core`` Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -49,16 +51,15 @@ project root directory.
 The Gradle ``build`` task compiles the ``wrims-eninge`` JAR file and produces
 two directories:
 
-.. list-table::
-   :widths: 25 75
-   :header-rows: 1
+- ``wrims-core/build/libs/``
 
-   * - ``wrims-core/build/libs/``
-     - Contains the ``wrims-core`` JAR file, which holds all of the classes
-       that run WRIMS models.
-   * - ``wrims-core/build/tmp/libs/``
-     - Contains all dependency JARs, like the JARs needed to write DSS files, or
-       use the MILP solvers.
+  - Contains the ``wrims-core`` JAR file, which holds all of the classes that run WRIMS models.
+
+- ``wrims-core/build/tmp/libs/``
+
+  - Contains all dependency JARs, like the JARs needed to use the MILP solvers.
+
+.. _headless_step_2:
 
 2. Download Native Libraries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,13 +72,14 @@ These are placed in ``wrims-core/build/tmp/x64/`` and must be on the system
 
    ./gradlew :wrims-core:getNatives
 
-.. info::
+.. note::
 
    Why does this not happen with the ``build`` task: these DLL files don't
    change very often, so it speeds up our build times to separate these steps.
    If you aren't planning on developing new versions of WRIMS Engine, you don't
    need to worry about the details here.
 
+.. _headless_step_3:
 
 3. Configure the Batch Script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,10 +99,11 @@ then edit the two project-specific variables at the top:
    * - ``CONFIG_FILE``
      - Name of the study configuration file within that directory (e.g., ``study.config``)
 
-.. note::
+.. warning::
 
    You must also set the ``JAVA_HOME`` environment variable to point to your
-   Java 21 JDK installation.
+   Java 21 JDK installation. This is something that is set on your machine, not
+   in the batch file.
 
 The remaining variables control Java classpath and entry-point settings. **Do
 not change these unless you have moved the script out of the repository root.**
@@ -140,6 +143,8 @@ Below is the full annotated batch file for reference:
 
    pause
 
+.. _headless_step_4:
+
 4. Run the Batch File
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -157,24 +162,22 @@ any output or error messages before it closes.
 Troubleshooting
 ---------------
 
-.. list-table::
-   :widths: 35 65
-   :header-rows: 1
+.. dropdown:: ``java`` not found
 
-   * - Symptom
-     - What to check
-   * - ``java`` not found
-     - Verify that ``JAVA_HOME`` points to a valid Java 21 JDK directory and that
-       ``%JAVA_HOME%\bin\java.exe`` exists.
-   * - Missing DLL errors on startup
-     - Confirm that Step 2 completed successfully and that
-       ``wrims-core\build\tmp\x64`` is populated.
-   * - ``ClassNotFoundException`` for ``ControllerBatch``
-     - Confirm that Step 1 completed successfully and that
-       ``wrims-core\build\libs\`` and ``wrims-core\build\tmp\libs\`` are populated.
-   * - Study config not found
-     - Double-check that ``PROJECT_DIR`` and ``CONFIG_FILE`` together form the
-       correct absolute path to your ``study.config`` file.
-   * - Script must be run from the repository root
-     - The classpath and DLL path entries are relative. Always launch the script
-       from the ``wrims-engine`` root directory, not from a subdirectory.
+   Verify that ``JAVA_HOME`` points to a valid Java 21 JDK directory and that ``%JAVA_HOME%\bin\java.exe`` exists.
+
+.. dropdown:: Missing DLL errors on startup
+
+   Confirm that :ref:`Step 2<headless_step_2>` completed successfully and that ``wrims-core\build\tmp\x64`` is populated.
+
+.. dropdown:: ``ClassNotFoundException`` for ``ControllerBatch``
+
+   Confirm that :ref:`Step 1<headless_step_1>` completed successfully and that ``wrims-core\build\libs\`` and ``wrims-core\build\tmp\libs\`` are populated.
+
+.. dropdown:: Study config not found
+
+   Double-check that ``PROJECT_DIR`` and ``CONFIG_FILE`` together form the correct absolute path to your ``study.config`` file.
+
+.. dropdown:: Script must be run from the repository root
+
+   The classpath and DLL path entries are relative. Always launch the script from the ``wrims-engine`` root directory, not from a subdirectory.
