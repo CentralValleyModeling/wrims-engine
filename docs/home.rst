@@ -16,10 +16,10 @@ If you are new to WRIMS, the recommended path is:
 
 1. Install WRIMS GUI. Starting out with WRIMS Engine is probably not the best
    entry point.
-2. Open an existing study in the GUI to familiarise yourself with the project
-   structure and configuration files.
+2. Check out the :ref:`WRIMS GUI Docs<wrims-gui:home>` to learn how to use
+   WRIMS from the graphical interface.
 3. When you are ready to run studies programmatically or in batch, refer to the
-   headless execution guide below.
+   headless guide here: :ref:`headless`.
 
 Contents
 --------
