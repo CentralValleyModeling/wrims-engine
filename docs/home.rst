@@ -24,31 +24,29 @@ If you are new to WRIMS, the recommended path is:
 Contents
 --------
 
-.. toctree::
-   :maxdepth: 1
-   :caption: How-To Guides
+How To
+^^^^^^
 
-   running_headless_wrims_engine
+- :ref:`headless`
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Reference
+Reference
+^^^^^^^^^
 
-   configuration
+- :ref:`Configuration File Structure <configuration>`
 
 .. note::
 
-   The **Configuration Reference** page is not yet written. The entry above is
-   a placeholder to show where it will appear in the navigation.
+   The **Configuration File Structure** page is not yet written. The entry above
+   is a placeholder to show where it will appear in the navigation.
 
 About WRIMS
 -----------
-
-WRIMS is developed and maintained by the `California Department of Water
-Resources <https://water.ca.gov/>`_. It is primarily used for planning and
+or planning and
 operational studies of the State Water Project and the Central Valley water
 system, though its general modeling framework can be applied to other
 large-scale water resource networks.
+WRIMS is developed and maintained by the `California Department of Water
+Resources <https://water.ca.gov/>`_. It is primarily used f
 
 The engine solves a linear program at each cycle/timestep to determine optimal
 allocations and deliveries given the network topology, physical constraints,

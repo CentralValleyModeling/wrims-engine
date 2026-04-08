@@ -1,3 +1,5 @@
+.. _headless:
+
 Running the WRIMS Engine in Headless Mode
 ==========================================
 
