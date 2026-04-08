@@ -19,39 +19,68 @@ CI/CD pipeline or scheduled task.
 Prerequisites
 -------------
 
-- Java 21 JDK (e.g., `Eclipse Temurin <https://adoptium.net/>`_)
-- Gradle (the project includes a wrapper, so a local installation is not required)
-- A WRIMS project directory containing a ``study.config`` file
+- Clone the ``wrims-engine`` repository.
+- Have Java 21 JDK available (e.g., `Eclipse Temurin <https://adoptium.net/>`_)
+- A WRIMS model directory containing a ``study.config`` file. (These
+  ``study.config`` files are similar to the ``.launch`` files that WRIMS GUI
+  uses. To create your own, refer to the :ref:`configuration` page.
 
 Steps
 -----
 
-Step 1 — Build the ``wrims-core`` Module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. Build the ``wrims-core`` Module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Run the Gradle build task for ``wrims-core``. This compiles the module and produces
-two directories:
-
-- ``wrims-core/build/libs/`` — contains the ``wrims-core`` JAR
-- ``wrims-core/build/tmp/libs/`` — contains all dependency JARs
+Run the Gradle ``build`` task for ``wrims-core`` from the ``wrims-engine``
+project root directory.
 
 .. code-block:: sh
 
    ./gradlew :wrims-core:build
 
-Step 2 — Download Native Libraries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
 
-Run the ``getNatives`` task to download the required Windows DLL files. These are
-placed in ``wrims-core/build/tmp/x64/`` and must be on the system ``PATH`` at
-runtime.
+   Gradle is a muti-use tool for Java projects. Don't worry too much about
+   learning how to use it if all you want to do is run WRIMS. All you need to
+   know is that it is helpful in downloading all of the dependencies WRIMS
+   needs, and putting those in the appropriate location on your machine. If you
+   use Python, Gradle is similar to Conda.
+
+The Gradle ``build`` task compiles the ``wrims-eninge`` JAR file and produces
+two directories:
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - ``wrims-core/build/libs/``
+     - Contains the ``wrims-core`` JAR file, which holds all of the classes
+       that run WRIMS models.
+   * - ``wrims-core/build/tmp/libs/``
+     - Contains all dependency JARs, like the JARs needed to write DSS files, or
+       use the MILP solvers.
+
+2. Download Native Libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Run the Gradle ``getNatives`` task to download the required Windows DLL files.
+These are placed in ``wrims-core/build/tmp/x64/`` and must be on the system
+``PATH`` at runtime.
 
 .. code-block:: sh
 
    ./gradlew :wrims-core:getNatives
 
-Step 3 — Configure the Launch Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. info::
+
+   Why does this not happen with the ``build`` task: these DLL files don't
+   change very often, so it speeds up our build times to separate these steps.
+   If you aren't planning on developing new versions of WRIMS Engine, you don't
+   need to worry about the details here.
+
+
+3. Configure the Batch Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A template batch file, ``run_wrims_study_example.bat``, is provided in the root of
 the repository. Copy it and rename it for your project (e.g., ``run_project.bat``),
@@ -68,10 +97,13 @@ then edit the two project-specific variables at the top:
    * - ``CONFIG_FILE``
      - Name of the study configuration file within that directory (e.g., ``study.config``)
 
-You must also set ``JAVA_HOME`` to point to your Java 21 JDK installation.
+.. note::
 
-The remaining variables control classpath and entry-point settings. **Do not change
-these unless you have moved the script out of the repository root.**
+   You must also set the ``JAVA_HOME`` environment variable to point to your
+   Java 21 JDK installation.
+
+The remaining variables control Java classpath and entry-point settings. **Do
+not change these unless you have moved the script out of the repository root.**
 
 Below is the full annotated batch file for reference:
 
@@ -108,8 +140,8 @@ Below is the full annotated batch file for reference:
 
    pause
 
-Step 4 — Run the Batch File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+4. Run the Batch File
+~~~~~~~~~~~~~~~~~~~~~
 
 Execute the batch file from the ``wrims-engine`` root directory. You can either
 double-click it in Windows Explorer or run it from a terminal:
