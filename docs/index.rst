@@ -8,3 +8,4 @@ Site Index
     :maxdepth: 2
 
     WRIMS Engine<home>
+    Headless Compute<headless>
