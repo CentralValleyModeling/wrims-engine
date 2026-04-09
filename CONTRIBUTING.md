@@ -211,6 +211,8 @@ Published releases are available to all users, regardless of their role. Users d
 To create, edit, or delete a release, you must have write permissions or either the "Maintain" or "Admin" role. 
 See [GitHub Documentation - Repository roles for an organization](https://docs.github.com/en/enterprise-server@3.17/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization) for more details on permissions.
 
+For details on navigating the release process, see [GitHub Documentation - Managing releases in a repository](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
+
 > [!IMPORTANT]
 > Tagging a release with "RC" in the tag name will trigger a comparison test action run.
 > This action will run on the tagged commit and is generally intended as a manually initiated action. 
