@@ -204,7 +204,7 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 - Once the pull request has been merged, the issue can be assigned to QA testing to verify that the bug has been addressed.
 - The developer should assign an appropriate reviewer for their work.
 
-### Creating releases
+## Creating releases
 
 Published releases are available to all users, regardless of their role. Users do not need to be logged in to download a release.
 
