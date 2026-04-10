@@ -92,7 +92,7 @@ very well interact with this method.
 - Directly embeds CPython into the JVM with Python 3.10+ support.
 
 #### Cons:
-- Requires maintaining a second Python runtime alongside GraalPy.
+- Requires updating JEP, which has breaking API changes in the latest version.
 - Lacking test coverage to confirm refactor does not introduce regressions.
 - No test coverage exists to validate JEP is currently functioning as intended.
 - Requires continued inclusion of an additional DLL file in the WRIMS-GUI project.
