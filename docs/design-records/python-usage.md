@@ -24,6 +24,26 @@ Previous dependency analysis is documented in:
 - Dependency management: prefer dependencies available via Maven/Gradle.
 - Future extensibility: prefer the integration that offers the broadest future applicability.
 
+
+## Evaluation boundary
+
+This ADR evaluates Python integration within the WRIMS-Engine runtime only.
+
+### Specifically
+
+**In scope:**
+
+- Python execution within WRIMS-Engine
+- Integration mechanisms between Java and Python
+- Dependencies introduced into the WRIMS-Engine runtime environment
+
+**Out of scope (but considered as impacts):**
+- WRIMS-GUI packaging and distribution concerns
+- External modeling workflows (e.g., CalLite usage patterns)
+- Client-side deployment environments
+
+Impacts to WRIMS-GUI and deployment are considered as secondary consequences, not primary decision drivers.
+
 ## Considered Options
 
 1. **Standardise on GraalPy** — replace JEP with GraalPy for all Python interoperability.
