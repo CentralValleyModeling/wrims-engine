@@ -204,7 +204,16 @@ Avoid the use of [namespace packages](https://docs.python.org/3/glossary.html#te
 - Once the pull request has been merged, the issue can be assigned to QA testing to verify that the bug has been addressed.
 - The developer should assign an appropriate reviewer for their work.
 
-### Creating releases
+## Creating releases
 
-Please note that tagging a release with "RC" in the tag name will trigger a comparison test action run.
-This action will run on the tagged commit and is generally intended as a manually initiated action. 
+Published releases are available to all users, regardless of their role. Users do not need to be logged in to download a release.
+
+To create, edit, or delete a release, you must have write permissions or either the "Maintain" or "Admin" role.  If you are interested in becoming a maintainer, please reach out to [wrims_development_application@water.ca.gov](mailto:wrims_development_application@water.ca.gov?subject=GitHub%20Permissions%20Request)
+
+See [GitHub Documentation - Repository roles for an organization](https://docs.github.com/en/enterprise-server@3.17/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization) for more details on permissions.
+
+For details on navigating the release process, see [GitHub Documentation - Managing releases in a repository](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
+
+> [!IMPORTANT]
+> Tagging a release with "RC" in the tag name will trigger a comparison test action run.
+> This action will run on the tagged commit and is generally intended as a manually initiated action. 
