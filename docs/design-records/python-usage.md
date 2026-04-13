@@ -32,7 +32,6 @@ This ADR evaluates Python integration within the WRIMS-Engine runtime only.
 ### Specifically
 
 **In scope:**
-
 - Python execution within WRIMS-Engine
 - Integration mechanisms between Java and Python
 - Dependencies introduced into the WRIMS-Engine runtime environment
@@ -155,12 +154,10 @@ but that is not guaranteed, as a CalLite project could very well interact with t
 - Directly embeds CPython into the JVM with Python 3.10+ support
 
 #### Cons:
-- Requires updating JEP, which has breaking API changes in the latest version.
-- Lack of test coverage introduces uncertainty in validating changes and current behavior.
-- Introduces/retains native runtime dependencies (CPython + JNI bindings)
-- Ongoing maintenance burden for native integration
-- Breaking API changes in newer JEP versions require refactor effort
-
+- Breaking API changes in newer JEP versions require refactor effort  
+- Lack of test coverage introduces uncertainty in validating changes and current behavior  
+- Introduces/retains native runtime dependencies (CPython + JNI bindings)  
+- Ongoing maintenance burden for native integration  
 
 ### Option 3: Maintain the Status Quo
 
