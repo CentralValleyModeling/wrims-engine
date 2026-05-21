@@ -13,8 +13,8 @@ public final class ConfigLoader {
 	public ConfigLoader() {
 	}
 
-	public void load() {
-		try (InputStream stream = getClass().getResourceAsStream("/config.properties")) {
+	public void load(InputStream stream) {
+		try {
 			if (stream == null) {
 				logger.atSevere().log("config.properties not found in classpath");
 				return;
