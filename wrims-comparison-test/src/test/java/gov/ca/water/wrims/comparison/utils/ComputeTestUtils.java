@@ -13,13 +13,20 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import gov.ca.water.wrims.engine.core.tools.MemoryParamParser;
 
 public class ComputeTestUtils {
 
     private static final Logger LOGGER = Logger.getLogger(ComputeTestUtils.class.getName());
 
-    public static final String XMX_PARAM = "-Xmx4096m";
-    public static final String XSS_PARAM = "-Xss1024K";
+	private static final String XMX_DEFAULT = "4096m";
+	private static final String XSS_DEFAULT = "1024K";
+
+	public static final String XMX_PARAM_KEY = "gov.ca.water.wrims.comparison.compute.memory.max";
+	public static final String XSS_PARAM_KEY = "gov.ca.water.wrims.comparison.compute.stack.size";
+
+	public static final String XMX_PARAM = MemoryParamParser.getMaxMemory(XMX_PARAM_KEY, XMX_DEFAULT);
+	public static final String XSS_PARAM = MemoryParamParser.getStackMemory(XSS_PARAM_KEY, XSS_DEFAULT);
 
     // Run the System Summary Report tool similarly to the Gradle testReport task
     // Overload with defaults: workingDir = build/testProjects, inputFile = build/(inputFilePath or testProjects/callite_version_check_dss6_6.inp)
