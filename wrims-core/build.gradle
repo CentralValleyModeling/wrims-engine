@@ -6,22 +6,6 @@ plugins {
     id 'jacoco'
 }
 
-sourceSets {
-    src {
-        antlr {
-            srcDir "src/main/antlr"
-        }
-        java {
-            srcDir "src/main/java"
-            // IMPORTANT:
-            // Do NOT add "generated-src" manually.
-            // The Gradle ANTLR plugin automatically adds:
-            //   build/generated-src/antlr/main
-            // to the main source set.
-        }
-    }
-}
-
 configurations {
     windows_x64
 }
@@ -98,7 +82,7 @@ tasks.withType(AntlrTask).configureEach {
                 into "${buildDir}/generated-src/antlr/main/gov/ca/water/wrims/engine/core/wreslplus/grammar/"
             }
 
-            delete "${buildDir}/generated-src/antlr/main/*.tokens"
+            delete fileTree(dir: "${buildDir}/generated-src/antlr/main", include: "*.tokens")
         }
     }
 }
@@ -122,7 +106,9 @@ tasks.register("createBuildPropertiesFile", WriteProperties) { t ->
 }
 
 tasks.register('getNatives', Sync) { syncTask ->
-    syncTask.from configurations.windows_x64.collect { zipTree(it) }
+    syncTask.from {
+        configurations.windows_x64.collect { zipTree(it) }
+    }
     syncTask.into file("${buildDir}/tmp/x64")
 }
 
