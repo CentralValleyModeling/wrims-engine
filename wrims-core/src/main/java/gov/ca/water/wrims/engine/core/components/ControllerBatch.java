@@ -64,6 +64,7 @@ public class ControllerBatch {
 	
 	private void enableInfeasibilityLogging(int cycleIndex) {
 		// dump error to file
+		System.out.println("Enable Infeasibility Logging");
 		Error.writeSolvingErrorFile("Error_solving.txt");
 		Error.writeErrorLog();
 		// keep track of when infeasibility occurs
@@ -276,7 +277,24 @@ public class ControllerBatch {
 	public void runModel(StudyDataSet sds){
 		System.out.println("==============Run Study Start============");
 		
-		runModelILP(sds);
+		if (ControlData.solverName.equalsIgnoreCase("Gurobi")){
+			runModelGurobi(sds);
+		} else if (ControlData.solverName.equalsIgnoreCase("Glpk")){
+			runModelOrTools(sds, "GLPK_MIXED_INTEGER_PROGRAMMING");
+		} else if (ControlData.solverName.equalsIgnoreCase("Clp")){
+			runModelClp(sds);
+		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")&&(ControlData.cbc_debug_routeXA||ControlData.cbc_debug_routeCbc)){
+			runModelCbc(sds);
+		} else if (ControlData.solverName.equalsIgnoreCase("Cbc")){
+			runModelCbc(sds);
+	    } else if (ControlData.solverName.equalsIgnoreCase("XA") || ControlData.solverName.equalsIgnoreCase("XALOG") ){
+			runModelXA(sds);
+		} else if (ILP.logging){
+			runModelILP(sds);
+		} else {
+			Error.addConfigError("Solver name not recognized: "+ControlData.solverName);
+			Error.writeErrorLog();
+		}
 		
 		WeightEval.outputWtTableAR();
 		
@@ -965,14 +983,18 @@ public class ControllerBatch {
 							Error.writeErrorLog();
 							noError=false;
 						} else {	
-							ILP.setIlpFile();
-							ILP.writeIlp();
+							if (ILP.logging) {
+								ILP.setIlpFile();
+								ILP.writeIlp();
+							}
 							if (ILP.loggingVariableValue) {
 								ILP.setVarFile();
 								ILP.writeSvarValue();
+								if (!ILP.logging) {
+									ILP.findDvarEffective();
+								}
 							}
-							GurobiSolver.setLp(ILP.cplexLpFilePath);
-							GurobiSolver.solve();
+							GurobiSolver.solveDirect();
 						}
 
 						// check monitored dvar list. they are slack and surplus generated automatically 
@@ -983,11 +1005,10 @@ public class ControllerBatch {
 						if (ControlData.showRunTimeMessage) System.out.println("Solving Done.");
 						if (Error.error_solving.size()<1){
 							
-		            	
-		            	
-		            	
-		            	
-		            		
+		            		ILP.writeObjValue_Gurobi();
+		            		if (ILP.loggingVariableValue) ILP.writeDvarValue_Gurobi();
+		            		ILP.closeIlpFile();
+
 							ControlData.isPostProcessing=true;
 							mds.processAlias();
 							if (ControlData.showRunTimeMessage) System.out.println("Assign Alias Done.");
