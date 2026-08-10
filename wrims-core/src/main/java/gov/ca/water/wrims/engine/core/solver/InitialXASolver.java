@@ -6,10 +6,15 @@ import com.sunsetsoft.xa.Optimizer;
 import com.sunsetsoft.xa.XAException;
 
 import gov.ca.water.wrims.engine.core.components.Error;
+import gov.ca.water.wrims.engine.core.tools.MemoryParamParser;
 
 public class InitialXASolver {
+	public static final String XA_MAX_MEMORY_PARAM_KEY = "gov.ca.water.wrims.engine.core.solver.xa.memory.max";
+	private static final long MEMORY_DEFAULT = 25000L;
+
 	public InitialXASolver(){
-		ControlData.xasolver=new Optimizer(25000);
+		Long initialMemory = MemoryParamParser.getMaxMemoryInBytes(XA_MAX_MEMORY_PARAM_KEY, MEMORY_DEFAULT);
+		ControlData.xasolver=new Optimizer(initialMemory.intValue());
 		ControlData.xasolver.setActivationCodes( 234416483 , 19834525 ) ;
 		ControlData.xasolver.setXAMessageWindowOff();
 		try{

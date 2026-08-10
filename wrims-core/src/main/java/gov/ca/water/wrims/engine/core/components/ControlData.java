@@ -25,6 +25,8 @@ import java.util.Map;
 import com.sunsetsoft.xa.Optimizer;
 
 public class ControlData {
+	public static final String XMX_GLOBAL_PARAM_KEY = "gov.ca.water.wrims.comparison.compute.memory.max";
+	public static final String XSS_GLOBAL_PARAM_KEY = "gov.ca.water.wrims.comparison.compute.stack.size";
 	public static ArrayList<Integer> currTimeStep;
 	public static StudyDataSet currStudyDataSet=new StudyDataSet();
 	public static ModelDataSet currModelDataSet=new ModelDataSet();
