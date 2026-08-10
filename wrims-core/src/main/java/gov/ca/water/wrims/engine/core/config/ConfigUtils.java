@@ -827,11 +827,7 @@ public class ConfigUtils {
         }else if (ControlData.solverName.equalsIgnoreCase("lpsolve")) {
             configMap.put("ilplog","yes");
             ILP.loggingLpSolve = true;
-        }else if (ControlData.solverName.equalsIgnoreCase("Gurobi")) {
-            configMap.put("ilplog","yes");
-            ILP.loggingCplexLp = true;
         }
-
         String strIlpLog = configMap.get("ilplog");
         if (strIlpLog.equalsIgnoreCase("yes") || strIlpLog.equalsIgnoreCase("true")) {
             ILP.logging = true;
@@ -1057,6 +1053,17 @@ public class ConfigUtils {
     private static Map<String, String> checkConfigFile(String configFilePath) {
 
         final File configFile = new File(configFilePath);
+
+        // Reset ILP logging flags to avoid stale values across runs in the same JVM.
+        ILP.logging = false;
+        ILP.loggingAllCycles = false;
+        ILP.loggingVariableValue = false;
+        ILP.loggingVariableValueRound = false;
+        ILP.loggingVariableValueRound10 = false;
+        ILP.loggingAmpl = false;
+        ILP.loggingCplexLp = false;
+        ILP.loggingLpSolve = false;
+        ILP.loggingMPModel = false;
 
 
         try {
