@@ -59,10 +59,13 @@ public class ILP {
 	public static PrintWriter _noteFile;
 	public static PrintWriter _noteFile_xa_obj;
 	public static PrintWriter _noteFile_xa_int;
+	public static PrintWriter _noteFile_xa_time;
 	public static PrintWriter _noteFile_cbc_obj;
 	public static PrintWriter _noteFile_cbc_time;
 	public static PrintWriter _noteFile_cbc_int;
 	public static PrintWriter _noteFile_cbc_int_log;
+	public static PrintWriter _noteFile_gurobi_time;
+	public static PrintWriter _noteFile_gurobi_obj;
 	public static PrintWriter _noteFile_memory;
 	public static PrintWriter _noteFile_timeusage;
 	public static PrintWriter _watchFile_xa;
@@ -112,7 +115,8 @@ public class ILP {
 				_noteFile_cbc_time = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_cbc_time.log");
 				_noteFile_xa_int = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_xa_int.log");
 				_noteFile_cbc_int = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_cbc_int.log");
-				
+				_noteFile_xa_time = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_xa_time.log");
+
 				if (ControlData.currStudyDataSet.cycIntDvMap!=null) {
 					ILP.writeNote("cyc ", _noteFile_cbc_int);
 					ILP.writeNote("cyc ", _noteFile_xa_int);
@@ -146,7 +150,17 @@ public class ILP {
 					ILP.writeNote( s+"  ", _watchFile_cbc);
 				}
 				ILP.writeNote("\r\n", _watchFile_cbc);
-			}  
+			}
+
+			if (ControlData.solverName.equalsIgnoreCase("Gurobi")) {
+                _noteFile_gurobi_time = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_gurobi_time.log");
+				_noteFile_gurobi_obj = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_gurobi_obj.log");
+
+            }
+            if (ControlData.solverName.equalsIgnoreCase("XA")) {
+				_noteFile_xa_time = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_xa_time.log");
+				_noteFile_xa_obj = Tools.openFile(_ilpDir.getAbsolutePath(), "Note_xa_obj.log");
+            }
 			
 			if (CbcSolver.intLog && ControlData.solverName.equalsIgnoreCase("Cbc")){
 
@@ -295,10 +309,13 @@ public class ILP {
 		double objValue = ControlData.gurobi_objective;
 		String objValueStr = Double.toString(objValue);
 		
-		writeObjValue(objValueStr, _cplexLpFile, cplexLp_comment_Symbol);
+		if (ILP.loggingCplexLp && _cplexLpFile != null) {
+			writeObjValue(objValueStr, _cplexLpFile, cplexLp_comment_Symbol);
+		}
 		if (ILP.loggingLpSolve) writeObjValue(objValueStr, _lpSolveFile, lpSolve_comment_Symbol);
 		if (ILP.loggingAmpl)    writeObjValue(objValueStr, _amplFile, ampl_comment_Symbol);
 
+		writeNoteLn(getYearMonthCycle(), objValueStr, _noteFile_gurobi_obj);
 		writeObjValueLog(getYearMonthCycle(), objValueStr, _objValueFile);
 
 	}
@@ -409,6 +426,9 @@ public class ILP {
 	}
 	public static void writeDvarValue_Gurobi() {
 		
+		if (dvar_effective == null) {
+			findDvarEffective();
+		}
 		writeDvarValue_Gurobi(_dvarFile, dvar_effective);
 		_dvarFile.flush();
 		
