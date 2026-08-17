@@ -1,0 +1,26 @@
+@echo off
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+REM Set the JAVA_HOME environment variable to the path of your java 21 JDK
+set JAVA_HOME="C:\Program Files\Java\jdk-21"
+
+REM Add the required DLLs to the PATH. Do not change if this if run from the wrims-engine root directory.
+set PATH=%PATH%;wrims-core\build\tmp\x64
+
+REM Set the main class to run. This is the entry point for the WRIMS application. Do not change when running from wrims-engine root.
+set MAIN_CLASS=gov.ca.water.wrims.engine.core.components.ControllerBatch
+set WRIMS_CORE_JAR="wrims-core\build\libs\*"
+set WRIMS_CORE_DEPENDENCIES="wrims-core\build\tmp\libs\*"
+
+REM Took out the cc50, cc75, cc95 scenarios 2/6/26
+FOR %%A in (adj) DO (
+	set PROJECT_DIR=C:\Users\jon\Dropbox\results\cs3\9.3.1_danube_%%A
+	REM Add the external libraries to the PATH. Do not change.
+	set PATH=%PATH%;!PROJECT_DIR!\Run\External
+
+	FOR %%B in (gurobi, cbc, xa) DO (
+		set CONFIG_FILE=cs3_%%B_test.config
+		echo !PROJECT_DIR!\!CONFIG_FILE!
+		%JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -Dproject.dir=!PROJECT_DIR! -cp "%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%" %MAIN_CLASS% -config=!PROJECT_DIR!\!CONFIG_FILE!
+	)
+)
