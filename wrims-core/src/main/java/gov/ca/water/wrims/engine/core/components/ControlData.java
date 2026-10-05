@@ -137,6 +137,7 @@ public class ControlData {
 	public static String xaSort = null;
 	public static boolean resimDate=false;
 	public static boolean resimGroundwater=false;
+    public static boolean resimFrcstRunoffTable=false;
 	public static int resimYear;
 	public static int resimMonth;
 	public static int resimDay;
