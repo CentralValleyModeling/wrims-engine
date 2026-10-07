@@ -2158,7 +2158,7 @@ public class DebugInterface {
 			for (int i=0; i<=currIndex; i++){
 				double value;
 				value=dataArray[i];
-				if (!(value==-901.0 || value==-902.0)){
+				if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 					int timestepListed=i-currIndex;
 					prvs = TimeOperation.findTime(timestepListed);
 					dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+df.format(value)+"#";
@@ -2173,7 +2173,7 @@ public class DebugInterface {
 				int currIndex=ValueEvaluation.timeSeriesIndex(dds, prvs);
 				for (int i=0; i<dataArrayList.size(); i++){
 					double value=dataArrayList.get(i);
-					if (!(value==-901.0 || value==-902.0)){
+					if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 						int timestepListed=i-currIndex;
 						prvs = TimeOperation.findTime(timestepListed);
 						dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+df.format(value)+"#";

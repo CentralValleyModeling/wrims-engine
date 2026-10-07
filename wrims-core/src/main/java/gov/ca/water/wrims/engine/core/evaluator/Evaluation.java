@@ -773,7 +773,7 @@ public class Evaluation {
 			if (index>=0 && index<data.size() && index>=dds.getStudyStartIndex()){
 				double value=data.get(index);
 				if (dds.fromDssFile()){
-					if (value != -901.0 && value != -902.0){
+					if (value != -901.0 && value != -902.0 && !Double.isNaN(value)){
 						return value;
 					}
 				}else{
@@ -787,7 +787,7 @@ public class Evaluation {
 			ArrayList<Double> data=dds.getData();
 			if (index>=0 && index<data.size()){
 				double value=data.get(index);
-				if (value !=-901.0){
+				if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
 					return value;
 				}
 			}
@@ -800,7 +800,7 @@ public class Evaluation {
 				ArrayList<Double> data=dds.getData();
 				if (index>=0 && index<data.size()){
 					double value=data.get(index);
-					if (value !=-901.0){
+					if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
 						return value;
 					}
 				}
@@ -813,7 +813,7 @@ public class Evaluation {
 			if (index>=0 && index<data.size() && index<dds.getStudyStartIndex()){
 				double value=data.get(index);
 				if (dds.fromDssFile()){
-					if (value != -901.0 && value != -902.0){
+					if (value != -901.0 && value != -902.0 && !Double.isNaN(value)){
 						return value;
 					}
 				}else{
@@ -871,7 +871,7 @@ public class Evaluation {
 		ArrayList<Double> data=dds.getData();
 		if (index>=0 && index<data.size()){
 			double result=data.get(index);
-			if (result==-901.0 || result==-902.0){
+			if (result==-901.0 || result==-902.0 || Double.isNaN(result)){
 				Error.addEvaluationError("Initial file doesn't have data for decision vairiable/alias " +ident);
 				return 1.0;
 			}
@@ -932,7 +932,7 @@ public class Evaluation {
 		ArrayList<Double> data=dds.getData();
 		if (index>=0 && index<data.size()){
 			double result=data.get(index);
-			if (result==-901.0 || result==-902.0){
+			if (result==-901.0 || result==-902.0 || Double.isNaN(result)){
 				Error.addEvaluationError("Initial file doesn't have data for decision vairiable/alias " +ident);
 				return 1.0;
 			}
@@ -988,7 +988,7 @@ public class Evaluation {
 		ArrayList<Double> data=dds.getData();
 		if (index>=0 && index<data.size()){
 			double result=data.get(index);
-			if (result==-901.0 || result==-902.0){
+			if (result==-901.0 || result==-902.0 || Double.isNaN(result)){
 				Error.addEvaluationError("Initial file doesn't have data for decision vairiable/alias " +ident);
 				return 1.0;
 			}
@@ -1146,7 +1146,7 @@ public class Evaluation {
 				ArrayList<Double> data=dds.getData();
 				if (index>=0 && index<data.size()){
 					double result=data.get(index);
-					if (result==-901.0 || result==-902.0){
+					if (result==-901.0 || result==-902.0 || Double.isNaN(result)){
 						Error.addEvaluationError("Initial file doesn't have data for decision vairiable/alias " + vn + " at time step "+i1+".");
 						return new EvalExpression(new IntDouble(1.0,false));
 					}
