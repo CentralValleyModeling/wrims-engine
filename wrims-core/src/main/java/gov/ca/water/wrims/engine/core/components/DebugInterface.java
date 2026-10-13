@@ -421,6 +421,7 @@ public class DebugInterface {
 		}else if (request.startsWith("resim_cycle:")){
 			String[] requestParts=request.split(":");
 			Error.clear();
+			ControlData.resimFrcstRunoffTable=true;
 			if (requestParts[1].equals("loadsv")){
 				new ReLoadSVDss(ControlData.currStudyDataSet);
 			}
@@ -438,6 +439,7 @@ public class DebugInterface {
 		}else if (request.startsWith("resim_date:")){
 			String[] requestParts=request.split(":");
 			Error.clear();
+			ControlData.resimFrcstRunoffTable=true;
 			ControlData.resimDate=true;
 			ControlData.resimGroundwater=true;
 			if (requestParts[1].equals("recompile")){
