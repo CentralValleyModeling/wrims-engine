@@ -17,7 +17,7 @@ public class DssDataSetFixLength {
 	public DssDataSetFixLength(int size){
 		data=new double[size];
 		for (int i=0; i<size; i++){
-			data[i]=-901.0;
+			data[i]=Double.NaN;
 		}
 	}
 
