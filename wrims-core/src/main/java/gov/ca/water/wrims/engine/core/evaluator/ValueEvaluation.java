@@ -488,6 +488,21 @@ public class ValueEvaluation {
 				}
 			}
 		}else{
+            if (ControlData.allowSvTsInit && DataTimeSeries.svTS.containsKey(entryNameTS)){
+                DssDataSet dds=DataTimeSeries.svTS.get(entryNameTS);
+                index =timeSeriesIndex(dds, prvs);
+                ArrayList<Double> data=dds.getData();
+                if (index>=0 && index<data.size() && index<dds.getStudyStartIndex()){
+                    double value=data.get(index);
+                    if (dds.fromDssFile()){
+					    if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
+                            return value;
+                        }
+                    }else{
+                        return value;
+                    }
+                }
+            }
 			DataTimeSeries.lookInitDss.add(entryNameTS);
 			if (getSVInitTimeseries(ident)){
 				DssDataSet dds=DataTimeSeries.svInit.get(entryNameTS);
@@ -496,24 +511,9 @@ public class ValueEvaluation {
 				ArrayList<Double> data=dds.getData();
 				if (index>=0 && index<data.size()){
 					double value=data.get(index);
-					if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
-						return value;
-					}
-				}
-			}
-		}
-		if (ControlData.allowSvTsInit && DataTimeSeries.svTS.containsKey(entryNameTS)){
-			DssDataSet dds=DataTimeSeries.svTS.get(entryNameTS);
-			index =timeSeriesIndex(dds, prvs);
-			ArrayList<Double> data=dds.getData();
-			if (index>=0 && index<data.size() && index<dds.getStudyStartIndex()){
-				double value=data.get(index);
-				if (dds.fromDssFile()){
 					if (value != -901.0 && value != -902.0 && !Double.isNaN(value)){
 						return value;
 					}
-				}else{
-					return value;
 				}
 			}
 		}

@@ -782,45 +782,52 @@ public class Evaluation {
 			}
 		}
 		if (DataTimeSeries.svInit.containsKey(entryNameTS)){
-			DssDataSet dds=DataTimeSeries.svInit.get(entryNameTS);
-			index =timeSeriesIndex(dds, prvs);
-			ArrayList<Double> data=dds.getData();
-			if (index>=0 && index<data.size()){
-				double value=data.get(index);
+            DssDataSet dds=DataTimeSeries.svInit.get(entryNameTS);
+            index =timeSeriesIndex(dds, prvs);
+            ArrayList<Double> data=dds.getData();
+
+            if (index>=0 && index<data.size()){
+                double value=data.get(index);
 				if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
-					return value;
-				}
-			}
-		}else{
-			DataTimeSeries.lookInitDss.add(entryNameTS);
-			if (getSVInitTimeseries(ident)){
-				DssDataSet dds=DataTimeSeries.svInit.get(entryNameTS);
-				prvs=TimeOperation.findTime(idValue);
-				index =timeSeriesIndex(dds, prvs);
-				ArrayList<Double> data=dds.getData();
-				if (index>=0 && index<data.size()){
-					double value=data.get(index);
-					if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
-						return value;
-					}
-				}
-			}
-		}
-		if (ControlData.allowSvTsInit && DataTimeSeries.svTS.containsKey(entryNameTS)){
-			DssDataSet dds=DataTimeSeries.svTS.get(entryNameTS);
-			index =timeSeriesIndex(dds, prvs);
-			ArrayList<Double> data=dds.getData();
-			if (index>=0 && index<data.size() && index<dds.getStudyStartIndex()){
-				double value=data.get(index);
-				if (dds.fromDssFile()){
+                    return value;
+                }
+            }
+        }else{
+
+            if (ControlData.allowSvTsInit && DataTimeSeries.svTS.containsKey(entryNameTS)){
+                DssDataSet dds=DataTimeSeries.svTS.get(entryNameTS);
+                index =timeSeriesIndex(dds, prvs);
+                ArrayList<Double> data=dds.getData();
+
+                if (index>=0 && index<data.size() && index<dds.getStudyStartIndex()){
+                    double value=data.get(index);
+
+                    if (dds.fromDssFile()){
+					    if (value !=-901.0 && value != -902.0 && !Double.isNaN(value)){
+                            return value;
+                        }
+                    }else{
+                        return value;
+                    }
+                }
+            }
+
+            DataTimeSeries.lookInitDss.add(entryNameTS);
+
+            if (getSVInitTimeseries(ident)){
+                DssDataSet dds=DataTimeSeries.svInit.get(entryNameTS);
+                prvs=TimeOperation.findTime(idValue);
+                index =timeSeriesIndex(dds, prvs);
+                ArrayList<Double> data=dds.getData();
+
+                if (index>=0 && index<data.size()){
+                    double value=data.get(index);
 					if (value != -901.0 && value != -902.0 && !Double.isNaN(value)){
-						return value;
-					}
-				}else{
-					return value;
-				}
-			}
-		}
+                        return value;
+                    }
+                }
+            }
+        }
 		Error.addEvaluationError("The data requested for timeseries "+ident+" does not match the entries in the dss file. Please check the name, kind, unit, and requested time period.");
 		return 1.0;
 	}
