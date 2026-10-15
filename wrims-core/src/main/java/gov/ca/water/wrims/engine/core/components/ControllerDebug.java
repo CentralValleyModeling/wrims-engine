@@ -728,7 +728,7 @@ public class ControllerDebug extends Thread {
 				}
 				for (int i=0; i<=currIndex; i++){
 					double value=dataArray[i];
-					if (!(value==-901.0 || value==-902.0)){
+					if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 						int timestepListed=i-currIndex;
 						prvs = TimeOperation.findTime(timestepListed);
 						dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+di.df.format(value)+"#";
@@ -743,7 +743,7 @@ public class ControllerDebug extends Thread {
 					int currIndex=ValueEvaluation.timeSeriesIndex(dds, prvs);
 					for (int i=0; i<=currIndex; i++){
 						double value=dataArrayList.get(i);
-						if (!(value==-901.0 || value==-902.0)){
+						if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 							int timestepListed=i-currIndex;
 							prvs = TimeOperation.findTime(timestepListed);
 							dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+di.df.format(value)+"#";

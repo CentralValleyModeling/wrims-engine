@@ -198,7 +198,7 @@ public class SQLServerRWriter{
 		try {
 			System.out.println("Importing output into table...");
 			stmt = conn.createStatement();
-			String sql = "Bulk INSERT "+tableName+" From '"+csvRemotePath+"' WITH (FIELDTERMINATOR=',', ROWTERMINATOR='\n', FIRSTROW=2)";
+			String sql = "Bulk INSERT "+tableName+" From '"+csvRemotePath+"' WITH (FIELDTERMINATOR=',', ROWTERMINATOR='\n', FIRSTROW=2, KEEPNULLS)";
 			stmt.executeUpdate(sql);
 			System.out.println("Imported output into table");
 		} catch (SQLException e) {

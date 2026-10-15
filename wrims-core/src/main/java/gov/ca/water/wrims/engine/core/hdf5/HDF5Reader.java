@@ -742,6 +742,8 @@ public class HDF5Reader {
 					dataArray.add(-901.0);
 				}else if (dataEntry==-902.0){
 					dataArray.add(-902.0);
+				}else if (Double.isNaN(dataEntry)){
+					dataArray.add(Double.NaN);
 				}else{
 					ParallelVars prvs = TimeOperation.findTime(j, startDate.getYear()+1900, startDate.getMonth(), startDate.getDate());
 					double dataEntryValue=dataEntry*Evaluation.tafcfs("taf_cfs", prvs);
@@ -755,6 +757,8 @@ public class HDF5Reader {
 					dataArray.add(-901.0);
 				}else if (dataEntry==-902.0){
 					dataArray.add(-902.0);
+				}else if (Double.isNaN(dataEntry)){
+					dataArray.add(Double.NaN);
 				}else{
 					ParallelVars prvs = TimeOperation.findTime(j, startDate.getYear()+1900, startDate.getMonth(), startDate.getDate());
 					double dataEntryValue=dataEntry*Evaluation.tafcfs("cfs_taf", prvs);
@@ -909,6 +913,8 @@ public class HDF5Reader {
 					dataArray.add(-901.0);
 				}else if (dataEntry==-902.0){
 					dataArray.add(-902.0);
+				}else if (Double.isNaN(dataEntry)){
+					dataArray.add(Double.NaN);
 				}else{
 					ParallelVars prvs = TimeOperation.findTime(j, startDate.getYear()+1900, startDate.getMonth(), startDate.getDate());
 					double dataEntryValue=dataEntry*Evaluation.tafcfs("taf_cfs", prvs);
@@ -922,6 +928,8 @@ public class HDF5Reader {
 					dataArray.add(-901.0);
 				}else if (dataEntry==-902.0){
 					dataArray.add(-902.0);
+				}else if (Double.isNaN(dataEntry)){
+					dataArray.add(Double.NaN);
 				}else{
 					ParallelVars prvs = TimeOperation.findTime(j, startDate.getYear()+1900, startDate.getMonth(), startDate.getDate());
 					double dataEntryValue=dataEntry*Evaluation.tafcfs("cfs_taf", prvs);

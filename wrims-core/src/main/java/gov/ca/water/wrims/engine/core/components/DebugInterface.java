@@ -421,6 +421,7 @@ public class DebugInterface {
 		}else if (request.startsWith("resim_cycle:")){
 			String[] requestParts=request.split(":");
 			Error.clear();
+			ControlData.resimFrcstRunoffTable=true;
 			if (requestParts[1].equals("loadsv")){
 				new ReLoadSVDss(ControlData.currStudyDataSet);
 			}
@@ -438,6 +439,7 @@ public class DebugInterface {
 		}else if (request.startsWith("resim_date:")){
 			String[] requestParts=request.split(":");
 			Error.clear();
+			ControlData.resimFrcstRunoffTable=true;
 			ControlData.resimDate=true;
 			ControlData.resimGroundwater=true;
 			if (requestParts[1].equals("recompile")){
@@ -2158,7 +2160,7 @@ public class DebugInterface {
 			for (int i=0; i<=currIndex; i++){
 				double value;
 				value=dataArray[i];
-				if (!(value==-901.0 || value==-902.0)){
+				if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 					int timestepListed=i-currIndex;
 					prvs = TimeOperation.findTime(timestepListed);
 					dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+df.format(value)+"#";
@@ -2173,7 +2175,7 @@ public class DebugInterface {
 				int currIndex=ValueEvaluation.timeSeriesIndex(dds, prvs);
 				for (int i=0; i<dataArrayList.size(); i++){
 					double value=dataArrayList.get(i);
-					if (!(value==-901.0 || value==-902.0)){
+					if (!(value==-901.0 || value==-902.0 || Double.isNaN(value))){
 						int timestepListed=i-currIndex;
 						prvs = TimeOperation.findTime(timestepListed);
 						dataString=dataString+timestepListed+":"+prvs.dataMonth+"-"+prvs.dataDay+"-"+prvs.dataYear+":"+df.format(value)+"#";
