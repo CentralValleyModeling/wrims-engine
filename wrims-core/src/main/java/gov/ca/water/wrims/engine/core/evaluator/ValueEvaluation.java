@@ -292,7 +292,7 @@ public class ValueEvaluation {
 			if (ControlData.allExternalFunctionMap.containsKey(ident)){
 				ef=ControlData.allExternalFunctionMap.get(ident);
 			}else{
-				ef = (ExternalFunction)function.newInstance();
+				ef = ExternalFunctions.newInstance(function);
 				ControlData.allExternalFunctionMap.put(ident, ef);
 			}
 			ef.execute(stack);
@@ -365,7 +365,7 @@ public class ValueEvaluation {
 				ef=ControlData.allExternalFunctionMap.get(ident);
 			}else{
 				function = Class.forName("wrimsv2.external.Function" + ident);
-				ef = (ExternalFunction)function.newInstance();
+				ef = ExternalFunctions.newInstance(function);
 				ControlData.allExternalFunctionMap.put(ident, ef);
 			}
 			ef.execute(stack);

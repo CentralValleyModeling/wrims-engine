@@ -13,6 +13,7 @@ import gov.ca.water.wrims.engine.core.components.ControlData;
 import gov.ca.water.wrims.engine.core.components.Error;
 import gov.ca.water.wrims.engine.core.components.IntDouble;
 import gov.ca.water.wrims.engine.core.external.ExternalFunction;
+import gov.ca.water.wrims.engine.core.external.ExternalFunctions;
 import gov.ca.water.wrims.engine.core.hdf5.HDF5Reader;
 import gov.ca.water.wrims.engine.core.parallel.ParallelVars;
 import gov.ca.water.wrims.engine.core.solver.CbcSolver;
@@ -488,7 +489,7 @@ public class Evaluation {
 			if (ControlData.allExternalFunctionMap.containsKey(ident)){
 				ef=ControlData.allExternalFunctionMap.get(ident);
 			}else{
-				ef = (ExternalFunction)function.newInstance();
+				ef = ExternalFunctions.newInstance(function);
 				ControlData.allExternalFunctionMap.put(ident, ef);
 			}
 			ef.execute(stack);
@@ -579,7 +580,7 @@ public class Evaluation {
 			if (ControlData.allExternalFunctionMap.containsKey(ident)){
 				ef=ControlData.allExternalFunctionMap.get(ident);
 			}else{
-				ef = (ExternalFunction)function.newInstance();
+				ef = ExternalFunctions.newInstance(function);
 				ControlData.allExternalFunctionMap.put(ident, ef);
 			}
 			ef.execute(stack);
