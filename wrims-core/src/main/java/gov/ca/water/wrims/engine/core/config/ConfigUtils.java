@@ -1236,7 +1236,7 @@ public class ConfigUtils {
         configMap.put("MonthMemorySection".toLowerCase(), "-1");
         configMap.put("unchangeGWRestart".toLowerCase(), "no");
         configMap.put("GenSVCatalog".toLowerCase(), "yes");
-        configMap.put("vHecLib".toLowerCase(), "6");
+        configMap.put("VersionHecDssOutput".toLowerCase(), "6");
         return configMap;
 
     }
