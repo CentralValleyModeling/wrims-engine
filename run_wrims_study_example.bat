@@ -26,5 +26,5 @@ set WRIMS_CORE_JAR=wrims-core\build\libs\*
 set WRIMS_CORE_DEPENDENCIES=wrims-core\build\tmp\libs\*
 set "CLASSPATH=%PROJECT_DIR%\Run\External;%STUDY_LIBS%;%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%"
 
-%JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -Dproject.dir="%PROJECT_DIR%" -cp "%CLASSPATH%" %MAIN_CLASS% -config=%PROJECT_DIR%\%CONFIG_FILE%
+%JAVA_HOME%\bin\java -Xmx4096m -Xss1024K -Dproject.dir="%PROJECT_DIR%" -cp "%CLASSPATH%;%WRIMS_CORE_JAR%;%WRIMS_CORE_DEPENDENCIES%" %MAIN_CLASS% -config=%PROJECT_DIR%\%CONFIG_FILE%
 pause
