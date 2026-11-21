@@ -84,6 +84,9 @@ public class ModelTemp implements Serializable {
 	public Map<String,WeightTemp> groupWeightMap;   // processed
 	
 	public Map<String, HashSet<String>> neededCycleVarMap;
+
+	// names referenced with a negative index (e.g. X(-1)) in this file -> first line number
+	public Map<String, Integer> laggedRefs = new LinkedHashMap<String, Integer>();
 	
 //	public Set<String> varUsedByLaterCycle; 
 //	public Set<String> dvarUsedByLaterCycle;

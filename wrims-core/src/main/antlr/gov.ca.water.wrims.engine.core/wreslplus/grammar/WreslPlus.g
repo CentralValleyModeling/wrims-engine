@@ -52,6 +52,8 @@ options {
   	public Set<String> dependants_notAllowed;
   	public Set<String> varInCycle;
   	public Map<String, HashSet<String>> neededCycleVarMap;
+  	// names used with a negative index, e.g. X(-1) -> first line seen; collected per model trunk
+  	public Map<String, Integer> laggedRefs = new LinkedHashMap<String, Integer>();
   	boolean addDep = true;
   	boolean isParameter = false;
   	public int number_of_errors = 0;
@@ -206,11 +208,13 @@ mt returns[ModelTemp modelObj]
 
 scope { ModelTemp m_;} 
 @init{ neededCycleVarMap = new HashMap<String, HashSet<String>>();
+       laggedRefs = new LinkedHashMap<String, Integer>();
        $mt::m_ = new ModelTemp(); 
 	   $mt::m_.absPath = currentAbsolutePath; 
 	   $mt::m_.parentAbsPath = currentAbsoluteParent; }
 @after{$modelObj =$mt::m_; 
        $modelObj.neededCycleVarMap = neededCycleVarMap;
+       $modelObj.laggedRefs = laggedRefs;
        $modelObj.id=Param.legacywresl;}	    
 :      
 	   ( fi=include_file {$mt::m_.itemTypeList.add(Param.incFileType); $mt::m_.itemList.add($fi.id); $mt::m_.incFileIDList.add($fi.id); $mt::m_.incFileMap.put($fi.id, $fi.incFileObj); }
@@ -855,7 +859,13 @@ logicalFunc
 constraint_token : '>' | '<' | '>=' | '<=' | '=' ;
 
 expr_constraint
-	: expr_add constraint_token expr_add
+	: expr_add t=constraint_token expr_add
+	{ // the run-time goal evaluator accepts only '<', '>' and '=' (in a goal, '<' already means at most)
+	  if ($t.text.equals("<=") || $t.text.equals(">=")) {
+	    LogUtils.errMsgLocation(currentAbsolutePath, $t.start.getLine(),
+	      "Operator '" + $t.text + "' is not supported in a goal; use '" + $t.text.substring(0,1) + "' (it already includes equality).");
+	  }
+	}
 	;
 
 // comparison expr
@@ -1002,8 +1012,11 @@ columnNumber : INT ;
 rowNumber : INT ;
 	
 varFunc
-	: v=varID '(' func_arg  (',' func_arg )*   ')'  ('(' expr_add ')')?
+	: v=varID '(' a1=func_arg  (',' func_arg )*   ')'  ('(' expr_add ')')?
 	{dependants.add($v.text);
+	 if ($a1.text.startsWith("-") && !laggedRefs.containsKey($v.text.toLowerCase())) {
+	   laggedRefs.put($v.text.toLowerCase(), $v.start.getLine());
+	 }
 	 //System.out.println(dependants);
 	 }
 	;
