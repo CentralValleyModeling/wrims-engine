@@ -97,6 +97,7 @@ final class WreslPlusCompileChecksTest {
                 + "define y {value x(-1) + 2.0}\n"
                 + "goal g {d < y}");
         assertTrue(log.contains("Earlier values of state variable [x]"), log);
+        assertEquals(1, log.split("Earlier values of state variable", -1).length - 1, log); // reported once
     }
 
     @Test

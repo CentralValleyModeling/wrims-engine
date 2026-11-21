@@ -105,9 +105,10 @@ public class ErrorCheck {
 		}
 		svNames.removeAll(otherNames);
 
+		Set<String> reported = new HashSet<String>(); // a model can appear in both collections above
 		for (ModelTemp m : models) {
 			for (Map.Entry<String, Integer> e : m.laggedRefs.entrySet()) {
-				if (svNames.contains(e.getKey())) {
+				if (svNames.contains(e.getKey()) && reported.add(m.absPath + ":" + e.getValue() + ":" + e.getKey())) {
 					LogUtils.warningMsgLocation(m.absPath, e.getValue(), "Earlier values of state variable ["
 						+ e.getKey() + "] are not available in WRIMS, so this lagged reference will stop the run."
 						+ " Read an alias of it (or a dvar) instead.");
