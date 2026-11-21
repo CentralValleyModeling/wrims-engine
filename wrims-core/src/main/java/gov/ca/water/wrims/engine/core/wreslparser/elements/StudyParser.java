@@ -38,6 +38,7 @@ public class StudyParser{
 
 
   public static void reset(){  
+	  LogUtils.resetDiagnostics();
 	  total_errors = 0;
 	  error_summary = new ArrayList<String>();
 	  total_warnings = 0;
