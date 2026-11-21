@@ -232,6 +232,7 @@ public class Workflow {
 		if (ErrorCheck.checkWeightObjList(st)) return null;
 		
 		ErrorCheck.checkVarRedefined(st);	
+		ErrorCheck.warnLaggedStateVariables(st);
 		
 		Procedures.classifyDependants(st);  // TODO: has bug. need to fix. also a bottleneck.
 		

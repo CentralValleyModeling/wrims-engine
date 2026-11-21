@@ -85,6 +85,38 @@ public class ErrorCheck {
 			
 	}
 	
+	/**
+	 * WRIMS keeps earlier time steps' values for decision variables and aliases, but not for
+	 * state variables (svar): X(-1) on an svar is looked up in the input timeseries and stops
+	 * the run in the second month. Warn at compile time and point to the alias instead.
+	 */
+	public static void warnLaggedStateVariables(StudyTemp st) {
+
+		Set<String> svNames = new HashSet<String>();
+		Set<String> otherNames = new HashSet<String>(); // names also declared as dvar, alias or timeseries
+		ArrayList<ModelTemp> models = new ArrayList<ModelTemp>(st.modelMap.values());
+		models.addAll(st.fileModelDataTable.values());
+
+		for (ModelTemp m : models) {
+			for (String id : m.svMap.keySet()) svNames.add(id.toLowerCase());
+			for (String id : m.dvMap.keySet()) otherNames.add(id.toLowerCase());
+			for (String id : m.asMap.keySet()) otherNames.add(id.toLowerCase());
+			for (String id : m.tsMap.keySet()) otherNames.add(id.toLowerCase());
+		}
+		svNames.removeAll(otherNames);
+
+		Set<String> reported = new HashSet<String>(); // a model can appear in both collections above
+		for (ModelTemp m : models) {
+			for (Map.Entry<String, Integer> e : m.laggedRefs.entrySet()) {
+				if (svNames.contains(e.getKey()) && reported.add(m.absPath + ":" + e.getValue() + ":" + e.getKey())) {
+					LogUtils.warningMsgLocation(m.absPath, e.getValue(), "Earlier values of state variable ["
+						+ e.getKey() + "] are not available in WRIMS, so this lagged reference will stop the run."
+						+ " Read an alias of it (or a dvar) instead.");
+				}
+			}
+		}
+	}
+
 	// TODO: this process alias only. need to expand to other types
 	public static void checkVarUsedBeforeDefined(StudyTemp s) {
 		
