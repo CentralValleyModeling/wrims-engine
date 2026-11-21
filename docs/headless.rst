@@ -159,6 +159,33 @@ The engine will start, load the study configuration, and run to completion. The
 ``pause`` at the end of the script keeps the terminal window open so you can review
 any output or error messages before it closes.
 
+Checking WRESL+ Code Without Running a Study
+--------------------------------------------
+
+``ValidateStudy`` runs only the WRESL+ pre-run check on a study's main file and
+prints every error and warning as one JSON object, which makes it suitable for
+scripts and AI agents. It needs the ``wrims-core`` JARs from
+:ref:`Step 1<headless_step_1>` but no native libraries or study configuration.
+
+.. code-block:: bat
+
+   java -Xss1024K -cp "wrims-core\build\libs\*;wrims-core\build\tmp\libs\*" ^
+       gov.ca.water.wrims.engine.core.debug.ValidateStudy ^
+       "J:\wrims\projects\dcr2023\Run\mainCS3.wresl"
+
+The result goes to standard output; progress messages go to standard error.
+
+.. code-block:: json
+
+   {"ok":false,"errors":1,"warnings":0,"diagnostics":[
+     {"severity":"error","file":"...\\goals.wresl","line":12,
+      "message":"Operator '<=' is not supported in a goal; use '<' (it already includes equality)."}]}
+
+The exit code is ``0`` when the study compiles, ``1`` when it has errors and
+``2`` when the command is used incorrectly. A clean check does not prove the
+code runs: some problems only appear when the study solves, so follow it with a
+short test run.
+
 Troubleshooting
 ---------------
 

@@ -3,6 +3,8 @@ package gov.ca.water.wrims.engine.core.wreslparser.elements;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +19,17 @@ import gov.ca.water.wrims.engine.core.components.ControlData;
 public class LogUtils {
 
 	public static PrintWriter _logFile;
+
+	// Every error and warning logged since the last reset, in machine-readable form.
+	private static final List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
+
+	public static void resetDiagnostics() {
+		diagnostics.clear();
+	}
+
+	public static List<Diagnostic> getDiagnostics() {
+		return Collections.unmodifiableList(new ArrayList<Diagnostic>(diagnostics));
+	}
 	
 	public static void closeLogFile(){
 		
@@ -258,6 +271,7 @@ public class LogUtils {
 	public static void warningMsg(String msg){
 		
 		 StudyParser.total_warnings++;
+		 diagnostics.add(new Diagnostic(Diagnostic.Severity.WARNING, null, -1, msg));
 
 		if (ControlData.showWreslLog) System.out.println("# Warning: "+msg);
 		 _logFile.println("# Warning: "+msg);
@@ -266,6 +280,8 @@ public class LogUtils {
 	}
 	
 	public static void warningMsgLocation(String filePath, int lineNumber, String msg){
+
+		 diagnostics.add(new Diagnostic(Diagnostic.Severity.WARNING, filePath, lineNumber, msg));
 
 		if (ControlData.showWreslLog) System.out.println( "("+filePath+":"+lineNumber+") "+msg );
 		 _logFile.println("# Warning: " + "("+filePath+":"+lineNumber+") "+msg );
@@ -276,6 +292,7 @@ public class LogUtils {
 	public static void typeRedefinedErrMsg(String msg) throws TypeRedefinedException {
 		
 		 StudyParser.total_errors++;
+		 diagnostics.add(new Diagnostic(Diagnostic.Severity.ERROR, null, -1, msg));
 
 		if (ControlData.showWreslLog) System.out.println("# Error: "+msg);
 		 _logFile.println("# Error: "+msg);
@@ -288,6 +305,7 @@ public class LogUtils {
 	public static void errMsgLocation(String filePath, int lineNumber, String msg){
 		
 		 StudyParser.total_errors++;
+		 diagnostics.add(new Diagnostic(Diagnostic.Severity.ERROR, filePath, lineNumber, msg));
 		 StudyParser.error_summary.add("# Error: ("+filePath+":"+lineNumber+") "+msg );
 		if (ControlData.showWreslLog) System.err.println( "# Error: ("+filePath+":"+lineNumber+") "+msg );
 		 _logFile.println("# Error: " + "("+filePath+":"+lineNumber+") "+msg );
@@ -298,6 +316,7 @@ public class LogUtils {
 	public static void errMsg(String msg){
 		
 		 StudyParser.total_errors++;
+		 diagnostics.add(new Diagnostic(Diagnostic.Severity.ERROR, null, -1, msg));
 
 		if (ControlData.showWreslLog) System.err.println("# Error: "+msg);
 		 _logFile.println("# Error: "+msg);
