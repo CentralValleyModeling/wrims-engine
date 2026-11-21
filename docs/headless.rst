@@ -169,7 +169,7 @@ scripts and AI agents. It needs the ``wrims-core`` JARs from
 
 .. code-block:: bat
 
-   java -Xss1024K -cp "wrims-coreuild\libs\*;wrims-coreuild	mp\libs\*" ^
+   java -Xss1024K -cp "wrims-core\build\libs\*;wrims-core\build\tmp\libs\*" ^
        gov.ca.water.wrims.engine.core.debug.ValidateStudy ^
        "J:\wrims\projects\dcr2023\Run\mainCS3.wresl"
 
@@ -178,7 +178,7 @@ The result goes to standard output; progress messages go to standard error.
 .. code-block:: json
 
    {"ok":false,"errors":1,"warnings":0,"diagnostics":[
-     {"severity":"error","file":"...\goals.wresl","line":12,
+     {"severity":"error","file":"...\\goals.wresl","line":12,
       "message":"Operator '<=' is not supported in a goal; use '<' (it already includes equality)."}]}
 
 The exit code is ``0`` when the study compiles, ``1`` when it has errors and
